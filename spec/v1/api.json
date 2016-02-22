@@ -139,6 +139,7 @@
     {
       "title": "Create a venue",
       "description": "venue describes the establishment in which the conference takes place. a venue contains multiple rooms",
+      "rel": "create",
       "href": "/v1/venue/create",
       "method": "POST",
       "encType": "application/x-www-form-urlencoded",
@@ -156,6 +157,7 @@
     },
     {
       "title": "List all venues",
+      "rel": "list",
       "href": "/v1/venue/list",
       "properties": {
         "lang": { "$ref": "#/definitions/language" },
@@ -167,6 +169,7 @@
     },
     {
       "title": "Create a room",
+      "rel": "create",
       "href": "/v1/room/create",
       "method": "POST",
       "encType": "application/x-www-form-urlencoded",
@@ -188,6 +191,7 @@
     },
     {
       "title": "List of rooms available",
+      "rel": "list",
       "href": "/v1/room/list",
       "method": "GET",
       "encType": "application/x-www-form-urlencoded",
@@ -202,6 +206,7 @@
     },
     {
       "title": "Create a conference instance",
+      "rel": "create",
       "href": "/v1/conference/create",
       "encType": "application/x-www-form-urlencoded",
       "properties": {
@@ -219,6 +224,7 @@
     },
     {
       "title": "Create a session",
+      "rel": "create",
       "href": "/v1/session/create",
       "properties": {
         "conference-id": { "$ref": "#/definitions/uuid" },
