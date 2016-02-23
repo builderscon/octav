@@ -8,6 +8,8 @@ Eh, don't worry. Just a word that I came up with, and has absolutely no meaning.
 
 # Features
 
+## MUST
+
 * Administrators can register "organizers"
 * Organizers can create/update/delete "conferences"
 * Organizers can register "venues" (which has one ore more "rooms")
@@ -18,3 +20,10 @@ Eh, don't worry. Just a word that I came up with, and has absolutely no meaning.
 * Accepted talks show up in schedule
 * Sessions can have, among other things, video urls and slide urls. These can be shown as a list. It can be grouped by tags, too.
 * Conferences have "news feed", "Twitter/Social Netowkr Feed display"
+
+## NICE TO HAVE
+
+* Register users (attendees)
+* Organizers can notify attendees via email or whatever else proper means
+* Attendees can send back feedback on sessions/conferences
+* Attendees can vote on sessions to determine "best session"
