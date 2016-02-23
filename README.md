@@ -31,6 +31,7 @@ Eh, don't worry. Just a word that I came up with, and has absolutely no meaning.
 * Attendees can send back feedback on sessions/conferences
 * Attendees can vote on sessions to determine "best session"
 * Sessions are announced 30 and 10 minutes before they are scheduled via Facebook/Twitter/etc
+* Session details page show video and slides displayed in a synchronized fashion.
 
 ## MISCELLANEOUS
 
