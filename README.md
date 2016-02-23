@@ -12,7 +12,7 @@ Eh, don't worry. Just a word that I came up with, and has absolutely no meaning.
 
 * Administrators can register "organizers"
 * Organizers can create/update/delete "conferences"
-* Organizers can register "venues" (which has one ore more "rooms")
+* Organizers can register "venues" (which has one or more "rooms")
 * Speakers can register themselves ("speakers")
 * Speakers can submit talk proposals ("sessions"). Proposals can be either hidden or visible. If hidden, we need a "make schedule visible" button
 * Organizers can accept/reject talk proposals
