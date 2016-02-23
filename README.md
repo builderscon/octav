@@ -31,3 +31,35 @@ Eh, don't worry. Just a word that I came up with, and has absolutely no meaning.
 * Attendees can send back feedback on sessions/conferences
 * Attendees can vote on sessions to determine "best session"
 * Sessions are announced 30 and 10 minutes before they are scheduled via Facebook/Twitter/etc
+
+## MISCELLANEOUS
+
+URL structure suggestions (just a thought, feel free to suggest better approaches).
+
+Assume base url https://builderscon.io. "Main" builderscon site.
+
+| name              | url pattern              | notes                                          |
+|:------------------|:-------------------------|:-----------------------------------------------|
+| main page         | /                        | latest conferences, links to videos, etc       |
+
+
+Assume base url https://conf.builderscon.io. Conferences show up under this host
+
+| name              | url pattern              | notes                                          |
+|:------------------|:-------------------------|:-----------------------------------------------|
+| conference page   | /tokyo                   | redirects to "latest" conference               |
+| per-instance page | /tokyo/2017              | "2017" can be "2017-summer" or other subtitles |
+| latest news       | /tokyo/2017/news         | |
+| schedule/calendar | /tokyo/2017/schedule     | |
+| session details   | /tokyo/2017/session/[id] | |
+| speaker details   | /tokyo/2017/speaker[id]  | |
+
+
+Admin site URL should be different, so let's assume base url https://admin.builderscon.io
+
+| name                | url pattern         | notes                                          |
+|:--------------------|:--------------------|:-----------------------------------------------|
+| main page           | /dashboard          |                                                |
+| register organizer  | /organizer/register | |
+| register conference | /conference/create  | |
+| TODO (Add more) | | |
