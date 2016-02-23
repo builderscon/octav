@@ -29,3 +29,5 @@ Eh, don't worry. Just a word that I came up with, and has absolutely no meaning.
 * Organizers can notify attendees via email or whatever else proper means
 * Attendees can send back feedback on sessions/conferences
 * Attendees can vote on sessions to determine "best session"
+* Organizers can post to Facebook/Twitter/etc, via the official account.
+* Sessions are announced 30 and 10 minutes before they are scheduled via Facebook/Twitter/etc
