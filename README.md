@@ -19,7 +19,7 @@ Eh, don't worry. Just a word that I came up with, and has absolutely no meaning.
 * Organizers can edit talk proposals, to set date/time, etc.
 * Accepted talks show up in schedule
 * Sessions can have, among other things, video urls and slide urls. These can be shown as a list. It can be grouped by tags, too.
-* Conferences have "news feed", "Twitter/Social Netowkr Feed display"
+* Conferences have "news feed", "Twitter/Social Network Feed display"
 * Speakers can register their photo, bio. Must register email (not public, only used to send notices from organizers)
 * Sessions have Facebook/Twitter/etc buttons
 
