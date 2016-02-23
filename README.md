@@ -53,7 +53,8 @@ Assume base url https://conf.builderscon.io. Conferences show up under this host
 | latest news       | /tokyo/2017/news         | |
 | schedule/calendar | /tokyo/2017/schedule     | |
 | session details   | /tokyo/2017/session/[id] | |
-| speaker details   | /tokyo/2017/speaker[id]  | |
+| speaker details   | /speaker/[id]            | use user.speaker\_bio |
+| user details      | /user/[id]               | user can be an attendee, speaker, organizer, etc |
 
 
 Admin site URL should be different, so let's assume base url https://admin.builderscon.io
