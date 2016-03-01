@@ -152,6 +152,25 @@
   "pathStart": "/v1",
   "links": [
     {
+      "title": "Create a user",
+      "description": "A user can be a staff/organizer, speaker, or a regular attendee. Information should be obtained from facebook/twitter/github",
+      "rel": "create",
+      "href": "/user/create",
+      "method": "POST",
+      "encType": "application/x-www-form-urlencoded",
+      "schema": {
+        "properties": {
+          "first_name": { "$ref": "#/definitions/string-en" },
+          "last_name": { "$ref": "#/definitions/string-en" },
+          "nickname": { "$ref": "#/definitions/string-en" },
+          "email": { "$ref": "#/definitions/email" }
+        },
+        "propertyPattern": {
+          "first_name#{a-z}+": { "$ref": "#/definitions/string-i18n" }
+        }
+      }
+    },
+    {
       "title": "Create a venue",
       "description": "venue describes the establishment in which the conference takes place. a venue contains multiple rooms",
       "rel": "create",
@@ -165,11 +184,11 @@
           "latitude": { "$ref": "#/definitions/latitude" },
           "longitude": { "$ref": "#/definitions/longitude" }
         },
-        "required": ["name", "address", "latitude", "longitude"]
-      },
-      "propertyPattern": {
-        "name#{a-z}+": { "$ref": "#/definitions/string-i18n" },
-        "address#{a-z}+": { "$ref": "#/definitions/string-i18n" }
+        "required": ["name", "address", "latitude", "longitude"],
+        "propertyPattern": {
+          "name#{a-z}+": { "$ref": "#/definitions/string-i18n" },
+          "address#{a-z}+": { "$ref": "#/definitions/string-i18n" }
+        }
       }
     },
     {
@@ -230,6 +249,7 @@
     {
       "title": "Create a conference instance",
       "rel": "create",
+      "method": "POST",
       "href": "/conference/create",
       "encType": "application/x-www-form-urlencoded",
       "schema": {
@@ -250,6 +270,7 @@
     {
       "title": "Create a session",
       "rel": "create",
+      "method": "POST",
       "href": "/session/create",
       "schema": {
         "properties": {
