@@ -58,6 +58,8 @@
       "type": "number"
     },
     "conference": {
+      "type": "object",
+      "gotype": "Conference",
       "properties": {
         "id": { "$ref": "#/definitions/uuid" },
         "name": { "$ref": "#/definitions/string-en" },
@@ -70,6 +72,8 @@
       }
     },
     "venue": {
+      "type": "object",
+      "gotype": "Venue",
       "properties": {
         "id": { "$ref": "#/definitions/uuid" },
         "name": { "type": "string" },
@@ -77,6 +81,8 @@
       }
     },
     "room": {
+      "type": "object",
+      "gotype": "Room",
       "properties": {
         "id": { "$ref": "#/definitions/uuid" },
         "venue-id": { "$ref": "#/definitions/uuid" },
@@ -117,6 +123,8 @@
       "type": "string"
     },
     "session": {
+      "type": "object",
+      "gotype": "Session",
       "properties": {
         "conference": { "$ref": "#/definitions/conference" },
         "room": { "$ref": "#/definitions/room" },
@@ -147,12 +155,27 @@
           "default": false
         }
       }
+    },
+    "tshirt_size": {
+      "type": "string",
+      "enum": ["XXXL","XXL","XL","L","M","S","XS"]
+    },
+    "user": {
+      "type": "object",
+      "gotype": "User",
+      "properties": {
+        "first_name": { "$ref": "#/definitions/string-en" },
+        "last_name": { "$ref": "#/definitions/string-en" },
+        "nickname": { "$ref": "#/definitions/string-en" },
+        "email": { "$ref": "#/definitions/email" },
+        "tshirt_size": { "$ref": "#/definitions/tshirt_size" }
+      }
     }
   },
   "pathStart": "/v1",
   "links": [
     {
-      "title": "Create a user",
+      "title": "Create user",
       "description": "A user can be a staff/organizer, speaker, or a regular attendee. Information should be obtained from facebook/twitter/github",
       "rel": "create",
       "href": "/user/create",
@@ -163,21 +186,24 @@
           "first_name": { "$ref": "#/definitions/string-en" },
           "last_name": { "$ref": "#/definitions/string-en" },
           "nickname": { "$ref": "#/definitions/string-en" },
-          "email": { "$ref": "#/definitions/email" }
+          "email": { "$ref": "#/definitions/email" },
+          "tshirt_size": { "$ref": "#/definitions/tshirt_size" }
         },
         "propertyPattern": {
           "first_name#{a-z}+": { "$ref": "#/definitions/string-i18n" }
         }
-      }
+      },
+      "targetSchema": { "$ref": "#/definitions/user" }
     },
     {
-      "title": "Create a venue",
+      "title": "Create venue",
       "description": "venue describes the establishment in which the conference takes place. a venue contains multiple rooms",
       "rel": "create",
       "href": "/venue/create",
       "method": "POST",
       "encType": "application/x-www-form-urlencoded",
       "schema": {
+        "gotype": "Venue",
         "properties": {
           "name": { "$ref": "#/definitions/string-en" },
           "address": { "$ref": "#/definitions/string-en" },
@@ -189,24 +215,27 @@
           "name#{a-z}+": { "$ref": "#/definitions/string-i18n" },
           "address#{a-z}+": { "$ref": "#/definitions/string-i18n" }
         }
-      }
+      },
+      "targetSchema": { "$ref": "#/definitions/venue" }
     },
     {
-      "title": "List all venues",
+      "title": "List venues",
       "rel": "list",
       "href": "/venue/list",
       "schema": {
+        "type": "object",
         "properties": {
           "lang": { "$ref": "#/definitions/language" },
           "since": { "$ref": "#/definitions/uuid" }
         }
       },
       "targetSchema": {
+        "gotype": "[]Venue",
         "items": { "$ref": "#/definitions/venue" }
       }
     },
     {
-      "title": "Create a room",
+      "title": "Create room",
       "rel": "create",
       "href": "/room/create",
       "method": "POST",
@@ -223,14 +252,15 @@
           },
           "capacity": { "$ref": "#/definitions/positiveInteger" }
         },
-        "required": ["venue-id", "name"]
+        "required": ["venue-id", "name"],
+        "propertyPattern": {
+          "name#{a-z}+": { "$ref": "name-i18n" }
+        }
       },
-      "propertyPattern": {
-        "name#{a-z}+": { "$ref": "name-i18n" }
-      }
+      "targetSchema": { "$ref": "#/definitions/room" }
     },
     {
-      "title": "List of rooms available",
+      "title": "List rooms",
       "rel": "list",
       "href": "/room/list",
       "method": "GET",
@@ -243,11 +273,12 @@
         "required": [ "venue-id" ]
       },
       "targetSchema": {
+        "gotype": "[]Room",
         "items": { "$ref": "#/definitions/room" }
       }
     },
     {
-      "title": "Create a conference instance",
+      "title": "Create conference",
       "rel": "create",
       "method": "POST",
       "href": "/conference/create",
@@ -268,7 +299,7 @@
       "targetSchema": { "$ref": "#/definitions/conference" }
     },
     {
-      "title": "Create a session",
+      "title": "Create session",
       "rel": "create",
       "method": "POST",
       "href": "/session/create",
@@ -304,13 +335,14 @@
           "confirmed": {
             "type": "boolean",
             "default": false
+          },
+          "patternProperties": {
+            "title#{a-z}+": { "$ref": "#/definitions/string-i18n" },
+            "abstract#{a-z}+": { "$ref": "#/definitions/markdown-i18n" }
           }
-        },
-        "patternProperties": {
-          "title#{a-z}+": { "$ref": "#/definitions/string-i18n" },
-          "abstract#{a-z}+": { "$ref": "#/definitions/markdown-i18n" }
         }
-      }
+      },
+      "targetSchema": { "$ref": "#/definitions/session" }
     }
   ]
 }
