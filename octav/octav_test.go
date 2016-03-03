@@ -90,7 +90,7 @@ func TestListRooms(t *testing.T) {
 	defer ts.Close()
 
 	cl := client.New(ts.URL)
-	var in interface{}
+	var in map[string]interface{}
 	res, err := cl.ListRooms(in)
 	if !assert.NoError(t, err, "ListRooms should succeed") {
 		return
@@ -105,7 +105,7 @@ func TestListVenues(t *testing.T) {
 	defer ts.Close()
 
 	cl := client.New(ts.URL)
-	var in interface{}
+	var in map[string]interface{}
 	res, err := cl.ListVenues(in)
 	if !assert.NoError(t, err, "ListVenues should succeed") {
 		return

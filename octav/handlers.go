@@ -21,8 +21,8 @@ func doCreateUser(ctx context.Context, w http.ResponseWriter, r *http.Request, p
 func doCreateVenue(ctx context.Context, w http.ResponseWriter, r *http.Request, payload *Venue) {
 }
 
-func doListRooms(ctx context.Context, w http.ResponseWriter, r *http.Request, payload interface{}) {
+func doListRooms(ctx context.Context, w http.ResponseWriter, r *http.Request, payload map[string]interface{}) {
 }
 
-func doListVenues(ctx context.Context, w http.ResponseWriter, r *http.Request, payload interface{}) {
+func doListVenues(ctx context.Context, w http.ResponseWriter, r *http.Request, payload map[string]interface{}) {
 }

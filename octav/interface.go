@@ -1,7 +1,7 @@
 package octav
 
-type Venue struct{}
-type User struct{}
 type Room struct{}
-type Conference struct{}
 type Session struct{}
+type User struct{}
+type Venue struct{}
+type Conference struct{}
