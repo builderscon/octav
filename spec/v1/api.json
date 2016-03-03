@@ -59,7 +59,7 @@
     },
     "conference": {
       "type": "object",
-      "gotype": "Conference",
+      "hsup.type": "octav.Conference",
       "properties": {
         "id": { "$ref": "#/definitions/uuid" },
         "name": { "$ref": "#/definitions/string-en" },
@@ -73,7 +73,7 @@
     },
     "venue": {
       "type": "object",
-      "gotype": "Venue",
+      "hsup.typ": "Venue",
       "properties": {
         "id": { "$ref": "#/definitions/uuid" },
         "name": { "type": "string" },
@@ -82,7 +82,7 @@
     },
     "room": {
       "type": "object",
-      "gotype": "Room",
+      "hsup.type": "octav.Room",
       "properties": {
         "id": { "$ref": "#/definitions/uuid" },
         "venue-id": { "$ref": "#/definitions/uuid" },
@@ -124,7 +124,7 @@
     },
     "session": {
       "type": "object",
-      "gotype": "Session",
+      "hsup.type": "octav.Session",
       "properties": {
         "conference": { "$ref": "#/definitions/conference" },
         "room": { "$ref": "#/definitions/room" },
@@ -162,7 +162,7 @@
     },
     "user": {
       "type": "object",
-      "gotype": "User",
+      "hsup.type": "octav.User",
       "properties": {
         "first_name": { "$ref": "#/definitions/string-en" },
         "last_name": { "$ref": "#/definitions/string-en" },
@@ -203,7 +203,7 @@
       "method": "POST",
       "encType": "application/x-www-form-urlencoded",
       "schema": {
-        "gotype": "Venue",
+        "hsup.type": "octav.Venue",
         "properties": {
           "name": { "$ref": "#/definitions/string-en" },
           "address": { "$ref": "#/definitions/string-en" },
@@ -230,7 +230,7 @@
         }
       },
       "targetSchema": {
-        "gotype": "[]Venue",
+        "hsup.type": "[]octav.Venue",
         "items": { "$ref": "#/definitions/venue" }
       }
     },
@@ -273,7 +273,7 @@
         "required": [ "venue-id" ]
       },
       "targetSchema": {
-        "gotype": "[]Room",
+        "hsup.type": "[]octav.Room",
         "items": { "$ref": "#/definitions/room" }
       }
     },
