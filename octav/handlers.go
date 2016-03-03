@@ -40,40 +40,17 @@ func doListVenues(ctx context.Context, w http.ResponseWriter, r *http.Request, p
 		httpError(w, `doListVenues`, err)
 		return
 	}
+	defer tx.AutoRollback()
 
-	var since uint64
-	if id := payload["since"].(string); id != "" {
-		v := db.Venue{}
-		if err := v.LoadByEID(tx, id); err != nil {
-			httpError(w, `doListVenues`, err)
-			return
-		}
-
-		since = v.OID
-	}
-
-	rows, err := tx.Query(`SELECT eid, name FROM venue WHERE oid > ? ORDER BY oid LIMIT 10`, since)
-	if err != nil {
+	vl := VenueList{}
+	if err := vl.Load(tx, payload["since"].(string)); err != nil {
 		httpError(w, `doListVenues`, err)
 		return
 	}
 
-	// Not using db.Venue here
-	res := make([]Venue, 0, 10)
-	for rows.Next() {
-		v := Venue{}
-		if err := rows.Scan(&v.ID, &v.Name); err != nil {
-			if pdebug.Enabled {
-				pdebug.Printf("doListVenues: %s", err)
-			}
-			http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
-			return
-		}
-		res = append(res, v)
-	}
-
-	if err := json.NewEncoder(w).Encode(res); err != nil {
+	if err := json.NewEncoder(w).Encode(vl); err != nil {
 		httpError(w, `doListVenues`, err)
 		return
 	}
 }
+

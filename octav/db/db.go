@@ -113,6 +113,10 @@ func Init(dsn string) error {
 // Begin creates a new transaction (`Tx`) from the current
 // global database connection
 func Begin() (*Tx, error) {
+	if _db == nil {
+		return nil, errors.New("database has not been initialized")
+	}
+
 	tx, err := _db.Begin()
 	if err != nil {
 		return nil, err

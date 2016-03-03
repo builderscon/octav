@@ -7,4 +7,5 @@ type Venue struct {
 	ID   string
 	Name string
 }
+type VenueList []Venue
 type Conference struct{}
