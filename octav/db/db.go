@@ -9,6 +9,7 @@ import (
 	"strconv"
 	"text/template"
 
+	"github.com/lestrrat/go-pdebug"
 	"github.com/lestrrat/go-tx-guard"
 )
 
@@ -95,7 +96,11 @@ func Init(dsn string) error {
 		dsn = buf.String()
 	}
 
-	conn, err := sql.Open(driverName(), dsn)
+	dn := driverName()
+	if pdebug.Enabled {
+		pdebug.Printf("Connecting to %s %s", dn, dsn)
+	}
+	conn, err := sql.Open(dn, dsn)
 	if err != nil {
 		return err
 	}

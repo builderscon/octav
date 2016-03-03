@@ -2,6 +2,10 @@ package db
 
 import "time"
 
+type Config struct {
+	DSN string // DSN, can be a template string
+}
+
 type Venue struct {
 	OID        uint64 // intenral id, used for sorting and what not
 	EID        string // ID that is visible to the outside
