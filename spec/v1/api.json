@@ -44,6 +44,12 @@
       "type": "string",
       "pattern": "^[a-fA-F0-9-]+$"
     },
+    "uuidDefaultEmpty": {
+      "description": "an UUID, expressed as hexadecimal chars, but if not provided, the empty string is returned",
+      "type": "string",
+      "pattern": "^[a-fA-F0-9-]+$",
+      "default": ""
+    },
     "language": {
       "description": "a language tag",
       "type": "string",
@@ -249,7 +255,7 @@
         "type": "object",
         "properties": {
           "lang": { "$ref": "#/definitions/language" },
-          "since": { "$ref": "#/definitions/uuid" }
+          "since": { "$ref": "#/definitions/uuidDefaultEmpty" }
         }
       },
       "targetSchema": {
@@ -389,6 +395,7 @@
       "href": "/session/lookup",
       "rel": "lookup",
       "schema": {
+        "required": ["id"],
         "properties": {
           "id": { "$ref": "#/definitions/uuid" }
         }
