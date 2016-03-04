@@ -4,15 +4,26 @@ import (
 	"github.com/builderscon/octav/octav/db"
 )
 
+func (v *Venue) Load(tx *db.Tx, id string) error {
+	vdb := db.Venue{}
+	if err := vdb.LoadByEID(tx, id); err != nil {
+		return err
+	}
+
+	v.ID = vdb.EID
+	v.Name = vdb.Name
+	return nil
+}
+
 func (v *VenueList) Load(tx *db.Tx, since string) error {
-	var s uint64
+	var s int64
 	if id := since; id != "" {
-		v := db.Venue{}
-		if err := v.LoadByEID(tx, id); err != nil {
+		vdb := db.Venue{}
+		if err := vdb.LoadByEID(tx, id); err != nil {
 			return err
 		}
 
-		s = v.OID
+		s = vdb.OID
 	}
 
 	rows, err := tx.Query(`SELECT eid, name FROM venue WHERE oid > ? ORDER BY oid LIMIT 10`, s)

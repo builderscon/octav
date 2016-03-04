@@ -57,14 +57,29 @@
       "description": "latitude of an object",
       "type": "number"
     },
+    "date": {
+      "hsup.type": "octav.Date",
+      "type": "object",
+      "property": {
+        "date": { "$ref": "#/definitions/date-string" },
+        "open": { "$ref": "#/definitions/time" },
+        "close": { "$ref": "#/definitions/time" }
+      }
+    },
+    "date-array": {
+      "type": "array",
+      "items": { "$ref": "#/definitions/date" }
+    },
     "conference": {
       "type": "object",
       "hsup.type": "octav.Conference",
       "properties": {
         "id": { "$ref": "#/definitions/uuid" },
         "name": { "$ref": "#/definitions/string-en" },
+        "slug": { "$ref": "#/definitions/string-en" },
         "description": { "$ref": "#/definitions/string-en" },
-        "venue": { "$ref": "#/definitions/venue" }
+        "venue": { "$ref": "#/definitions/venue" },
+        "dates": { "$ref": "#/definitions/date-array" }
       },
       "patternProperties": {
         "title#{a-z}+": { "$ref": "#/definitions/string-i18n" },
@@ -85,7 +100,7 @@
       "hsup.type": "octav.Room",
       "properties": {
         "id": { "$ref": "#/definitions/uuid" },
-        "venue-id": { "$ref": "#/definitions/uuid" },
+        "venue_id": { "$ref": "#/definitions/uuid" },
         "name": { "type": "string" },
         "capcity": { "$ref": "#/definitions/positiveInteger" }
       }
@@ -135,7 +150,7 @@
         "starts-on": { "$ref": "#/definitions/datetime" },
         "duration": { "$ref": "#/definitions/duration" },
         "material-level": { "$ref": "#/definitions/material-level" },
-        "tag": { "$ref": "#/definitions/tag-array" },
+        "tags": { "$ref": "#/definitions/tag-array" },
         "category": { "type": "string" },
         "spoken-language": { "$ref": "#/definitions/language" },
         "slide-language": { "$ref": "#/definitions/language" },
@@ -235,14 +250,28 @@
       }
     },
     {
+      "title": "Lookup venue",
+      "rel": "lookup",
+      "href": "/venue/lookup",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "id": { "$ref": "#/definitions/uuid" }
+        }
+      },
+      "targetSchema": { "$ref": "#/definitions/venue" }
+    },
+    {
       "title": "Create room",
       "rel": "create",
       "href": "/room/create",
       "method": "POST",
       "encType": "application/x-www-form-urlencoded",
       "schema": {
+        "type": "object",
+        "hsup.type": "octav.Room",
         "properties": {
-          "venue-id": {
+          "venue_id": {
             "$ref": "#/definitions/uuid",
             "description": "venue id that this room belongs to"
           },
@@ -252,7 +281,7 @@
           },
           "capacity": { "$ref": "#/definitions/positiveInteger" }
         },
-        "required": ["venue-id", "name"],
+        "required": ["venue_id", "name"],
         "propertyPattern": {
           "name#{a-z}+": { "$ref": "name-i18n" }
         }
@@ -267,10 +296,10 @@
       "encType": "application/x-www-form-urlencoded",
       "schema": {
         "properties": {
-          "venue-id": { "$ref": "#/definitions/uuid" },
+          "venue_id": { "$ref": "#/definitions/uuid" },
           "lang": { "$ref": "#/definitions/language" }
         },
-        "required": [ "venue-id" ]
+        "required": [ "venue_id" ]
       },
       "targetSchema": {
         "hsup.type": "[]octav.Room",
@@ -284,17 +313,19 @@
       "href": "/conference/create",
       "encType": "application/x-www-form-urlencoded",
       "schema": {
+        "hsup.type": "octav.Conference",
         "properties": {
-          "venue-id": { "$ref": "#/definitions/uuid" },
+          "venue_id": { "$ref": "#/definitions/uuid" },
           "title": { "$ref": "#/definitions/string-en" },
+          "subtitle": { "$ref": "#/definitions/string-en" },
           "description": { "$ref": "#/definitions/string-en" },
-          "starts-on": { "$ref": "#/definitions/datetime" },
-          "duration": { "$ref": "#/definitions/duration" }
+          "starts-on": { "$ref": "#/definitions/datetime" }
         },
         "patternProperties": {
           "title#{a-z}+": { "$ref": "#/definitions/string-i18n" },
           "description#{a-z}+": { "$ref": "#/definitions/string-i18n" }
-        }
+        },
+        "required": ["title", "slug"]
       },
       "targetSchema": { "$ref": "#/definitions/conference" }
     },
@@ -340,6 +371,17 @@
             "title#{a-z}+": { "$ref": "#/definitions/string-i18n" },
             "abstract#{a-z}+": { "$ref": "#/definitions/markdown-i18n" }
           }
+        }
+      },
+      "targetSchema": { "$ref": "#/definitions/session" }
+    },
+    {
+      "title": "Lookup session",
+      "href": "/session/lookup",
+      "rel": "lookup",
+      "schema": {
+        "properties": {
+          "id": { "$ref": "#/definitions/uuid" }
         }
       },
       "targetSchema": { "$ref": "#/definitions/session" }

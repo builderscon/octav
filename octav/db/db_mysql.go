@@ -15,6 +15,10 @@ import (
 	"github.com/shogo82148/go-sql-proxy"
 )
 
+type NullTime struct {
+	mysql.NullTime
+}
+
 func defaultDSNVars() dsnvars {
 	return dsnvars{
 		Address:  "127.0.0.1",

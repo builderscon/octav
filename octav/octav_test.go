@@ -15,7 +15,7 @@ func TestCreateConference(t *testing.T) {
 	defer ts.Close()
 
 	cl := client.New(ts.URL)
-	var in interface{}
+	var in *octav.Conference
 	res, err := cl.CreateConference(in)
 	if !assert.NoError(t, err, "CreateConference should succeed") {
 		return
@@ -30,7 +30,7 @@ func TestCreateRoom(t *testing.T) {
 	defer ts.Close()
 
 	cl := client.New(ts.URL)
-	var in interface{}
+	var in *octav.Room
 	res, err := cl.CreateRoom(in)
 	if !assert.NoError(t, err, "CreateRoom should succeed") {
 		return
