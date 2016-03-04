@@ -142,7 +142,7 @@ func doListVenues(ctx context.Context, w http.ResponseWriter, r *http.Request, p
 func doLookupSession(ctx context.Context, w http.ResponseWriter, r *http.Request, payload map[string]interface{}) {
 	tx, err := db.Begin()
 	if err != nil {
-		httpError(w, `doListVenues`, err)
+		httpError(w, `doListSession`, err)
 		return
 	}
 	defer tx.AutoRollback()
@@ -155,6 +155,29 @@ func doLookupSession(ctx context.Context, w http.ResponseWriter, r *http.Request
 
 	if err := json.NewEncoder(w).Encode(s); err != nil {
 		httpError(w, `doLookupSession`, err)
+		return
+	}
+}
+
+func doListSessionsByConference(ctx context.Context, w http.ResponseWriter, r *http.Request, payload map[string]interface{}) {
+	cid := payload["conference_id"].(string)
+	date := payload["date"].(string)
+
+	tx, err := db.Begin()
+	if err != nil {
+		httpError(w, `doListSessionsByConference`, err)
+		return
+	}
+	defer tx.AutoRollback()
+
+	sl := SessionList{}
+	if err := sl.LoadByConference(tx, cid, date); err != nil {
+		httpError(w, `doListSessionsByConference`, err)
+		return
+	}
+
+	if err := json.NewEncoder(w).Encode(sl); err != nil {
+		httpError(w, `doListSessionsByConference`, err)
 		return
 	}
 }

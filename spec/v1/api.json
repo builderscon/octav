@@ -66,6 +66,10 @@
         "close": { "$ref": "#/definitions/time" }
       }
     },
+    "date-string": {
+      "type": "string",
+      "pattern": "^\\d+-\\d+-\\d+$"
+    },
     "date-array": {
       "type": "array",
       "items": { "$ref": "#/definitions/date" }
@@ -136,6 +140,10 @@
     },
     "duration": {
       "type": "string"
+    },
+    "session-array": {
+      "type": "array",
+      "items": { "$ref": "#/definitions/session" }
     },
     "session": {
       "type": "object",
@@ -385,6 +393,20 @@
         }
       },
       "targetSchema": { "$ref": "#/definitions/session" }
+    },
+    {
+      "title": "List sessions by conference",
+      "href": "/schedule/list",
+      "rel": "list",
+      "schema": {
+        "type": "object",
+        "required": ["conference_id"],
+        "properties": {
+          "date": { "$ref": "#/definitions/date-string" },
+          "conference_id": { "$ref": "#/definitions/uuid" }
+        }
+      },
+      "targetSchema": { "$ref": "#/definitions/session-array" }
     }
   ]
 }

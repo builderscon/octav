@@ -1,6 +1,7 @@
 package octav
 
 import (
+	"database/sql"
 	"strings"
 
 	"github.com/builderscon/octav/octav/db"
@@ -74,6 +75,13 @@ func (v *SessionList) Load(tx *db.Tx, since string) error {
 		return err
 	}
 
+	if err := v.FromCursor(rows); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (v *SessionList) FromCursor(rows *sql.Rows) error {
 	// Not using db.Session here
 	res := make([]Session, 0, 10)
 	for rows.Next() {
@@ -88,5 +96,24 @@ func (v *SessionList) Load(tx *db.Tx, since string) error {
 		res = append(res, v)
 	}
 	*v = res
+	return nil
+}
+
+func (v *SessionList) LoadByConference(tx *db.Tx, cid, date string) error {
+	var rows *sql.Rows
+	var err error
+
+	if date == "" {
+		rows, err = tx.Query(`SELECT oid, eid, conference_id, room_id, speaker_id, title, abstract, memo, starts_on, duration, material_level, tags, category, spoken_language, slide_language, slide_subtitles, slide_url, video_url, photo_permission, video_permission, has_interpretation, status, sort_order, confirmed, created_on, modified_on FROM `+db.SessionTable+` WHERE conference_id = ?`, cid)
+	} else {
+		rows, err = tx.Query(`SELECT oid, eid, conference_id, room_id, speaker_id, title, abstract, memo, starts_on, duration, material_level, tags, category, spoken_language, slide_language, slide_subtitles, slide_url, video_url, photo_permission, video_permission, has_interpretation, status, sort_order, confirmed, created_on, modified_on FROM `+db.SessionTable+` WHERE conference_id = ? AND DATE(starts_on) = ?`, cid, date)
+	}
+	if err != nil {
+		return err
+	}
+
+	if err := v.FromCursor(rows); err != nil {
+		return err
+	}
 	return nil
 }
