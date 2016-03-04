@@ -263,6 +263,7 @@
       "href": "/venue/lookup",
       "schema": {
         "type": "object",
+        "required": ["id"],
         "properties": {
           "id": { "$ref": "#/definitions/uuid" }
         }
