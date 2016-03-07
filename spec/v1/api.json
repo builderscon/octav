@@ -98,7 +98,7 @@
     },
     "venue": {
       "type": "object",
-      "hsup.typ": "Venue",
+      "hsup.type": "octav.Venue",
       "properties": {
         "id": { "$ref": "#/definitions/uuid" },
         "name": { "type": "string" },
