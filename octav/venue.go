@@ -1,6 +1,7 @@
 package octav
 
 import (
+	"bytes"
 	"encoding/json"
 	"errors"
 
@@ -8,6 +9,31 @@ import (
 )
 
 var ErrInvalidFieldType = errors.New("placeholder error")
+
+func (v Venue) MarshalJSON() ([]byte, error) {
+	m := make(map[string]interface{})
+	m["id"] = v.ID
+	m["name"] = v.Name
+	m["address"] = v.Address
+	buf, err := json.Marshal(m)
+	if err != nil {
+		return nil, err
+	}
+
+	if v.L10N.Len() == 0 {
+		return buf, nil
+	}
+
+	l10buf, err := json.Marshal(v.L10N)
+	if err != nil {
+		return nil, err
+	}
+	b := bytes.NewBuffer(buf[:len(buf)-1])
+	b.WriteRune(',') // Replace closing '}'
+	b.Write(l10buf[1:])
+
+	return b.Bytes(), nil
+}
 
 func (v *Venue) UnmarshalJSON(data []byte) error {
 	m := make(map[string]interface{})

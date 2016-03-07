@@ -79,13 +79,17 @@ func TestCreateVenue(t *testing.T) {
 	lf.Set("ja", "name", `東京ビッグサイト`)
 	lf.Set("ja", "address", `〒135-0063 東京都江東区有明３丁目１０−１`)
 	in := octav.Venue{
-		Name: "Tokyo Bigsight",
-		Address: "Ariake 3-10-1, Koto-ku, Tokyo",
-		L10N: lf,
+		Name:      "Tokyo Bigsight",
+		Address:   "Ariake 3-10-1, Koto-ku, Tokyo",
+		L10N:      lf,
 		Longitude: 35.6320326,
-		Latitude: 139.7976891,
+		Latitude:  139.7976891,
 	}
 	res, err := cl.CreateVenue(&in)
+	if !assert.NotEmpty(t, res.ID, "Returned structure has ID") {
+		return
+	}
+
 	if !assert.NoError(t, err, "CreateVenue should succeed") {
 		return
 	}
@@ -93,7 +97,9 @@ func TestCreateVenue(t *testing.T) {
 		return
 	}
 
-//	testDeleteVenue(t, &v)
+	if !assert.NoError(t, cl.DeleteVenue(&octav.DeleteVenueRequest{ID: res.ID}), "Cleanup: delete should be successful") {
+		return
+	}
 }
 
 func TestListRooms(t *testing.T) {

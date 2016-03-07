@@ -71,6 +71,9 @@ type Venue struct {
 	Latitude  float64         `json:"latitude,omitempty"`
 	L10N      LocalizedFields `json:"-"`
 }
+type DeleteVenueRequest struct {
+	ID string `json:"id"`
+}
 
 type ConferenceList []Conference
 type Conference struct {

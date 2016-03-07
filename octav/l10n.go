@@ -1,10 +1,44 @@
 package octav
 
 import (
+	"bytes"
+	"encoding/json"
 	"strings"
 
 	"golang.org/x/text/language"
 )
+
+func (lf LocalizedFields) MarshalJSON() ([]byte, error) {
+	lf.lock.RLock()
+	defer lf.lock.RUnlock()
+
+	buf := bytes.Buffer{}
+	buf.WriteString("{")
+	for lang, kv := range lf.fields {
+		for k, v := range kv {
+			jk, err := json.Marshal(k + "#" + lang)
+			if err != nil {
+				return nil, err
+			}
+			jv, err := json.Marshal(v)
+			if err != nil {
+				return nil, err
+			}
+			buf.Write(jk)
+			buf.WriteRune(':')
+			buf.Write(jv)
+			buf.WriteRune(',')
+		}
+	}
+
+	b := buf.Bytes()
+	b[len(b)-1] = '}' // replace trailing "," with a "}"
+	return b, nil
+}
+
+func (lf LocalizedFields) Len() int {
+	return len(lf.fields)
+}
 
 func (lf LocalizedFields) Keys() []string {
 	lf.lock.Lock()

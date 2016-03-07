@@ -284,6 +284,7 @@
       "encType": "application/x-www-form-urlencoded",
       "schema": {
         "type": "object",
+        "hsup.type": "octav.DeleteVenueRequest",
         "properties": {
           "id": { "$ref": "#/definitions/uuid" }
         }

@@ -117,13 +117,7 @@ func doCreateVenue(ctx context.Context, w http.ResponseWriter, r *http.Request, 
 func doListRooms(ctx context.Context, w http.ResponseWriter, r *http.Request, payload map[string]interface{}) {
 }
 
-func doDeleteVenue(ctx context.Context, w http.ResponseWriter, r *http.Request, payload map[string]interface{}) {
-	id, ok := payload["id"].(string)
-	if !ok {
-		httpError(w, `DeleteVenue`, http.StatusInternalServerError, nil)
-		return
-	}
-
+func doDeleteVenue(ctx context.Context, w http.ResponseWriter, r *http.Request, payload *DeleteVenueRequest) {
 	tx, err := db.Begin()
 	if err != nil {
 		httpError(w, `DeleteVenue`, http.StatusInternalServerError, err)
@@ -131,7 +125,7 @@ func doDeleteVenue(ctx context.Context, w http.ResponseWriter, r *http.Request, 
 	}
 	defer tx.AutoRollback()
 
-	s := db.Venue{EID: id}
+	s := db.Venue{EID: payload.ID}
 	if err := s.Delete(tx); err != nil {
 		httpError(w, `DeleteVenue`, http.StatusInternalServerError, err)
 		return
@@ -140,7 +134,7 @@ func doDeleteVenue(ctx context.Context, w http.ResponseWriter, r *http.Request, 
 		httpError(w, `DeleteVenue`, http.StatusInternalServerError, err)
 		return
 	}
-	w.WriteHeader(http.StatusNoContent)
+	httpJSON(w, map[string]string{"status": "success"})
 }
 
 func doLookupVenue(ctx context.Context, w http.ResponseWriter, r *http.Request, payload map[string]interface{}) {
