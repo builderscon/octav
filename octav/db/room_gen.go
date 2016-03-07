@@ -14,7 +14,7 @@ func (r *Room) Scan(scanner interface {
 }
 
 func (r *Room) LoadByEID(tx *Tx, eid string) error {
-	row := tx.QueryRow(`SELECT oid, eid, venue_id, name, capacity, created_on, modified_on FROM `+SessionTable+` WHERE eid = ?`, eid)
+	row := tx.QueryRow(`SELECT oid, eid, venue_id, name, capacity, created_on, modified_on FROM `+RoomTable+` WHERE eid = ?`, eid)
 	if err := r.Scan(row); err != nil {
 		return err
 	}
@@ -26,7 +26,7 @@ func (r *Room) Create(tx *Tx) error {
 		return errors.New("create: non-empty EID required")
 	}
 
-	result, err := tx.Exec(`INSERT INTO eid, venue_id, name, capacity, created_on, modified_on VALUES (?, ?, ?, ?, ?, ?)`, r.EID, r.VenueID, r.Name, r.Capacity, r.CreatedOn, r.ModifiedOn)
+	result, err := tx.Exec(`INSERT INTO `+RoomTable+` (eid, venue_id, name, capacity, created_on, modified_on) VALUES (?, ?, ?, ?, ?, ?)`, r.EID, r.VenueID, r.Name, r.Capacity, r.CreatedOn, r.ModifiedOn)
 	if err != nil {
 		return err
 	}
@@ -38,4 +38,18 @@ func (r *Room) Create(tx *Tx) error {
 
 	r.OID = lii
 	return nil
+}
+
+func (r Room) Delete(tx *Tx) error {
+	if r.OID != 0 {
+		_, err := tx.Exec(`DELETE FROM `+RoomTable+`WHERE oid = ?`, r.OID)
+		return err
+	}
+
+	if r.EID != "" {
+		_, err := tx.Exec(`DELETE FROM `+RoomTable+`WHERE eid = ?`, r.EID)
+		return err
+	}
+
+	return errors.New("either OID/EID mustbe filled")
 }

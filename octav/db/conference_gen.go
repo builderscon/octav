@@ -14,7 +14,7 @@ func (c *Conference) Scan(scanner interface {
 }
 
 func (c *Conference) LoadByEID(tx *Tx, eid string) error {
-	row := tx.QueryRow(`SELECT oid, eid, slug, title, sub_title, created_on, modified_on FROM `+SessionTable+` WHERE eid = ?`, eid)
+	row := tx.QueryRow(`SELECT oid, eid, slug, title, sub_title, created_on, modified_on FROM `+ConferenceTable+` WHERE eid = ?`, eid)
 	if err := c.Scan(row); err != nil {
 		return err
 	}
@@ -26,7 +26,7 @@ func (c *Conference) Create(tx *Tx) error {
 		return errors.New("create: non-empty EID required")
 	}
 
-	result, err := tx.Exec(`INSERT INTO eid, slug, title, sub_title, created_on, modified_on VALUES (?, ?, ?, ?, ?, ?)`, c.EID, c.Slug, c.Title, c.SubTitle, c.CreatedOn, c.ModifiedOn)
+	result, err := tx.Exec(`INSERT INTO `+ConferenceTable+` (eid, slug, title, sub_title, created_on, modified_on) VALUES (?, ?, ?, ?, ?, ?)`, c.EID, c.Slug, c.Title, c.SubTitle, c.CreatedOn, c.ModifiedOn)
 	if err != nil {
 		return err
 	}
@@ -38,4 +38,18 @@ func (c *Conference) Create(tx *Tx) error {
 
 	c.OID = lii
 	return nil
+}
+
+func (c Conference) Delete(tx *Tx) error {
+	if c.OID != 0 {
+		_, err := tx.Exec(`DELETE FROM `+ConferenceTable+`WHERE oid = ?`, c.OID)
+		return err
+	}
+
+	if c.EID != "" {
+		_, err := tx.Exec(`DELETE FROM `+ConferenceTable+`WHERE eid = ?`, c.EID)
+		return err
+	}
+
+	return errors.New("either OID/EID mustbe filled")
 }
