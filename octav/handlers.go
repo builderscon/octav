@@ -32,7 +32,7 @@ func httpError(w http.ResponseWriter, message string, err error) {
 
 func doCreateConference(ctx context.Context, w http.ResponseWriter, r *http.Request, payload *Conference) {
 	c := db.Conference{}
-	payload.ID = uuid()
+	payload.ID = UUID()
 	if err := payload.ToRow(&c); err != nil {
 		httpError(w, `CreateConference`, err)
 		return
@@ -65,7 +65,7 @@ func doCreateConference(ctx context.Context, w http.ResponseWriter, r *http.Requ
 
 func doCreateRoom(ctx context.Context, w http.ResponseWriter, r *http.Request, payload *Room) {
 	c := db.Room{}
-	payload.ID = uuid()
+	payload.ID = UUID()
 	if err := payload.ToRow(&c); err != nil {
 		httpError(w, `CreateRoom`, err)
 		return
