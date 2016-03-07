@@ -42,12 +42,12 @@ func (c *Conference) Create(tx *Tx) error {
 
 func (c Conference) Delete(tx *Tx) error {
 	if c.OID != 0 {
-		_, err := tx.Exec(`DELETE FROM `+ConferenceTable+`WHERE oid = ?`, c.OID)
+		_, err := tx.Exec(`DELETE FROM `+ConferenceTable+` WHERE oid = ?`, c.OID)
 		return err
 	}
 
 	if c.EID != "" {
-		_, err := tx.Exec(`DELETE FROM `+ConferenceTable+`WHERE eid = ?`, c.EID)
+		_, err := tx.Exec(`DELETE FROM `+ConferenceTable+` WHERE eid = ?`, c.EID)
 		return err
 	}
 

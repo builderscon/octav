@@ -42,12 +42,12 @@ func (v *Venue) Create(tx *Tx) error {
 
 func (v Venue) Delete(tx *Tx) error {
 	if v.OID != 0 {
-		_, err := tx.Exec(`DELETE FROM `+VenueTable+`WHERE oid = ?`, v.OID)
+		_, err := tx.Exec(`DELETE FROM `+VenueTable+` WHERE oid = ?`, v.OID)
 		return err
 	}
 
 	if v.EID != "" {
-		_, err := tx.Exec(`DELETE FROM `+VenueTable+`WHERE eid = ?`, v.EID)
+		_, err := tx.Exec(`DELETE FROM `+VenueTable+` WHERE eid = ?`, v.EID)
 		return err
 	}
 

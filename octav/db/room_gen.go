@@ -42,12 +42,12 @@ func (r *Room) Create(tx *Tx) error {
 
 func (r Room) Delete(tx *Tx) error {
 	if r.OID != 0 {
-		_, err := tx.Exec(`DELETE FROM `+RoomTable+`WHERE oid = ?`, r.OID)
+		_, err := tx.Exec(`DELETE FROM `+RoomTable+` WHERE oid = ?`, r.OID)
 		return err
 	}
 
 	if r.EID != "" {
-		_, err := tx.Exec(`DELETE FROM `+RoomTable+`WHERE eid = ?`, r.EID)
+		_, err := tx.Exec(`DELETE FROM `+RoomTable+` WHERE eid = ?`, r.EID)
 		return err
 	}
 

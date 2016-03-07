@@ -42,12 +42,12 @@ func (s *Session) Create(tx *Tx) error {
 
 func (s Session) Delete(tx *Tx) error {
 	if s.OID != 0 {
-		_, err := tx.Exec(`DELETE FROM `+SessionTable+`WHERE oid = ?`, s.OID)
+		_, err := tx.Exec(`DELETE FROM `+SessionTable+` WHERE oid = ?`, s.OID)
 		return err
 	}
 
 	if s.EID != "" {
-		_, err := tx.Exec(`DELETE FROM `+SessionTable+`WHERE eid = ?`, s.EID)
+		_, err := tx.Exec(`DELETE FROM `+SessionTable+` WHERE eid = ?`, s.EID)
 		return err
 	}
 

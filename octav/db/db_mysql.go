@@ -29,7 +29,7 @@ func defaultDSNVars() dsnvars {
 }
 
 func defaultDSN() string {
-	return "root:@/kunai?parseTime=true"
+	return "root:@/octav?parseTime=true"
 }
 
 func driverName() string {
