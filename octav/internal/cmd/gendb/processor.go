@@ -208,11 +208,11 @@ func (p *Processor) ProcessStruct(s Struct) error {
 
 	fmt.Fprintf(&buf, "\nfunc (%c %s) Delete(tx *Tx) error {", varname, s.Name)
 	fmt.Fprintf(&buf, "\nif %c.OID != 0 {", varname)
-	fmt.Fprintf(&buf, "\n_, err := tx.Exec(`DELETE FROM ` + %sTable + `WHERE oid = ?`, %c.OID)", s.Name, varname)
+	fmt.Fprintf(&buf, "\n_, err := tx.Exec(`DELETE FROM ` + %sTable + ` WHERE oid = ?`, %c.OID)", s.Name, varname)
 	buf.WriteString("\nreturn err")
 	buf.WriteString("\n}\n")
 	fmt.Fprintf(&buf, "\nif %c.EID != %s {", varname, `""`)
-	fmt.Fprintf(&buf, "\n_, err := tx.Exec(`DELETE FROM ` + %sTable + `WHERE eid = ?`, %c.EID)", s.Name, varname)
+	fmt.Fprintf(&buf, "\n_, err := tx.Exec(`DELETE FROM ` + %sTable + ` WHERE eid = ?`, %c.EID)", s.Name, varname)
 	buf.WriteString("\nreturn err")
 	buf.WriteString("\n}\n")
 	fmt.Fprintf(&buf, "\nreturn errors.New(%s)", strconv.Quote("either OID/EID mustbe filled"))
