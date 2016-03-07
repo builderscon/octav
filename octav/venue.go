@@ -26,7 +26,7 @@ func (v *VenueList) Load(tx *db.Tx, since string) error {
 		s = vdb.OID
 	}
 
-	rows, err := tx.Query(`SELECT eid, name FROM venue WHERE oid > ? ORDER BY oid LIMIT 10`, s)
+	rows, err := tx.Query(`SELECT eid, name FROM venues WHERE oid > ? ORDER BY oid LIMIT 10`, s)
 	if err != nil {
 		return err
 	}
