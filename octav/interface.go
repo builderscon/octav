@@ -1,6 +1,9 @@
 package octav
 
-import "time"
+import (
+	"sync"
+	"time"
+)
 
 type Date struct {
 	Year  int
@@ -61,8 +64,12 @@ type User struct{}
 
 type VenueList []Venue
 type Venue struct {
-	ID   string
-	Name string
+	ID        string          `json:"id,omitempty"`
+	Name      string          `json:"name"`
+	Address   string          `json:"address"`
+	Longitude float64         `json:"longitude,omitempty"`
+	Latitude  float64         `json:"latitude,omitempty"`
+	L10N      LocalizedFields `json:"-"`
 }
 
 type ConferenceList []Conference
@@ -72,4 +79,10 @@ type Conference struct {
 	SubTitle string           `json:"subtitle"`
 	Slug     string           `json:"slug"`
 	Dates    []ConferenceDate `json:"dates"` // only populated for JSON response
+}
+
+type LocalizedFields struct {
+	lock sync.RWMutex
+	// Language -> field/value
+	fields map[string]map[string]string
 }

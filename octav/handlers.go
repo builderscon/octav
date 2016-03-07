@@ -3,11 +3,9 @@ package octav
 import (
 	"bytes"
 	"encoding/json"
-	"errors"
 	"net/http"
 
 	"github.com/builderscon/octav/octav/db"
-	"github.com/lestrrat/go-pdebug"
 	"golang.org/x/net/context"
 )
 
@@ -15,7 +13,7 @@ func httpJSON(w http.ResponseWriter, v interface{}) {
 	buf := bytes.Buffer{}
 	w.Header().Set("Content-Type", "application/json")
 	if err := json.NewEncoder(&buf).Encode(v); err != nil {
-		httpError(w, `encode json`, err)
+		httpError(w, `encode json`, http.StatusInternalServerError, err)
 		return
 	}
 
@@ -23,40 +21,33 @@ func httpJSON(w http.ResponseWriter, v interface{}) {
 	buf.WriteTo(w)
 }
 
-func httpError(w http.ResponseWriter, message string, err error) {
-	if pdebug.Enabled {
-		pdebug.Printf("%s: %s", message, err)
-	}
-	http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
-}
-
 func doCreateConference(ctx context.Context, w http.ResponseWriter, r *http.Request, payload *Conference) {
 	c := db.Conference{}
 	payload.ID = UUID()
 	if err := payload.ToRow(&c); err != nil {
-		httpError(w, `CreateConference`, err)
+		httpError(w, `CreateConference`, http.StatusInternalServerError, err)
 		return
 	}
 
 	tx, err := db.Begin()
 	if err != nil {
-		httpError(w, `CreateConference`, err)
+		httpError(w, `CreateConference`, http.StatusInternalServerError, err)
 		return
 	}
 	defer tx.AutoRollback()
 
 	if err := c.Create(tx); err != nil {
-		httpError(w, `CreateConference`, err)
+		httpError(w, `CreateConference`, http.StatusInternalServerError, err)
 		return
 	}
 	if err := tx.Commit(); err != nil {
-		httpError(w, `CreateConference`, err)
+		httpError(w, `CreateConference`, http.StatusInternalServerError, err)
 		return
 	}
 
 	c2 := Conference{}
 	if err := c2.FromRow(c); err != nil {
-		httpError(w, `CreateConference`, err)
+		httpError(w, `CreateConference`, http.StatusInternalServerError, err)
 		return
 	}
 
@@ -67,29 +58,29 @@ func doCreateRoom(ctx context.Context, w http.ResponseWriter, r *http.Request, p
 	c := db.Room{}
 	payload.ID = UUID()
 	if err := payload.ToRow(&c); err != nil {
-		httpError(w, `CreateRoom`, err)
+		httpError(w, `CreateRoom`, http.StatusInternalServerError, err)
 		return
 	}
 
 	tx, err := db.Begin()
 	if err != nil {
-		httpError(w, `CreateRoom`, err)
+		httpError(w, `CreateRoom`, http.StatusInternalServerError, err)
 		return
 	}
 	defer tx.AutoRollback()
 
 	if err := c.Create(tx); err != nil {
-		httpError(w, `CreateRoom`, err)
+		httpError(w, `CreateRoom`, http.StatusInternalServerError, err)
 		return
 	}
 	if err := tx.Commit(); err != nil {
-		httpError(w, `CreateRoom`, err)
+		httpError(w, `CreateRoom`, http.StatusInternalServerError, err)
 		return
 	}
 
 	c2 := Room{}
 	if err := c2.FromRow(c); err != nil {
-		httpError(w, `CreateRoom`, err)
+		httpError(w, `CreateRoom`, http.StatusInternalServerError, err)
 		return
 	}
 
@@ -103,6 +94,24 @@ func doCreateUser(ctx context.Context, w http.ResponseWriter, r *http.Request, p
 }
 
 func doCreateVenue(ctx context.Context, w http.ResponseWriter, r *http.Request, payload *Venue) {
+	tx, err := db.Begin()
+	if err != nil {
+		httpError(w, `CreateVenue`, http.StatusInternalServerError, err)
+		return
+	}
+	defer tx.AutoRollback()
+
+	if err := payload.Create(tx); err != nil {
+		httpError(w, `CreateVenue`, http.StatusInternalServerError, err)
+		return
+	}
+
+	if err := tx.Commit(); err != nil {
+		httpError(w, `CreateVenue`, http.StatusInternalServerError, err)
+		return
+	}
+
+	httpJSON(w, payload)
 }
 
 func doListRooms(ctx context.Context, w http.ResponseWriter, r *http.Request, payload map[string]interface{}) {
@@ -111,24 +120,24 @@ func doListRooms(ctx context.Context, w http.ResponseWriter, r *http.Request, pa
 func doDeleteVenue(ctx context.Context, w http.ResponseWriter, r *http.Request, payload map[string]interface{}) {
 	id, ok := payload["id"].(string)
 	if !ok {
-		httpError(w, `doDeleteVenue`, errors.New("invalid id"))
+		httpError(w, `DeleteVenue`, http.StatusInternalServerError, nil)
 		return
 	}
 
 	tx, err := db.Begin()
 	if err != nil {
-		httpError(w, `doDeleteVenue`, err)
+		httpError(w, `DeleteVenue`, http.StatusInternalServerError, err)
 		return
 	}
 	defer tx.AutoRollback()
 
 	s := db.Venue{EID: id}
 	if err := s.Delete(tx); err != nil {
-		httpError(w, `doDeleteVenue`, err)
+		httpError(w, `DeleteVenue`, http.StatusInternalServerError, err)
 		return
 	}
 	if err := tx.Commit(); err != nil {
-		httpError(w, `doDeleteVenue`, err)
+		httpError(w, `DeleteVenue`, http.StatusInternalServerError, err)
 		return
 	}
 	w.WriteHeader(http.StatusNoContent)
@@ -137,14 +146,14 @@ func doDeleteVenue(ctx context.Context, w http.ResponseWriter, r *http.Request, 
 func doLookupVenue(ctx context.Context, w http.ResponseWriter, r *http.Request, payload map[string]interface{}) {
 	tx, err := db.Begin()
 	if err != nil {
-		httpError(w, `doListVenues`, err)
+		httpError(w, `LookupVenue`, http.StatusInternalServerError, err)
 		return
 	}
 	defer tx.AutoRollback()
 
 	s := Venue{}
 	if err := s.Load(tx, payload["id"].(string)); err != nil {
-		httpError(w, `doLookupVenue`, err)
+		httpError(w, `LookupVenue`, http.StatusInternalServerError, err)
 		return
 	}
 
@@ -153,14 +162,14 @@ func doLookupVenue(ctx context.Context, w http.ResponseWriter, r *http.Request, 
 func doListVenues(ctx context.Context, w http.ResponseWriter, r *http.Request, payload map[string]interface{}) {
 	tx, err := db.Begin()
 	if err != nil {
-		httpError(w, `doListVenues`, err)
+		httpError(w, `ListVenues`, http.StatusInternalServerError, err)
 		return
 	}
 	defer tx.AutoRollback()
 
 	vl := VenueList{}
 	if err := vl.Load(tx, payload["since"].(string)); err != nil {
-		httpError(w, `doListVenues`, err)
+		httpError(w, `ListVenues`, http.StatusInternalServerError, err)
 		return
 	}
 
@@ -170,14 +179,14 @@ func doListVenues(ctx context.Context, w http.ResponseWriter, r *http.Request, p
 func doLookupSession(ctx context.Context, w http.ResponseWriter, r *http.Request, payload map[string]interface{}) {
 	tx, err := db.Begin()
 	if err != nil {
-		httpError(w, `doListSession`, err)
+		httpError(w, `LookupSession`, http.StatusInternalServerError, err)
 		return
 	}
 	defer tx.AutoRollback()
 
 	s := Session{}
 	if err := s.Load(tx, payload["id"].(string)); err != nil {
-		httpError(w, `doLookupSession`, err)
+		httpError(w, `LookupSession`, http.StatusInternalServerError, err)
 		return
 	}
 
@@ -190,14 +199,14 @@ func doListSessionsByConference(ctx context.Context, w http.ResponseWriter, r *h
 
 	tx, err := db.Begin()
 	if err != nil {
-		httpError(w, `doListSessionsByConference`, err)
+		httpError(w, `ListVenuesByConference`, http.StatusInternalServerError, err)
 		return
 	}
 	defer tx.AutoRollback()
 
 	sl := SessionList{}
 	if err := sl.LoadByConference(tx, cid, date); err != nil {
-		httpError(w, `doListSessionsByConference`, err)
+		httpError(w, `ListVenuesByConference`, http.StatusInternalServerError, err)
 		return
 	}
 

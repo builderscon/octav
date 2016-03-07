@@ -75,14 +75,25 @@ func TestCreateVenue(t *testing.T) {
 	defer ts.Close()
 
 	cl := client.New(ts.URL)
-	var in *octav.Venue
-	res, err := cl.CreateVenue(in)
+	lf := octav.LocalizedFields{}
+	lf.Set("ja", "name", `東京ビッグサイト`)
+	lf.Set("ja", "address", `〒135-0063 東京都江東区有明３丁目１０−１`)
+	in := octav.Venue{
+		Name: "Tokyo Bigsight",
+		Address: "Ariake 3-10-1, Koto-ku, Tokyo",
+		L10N: lf,
+		Longitude: 35.6320326,
+		Latitude: 139.7976891,
+	}
+	res, err := cl.CreateVenue(&in)
 	if !assert.NoError(t, err, "CreateVenue should succeed") {
 		return
 	}
 	if !assert.NoError(t, validator.HTTPCreateVenueResponse.Validate(res), "Validation should succeed") {
 		return
 	}
+
+//	testDeleteVenue(t, &v)
 }
 
 func TestListRooms(t *testing.T) {

@@ -239,7 +239,7 @@
           "latitude": { "$ref": "#/definitions/latitude" },
           "longitude": { "$ref": "#/definitions/longitude" }
         },
-        "required": ["name", "address", "latitude", "longitude"],
+        "required": ["name", "address"],
         "propertyPattern": {
           "name#{a-z}+": { "$ref": "#/definitions/string-i18n" },
           "address#{a-z}+": { "$ref": "#/definitions/string-i18n" }

@@ -1,9 +1,53 @@
 package octav
 
 import (
+	"encoding/json"
+	"errors"
+
 	"github.com/builderscon/octav/octav/db"
 )
 
+var ErrInvalidFieldType = errors.New("placeholder error")
+
+func (v *Venue) UnmarshalJSON(data []byte) error {
+	m := make(map[string]interface{})
+	if err := json.Unmarshal(data, &m); err != nil {
+		return err
+	}
+	if jv, ok := m["id"]; ok {
+		switch jv.(type) {
+		case string:
+			v.ID = jv.(string)
+			delete(m, "id")
+		default:
+			return ErrInvalidFieldType
+		}
+	}
+	if jv, ok := m["name"]; ok {
+		switch jv.(type) {
+		case string:
+			v.Name = jv.(string)
+			delete(m, "name")
+		default:
+			return ErrInvalidFieldType
+		}
+	}
+	if jv, ok := m["address"]; ok {
+		switch jv.(type) {
+		case string:
+			v.Address = jv.(string)
+			delete(m, "address")
+		default:
+			return ErrInvalidFieldType
+		}
+	}
+
+	if err := ExtractL10NFields(m, &v.L10N, []string{"address", "name"}); err != nil {
+		return err
+	}
+
+	return nil
+}
 func (v *Venue) Load(tx *db.Tx, id string) error {
 	vdb := db.Venue{}
 	if err := vdb.LoadByEID(tx, id); err != nil {
@@ -13,6 +57,18 @@ func (v *Venue) Load(tx *db.Tx, id string) error {
 	v.ID = vdb.EID
 	v.Name = vdb.Name
 	return nil
+}
+
+func (v *Venue) Create(tx *db.Tx) error {
+	if v.ID == "" {
+		v.ID = UUID()
+	}
+
+	vdb := db.Venue{
+		EID:  v.ID,
+		Name: v.Name,
+	}
+	return vdb.Create(tx)
 }
 
 func (v *VenueList) Load(tx *db.Tx, since string) error {
