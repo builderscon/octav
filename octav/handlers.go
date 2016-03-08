@@ -123,6 +123,53 @@ func doCreateVenue(ctx context.Context, w http.ResponseWriter, r *http.Request, 
 func doListRooms(ctx context.Context, w http.ResponseWriter, r *http.Request, payload map[string]interface{}) {
 }
 
+func doLookupRoom(ctx context.Context, w http.ResponseWriter, r *http.Request, payload *LookupRoomRequest) {
+	if pdebug.Enabled {
+		g := pdebug.Marker("doLookupRoom")
+		defer g.End()
+	}
+	tx, err := db.Begin()
+	if err != nil {
+		httpError(w, `LookupRoom`, http.StatusInternalServerError, err)
+		return
+	}
+	defer tx.AutoRollback()
+
+	s := Room{}
+	if err := s.Load(tx, payload.ID); err != nil {
+		httpError(w, `LookupRoom`, http.StatusInternalServerError, err)
+		return
+	}
+
+	httpJSON(w, s)
+}
+
+
+func doDeleteRoom(ctx context.Context, w http.ResponseWriter, r *http.Request, payload *DeleteRoomRequest) {
+	if pdebug.Enabled {
+		g := pdebug.Marker("doDeleteRoom")
+		defer g.End()
+	}
+
+	tx, err := db.Begin()
+	if err != nil {
+		httpError(w, `DeleteRoom`, http.StatusInternalServerError, err)
+		return
+	}
+	defer tx.AutoRollback()
+
+	v := Room{ID: payload.ID}
+	if err := v.Delete(tx); err != nil {
+		httpError(w, `DeleteRoom`, http.StatusInternalServerError, err)
+		return
+	}
+	if err := tx.Commit(); err != nil {
+		httpError(w, `DeleteRoom`, http.StatusInternalServerError, err)
+		return
+	}
+	httpJSON(w, map[string]string{"status": "success"})
+}
+
 func doDeleteVenue(ctx context.Context, w http.ResponseWriter, r *http.Request, payload *DeleteVenueRequest) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("doDeleteVenue")
@@ -150,7 +197,7 @@ func doDeleteVenue(ctx context.Context, w http.ResponseWriter, r *http.Request, 
 
 func doLookupVenue(ctx context.Context, w http.ResponseWriter, r *http.Request, payload *LookupVenueRequest) {
 	if pdebug.Enabled {
-		g := pdebug.Marker("doCreateVenue")
+		g := pdebug.Marker("doLookupVenue")
 		defer g.End()
 	}
 	tx, err := db.Begin()
@@ -168,6 +215,7 @@ func doLookupVenue(ctx context.Context, w http.ResponseWriter, r *http.Request, 
 
 	httpJSON(w, s)
 }
+
 func doListVenues(ctx context.Context, w http.ResponseWriter, r *http.Request, payload map[string]interface{}) {
 	tx, err := db.Begin()
 	if err != nil {

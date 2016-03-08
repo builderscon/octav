@@ -320,6 +320,35 @@
       "targetSchema": { "$ref": "#/definitions/room" }
     },
     {
+      "title": "Lookup room",
+      "rel": "lookup",
+      "href": "/room/lookup",
+      "method": "GET",
+      "schema": {
+        "type": "object",
+        "hsup.type": "octav.LookupRoomRequest",
+        "required": ["id"],
+        "properties": {
+          "id": { "$ref": "#/definitions/uuid" }
+        }
+      },
+      "targetSchema": { "$ref": "#/definitions/room" }
+    },
+    {
+      "title": "Delete room",
+      "rel": "delete",
+      "href": "/room/delete",
+      "method": "POST",
+      "encType": "application/x-www-form-urlencoded",
+      "schema": {
+        "type": "object",
+        "hsup.type": "octav.DeleteRoomRequest",
+        "properties": {
+          "id": { "$ref": "#/definitions/uuid" }
+        }
+      }
+    },
+    {
       "title": "List rooms",
       "rel": "list",
       "href": "/room/list",

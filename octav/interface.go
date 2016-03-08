@@ -31,6 +31,13 @@ type Room struct {
 	Capacity uint   `json:"capacity"`
 }
 type RoomList []Room
+type DeleteRoomRequest struct {
+	ID string `json:"id" urlenc:"id"`
+}
+type LookupRoomRequest struct {
+	ID string `json:"id" urlenc:"id"`
+}
+
 type SessionList []Session
 type Session struct {
 	ID                string     `json:"id"`

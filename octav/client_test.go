@@ -10,6 +10,75 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+func bigsight() *octav.Venue {
+	lf := octav.LocalizedFields{}
+	lf.Set("ja", "name", `東京ビッグサイト`)
+	lf.Set("ja", "address", `〒135-0063 東京都江東区有明３丁目１０−１`)
+	return &octav.Venue{
+		Name:      "Tokyo Bigsight",
+		Address:   "Ariake 3-10-1, Koto-ku, Tokyo",
+		L10N:      lf,
+		Longitude: 35.6320326,
+		Latitude:  139.7976891,
+	}
+}
+
+func intlConferenceRoom(venueID string) *octav.Room {
+	return &octav.Room{
+		VenueID: venueID,
+		Name: "International Conference Hall",
+		Capacity: 1000,
+	}
+}
+
+func testCreateRoom(t *testing.T, cl *client.Client, r *octav.Room) (*octav.Room, error) {
+	res, err := cl.CreateRoom(r)
+	if !assert.NoError(t, err, "CreateRoom should succeed") {
+		return nil, err
+	}
+	return res, nil
+}
+
+func testCreateVenue(t *testing.T, cl *client.Client, v *octav.Venue) (*octav.Venue, error) {
+	res, err := cl.CreateVenue(v)
+	if !assert.NoError(t, err, "CreateVenue should succeed") {
+		return nil, err
+	}
+	return res, nil
+}
+
+func testLookupRoom(t *testing.T, cl *client.Client, id string) (*octav.Room, error) {
+	venue, err := cl.LookupRoom(&octav.LookupRoomRequest{ID: id})
+	if !assert.NoError(t, err, "LookupRoom succeeds") {
+		return nil, err
+	}
+	return venue, nil
+}
+
+func testLookupVenue(t *testing.T, cl *client.Client, id string) (*octav.Venue, error) {
+	venue, err := cl.LookupVenue(&octav.LookupVenueRequest{ID: id})
+	if !assert.NoError(t, err, "LookupVenue succeeds") {
+		return nil, err
+	}
+	return venue, nil
+}
+
+func testDeleteRoom(t *testing.T, cl *client.Client, id string) error {
+	err := cl.DeleteRoom(&octav.DeleteRoomRequest{ID: id})
+	if !assert.NoError(t, err, "Delete room should be successful") {
+		return err
+	}
+	return err
+}
+
+func testDeleteVenue(t *testing.T, cl *client.Client, id string) error {
+	err := cl.DeleteVenue(&octav.DeleteVenueRequest{ID: id})
+	if !assert.NoError(t, err, "Delete venue should be successful") {
+		return err
+	}
+	return err
+}
+
 func TestCreateConference(t *testing.T) {
 	ts := httptest.NewServer(octav.New())
 	defer ts.Close()
@@ -20,6 +89,7 @@ func TestCreateConference(t *testing.T) {
 	if !assert.NoError(t, err, "CreateConference should succeed") {
 		return
 	}
+
 	if !assert.NoError(t, validator.HTTPCreateConferenceResponse.Validate(res), "Validation should succeed") {
 		return
 	}
@@ -30,12 +100,39 @@ func TestCreateRoom(t *testing.T) {
 	defer ts.Close()
 
 	cl := client.New(ts.URL)
-	var in *octav.Room
-	res, err := cl.CreateRoom(in)
-	if !assert.NoError(t, err, "CreateRoom should succeed") {
+
+	venue, err := testCreateVenue(t, cl, bigsight())
+	if err != nil {
 		return
 	}
+
+	res, err := testCreateRoom(t, cl, intlConferenceRoom(venue.ID))
+	if err != nil {
+		return
+	}
+
+	if !assert.NotEmpty(t, res.ID, "Returned structure has ID") {
+		return
+	}
+
 	if !assert.NoError(t, validator.HTTPCreateRoomResponse.Validate(res), "Validation should succeed") {
+		return
+	}
+
+	res2, err := testLookupRoom(t, cl, res.ID)
+	if err != nil {
+		return
+	}
+
+	if !assert.Equal(t, res2, res, "LookupRoom is the same as the room created") {
+		return
+	}
+
+	if err := testDeleteRoom(t, cl, res.ID); err != nil {
+		return
+	}
+
+	if err := testDeleteVenue(t, cl, venue.ID); err != nil {
 		return
 	}
 }
@@ -75,18 +172,8 @@ func TestCreateVenue(t *testing.T) {
 	defer ts.Close()
 
 	cl := client.New(ts.URL)
-	lf := octav.LocalizedFields{}
-	lf.Set("ja", "name", `東京ビッグサイト`)
-	lf.Set("ja", "address", `〒135-0063 東京都江東区有明３丁目１０−１`)
-	in := octav.Venue{
-		Name:      "Tokyo Bigsight",
-		Address:   "Ariake 3-10-1, Koto-ku, Tokyo",
-		L10N:      lf,
-		Longitude: 35.6320326,
-		Latitude:  139.7976891,
-	}
-	res, err := cl.CreateVenue(&in)
-	if !assert.NoError(t, err, "CreateVenue should succeed") {
+	res, err := testCreateVenue(t, cl, bigsight())
+	if err != nil {
 		return
 	}
 
@@ -98,16 +185,16 @@ func TestCreateVenue(t *testing.T) {
 		return
 	}
 
-	res2, err := cl.LookupVenue(&octav.LookupVenueRequest{ID: res.ID})
-	if !assert.NoError(t, err, "LookupVenue succeeds") {
+	res2, err := testLookupVenue(t, cl, res.ID)
+	if err != nil {
 		return
 	}
 
-	if !assert.Equal(t, res2, res, "LookupVenue is the same as thevenue created") {
+	if !assert.Equal(t, res2, res, "LookupVenue is the same as the venue created") {
 		return
 	}
 
-	if !assert.NoError(t, cl.DeleteVenue(&octav.DeleteVenueRequest{ID: res.ID}), "Cleanup: delete should be successful") {
+	if err := testDeleteVenue(t, cl, res.ID); err != nil {
 		return
 	}
 }
