@@ -226,7 +226,7 @@ func (p *Processor) ProcessStruct(s Struct) error {
 	}
 
 	if hasEID {
-		fmt.Fprintf(&buf, "\nreturn errors.New(%s)", strconv.Quote("either OID/EID musti be filled"))
+		fmt.Fprintf(&buf, "\nreturn errors.New(%s)", strconv.Quote("either OID/EID must be filled"))
 		buf.WriteString("\n}\n")
 	} else {
 		fmt.Fprintf(&buf, "\nreturn errors.New(%s)", strconv.Quote("column OID must be filled"))
