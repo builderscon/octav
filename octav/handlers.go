@@ -6,6 +6,7 @@ import (
 	"net/http"
 
 	"github.com/builderscon/octav/octav/db"
+	"github.com/lestrrat/go-pdebug"
 	"golang.org/x/net/context"
 )
 
@@ -94,6 +95,11 @@ func doCreateUser(ctx context.Context, w http.ResponseWriter, r *http.Request, p
 }
 
 func doCreateVenue(ctx context.Context, w http.ResponseWriter, r *http.Request, payload *Venue) {
+	if pdebug.Enabled {
+		g := pdebug.Marker("doCreateVenue")
+		defer g.End()
+	}
+
 	tx, err := db.Begin()
 	if err != nil {
 		httpError(w, `CreateVenue`, http.StatusInternalServerError, err)
@@ -118,6 +124,11 @@ func doListRooms(ctx context.Context, w http.ResponseWriter, r *http.Request, pa
 }
 
 func doDeleteVenue(ctx context.Context, w http.ResponseWriter, r *http.Request, payload *DeleteVenueRequest) {
+	if pdebug.Enabled {
+		g := pdebug.Marker("doDeleteVenue")
+		defer g.End()
+	}
+
 	tx, err := db.Begin()
 	if err != nil {
 		httpError(w, `DeleteVenue`, http.StatusInternalServerError, err)
@@ -125,8 +136,8 @@ func doDeleteVenue(ctx context.Context, w http.ResponseWriter, r *http.Request, 
 	}
 	defer tx.AutoRollback()
 
-	s := db.Venue{EID: payload.ID}
-	if err := s.Delete(tx); err != nil {
+	v := Venue{ID: payload.ID}
+	if err := v.Delete(tx); err != nil {
 		httpError(w, `DeleteVenue`, http.StatusInternalServerError, err)
 		return
 	}
@@ -137,7 +148,11 @@ func doDeleteVenue(ctx context.Context, w http.ResponseWriter, r *http.Request, 
 	httpJSON(w, map[string]string{"status": "success"})
 }
 
-func doLookupVenue(ctx context.Context, w http.ResponseWriter, r *http.Request, payload map[string]interface{}) {
+func doLookupVenue(ctx context.Context, w http.ResponseWriter, r *http.Request, payload *LookupVenueRequest) {
+	if pdebug.Enabled {
+		g := pdebug.Marker("doCreateVenue")
+		defer g.End()
+	}
 	tx, err := db.Begin()
 	if err != nil {
 		httpError(w, `LookupVenue`, http.StatusInternalServerError, err)
@@ -146,7 +161,7 @@ func doLookupVenue(ctx context.Context, w http.ResponseWriter, r *http.Request, 
 	defer tx.AutoRollback()
 
 	s := Venue{}
-	if err := s.Load(tx, payload["id"].(string)); err != nil {
+	if err := s.Load(tx, payload.ID); err != nil {
 		httpError(w, `LookupVenue`, http.StatusInternalServerError, err)
 		return
 	}

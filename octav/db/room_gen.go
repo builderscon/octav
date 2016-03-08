@@ -51,5 +51,5 @@ func (r Room) Delete(tx *Tx) error {
 		return err
 	}
 
-	return errors.New("either OID/EID mustbe filled")
+	return errors.New("either OID/EID musti be filled")
 }

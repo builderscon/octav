@@ -6,6 +6,7 @@ import (
 	"errors"
 
 	"github.com/builderscon/octav/octav/db"
+	"github.com/lestrrat/go-pdebug"
 )
 
 var ErrInvalidFieldType = errors.New("placeholder error")
@@ -74,6 +75,7 @@ func (v *Venue) UnmarshalJSON(data []byte) error {
 
 	return nil
 }
+
 func (v *Venue) Load(tx *db.Tx, id string) error {
 	vdb := db.Venue{}
 	if err := vdb.LoadByEID(tx, id); err != nil {
@@ -82,6 +84,20 @@ func (v *Venue) Load(tx *db.Tx, id string) error {
 
 	v.ID = vdb.EID
 	v.Name = vdb.Name
+	v.Address = vdb.Address
+
+	ls, err := db.LoadLocalizedStringsForParent(tx, v.ID, "Venue")
+	if err != nil {
+		return err
+	}
+
+	if len(ls) > 0 {
+		v.L10N = LocalizedFields{}
+		for _, l := range ls {
+			v.L10N.Set(l.Language, l.Name, l.Localized)
+		}
+	}
+
 	return nil
 }
 
@@ -91,10 +107,48 @@ func (v *Venue) Create(tx *db.Tx) error {
 	}
 
 	vdb := db.Venue{
-		EID:  v.ID,
-		Name: v.Name,
+		EID:     v.ID,
+		Name:    v.Name,
+		Address: v.Address,
 	}
-	return vdb.Create(tx)
+	if err := vdb.Create(tx); err != nil {
+		return err
+	}
+
+	// vdb.EID, vdb.
+	if v.L10N.Len() > 0 {
+		err := v.L10N.Foreach(func(lang, key, val string) error {
+			ldb := db.LocalizedString{
+				ParentType: "Venue",
+				ParentID:   vdb.EID,
+				Language:   lang,
+				Localized:  val,
+				Name:       key,
+			}
+			return ldb.Create(tx)
+		})
+		if err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func (v *Venue) Delete(tx *db.Tx) error {
+	if pdebug.Enabled {
+		g := pdebug.Marker("Venue.Delete (%s)", v.ID)
+		defer g.End()
+	}
+
+	vdb := db.Venue{EID: v.ID}
+	if err := vdb.Delete(tx); err != nil {
+		return err
+	}
+
+	if err := db.DeleteLocalizedStringsForParent(tx, v.ID, "Venue"); err != nil {
+		return err
+	}
+	return nil
 }
 
 func (v *VenueList) Load(tx *db.Tx, since string) error {

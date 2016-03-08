@@ -86,14 +86,24 @@ func TestCreateVenue(t *testing.T) {
 		Latitude:  139.7976891,
 	}
 	res, err := cl.CreateVenue(&in)
+	if !assert.NoError(t, err, "CreateVenue should succeed") {
+		return
+	}
+
 	if !assert.NotEmpty(t, res.ID, "Returned structure has ID") {
 		return
 	}
 
-	if !assert.NoError(t, err, "CreateVenue should succeed") {
+	if !assert.NoError(t, validator.HTTPCreateVenueResponse.Validate(res), "Validation should succeed") {
 		return
 	}
-	if !assert.NoError(t, validator.HTTPCreateVenueResponse.Validate(res), "Validation should succeed") {
+
+	res2, err := cl.LookupVenue(&octav.LookupVenueRequest{ID: res.ID})
+	if !assert.NoError(t, err, "LookupVenue succeeds") {
+		return
+	}
+
+	if !assert.Equal(t, res2, res, "LookupVenue is the same as thevenue created") {
 		return
 	}
 
@@ -158,21 +168,6 @@ func TestLookupSession(t *testing.T) {
 		return
 	}
 	if !assert.NoError(t, validator.HTTPLookupSessionResponse.Validate(res), "Validation should succeed") {
-		return
-	}
-}
-
-func TestLookupVenue(t *testing.T) {
-	ts := httptest.NewServer(octav.New())
-	defer ts.Close()
-
-	cl := client.New(ts.URL)
-	var in map[string]interface{}
-	res, err := cl.LookupVenue(in)
-	if !assert.NoError(t, err, "LookupVenue should succeed") {
-		return
-	}
-	if !assert.NoError(t, validator.HTTPLookupVenueResponse.Validate(res), "Validation should succeed") {
 		return
 	}
 }

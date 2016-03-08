@@ -48,7 +48,7 @@ func snakeCase(s string) string {
 
 type Processor struct {
 	Types []string
-	Dir    string
+	Dir   string
 }
 
 func skipGenerated(fi os.FileInfo) bool {
@@ -139,14 +139,18 @@ func (p *Processor) ProcessStruct(s Struct) error {
 
 	scols := bytes.Buffer{}
 	icols := bytes.Buffer{}
-	sfields := bytes.Buffer{} // Scan fields
-	ifields := bytes.Buffer{} // Scan fields (everything except for OID)
+	sfields := bytes.Buffer{}   // Scan fields
+	ifields := bytes.Buffer{}   // Scan fields (everything except for OID)
 	ipholders := bytes.Buffer{} // Insert place holders (everything except for OID)
 
+	hasEID := false
 	sansOidFields := make([]StructField, 0, len(s.Fields)-1)
 	for _, f := range s.Fields {
 		if f.Name == "OID" {
 			continue
+		}
+		if f.Name == "EID" {
+			hasEID = true
 		}
 		sansOidFields = append(sansOidFields, f)
 	}
@@ -157,7 +161,7 @@ func (p *Processor) ProcessStruct(s Struct) error {
 		ifields.WriteRune(varname)
 		ifields.WriteRune('.')
 		ifields.WriteString(f.Name)
-		if i < len(sansOidFields) - 1 {
+		if i < len(sansOidFields)-1 {
 			icols.WriteString(", ")
 			ipholders.WriteString(", ")
 			ifields.WriteString(", ")
@@ -170,7 +174,7 @@ func (p *Processor) ProcessStruct(s Struct) error {
 		sfields.WriteRune(varname)
 		sfields.WriteRune('.')
 		sfields.WriteString(f.Name)
-		if i < len(s.Fields) - 1 {
+		if i < len(s.Fields)-1 {
 			scols.WriteString(", ")
 			sfields.WriteString(", ")
 		}
@@ -181,19 +185,22 @@ func (p *Processor) ProcessStruct(s Struct) error {
 	fmt.Fprintf(&buf, "\nreturn scanner.Scan(%s)", sfields.String())
 	buf.WriteString("\n}\n")
 
-	fmt.Fprintf(&buf, "\nfunc (%c *%s) LoadByEID(tx *Tx, eid string) error {", varname, s.Name)
-	fmt.Fprintf(&buf, "\nrow := tx.QueryRow(`SELECT %s FROM ` + %sTable + ` WHERE eid = ?`, eid)", scols.String(), s.Name)
-	fmt.Fprintf(&buf, "\nif err := %c.Scan(row); err != nil {", varname)
-	buf.WriteString("\nreturn err")
-	buf.WriteString("\n}")
-	buf.WriteString("\nreturn nil")
-	buf.WriteString("\n}\n")
-
+	if hasEID {
+		fmt.Fprintf(&buf, "\nfunc (%c *%s) LoadByEID(tx *Tx, eid string) error {", varname, s.Name)
+		fmt.Fprintf(&buf, "\nrow := tx.QueryRow(`SELECT %s FROM ` + %sTable + ` WHERE eid = ?`, eid)", scols.String(), s.Name)
+		fmt.Fprintf(&buf, "\nif err := %c.Scan(row); err != nil {", varname)
+		buf.WriteString("\nreturn err")
+		buf.WriteString("\n}")
+		buf.WriteString("\nreturn nil")
+		buf.WriteString("\n}\n")
+	}
 
 	fmt.Fprintf(&buf, "\nfunc (%c *%s) Create(tx *Tx) error {", varname, s.Name)
-	fmt.Fprintf(&buf, "\nif %c.EID == " + `""` + " {", varname)
-	buf.WriteString("\n" + `return errors.New("create: non-empty EID required")`)
-	buf.WriteString("\n}\n\n")
+	if hasEID {
+		fmt.Fprintf(&buf, "\nif %c.EID == "+`""`+" {", varname)
+		buf.WriteString("\n" + `return errors.New("create: non-empty EID required")`)
+		buf.WriteString("\n}\n\n")
+	}
 	fmt.Fprintf(&buf, "\nresult, err := tx.Exec(`INSERT INTO ` + %sTable + ` (%s) VALUES (%s)`, %s)", s.Name, icols.String(), ipholders.String(), ifields.String())
 	buf.WriteString("\nif err != nil {")
 	buf.WriteString("\nreturn err")
@@ -211,12 +218,20 @@ func (p *Processor) ProcessStruct(s Struct) error {
 	fmt.Fprintf(&buf, "\n_, err := tx.Exec(`DELETE FROM ` + %sTable + ` WHERE oid = ?`, %c.OID)", s.Name, varname)
 	buf.WriteString("\nreturn err")
 	buf.WriteString("\n}\n")
-	fmt.Fprintf(&buf, "\nif %c.EID != %s {", varname, `""`)
-	fmt.Fprintf(&buf, "\n_, err := tx.Exec(`DELETE FROM ` + %sTable + ` WHERE eid = ?`, %c.EID)", s.Name, varname)
-	buf.WriteString("\nreturn err")
-	buf.WriteString("\n}\n")
-	fmt.Fprintf(&buf, "\nreturn errors.New(%s)", strconv.Quote("either OID/EID mustbe filled"))
-	buf.WriteString("\n}\n")
+	if hasEID {
+		fmt.Fprintf(&buf, "\nif %c.EID != %s {", varname, `""`)
+		fmt.Fprintf(&buf, "\n_, err := tx.Exec(`DELETE FROM ` + %sTable + ` WHERE eid = ?`, %c.EID)", s.Name, varname)
+		buf.WriteString("\nreturn err")
+		buf.WriteString("\n}\n")
+	}
+
+	if hasEID {
+		fmt.Fprintf(&buf, "\nreturn errors.New(%s)", strconv.Quote("either OID/EID musti be filled"))
+		buf.WriteString("\n}\n")
+	} else {
+		fmt.Fprintf(&buf, "\nreturn errors.New(%s)", strconv.Quote("column OID must be filled"))
+		buf.WriteString("\n}\n")
+	}
 
 	fsrc, err := format.Source(buf.Bytes())
 	if err != nil {

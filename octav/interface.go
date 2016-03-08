@@ -72,7 +72,10 @@ type Venue struct {
 	L10N      LocalizedFields `json:"-"`
 }
 type DeleteVenueRequest struct {
-	ID string `json:"id"`
+	ID string `json:"id" urlenc:"id"`
+}
+type LookupVenueRequest struct {
+	ID string `json:"id" urlenc:"id"`
 }
 
 type ConferenceList []Conference

@@ -10,11 +10,11 @@ var VenueTable = "venues"
 func (v *Venue) Scan(scanner interface {
 	Scan(...interface{}) error
 }) error {
-	return scanner.Scan(&v.OID, &v.EID, &v.Name, &v.CreatedOn, &v.ModifiedOn)
+	return scanner.Scan(&v.OID, &v.EID, &v.Name, &v.Address, &v.CreatedOn, &v.ModifiedOn)
 }
 
 func (v *Venue) LoadByEID(tx *Tx, eid string) error {
-	row := tx.QueryRow(`SELECT oid, eid, name, created_on, modified_on FROM `+VenueTable+` WHERE eid = ?`, eid)
+	row := tx.QueryRow(`SELECT oid, eid, name, address, created_on, modified_on FROM `+VenueTable+` WHERE eid = ?`, eid)
 	if err := v.Scan(row); err != nil {
 		return err
 	}
@@ -26,7 +26,7 @@ func (v *Venue) Create(tx *Tx) error {
 		return errors.New("create: non-empty EID required")
 	}
 
-	result, err := tx.Exec(`INSERT INTO `+VenueTable+` (eid, name, created_on, modified_on) VALUES (?, ?, ?, ?)`, v.EID, v.Name, v.CreatedOn, v.ModifiedOn)
+	result, err := tx.Exec(`INSERT INTO `+VenueTable+` (eid, name, address, created_on, modified_on) VALUES (?, ?, ?, ?, ?)`, v.EID, v.Name, v.Address, v.CreatedOn, v.ModifiedOn)
 	if err != nil {
 		return err
 	}
@@ -51,5 +51,5 @@ func (v Venue) Delete(tx *Tx) error {
 		return err
 	}
 
-	return errors.New("either OID/EID mustbe filled")
+	return errors.New("either OID/EID musti be filled")
 }

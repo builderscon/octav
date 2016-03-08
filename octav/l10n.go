@@ -40,7 +40,7 @@ func (lf LocalizedFields) Len() int {
 	return len(lf.fields)
 }
 
-func (lf LocalizedFields) Keys() []string {
+func (lf LocalizedFields) Languages() []string {
 	lf.lock.Lock()
 	defer lf.lock.Unlock()
 
@@ -49,6 +49,20 @@ func (lf LocalizedFields) Keys() []string {
 		l = append(l, k)
 	}
 	return l
+}
+
+func (lf LocalizedFields) Foreach(cb func(string, string, string) error) error {
+	lf.lock.RLock()
+	defer lf.lock.RUnlock()
+
+	for lang, kv := range lf.fields {
+		for k, v := range kv {
+			if err := cb(lang, k, v); err != nil {
+				return err
+			}
+		}
+	}
+	return nil
 }
 
 func (lf LocalizedFields) Get(lang, key string) (string, bool) {

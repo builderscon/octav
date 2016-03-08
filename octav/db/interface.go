@@ -66,6 +66,18 @@ type Venue struct {
 	OID        int64  // intenral id, used for sorting and what not
 	EID        string // ID that is visible to the outside
 	Name       string // Name of the venue (English)
+	Address    string
 	CreatedOn  time.Time
 	ModifiedOn time.Time
 }
+
+// +DB tablename:"localized_strings"
+type LocalizedString struct {
+	OID        int64
+	ParentID   string // EID of the parent object
+	ParentType string // Type of the parent object
+	Name       string
+	Language   string
+	Localized  string
+}
+type LocalizedStringList []LocalizedString

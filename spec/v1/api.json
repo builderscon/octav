@@ -267,8 +267,10 @@
       "title": "Lookup venue",
       "rel": "lookup",
       "href": "/venue/lookup",
+      "method": "GET",
       "schema": {
         "type": "object",
+        "hsup.type": "octav.LookupVenueRequest",
         "required": ["id"],
         "properties": {
           "id": { "$ref": "#/definitions/uuid" }
@@ -364,42 +366,43 @@
       "method": "POST",
       "href": "/session/create",
       "schema": {
+        "type": "object",
         "properties": {
-          "conference-id": { "$ref": "#/definitions/uuid" },
-          "room-id": { "$ref": "#/definitions/uuid" },
-          "speaker-id": {
+          "conference_id": { "$ref": "#/definitions/uuid" },
+          "room_id": { "$ref": "#/definitions/uuid" },
+          "speaker_id": {
             "type": "array",
             "items": { "$ref": "#/definitions/uuid" }
           },
           "title": { "$ref": "#/definitions/string-en" },
           "abstract": { "$ref": "#/definitions/markdown-en" },
           "memo": { "type": "string" },
-          "starts-on": { "$ref": "#/definitions/datetime" },
+          "starts_on": { "$ref": "#/definitions/datetime" },
           "duration": { "$ref": "#/definitions/duration" },
-          "material-level": { "$ref": "#/definitions/material-level" },
+          "material_level": { "$ref": "#/definitions/material-level" },
           "tag": { "$ref": "#/definitions/tag-array" },
           "category": { "type": "string" },
-          "spoken-language": { "$ref": "#/definitions/language" },
-          "slide-language": { "$ref": "#/definitions/language" },
-          "slide-subtitles": { "$ref": "#/definitions/language" },
-          "slide-url": { "$ref": "#/definitions/url" },
-          "video-url": { "$ref": "#/definitions/url" },
-          "photo-permission": { "$ref": "#/definitions/binary-permission" },
-          "video-permission": { "$ref": "#/definitions/binary-permission" },
-          "has-interpretation": {
+          "spoken_language": { "$ref": "#/definitions/language" },
+          "slide_language": { "$ref": "#/definitions/language" },
+          "slide_subtitles": { "$ref": "#/definitions/language" },
+          "slide_url": { "$ref": "#/definitions/url" },
+          "video_url": { "$ref": "#/definitions/url" },
+          "photo_permission": { "$ref": "#/definitions/binary-permission" },
+          "video_permission": { "$ref": "#/definitions/binary-permission" },
+          "has_interpretation": {
             "type": "boolean",
             "default": false
           },
           "status": { "$ref": "#/definitions/acceptance-status" },
-          "sort-order": { "$ref": "#/definitions/positiveInteger" },
+          "sort_order": { "$ref": "#/definitions/positiveInteger" },
           "confirmed": {
             "type": "boolean",
             "default": false
-          },
-          "patternProperties": {
-            "title#{a-z}+": { "$ref": "#/definitions/string-i18n" },
-            "abstract#{a-z}+": { "$ref": "#/definitions/markdown-i18n" }
           }
+        },
+        "patternProperties": {
+          "title#{a-z}+": { "$ref": "#/definitions/string-i18n" },
+          "abstract#{a-z}+": { "$ref": "#/definitions/markdown-i18n" }
         }
       },
       "targetSchema": { "$ref": "#/definitions/session" }
