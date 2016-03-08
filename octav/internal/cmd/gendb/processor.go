@@ -53,7 +53,7 @@ type Processor struct {
 
 func skipGenerated(fi os.FileInfo) bool {
 	switch {
-	case strings.HasSuffix(fi.Name(), "gendb.go"):
+	case strings.HasSuffix(fi.Name(), "gen.go"):
 		return false
 	case strings.HasSuffix(fi.Name(), "_gen.go"):
 		return false

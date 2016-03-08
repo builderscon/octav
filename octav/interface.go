@@ -69,6 +69,7 @@ type Session struct {
 	Conference        Conference `json:"conference"` // only populated for JSON response
 	Room              Room       `json:"room"`       // only populated for JSON response
 	Speaker           User       `json:"speaker"`    // only populated for JSON response
+	L10N      LocalizedFields `json:"-"`
 }
 type User struct {
 	ID         string          `json:"id"`
@@ -117,6 +118,7 @@ type Conference struct {
 	SubTitle string           `json:"subtitle"`
 	Slug     string           `json:"slug"`
 	Dates    []ConferenceDate `json:"dates"` // only populated for JSON response
+	L10N      LocalizedFields `json:"-"`
 }
 
 type LocalizedFields struct {

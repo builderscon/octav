@@ -3,11 +3,33 @@ package octav
 import (
 	"bytes"
 	"encoding/json"
+	"errors"
 	"strings"
 
 	"github.com/builderscon/octav/octav/db"
 	"golang.org/x/text/language"
 )
+
+func (lf LocalizedFields) GetPropNames() ([]string, error) {
+	lf.lock.RLock()
+	defer lf.lock.RUnlock()
+
+	var ret []string
+	for lang, kv := range lf.fields {
+		for k := range kv {
+			ret = append(ret, k + "#" + lang)
+		}
+	}
+	return ret, nil
+}
+
+func (lf LocalizedFields) GetPropValue(s string) (interface{}, error) {
+	if v, ok := lf.GetFQKey(s); ok {
+		return v, nil
+	}
+
+	return nil, errors.New("not found")
+}
 
 func (lf LocalizedFields) MarshalJSON() ([]byte, error) {
 	lf.lock.RLock()
@@ -66,6 +88,15 @@ func (lf LocalizedFields) Foreach(cb func(string, string, string) error) error {
 	return nil
 }
 
+func (lf LocalizedFields) GetFQKey(key string) (string, bool) {
+	lang, skey, err := splitFQKey(key)
+	if err != nil {
+		return "", false
+	}
+
+	return lf.Get(lang, skey)
+}
+
 func (lf LocalizedFields) Get(lang, key string) (string, bool) {
 	lf.lock.RLock()
 	defer lf.lock.RUnlock()
@@ -115,6 +146,19 @@ func (lf *LocalizedFields) CreateLocalizedStrings(tx *db.Tx, parentType, parentI
 	return nil
 }
 
+func splitFQKey(k string) (string, string, error) {
+	sp := strings.SplitN(k, "#", 2)
+	if len(sp) != 2 {
+		return "", "", errors.New("not a localized name")
+	}
+
+	t, err := language.Default.Parse(sp[1])
+	if err != nil {
+		return "", "", err
+	}
+	return t.String(), sp[0], nil
+}
+
 func ExtractL10NFields(m map[string]interface{}, lf *LocalizedFields, keys []string) error {
 	km := make(map[string]struct{})
 	for _, k := range keys {
@@ -128,17 +172,15 @@ func ExtractL10NFields(m map[string]interface{}, lf *LocalizedFields, keys []str
 			continue
 		}
 
-		sp := strings.SplitN(lk, "#", 2)
-		if _, ok := km[sp[0]]; !ok {
-			continue
-		}
-
-		t, err := language.Default.Parse(sp[1])
+		lang, name, err := splitFQKey(lk)
 		if err != nil {
 			return err
 		}
+		if _, ok := km[name]; !ok {
+			continue
+		}
 
-		lf.Set(t.String(), sp[0], lv.(string))
+		lf.Set(lang, name, lv.(string))
 	}
 	return nil
 }

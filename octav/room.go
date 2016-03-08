@@ -1,74 +1,9 @@
 package octav
 
 import (
-	"encoding/json"
-
 	"github.com/builderscon/octav/octav/db"
 	"github.com/lestrrat/go-pdebug"
 )
-
-func (v Room) MarshalJSON() ([]byte, error) {
-	m := make(map[string]interface{})
-	m["id"] = v.ID
-	m["venue_id"] = v.VenueID
-	m["name"] = v.Name
-	m["capacity"] = v.Capacity
-
-	buf, err := json.Marshal(m)
-	if err != nil {
-		return nil, err
-	}
-	return marshalJSONWithL10N(buf, v.L10N)
-}
-
-func (v *Room) UnmarshalJSON(data []byte) error {
-	m := make(map[string]interface{})
-	if err := json.Unmarshal(data, &m); err != nil {
-		return err
-	}
-	if jv, ok := m["id"]; ok {
-		switch jv.(type) {
-		case string:
-			v.ID = jv.(string)
-			delete(m, "id")
-		default:
-			return ErrInvalidFieldType
-		}
-	}
-	if jv, ok := m["venue_id"]; ok {
-		switch jv.(type) {
-		case string:
-			v.VenueID = jv.(string)
-			delete(m, "venue_id")
-		default:
-			return ErrInvalidFieldType
-		}
-	}
-	if jv, ok := m["name"]; ok {
-		switch jv.(type) {
-		case string:
-			v.Name = jv.(string)
-			delete(m, "name")
-		default:
-			return ErrInvalidFieldType
-		}
-	}
-	if jv, ok := m["capacity"]; ok {
-		switch jv.(type) {
-		case float64:
-			v.Capacity = uint(jv.(float64))
-			delete(m, "capacity")
-		default:
-			return ErrInvalidFieldType
-		}
-	}
-
-	if err := ExtractL10NFields(m, &v.L10N, []string{"name"}); err != nil {
-		return err
-	}
-
-	return nil
-}
 
 func (v *Room) Load(tx *db.Tx, id string) error {
 	vdb := db.Room{}
