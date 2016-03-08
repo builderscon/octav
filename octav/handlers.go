@@ -56,13 +56,6 @@ func doCreateConference(ctx context.Context, w http.ResponseWriter, r *http.Requ
 }
 
 func doCreateRoom(ctx context.Context, w http.ResponseWriter, r *http.Request, payload Room) {
-	c := db.Room{}
-	payload.ID = UUID()
-	if err := payload.ToRow(&c); err != nil {
-		httpError(w, `CreateRoom`, http.StatusInternalServerError, err)
-		return
-	}
-
 	tx, err := db.Begin()
 	if err != nil {
 		httpError(w, `CreateRoom`, http.StatusInternalServerError, err)
@@ -70,22 +63,17 @@ func doCreateRoom(ctx context.Context, w http.ResponseWriter, r *http.Request, p
 	}
 	defer tx.AutoRollback()
 
-	if err := c.Create(tx); err != nil {
+	if err := payload.Create(tx); err != nil {
 		httpError(w, `CreateRoom`, http.StatusInternalServerError, err)
 		return
 	}
+
 	if err := tx.Commit(); err != nil {
 		httpError(w, `CreateRoom`, http.StatusInternalServerError, err)
 		return
 	}
 
-	c2 := Room{}
-	if err := c2.FromRow(c); err != nil {
-		httpError(w, `CreateRoom`, http.StatusInternalServerError, err)
-		return
-	}
-
-	httpJSON(w, c2)
+	httpJSON(w, payload)
 }
 
 func doCreateSession(ctx context.Context, w http.ResponseWriter, r *http.Request, payload interface{}) {

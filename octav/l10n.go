@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"strings"
 
+	"github.com/builderscon/octav/octav/db"
 	"golang.org/x/text/language"
 )
 
@@ -92,6 +93,26 @@ func (lf *LocalizedFields) Set(lang, key, value string) {
 		lf.fields[lang] = kv
 	}
 	kv[key] = value
+}
+
+func (lf *LocalizedFields) CreateLocalizedStrings(tx *db.Tx, parentType, parentID string) error {
+	if lf.Len() <= 0 {
+		return nil
+	}
+	err := lf.Foreach(func(lang, key, val string) error {
+		ldb := db.LocalizedString{
+			ParentType: parentType,
+			ParentID:   parentID,
+			Language:   lang,
+			Localized:  val,
+			Name:       key,
+		}
+		return ldb.Create(tx)
+	})
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
 func ExtractL10NFields(m map[string]interface{}, lf *LocalizedFields, keys []string) error {

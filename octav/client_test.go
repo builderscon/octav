@@ -24,10 +24,13 @@ func bigsight() *octav.Venue {
 }
 
 func intlConferenceRoom(venueID string) *octav.Room {
+	lf := octav.LocalizedFields{}
+	lf.Set("ja", "name", `国際会議場`)
 	return &octav.Room{
-		VenueID: venueID,
-		Name: "International Conference Hall",
 		Capacity: 1000,
+		L10N: lf,
+		Name: "International Conference Hall",
+		VenueID: venueID,
 	}
 }
 
@@ -157,8 +160,8 @@ func TestCreateUser(t *testing.T) {
 	defer ts.Close()
 
 	cl := client.New(ts.URL)
-	var in interface{}
-	res, err := cl.CreateUser(in)
+	var in octav.CreateUserRequest
+	res, err := cl.CreateUser(&in)
 	if !assert.NoError(t, err, "CreateUser should succeed") {
 		return
 	}

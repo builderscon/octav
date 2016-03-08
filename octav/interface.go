@@ -1,9 +1,12 @@
 package octav
 
 import (
+	"errors"
 	"sync"
 	"time"
 )
+
+var ErrInvalidFieldType = errors.New("placeholder error")
 
 type Date struct {
 	Year  int
@@ -25,10 +28,11 @@ type ConferenceDate struct {
 
 type Member struct{}
 type Room struct {
-	ID       string `json:"id"`
-	VenueID  string `json:"venue_id"`
-	Name     string `json:"name"`
-	Capacity uint   `json:"capacity"`
+	ID       string          `json:"id"`
+	VenueID  string          `json:"venue_id"`
+	Name     string          `json:"name"`
+	Capacity uint            `json:"capacity"`
+	L10N     LocalizedFields `json:"-"`
 }
 type RoomList []Room
 type DeleteRoomRequest struct {
@@ -67,7 +71,23 @@ type Session struct {
 	Room              Room       `json:"room"`       // only populated for JSON response
 	Speaker           Member     `json:"speaker"`    // only populated for JSON response
 }
-type User struct{}
+type User struct {
+	ID         string          `json:"id"`
+	FirstName  string          `json:"first_name"`
+	LastName   string          `json:"last_name"`
+	Nickname   string          `json:"nickname"`
+	Email      string          `json:"email"`
+	TshirtSize string          `json:"tshirt_size"`
+	L10N       LocalizedFields `json:"-"`
+}
+type CreateUserRequest struct {
+	FirstName  string          `json:"first_name"`
+	LastName   string          `json:"last_name"`
+	Nickname   string          `json:"nickname"`
+	Email      string          `json:"email"`
+	TshirtSize string          `json:"tshirt_size"`
+	L10N       LocalizedFields `json:"-"`
+}
 
 type VenueList []Venue
 type Venue struct {
