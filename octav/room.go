@@ -5,49 +5,6 @@ import (
 	"github.com/lestrrat/go-pdebug"
 )
 
-func (v *Room) Load(tx *db.Tx, id string) error {
-	vdb := db.Room{}
-	if err := vdb.LoadByEID(tx, id); err != nil {
-		return err
-	}
-
-	v.FromRow(vdb)
-	ls, err := db.LoadLocalizedStringsForParent(tx, v.ID, "Room")
-	if err != nil {
-		return err
-	}
-
-	if len(ls) > 0 {
-		v.L10N = LocalizedFields{}
-		for _, l := range ls {
-			v.L10N.Set(l.Language, l.Name, l.Localized)
-		}
-	}
-
-	return v.FromRow(vdb)
-}
-
-func (v *Room) Create(tx *db.Tx) error {
-	if v.ID == "" {
-		v.ID = UUID()
-	}
-
-	vdb := db.Room{
-		EID:     v.ID,
-		Name:    v.Name,
-		VenueID: v.VenueID,
-		Capacity: v.Capacity,
-	}
-	if err := vdb.Create(tx); err != nil {
-		return err
-	}
-
-	if err := v.L10N.CreateLocalizedStrings(tx, "Room", v.ID); err != nil {
-		return err
-	}
-	return nil
-}
-
 func (v *Room) Delete(tx *db.Tx) error {
 	if pdebug.Enabled {
 		g := pdebug.Marker("Room.Delete (%s)", v.ID)

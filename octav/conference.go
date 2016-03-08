@@ -1,8 +1,89 @@
 package octav
 
 import (
+	"database/sql"
+	"encoding/json"
+
 	"github.com/builderscon/octav/octav/db"
 )
+
+func (v Conference) GetPropNames() ([]string, error) {
+	l, _ := v.L10N.GetPropNames()
+	return append(l, "id", "title", "subtitle", "slug", "dates"), nil
+}
+
+func (v Conference) GetPropValue(s string) (interface{}, error) {
+	switch s {
+	case "id":
+		return v.ID, nil
+	case "title":
+		return v.Title, nil
+	case "subtitle":
+		return v.SubTitle, nil
+	case "slug":
+		return v.Slug, nil
+	case "dates":
+		return v.Dates, nil
+	default:
+		return v.L10N.GetPropValue(s)
+	}
+}
+
+func (v Conference) MarshalJSON() ([]byte, error) {
+	m := make(map[string]interface{})
+	m["id"] = v.ID
+	m["title"] = v.Title
+	m["subtitle"] = v.SubTitle
+	m["slug"] = v.Slug
+	buf, err := json.Marshal(m)
+	if err != nil {
+		return nil, err
+	}
+	return marshalJSONWithL10N(buf, v.L10N)
+}
+func (v *Conference) UnmarshalJSON(data []byte) error {
+	m := make(map[string]interface{})
+	if err := json.Unmarshal(data, &m); err != nil {
+		return err
+	}
+	if jv, ok := m["id"]; ok {
+		switch jv.(type) {
+		case string:
+			v.ID = jv.(string)
+			delete(m, "id")
+		default:
+			return ErrInvalidFieldType
+		}
+	}
+	if jv, ok := m["title"]; ok {
+		switch jv.(type) {
+		case string:
+			v.Title = jv.(string)
+			delete(m, "title")
+		default:
+			return ErrInvalidFieldType
+		}
+	}
+	if jv, ok := m["subtitle"]; ok {
+		switch jv.(type) {
+		case string:
+			v.SubTitle = jv.(string)
+			delete(m, "subtitle")
+		default:
+			return ErrInvalidFieldType
+		}
+	}
+	if jv, ok := m["slug"]; ok {
+		switch jv.(type) {
+		case string:
+			v.Slug = jv.(string)
+			delete(m, "slug")
+		default:
+			return ErrInvalidFieldType
+		}
+	}
+	return nil
+}
 
 func (v *Conference) Load(tx *db.Tx, id string) error {
 	vdb := db.Conference{}
@@ -10,9 +91,47 @@ func (v *Conference) Load(tx *db.Tx, id string) error {
 		return err
 	}
 
-	return v.FromRow(vdb)
+	v.ID = vdb.EID
+	v.Title = vdb.Title
+	if vdb.SubTitle.Valid {
+		v.SubTitle = vdb.SubTitle.String
+	}
+	v.Slug = vdb.Slug
+
+	ls, err := db.LoadLocalizedStringsForParent(tx, v.ID, "Conference")
+	if err != nil {
+		return err
+	}
+
+	if len(ls) > 0 {
+		v.L10N = LocalizedFields{}
+		for _, l := range ls {
+			v.L10N.Set(l.Language, l.Name, l.Localized)
+		}
+	}
+	return nil
 }
 
+func (v *Conference) Create(tx *db.Tx) error {
+	if v.ID == "" {
+		v.ID = UUID()
+	}
+
+	vdb := db.Conference{
+		EID:      v.ID,
+		Title:    v.Title,
+		SubTitle: sql.NullString{String: v.SubTitle, Valid: true},
+		Slug:     v.Slug,
+	}
+	if err := vdb.Create(tx); err != nil {
+		return err
+	}
+
+	if err := v.L10N.CreateLocalizedStrings(tx, "Conference", v.ID); err != nil {
+		return err
+	}
+	return nil
+}
 func (v *Conference) FromRow(vdb db.Conference) error {
 	v.ID = vdb.EID
 	v.Slug = vdb.Slug

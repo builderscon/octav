@@ -16,6 +16,8 @@ CREATE TABLE venues (
     eid CHAR(64) CHARACTER SET latin1 NOT NULL,
     name TEXT NOT NULL,
     address TEXT NOT NULL,
+    latitude DECIMAL(10,7),
+    longitude DECIMAL(10,7),
     created_on DATETIME NOT NULL,
     modified_on TIMESTAMP NOT NULL ON UPDAte CURRENT_TIMESTAMP,
     KEY(eid)

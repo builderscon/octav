@@ -80,6 +80,8 @@ type Venue struct {
 	EID        string // ID that is visible to the outside
 	Name       string // Name of the venue (English)
 	Address    string
+	Latitude   float64
+	Longitude  float64
 	CreatedOn  time.Time
 	ModifiedOn NullTime
 }
