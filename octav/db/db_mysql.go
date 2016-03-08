@@ -82,3 +82,11 @@ func trySetupTLS() error {
 
 	return nil
 }
+
+func onConnect(db *sql.DB) error {
+	_, err := db.Exec(`SET SESSION sql_mode='TRADITIONAL,NO_AUTO_VALUE_ON_ZERO,ONLY_FULL_GROUP_BY'`)
+	if err != nil {
+		return err
+	}
+	return nil
+}

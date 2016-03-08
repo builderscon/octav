@@ -3,6 +3,7 @@ package db
 
 import (
 	"errors"
+	"time"
 )
 
 var ConferenceTable = "conferences"
@@ -26,6 +27,7 @@ func (c *Conference) Create(tx *Tx) error {
 		return errors.New("create: non-empty EID required")
 	}
 
+	c.CreatedOn = time.Now()
 	result, err := tx.Exec(`INSERT INTO `+ConferenceTable+` (eid, slug, title, sub_title, created_on, modified_on) VALUES (?, ?, ?, ?, ?, ?)`, c.EID, c.Slug, c.Title, c.SubTitle, c.CreatedOn, c.ModifiedOn)
 	if err != nil {
 		return err
@@ -51,5 +53,5 @@ func (c Conference) Delete(tx *Tx) error {
 		return err
 	}
 
-	return errors.New("either OID/EID musti be filled")
+	return errors.New("either OID/EID must be filled")
 }

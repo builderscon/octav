@@ -79,7 +79,79 @@ func doCreateRoom(ctx context.Context, w http.ResponseWriter, r *http.Request, p
 func doCreateSession(ctx context.Context, w http.ResponseWriter, r *http.Request, payload interface{}) {
 }
 
-func doCreateUser(ctx context.Context, w http.ResponseWriter, r *http.Request, payload interface{}) {
+func doCreateUser(ctx context.Context, w http.ResponseWriter, r *http.Request, payload CreateUserRequest) {
+	u := User{
+		Email:      payload.Email,
+		FirstName:  payload.FirstName,
+		LastName:   payload.LastName,
+		Nickname:   payload.Nickname,
+		TshirtSize: payload.TshirtSize,
+	}
+
+	tx, err := db.Begin()
+	if err != nil {
+		httpError(w, `CreateUser`, http.StatusInternalServerError, err)
+		return
+	}
+	defer tx.AutoRollback()
+
+	if err := u.Create(tx); err != nil {
+		httpError(w, `CreateUser`, http.StatusInternalServerError, err)
+		return
+	}
+
+	if err := tx.Commit(); err != nil {
+		httpError(w, `CreateUser`, http.StatusInternalServerError, err)
+		return
+	}
+
+	httpJSON(w, u)
+}
+
+func doDeleteUser(ctx context.Context, w http.ResponseWriter, r *http.Request, payload DeleteUserRequest) {
+	if pdebug.Enabled {
+		g := pdebug.Marker("doDeleteUser")
+		defer g.End()
+	}
+
+	tx, err := db.Begin()
+	if err != nil {
+		httpError(w, `DeleteUser`, http.StatusInternalServerError, err)
+		return
+	}
+	defer tx.AutoRollback()
+
+	v := User{ID: payload.ID}
+	if err := v.Delete(tx); err != nil {
+		httpError(w, `DeleteUser`, http.StatusInternalServerError, err)
+		return
+	}
+	if err := tx.Commit(); err != nil {
+		httpError(w, `DeleteUser`, http.StatusInternalServerError, err)
+		return
+	}
+	httpJSON(w, map[string]string{"status": "success"})
+}
+
+func doLookupUser(ctx context.Context, w http.ResponseWriter, r *http.Request, payload LookupUserRequest) {
+	if pdebug.Enabled {
+		g := pdebug.Marker("doLookupUser")
+		defer g.End()
+	}
+	tx, err := db.Begin()
+	if err != nil {
+		httpError(w, `LookupUser`, http.StatusInternalServerError, err)
+		return
+	}
+	defer tx.AutoRollback()
+
+	s := User{}
+	if err := s.Load(tx, payload.ID); err != nil {
+		httpError(w, `LookupUser`, http.StatusInternalServerError, err)
+		return
+	}
+
+	httpJSON(w, s)
 }
 
 func doCreateVenue(ctx context.Context, w http.ResponseWriter, r *http.Request, payload Venue) {
@@ -131,7 +203,6 @@ func doLookupRoom(ctx context.Context, w http.ResponseWriter, r *http.Request, p
 
 	httpJSON(w, s)
 }
-
 
 func doDeleteRoom(ctx context.Context, w http.ResponseWriter, r *http.Request, payload DeleteRoomRequest) {
 	if pdebug.Enabled {

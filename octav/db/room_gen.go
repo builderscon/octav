@@ -3,6 +3,7 @@ package db
 
 import (
 	"errors"
+	"time"
 )
 
 var RoomTable = "rooms"
@@ -26,6 +27,7 @@ func (r *Room) Create(tx *Tx) error {
 		return errors.New("create: non-empty EID required")
 	}
 
+	r.CreatedOn = time.Now()
 	result, err := tx.Exec(`INSERT INTO `+RoomTable+` (eid, venue_id, name, capacity, created_on, modified_on) VALUES (?, ?, ?, ?, ?, ?)`, r.EID, r.VenueID, r.Name, r.Capacity, r.CreatedOn, r.ModifiedOn)
 	if err != nil {
 		return err
@@ -51,5 +53,5 @@ func (r Room) Delete(tx *Tx) error {
 		return err
 	}
 
-	return errors.New("either OID/EID musti be filled")
+	return errors.New("either OID/EID must be filled")
 }

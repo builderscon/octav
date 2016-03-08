@@ -17,7 +17,7 @@ type Conference struct {
 	Title      string
 	SubTitle   sql.NullString
 	CreatedOn  time.Time
-	ModifiedOn time.Time
+	ModifiedOn NullTime
 }
 
 // +DB tablename:"rooms"
@@ -28,7 +28,7 @@ type Room struct {
 	Name       string // Name of the room (English)
 	Capacity   uint   // How many people fit in this room? Approximation.
 	CreatedOn  time.Time
-	ModifiedOn time.Time
+	ModifiedOn NullTime
 }
 
 // +DB tablename:"sessions"
@@ -58,7 +58,20 @@ type Session struct {
 	SortOrder         int
 	Confirmed         bool
 	CreatedOn         time.Time
-	ModifiedOn        time.Time
+	ModifiedOn NullTime
+}
+
+// +DB tablename:"users"
+type User struct {
+	OID        int64
+	EID        string
+	FirstName  string
+	LastName   string
+	Nickname   string
+	Email      string
+	TshirtSize string
+	CreatedOn  time.Time
+	ModifiedOn NullTime
 }
 
 // +DB tablename:"venues"
@@ -68,7 +81,7 @@ type Venue struct {
 	Name       string // Name of the venue (English)
 	Address    string
 	CreatedOn  time.Time
-	ModifiedOn time.Time
+	ModifiedOn NullTime
 }
 
 // +DB tablename:"localized_strings"

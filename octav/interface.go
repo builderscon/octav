@@ -26,7 +26,6 @@ type ConferenceDate struct {
 	Close WallClock
 }
 
-type Member struct{}
 type Room struct {
 	ID       string          `json:"id"`
 	VenueID  string          `json:"venue_id"`
@@ -69,7 +68,7 @@ type Session struct {
 	Confirmed         bool       `json:"confirmed"`
 	Conference        Conference `json:"conference"` // only populated for JSON response
 	Room              Room       `json:"room"`       // only populated for JSON response
-	Speaker           Member     `json:"speaker"`    // only populated for JSON response
+	Speaker           User       `json:"speaker"`    // only populated for JSON response
 }
 type User struct {
 	ID         string          `json:"id"`
@@ -87,6 +86,12 @@ type CreateUserRequest struct {
 	Email      string          `json:"email"`
 	TshirtSize string          `json:"tshirt_size"`
 	L10N       LocalizedFields `json:"-"`
+}
+type LookupUserRequest struct {
+	ID string `json:"id" urlenc:"id"`
+}
+type DeleteUserRequest struct {
+	ID string `json:"id" urlenc:"id"`
 }
 
 type VenueList []Venue

@@ -105,6 +105,10 @@ func Init(dsn string) error {
 		return err
 	}
 
+	if err := onConnect(conn); err != nil {
+		return err
+	}
+
 	_db = &DB{&guard.DB{conn}}
 
 	return nil

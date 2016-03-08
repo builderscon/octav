@@ -28,9 +28,9 @@ func intlConferenceRoom(venueID string) *octav.Room {
 	lf.Set("ja", "name", `国際会議場`)
 	return &octav.Room{
 		Capacity: 1000,
-		L10N: lf,
-		Name: "International Conference Hall",
-		VenueID: venueID,
+		L10N:     lf,
+		Name:     "International Conference Hall",
+		VenueID:  venueID,
 	}
 }
 
@@ -56,6 +56,30 @@ func testLookupRoom(t *testing.T, cl *client.Client, id string) (*octav.Room, er
 		return nil, err
 	}
 	return venue, nil
+}
+
+func testCreateUser(t *testing.T, cl *client.Client, in octav.CreateUserRequest) (*octav.User, error) {
+	res, err := cl.CreateUser(&in)
+	if !assert.NoError(t, err, "CreateUser should succeed") {
+		return nil, err
+	}
+	return res, nil
+}
+
+func testLookupUser(t *testing.T, cl *client.Client, id string) (*octav.User, error) {
+	user, err := cl.LookupUser(&octav.LookupUserRequest{ID: id})
+	if !assert.NoError(t, err, "LookupUser succeeds") {
+		return nil, err
+	}
+	return user, nil
+}
+
+func testDeleteUser(t *testing.T, cl *client.Client, id string) error {
+	err := cl.DeleteUser(&octav.DeleteUserRequest{ID: id})
+	if !assert.NoError(t, err, "DeleteUser should succeed") {
+		return err
+	}
+	return nil
 }
 
 func testLookupVenue(t *testing.T, cl *client.Client, id string) (*octav.Venue, error) {
@@ -160,12 +184,40 @@ func TestCreateUser(t *testing.T) {
 	defer ts.Close()
 
 	cl := client.New(ts.URL)
-	var in octav.CreateUserRequest
-	res, err := cl.CreateUser(&in)
-	if !assert.NoError(t, err, "CreateUser should succeed") {
+	lf := octav.LocalizedFields{}
+	lf.Set("ja", "first_name", "ジョン")
+	lf.Set("ja", "last_name", "ドー")
+	in := octav.CreateUserRequest{
+		FirstName:  "John",
+		LastName:   "Doe",
+		Nickname:   "enigma621",
+		Email:      "john.doe@example.com",
+		TshirtSize: "XL",
+		L10N:       lf,
+	}
+	res, err := testCreateUser(t, cl, in)
+	if err != nil {
 		return
 	}
+
+	if !assert.NotEmpty(t, res.ID, "Returned structure has ID") {
+		return
+	}
+
 	if !assert.NoError(t, validator.HTTPCreateUserResponse.Validate(res), "Validation should succeed") {
+		return
+	}
+
+	res2, err := testLookupUser(t, cl, res.ID)
+	if err != nil {
+		return
+	}
+
+	if !assert.Equal(t, res2, res, "LookupUser is the same as the user created") {
+		return
+	}
+
+	if err := testDeleteUser(t, cl, res.ID); err != nil {
 		return
 	}
 }
