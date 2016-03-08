@@ -22,7 +22,7 @@ func httpJSON(w http.ResponseWriter, v interface{}) {
 	buf.WriteTo(w)
 }
 
-func doCreateConference(ctx context.Context, w http.ResponseWriter, r *http.Request, payload *Conference) {
+func doCreateConference(ctx context.Context, w http.ResponseWriter, r *http.Request, payload Conference) {
 	c := db.Conference{}
 	payload.ID = UUID()
 	if err := payload.ToRow(&c); err != nil {
@@ -55,7 +55,7 @@ func doCreateConference(ctx context.Context, w http.ResponseWriter, r *http.Requ
 	httpJSON(w, c2)
 }
 
-func doCreateRoom(ctx context.Context, w http.ResponseWriter, r *http.Request, payload *Room) {
+func doCreateRoom(ctx context.Context, w http.ResponseWriter, r *http.Request, payload Room) {
 	c := db.Room{}
 	payload.ID = UUID()
 	if err := payload.ToRow(&c); err != nil {
@@ -94,7 +94,7 @@ func doCreateSession(ctx context.Context, w http.ResponseWriter, r *http.Request
 func doCreateUser(ctx context.Context, w http.ResponseWriter, r *http.Request, payload interface{}) {
 }
 
-func doCreateVenue(ctx context.Context, w http.ResponseWriter, r *http.Request, payload *Venue) {
+func doCreateVenue(ctx context.Context, w http.ResponseWriter, r *http.Request, payload Venue) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("doCreateVenue")
 		defer g.End()
@@ -123,7 +123,7 @@ func doCreateVenue(ctx context.Context, w http.ResponseWriter, r *http.Request, 
 func doListRooms(ctx context.Context, w http.ResponseWriter, r *http.Request, payload map[string]interface{}) {
 }
 
-func doLookupRoom(ctx context.Context, w http.ResponseWriter, r *http.Request, payload *LookupRoomRequest) {
+func doLookupRoom(ctx context.Context, w http.ResponseWriter, r *http.Request, payload LookupRoomRequest) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("doLookupRoom")
 		defer g.End()
@@ -145,7 +145,7 @@ func doLookupRoom(ctx context.Context, w http.ResponseWriter, r *http.Request, p
 }
 
 
-func doDeleteRoom(ctx context.Context, w http.ResponseWriter, r *http.Request, payload *DeleteRoomRequest) {
+func doDeleteRoom(ctx context.Context, w http.ResponseWriter, r *http.Request, payload DeleteRoomRequest) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("doDeleteRoom")
 		defer g.End()
@@ -170,7 +170,7 @@ func doDeleteRoom(ctx context.Context, w http.ResponseWriter, r *http.Request, p
 	httpJSON(w, map[string]string{"status": "success"})
 }
 
-func doDeleteVenue(ctx context.Context, w http.ResponseWriter, r *http.Request, payload *DeleteVenueRequest) {
+func doDeleteVenue(ctx context.Context, w http.ResponseWriter, r *http.Request, payload DeleteVenueRequest) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("doDeleteVenue")
 		defer g.End()
@@ -195,7 +195,7 @@ func doDeleteVenue(ctx context.Context, w http.ResponseWriter, r *http.Request, 
 	httpJSON(w, map[string]string{"status": "success"})
 }
 
-func doLookupVenue(ctx context.Context, w http.ResponseWriter, r *http.Request, payload *LookupVenueRequest) {
+func doLookupVenue(ctx context.Context, w http.ResponseWriter, r *http.Request, payload LookupVenueRequest) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("doLookupVenue")
 		defer g.End()
