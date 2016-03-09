@@ -112,12 +112,9 @@ func (v *User) Load(tx *db.Tx, id string) error {
 		return err
 	}
 
-	v.ID = vdb.EID
-	v.FirstName = vdb.FirstName
-	v.LastName = vdb.LastName
-	v.Nickname = vdb.Nickname
-	v.Email = vdb.Email
-	v.TshirtSize = vdb.TshirtSize
+	if err := v.FromRow(vdb); err != nil {
+		return err
+	}
 
 	ls, err := db.LoadLocalizedStringsForParent(tx, v.ID, "User")
 	if err != nil {
@@ -130,6 +127,16 @@ func (v *User) Load(tx *db.Tx, id string) error {
 			v.L10N.Set(l.Language, l.Name, l.Localized)
 		}
 	}
+	return nil
+}
+
+func (v *User) FromRow(vdb db.User) error {
+	v.ID = vdb.EID
+	v.FirstName = vdb.FirstName
+	v.LastName = vdb.LastName
+	v.Nickname = vdb.Nickname
+	v.Email = vdb.Email
+	v.TshirtSize = vdb.TshirtSize
 	return nil
 }
 
@@ -153,5 +160,22 @@ func (v *User) Create(tx *db.Tx) error {
 	if err := v.L10N.CreateLocalizedStrings(tx, "User", v.ID); err != nil {
 		return err
 	}
+	return nil
+}
+
+func (v *UserList) Load(tx *db.Tx, since string, limit int) error {
+	vdbl := db.UserList{}
+	if err := vdbl.LoadSinceEID(tx, since, limit); err != nil {
+		return err
+	}
+	res := make([]User, len(vdbl))
+	for i, vdb := range vdbl {
+		v := User{}
+		if err := v.FromRow(vdb); err != nil {
+			return err
+		}
+		res[i] = v
+	}
+	*v = res
 	return nil
 }

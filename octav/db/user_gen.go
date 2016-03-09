@@ -3,6 +3,7 @@ package db
 
 import (
 	"errors"
+	"strconv"
 	"time"
 )
 
@@ -54,4 +55,34 @@ func (u User) Delete(tx *Tx) error {
 	}
 
 	return errors.New("either OID/EID must be filled")
+}
+
+func (v *UserList) LoadSinceEID(tx *Tx, since string, limit int) error {
+	var s int64
+	if id := since; id != "" {
+		vdb := User{}
+		if err := vdb.LoadByEID(tx, id); err != nil {
+			return err
+		}
+
+		s = vdb.OID
+	}
+	return v.LoadSince(tx, s, limit)
+}
+
+func (v *UserList) LoadSince(tx *Tx, since int64, limit int) error {
+	rows, err := tx.Query(`SELECT oid, eid, first_name, last_name, nickname, email, tshirt_size, created_on, modified_on FROM `+UserTable+` WHERE oid > ? ORDER BY oid ASC LIMIT `+strconv.Itoa(limit), since)
+	if err != nil {
+		return err
+	}
+	res := make([]User, 0, limit)
+	for rows.Next() {
+		vdb := User{}
+		if err := vdb.Scan(rows); err != nil {
+			return err
+		}
+		res = append(res, vdb)
+	}
+	*v = res
+	return nil
 }

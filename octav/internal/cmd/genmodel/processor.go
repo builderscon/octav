@@ -206,13 +206,9 @@ func (p *Processor) ProcessStruct(s Struct) error {
 		buf.WriteString("\nif err := vdb.LoadByEID(tx, id); err != nil {")
 		buf.WriteString("\nreturn err")
 		buf.WriteString("\n}\n")
-		buf.WriteString("\nv.ID = vdb.EID")
-		for _, f := range s.Fields {
-			if f.Name == "ID" {
-				continue
-			}
-			fmt.Fprintf(&buf, "\nv.%s = vdb.%s", f.Name, f.Name)
-		}
+		buf.WriteString("\nif err := v.FromRow(vdb); err != nil {")
+		buf.WriteString("\nreturn err")
+		buf.WriteString("\n}")
 		fmt.Fprintf(&buf, "\n\nls, err := db.LoadLocalizedStringsForParent(tx, v.ID, %s)", strconv.Quote(s.Name))
 		buf.WriteString("\nif err != nil {")
 		buf.WriteString("\nreturn err")
@@ -223,6 +219,17 @@ func (p *Processor) ProcessStruct(s Struct) error {
 		buf.WriteString("\nv.L10N.Set(l.Language, l.Name, l.Localized)")
 		buf.WriteString("\n}")
 		buf.WriteString("\n}")
+		buf.WriteString("\nreturn nil")
+		buf.WriteString("\n}")
+
+		fmt.Fprintf(&buf, "\n\nfunc (v *%s) FromRow(vdb db.%s) error {", s.Name, s.Name)
+		buf.WriteString("\nv.ID = vdb.EID")
+		for _, f := range s.Fields {
+			if f.Name == "ID" {
+				continue
+			}
+			fmt.Fprintf(&buf, "\nv.%s = vdb.%s", f.Name, f.Name)
+		}
 		buf.WriteString("\nreturn nil")
 		buf.WriteString("\n}")
 	}
@@ -252,6 +259,25 @@ func (p *Processor) ProcessStruct(s Struct) error {
 	}
 	buf.WriteString("\nreturn nil")
 	buf.WriteString("\n}")
+
+	if hasID {
+		fmt.Fprintf(&buf, "\n\nfunc (v *%sList) Load(tx *db.Tx, since string, limit int) error {", s.Name)
+		fmt.Fprintf(&buf, "\nvdbl := db.%sList{}", s.Name)
+		buf.WriteString("\nif err := vdbl.LoadSinceEID(tx, since, limit); err != nil {")
+		buf.WriteString("\nreturn err")
+		buf.WriteString("\n}")
+		fmt.Fprintf(&buf, "\nres := make([]%s, len(vdbl))", s.Name)
+		buf.WriteString("\nfor i, vdb := range vdbl {")
+		fmt.Fprintf(&buf, "\nv := %s{}", s.Name)
+		buf.WriteString("\nif err := v.FromRow(vdb); err != nil {")
+		buf.WriteString("\nreturn err")
+		buf.WriteString("\n}")
+		buf.WriteString("\nres[i] = v")
+		buf.WriteString("\n}")
+		buf.WriteString("\n*v = res")
+		buf.WriteString("\nreturn nil")
+		buf.WriteString("\n}")
+	}
 
 	fsrc, err := format.Source(buf.Bytes())
 	if err != nil {

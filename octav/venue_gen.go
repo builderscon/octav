@@ -100,11 +100,9 @@ func (v *Venue) Load(tx *db.Tx, id string) error {
 		return err
 	}
 
-	v.ID = vdb.EID
-	v.Name = vdb.Name
-	v.Address = vdb.Address
-	v.Longitude = vdb.Longitude
-	v.Latitude = vdb.Latitude
+	if err := v.FromRow(vdb); err != nil {
+		return err
+	}
 
 	ls, err := db.LoadLocalizedStringsForParent(tx, v.ID, "Venue")
 	if err != nil {
@@ -117,6 +115,15 @@ func (v *Venue) Load(tx *db.Tx, id string) error {
 			v.L10N.Set(l.Language, l.Name, l.Localized)
 		}
 	}
+	return nil
+}
+
+func (v *Venue) FromRow(vdb db.Venue) error {
+	v.ID = vdb.EID
+	v.Name = vdb.Name
+	v.Address = vdb.Address
+	v.Longitude = vdb.Longitude
+	v.Latitude = vdb.Latitude
 	return nil
 }
 
@@ -139,5 +146,22 @@ func (v *Venue) Create(tx *db.Tx) error {
 	if err := v.L10N.CreateLocalizedStrings(tx, "Venue", v.ID); err != nil {
 		return err
 	}
+	return nil
+}
+
+func (v *VenueList) Load(tx *db.Tx, since string, limit int) error {
+	vdbl := db.VenueList{}
+	if err := vdbl.LoadSinceEID(tx, since, limit); err != nil {
+		return err
+	}
+	res := make([]Venue, len(vdbl))
+	for i, vdb := range vdbl {
+		v := Venue{}
+		if err := v.FromRow(vdb); err != nil {
+			return err
+		}
+		res[i] = v
+	}
+	*v = res
 	return nil
 }

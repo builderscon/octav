@@ -37,40 +37,45 @@ type RoomList []Room
 type DeleteRoomRequest struct {
 	ID string `json:"id" urlenc:"id"`
 }
+type ListRoomRequest struct {
+	Since string `json:"since" urlenc:"since"`
+	Limit int    `json:"limit" urlenc:"limit"`
+}
 type LookupRoomRequest struct {
 	ID string `json:"id" urlenc:"id"`
 }
 
-type SessionList []Session
 type Session struct {
-	ID                string     `json:"id"`
-	ConferenceID      string     `json:"conference_id"`
-	RoomID            string     `json:"room_id"`
-	SpeakerID         string     `json:"speaker_id"`
-	Title             string     `json:"title"`
-	Abstract          string     `json:"abstract"`
-	Memo              string     `json:"memo"`
-	StartsOn          time.Time  `json:"starts_on"`
-	Duration          int        `json:"duration"`
-	MaterialLevel     string     `json:"material_level"`
-	Tags              []string   `json:"tags,omitempty"`
-	Category          string     `json:"category,omitempty"`
-	SpokenLanguage    string     `json:"spoken_language,omitempty"`
-	SlideLanguage     string     `json:"slide_language,omitempty"`
-	SlideSubtitles    string     `json:"slide_subtitles,omitempty"`
-	SlideURL          string     `json:"slide_url,omitempty"`
-	VideoURL          string     `json:"video_url,omitempty"`
-	PhotoPermission   string     `json:"photo_permission"`
-	VideoPermission   string     `json:"video_permission"`
-	HasInterpretation bool       `json:"has_interpretation"`
-	Status            string     `json:"status"`
-	SortOrder         int        `json:"sort_order"`
-	Confirmed         bool       `json:"confirmed"`
-	Conference        Conference `json:"conference"` // only populated for JSON response
-	Room              Room       `json:"room"`       // only populated for JSON response
-	Speaker           User       `json:"speaker"`    // only populated for JSON response
-	L10N      LocalizedFields `json:"-"`
+	ID                string          `json:"id"`
+	ConferenceID      string          `json:"conference_id"`
+	RoomID            string          `json:"room_id"`
+	SpeakerID         string          `json:"speaker_id"`
+	Title             string          `json:"title"`
+	Abstract          string          `json:"abstract"`
+	Memo              string          `json:"memo"`
+	StartsOn          time.Time       `json:"starts_on"`
+	Duration          int             `json:"duration"`
+	MaterialLevel     string          `json:"material_level"`
+	Tags              []string        `json:"tags,omitempty"`
+	Category          string          `json:"category,omitempty"`
+	SpokenLanguage    string          `json:"spoken_language,omitempty"`
+	SlideLanguage     string          `json:"slide_language,omitempty"`
+	SlideSubtitles    string          `json:"slide_subtitles,omitempty"`
+	SlideURL          string          `json:"slide_url,omitempty"`
+	VideoURL          string          `json:"video_url,omitempty"`
+	PhotoPermission   string          `json:"photo_permission"`
+	VideoPermission   string          `json:"video_permission"`
+	HasInterpretation bool            `json:"has_interpretation"`
+	Status            string          `json:"status"`
+	SortOrder         int             `json:"sort_order"`
+	Confirmed         bool            `json:"confirmed"`
+	Conference        Conference      `json:"conference"` // only populated for JSON response
+	Room              Room            `json:"room"`       // only populated for JSON response
+	Speaker           User            `json:"speaker"`    // only populated for JSON response
+	L10N              LocalizedFields `json:"-"`
 }
+type SessionList []Session
+
 type User struct {
 	ID         string          `json:"id"`
 	FirstName  string          `json:"first_name"`
@@ -80,6 +85,7 @@ type User struct {
 	TshirtSize string          `json:"tshirt_size"`
 	L10N       LocalizedFields `json:"-"`
 }
+type UserList []User
 type CreateUserRequest struct {
 	FirstName  string          `json:"first_name"`
 	LastName   string          `json:"last_name"`
@@ -95,7 +101,6 @@ type DeleteUserRequest struct {
 	ID string `json:"id" urlenc:"id"`
 }
 
-type VenueList []Venue
 type Venue struct {
 	ID        string          `json:"id,omitempty"`
 	Name      string          `json:"name"`
@@ -104,8 +109,13 @@ type Venue struct {
 	Latitude  float64         `json:"latitude,omitempty"`
 	L10N      LocalizedFields `json:"-"`
 }
+type VenueList []Venue
 type DeleteVenueRequest struct {
 	ID string `json:"id" urlenc:"id"`
+}
+type ListVenueRequest struct {
+	Since string `json:"since" urlenc:"since"`
+	Limit int    `json:"limit" urlenc:"limit"`
 }
 type LookupVenueRequest struct {
 	ID string `json:"id" urlenc:"id"`
@@ -118,7 +128,7 @@ type Conference struct {
 	SubTitle string           `json:"subtitle"`
 	Slug     string           `json:"slug"`
 	Dates    []ConferenceDate `json:"dates"` // only populated for JSON response
-	L10N      LocalizedFields `json:"-"`
+	L10N     LocalizedFields  `json:"-"`
 }
 
 type LocalizedFields struct {

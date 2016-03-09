@@ -137,11 +137,13 @@ func (p *Processor) ProcessStruct(s Struct) error {
 	ipholders := bytes.Buffer{} // Insert place holders (everything except for OID)
 
 	hasEID := false
+	hasOID := true
 	hasCreatedOn := false
 	sansOidFields := make([]StructField, 0, len(s.Fields)-1)
 	for _, f := range s.Fields {
 		switch f.Name {
 		case "OID":
+			hasOID = true
 			continue
 		case "EID":
 			hasEID = true
@@ -157,6 +159,9 @@ func (p *Processor) ProcessStruct(s Struct) error {
 	buf.WriteString("\n\n")
 	buf.WriteString("\nimport (")
 	buf.WriteString("\n" + `"errors"`)
+	if hasEID && hasOID {
+		buf.WriteString("\n" + `"strconv"`)
+	}
 	if hasCreatedOn {
 		buf.WriteString("\n" + `"time"`)
 	}
@@ -242,6 +247,39 @@ func (p *Processor) ProcessStruct(s Struct) error {
 		fmt.Fprintf(&buf, "\nreturn errors.New(%s)", strconv.Quote("column OID must be filled"))
 		buf.WriteString("\n}\n")
 	}
+
+	if hasOID && hasEID {
+		fmt.Fprintf(&buf, "\n\nfunc (v *%sList) LoadSinceEID(tx *Tx, since string, limit int) error {", s.Name)
+		buf.WriteString("\nvar s int64")
+		buf.WriteString("\n" + `if id := since; id != "" {`)
+		fmt.Fprintf(&buf, "\nvdb := %s{}", s.Name)
+		buf.WriteString("\nif err := vdb.LoadByEID(tx, id); err != nil {")
+		buf.WriteString("\nreturn err")
+		buf.WriteString("\n}\n")
+		buf.WriteString("\ns = vdb.OID")
+		buf.WriteString("\n}")
+		buf.WriteString("\nreturn v.LoadSince(tx, s, limit)")
+		buf.WriteString("\n}\n")
+
+		fmt.Fprintf(&buf, "\n\nfunc (v *%sList) LoadSince(tx *Tx, since int64, limit int) error {", s.Name)
+		fmt.Fprintf(&buf, "\nrows, err := tx.Query(`SELECT %s FROM ` + %sTable + ` WHERE oid > ? ORDER BY oid ASC LIMIT ` + strconv.Itoa(limit), since)", scols.String(), s.Name)
+		buf.WriteString("\nif err != nil {")
+		buf.WriteString("\nreturn err")
+		buf.WriteString("\n}")
+
+		fmt.Fprintf(&buf, "\nres := make([]%s, 0, limit)", s.Name)
+		buf.WriteString("\nfor rows.Next() {")
+		fmt.Fprintf(&buf, "\nvdb := %s{}", s.Name)
+		buf.WriteString("\nif err := vdb.Scan(rows); err != nil {")
+		buf.WriteString("\nreturn err")
+		buf.WriteString("\n}")
+		buf.WriteString("\nres = append(res, vdb)")
+		buf.WriteString("\n}")
+		buf.WriteString("\n*v = res")
+		buf.WriteString("\nreturn nil")
+		buf.WriteString("\n}")
+	}
+
 
 	fsrc, err := format.Source(buf.Bytes())
 	if err != nil {

@@ -180,7 +180,8 @@ func doCreateVenue(ctx context.Context, w http.ResponseWriter, r *http.Request, 
 	httpJSON(w, payload)
 }
 
-func doListRooms(ctx context.Context, w http.ResponseWriter, r *http.Request, payload map[string]interface{}) {
+func doListRooms(ctx context.Context, w http.ResponseWriter, r *http.Request, payload ListRoomRequest) {
+
 }
 
 func doLookupRoom(ctx context.Context, w http.ResponseWriter, r *http.Request, payload LookupRoomRequest) {
@@ -275,7 +276,7 @@ func doLookupVenue(ctx context.Context, w http.ResponseWriter, r *http.Request, 
 	httpJSON(w, s)
 }
 
-func doListVenues(ctx context.Context, w http.ResponseWriter, r *http.Request, payload map[string]interface{}) {
+func doListVenues(ctx context.Context, w http.ResponseWriter, r *http.Request, payload ListVenueRequest) {
 	tx, err := db.Begin()
 	if err != nil {
 		httpError(w, `ListVenues`, http.StatusInternalServerError, err)
@@ -284,7 +285,7 @@ func doListVenues(ctx context.Context, w http.ResponseWriter, r *http.Request, p
 	defer tx.AutoRollback()
 
 	vl := VenueList{}
-	if err := vl.Load(tx, payload["since"].(string)); err != nil {
+	if err := vl.Load(tx, payload.Since, payload.Limit); err != nil {
 		httpError(w, `ListVenues`, http.StatusInternalServerError, err)
 		return
 	}

@@ -294,6 +294,7 @@
       "href": "/venue/list",
       "schema": {
         "type": "object",
+        "hsup.type": "octav.ListVenueRequest",
         "properties": {
           "lang": { "$ref": "#/definitions/language" },
           "since": { "$ref": "#/definitions/uuidDefaultEmpty" }
@@ -398,6 +399,7 @@
       "method": "GET",
       "encType": "application/x-www-form-urlencoded",
       "schema": {
+        "hsup.type": "octav.ListRoomRequest",
         "properties": {
           "venue_id": { "$ref": "#/definitions/uuid" },
           "lang": { "$ref": "#/definitions/language" }

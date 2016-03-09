@@ -3,6 +3,7 @@ package db
 
 import (
 	"errors"
+	"strconv"
 	"time"
 )
 
@@ -54,4 +55,34 @@ func (s Session) Delete(tx *Tx) error {
 	}
 
 	return errors.New("either OID/EID must be filled")
+}
+
+func (v *SessionList) LoadSinceEID(tx *Tx, since string, limit int) error {
+	var s int64
+	if id := since; id != "" {
+		vdb := Session{}
+		if err := vdb.LoadByEID(tx, id); err != nil {
+			return err
+		}
+
+		s = vdb.OID
+	}
+	return v.LoadSince(tx, s, limit)
+}
+
+func (v *SessionList) LoadSince(tx *Tx, since int64, limit int) error {
+	rows, err := tx.Query(`SELECT oid, eid, conference_id, room_id, speaker_id, title, abstract, memo, starts_on, duration, material_level, tags, category, spoken_language, slide_language, slide_subtitles, slide_url, video_url, photo_permission, video_permission, has_interpretation, status, sort_order, confirmed, created_on, modified_on FROM `+SessionTable+` WHERE oid > ? ORDER BY oid ASC LIMIT `+strconv.Itoa(limit), since)
+	if err != nil {
+		return err
+	}
+	res := make([]Session, 0, limit)
+	for rows.Next() {
+		vdb := Session{}
+		if err := vdb.Scan(rows); err != nil {
+			return err
+		}
+		res = append(res, vdb)
+	}
+	*v = res
+	return nil
 }
