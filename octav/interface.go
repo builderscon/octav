@@ -121,14 +121,26 @@ type LookupVenueRequest struct {
 	ID string `json:"id" urlenc:"id"`
 }
 
-type ConferenceList []Conference
 type Conference struct {
 	ID       string           `json:"id"`
 	Title    string           `json:"title"`
-	SubTitle string           `json:"subtitle"`
+	SubTitle string           `json:"sub_title"`
 	Slug     string           `json:"slug"`
 	Dates    []ConferenceDate `json:"dates"` // only populated for JSON response
 	L10N     LocalizedFields  `json:"-"`
+}
+type ConferenceList []Conference
+type CreateConferenceRequest struct {
+	Title    string          `json:"title"`
+	SubTitle string          `json:"sub_title"`
+	Slug     string          `json:"slug"`
+	L10N     LocalizedFields `json:"-"`
+}
+type DeleteConferenceRequest struct {
+	ID string `json:"id" urlenc:"id"`
+}
+type LookupConferenceRequest struct {
+	ID string `json:"id" urlenc:"id"`
 }
 
 type LocalizedFields struct {

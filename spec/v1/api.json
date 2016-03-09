@@ -418,11 +418,11 @@
       "href": "/conference/create",
       "encType": "application/x-www-form-urlencoded",
       "schema": {
-        "hsup.type": "octav.Conference",
+        "hsup.type": "octav.CreateConferenceRequest",
         "properties": {
-          "venue_id": { "$ref": "#/definitions/uuid" },
           "title": { "$ref": "#/definitions/string-en" },
-          "subtitle": { "$ref": "#/definitions/string-en" },
+          "sub_title": { "$ref": "#/definitions/string-en" },
+          "slug": { "$ref": "#/definitions/string-en" },
           "description": { "$ref": "#/definitions/string-en" },
           "starts-on": { "$ref": "#/definitions/datetime" }
         },
@@ -433,6 +433,34 @@
         "required": ["title", "slug"]
       },
       "targetSchema": { "$ref": "#/definitions/conference" }
+    },
+    {
+      "title": "Lookup conference",
+      "href": "/conference/lookup",
+      "rel": "lookup",
+      "schema": {
+        "hsup.type": "octav.LookupConferenceRequest",
+        "required": ["id"],
+        "properties": {
+          "id": { "$ref": "#/definitions/uuid" }
+        }
+      },
+      "targetSchema": { "$ref": "#/definitions/conference" }
+    },
+    {
+      "title": "Delete conference",
+      "rel": "delete",
+      "href": "/conference/delete",
+      "method": "POST",
+      "encType": "application/x-www-form-urlencoded",
+      "schema": {
+        "type": "object",
+        "hsup.type": "octav.DeleteConferenceRequest",
+        "required": ["id"],
+        "properties": {
+          "id": { "$ref": "#/definitions/uuid" }
+        }
+      }
     },
     {
       "title": "Create session",

@@ -4,6 +4,7 @@ package octav
 import (
 	"encoding/json"
 	"github.com/builderscon/octav/octav/db"
+	"github.com/lestrrat/go-pdebug"
 )
 
 func (v Room) GetPropNames() ([]string, error) {
@@ -130,6 +131,22 @@ func (v *Room) Create(tx *db.Tx) error {
 	}
 
 	if err := v.L10N.CreateLocalizedStrings(tx, "Room", v.ID); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (v *Room) Delete(tx *db.Tx) error {
+	if pdebug.Enabled {
+		g := pdebug.Marker("Room.Delete (%s)", v.ID)
+		defer g.End()
+	}
+
+	vdb := db.Room{EID: v.ID}
+	if err := vdb.Delete(tx); err != nil {
+		return err
+	}
+	if err := db.DeleteLocalizedStringsForParent(tx, v.ID, "Room"); err != nil {
 		return err
 	}
 	return nil

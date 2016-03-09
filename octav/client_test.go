@@ -92,7 +92,7 @@ func testLookupVenue(t *testing.T, cl *client.Client, id string) (*octav.Venue, 
 
 func testDeleteRoom(t *testing.T, cl *client.Client, id string) error {
 	err := cl.DeleteRoom(&octav.DeleteRoomRequest{ID: id})
-	if !assert.NoError(t, err, "Delete room should be successful") {
+	if !assert.NoError(t, err, "DeleteRoom should be successful") {
 		return err
 	}
 	return err
@@ -100,7 +100,38 @@ func testDeleteRoom(t *testing.T, cl *client.Client, id string) error {
 
 func testDeleteVenue(t *testing.T, cl *client.Client, id string) error {
 	err := cl.DeleteVenue(&octav.DeleteVenueRequest{ID: id})
-	if !assert.NoError(t, err, "Delete venue should be successful") {
+	if !assert.NoError(t, err, "DeleteVenue should be successful") {
+		return err
+	}
+	return err
+}
+
+func yapcasia() *octav.CreateConferenceRequest {
+	return &octav.CreateConferenceRequest{
+		Title: "YAPC::Asia Tokyo",
+		Slug: "yapcasia",
+	}
+}
+
+func testCreateConference(t *testing.T, cl *client.Client, in *octav.CreateConferenceRequest) (*octav.Conference, error) {
+	res, err := cl.CreateConference(in)
+	if !assert.NoError(t, err, "CreateConference should succeed") {
+		return nil, err
+	}
+	return res, nil
+}
+
+func testLookupConference(t *testing.T, cl *client.Client, id string) (*octav.Conference, error) {
+	venue, err := cl.LookupConference(&octav.LookupConferenceRequest{ID: id})
+	if !assert.NoError(t, err, "LookupConference succeeds") {
+		return nil, err
+	}
+	return venue, nil
+}
+
+func testDeleteConference(t *testing.T, cl *client.Client, id string) error {
+	err := cl.DeleteConference(&octav.DeleteConferenceRequest{ID: id})
+	if !assert.NoError(t, err, "DeleteConference should be successful") {
 		return err
 	}
 	return err
@@ -111,13 +142,25 @@ func TestCreateConference(t *testing.T) {
 	defer ts.Close()
 
 	cl := client.New(ts.URL)
-	var in *octav.Conference
-	res, err := cl.CreateConference(in)
-	if !assert.NoError(t, err, "CreateConference should succeed") {
+	res, err := testCreateConference(t, cl, yapcasia())
+	if err != nil {
 		return
 	}
 
 	if !assert.NoError(t, validator.HTTPCreateConferenceResponse.Validate(res), "Validation should succeed") {
+		return
+	}
+
+	res2, err := testLookupConference(t, cl, res.ID)
+	if err != nil {
+		return
+	}
+
+	if !assert.Equal(t, res2, res, "LookupConference is the same as the conference created") {
+		return
+	}
+
+	if err := testDeleteConference(t, cl, res.ID); err != nil {
 		return
 	}
 }

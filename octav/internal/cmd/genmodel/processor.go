@@ -138,6 +138,7 @@ func (p *Processor) ProcessStruct(s Struct) error {
 	buf.WriteString("\nimport (\n")
 	buf.WriteString("\n" + strconv.Quote("encoding/json"))
 	buf.WriteString("\n" + strconv.Quote("github.com/builderscon/octav/octav/db"))
+	buf.WriteString("\n" + strconv.Quote("github.com/lestrrat/go-pdebug"))
 	buf.WriteString("\n)")
 
 	fmt.Fprintf(&buf, "\n\nfunc (%c %s) GetPropNames() ([]string, error) {", varname, s.Name)
@@ -257,6 +258,21 @@ func (p *Processor) ProcessStruct(s Struct) error {
 		buf.WriteString("\nreturn err")
 		buf.WriteString("\n}")
 	}
+	buf.WriteString("\nreturn nil")
+	buf.WriteString("\n}")
+
+	fmt.Fprintf(&buf, "\n\nfunc (v *%s) Delete(tx *db.Tx) error {", s.Name)
+	buf.WriteString("\nif pdebug.Enabled {")
+	fmt.Fprintf(&buf, "\n" + `g := pdebug.Marker("%s.Delete (%%s)", v.ID)`, s.Name)
+	buf.WriteString("\ndefer g.End()")
+	buf.WriteString("\n}")
+	fmt.Fprintf(&buf, "\n\nvdb := db.%s{EID: v.ID}", s.Name)
+	buf.WriteString("\nif err := vdb.Delete(tx); err != nil {")
+	buf.WriteString("\nreturn err")
+	buf.WriteString("\n}")
+	fmt.Fprintf(&buf, "\nif err := db.DeleteLocalizedStringsForParent(tx, v.ID, %s); err != nil {", strconv.Quote(s.Name))
+	buf.WriteString("\nreturn err")
+	buf.WriteString("\n}")
 	buf.WriteString("\nreturn nil")
 	buf.WriteString("\n}")
 

@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 
 	"github.com/builderscon/octav/octav/db"
+	"github.com/lestrrat/go-pdebug"
 )
 
 func (v Conference) GetPropNames() ([]string, error) {
@@ -148,6 +149,22 @@ func (v Conference) ToRow(vdb *db.Conference) error {
 	vdb.Title = v.Title
 	vdb.SubTitle.Valid = true
 	vdb.SubTitle.String = v.SubTitle
+	return nil
+}
+
+func (v *Conference) Delete(tx *db.Tx) error {
+	if pdebug.Enabled {
+		g := pdebug.Marker("Conference.Delete (%s)", v.ID)
+		defer g.End()
+	}
+
+	vdb := db.Conference{EID: v.ID}
+	if err := vdb.Delete(tx); err != nil {
+		return err
+	}
+	if err := db.DeleteLocalizedStringsForParent(tx, v.ID, "Conference"); err != nil {
+		return err
+	}
 	return nil
 }
 

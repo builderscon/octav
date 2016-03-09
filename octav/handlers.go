@@ -22,12 +22,11 @@ func httpJSON(w http.ResponseWriter, v interface{}) {
 	buf.WriteTo(w)
 }
 
-func doCreateConference(ctx context.Context, w http.ResponseWriter, r *http.Request, payload Conference) {
-	c := db.Conference{}
-	payload.ID = UUID()
-	if err := payload.ToRow(&c); err != nil {
-		httpError(w, `CreateConference`, http.StatusInternalServerError, err)
-		return
+func doCreateConference(ctx context.Context, w http.ResponseWriter, r *http.Request, payload CreateConferenceRequest) {
+	c := Conference{
+		Slug: payload.Slug,
+		Title: payload.Title,
+		SubTitle: payload.SubTitle,
 	}
 
 	tx, err := db.Begin()
@@ -46,13 +45,53 @@ func doCreateConference(ctx context.Context, w http.ResponseWriter, r *http.Requ
 		return
 	}
 
-	c2 := Conference{}
-	if err := c2.FromRow(c); err != nil {
-		httpError(w, `CreateConference`, http.StatusInternalServerError, err)
+	httpJSON(w, c)
+}
+
+func doLookupConference(ctx context.Context, w http.ResponseWriter, r *http.Request, payload LookupConferenceRequest) {
+	if pdebug.Enabled {
+		g := pdebug.Marker("doLookupConference")
+		defer g.End()
+	}
+	tx, err := db.Begin()
+	if err != nil {
+		httpError(w, `LookupConference`, http.StatusInternalServerError, err)
+		return
+	}
+	defer tx.AutoRollback()
+
+	s := Conference{}
+	if err := s.Load(tx, payload.ID); err != nil {
+		httpError(w, `LookupConference`, http.StatusInternalServerError, err)
 		return
 	}
 
-	httpJSON(w, c2)
+	httpJSON(w, s)
+}
+
+func doDeleteConference(ctx context.Context, w http.ResponseWriter, r *http.Request, payload DeleteConferenceRequest) {
+	if pdebug.Enabled {
+		g := pdebug.Marker("doDeleteConference")
+		defer g.End()
+	}
+
+	tx, err := db.Begin()
+	if err != nil {
+		httpError(w, `DeleteConference`, http.StatusInternalServerError, err)
+		return
+	}
+	defer tx.AutoRollback()
+
+	v := Conference{ID: payload.ID}
+	if err := v.Delete(tx); err != nil {
+		httpError(w, `DeleteConference`, http.StatusInternalServerError, err)
+		return
+	}
+	if err := tx.Commit(); err != nil {
+		httpError(w, `DeleteConference`, http.StatusInternalServerError, err)
+		return
+	}
+	httpJSON(w, map[string]string{"status": "success"})
 }
 
 func doCreateRoom(ctx context.Context, w http.ResponseWriter, r *http.Request, payload Room) {
