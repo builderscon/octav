@@ -29,7 +29,7 @@ type ConferenceDate struct {
 type Room struct {
 	ID       string          `json:"id"`
 	VenueID  string          `json:"venue_id"`
-	Name     string          `json:"name"`
+	Name     string          `json:"name" l10n:"true"`
 	Capacity uint            `json:"capacity"`
 	L10N     LocalizedFields `json:"-"`
 }
@@ -38,8 +38,10 @@ type DeleteRoomRequest struct {
 	ID string `json:"id" urlenc:"id"`
 }
 type ListRoomRequest struct {
-	Since string `json:"since" urlenc:"since"`
-	Limit int    `json:"limit" urlenc:"limit"`
+	VenueID string `json:"venue_id" urlenc:"venue_id"`
+	Since   string `json:"since" urlenc:"since"`
+	Lang    string `json:"lang" urlenc:"lang"`
+	Limit   int    `json:"limit,omitempty" urlenc:"limit,omitempty"`
 }
 type LookupRoomRequest struct {
 	ID string `json:"id" urlenc:"id"`
@@ -103,8 +105,8 @@ type DeleteUserRequest struct {
 
 type Venue struct {
 	ID        string          `json:"id,omitempty"`
-	Name      string          `json:"name"`
-	Address   string          `json:"address"`
+	Name      string          `json:"name" l10n:"true"`
+	Address   string          `json:"address" l10n:"true"`
 	Longitude float64         `json:"longitude,omitempty"`
 	Latitude  float64         `json:"latitude,omitempty"`
 	L10N      LocalizedFields `json:"-"`
@@ -115,6 +117,7 @@ type DeleteVenueRequest struct {
 }
 type ListVenueRequest struct {
 	Since string `json:"since" urlenc:"since"`
+	Lang  string `json:"lang" urlenc:"lang"`
 	Limit int    `json:"limit" urlenc:"limit"`
 }
 type LookupVenueRequest struct {

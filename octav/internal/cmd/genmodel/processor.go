@@ -144,11 +144,18 @@ func (p *Processor) ProcessStruct(s Struct) error {
 	fmt.Fprintf(&buf, "\n\nfunc (%c %s) GetPropNames() ([]string, error) {", varname, s.Name)
 	fmt.Fprintf(&buf, "\nl, _ := %c.L10N.GetPropNames()", varname)
 	buf.WriteString("\nreturn append(l, ")
+
+
+	l10nfields := bytes.Buffer{}
 	for _, f := range s.Fields {
 		buf.WriteString(strconv.Quote(f.JSONName))
 		buf.WriteString(",")
 		if f.Name == "ID" {
 			hasID = true
+		}
+		if f.L10N {
+			l10nfields.WriteString(strconv.Quote(f.JSONName))
+			l10nfields.WriteString(",")
 		}
 	}
 	buf.WriteString("), nil")
@@ -176,14 +183,14 @@ func (p *Processor) ProcessStruct(s Struct) error {
 	fmt.Fprintf(&buf, "\nreturn marshalJSONWithL10N(buf, %c.L10N)", varname)
 	buf.WriteString("\n}")
 
-	fmt.Fprintf(&buf, "\nfunc (%c *%s) UnmarshalJSON(data []byte) error {", varname, s.Name)
+	fmt.Fprintf(&buf, "\n\nfunc (%c *%s) UnmarshalJSON(data []byte) error {", varname, s.Name)
 	buf.WriteString("\nm := make(map[string]interface{})")
 	buf.WriteString("\nif err := json.Unmarshal(data, &m); err != nil {")
 	buf.WriteString("\nreturn err")
 	buf.WriteString("\n}")
 
 	for _, f := range s.Fields {
-		fmt.Fprintf(&buf, "\nif jv, ok := m[%s]; ok {", strconv.Quote(f.JSONName))
+		fmt.Fprintf(&buf, "\n\nif jv, ok := m[%s]; ok {", strconv.Quote(f.JSONName))
 		buf.WriteString("\nswitch jv.(type) {")
 		if strings.Contains(f.Type, "int") {
 			buf.WriteString("\ncase float64:")
@@ -198,6 +205,13 @@ func (p *Processor) ProcessStruct(s Struct) error {
 		buf.WriteString("\n}")
 		buf.WriteString("\n}")
 	}
+
+	if l10nfields.Len() > 0 {
+		fmt.Fprintf(&buf, "\n\nif err := ExtractL10NFields(m, &v.L10N, []string{%s}); err != nil {", l10nfields.String())
+		buf.WriteString("\nreturn err")
+		buf.WriteString("\n}")
+	}
+
 	buf.WriteString("\nreturn nil")
 	buf.WriteString("\n}")
 
@@ -210,7 +224,14 @@ func (p *Processor) ProcessStruct(s Struct) error {
 		buf.WriteString("\nif err := v.FromRow(vdb); err != nil {")
 		buf.WriteString("\nreturn err")
 		buf.WriteString("\n}")
-		fmt.Fprintf(&buf, "\n\nls, err := db.LoadLocalizedStringsForParent(tx, v.ID, %s)", strconv.Quote(s.Name))
+		buf.WriteString("\nif err := v.LoadLocalizedFields(tx); err != nil {")
+		buf.WriteString("\nreturn err")
+		buf.WriteString("\n}")
+		buf.WriteString("\nreturn nil")
+		buf.WriteString("\n}")
+
+		fmt.Fprintf(&buf, "\n\nfunc (v *%s) LoadLocalizedFields(tx *db.Tx) error {", s.Name)
+		fmt.Fprintf(&buf, "\nls, err := db.LoadLocalizedStringsForParent(tx, v.ID, %s)", strconv.Quote(s.Name))
 		buf.WriteString("\nif err != nil {")
 		buf.WriteString("\nreturn err")
 		buf.WriteString("\n}")
@@ -286,6 +307,9 @@ func (p *Processor) ProcessStruct(s Struct) error {
 		buf.WriteString("\nfor i, vdb := range vdbl {")
 		fmt.Fprintf(&buf, "\nv := %s{}", s.Name)
 		buf.WriteString("\nif err := v.FromRow(vdb); err != nil {")
+		buf.WriteString("\nreturn err")
+		buf.WriteString("\n}")
+		buf.WriteString("\nif err := v.LoadLocalizedFields(tx); err != nil {")
 		buf.WriteString("\nreturn err")
 		buf.WriteString("\n}")
 		buf.WriteString("\nres[i] = v")
@@ -398,6 +422,7 @@ func (ctx *InspectionCtx) ExtractStructsFromDecl(decl *ast.GenDecl) error {
 			}
 
 			var jsname string
+			var l10n bool
 			if f.Tag != nil {
 				v := f.Tag.Value
 				if len(v) >= 2 {
@@ -409,7 +434,8 @@ func (ctx *InspectionCtx) ExtractStructsFromDecl(decl *ast.GenDecl) error {
 					}
 				}
 
-				tag := reflect.StructTag(v).Get("json")
+				st := reflect.StructTag(v)
+				tag := st.Get("json")
 				if tag == "-" {
 					continue LoopFields
 				}
@@ -418,6 +444,11 @@ func (ctx *InspectionCtx) ExtractStructsFromDecl(decl *ast.GenDecl) error {
 				} else {
 					tl := strings.SplitN(tag, ",", 2)
 					jsname = tl[0]
+				}
+
+				tag = st.Get("l10n")
+				if b, err := strconv.ParseBool(tag); err == nil && b {
+					l10n = true
 				}
 			}
 
@@ -440,6 +471,7 @@ func (ctx *InspectionCtx) ExtractStructsFromDecl(decl *ast.GenDecl) error {
 			}
 
 			field := StructField{
+				L10N: l10n,
 				Name:     f.Names[0].Name,
 				JSONName: jsname,
 				Type:     typ,

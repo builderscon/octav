@@ -220,7 +220,20 @@ func doCreateVenue(ctx context.Context, w http.ResponseWriter, r *http.Request, 
 }
 
 func doListRooms(ctx context.Context, w http.ResponseWriter, r *http.Request, payload ListRoomRequest) {
+	tx, err := db.Begin()
+	if err != nil {
+		httpError(w, `ListRoom`, http.StatusInternalServerError, err)
+		return
+	}
+	defer tx.AutoRollback()
 
+	rl := RoomList{}
+	if err := rl.LoadForVenue(tx, payload.VenueID, payload.Since, payload.Limit); err != nil {
+		httpError(w, `ListRoom`, http.StatusInternalServerError, err)
+		return
+	}
+
+	httpJSON(w, rl)
 }
 
 func doLookupRoom(ctx context.Context, w http.ResponseWriter, r *http.Request, payload LookupRoomRequest) {

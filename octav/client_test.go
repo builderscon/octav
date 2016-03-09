@@ -297,17 +297,38 @@ func TestCreateVenue(t *testing.T) {
 	}
 }
 
+type setPropValuer interface {
+  SetPropValue(string, interface{}) error
+}
+
 func TestListRooms(t *testing.T) {
 	ts := httptest.NewServer(octav.New())
 	defer ts.Close()
 
 	cl := client.New(ts.URL)
-	in := octav.ListRoomRequest{}
+	venue, err := testCreateVenue(t, cl, bigsight())
+	if err != nil {
+		return
+	}
+
+	_, err = testCreateRoom(t, cl, intlConferenceRoom(venue.ID))
+	if err != nil {
+		return
+	}
+
+	in := octav.ListRoomRequest{
+		VenueID: venue.ID,
+	}
 	res, err := cl.ListRooms(&in)
 	if !assert.NoError(t, err, "ListRooms should succeed") {
 		return
 	}
+
 	if !assert.NoError(t, validator.HTTPListRoomsResponse.Validate(res), "Validation should succeed") {
+		return
+	}
+
+	if !assert.Len(t, res, 1, "ListRooms returns 1 rooms") {
 		return
 	}
 }

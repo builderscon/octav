@@ -23,6 +23,11 @@
       "type": "integer",
       "minimum": 0
     },
+    "positiveIntegerDefault10": {
+      "type": "integer",
+      "minimum": 0,
+      "default": 10
+    },
     "email": {
       "type": "string",
       "format": "email"
@@ -402,7 +407,8 @@
         "hsup.type": "octav.ListRoomRequest",
         "properties": {
           "venue_id": { "$ref": "#/definitions/uuid" },
-          "lang": { "$ref": "#/definitions/language" }
+          "lang": { "$ref": "#/definitions/language" },
+          "limit": { "$ref": "#/definitions/positiveIntegerDefault10" }
         },
         "required": [ "venue_id" ]
       },

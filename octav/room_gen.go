@@ -39,11 +39,13 @@ func (v Room) MarshalJSON() ([]byte, error) {
 	}
 	return marshalJSONWithL10N(buf, v.L10N)
 }
+
 func (v *Room) UnmarshalJSON(data []byte) error {
 	m := make(map[string]interface{})
 	if err := json.Unmarshal(data, &m); err != nil {
 		return err
 	}
+
 	if jv, ok := m["id"]; ok {
 		switch jv.(type) {
 		case string:
@@ -53,6 +55,7 @@ func (v *Room) UnmarshalJSON(data []byte) error {
 			return ErrInvalidFieldType
 		}
 	}
+
 	if jv, ok := m["venue_id"]; ok {
 		switch jv.(type) {
 		case string:
@@ -62,6 +65,7 @@ func (v *Room) UnmarshalJSON(data []byte) error {
 			return ErrInvalidFieldType
 		}
 	}
+
 	if jv, ok := m["name"]; ok {
 		switch jv.(type) {
 		case string:
@@ -71,6 +75,7 @@ func (v *Room) UnmarshalJSON(data []byte) error {
 			return ErrInvalidFieldType
 		}
 	}
+
 	if jv, ok := m["capacity"]; ok {
 		switch jv.(type) {
 		case float64:
@@ -79,6 +84,10 @@ func (v *Room) UnmarshalJSON(data []byte) error {
 		default:
 			return ErrInvalidFieldType
 		}
+	}
+
+	if err := ExtractL10NFields(m, &v.L10N, []string{"name"}); err != nil {
+		return err
 	}
 	return nil
 }
@@ -92,7 +101,13 @@ func (v *Room) Load(tx *db.Tx, id string) error {
 	if err := v.FromRow(vdb); err != nil {
 		return err
 	}
+	if err := v.LoadLocalizedFields(tx); err != nil {
+		return err
+	}
+	return nil
+}
 
+func (v *Room) LoadLocalizedFields(tx *db.Tx) error {
 	ls, err := db.LoadLocalizedStringsForParent(tx, v.ID, "Room")
 	if err != nil {
 		return err
@@ -161,6 +176,9 @@ func (v *RoomList) Load(tx *db.Tx, since string, limit int) error {
 	for i, vdb := range vdbl {
 		v := Room{}
 		if err := v.FromRow(vdb); err != nil {
+			return err
+		}
+		if err := v.LoadLocalizedFields(tx); err != nil {
 			return err
 		}
 		res[i] = v

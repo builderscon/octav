@@ -24,12 +24,6 @@ func TestVenueJSONL10NKeys(t *testing.T) {
 		return
 	}
 
-t.Logf("%#v", v)
-{
-	buf, _ := json.Marshal(&v)
-t.Logf("%s", buf)
-}
-
 	var lv string
 	var ok bool
 	lv, ok = v.L10N.Get("ja", "name")

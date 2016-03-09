@@ -45,11 +45,13 @@ func (v User) MarshalJSON() ([]byte, error) {
 	}
 	return marshalJSONWithL10N(buf, v.L10N)
 }
+
 func (v *User) UnmarshalJSON(data []byte) error {
 	m := make(map[string]interface{})
 	if err := json.Unmarshal(data, &m); err != nil {
 		return err
 	}
+
 	if jv, ok := m["id"]; ok {
 		switch jv.(type) {
 		case string:
@@ -59,6 +61,7 @@ func (v *User) UnmarshalJSON(data []byte) error {
 			return ErrInvalidFieldType
 		}
 	}
+
 	if jv, ok := m["first_name"]; ok {
 		switch jv.(type) {
 		case string:
@@ -68,6 +71,7 @@ func (v *User) UnmarshalJSON(data []byte) error {
 			return ErrInvalidFieldType
 		}
 	}
+
 	if jv, ok := m["last_name"]; ok {
 		switch jv.(type) {
 		case string:
@@ -77,6 +81,7 @@ func (v *User) UnmarshalJSON(data []byte) error {
 			return ErrInvalidFieldType
 		}
 	}
+
 	if jv, ok := m["nickname"]; ok {
 		switch jv.(type) {
 		case string:
@@ -86,6 +91,7 @@ func (v *User) UnmarshalJSON(data []byte) error {
 			return ErrInvalidFieldType
 		}
 	}
+
 	if jv, ok := m["email"]; ok {
 		switch jv.(type) {
 		case string:
@@ -95,6 +101,7 @@ func (v *User) UnmarshalJSON(data []byte) error {
 			return ErrInvalidFieldType
 		}
 	}
+
 	if jv, ok := m["tshirt_size"]; ok {
 		switch jv.(type) {
 		case string:
@@ -116,7 +123,13 @@ func (v *User) Load(tx *db.Tx, id string) error {
 	if err := v.FromRow(vdb); err != nil {
 		return err
 	}
+	if err := v.LoadLocalizedFields(tx); err != nil {
+		return err
+	}
+	return nil
+}
 
+func (v *User) LoadLocalizedFields(tx *db.Tx) error {
 	ls, err := db.LoadLocalizedStringsForParent(tx, v.ID, "User")
 	if err != nil {
 		return err
@@ -189,6 +202,9 @@ func (v *UserList) Load(tx *db.Tx, since string, limit int) error {
 	for i, vdb := range vdbl {
 		v := User{}
 		if err := v.FromRow(vdb); err != nil {
+			return err
+		}
+		if err := v.LoadLocalizedFields(tx); err != nil {
 			return err
 		}
 		res[i] = v
