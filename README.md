@@ -65,3 +65,49 @@ Admin site URL should be different, so let's assume base url https://admin.build
 | register organizer  | /organizer/register | |
 | register conference | /conference/create  | |
 | TODO (Add more) | | |
+
+# Development
+
+## Useful Debugging Tips
+
+### Enable Debug Prints
+
+When running your tests, use the tag `debug0` (or debug). See [github.com/lestrrat/go-pdebug](https://github.com/lestrrat/go-pdebug) for details. |
+
+## Useful Environment Variables
+
+| Name | Description |
+|:-----|:------------|
+|OCTAV_TEST_DSN | DSN to use to connect to the database. See [github.com/go-sql-driver/mysql](https://github.com/go-sql-driver/mysql) for syntax details. |
+|OCTAV_DB_TRACE | Enable to see SQL execution trace. See [github.com/shogo82148/go-sql-proxy](https://github.com/shogo82148/go-sql-proxy) for details. |
+|PDEBUG_TRACE | Enable print debug mode. See [github.com/lestrrat/go-pdebug](https://github.com/lestrrat/go-pdebug) for details. |
+
+
+# Running Tests
+
+See "Useful Environemnt Variables", and "Useful Debugging Tips"
+
+## 0. Drop the old database
+
+The schema is still changing wildly. You probably want to flush it from
+time to time
+
+```
+mysqladmin -uroot drop octav
+```
+
+## 1. Create a database
+
+```
+mysqladmin -uroot create octav
+mysql -uroot octav < octav/sql/octav.sql
+```
+
+## 2. Run
+
+```
+cd octav
+OCTAV_TEST_DSN='root:@:/octav?parseTime=true' go test .
+```
+
+Currently, the tests are still failing.

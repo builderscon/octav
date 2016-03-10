@@ -1,21 +1,29 @@
 {
   "definitions": {
-    "datetime": {
-      "type": "string"
+    "datestr": {
+      "type": "string",
+      "pattern": "\\d{4}-\\d{2}-\\d{2}",
+      "description": "date in YYYY-MM-DD format"
     },
-    "string-en": {
+    "datetime": {
+      "oneOf": [
+        { "type": "string", "format": "date-time" },
+        { "type": "object", "description": "implementation specific object representing time" }
+      ]
+    },
+    "string_en": {
       "description": "a string in English.",
       "type": "string"
     },
-    "markdown-en": {
+    "markdown_en": {
       "description": "a string with markdown markup in English.",
       "type": "string"
     },
-    "string-i18n": {
+    "string_i18n": {
       "description": "a string for a particular language, where language is presented as the suffix of the property in the form of <foo>#<language>.",
       "type": "string"
     },
-    "markdown-i18n": {
+    "markdown_i18n": {
       "description": "a string with markdown markup for a particular language, where language is presented as the suffix of the property in the form of <foo>#<language>.",
       "type": "string"
     },
@@ -23,17 +31,24 @@
       "type": "integer",
       "minimum": 0
     },
+    "positiveIntegerDefault10": {
+      "type": "integer",
+      "minimum": 0,
+      "default": 10
+    },
     "email": {
       "type": "string",
       "format": "email"
     },
-    "material-level": {
+    "material_level": {
       "type": "string",
-      "enum": ["beginner", "intermediate", "advanced"]
+      "enum": ["beginner", "intermediate", "advanced"],
+      "default": "beginner"
     },
-    "binary-permission": {
+    "binary_permission_default_allow": {
       "type": "string",
-      "enum": ["allow","disallow"]
+      "enum": ["allow","disallow"],
+      "default": "allow"
     },
     "url": {
       "type": "string",
@@ -43,6 +58,12 @@
       "description": "an UUID, expressed as hexadecimal chars",
       "type": "string",
       "pattern": "^[a-fA-F0-9-]+$"
+    },
+    "uuidDefaultEmpty": {
+      "description": "an UUID, expressed as hexadecimal chars, but if not provided, the empty string is returned",
+      "type": "string",
+      "pattern": "^[a-fA-F0-9-]+$",
+      "default": ""
     },
     "language": {
       "description": "a language tag",
@@ -57,23 +78,42 @@
       "description": "latitude of an object",
       "type": "number"
     },
+    "date": {
+      "hsup.type": "octav.Date",
+      "type": "object",
+      "property": {
+        "date": { "$ref": "#/definitions/datestr" },
+        "open": { "$ref": "#/definitions/time" },
+        "close": { "$ref": "#/definitions/time" }
+      }
+    },
+    "datestr": {
+      "type": "string",
+      "pattern": "^\\d+-\\d+-\\d+$"
+    },
+    "date_array": {
+      "type": "array",
+      "items": { "$ref": "#/definitions/date" }
+    },
     "conference": {
       "type": "object",
       "hsup.type": "octav.Conference",
       "properties": {
         "id": { "$ref": "#/definitions/uuid" },
-        "name": { "$ref": "#/definitions/string-en" },
-        "description": { "$ref": "#/definitions/string-en" },
-        "venue": { "$ref": "#/definitions/venue" }
+        "name": { "$ref": "#/definitions/string_en" },
+        "slug": { "$ref": "#/definitions/string_en" },
+        "description": { "$ref": "#/definitions/string_en" },
+        "venue": { "$ref": "#/definitions/venue" },
+        "dates": { "$ref": "#/definitions/date_array" }
       },
       "patternProperties": {
-        "title#{a-z}+": { "$ref": "#/definitions/string-i18n" },
-        "description#{a-z}+": { "$ref": "#/definitions/string-i18n" }
+        "title#[a-z]+": { "$ref": "#/definitions/string_i18n" },
+        "description#[a-z]+": { "$ref": "#/definitions/string_i18n" }
       }
     },
     "venue": {
       "type": "object",
-      "hsup.typ": "Venue",
+      "hsup.type": "octav.Venue",
       "properties": {
         "id": { "$ref": "#/definitions/uuid" },
         "name": { "type": "string" },
@@ -85,15 +125,18 @@
       "hsup.type": "octav.Room",
       "properties": {
         "id": { "$ref": "#/definitions/uuid" },
-        "venue-id": { "$ref": "#/definitions/uuid" },
+        "venue_id": { "$ref": "#/definitions/uuid" },
         "name": { "type": "string" },
         "capcity": { "$ref": "#/definitions/positiveInteger" }
+      },
+      "patternProperties": {
+        "name#[a-z]+": { "$ref": "#/definitions/string_i18n" }
       }
     },
     "tag": {
       "type": "string"
     },
-    "tag-array": {
+    "tag_array": {
       "type": "array",
       "items": { "$ref": "#/definitions/tag" }
     },
@@ -110,45 +153,65 @@
         }
       }
     },
-    "speaker-array": {
+    "speaker_array": {
       "type": "array",
       "items": { "$ref": "#/definitions/speaker" }
     },
-    "acceptance-status": {
+    "acceptance_status": {
       "type": "string",
       "enum": [ "pending", "accepted", "rejected" ],
       "default": "pending"
     },
     "duration": {
-      "type": "string"
+      "type": "integer"
+    },
+    "session_array": {
+      "type": "array",
+      "items": { "$ref": "#/definitions/session" }
     },
     "session": {
       "type": "object",
       "hsup.type": "octav.Session",
       "properties": {
-        "conference": { "$ref": "#/definitions/conference" },
-        "room": { "$ref": "#/definitions/room" },
-        "speaker": { "$ref": "#/definitions/speaker-array" },
+        "conference": {
+          "oneOf": [
+            { "type": "null" },
+            { "$ref": "#/definitions/conference" }
+          ]
+        },
+        "room": {
+          "oneOf": [
+            { "type": "null" },
+            { "$ref": "#/definitions/room" }
+          ]
+        },
+        "speaker": {
+          "oneOf": [
+            { "type": "null" },
+            { "type": "object" },
+            { "$ref": "#/definitions/speaker_array" }
+          ]
+        },
         "title": { "type": "string" },
         "abstract": { "type": "string" },
         "memo": { "type": "string" },
-        "starts-on": { "$ref": "#/definitions/datetime" },
+        "starts_on": { "$ref": "#/definitions/datetime" },
         "duration": { "$ref": "#/definitions/duration" },
-        "material-level": { "$ref": "#/definitions/material-level" },
-        "tag": { "$ref": "#/definitions/tag-array" },
+        "material_level": { "$ref": "#/definitions/material_level" },
+        "tags": { "$ref": "#/definitions/tag_array" },
         "category": { "type": "string" },
-        "spoken-language": { "$ref": "#/definitions/language" },
-        "slide-language": { "$ref": "#/definitions/language" },
-        "slide-subtitles": { "$ref": "#/definitions/language" },
-        "slide-url": { "$ref": "#/definitions/url" },
-        "video-url": { "$ref": "#/definitions/url" },
-        "photo-permission": { "$ref": "#/definitions/binary-permission" },
-        "video-permission": { "$ref": "#/definitions/binary-permission" },
-        "has-interpretation": {
+        "spoken_language": { "$ref": "#/definitions/language" },
+        "slide_language": { "$ref": "#/definitions/language" },
+        "slide_subtitles": { "$ref": "#/definitions/language" },
+        "slide_url": { "$ref": "#/definitions/url" },
+        "video_url": { "$ref": "#/definitions/url" },
+        "photo_permission": { "$ref": "#/definitions/binary_permission_default_allow" },
+        "video_permission": { "$ref": "#/definitions/binary_permission_default_allow" },
+        "has_interpretation": {
           "type": "boolean",
           "default": false
         },
-        "status": { "$ref": "#/definitions/acceptance-status" },
+        "status": { "$ref": "#/definitions/acceptance_status" },
         "sort-order": { "$ref": "#/definitions/positiveInteger" },
         "confirmed": {
           "type": "boolean",
@@ -164,11 +227,16 @@
       "type": "object",
       "hsup.type": "octav.User",
       "properties": {
-        "first_name": { "$ref": "#/definitions/string-en" },
-        "last_name": { "$ref": "#/definitions/string-en" },
-        "nickname": { "$ref": "#/definitions/string-en" },
+        "id": { "$ref": "#/definitions/uuid" },
+        "first_name": { "$ref": "#/definitions/string_en" },
+        "last_name": { "$ref": "#/definitions/string_en" },
+        "nickname": { "$ref": "#/definitions/string_en" },
         "email": { "$ref": "#/definitions/email" },
         "tshirt_size": { "$ref": "#/definitions/tshirt_size" }
+      },
+      "patternProperties": {
+        "first_name#[a-z]+": { "$ref": "#/definitions/string_i18n" },
+        "last_name#[a-z]+": { "$ref": "#/definitions/string_i18n" }
       }
     }
   },
@@ -182,18 +250,51 @@
       "method": "POST",
       "encType": "application/x-www-form-urlencoded",
       "schema": {
+        "type": "object",
+        "hsup.type": "octav.CreateUserRequest",
         "properties": {
-          "first_name": { "$ref": "#/definitions/string-en" },
-          "last_name": { "$ref": "#/definitions/string-en" },
-          "nickname": { "$ref": "#/definitions/string-en" },
+          "first_name": { "$ref": "#/definitions/string_en" },
+          "last_name": { "$ref": "#/definitions/string_en" },
+          "nickname": { "$ref": "#/definitions/string_en" },
           "email": { "$ref": "#/definitions/email" },
           "tshirt_size": { "$ref": "#/definitions/tshirt_size" }
         },
-        "propertyPattern": {
-          "first_name#{a-z}+": { "$ref": "#/definitions/string-i18n" }
+        "patternProperties": {
+          "first_name#[a-z]+": { "$ref": "#/definitions/string_i18n" },
+          "last_name#[a-z]+": { "$ref": "#/definitions/string_i18n" }
         }
       },
       "targetSchema": { "$ref": "#/definitions/user" }
+    },
+    {
+      "title": "Lookup user",
+      "rel": "lookup",
+      "href": "/user/lookup",
+      "method": "GET",
+      "schema": {
+        "type": "object",
+        "hsup.type": "octav.LookupUserRequest",
+        "required": ["id"],
+        "properties": {
+          "id": { "$ref": "#/definitions/uuid" }
+        }
+      },
+      "targetSchema": { "$ref": "#/definitions/user" }
+    },
+    {
+      "title": "Delete user",
+      "rel": "delete",
+      "href": "/user/delete",
+      "method": "POST",
+      "encType": "application/x-www-form-urlencoded",
+      "schema": {
+        "type": "object",
+        "hsup.type": "octav.DeleteUserRequest",
+        "required": ["id"],
+        "properties": {
+          "id": { "$ref": "#/definitions/uuid" }
+        }
+      }
     },
     {
       "title": "Create venue",
@@ -205,15 +306,15 @@
       "schema": {
         "hsup.type": "octav.Venue",
         "properties": {
-          "name": { "$ref": "#/definitions/string-en" },
-          "address": { "$ref": "#/definitions/string-en" },
+          "name": { "$ref": "#/definitions/string_en" },
+          "address": { "$ref": "#/definitions/string_en" },
           "latitude": { "$ref": "#/definitions/latitude" },
           "longitude": { "$ref": "#/definitions/longitude" }
         },
-        "required": ["name", "address", "latitude", "longitude"],
-        "propertyPattern": {
-          "name#{a-z}+": { "$ref": "#/definitions/string-i18n" },
-          "address#{a-z}+": { "$ref": "#/definitions/string-i18n" }
+        "required": ["name", "address"],
+        "patternProperties": {
+          "name#[a-z]+": { "$ref": "#/definitions/string_i18n" },
+          "address#[a-z]+": { "$ref": "#/definitions/string_i18n" }
         }
       },
       "targetSchema": { "$ref": "#/definitions/venue" }
@@ -224,14 +325,45 @@
       "href": "/venue/list",
       "schema": {
         "type": "object",
+        "hsup.type": "octav.ListVenueRequest",
         "properties": {
           "lang": { "$ref": "#/definitions/language" },
-          "since": { "$ref": "#/definitions/uuid" }
+          "since": { "$ref": "#/definitions/uuidDefaultEmpty" }
         }
       },
       "targetSchema": {
         "hsup.type": "[]octav.Venue",
         "items": { "$ref": "#/definitions/venue" }
+      }
+    },
+    {
+      "title": "Lookup venue",
+      "rel": "lookup",
+      "href": "/venue/lookup",
+      "method": "GET",
+      "schema": {
+        "type": "object",
+        "hsup.type": "octav.LookupVenueRequest",
+        "required": ["id"],
+        "properties": {
+          "id": { "$ref": "#/definitions/uuid" }
+        }
+      },
+      "targetSchema": { "$ref": "#/definitions/venue" }
+    },
+    {
+      "title": "Delete venue",
+      "rel": "delete",
+      "href": "/venue/delete",
+      "method": "POST",
+      "encType": "application/x-www-form-urlencoded",
+      "schema": {
+        "type": "object",
+        "hsup.type": "octav.DeleteVenueRequest",
+        "required": ["id"],
+        "properties": {
+          "id": { "$ref": "#/definitions/uuid" }
+        }
       }
     },
     {
@@ -241,8 +373,10 @@
       "method": "POST",
       "encType": "application/x-www-form-urlencoded",
       "schema": {
+        "type": "object",
+        "hsup.type": "octav.Room",
         "properties": {
-          "venue-id": {
+          "venue_id": {
             "$ref": "#/definitions/uuid",
             "description": "venue id that this room belongs to"
           },
@@ -252,12 +386,42 @@
           },
           "capacity": { "$ref": "#/definitions/positiveInteger" }
         },
-        "required": ["venue-id", "name"],
-        "propertyPattern": {
-          "name#{a-z}+": { "$ref": "name-i18n" }
+        "required": ["venue_id", "name"],
+        "patternProperties": {
+          "name#[a-z]+": { "$ref": "#/definitions/string_i18n" }
         }
       },
       "targetSchema": { "$ref": "#/definitions/room" }
+    },
+    {
+      "title": "Lookup room",
+      "rel": "lookup",
+      "href": "/room/lookup",
+      "method": "GET",
+      "schema": {
+        "type": "object",
+        "hsup.type": "octav.LookupRoomRequest",
+        "required": ["id"],
+        "properties": {
+          "id": { "$ref": "#/definitions/uuid" }
+        }
+      },
+      "targetSchema": { "$ref": "#/definitions/room" }
+    },
+    {
+      "title": "Delete room",
+      "rel": "delete",
+      "href": "/room/delete",
+      "method": "POST",
+      "encType": "application/x-www-form-urlencoded",
+      "schema": {
+        "type": "object",
+        "hsup.type": "octav.DeleteRoomRequest",
+        "required": ["id"],
+        "properties": {
+          "id": { "$ref": "#/definitions/uuid" }
+        }
+      }
     },
     {
       "title": "List rooms",
@@ -266,11 +430,13 @@
       "method": "GET",
       "encType": "application/x-www-form-urlencoded",
       "schema": {
+        "hsup.type": "octav.ListRoomRequest",
         "properties": {
-          "venue-id": { "$ref": "#/definitions/uuid" },
-          "lang": { "$ref": "#/definitions/language" }
+          "venue_id": { "$ref": "#/definitions/uuid" },
+          "lang": { "$ref": "#/definitions/language" },
+          "limit": { "$ref": "#/definitions/positiveIntegerDefault10" }
         },
-        "required": [ "venue-id" ]
+        "required": [ "venue_id" ]
       },
       "targetSchema": {
         "hsup.type": "[]octav.Room",
@@ -284,19 +450,49 @@
       "href": "/conference/create",
       "encType": "application/x-www-form-urlencoded",
       "schema": {
+        "hsup.type": "octav.CreateConferenceRequest",
         "properties": {
-          "venue-id": { "$ref": "#/definitions/uuid" },
-          "title": { "$ref": "#/definitions/string-en" },
-          "description": { "$ref": "#/definitions/string-en" },
-          "starts-on": { "$ref": "#/definitions/datetime" },
-          "duration": { "$ref": "#/definitions/duration" }
+          "title": { "$ref": "#/definitions/string_en" },
+          "sub_title": { "$ref": "#/definitions/string_en" },
+          "slug": { "$ref": "#/definitions/string_en" },
+          "description": { "$ref": "#/definitions/string_en" },
+          "starts-on": { "$ref": "#/definitions/datetime" }
         },
         "patternProperties": {
-          "title#{a-z}+": { "$ref": "#/definitions/string-i18n" },
-          "description#{a-z}+": { "$ref": "#/definitions/string-i18n" }
+          "title#[a-z]+": { "$ref": "#/definitions/string_i18n" },
+          "description#[a-z]+": { "$ref": "#/definitions/string_i18n" }
+        },
+        "required": ["title", "slug"]
+      },
+      "targetSchema": { "$ref": "#/definitions/conference" }
+    },
+    {
+      "title": "Lookup conference",
+      "href": "/conference/lookup",
+      "rel": "lookup",
+      "schema": {
+        "hsup.type": "octav.LookupConferenceRequest",
+        "required": ["id"],
+        "properties": {
+          "id": { "$ref": "#/definitions/uuid" }
         }
       },
       "targetSchema": { "$ref": "#/definitions/conference" }
+    },
+    {
+      "title": "Delete conference",
+      "rel": "delete",
+      "href": "/conference/delete",
+      "method": "POST",
+      "encType": "application/x-www-form-urlencoded",
+      "schema": {
+        "type": "object",
+        "hsup.type": "octav.DeleteConferenceRequest",
+        "required": ["id"],
+        "properties": {
+          "id": { "$ref": "#/definitions/uuid" }
+        }
+      }
     },
     {
       "title": "Create session",
@@ -304,45 +500,61 @@
       "method": "POST",
       "href": "/session/create",
       "schema": {
+        "type": "object",
+        "hsup.type": "octav.CreateSessionRequest",
+        "required": ["conference_id", "speaker_id", "title"],
         "properties": {
-          "conference-id": { "$ref": "#/definitions/uuid" },
-          "room-id": { "$ref": "#/definitions/uuid" },
-          "speaker-id": {
-            "type": "array",
-            "items": { "$ref": "#/definitions/uuid" }
-          },
-          "title": { "$ref": "#/definitions/string-en" },
-          "abstract": { "$ref": "#/definitions/markdown-en" },
+          "conference_id": { "$ref": "#/definitions/uuid" },
+          "speaker_id": { "$ref": "#/definitions/uuid" },
+          "title": { "$ref": "#/definitions/string_en" },
+          "abstract": { "$ref": "#/definitions/markdown_en" },
           "memo": { "type": "string" },
-          "starts-on": { "$ref": "#/definitions/datetime" },
           "duration": { "$ref": "#/definitions/duration" },
-          "material-level": { "$ref": "#/definitions/material-level" },
-          "tag": { "$ref": "#/definitions/tag-array" },
+          "material_level": { "$ref": "#/definitions/material_level" },
+          "tag": { "$ref": "#/definitions/tag_array" },
           "category": { "type": "string" },
-          "spoken-language": { "$ref": "#/definitions/language" },
-          "slide-language": { "$ref": "#/definitions/language" },
-          "slide-subtitles": { "$ref": "#/definitions/language" },
-          "slide-url": { "$ref": "#/definitions/url" },
-          "video-url": { "$ref": "#/definitions/url" },
-          "photo-permission": { "$ref": "#/definitions/binary-permission" },
-          "video-permission": { "$ref": "#/definitions/binary-permission" },
-          "has-interpretation": {
-            "type": "boolean",
-            "default": false
-          },
-          "status": { "$ref": "#/definitions/acceptance-status" },
-          "sort-order": { "$ref": "#/definitions/positiveInteger" },
-          "confirmed": {
-            "type": "boolean",
-            "default": false
-          },
-          "patternProperties": {
-            "title#{a-z}+": { "$ref": "#/definitions/string-i18n" },
-            "abstract#{a-z}+": { "$ref": "#/definitions/markdown-i18n" }
-          }
+          "spoken_language": { "$ref": "#/definitions/language" },
+          "slide_language": { "$ref": "#/definitions/language" },
+          "slide_subtitles": { "$ref": "#/definitions/language" },
+          "slide_url": { "$ref": "#/definitions/url" },
+          "video_url": { "$ref": "#/definitions/url" },
+          "photo_permission": { "$ref": "#/definitions/binary_permission_default_allow" },
+          "video_permission": { "$ref": "#/definitions/binary_permission_default_allow" }
+        },
+        "patternProperties": {
+          "title#[a-z]+": { "$ref": "#/definitions/string_i18n" },
+          "abstract#[a-z]+": { "$ref": "#/definitions/markdown_i18n" }
         }
       },
       "targetSchema": { "$ref": "#/definitions/session" }
+    },
+    {
+      "title": "Lookup session",
+      "href": "/session/lookup",
+      "rel": "lookup",
+      "schema": {
+        "hsup.type": "octav.LookupSessionRequest",
+        "required": ["id"],
+        "properties": {
+          "id": { "$ref": "#/definitions/uuid" }
+        }
+      },
+      "targetSchema": { "$ref": "#/definitions/session" }
+    },
+    {
+      "title": "List sessions by conference",
+      "href": "/schedule/list",
+      "rel": "list",
+      "schema": {
+        "type": "object",
+        "hsup.type": "octav.ListSessionsByConferenceRequest",
+        "required": ["conference_id"],
+        "properties": {
+          "date": { "$ref": "#/definitions/datestr" },
+          "conference_id": { "$ref": "#/definitions/uuid" }
+        }
+      },
+      "targetSchema": { "$ref": "#/definitions/session_array" }
     }
   ]
 }
