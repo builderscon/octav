@@ -201,7 +201,7 @@ func (p *Processor) ProcessStruct(s Struct) error {
 		}
 		fmt.Fprintf(&buf, "\ndelete(m, %s)", strconv.Quote(f.JSONName))
 		buf.WriteString("\ndefault:")
-		buf.WriteString("\nreturn ErrInvalidFieldType")
+		fmt.Fprintf(&buf, "\nreturn ErrInvalidFieldType{Field: %s}", strconv.Quote(f.JSONName))
 		buf.WriteString("\n}")
 		buf.WriteString("\n}")
 	}
@@ -452,22 +452,9 @@ func (ctx *InspectionCtx) ExtractStructsFromDecl(decl *ast.GenDecl) error {
 				}
 			}
 
-			var typ string
-			switch f.Type.(type) {
-			case *ast.Ident:
-				typ = f.Type.(*ast.Ident).Name
-			case *ast.SelectorExpr:
-				typ = f.Type.(*ast.SelectorExpr).Sel.Name
-			case *ast.StarExpr:
-				typ = f.Type.(*ast.StarExpr).X.(*ast.SelectorExpr).Sel.Name
-			case *ast.ArrayType:
-				typ = "[]" + f.Type.(*ast.ArrayType).Elt.(*ast.Ident).Name
-			case *ast.MapType:
-				mt := f.Type.(*ast.MapType)
-				typ = "map[" + mt.Key.(*ast.Ident).Name + "]" + mt.Value.(*ast.Ident).Name
-			default:
-				fmt.Printf("%#v\n", f.Type)
-				panic("field type not supported")
+			typ, err := getTypeName(f.Type)
+			if err != nil {
+				return err
 			}
 
 			field := StructField{
@@ -484,3 +471,25 @@ func (ctx *InspectionCtx) ExtractStructsFromDecl(decl *ast.GenDecl) error {
 
 	return nil
 }
+
+func getTypeName(ref ast.Expr) (string, error) {
+	var typ string
+	switch ref.(type) {
+	case *ast.Ident:
+		typ = ref.(*ast.Ident).Name
+	case *ast.SelectorExpr:
+		typ = ref.(*ast.SelectorExpr).Sel.Name
+	case *ast.StarExpr:
+		return getTypeName(ref.(*ast.StarExpr).X)
+	case *ast.ArrayType:
+		typ = "[]" + ref.(*ast.ArrayType).Elt.(*ast.Ident).Name
+	case *ast.MapType:
+		mt := ref.(*ast.MapType)
+		typ = "map[" + mt.Key.(*ast.Ident).Name + "]" + mt.Value.(*ast.Ident).Name
+	default:
+		fmt.Printf("%#v\n", ref)
+		return "", errors.New("field type not supported")
+	}
+	return typ, nil
+}
+

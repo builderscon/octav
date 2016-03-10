@@ -53,7 +53,7 @@ func (v *Conference) UnmarshalJSON(data []byte) error {
 			v.ID = jv.(string)
 			delete(m, "id")
 		default:
-			return ErrInvalidFieldType
+			return ErrInvalidJSONFieldType{Field:"id"}
 		}
 	}
 	if jv, ok := m["title"]; ok {
@@ -62,7 +62,7 @@ func (v *Conference) UnmarshalJSON(data []byte) error {
 			v.Title = jv.(string)
 			delete(m, "title")
 		default:
-			return ErrInvalidFieldType
+			return ErrInvalidJSONFieldType{Field:"title"}
 		}
 	}
 	if jv, ok := m["subtitle"]; ok {
@@ -71,7 +71,7 @@ func (v *Conference) UnmarshalJSON(data []byte) error {
 			v.SubTitle = jv.(string)
 			delete(m, "subtitle")
 		default:
-			return ErrInvalidFieldType
+			return ErrInvalidJSONFieldType{Field:"subtitle"}
 		}
 	}
 	if jv, ok := m["slug"]; ok {
@@ -80,7 +80,7 @@ func (v *Conference) UnmarshalJSON(data []byte) error {
 			v.Slug = jv.(string)
 			delete(m, "slug")
 		default:
-			return ErrInvalidFieldType
+			return ErrInvalidJSONFieldType{Field:"slug"}
 		}
 	}
 	return nil

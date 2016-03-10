@@ -58,7 +58,7 @@ func (v *User) UnmarshalJSON(data []byte) error {
 			v.ID = jv.(string)
 			delete(m, "id")
 		default:
-			return ErrInvalidFieldType
+			return ErrInvalidFieldType{Field: "id"}
 		}
 	}
 
@@ -68,7 +68,7 @@ func (v *User) UnmarshalJSON(data []byte) error {
 			v.FirstName = jv.(string)
 			delete(m, "first_name")
 		default:
-			return ErrInvalidFieldType
+			return ErrInvalidFieldType{Field: "first_name"}
 		}
 	}
 
@@ -78,7 +78,7 @@ func (v *User) UnmarshalJSON(data []byte) error {
 			v.LastName = jv.(string)
 			delete(m, "last_name")
 		default:
-			return ErrInvalidFieldType
+			return ErrInvalidFieldType{Field: "last_name"}
 		}
 	}
 
@@ -88,7 +88,7 @@ func (v *User) UnmarshalJSON(data []byte) error {
 			v.Nickname = jv.(string)
 			delete(m, "nickname")
 		default:
-			return ErrInvalidFieldType
+			return ErrInvalidFieldType{Field: "nickname"}
 		}
 	}
 
@@ -98,7 +98,7 @@ func (v *User) UnmarshalJSON(data []byte) error {
 			v.Email = jv.(string)
 			delete(m, "email")
 		default:
-			return ErrInvalidFieldType
+			return ErrInvalidFieldType{Field: "email"}
 		}
 	}
 
@@ -108,7 +108,7 @@ func (v *User) UnmarshalJSON(data []byte) error {
 			v.TshirtSize = jv.(string)
 			delete(m, "tshirt_size")
 		default:
-			return ErrInvalidFieldType
+			return ErrInvalidFieldType{Field: "tshirt_size"}
 		}
 	}
 	return nil

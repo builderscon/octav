@@ -52,7 +52,7 @@ func (v *Room) UnmarshalJSON(data []byte) error {
 			v.ID = jv.(string)
 			delete(m, "id")
 		default:
-			return ErrInvalidFieldType
+			return ErrInvalidFieldType{Field: "id"}
 		}
 	}
 
@@ -62,7 +62,7 @@ func (v *Room) UnmarshalJSON(data []byte) error {
 			v.VenueID = jv.(string)
 			delete(m, "venue_id")
 		default:
-			return ErrInvalidFieldType
+			return ErrInvalidFieldType{Field: "venue_id"}
 		}
 	}
 
@@ -72,7 +72,7 @@ func (v *Room) UnmarshalJSON(data []byte) error {
 			v.Name = jv.(string)
 			delete(m, "name")
 		default:
-			return ErrInvalidFieldType
+			return ErrInvalidFieldType{Field: "name"}
 		}
 	}
 
@@ -82,7 +82,7 @@ func (v *Room) UnmarshalJSON(data []byte) error {
 			v.Capacity = uint(jv.(float64))
 			delete(m, "capacity")
 		default:
-			return ErrInvalidFieldType
+			return ErrInvalidFieldType{Field: "capacity"}
 		}
 	}
 

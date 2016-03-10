@@ -58,8 +58,8 @@ func testLookupRoom(t *testing.T, cl *client.Client, id string) (*octav.Room, er
 	return venue, nil
 }
 
-func testCreateUser(t *testing.T, cl *client.Client, in octav.CreateUserRequest) (*octav.User, error) {
-	res, err := cl.CreateUser(&in)
+func testCreateUser(t *testing.T, cl *client.Client, in *octav.CreateUserRequest) (*octav.User, error) {
+	res, err := cl.CreateUser(in)
 	if !assert.NoError(t, err, "CreateUser should succeed") {
 		return nil, err
 	}
@@ -207,18 +207,57 @@ func TestCreateRoom(t *testing.T) {
 	}
 }
 
+func testCreateSession(t *testing.T, cl *client.Client, in *octav.CreateSessionRequest) (*octav.Session, error) {
+	res, err := cl.CreateSession(in)
+	if !assert.NoError(t, err, "CreateSession should succeed") {
+		return nil, err
+	}
+	return res, nil
+}
+
 func TestCreateSession(t *testing.T) {
 	ts := httptest.NewServer(octav.New())
 	defer ts.Close()
 
 	cl := client.New(ts.URL)
-	var in interface{}
-	res, err := cl.CreateSession(in)
-	if !assert.NoError(t, err, "CreateSession should succeed") {
+
+	conference, err := testCreateConference(t, cl, yapcasia())
+	if err != nil {
 		return
 	}
+
+	user, err := testCreateUser(t, cl, johndoe())
+	if err != nil {
+		return
+	}
+
+	in := octav.CreateSessionRequest{
+		ConferenceID: conference.ID,
+		SpeakerID: user.ID,
+		Title: "How To Write A Conference Backend",
+	}
+	res, err := testCreateSession(t, cl, &in)
+	if err != nil {
+		return
+	}
+
+t.Logf("%#v", res)
 	if !assert.NoError(t, validator.HTTPCreateSessionResponse.Validate(res), "Validation should succeed") {
 		return
+	}
+}
+
+func johndoe() *octav.CreateUserRequest {
+	lf := octav.LocalizedFields{}
+	lf.Set("ja", "first_name", "ジョン")
+	lf.Set("ja", "last_name", "ドー")
+	return &octav.CreateUserRequest{
+		FirstName:  "John",
+		LastName:   "Doe",
+		Nickname:   "enigma621",
+		Email:      "john.doe@example.com",
+		TshirtSize: "XL",
+		L10N:       lf,
 	}
 }
 
@@ -227,18 +266,7 @@ func TestCreateUser(t *testing.T) {
 	defer ts.Close()
 
 	cl := client.New(ts.URL)
-	lf := octav.LocalizedFields{}
-	lf.Set("ja", "first_name", "ジョン")
-	lf.Set("ja", "last_name", "ドー")
-	in := octav.CreateUserRequest{
-		FirstName:  "John",
-		LastName:   "Doe",
-		Nickname:   "enigma621",
-		Email:      "john.doe@example.com",
-		TshirtSize: "XL",
-		L10N:       lf,
-	}
-	res, err := testCreateUser(t, cl, in)
+	res, err := testCreateUser(t, cl, johndoe())
 	if err != nil {
 		return
 	}
@@ -359,21 +387,6 @@ func TestListVenues(t *testing.T) {
 		return
 	}
 	if !assert.NoError(t, validator.HTTPListVenuesResponse.Validate(res), "Validation should succeed") {
-		return
-	}
-}
-
-func TestLookupSession(t *testing.T) {
-	ts := httptest.NewServer(octav.New())
-	defer ts.Close()
-
-	cl := client.New(ts.URL)
-	var in map[string]interface{}
-	res, err := cl.LookupSession(in)
-	if !assert.NoError(t, err, "LookupSession should succeed") {
-		return
-	}
-	if !assert.NoError(t, validator.HTTPLookupSessionResponse.Validate(res), "Validation should succeed") {
 		return
 	}
 }

@@ -23,9 +23,14 @@ func httpJSON(w http.ResponseWriter, v interface{}) {
 }
 
 func doCreateConference(ctx context.Context, w http.ResponseWriter, r *http.Request, payload CreateConferenceRequest) {
+	if pdebug.Enabled {
+		g := pdebug.Marker("doCreateConference")
+		defer g.End()
+	}
+
 	c := Conference{
-		Slug: payload.Slug,
-		Title: payload.Title,
+		Slug:     payload.Slug,
+		Title:    payload.Title,
 		SubTitle: payload.SubTitle,
 	}
 
@@ -115,7 +120,49 @@ func doCreateRoom(ctx context.Context, w http.ResponseWriter, r *http.Request, p
 	httpJSON(w, payload)
 }
 
-func doCreateSession(ctx context.Context, w http.ResponseWriter, r *http.Request, payload interface{}) {
+func doCreateSession(ctx context.Context, w http.ResponseWriter, r *http.Request, payload CreateSessionRequest) {
+	v := Session{
+		ConferenceID:      payload.ConferenceID,
+		SpeakerID:         payload.SpeakerID,
+		Title:             payload.Title,
+		Abstract:          payload.Abstract.String,
+		Memo:              payload.Memo.String,
+		Duration:          payload.Duration,
+		MaterialLevel:     payload.MaterialLevel.String,
+		Tags:              payload.Tags,
+		Category:          payload.Category.String,
+		SpokenLanguage:    payload.SpokenLanguage.String,
+		SlideLanguage:     payload.SlideLanguage.String,
+		SlideSubtitles:    payload.SlideSubtitles.String,
+		SlideURL:          payload.SlideURL.String,
+		VideoURL:          payload.VideoURL.String,
+		PhotoPermission:   payload.PhotoPermission.String,
+		VideoPermission:   payload.VideoPermission.String,
+		HasInterpretation: false,
+		Status:            "pending",
+		SortOrder:         0,
+		Confirmed:         false,
+		L10N:              payload.L10N,
+	}
+
+	tx, err := db.Begin()
+	if err != nil {
+		httpError(w, `CreateUser`, http.StatusInternalServerError, err)
+		return
+	}
+	defer tx.AutoRollback()
+
+	if err := v.Create(tx); err != nil {
+		httpError(w, `CreateSession`, http.StatusInternalServerError, err)
+		return
+	}
+
+	if err := tx.Commit(); err != nil {
+		httpError(w, `CreateUser`, http.StatusInternalServerError, err)
+		return
+	}
+
+	httpJSON(w, v)
 }
 
 func doCreateUser(ctx context.Context, w http.ResponseWriter, r *http.Request, payload CreateUserRequest) {
@@ -228,7 +275,7 @@ func doListRooms(ctx context.Context, w http.ResponseWriter, r *http.Request, pa
 	defer tx.AutoRollback()
 
 	rl := RoomList{}
-	if err := rl.LoadForVenue(tx, payload.VenueID, payload.Since, payload.Limit); err != nil {
+	if err := rl.LoadForVenue(tx, payload.VenueID, payload.Since.String, int(payload.Limit.Int)); err != nil {
 		httpError(w, `ListRoom`, http.StatusInternalServerError, err)
 		return
 	}
@@ -345,7 +392,7 @@ func doListVenues(ctx context.Context, w http.ResponseWriter, r *http.Request, p
 	httpJSON(w, vl)
 }
 
-func doLookupSession(ctx context.Context, w http.ResponseWriter, r *http.Request, payload map[string]interface{}) {
+func doLookupSession(ctx context.Context, w http.ResponseWriter, r *http.Request, payload LookupSessionRequest) {
 	tx, err := db.Begin()
 	if err != nil {
 		httpError(w, `LookupSession`, http.StatusInternalServerError, err)
@@ -354,7 +401,7 @@ func doLookupSession(ctx context.Context, w http.ResponseWriter, r *http.Request
 	defer tx.AutoRollback()
 
 	s := Session{}
-	if err := s.Load(tx, payload["id"].(string)); err != nil {
+	if err := s.Load(tx, payload.ID); err != nil {
 		httpError(w, `LookupSession`, http.StatusInternalServerError, err)
 		return
 	}

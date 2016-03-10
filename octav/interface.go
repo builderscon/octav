@@ -1,12 +1,19 @@
 package octav
 
 import (
-	"errors"
 	"sync"
 	"time"
+
+	"github.com/lestrrat/go-jsval"
 )
 
-var ErrInvalidFieldType = errors.New("placeholder error")
+type ErrInvalidJSONFieldType struct {
+	Field string
+}
+
+type ErrInvalidFieldType struct {
+	Field string
+}
 
 type Date struct {
 	Year  int
@@ -38,10 +45,10 @@ type DeleteRoomRequest struct {
 	ID string `json:"id" urlenc:"id"`
 }
 type ListRoomRequest struct {
-	VenueID string `json:"venue_id" urlenc:"venue_id"`
-	Since   string `json:"since" urlenc:"since"`
-	Lang    string `json:"lang" urlenc:"lang"`
-	Limit   int    `json:"limit,omitempty" urlenc:"limit,omitempty"`
+	VenueID string            `json:"venue_id" urlenc:"venue_id"`
+	Since   jsval.MaybeString `json:"since" urlenc:"since"`
+	Lang    jsval.MaybeString `json:"lang" urlenc:"lang"`
+	Limit   jsval.MaybeInt    `json:"limit,omitempty" urlenc:"limit,omitempty"`
 }
 type LookupRoomRequest struct {
 	ID string `json:"id" urlenc:"id"`
@@ -69,14 +76,36 @@ type Session struct {
 	VideoPermission   string          `json:"video_permission"`
 	HasInterpretation bool            `json:"has_interpretation"`
 	Status            string          `json:"status"`
-	SortOrder         int             `json:"sort_order"`
+	SortOrder         int             `json:"-"`
 	Confirmed         bool            `json:"confirmed"`
-	Conference        Conference      `json:"conference"` // only populated for JSON response
-	Room              Room            `json:"room"`       // only populated for JSON response
-	Speaker           User            `json:"speaker"`    // only populated for JSON response
+	Conference        *Conference     `json:"conference"` // only populated for JSON response
+	Room              *Room           `json:"room"`       // only populated for JSON response
+	Speaker           *User           `json:"speaker"`    // only populated for JSON response
 	L10N              LocalizedFields `json:"-"`
 }
 type SessionList []Session
+type CreateSessionRequest struct {
+	ConferenceID    string            `json:"conference_id,omitempty"`
+	SpeakerID       string            `json:"speaker_id,omitempty"`
+	Title           string            `json:"title,omitempty"`
+	Abstract        jsval.MaybeString `json:"abstract,omitempty"`
+	Memo            jsval.MaybeString `json:"memo,omitempty"`
+	Duration        int               `json:"duration,omitempty"`
+	MaterialLevel   jsval.MaybeString `json:"material_level,omitempty"`
+	Tags            []string          `json:"tags,omitempty"`
+	Category        jsval.MaybeString `json:"category,omitempty"`
+	SpokenLanguage  jsval.MaybeString `json:"spoken_language,omitempty"`
+	SlideLanguage   jsval.MaybeString `json:"slide_language,omitempty"`
+	SlideSubtitles  jsval.MaybeString `json:"slide_subtitles,omitempty"`
+	SlideURL        jsval.MaybeString `json:"slide_url,omitempty"`
+	VideoURL        jsval.MaybeString `json:"video_url,omitempty"`
+	PhotoPermission jsval.MaybeString `json:"photo_permission,omitempty"`
+	VideoPermission jsval.MaybeString `json:"video_permission,omitempty"`
+	L10N            LocalizedFields   `json:"-"`
+}
+type LookupSessionRequest struct {
+	ID string `json:"id" urlenc:"id"`
+}
 
 type User struct {
 	ID         string          `json:"id"`
