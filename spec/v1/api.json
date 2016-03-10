@@ -45,9 +45,10 @@
       "enum": ["beginner", "intermediate", "advanced"],
       "default": "beginner"
     },
-    "binary_permission": {
+    "binary_permission_default_allow": {
       "type": "string",
-      "enum": ["allow","disallow"]
+      "enum": ["allow","disallow"],
+      "default": "allow"
     },
     "url": {
       "type": "string",
@@ -204,8 +205,8 @@
         "slide_subtitles": { "$ref": "#/definitions/language" },
         "slide_url": { "$ref": "#/definitions/url" },
         "video_url": { "$ref": "#/definitions/url" },
-        "photo_permission": { "$ref": "#/definitions/binary_permission" },
-        "video_permission": { "$ref": "#/definitions/binary_permission" },
+        "photo_permission": { "$ref": "#/definitions/binary_permission_default_allow" },
+        "video_permission": { "$ref": "#/definitions/binary_permission_default_allow" },
         "has_interpretation": {
           "type": "boolean",
           "default": false
@@ -517,8 +518,8 @@
           "slide_subtitles": { "$ref": "#/definitions/language" },
           "slide_url": { "$ref": "#/definitions/url" },
           "video_url": { "$ref": "#/definitions/url" },
-          "photo_permission": { "$ref": "#/definitions/binary_permission" },
-          "video_permission": { "$ref": "#/definitions/binary_permission" }
+          "photo_permission": { "$ref": "#/definitions/binary_permission_default_allow" },
+          "video_permission": { "$ref": "#/definitions/binary_permission_default_allow" }
         },
         "patternProperties": {
           "title#[a-z]+": { "$ref": "#/definitions/string_i18n" },
@@ -546,6 +547,7 @@
       "rel": "list",
       "schema": {
         "type": "object",
+        "hsup.type": "octav.ListSessionsByConferenceRequest",
         "required": ["conference_id"],
         "properties": {
           "date": { "$ref": "#/definitions/datestr" },

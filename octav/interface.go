@@ -46,9 +46,9 @@ type DeleteRoomRequest struct {
 }
 type ListRoomRequest struct {
 	VenueID string            `json:"venue_id" urlenc:"venue_id"`
-	Since   jsval.MaybeString `json:"since" urlenc:"since"`
-	Lang    jsval.MaybeString `json:"lang" urlenc:"lang"`
-	Limit   jsval.MaybeInt    `json:"limit,omitempty" urlenc:"limit,omitempty"`
+	Since   jsval.MaybeString `json:"since" urlenc:"since,omitempty,string"`
+	Lang    jsval.MaybeString `json:"lang" urlenc:"lang,omitempty,string"`
+	Limit   jsval.MaybeInt    `json:"limit,omitempty" urlenc:"limit,omitempty,int64"`
 }
 type LookupRoomRequest struct {
 	ID string `json:"id" urlenc:"id"`
@@ -145,9 +145,9 @@ type DeleteVenueRequest struct {
 	ID string `json:"id" urlenc:"id"`
 }
 type ListVenueRequest struct {
-	Since string `json:"since" urlenc:"since"`
-	Lang  string `json:"lang" urlenc:"lang"`
-	Limit int    `json:"limit" urlenc:"limit"`
+	Since jsval.MaybeString `json:"since" urlenc:"since,omitempty,string"`
+	Lang  jsval.MaybeString `json:"lang" urlenc:"lang,omitempty,string"`
+	Limit jsval.MaybeInt    `json:"limit" urlenc:"limit,omitempty,int64"`
 }
 type LookupVenueRequest struct {
 	ID string `json:"id" urlenc:"id"`
@@ -173,6 +173,10 @@ type DeleteConferenceRequest struct {
 }
 type LookupConferenceRequest struct {
 	ID string `json:"id" urlenc:"id"`
+}
+type ListSessionsByConferenceRequest struct {
+	ConferenceID string            `json:"conference_id" urlenc:"conference_id"`
+	Date         jsval.MaybeString `json:"date" urlenc:"date,omitempty,string"`
 }
 
 type LocalizedFields struct {

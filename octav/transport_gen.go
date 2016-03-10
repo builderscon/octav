@@ -4,9 +4,11 @@ package octav
 import (
 	"encoding/json"
 	"errors"
+
+	"github.com/lestrrat/go-urlenc"
 )
 
-func (r CreateSessionRequest) MarshalJSON() ([]byte, error) {
+func (r CreateSessionRequest) collectMarshalData() map[string]interface{} {
 	m := make(map[string]interface{})
 	m["conference_id"] = r.ConferenceID
 	m["speaker_id"] = r.SpeakerID
@@ -46,11 +48,25 @@ func (r CreateSessionRequest) MarshalJSON() ([]byte, error) {
 	if r.VideoPermission.Valid() {
 		m["video_permission"] = r.VideoPermission.Value()
 	}
+	return m
+}
+
+func (r CreateSessionRequest) MarshalJSON() ([]byte, error) {
+	m := r.collectMarshalData()
 	buf, err := json.Marshal(m)
 	if err != nil {
 		return nil, err
 	}
 	return marshalJSONWithL10N(buf, r.L10N)
+}
+
+func (r CreateSessionRequest) MarshalURL() ([]byte, error) {
+	m := r.collectMarshalData()
+	buf, err := urlenc.Marshal(m)
+	if err != nil {
+		return nil, err
+	}
+	return marshalURLWithL10N(buf, r.L10N)
 }
 
 func (r *CreateSessionRequest) SetPropValue(s string, v interface{}) error {
@@ -106,4 +122,63 @@ func (r *CreateSessionRequest) SetPropValue(s string, v interface{}) error {
 		return errors.New("unknown column '" + s + "'")
 	}
 	return ErrInvalidFieldType{Field: s}
+}
+
+func (r ListVenueRequest) collectMarshalData() map[string]interface{} {
+	m := make(map[string]interface{})
+	if r.Since.Valid() {
+		m["since"] = r.Since.Value()
+	}
+	if r.Lang.Valid() {
+		m["lang"] = r.Lang.Value()
+	}
+	if r.Limit.Valid() {
+		m["limit"] = r.Limit.Value()
+	}
+	return m
+}
+
+func (r ListVenueRequest) MarshalJSON() ([]byte, error) {
+	m := r.collectMarshalData()
+	buf, err := json.Marshal(m)
+	if err != nil {
+		return nil, err
+	}
+	return buf, nil
+}
+
+func (r ListVenueRequest) MarshalURL() ([]byte, error) {
+	m := r.collectMarshalData()
+	buf, err := urlenc.Marshal(m)
+	if err != nil {
+		return nil, err
+	}
+	return buf, nil
+}
+
+func (r ListSessionsByConferenceRequest) collectMarshalData() map[string]interface{} {
+	m := make(map[string]interface{})
+	m["conference_id"] = r.ConferenceID
+	if r.Date.Valid() {
+		m["date"] = r.Date.Value()
+	}
+	return m
+}
+
+func (r ListSessionsByConferenceRequest) MarshalJSON() ([]byte, error) {
+	m := r.collectMarshalData()
+	buf, err := json.Marshal(m)
+	if err != nil {
+		return nil, err
+	}
+	return buf, nil
+}
+
+func (r ListSessionsByConferenceRequest) MarshalURL() ([]byte, error) {
+	m := r.collectMarshalData()
+	buf, err := urlenc.Marshal(m)
+	if err != nil {
+		return nil, err
+	}
+	return buf, nil
 }

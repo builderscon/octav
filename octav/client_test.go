@@ -1,6 +1,7 @@
 package octav_test
 
 import (
+	"fmt"
 	"net/http/httptest"
 	"testing"
 
@@ -109,7 +110,7 @@ func testDeleteVenue(t *testing.T, cl *client.Client, id string) error {
 func yapcasia() *octav.CreateConferenceRequest {
 	return &octav.CreateConferenceRequest{
 		Title: "YAPC::Asia Tokyo",
-		Slug: "yapcasia",
+		Slug:  "yapcasia",
 	}
 }
 
@@ -233,15 +234,14 @@ func TestCreateSession(t *testing.T) {
 
 	in := octav.CreateSessionRequest{
 		ConferenceID: conference.ID,
-		SpeakerID: user.ID,
-		Title: "How To Write A Conference Backend",
+		SpeakerID:    user.ID,
+		Title:        "How To Write A Conference Backend",
 	}
 	res, err := testCreateSession(t, cl, &in)
 	if err != nil {
 		return
 	}
 
-t.Logf("%#v", res)
 	if !assert.NoError(t, validator.HTTPCreateSessionResponse.Validate(res), "Validation should succeed") {
 		return
 	}
@@ -326,7 +326,7 @@ func TestCreateVenue(t *testing.T) {
 }
 
 type setPropValuer interface {
-  SetPropValue(string, interface{}) error
+	SetPropValue(string, interface{}) error
 }
 
 func TestListRooms(t *testing.T) {
@@ -366,12 +366,40 @@ func TestListSessionsByConference(t *testing.T) {
 	defer ts.Close()
 
 	cl := client.New(ts.URL)
-	var in map[string]interface{}
-	res, err := cl.ListSessionsByConference(in)
+	conference, err := testCreateConference(t, cl, yapcasia())
+	if err != nil {
+		return
+	}
+
+	user, err := testCreateUser(t, cl, johndoe())
+	if err != nil {
+		return
+	}
+
+	for i := 0; i < 10; i++ {
+		sin := octav.CreateSessionRequest{
+			ConferenceID: conference.ID,
+			SpeakerID:    user.ID,
+			Title:        fmt.Sprintf("Title %d", i),
+		}
+		_, err := testCreateSession(t, cl, &sin)
+		if err != nil {
+			return
+		}
+	}
+
+	in := octav.ListSessionsByConferenceRequest{
+		ConferenceID: conference.ID,
+	}
+	res, err := cl.ListSessionsByConference(&in)
 	if !assert.NoError(t, err, "ListSessionsByConference should succeed") {
 		return
 	}
 	if !assert.NoError(t, validator.HTTPListSessionsByConferenceResponse.Validate(res), "Validation should succeed") {
+		return
+	}
+
+	if !assert.Len(t, res, 10, "There should be 10 sessions") {
 		return
 	}
 }

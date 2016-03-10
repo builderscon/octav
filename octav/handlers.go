@@ -384,7 +384,7 @@ func doListVenues(ctx context.Context, w http.ResponseWriter, r *http.Request, p
 	defer tx.AutoRollback()
 
 	vl := VenueList{}
-	if err := vl.Load(tx, payload.Since, payload.Limit); err != nil {
+	if err := vl.Load(tx, payload.Since.String, int(payload.Limit.Int)); err != nil {
 		httpError(w, `ListVenues`, http.StatusInternalServerError, err)
 		return
 	}
@@ -409,10 +409,7 @@ func doLookupSession(ctx context.Context, w http.ResponseWriter, r *http.Request
 	httpJSON(w, s)
 }
 
-func doListSessionsByConference(ctx context.Context, w http.ResponseWriter, r *http.Request, payload map[string]interface{}) {
-	cid := payload["conference_id"].(string)
-	date := payload["date"].(string)
-
+func doListSessionsByConference(ctx context.Context, w http.ResponseWriter, r *http.Request, payload ListSessionsByConferenceRequest) {
 	tx, err := db.Begin()
 	if err != nil {
 		httpError(w, `ListVenuesByConference`, http.StatusInternalServerError, err)
@@ -421,7 +418,7 @@ func doListSessionsByConference(ctx context.Context, w http.ResponseWriter, r *h
 	defer tx.AutoRollback()
 
 	sl := SessionList{}
-	if err := sl.LoadByConference(tx, cid, date); err != nil {
+	if err := sl.LoadByConference(tx, payload.ConferenceID, payload.Date.String); err != nil {
 		httpError(w, `ListVenuesByConference`, http.StatusInternalServerError, err)
 		return
 	}

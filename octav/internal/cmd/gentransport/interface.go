@@ -6,6 +6,7 @@ type Scanner interface {
 
 type StructField struct {
 	JSONName string
+	URLName string
 	L10N     bool
 	Maybe    bool
 	Name     string
