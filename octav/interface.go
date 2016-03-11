@@ -85,14 +85,14 @@ type Session struct {
 }
 type SessionList []Session
 type CreateSessionRequest struct {
-	ConferenceID    string            `json:"conference_id,omitempty"`
-	SpeakerID       string            `json:"speaker_id,omitempty"`
-	Title           string            `json:"title,omitempty"`
+	ConferenceID    jsval.MaybeString `json:"conference_id,omitempty"`
+	SpeakerID       jsval.MaybeString `json:"speaker_id,omitempty"`
+	Title           jsval.MaybeString `json:"title,omitempty"`
 	Abstract        jsval.MaybeString `json:"abstract,omitempty"`
 	Memo            jsval.MaybeString `json:"memo,omitempty"`
-	Duration        int               `json:"duration,omitempty"`
+	Duration        jsval.MaybeInt    `json:"duration,omitempty"`
 	MaterialLevel   jsval.MaybeString `json:"material_level,omitempty"`
-	Tags            []string          `json:"tags,omitempty"`
+	Tags            jsval.MaybeString `json:"tags,omitempty"`
 	Category        jsval.MaybeString `json:"category,omitempty"`
 	SpokenLanguage  jsval.MaybeString `json:"spoken_language,omitempty"`
 	SlideLanguage   jsval.MaybeString `json:"slide_language,omitempty"`

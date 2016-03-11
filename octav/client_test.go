@@ -261,11 +261,13 @@ func TestCreateSession(t *testing.T) {
 		return
 	}
 
-	in := octav.CreateSessionRequest{
-		ConferenceID: conference.ID,
-		SpeakerID:    user.ID,
-		Title:        "How To Write A Conference Backend",
-	}
+	in := octav.CreateSessionRequest{}
+	in.ConferenceID.Set(conference.ID)
+	in.SpeakerID.Set(user.ID)
+	in.Title.Set("How To Write A Conference Backend")
+	in.Duration.Set(60)
+	in.Abstract.Set("Use lots of reflection and generate lots of code")
+	//	json.NewEncoder(os.Stdout).Encode(in)
 	res, err := testCreateSession(t, cl, &in)
 	if err != nil {
 		return
@@ -406,11 +408,12 @@ func TestListSessionsByConference(t *testing.T) {
 	}
 
 	for i := 0; i < 10; i++ {
-		sin := octav.CreateSessionRequest{
-			ConferenceID: conference.ID,
-			SpeakerID:    user.ID,
-			Title:        fmt.Sprintf("Title %d", i),
-		}
+		sin := octav.CreateSessionRequest{}
+		sin.ConferenceID.Set(conference.ID)
+		sin.SpeakerID.Set(user.ID)
+		sin.Title.Set(fmt.Sprintf("Title %d", i))
+		sin.Duration.Set(60)
+		sin.Abstract.Set("Use lots of reflection and generate lots of code")
 		_, err := testCreateSession(t, cl, &sin)
 		if err != nil {
 			return

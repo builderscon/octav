@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"net/http"
+	"strings"
 
 	"github.com/builderscon/octav/octav/db"
 	"github.com/lestrrat/go-pdebug"
@@ -166,14 +167,13 @@ func doCreateRoom(ctx context.Context, w http.ResponseWriter, r *http.Request, p
 
 func doCreateSession(ctx context.Context, w http.ResponseWriter, r *http.Request, payload CreateSessionRequest) {
 	v := Session{
-		ConferenceID:      payload.ConferenceID,
-		SpeakerID:         payload.SpeakerID,
-		Title:             payload.Title,
+		ConferenceID:      payload.ConferenceID.String,
+		SpeakerID:         payload.SpeakerID.String,
+		Title:             payload.Title.String,
 		Abstract:          payload.Abstract.String,
 		Memo:              payload.Memo.String,
-		Duration:          payload.Duration,
+		Duration:          int(payload.Duration.Int),
 		MaterialLevel:     payload.MaterialLevel.String,
-		Tags:              payload.Tags,
 		Category:          payload.Category.String,
 		SpokenLanguage:    payload.SpokenLanguage.String,
 		SlideLanguage:     payload.SlideLanguage.String,
@@ -187,6 +187,10 @@ func doCreateSession(ctx context.Context, w http.ResponseWriter, r *http.Request
 		SortOrder:         0,
 		Confirmed:         false,
 		L10N:              payload.L10N,
+	}
+
+	if payload.Tags.Valid() {
+		v.Tags = strings.Split(payload.Tags.String, ",")
 	}
 
 	tx, err := db.Begin()

@@ -3,6 +3,7 @@ package octav
 import (
 	"database/sql"
 	"encoding/json"
+	"reflect"
 	"strings"
 	"time"
 
@@ -235,6 +236,7 @@ func (v *Session) UnmarshalJSON(data []byte) (err error) {
 			v.Duration = int(jv.(float64))
 			delete(m, "duration")
 		default:
+			pdebug.Printf("%s", reflect.ValueOf(jv).Type())
 			return ErrInvalidJSONFieldType{Field: "duration"}
 		}
 	}

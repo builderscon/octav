@@ -525,7 +525,7 @@
       "schema": {
         "type": "object",
         "hsup.type": "octav.CreateSessionRequest",
-        "required": ["conference_id", "speaker_id", "title"],
+        "required": ["conference_id", "speaker_id", "title", "abstract", "duration"],
         "properties": {
           "conference_id": { "$ref": "#/definitions/uuid" },
           "speaker_id": { "$ref": "#/definitions/uuid" },
@@ -534,7 +534,7 @@
           "memo": { "type": "string" },
           "duration": { "$ref": "#/definitions/duration" },
           "material_level": { "$ref": "#/definitions/material_level" },
-          "tag": { "$ref": "#/definitions/tag_array" },
+          "tags": { "type": "string" },
           "category": { "type": "string" },
           "spoken_language": { "$ref": "#/definitions/language" },
           "slide_language": { "$ref": "#/definitions/language" },

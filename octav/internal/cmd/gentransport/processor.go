@@ -12,6 +12,7 @@ import (
 	"os"
 	"path/filepath"
 	"reflect"
+	"regexp"
 	"strconv"
 	"strings"
 	"unicode"
@@ -201,15 +202,29 @@ func (p *Processor) ProcessStruct(buf *bytes.Buffer, s Struct) error {
 	buf.WriteString("\nreturn err")
 	buf.WriteString("\n}")
 
+	rx := regexp.MustCompile(`^(u?int\d*|float(32|64))`)
 	for _, f := range s.Fields {
 		fmt.Fprintf(buf, "\nif jv, ok := m[%s]; ok {", strconv.Quote(f.JSONName))
 		if f.Maybe {
-			fmt.Fprintf(buf, "\nr.%s.Set(jv)", f.Name)
+			fmt.Fprintf(buf, "\nif err := r.%s.Set(jv); err != nil {", f.Name)
+			fmt.Fprintf(buf, "\n" + `return errors.New("set field %s failed: " + err.Error())`, f.Name)
+			buf.WriteString("\n}")
 			fmt.Fprintf(buf, "\ndelete(m, %s)", strconv.Quote(f.JSONName))
 		} else {
 			buf.WriteString("\nswitch jv.(type) {")
-			fmt.Fprintf(buf, "\ncase %s:", f.Type)
-			fmt.Fprintf(buf, "\nr.%s = jv.(%s)", f.Name, f.Type)
+			// XXX dirty hack. this should be fixed
+			convert := ""
+			typ := f.Type
+			if rx.MatchString(f.Type) {
+				convert = f.Type
+				typ = "float64"
+			}
+			fmt.Fprintf(buf, "\ncase %s:", typ)
+			if convert == "" {
+				fmt.Fprintf(buf, "\nr.%s = jv.(%s)", f.Name, typ)
+			} else {
+				fmt.Fprintf(buf, "\nr.%s = %s(jv.(%s))", f.Name, convert, typ)
+			}
 			fmt.Fprintf(buf, "\ndelete(m, %s)", strconv.Quote(f.JSONName))
 			buf.WriteString("\ndefault:")
 			fmt.Fprintf(buf, "\nreturn ErrInvalidJSONFieldType{Field:%s}", strconv.Quote(f.JSONName))

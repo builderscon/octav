@@ -10,20 +10,30 @@ import (
 
 func (r CreateSessionRequest) collectMarshalData() map[string]interface{} {
 	m := make(map[string]interface{})
-	m["conference_id"] = r.ConferenceID
-	m["speaker_id"] = r.SpeakerID
-	m["title"] = r.Title
+	if r.ConferenceID.Valid() {
+		m["conference_id"] = r.ConferenceID.Value()
+	}
+	if r.SpeakerID.Valid() {
+		m["speaker_id"] = r.SpeakerID.Value()
+	}
+	if r.Title.Valid() {
+		m["title"] = r.Title.Value()
+	}
 	if r.Abstract.Valid() {
 		m["abstract"] = r.Abstract.Value()
 	}
 	if r.Memo.Valid() {
 		m["memo"] = r.Memo.Value()
 	}
-	m["duration"] = r.Duration
+	if r.Duration.Valid() {
+		m["duration"] = r.Duration.Value()
+	}
 	if r.MaterialLevel.Valid() {
 		m["material_level"] = r.MaterialLevel.Value()
 	}
-	m["tags"] = r.Tags
+	if r.Tags.Valid() {
+		m["tags"] = r.Tags.Value()
+	}
 	if r.Category.Valid() {
 		m["category"] = r.Category.Value()
 	}
@@ -75,92 +85,99 @@ func (r *CreateSessionRequest) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	if jv, ok := m["conference_id"]; ok {
-		switch jv.(type) {
-		case string:
-			r.ConferenceID = jv.(string)
-			delete(m, "conference_id")
-		default:
-			return ErrInvalidJSONFieldType{Field: "conference_id"}
+		if err := r.ConferenceID.Set(jv); err != nil {
+			return errors.New("set field ConferenceID failed: " + err.Error())
 		}
+		delete(m, "conference_id")
 	}
 	if jv, ok := m["speaker_id"]; ok {
-		switch jv.(type) {
-		case string:
-			r.SpeakerID = jv.(string)
-			delete(m, "speaker_id")
-		default:
-			return ErrInvalidJSONFieldType{Field: "speaker_id"}
+		if err := r.SpeakerID.Set(jv); err != nil {
+			return errors.New("set field SpeakerID failed: " + err.Error())
 		}
+		delete(m, "speaker_id")
 	}
 	if jv, ok := m["title"]; ok {
-		switch jv.(type) {
-		case string:
-			r.Title = jv.(string)
-			delete(m, "title")
-		default:
-			return ErrInvalidJSONFieldType{Field: "title"}
+		if err := r.Title.Set(jv); err != nil {
+			return errors.New("set field Title failed: " + err.Error())
 		}
+		delete(m, "title")
 	}
 	if jv, ok := m["abstract"]; ok {
-		r.Abstract.Set(jv)
+		if err := r.Abstract.Set(jv); err != nil {
+			return errors.New("set field Abstract failed: " + err.Error())
+		}
 		delete(m, "abstract")
 	}
 	if jv, ok := m["memo"]; ok {
-		r.Memo.Set(jv)
+		if err := r.Memo.Set(jv); err != nil {
+			return errors.New("set field Memo failed: " + err.Error())
+		}
 		delete(m, "memo")
 	}
 	if jv, ok := m["duration"]; ok {
-		switch jv.(type) {
-		case int:
-			r.Duration = jv.(int)
-			delete(m, "duration")
-		default:
-			return ErrInvalidJSONFieldType{Field: "duration"}
+		if err := r.Duration.Set(jv); err != nil {
+			return errors.New("set field Duration failed: " + err.Error())
 		}
+		delete(m, "duration")
 	}
 	if jv, ok := m["material_level"]; ok {
-		r.MaterialLevel.Set(jv)
+		if err := r.MaterialLevel.Set(jv); err != nil {
+			return errors.New("set field MaterialLevel failed: " + err.Error())
+		}
 		delete(m, "material_level")
 	}
 	if jv, ok := m["tags"]; ok {
-		switch jv.(type) {
-		case []string:
-			r.Tags = jv.([]string)
-			delete(m, "tags")
-		default:
-			return ErrInvalidJSONFieldType{Field: "tags"}
+		if err := r.Tags.Set(jv); err != nil {
+			return errors.New("set field Tags failed: " + err.Error())
 		}
+		delete(m, "tags")
 	}
 	if jv, ok := m["category"]; ok {
-		r.Category.Set(jv)
+		if err := r.Category.Set(jv); err != nil {
+			return errors.New("set field Category failed: " + err.Error())
+		}
 		delete(m, "category")
 	}
 	if jv, ok := m["spoken_language"]; ok {
-		r.SpokenLanguage.Set(jv)
+		if err := r.SpokenLanguage.Set(jv); err != nil {
+			return errors.New("set field SpokenLanguage failed: " + err.Error())
+		}
 		delete(m, "spoken_language")
 	}
 	if jv, ok := m["slide_language"]; ok {
-		r.SlideLanguage.Set(jv)
+		if err := r.SlideLanguage.Set(jv); err != nil {
+			return errors.New("set field SlideLanguage failed: " + err.Error())
+		}
 		delete(m, "slide_language")
 	}
 	if jv, ok := m["slide_subtitles"]; ok {
-		r.SlideSubtitles.Set(jv)
+		if err := r.SlideSubtitles.Set(jv); err != nil {
+			return errors.New("set field SlideSubtitles failed: " + err.Error())
+		}
 		delete(m, "slide_subtitles")
 	}
 	if jv, ok := m["slide_url"]; ok {
-		r.SlideURL.Set(jv)
+		if err := r.SlideURL.Set(jv); err != nil {
+			return errors.New("set field SlideURL failed: " + err.Error())
+		}
 		delete(m, "slide_url")
 	}
 	if jv, ok := m["video_url"]; ok {
-		r.VideoURL.Set(jv)
+		if err := r.VideoURL.Set(jv); err != nil {
+			return errors.New("set field VideoURL failed: " + err.Error())
+		}
 		delete(m, "video_url")
 	}
 	if jv, ok := m["photo_permission"]; ok {
-		r.PhotoPermission.Set(jv)
+		if err := r.PhotoPermission.Set(jv); err != nil {
+			return errors.New("set field PhotoPermission failed: " + err.Error())
+		}
 		delete(m, "photo_permission")
 	}
 	if jv, ok := m["video_permission"]; ok {
-		r.VideoPermission.Set(jv)
+		if err := r.VideoPermission.Set(jv); err != nil {
+			return errors.New("set field VideoPermission failed: " + err.Error())
+		}
 		delete(m, "video_permission")
 	}
 	if err := ExtractL10NFields(m, &r.L10N, []string{"conference_id", "speaker_id", "title", "abstract", "memo", "duration", "material_level", "tags", "category", "spoken_language", "slide_language", "slide_subtitles", "slide_url", "video_url", "photo_permission", "video_permission"}); err != nil {
@@ -177,36 +194,21 @@ func (r *CreateSessionRequest) GetPropNames() ([]string, error) {
 func (r *CreateSessionRequest) SetPropValue(s string, v interface{}) error {
 	switch s {
 	case "conference_id":
-		if jv, ok := v.(string); ok {
-			r.ConferenceID = jv
-			return nil
-		}
+		return r.ConferenceID.Set(v)
 	case "speaker_id":
-		if jv, ok := v.(string); ok {
-			r.SpeakerID = jv
-			return nil
-		}
+		return r.SpeakerID.Set(v)
 	case "title":
-		if jv, ok := v.(string); ok {
-			r.Title = jv
-			return nil
-		}
+		return r.Title.Set(v)
 	case "abstract":
 		return r.Abstract.Set(v)
 	case "memo":
 		return r.Memo.Set(v)
 	case "duration":
-		if jv, ok := v.(int); ok {
-			r.Duration = jv
-			return nil
-		}
+		return r.Duration.Set(v)
 	case "material_level":
 		return r.MaterialLevel.Set(v)
 	case "tags":
-		if jv, ok := v.([]string); ok {
-			r.Tags = jv
-			return nil
-		}
+		return r.Tags.Set(v)
 	case "category":
 		return r.Category.Set(v)
 	case "spoken_language":
@@ -267,15 +269,21 @@ func (r *ListVenueRequest) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	if jv, ok := m["since"]; ok {
-		r.Since.Set(jv)
+		if err := r.Since.Set(jv); err != nil {
+			return errors.New("set field Since failed: " + err.Error())
+		}
 		delete(m, "since")
 	}
 	if jv, ok := m["lang"]; ok {
-		r.Lang.Set(jv)
+		if err := r.Lang.Set(jv); err != nil {
+			return errors.New("set field Lang failed: " + err.Error())
+		}
 		delete(m, "lang")
 	}
 	if jv, ok := m["limit"]; ok {
-		r.Limit.Set(jv)
+		if err := r.Limit.Set(jv); err != nil {
+			return errors.New("set field Limit failed: " + err.Error())
+		}
 		delete(m, "limit")
 	}
 	return nil
@@ -329,15 +337,21 @@ func (r *UpdateConferenceRequest) UnmarshalJSON(data []byte) error {
 		}
 	}
 	if jv, ok := m["title"]; ok {
-		r.Title.Set(jv)
+		if err := r.Title.Set(jv); err != nil {
+			return errors.New("set field Title failed: " + err.Error())
+		}
 		delete(m, "title")
 	}
 	if jv, ok := m["sub_title"]; ok {
-		r.SubTitle.Set(jv)
+		if err := r.SubTitle.Set(jv); err != nil {
+			return errors.New("set field SubTitle failed: " + err.Error())
+		}
 		delete(m, "sub_title")
 	}
 	if jv, ok := m["slug"]; ok {
-		r.Slug.Set(jv)
+		if err := r.Slug.Set(jv); err != nil {
+			return errors.New("set field Slug failed: " + err.Error())
+		}
 		delete(m, "slug")
 	}
 	if err := ExtractL10NFields(m, &r.L10N, []string{"id", "title", "sub_title", "slug"}); err != nil {
@@ -412,7 +426,9 @@ func (r *ListSessionsByConferenceRequest) UnmarshalJSON(data []byte) error {
 		}
 	}
 	if jv, ok := m["date"]; ok {
-		r.Date.Set(jv)
+		if err := r.Date.Set(jv); err != nil {
+			return errors.New("set field Date failed: " + err.Error())
+		}
 		delete(m, "date")
 	}
 	return nil
