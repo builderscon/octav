@@ -34,7 +34,7 @@ generate: build_internal_cmd
 	@echo "go generate ./..."
 	@PATH=$(CURDIR)/_internal_bin:$(PATH) go generate ./...
 
-test: generate
+test: generate buildspec
 	$(GO_TEST_CMD) ./...
 
 $(CURDIR)/_bin/octav: cmd/octav/octav.go $(SRC_FILES)
