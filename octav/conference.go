@@ -42,11 +42,13 @@ func (v Conference) MarshalJSON() ([]byte, error) {
 	}
 	return marshalJSONWithL10N(buf, v.L10N)
 }
+
 func (v *Conference) UnmarshalJSON(data []byte) error {
 	m := make(map[string]interface{})
 	if err := json.Unmarshal(data, &m); err != nil {
 		return err
 	}
+
 	if jv, ok := m["id"]; ok {
 		switch jv.(type) {
 		case string:
@@ -82,6 +84,9 @@ func (v *Conference) UnmarshalJSON(data []byte) error {
 		default:
 			return ErrInvalidJSONFieldType{Field:"slug"}
 		}
+	}
+	if err := ExtractL10NFields(m, &v.L10N, []string{"title", "subtitle"}); err != nil {
+		return err
 	}
 	return nil
 }
@@ -150,6 +155,30 @@ func (v Conference) ToRow(vdb *db.Conference) error {
 	vdb.SubTitle.Valid = true
 	vdb.SubTitle.String = v.SubTitle
 	return nil
+}
+
+func (v *Conference) Update(tx *db.Tx) (err error) {
+	if pdebug.Enabled {
+		g := pdebug.Marker("Conference.Update (%s)", v.ID).BindError(&err)
+		defer g.End()
+	}
+
+	vdb := db.Conference{}
+	v.ToRow(&vdb)
+	if err := vdb.Update(tx); err != nil {
+		return err
+	}
+
+	return v.L10N.Foreach(func(l, k, x string) error {
+		ls := db.LocalizedString{
+			ParentType: "Conference",
+			ParentID: v.ID,
+			Language: l,
+			Name: k,
+			Localized: x,
+		}
+		return ls.Upsert(tx)
+	})
 }
 
 func (v *Conference) Delete(tx *db.Tx) error {

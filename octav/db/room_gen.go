@@ -43,6 +43,18 @@ func (r *Room) Create(tx *Tx) error {
 	return nil
 }
 
+func (r Room) Update(tx *Tx) error {
+	if r.OID != 0 {
+		_, err := tx.Exec(`UPDATE `+RoomTable+` SET eid = ?, venue_id = ?, name = ?, capacity = ? WHERE oid = ?`, r.EID, r.VenueID, r.Name, r.Capacity, r.OID)
+		return err
+	}
+	if r.EID != "" {
+		_, err := tx.Exec(`UPDATE `+RoomTable+` SET venue_id = ?, name = ?, capacity = ? WHERE eid = ?`, r.VenueID, r.Name, r.Capacity, r.EID)
+		return err
+	}
+	return errors.New("either OID/EID must be filled")
+}
+
 func (r Room) Delete(tx *Tx) error {
 	if r.OID != 0 {
 		_, err := tx.Exec(`DELETE FROM `+RoomTable+` WHERE oid = ?`, r.OID)

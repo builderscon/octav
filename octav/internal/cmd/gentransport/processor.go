@@ -179,7 +179,8 @@ func (p *Processor) ProcessStruct(buf *bytes.Buffer, s Struct) error {
 	buf.WriteString("\nreturn m")
 	buf.WriteString("\n}")
 
-	for prefix, method := range data {
+	for _, prefix := range []string{"json", "urlenc"} {
+		method := data[prefix]
 		fmt.Fprintf(buf, "\n\nfunc (r %s) Marshal%s() ([]byte, error) {", s.Name, method)
 		buf.WriteString("\nm := r.collectMarshalData()")
 		fmt.Fprintf(buf, "\nbuf, err := %s.Marshal(m)", prefix)
@@ -194,7 +195,56 @@ func (p *Processor) ProcessStruct(buf *bytes.Buffer, s Struct) error {
 		buf.WriteString("\n}")
 	}
 
+	fmt.Fprintf(buf, "\n\nfunc (r *%s) UnmarshalJSON(data []byte) error {", s.Name)
+	buf.WriteString("\nm := make(map[string]interface{})")
+	buf.WriteString("\nif err := json.Unmarshal(data, &m); err != nil {")
+	buf.WriteString("\nreturn err")
+	buf.WriteString("\n}")
+
+	for _, f := range s.Fields {
+		fmt.Fprintf(buf, "\nif jv, ok := m[%s]; ok {", strconv.Quote(f.JSONName))
+		if f.Maybe {
+			fmt.Fprintf(buf, "\nr.%s.Set(jv)", f.Name)
+			fmt.Fprintf(buf, "\ndelete(m, %s)", strconv.Quote(f.JSONName))
+		} else {
+			buf.WriteString("\nswitch jv.(type) {")
+			fmt.Fprintf(buf, "\ncase %s:", f.Type)
+			fmt.Fprintf(buf, "\nr.%s = jv.(%s)", f.Name, f.Type)
+			fmt.Fprintf(buf, "\ndelete(m, %s)", strconv.Quote(f.JSONName))
+			buf.WriteString("\ndefault:")
+			fmt.Fprintf(buf, "\nreturn ErrInvalidJSONFieldType{Field:%s}", strconv.Quote(f.JSONName))
+			buf.WriteString("\n}")
+		}
+		buf.WriteString("\n}")
+	}
 	if s.HasL10N {
+		buf.WriteString("\nif err := ExtractL10NFields(m, &r.L10N, []string{")
+		for i, f := range s.Fields {
+			buf.WriteString(strconv.Quote(f.JSONName))
+			if i != len(s.Fields)-1 {
+				buf.WriteString(", ")
+			}
+		}
+		buf.WriteString("}); err != nil {")
+		buf.WriteString("\nreturn err")
+		buf.WriteString("\n}")
+	}
+	buf.WriteString("\nreturn nil")
+	buf.WriteString("\n}")
+
+	if s.HasL10N {
+		fmt.Fprintf(buf, "\n\nfunc (r *%s) GetPropNames() ([]string, error) {", s.Name)
+		buf.WriteString("\nl, _ := r.L10N.GetPropNames()")
+		buf.WriteString("\nreturn append(l, ")
+		for i, f := range s.Fields {
+			buf.WriteString(strconv.Quote(f.JSONName))
+			if i != len(s.Fields)-1 {
+				buf.WriteString(", ")
+			}
+		}
+		buf.WriteString("), nil")
+		buf.WriteString("\n}")
+
 		fmt.Fprintf(buf, "\n\nfunc (r *%s) SetPropValue(s string, v interface{}) error {", s.Name)
 		buf.WriteString("\nswitch s {")
 		for _, f := range s.Fields {

@@ -123,11 +123,19 @@ func testCreateConference(t *testing.T, cl *client.Client, in *octav.CreateConfe
 }
 
 func testLookupConference(t *testing.T, cl *client.Client, id string) (*octav.Conference, error) {
-	venue, err := cl.LookupConference(&octav.LookupConferenceRequest{ID: id})
+	conference, err := cl.LookupConference(&octav.LookupConferenceRequest{ID: id})
 	if !assert.NoError(t, err, "LookupConference succeeds") {
 		return nil, err
 	}
-	return venue, nil
+	return conference, nil
+}
+
+func testUpdateConference(t *testing.T, cl *client.Client, in *octav.UpdateConferenceRequest) error {
+	err := cl.UpdateConference(in)
+	if !assert.NoError(t, err, "UpdateConference succeeds") {
+		return err
+	}
+	return nil
 }
 
 func testDeleteConference(t *testing.T, cl *client.Client, id string) error {
@@ -138,7 +146,7 @@ func testDeleteConference(t *testing.T, cl *client.Client, id string) error {
 	return err
 }
 
-func TestCreateConference(t *testing.T) {
+func TestConferenceCRUD(t *testing.T) {
 	ts := httptest.NewServer(octav.New())
 	defer ts.Close()
 
@@ -158,6 +166,27 @@ func TestCreateConference(t *testing.T) {
 	}
 
 	if !assert.Equal(t, res2, res, "LookupConference is the same as the conference created") {
+		return
+	}
+
+	in := octav.UpdateConferenceRequest{ID: res.ID}
+	in.SubTitle.Set("Big Bang!")
+	in.L10N.Set("ja", "title", "ヤップシー エイジア")
+	if err := testUpdateConference(t, cl, &in); err != nil {
+		return
+	}
+
+	res3, err := testLookupConference(t, cl, res.ID)
+	if err != nil {
+		return
+	}
+
+	if !assert.Equal(t, res3.SubTitle, "Big Bang!", "Conference.SubTitle is the same as the conference updated") {
+		return
+	}
+
+	jatitle, _ := res3.L10N.Get("ja", "title")
+	if !assert.Equal(t, jatitle, "ヤップシー エイジア", "Conference.title#ja is the same as the conference updated") {
 		return
 	}
 

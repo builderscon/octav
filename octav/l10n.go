@@ -110,7 +110,7 @@ func (lf LocalizedFields) Get(lang, key string) (string, bool) {
 	return v, ok
 }
 
-func (lf *LocalizedFields) Set(lang, key, value string) {
+func (lf *LocalizedFields) Set(lang, key, value string) error {
 	lf.lock.Lock()
 	defer lf.lock.Unlock()
 
@@ -124,6 +124,8 @@ func (lf *LocalizedFields) Set(lang, key, value string) {
 		lf.fields[lang] = kv
 	}
 	kv[key] = value
+
+	return nil
 }
 
 func (lf *LocalizedFields) CreateLocalizedStrings(tx *db.Tx, parentType, parentID string) error {

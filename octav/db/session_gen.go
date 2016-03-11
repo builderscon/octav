@@ -43,6 +43,18 @@ func (s *Session) Create(tx *Tx) error {
 	return nil
 }
 
+func (s Session) Update(tx *Tx) error {
+	if s.OID != 0 {
+		_, err := tx.Exec(`UPDATE `+SessionTable+` SET eid = ?, conference_id = ?, room_id = ?, speaker_id = ?, title = ?, abstract = ?, memo = ?, starts_on = ?, duration = ?, material_level = ?, tags = ?, category = ?, spoken_language = ?, slide_language = ?, slide_subtitles = ?, slide_url = ?, video_url = ?, photo_permission = ?, video_permission = ?, has_interpretation = ?, status = ?, sort_order = ?, confirmed = ? WHERE oid = ?`, s.EID, s.ConferenceID, s.RoomID, s.SpeakerID, s.Title, s.Abstract, s.Memo, s.StartsOn, s.Duration, s.MaterialLevel, s.Tags, s.Category, s.SpokenLanguage, s.SlideLanguage, s.SlideSubtitles, s.SlideURL, s.VideoURL, s.PhotoPermission, s.VideoPermission, s.HasInterpretation, s.Status, s.SortOrder, s.Confirmed, s.OID)
+		return err
+	}
+	if s.EID != "" {
+		_, err := tx.Exec(`UPDATE `+SessionTable+` SET conference_id = ?, room_id = ?, speaker_id = ?, title = ?, abstract = ?, memo = ?, starts_on = ?, duration = ?, material_level = ?, tags = ?, category = ?, spoken_language = ?, slide_language = ?, slide_subtitles = ?, slide_url = ?, video_url = ?, photo_permission = ?, video_permission = ?, has_interpretation = ?, status = ?, sort_order = ?, confirmed = ? WHERE eid = ?`, s.ConferenceID, s.RoomID, s.SpeakerID, s.Title, s.Abstract, s.Memo, s.StartsOn, s.Duration, s.MaterialLevel, s.Tags, s.Category, s.SpokenLanguage, s.SlideLanguage, s.SlideSubtitles, s.SlideURL, s.VideoURL, s.PhotoPermission, s.VideoPermission, s.HasInterpretation, s.Status, s.SortOrder, s.Confirmed, s.EID)
+		return err
+	}
+	return errors.New("either OID/EID must be filled")
+}
+
 func (s Session) Delete(tx *Tx) error {
 	if s.OID != 0 {
 		_, err := tx.Exec(`DELETE FROM `+SessionTable+` WHERE oid = ?`, s.OID)

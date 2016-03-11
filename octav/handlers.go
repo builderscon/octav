@@ -74,6 +74,50 @@ func doLookupConference(ctx context.Context, w http.ResponseWriter, r *http.Requ
 	httpJSON(w, s)
 }
 
+func doUpdateConference(ctx context.Context, w http.ResponseWriter, r *http.Request, payload UpdateConferenceRequest) {
+	if pdebug.Enabled {
+		g := pdebug.Marker("doDeleteConference")
+		defer g.End()
+	}
+
+	tx, err := db.Begin()
+	if err != nil {
+		httpError(w, `UpdateConference`, http.StatusInternalServerError, err)
+		return
+	}
+	defer tx.AutoRollback()
+
+	v := Conference{}
+	if err := v.Load(tx, payload.ID); err != nil {
+		httpError(w, `UpdateConference`, http.StatusInternalServerError, err)
+		return
+	}
+
+	if payload.Title.Valid() {
+		v.Title = payload.Title.String
+	}
+
+	if payload.SubTitle.Valid() {
+		v.SubTitle = payload.SubTitle.String
+	}
+
+	if payload.Slug.Valid() {
+		v.Slug = payload.Slug.String
+	}
+
+	payload.L10N.Foreach(v.L10N.Set)
+
+	if err := v.Update(tx); err != nil {
+		httpError(w, `UpdateConference`, http.StatusInternalServerError, err)
+		return
+	}
+	if err := tx.Commit(); err != nil {
+		httpError(w, `UpdateConference`, http.StatusInternalServerError, err)
+		return
+	}
+	httpJSON(w, map[string]string{"status": "success"})
+}
+
 func doDeleteConference(ctx context.Context, w http.ResponseWriter, r *http.Request, payload DeleteConferenceRequest) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("doDeleteConference")

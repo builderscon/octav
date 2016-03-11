@@ -168,6 +168,14 @@ type CreateConferenceRequest struct {
 	Slug     string          `json:"slug"`
 	L10N     LocalizedFields `json:"-"`
 }
+type UpdateConferenceRequest struct {
+	ID       string            `json:"id"`
+	Title    jsval.MaybeString `json:"title,omitempty"`
+	SubTitle jsval.MaybeString `json:"sub_title,omitempty"`
+	Slug     jsval.MaybeString `json:"slug,omitempty"`
+	// TODO dates
+	L10N LocalizedFields `json:"-"`
+}
 type DeleteConferenceRequest struct {
 	ID string `json:"id" urlenc:"id"`
 }

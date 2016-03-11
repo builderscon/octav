@@ -43,6 +43,18 @@ func (c *Conference) Create(tx *Tx) error {
 	return nil
 }
 
+func (c Conference) Update(tx *Tx) error {
+	if c.OID != 0 {
+		_, err := tx.Exec(`UPDATE `+ConferenceTable+` SET eid = ?, slug = ?, title = ?, sub_title = ? WHERE oid = ?`, c.EID, c.Slug, c.Title, c.SubTitle, c.OID)
+		return err
+	}
+	if c.EID != "" {
+		_, err := tx.Exec(`UPDATE `+ConferenceTable+` SET slug = ?, title = ?, sub_title = ? WHERE eid = ?`, c.Slug, c.Title, c.SubTitle, c.EID)
+		return err
+	}
+	return errors.New("either OID/EID must be filled")
+}
+
 func (c Conference) Delete(tx *Tx) error {
 	if c.OID != 0 {
 		_, err := tx.Exec(`DELETE FROM `+ConferenceTable+` WHERE oid = ?`, c.OID)

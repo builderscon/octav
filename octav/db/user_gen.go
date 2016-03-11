@@ -43,6 +43,18 @@ func (u *User) Create(tx *Tx) error {
 	return nil
 }
 
+func (u User) Update(tx *Tx) error {
+	if u.OID != 0 {
+		_, err := tx.Exec(`UPDATE `+UserTable+` SET eid = ?, first_name = ?, last_name = ?, nickname = ?, email = ?, tshirt_size = ? WHERE oid = ?`, u.EID, u.FirstName, u.LastName, u.Nickname, u.Email, u.TshirtSize, u.OID)
+		return err
+	}
+	if u.EID != "" {
+		_, err := tx.Exec(`UPDATE `+UserTable+` SET first_name = ?, last_name = ?, nickname = ?, email = ?, tshirt_size = ? WHERE eid = ?`, u.FirstName, u.LastName, u.Nickname, u.Email, u.TshirtSize, u.EID)
+		return err
+	}
+	return errors.New("either OID/EID must be filled")
+}
+
 func (u User) Delete(tx *Tx) error {
 	if u.OID != 0 {
 		_, err := tx.Exec(`DELETE FROM `+UserTable+` WHERE oid = ?`, u.OID)

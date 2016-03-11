@@ -28,6 +28,14 @@ func (l *LocalizedString) Create(tx *Tx) error {
 	return nil
 }
 
+func (l LocalizedString) Update(tx *Tx) error {
+	if l.OID != 0 {
+		_, err := tx.Exec(`UPDATE `+LocalizedStringTable+` SET parent_id = ?, parent_type = ?, name = ?, language = ?, localized = ? WHERE oid = ?`, l.ParentID, l.ParentType, l.Name, l.Language, l.Localized, l.OID)
+		return err
+	}
+	return errors.New("either OID/EID must be filled")
+}
+
 func (l LocalizedString) Delete(tx *Tx) error {
 	if l.OID != 0 {
 		_, err := tx.Exec(`DELETE FROM `+LocalizedStringTable+` WHERE oid = ?`, l.OID)

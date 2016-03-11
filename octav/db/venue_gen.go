@@ -43,6 +43,18 @@ func (v *Venue) Create(tx *Tx) error {
 	return nil
 }
 
+func (v Venue) Update(tx *Tx) error {
+	if v.OID != 0 {
+		_, err := tx.Exec(`UPDATE `+VenueTable+` SET eid = ?, name = ?, address = ?, latitude = ?, longitude = ? WHERE oid = ?`, v.EID, v.Name, v.Address, v.Latitude, v.Longitude, v.OID)
+		return err
+	}
+	if v.EID != "" {
+		_, err := tx.Exec(`UPDATE `+VenueTable+` SET name = ?, address = ?, latitude = ?, longitude = ? WHERE eid = ?`, v.Name, v.Address, v.Latitude, v.Longitude, v.EID)
+		return err
+	}
+	return errors.New("either OID/EID must be filled")
+}
+
 func (v Venue) Delete(tx *Tx) error {
 	if v.OID != 0 {
 		_, err := tx.Exec(`DELETE FROM `+VenueTable+` WHERE oid = ?`, v.OID)

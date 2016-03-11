@@ -480,6 +480,29 @@
       "targetSchema": { "$ref": "#/definitions/conference" }
     },
     {
+      "title": "Update conference",
+      "rel": "update",
+      "method": "POST",
+      "href": "/conference/update",
+      "encType": "application/x-www-form-urlencoded",
+      "schema": {
+        "hsup.type": "octav.UpdateConferenceRequest",
+        "properties": {
+          "id": { "$ref": "#/definitions/uuid" },
+          "title": { "$ref": "#/definitions/string_en" },
+          "sub_title": { "$ref": "#/definitions/string_en" },
+          "slug": { "$ref": "#/definitions/string_en" },
+          "description": { "$ref": "#/definitions/string_en" },
+          "starts-on": { "$ref": "#/definitions/datetime" }
+        },
+        "patternProperties": {
+          "title#[a-z]+": { "$ref": "#/definitions/string_i18n" },
+          "description#[a-z]+": { "$ref": "#/definitions/string_i18n" }
+        },
+        "required": ["id"]
+      }
+    },
+    {
       "title": "Delete conference",
       "rel": "delete",
       "href": "/conference/delete",

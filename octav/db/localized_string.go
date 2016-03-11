@@ -1,10 +1,32 @@
 package db
 
+import "github.com/lestrrat/go-pdebug"
+
 func (l *LocalizedString) LoadByLangKey(tx *Tx, name, language string) error {
 	row := tx.QueryRow(`SELECT oid, parent_id, parent_type, name, language, localized FROM `+LocalizedStringTable+` WHERE name = ? AND language = ?`, name, language)
 	if err := l.Scan(row); err != nil {
 		return err
 	}
+	return nil
+}
+
+func (l *LocalizedString) Upsert(tx *Tx) (err error) {
+	if pdebug.Enabled {
+		g := pdebug.Marker("LocalizedString.Upsert (%s#%s)", l.Language, l.Name).BindError(&err)
+		defer g.End()
+	}
+
+	result, err := tx.Exec(`INSERT INTO `+LocalizedStringTable+` (parent_id, parent_type, name, language, localized) VALUES (?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE localized = VALUES(localized)`, l.ParentID, l.ParentType, l.Name, l.Language, l.Localized)
+	if err != nil {
+		return err
+	}
+
+	lii, err := result.LastInsertId()
+	if err != nil {
+		return err
+	}
+
+	l.OID = lii
 	return nil
 }
 
@@ -33,4 +55,3 @@ func DeleteLocalizedStringsForParent(tx *Tx, parentID, parentType string) error 
 	}
 	return nil
 }
-
