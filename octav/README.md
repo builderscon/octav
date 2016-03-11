@@ -15,6 +15,12 @@ No authentication is done on this component.
 
 ## If you edited spec/v1/api.json
 
+You must install [hsup](https://github.com/lestrrat/go-hsup) first:
+
+```
+go get github.com/lestrrat/go-hsup
+```
+
 ```
 hsup -s /path/to/octav/spec/v1/api.json -d /path/to/octav/octav
 ```
@@ -39,8 +45,6 @@ Then run:
 ```
 
 You have to specify all of the necessary transport types. See `octav.go`'s `go:generate` lines.
-
-
 
 ## If you edited model types
 
