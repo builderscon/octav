@@ -8,18 +8,18 @@ all: install_deps build_internal_cmd generate build
 install_deps:
 	go get -d -v ./...
 
-build_internal_cmd:
+build_internal_cmd: install_deps
 	@for cmd in $(INTERNAL_CMDS); do\
 		go build -o $(INTERNAL_BIN_DIR)/"$$cmd" internal/cmd/"$$cmd"/*.go;\
 	done
 
-generate:
+generate: build_internal_cmd
 	PATH=$(CURDIR)/_internal_bin:$(PATH) go generate ./...
 
-build:
+build: generate
 	go build -o $(CURDIR)/_bin/octav cmd/octav/*.go
 
-run:
+run: build
 	./_bin/octav
 
 clean:
