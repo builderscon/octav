@@ -2,7 +2,7 @@
 
 octav - The main API server
 
-[![Build Status](https://travis-ci.org/builderscon/octav/octav.svg?branch=master)](https://travis-ci.org/builderscon/octav/octav)
+[![Build Status](https://travis-ci.org/builderscon/octav.svg?branch=master)](https://travis-ci.org/builderscon/octav)
 
 [![GoDoc](https://godoc.org/github.com/builderscon/octav/octav?status.svg)](https://godoc.org/github.com/builderscon/octav/octav)
 
