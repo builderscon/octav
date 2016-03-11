@@ -74,6 +74,9 @@ func (p *Processor) Do() error {
 	}
 
 	for _, pkg := range pkgs {
+		if pkg.Name != "octav" {
+			continue
+		}
 		if err := p.ProcessPkg(pkg); err != nil {
 			return err
 		}
