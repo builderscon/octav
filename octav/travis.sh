@@ -12,6 +12,7 @@ if [ "$TRAVIS" == "true" ]; then
     echo " + Detected running under Travis CI"
     echo " + Creating database '$OCTAV_DB_NAME'"
     make init_db
+    make install_deps
 fi
 
 export OCTAV_TEST_DSN="root:@/$OCTAV_DB_NAME?parseTime=true"
