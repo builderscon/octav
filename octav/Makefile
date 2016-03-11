@@ -2,8 +2,8 @@ INTERNAL_BIN_DIR = _internal_bin
 INTERNAL_CMDS    = gendb genmodel gentransport
 BIN_DIR          = _bin
 
-.PHONY: install_deps build_internal_cmd generate build run all
-all: install_deps build_internal_cmd generate build run
+.PHONY: install_deps build_internal_cmd generate build run all clean
+all: install_deps build_internal_cmd generate build
 
 install_deps:
 	go get -d -v ./...
@@ -21,3 +21,7 @@ build:
 
 run:
 	./_bin/octav
+
+clean:
+	rm _internal_bin/*
+	rm _bin/*
