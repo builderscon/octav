@@ -2,8 +2,8 @@
 
 set -e
 
-go env
-go get -t -v ./...
+# tags is required to install optional dependencies
+go get -t -v -tags debug0 ./...
 
 if [ -z "$OCTAV_DB_NAME" ]; then
     OCTAV_DB_NAME=octav
