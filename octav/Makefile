@@ -17,15 +17,16 @@ all: test build
 install_deps:
 	go get -d -v -t $(GO_TAGS_OPT) ./...
 
-build_internal_cmd: install_deps
+build_internal_cmd:
 	@for cmd in $(INTERNAL_CMDS); do\
 		go build -o $(INTERNAL_BIN_DIR)/"$$cmd" internal/cmd/"$$cmd"/*.go;\
 	done
 
 generate: build_internal_cmd
-	PATH=$(CURDIR)/_internal_bin:$(PATH) go generate ./...
+	@echo "go generate ./..."
+	@PATH=$(CURDIR)/_internal_bin:$(PATH) go generate ./...
 
-build: generate
+build: generate install_deps
 	go build -o $(CURDIR)/_bin/octav cmd/octav/*.go
 
 test: generate
