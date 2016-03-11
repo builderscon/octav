@@ -17,10 +17,11 @@ all: test build
 install_deps:
 	go get -d -v -t $(GO_TAGS_OPT) ./...
 
-build_internal_cmd:
-	@for cmd in $(INTERNAL_CMDS); do\
-		go build -o $(INTERNAL_BIN_DIR)/"$$cmd" internal/cmd/"$$cmd"/*.go;\
-	done
+$(INTERNAL_BIN_DIR)/%: internal/cmd/%/*.go
+	@echo "Building $(@F)..."
+	@go build -o $@ $^
+
+build_internal_cmd: $(patsubst %,$(INTERNAL_BIN_DIR)/%, $(INTERNAL_CMDS))
 
 generate: build_internal_cmd
 	@echo "go generate ./..."
