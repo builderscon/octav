@@ -36,6 +36,9 @@ $(CURDIR)/_bin/octav: cmd/octav/octav.go $(SRC_FILES)
 	@echo "Building $(@F)..."
 	@go build -o $@ $<
 
+buildspec: ../spec/v1/api.json
+	hsup -s ../spec/v1/api.json -d . -O
+
 build: $(CURDIR)/_bin/octav
 
 run: build
