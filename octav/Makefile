@@ -6,6 +6,8 @@ ifndef OCTAV_DB_NAME
 	OCTAV_DB_NAME = octav
 endif
 
+SRC_FILES = *.go validator/*.go client/*.go db/*.go
+
 GO_TEST_CMD      = OCTAV_TEST_DSN="root:@/$(OCTAV_DB_NAME)?parseTime=true" go test -v $(GO_TAGS_OPT)
 ifdef OCTAV_TEST_DSN
 	GO_TEST_CMD = go test -v $(GO_TAGS_OPT)
@@ -17,19 +19,27 @@ all: test build
 install_deps:
 	go get -d -v -t $(GO_TAGS_OPT) ./...
 
-build_internal_cmd: install_deps
-	@for cmd in $(INTERNAL_CMDS); do\
-		go build -o $(INTERNAL_BIN_DIR)/"$$cmd" internal/cmd/"$$cmd"/*.go;\
-	done
+$(INTERNAL_BIN_DIR)/%: internal/cmd/%/*.go
+	@echo "Building $(@F)..."
+	@go build -o $@ $^
+
+build_internal_cmd: $(patsubst %,$(INTERNAL_BIN_DIR)/%, $(INTERNAL_CMDS))
 
 generate: build_internal_cmd
-	PATH=$(CURDIR)/_internal_bin:$(PATH) go generate ./...
-
-build: generate
-	go build -o $(CURDIR)/_bin/octav cmd/octav/*.go
+	@echo "go generate ./..."
+	@PATH=$(CURDIR)/_internal_bin:$(PATH) go generate ./...
 
 test: generate
 	$(GO_TEST_CMD) ./...
+
+$(CURDIR)/_bin/octav: cmd/octav/octav.go $(SRC_FILES)
+	@echo "Building $(@F)..."
+	@go build -o $@ $<
+
+buildspec: ../spec/v1/api.json
+	hsup -s ../spec/v1/api.json -d . -O
+
+build: $(CURDIR)/_bin/octav
 
 run: build
 	./_bin/octav
