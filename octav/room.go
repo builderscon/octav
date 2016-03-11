@@ -1,10 +1,6 @@
 package octav
 
-import (
-	"log"
-
-	"github.com/builderscon/octav/octav/db"
-)
+import "github.com/builderscon/octav/octav/db"
 
 func (v Room) ToRow(vdb *db.Room) error {
 	vdb.EID = v.ID
@@ -19,8 +15,6 @@ func (v *RoomList) LoadForVenue(tx *db.Tx, venueID, since string, limit int) err
 	if err := vdbl.LoadForVenueSinceEID(tx, venueID, since, limit); err != nil {
 		return err
 	}
-
-	log.Printf("%#v", vdbl)
 
 	res := make([]Room, len(vdbl))
 	for i, vdb := range vdbl {

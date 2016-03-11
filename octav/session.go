@@ -3,7 +3,6 @@ package octav
 import (
 	"database/sql"
 	"encoding/json"
-	"log"
 	"strings"
 	"time"
 
@@ -427,7 +426,6 @@ func (v *Session) Create(tx *db.Tx) error {
 		return err
 	}
 
-	log.Printf("%#v", vdb)
 	if err := vdb.Create(tx); err != nil {
 		return err
 	}
