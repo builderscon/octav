@@ -1,0 +1,11 @@
+language: go
+go:
+  - 1.6
+services:
+  - mysql
+env:
+  - DIR=octav
+install:
+  - echo "skipping install step"
+script:
+  - cd $DIR && ./travis.sh
