@@ -6,7 +6,7 @@ ifndef OCTAV_DB_NAME
 	OCTAV_DB_NAME = octav
 endif
 
-SRC_FILES = *.go validator/*.go client/*.go db/*.go
+SRC_FILES = $(wildcard *.go validator/*.go client/*.go db/*.go)
 
 GO_TEST_CMD      = OCTAV_TEST_DSN="root:@/$(OCTAV_DB_NAME)?parseTime=true" go test -v $(GO_TAGS_OPT)
 ifdef OCTAV_TEST_DSN
@@ -23,21 +23,27 @@ $(INTERNAL_BIN_DIR)/%: internal/cmd/%/*.go
 	@echo "Building $(@F)..."
 	@go build -o $@ $^
 
+$(INTERNAL_BIN_DIR)/hsup:
+	@echo "Building hsup..."
+	@go get -d github.com/lestrrat/go-hsup
+	@go build -o $@ github.com/lestrrat/go-hsup/cmd/hsup
+
 build_internal_cmd: $(patsubst %,$(INTERNAL_BIN_DIR)/%, $(INTERNAL_CMDS))
 
 generate: build_internal_cmd
 	@echo "go generate ./..."
 	@PATH=$(CURDIR)/_internal_bin:$(PATH) go generate ./...
 
-test: generate
+test: generate buildspec
 	$(GO_TEST_CMD) ./...
 
 $(CURDIR)/_bin/octav: cmd/octav/octav.go $(SRC_FILES)
 	@echo "Building $(@F)..."
 	@go build -o $@ $<
 
-buildspec: ../spec/v1/api.json
-	hsup -s ../spec/v1/api.json -d . -O
+buildspec: $(INTERNAL_BIN_DIR)/hsup ../spec/v1/api.json
+	@echo "Regenerating files based on ../spec/v1/api.json"
+	@PATH=$(CURDIR)/_internal_bin:$(PATH) hsup -s ../spec/v1/api.json -d . -O
 
 build: $(CURDIR)/_bin/octav
 
