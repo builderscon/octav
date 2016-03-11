@@ -15,14 +15,8 @@ No authentication is done on this component.
 
 ## If you edited spec/v1/api.json
 
-You must install [hsup](https://github.com/lestrrat/go-hsup) first:
-
 ```
-go get github.com/lestrrat/go-hsup
-```
-
-```
-hsup -s /path/to/octav/spec/v1/api.json -d /path/to/octav/octav
+make buildspec
 ```
 
 This will regenerate 
@@ -33,59 +27,14 @@ This will regenerate
 
 If you add more endpoints, you need to write additional `doXXXX` handlers in handlers.go
 
-## If you edited transport structs
+## If you edited interfaces.go or db/interfaces.go
 
-By "transport" structs, we mean structs like `LookupVenueRequest`, which are used to transport data between the client and the API server.
+Technically, you do NOT need to do this every time, but if you want to be safe, whenever you touch these files you should regenerate auto-generated files
 
-First, see `How To Build The Code Generation Tools`, and build the tools.
-Then run:
-
-```
-./gentransport ... -t NewTransportType -d .
-```
-
-You have to specify all of the necessary transport types. See `octav.go`'s `go:generate` lines.
-
-## If you edited model types
-
-Structs like `Conference`, `Venue`, `Room`, etc are models. They are the frontends to the underlying DB structs.
-
-First, see `How To Build The Code Generation Tools`, and build the tools.
-Then run:
+To regenerate files, run:
 
 ```
-./genmodel -t Room -t User -t Venue -d .
-```
-
-Note that we don't generate `Conference` here, because `Conference` has some special case handling that can't be automatically generated. We *may* fix this later, but for now, you will have to do this by hand.
-
-You have to specify all of the necessary model types. See `octav.go`'s `go:generate` lines.
-
-## If you edited DB types
-
-Structs defined in `db/interface.go` talk directly to the database.
-
-First, see `How To Build The Code Generation Tools`, and build the tools.
-Then run:
-
-```
-./gendb -t Conference -t Room -t Session -t User -t Venue -t LocalizedString -d db
-```
-
-They generate basic database access routines.
-
-You have to specify all of the necessary db types. See `octav.go`'s `go:generate` lines.
-
-## Running all of the generation tools
-
-You can run `go generate` to generate the DB tools, Model tools, and Transport tools.
-
-## How To Build The Code Generation Tools
-
-```
-go build ./internal/cmd/gendb
-go build ./internal/cmd/genmodel
-go build ./internal/cmd/gentransport
+make generate
 ```
 
 ## Useful Debugging Tips
