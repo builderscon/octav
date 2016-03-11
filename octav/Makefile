@@ -1,13 +1,21 @@
 INTERNAL_BIN_DIR = _internal_bin
 INTERNAL_CMDS    = gendb genmodel gentransport
 BIN_DIR          = _bin
-OCTAV_DB_NAME    = octav
+
+ifndef OCTAV_DB_NAME
+	OCTAV_DB_NAME = octav
+endif
+
+GO_TEST_CMD      = OCTAV_TEST_DSN="root:@/$(OCTAV_DB_NAME)?parseTime=true" go test -v $(GO_TAGS_OPT)
+ifdef OCTAV_TEST_DSN
+	GO_TEST_CMD = go test -v $(GO_TAGS_OPT)
+endif
 
 .PHONY: install_deps build_internal_cmd generate build run all clean test init_db
 all: test build
 
 install_deps:
-	go get -d -v -t ./...
+	go get -d -v -t $(GO_TAGS_OPT) ./...
 
 build_internal_cmd: install_deps
 	@for cmd in $(INTERNAL_CMDS); do\
@@ -21,7 +29,7 @@ build: generate
 	go build -o $(CURDIR)/_bin/octav cmd/octav/*.go
 
 test: generate
-	OCTAV_TEST_DSN="root:@/$(OCTAV_DB_NAME)?parseTime=true" go test ./...
+	$(GO_TEST_CMD) ./...
 
 run: build
 	./_bin/octav
