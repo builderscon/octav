@@ -9,3 +9,5 @@ install:
   - echo "skipping install step"
 script:
   - cd $DIR && ./travis.sh
+after_failure:
+  - -e "$DIR/debug.out" && cat "$DIR/debug.out"
