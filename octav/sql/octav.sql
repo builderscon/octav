@@ -79,7 +79,7 @@ CREATE TABLE localized_strings (
     oid INTEGER UNSIGNED NOT NULL PRIMARY KEY AUTO_INCREMENT,
     parent_id CHAR(64) CHARACTER SET latin1 NOT NULL,
     parent_type CHAR(64) CHARACTER SET latin1 NOT NULL,
-    name CHAR(250) BINARY NOT NULL,
+    name CHAR(128) BINARY NOT NULL,
     language CHAR(32) BINARY NOT NULL,
     localized TEXT NOT NULL,
     KEY (parent_id, parent_type, name, language)
