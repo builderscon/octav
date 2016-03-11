@@ -42,6 +42,7 @@ $(CURDIR)/_bin/octav: cmd/octav/octav.go $(SRC_FILES)
 	@go build -o $@ $<
 
 buildspec: $(INTERNAL_BIN_DIR)/hsup ../spec/v1/api.json
+	@echo "Regenerating files based on ../spec/v1/api.json"
 	@PATH=$(CURDIR)/_internal_bin:$(PATH) hsup -s ../spec/v1/api.json -d . -O
 
 build: $(CURDIR)/_bin/octav
