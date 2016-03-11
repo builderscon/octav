@@ -6,6 +6,7 @@ import (
 	"crypto/tls"
 	"crypto/x509"
 	"database/sql"
+	"io"
 	"io/ioutil"
 	"log"
 	"os"
@@ -36,7 +37,14 @@ func driverName() string {
 	driverName := "mysql"
 	if Trace {
 		driverName = "mysql-trace"
-		sql.Register(driverName, proxy.NewTraceProxy(&mysql.MySQLDriver{}, log.New(os.Stderr, "", 0)))
+		var out io.Writer
+		if pdebug.Enabled {
+			// Send the output to the same place as pdebug
+			out = pdebug.DefaultCtx.Writer
+		} else {
+			out = os.Stderr
+		}
+		sql.Register(driverName, proxy.NewTraceProxy(&mysql.MySQLDriver{}, log.New(out, "", 0)))
 	}
 	return driverName
 }
