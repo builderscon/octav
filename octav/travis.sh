@@ -5,6 +5,10 @@ set -e
 go env
 go get -t -v ./...
 
+if [ -z "$OCTAV_DB_NAME" ]; then
+    OCTAV_DB_NAME=octav
+fi
+
 echo " + Creating database '$OCTAV_DB_NAME'"
 mysql -u root -e "CREATE DATABASE $OCTAV_DB_NAME"
 mysql -u root octav < sql/octav.sql
