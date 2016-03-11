@@ -6,6 +6,8 @@ ifndef OCTAV_DB_NAME
 	OCTAV_DB_NAME = octav
 endif
 
+SRC_FILES = *.go validator/*.go client/*.go db/*.go
+
 GO_TEST_CMD      = OCTAV_TEST_DSN="root:@/$(OCTAV_DB_NAME)?parseTime=true" go test -v $(GO_TAGS_OPT)
 ifdef OCTAV_TEST_DSN
 	GO_TEST_CMD = go test -v $(GO_TAGS_OPT)
@@ -27,11 +29,14 @@ generate: build_internal_cmd
 	@echo "go generate ./..."
 	@PATH=$(CURDIR)/_internal_bin:$(PATH) go generate ./...
 
-build: generate install_deps
-	go build -o $(CURDIR)/_bin/octav cmd/octav/*.go
-
 test: generate
 	$(GO_TEST_CMD) ./...
+
+$(CURDIR)/_bin/octav: cmd/octav/octav.go $(SRC_FILES)
+	@echo "Building $(@F)..."
+	@go build -o $@ $<
+
+build: $(CURDIR)/_bin/octav
 
 run: build
 	./_bin/octav
