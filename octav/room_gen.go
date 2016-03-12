@@ -135,12 +135,11 @@ func (v *Room) Create(tx *db.Tx) error {
 		v.ID = UUID()
 	}
 
-	vdb := db.Room{
-		EID:      v.ID,
-		VenueID:  v.VenueID,
-		Name:     v.Name,
-		Capacity: v.Capacity,
-	}
+	vdb := db.Room{}
+	vdb.EID = v.ID
+	vdb.VenueID = v.VenueID
+	vdb.Name = v.Name
+	vdb.Capacity = v.Capacity
 	if err := vdb.Create(tx); err != nil {
 		return err
 	}

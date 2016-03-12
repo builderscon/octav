@@ -159,14 +159,13 @@ func (v *User) Create(tx *db.Tx) error {
 		v.ID = UUID()
 	}
 
-	vdb := db.User{
-		EID:        v.ID,
-		FirstName:  v.FirstName,
-		LastName:   v.LastName,
-		Nickname:   v.Nickname,
-		Email:      v.Email,
-		TshirtSize: v.TshirtSize,
-	}
+	vdb := db.User{}
+	vdb.EID = v.ID
+	vdb.FirstName = v.FirstName
+	vdb.LastName = v.LastName
+	vdb.Nickname = v.Nickname
+	vdb.Email = v.Email
+	vdb.TshirtSize = v.TshirtSize
 	if err := vdb.Create(tx); err != nil {
 		return err
 	}

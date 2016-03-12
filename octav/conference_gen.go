@@ -135,7 +135,7 @@ func (v *Conference) FromRow(vdb db.Conference) error {
 	v.ID = vdb.EID
 	v.Title = vdb.Title
 	if vdb.SubTitle.Valid {
-		v.SubTitle = vdb.String
+		v.SubTitle = vdb.SubTitle.String
 	}
 	v.Slug = vdb.Slug
 	return nil
@@ -146,13 +146,12 @@ func (v *Conference) Create(tx *db.Tx) error {
 		v.ID = UUID()
 	}
 
-	vdb := db.Conference{
-		EID:      v.ID,
-		Title:    v.Title,
-		SubTitle: v.SubTitle,
-		Slug:     v.Slug,
-		Dates:    v.Dates,
-	}
+	vdb := db.Conference{}
+	vdb.EID = v.ID
+	vdb.Title = v.Title
+	vdb.SubTitle.Valid = true
+	vdb.SubTitle.String = v.SubTitle
+	vdb.Slug = v.Slug
 	if err := vdb.Create(tx); err != nil {
 		return err
 	}

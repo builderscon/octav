@@ -581,15 +581,24 @@ func generateModelFile(ctx *genctx, m Model) error {
 		buf.WriteString("\nv.ID = UUID()")
 		buf.WriteString("\n}")
 	}
-	fmt.Fprintf(&buf, "\n\nvdb := db.%s{", m.Name)
+	fmt.Fprintf(&buf, "\n\nvdb := db.%s{}", m.Name)
 	for _, f := range m.Fields {
 		if f.Name == "ID" {
-			buf.WriteString("\nEID:     v.ID,")
+			buf.WriteString("\nvdb.EID = v.ID")
 		} else {
-			fmt.Fprintf(&buf, "\n%s: v.%s,", f.Name, f.Name)
+			c, ok := row.Columns[f.Name]
+			if !ok {
+				continue
+			}
+
+			if c.IsNullType {
+				fmt.Fprintf(&buf, "\nvdb.%s.Valid = true", f.Name)
+				fmt.Fprintf(&buf, "\nvdb.%s.%s = v.%s", f.Name, c.BaseType, f.Name)
+			} else {
+				fmt.Fprintf(&buf, "\nvdb.%s = v.%s", f.Name, f.Name)
+			}
 		}
 	}
-	buf.WriteString("\n}")
 	buf.WriteString("\nif err := vdb.Create(tx); err != nil {")
 	buf.WriteString("\nreturn err")
 	buf.WriteString("\n}\n")

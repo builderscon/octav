@@ -149,13 +149,12 @@ func (v *Venue) Create(tx *db.Tx) error {
 		v.ID = UUID()
 	}
 
-	vdb := db.Venue{
-		EID:       v.ID,
-		Name:      v.Name,
-		Address:   v.Address,
-		Longitude: v.Longitude,
-		Latitude:  v.Latitude,
-	}
+	vdb := db.Venue{}
+	vdb.EID = v.ID
+	vdb.Name = v.Name
+	vdb.Address = v.Address
+	vdb.Longitude = v.Longitude
+	vdb.Latitude = v.Latitude
 	if err := vdb.Create(tx); err != nil {
 		return err
 	}
