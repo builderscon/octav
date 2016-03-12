@@ -29,9 +29,7 @@ func defaultDSNVars() dsnvars {
 	}
 }
 
-func defaultDSN() string {
-	return "root:@/octav?parseTime=true"
-}
+var DefaultDSN = "root:@/octav?parseTime=true"
 
 func driverName() string {
 	driverName := "mysql"
