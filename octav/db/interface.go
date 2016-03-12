@@ -19,7 +19,6 @@ type Conference struct {
 	CreatedOn  time.Time
 	ModifiedOn NullTime
 }
-type ConferenceList []Conference
 
 // +DB tablename:"rooms"
 type Room struct {
@@ -31,7 +30,6 @@ type Room struct {
 	CreatedOn  time.Time
 	ModifiedOn NullTime
 }
-type RoomList []Room
 
 // +DB tablename:"sessions"
 type Session struct {
@@ -62,7 +60,6 @@ type Session struct {
 	CreatedOn         time.Time
 	ModifiedOn NullTime
 }
-type SessionList []Session
 
 // +DB tablename:"users"
 type User struct {
@@ -76,7 +73,6 @@ type User struct {
 	CreatedOn  time.Time
 	ModifiedOn NullTime
 }
-type UserList []User
 
 // +DB tablename:"venues"
 type Venue struct {
@@ -89,7 +85,6 @@ type Venue struct {
 	CreatedOn  time.Time
 	ModifiedOn NullTime
 }
-type VenueList []Venue
 
 // +DB tablename:"localized_strings"
 type LocalizedString struct {
@@ -100,4 +95,3 @@ type LocalizedString struct {
 	Language   string
 	Localized  string
 }
-type LocalizedStringList []LocalizedString

@@ -2,10 +2,13 @@
 package db
 
 import (
+	"database/sql"
 	"errors"
 )
 
 var LocalizedStringTable = "localized_strings"
+
+type LocalizedStringList []LocalizedString
 
 func (l *LocalizedString) Scan(scanner interface {
 	Scan(...interface{}) error
@@ -43,4 +46,23 @@ func (l LocalizedString) Delete(tx *Tx) error {
 	}
 
 	return errors.New("column OID must be filled")
+}
+
+func (v *LocalizedStringList) FromRows(rows *sql.Rows, capacity int) error {
+	var res []LocalizedString
+	if capacity > 0 {
+		res = make([]LocalizedString, 0, capacity)
+	} else {
+		res = []LocalizedString{}
+	}
+
+	for rows.Next() {
+		vdb := LocalizedString{}
+		if err := vdb.Scan(rows); err != nil {
+			return err
+		}
+		res = append(res, vdb)
+	}
+	*v = res
+	return nil
 }

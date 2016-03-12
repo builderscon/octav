@@ -2,12 +2,15 @@
 package db
 
 import (
+	"database/sql"
 	"errors"
 	"strconv"
 	"time"
 )
 
 var UserTable = "users"
+
+type UserList []User
 
 func (u *User) Scan(scanner interface {
 	Scan(...interface{}) error
@@ -69,6 +72,25 @@ func (u User) Delete(tx *Tx) error {
 	return errors.New("either OID/EID must be filled")
 }
 
+func (v *UserList) FromRows(rows *sql.Rows, capacity int) error {
+	var res []User
+	if capacity > 0 {
+		res = make([]User, 0, capacity)
+	} else {
+		res = []User{}
+	}
+
+	for rows.Next() {
+		vdb := User{}
+		if err := vdb.Scan(rows); err != nil {
+			return err
+		}
+		res = append(res, vdb)
+	}
+	*v = res
+	return nil
+}
+
 func (v *UserList) LoadSinceEID(tx *Tx, since string, limit int) error {
 	var s int64
 	if id := since; id != "" {
@@ -87,14 +109,9 @@ func (v *UserList) LoadSince(tx *Tx, since int64, limit int) error {
 	if err != nil {
 		return err
 	}
-	res := make([]User, 0, limit)
-	for rows.Next() {
-		vdb := User{}
-		if err := vdb.Scan(rows); err != nil {
-			return err
-		}
-		res = append(res, vdb)
+
+	if err := v.FromRows(rows, limit); err != nil {
+		return err
 	}
-	*v = res
 	return nil
 }
