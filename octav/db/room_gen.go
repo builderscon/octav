@@ -2,12 +2,15 @@
 package db
 
 import (
+	"database/sql"
 	"errors"
 	"strconv"
 	"time"
 )
 
 var RoomTable = "rooms"
+
+type RoomList []Room
 
 func (r *Room) Scan(scanner interface {
 	Scan(...interface{}) error
@@ -69,6 +72,25 @@ func (r Room) Delete(tx *Tx) error {
 	return errors.New("either OID/EID must be filled")
 }
 
+func (v *RoomList) FromRows(rows *sql.Rows, capacity int) error {
+	var res []Room
+	if capacity > 0 {
+		res = make([]Room, 0, capacity)
+	} else {
+		res = []Room{}
+	}
+
+	for rows.Next() {
+		vdb := Room{}
+		if err := vdb.Scan(rows); err != nil {
+			return err
+		}
+		res = append(res, vdb)
+	}
+	*v = res
+	return nil
+}
+
 func (v *RoomList) LoadSinceEID(tx *Tx, since string, limit int) error {
 	var s int64
 	if id := since; id != "" {
@@ -87,14 +109,9 @@ func (v *RoomList) LoadSince(tx *Tx, since int64, limit int) error {
 	if err != nil {
 		return err
 	}
-	res := make([]Room, 0, limit)
-	for rows.Next() {
-		vdb := Room{}
-		if err := vdb.Scan(rows); err != nil {
-			return err
-		}
-		res = append(res, vdb)
+
+	if err := v.FromRows(rows, limit); err != nil {
+		return err
 	}
-	*v = res
 	return nil
 }
