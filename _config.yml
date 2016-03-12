@@ -7,6 +7,7 @@ exclude:
   - 'scripts'
   - 'Gemfile'
   - 'vendor'
+  - README.md
 # デフォルトと同じだが「utf-8で記事を書こう」という宣言的な意味合で残した。
 encoding: utf-8
 
@@ -27,3 +28,5 @@ permalink: date
 ### Markdown Processors
 kramdown:
   input: GFM
+
+root: /octav
