@@ -12,6 +12,7 @@ import (
 	"go/format"
 	"go/parser"
 	"go/token"
+	"io"
 	"log"
 	"os"
 	"path/filepath"
@@ -74,6 +75,7 @@ type genctx struct {
 }
 
 type Field struct {
+	Convert  bool
 	JSONName string
 	L10N     bool
 	Name     string
@@ -89,10 +91,10 @@ type Model struct {
 }
 
 type DBColumn struct {
-	BaseType string
+	BaseType   string
 	IsNullType bool
-	Name string
-	Type string
+	Name       string
+	Type       string
 }
 
 type DBRow struct {
@@ -103,8 +105,8 @@ type DBRow struct {
 
 func (p *Processor) Do() error {
 	ctx := genctx{
-		Dir: p.Dir,
-		DBRows: make(map[string]DBRow),
+		Dir:         p.Dir,
+		DBRows:      make(map[string]DBRow),
 		TargetTypes: p.Types,
 	}
 	if err := parseModelDir(&ctx, ctx.Dir); err != nil {
@@ -254,6 +256,7 @@ func (ctx *genctx) extractModelStructs(n ast.Node) bool {
 
 			var jsname string
 			var l10n bool
+			var convert bool
 			if f.Tag != nil {
 				v := f.Tag.Value
 				if len(v) >= 2 {
@@ -281,6 +284,10 @@ func (ctx *genctx) extractModelStructs(n ast.Node) bool {
 				if b, err := strconv.ParseBool(tag); err == nil && b {
 					l10n = true
 				}
+
+				if tag = st.Get("assign"); tag == "convert" {
+					convert = true
+				}
 			}
 
 			typ, err := getTypeName(f.Type)
@@ -290,6 +297,7 @@ func (ctx *genctx) extractModelStructs(n ast.Node) bool {
 
 			field := Field{
 				L10N:     l10n,
+				Convert:  convert,
 				Name:     f.Names[0].Name,
 				JSONName: jsname,
 				Type:     typ,
@@ -305,13 +313,19 @@ func (ctx *genctx) extractModelStructs(n ast.Node) bool {
 
 func getTypeName(ref ast.Expr) (string, error) {
 	var typ string
+	var err error
 	switch ref.(type) {
 	case *ast.Ident:
 		typ = ref.(*ast.Ident).Name
 	case *ast.SelectorExpr:
-		typ = ref.(*ast.SelectorExpr).Sel.Name
+		se := ref.(*ast.SelectorExpr)
+		typ = se.X.(*ast.Ident).Name + "." + se.Sel.Name
 	case *ast.StarExpr:
-		return getTypeName(ref.(*ast.StarExpr).X)
+		typ, err = getTypeName(ref.(*ast.StarExpr).X)
+		if err != nil {
+			return "", err
+		}
+		return "*" + typ, nil
 	case *ast.ArrayType:
 		typ = "[]" + ref.(*ast.ArrayType).Elt.(*ast.Ident).Name
 	case *ast.MapType:
@@ -352,7 +366,7 @@ func (ctx *genctx) extractDBStructs(n ast.Node) bool {
 		}
 
 		st := DBRow{
-			Columns:  make(map[string]DBColumn),
+			Columns: make(map[string]DBColumn),
 			Name:    t.Name.Name,
 			PkgName: ctx.PkgName,
 		}
@@ -379,20 +393,24 @@ func (ctx *genctx) extractDBStructs(n ast.Node) bool {
 				// extract the package portion
 				var prefix string
 				if dotpos := strings.IndexRune(typ, '.'); dotpos > -1 {
-					prefix = typ[:dotpos]
+					prefix = typ[:dotpos+1]
 				}
 
-				if i := strings.Index(typ, prefix + "Null"); i > -1 {
+				if i := strings.Index(typ, prefix+"Null"); i > -1 {
 					nulltyp = true
 					basetyp = typ[len(prefix)+i+4:]
 				}
 			}
 
+			pdebug.Printf("--------> typ: %s", typ)
+			pdebug.Printf("----> nulltyp: %t", nulltyp)
+			pdebug.Printf("----> basetyp: %s", basetyp)
+
 			column := DBColumn{
-				BaseType: basetyp,
+				BaseType:   basetyp,
 				IsNullType: nulltyp,
-				Name:     f.Names[0].Name,
-				Type:     typ,
+				Name:       f.Names[0].Name,
+				Type:       typ,
 			}
 
 			st.Columns[column.Name] = column
@@ -422,6 +440,14 @@ func generateFiles(ctx *genctx) error {
 	return nil
 }
 
+func wrapConvertIf(b bool, out io.Writer, t, expr string) {
+	if b {
+		fmt.Fprintf(out, "%s(%s)", t, expr)
+	} else {
+		fmt.Fprint(out, expr)
+	}
+}
+
 func generateModelFile(ctx *genctx, m Model) error {
 	if pdebug.Enabled {
 		g := pdebug.Marker("generateModelFile %s", m.Name)
@@ -429,7 +455,7 @@ func generateModelFile(ctx *genctx, m Model) error {
 	}
 
 	// Find the matching DBRow
-	row, ok  := ctx.DBRows[m.Name]
+	row, ok := ctx.DBRows[m.Name]
 	if !ok {
 		return errors.New("could not find matching row for " + m.Name)
 	}
@@ -443,11 +469,13 @@ func generateModelFile(ctx *genctx, m Model) error {
 	buf.WriteString("package ")
 	buf.WriteString(m.PkgName)
 	buf.WriteString("\n\n")
-	buf.WriteString("\nimport (\n")
+	buf.WriteString("\nimport (")
 	buf.WriteString("\n" + strconv.Quote("encoding/json"))
-	buf.WriteString("\n" + strconv.Quote("github.com/builderscon/octav/octav/db"))
+	buf.WriteString("\n" + strconv.Quote("time"))
+	buf.WriteString("\n\n" + strconv.Quote("github.com/builderscon/octav/octav/db"))
 	buf.WriteString("\n" + strconv.Quote("github.com/lestrrat/go-pdebug"))
 	buf.WriteString("\n)")
+	buf.WriteString("\n\nvar _ = time.Time{}")
 
 	fmt.Fprintf(&buf, "\n\nfunc (%c %s) GetPropNames() ([]string, error) {", varname, m.Name)
 	fmt.Fprintf(&buf, "\nl, _ := %c.L10N.GetPropNames()", varname)
@@ -565,10 +593,12 @@ func generateModelFile(ctx *genctx, m Model) error {
 
 			if c.IsNullType {
 				fmt.Fprintf(&buf, "\nif vdb.%s.Valid {", f.Name)
-				fmt.Fprintf(&buf, "\nv.%s = vdb.%s.%s", f.Name, f.Name, c.BaseType)
+				fmt.Fprintf(&buf, "\nv.%s = ", f.Name)
+				wrapConvertIf(f.Convert, &buf, f.Type, fmt.Sprintf("vdb.%s.%s", f.Name, c.BaseType))
 				buf.WriteString("\n}")
 			} else {
-				fmt.Fprintf(&buf, "\nv.%s = vdb.%s", f.Name, f.Name)
+				fmt.Fprintf(&buf, "\nv.%s = ", f.Name)
+				wrapConvertIf(f.Convert, &buf, f.Type, fmt.Sprintf("vdb.%s", f.Name))
 			}
 		}
 		buf.WriteString("\nreturn nil")
@@ -587,9 +617,11 @@ func generateModelFile(ctx *genctx, m Model) error {
 
 			if c.IsNullType {
 				fmt.Fprintf(&buf, "\nvdb.%s.Valid = true", f.Name)
-				fmt.Fprintf(&buf, "\nvdb.%s.%s = v.%s", f.Name, c.BaseType, f.Name)
+				fmt.Fprintf(&buf, "\nvdb.%s.%s = ", f.Name, c.BaseType)
+				wrapConvertIf(f.Convert, &buf, strings.ToLower(c.BaseType), "v." + f.Name)
 			} else {
-				fmt.Fprintf(&buf, "\nvdb.%s = v.%s", f.Name, f.Name)
+				fmt.Fprintf(&buf, "\nvdb.%s = ", f.Name)
+				wrapConvertIf(f.Convert, &buf, strings.ToLower(c.BaseType), "v." + f.Name)
 			}
 		}
 	}
@@ -617,7 +649,7 @@ func generateModelFile(ctx *genctx, m Model) error {
 
 	fmt.Fprintf(&buf, "\n\nfunc (v *%s) Update(tx *db.Tx) (err error) {", m.Name)
 	buf.WriteString("\nif pdebug.Enabled {")
-	fmt.Fprintf(&buf, "\n" + `g := pdebug.Marker("%s.Update (%%s)", v.ID).BindError(&err)`, m.Name)
+	fmt.Fprintf(&buf, "\n"+`g := pdebug.Marker("%s.Update (%%s)", v.ID).BindError(&err)`, m.Name)
 	buf.WriteString("\ndefer g.End()")
 	buf.WriteString("\n}")
 	fmt.Fprintf(&buf, "\n\nvdb := db.%s{}", m.Name)
