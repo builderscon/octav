@@ -27,7 +27,7 @@ This will regenerate
 
 If you add more endpoints, you need to write additional `doXXXX` handlers in handlers.go
 
-## If you edited interfaces.go or db/interfaces.go
+## If you edited interface.go or db/interface.go
 
 Technically, you do NOT need to do this every time, but if you want to be safe, whenever you touch these files you should regenerate auto-generated files
 
