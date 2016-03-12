@@ -565,7 +565,7 @@ func generateModelFile(ctx *genctx, m Model) error {
 
 			if c.IsNullType {
 				fmt.Fprintf(&buf, "\nif vdb.%s.Valid {", f.Name)
-				fmt.Fprintf(&buf, "\nv.%s = vdb.%s", f.Name, c.BaseType)
+				fmt.Fprintf(&buf, "\nv.%s = vdb.%s.%s", f.Name, f.Name, c.BaseType)
 				buf.WriteString("\n}")
 			} else {
 				fmt.Fprintf(&buf, "\nv.%s = vdb.%s", f.Name, f.Name)
