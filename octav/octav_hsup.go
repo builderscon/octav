@@ -120,17 +120,10 @@ func httpCreateSession(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-{
-buf, _ := json.MarshalIndent(payload, "", "  ")
-pdebug.Printf("%s", buf)
-}
-
 	if err := validator.HTTPCreateSessionRequest.Validate(&payload); err != nil {
 		httpError(w, `Invalid input`, http.StatusInternalServerError, err)
 		return
 	}
-
-pdebug.Printf("Validation done")
 	doCreateSession(context.Background(), w, r, payload)
 }
 

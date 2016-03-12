@@ -271,7 +271,13 @@ func init() {
 		).
 		AddProp(
 			"tags",
-			jsval.Reference(M).RefersTo("#/definitions/tag_array"),
+			jsval.OneOf().
+				Add(
+					jsval.String(),
+				).
+				Add(
+					jsval.Reference(M).RefersTo("#/definitions/tag_array"),
+				),
 		).
 		AddProp(
 			"title",
@@ -321,16 +327,13 @@ func init() {
 	R22 = jsval.String()
 	R23 = jsval.String()
 	R24 = jsval.String()
-	R25 = jsval.OneOf().
-		Add(jsval.NullConstraint).
-		Add(jsval.String()).
-		Add(jsval.Array().
+	R25 = jsval.Array().
 		Items(
 			jsval.Reference(M).RefersTo("#/definitions/tag"),
 		).
 		AdditionalItems(
 			jsval.EmptyConstraint,
-		))
+		)
 	R26 = jsval.String().Enum("XXXL", "XXL", "XL", "L", "M", "S", "XS")
 	R27 = jsval.String().Format("url")
 	R28 = jsval.String().RegexpString("^[a-fA-F0-9-]+$")
@@ -705,7 +708,13 @@ func init() {
 				).
 				AddProp(
 					"tags",
-					jsval.Reference(M).RefersTo("#/definitions/tag_array"),
+					jsval.OneOf().
+						Add(
+							jsval.String(),
+						).
+						Add(
+							jsval.Reference(M).RefersTo("#/definitions/tag_array"),
+						),
 				).
 				AddProp(
 					"title",
@@ -1222,7 +1231,13 @@ func init() {
 				).
 				AddProp(
 					"tags",
-					jsval.Reference(M).RefersTo("#/definitions/tag_array"),
+					jsval.OneOf().
+						Add(
+							jsval.String(),
+						).
+						Add(
+							jsval.Reference(M).RefersTo("#/definitions/tag_array"),
+						),
 				).
 				AddProp(
 					"title",

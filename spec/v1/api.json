@@ -1,4 +1,14 @@
 {
+  "hsup.client": {
+    "imports": [
+      "github.com/builderscon/octav/octav/service"
+    ]
+  },
+  "hsup.server": {
+    "imports": [
+      "github.com/builderscon/octav/octav/service"
+    ]
+  },
   "definitions": {
     "boolean_default_false": {
       "type": "boolean",
@@ -207,7 +217,12 @@
         "starts_on": { "$ref": "#/definitions/datetime" },
         "duration": { "$ref": "#/definitions/duration" },
         "material_level": { "$ref": "#/definitions/material_level" },
-        "tags": { "$ref": "#/definitions/tag_array" },
+        "tags": {
+          "oneOf": [
+            { "type": "string" },
+            { "$ref": "#/definitions/tag_array" }
+          ]
+        },
         "category": { "type": "string" },
         "spoken_language": { "$ref": "#/definitions/language" },
         "slide_language": { "$ref": "#/definitions/language" },
@@ -452,7 +467,7 @@
       "href": "/conference/create",
       "encType": "application/x-www-form-urlencoded",
       "schema": {
-        "hsup.type": "octav.CreateConferenceRequest",
+        "hsup.type": "service.CreateConferenceRequest",
         "properties": {
           "title": { "$ref": "#/definitions/string_en" },
           "sub_title": { "$ref": "#/definitions/string_en" },
@@ -526,7 +541,7 @@
       "href": "/session/create",
       "schema": {
         "type": "object",
-        "hsup.type": "octav.CreateSessionRequest",
+        "hsup.type": "service.CreateSessionRequest",
         "required": ["conference_id", "speaker_id", "title", "abstract", "duration"],
         "properties": {
           "conference_id": { "$ref": "#/definitions/uuid" },
