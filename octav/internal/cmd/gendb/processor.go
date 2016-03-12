@@ -169,6 +169,7 @@ func (p *Processor) ProcessStruct(s Struct) error {
 	buf.WriteString(s.PackageName)
 	buf.WriteString("\n\n")
 	buf.WriteString("\nimport (")
+	buf.WriteString("\n" + `"database/sql"`)
 	buf.WriteString("\n" + `"errors"`)
 	if hasEID && hasOID {
 		buf.WriteString("\n" + `"strconv"`)
@@ -224,8 +225,9 @@ func (p *Processor) ProcessStruct(s Struct) error {
 		}
 	}
 
-	fmt.Fprintf(&buf, "\nvar %sTable = %s\n", s.Name, strconv.Quote(s.Tablename))
-	fmt.Fprintf(&buf, "\nfunc (%c *%s) Scan(scanner interface { Scan(...interface{}) error }) error {", varname, s.Name)
+	fmt.Fprintf(&buf, "\nvar %sTable = %s", s.Name, strconv.Quote(s.Tablename))
+	fmt.Fprintf(&buf, "\ntype %sList []%s", s.Name, s.Name)
+	fmt.Fprintf(&buf, "\n\nfunc (%c *%s) Scan(scanner interface { Scan(...interface{}) error }) error {", varname, s.Name)
 	fmt.Fprintf(&buf, "\nreturn scanner.Scan(%s)", sfields.String())
 	buf.WriteString("\n}\n")
 
@@ -292,8 +294,26 @@ func (p *Processor) ProcessStruct(s Struct) error {
 		buf.WriteString("\n}\n")
 	} else {
 		fmt.Fprintf(&buf, "\nreturn errors.New(%s)", strconv.Quote("column OID must be filled"))
-		buf.WriteString("\n}\n")
+		buf.WriteString("\n}")
 	}
+
+	fmt.Fprintf(&buf, "\n\nfunc (v *%sList) FromRows(rows *sql.Rows, capacity int) error {", s.Name)
+	fmt.Fprintf(&buf, "\nvar res []%s", s.Name)
+	buf.WriteString("\nif capacity > 0 {")
+	fmt.Fprintf(&buf, "\nres = make([]%s, 0, capacity)", s.Name)
+	buf.WriteString("\n} else {")
+	fmt.Fprintf(&buf, "\nres = []%s{}", s.Name)
+	buf.WriteString("\n}")
+	buf.WriteString("\n\nfor rows.Next() {")
+	fmt.Fprintf(&buf, "\nvdb := %s{}", s.Name)
+	buf.WriteString("\nif err := vdb.Scan(rows); err != nil {")
+	buf.WriteString("\nreturn err")
+	buf.WriteString("\n}")
+	buf.WriteString("\nres = append(res, vdb)")
+	buf.WriteString("\n}")
+	buf.WriteString("\n*v = res")
+	buf.WriteString("\nreturn nil")
+	buf.WriteString("\n}")
 
 	if hasOID && hasEID {
 		fmt.Fprintf(&buf, "\n\nfunc (v *%sList) LoadSinceEID(tx *Tx, since string, limit int) error {", s.Name)
@@ -313,16 +333,9 @@ func (p *Processor) ProcessStruct(s Struct) error {
 		buf.WriteString("\nif err != nil {")
 		buf.WriteString("\nreturn err")
 		buf.WriteString("\n}")
-
-		fmt.Fprintf(&buf, "\nres := make([]%s, 0, limit)", s.Name)
-		buf.WriteString("\nfor rows.Next() {")
-		fmt.Fprintf(&buf, "\nvdb := %s{}", s.Name)
-		buf.WriteString("\nif err := vdb.Scan(rows); err != nil {")
+		buf.WriteString("\n\nif err := v.FromRows(rows, limit); err != nil {")
 		buf.WriteString("\nreturn err")
 		buf.WriteString("\n}")
-		buf.WriteString("\nres = append(res, vdb)")
-		buf.WriteString("\n}")
-		buf.WriteString("\n*v = res")
 		buf.WriteString("\nreturn nil")
 		buf.WriteString("\n}")
 	}
