@@ -35,15 +35,24 @@ func setupAndRun(m *testing.M) int {
 		}
 	}
 
-	if dsn := os.Getenv("OCTAV_TEST_DSN"); dsn != "" {
+	var dsn string
+	if dsn = os.Getenv("OCTAV_TEST_DSN"); dsn != "" {
 		if pdebug.Enabled {
-			pdebug.Printf("OCTAV_TEST_DSN (%s) is available. Initializing database", dsn)
+			pdebug.Printf("OCTAV_TEST_DSN (%s) is available", dsn)
 		}
-		if err := db.Init(dsn); err != nil {
-			panic(err.Error())
+	} else {
+		dsn = db.DefaultDSN
+		if pdebug.Enabled {
+			pdebug.Printf("Using default DSN '%s'", dsn)
 		}
 	}
 
+	if pdebug.Enabled {
+		pdebug.Printf("Initializing database...")
+	}
+	if err := db.Init(dsn); err != nil {
+		panic(err.Error())
+	}
 
 	return m.Run()
 }

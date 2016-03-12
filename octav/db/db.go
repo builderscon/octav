@@ -44,7 +44,7 @@ func init() {
 
 func Init(dsn string) error {
 	if dsn == "" {
-		dsn = defaultDSN()
+		dsn = DefaultDSN
 	}
 
 	// dsn can be a template, so we can incorporate automatically
