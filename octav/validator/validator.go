@@ -78,7 +78,13 @@ func init() {
 		).
 		AddProp(
 			"dates",
-			jsval.Reference(M).RefersTo("#/definitions/date_array"),
+			jsval.OneOf().
+				Add(
+					jsval.NullConstraint,
+				).
+				Add(
+					jsval.Reference(M).RefersTo("#/definitions/date_array"),
+				),
 		).
 		AddProp(
 			"description",
@@ -119,7 +125,7 @@ func init() {
 		AdditionalItems(
 			jsval.EmptyConstraint,
 		)
-	R5 = jsval.String().RegexpString("^\\d+-\\d+-\\d+$")
+	R5 = jsval.String().RegexpString("^\\d+-\\d+-\\d+(,\\d+-\\d+-\\d+-)*$")
 	R6 = jsval.OneOf().
 		Add(
 			jsval.String().Format("date-time"),
@@ -390,7 +396,7 @@ func init() {
 					jsval.Reference(M).RefersTo("#/definitions/string_en"),
 				).
 				AddProp(
-					"starts-on",
+					"starts_on",
 					jsval.Reference(M).RefersTo("#/definitions/datetime"),
 				).
 				AddProp(
@@ -420,7 +426,13 @@ func init() {
 				).
 				AddProp(
 					"dates",
-					jsval.Reference(M).RefersTo("#/definitions/date_array"),
+					jsval.OneOf().
+						Add(
+							jsval.NullConstraint,
+						).
+						Add(
+							jsval.Reference(M).RefersTo("#/definitions/date_array"),
+						),
 				).
 				AddProp(
 					"description",
@@ -1015,7 +1027,13 @@ func init() {
 				).
 				AddProp(
 					"dates",
-					jsval.Reference(M).RefersTo("#/definitions/date_array"),
+					jsval.OneOf().
+						Add(
+							jsval.NullConstraint,
+						).
+						Add(
+							jsval.Reference(M).RefersTo("#/definitions/date_array"),
+						),
 				).
 				AddProp(
 					"description",
@@ -1336,7 +1354,7 @@ func init() {
 					jsval.Reference(M).RefersTo("#/definitions/string_en"),
 				).
 				AddProp(
-					"starts-on",
+					"starts_on",
 					jsval.Reference(M).RefersTo("#/definitions/datetime"),
 				).
 				AddProp(

@@ -130,16 +130,21 @@ func (v *Room) FromRow(vdb db.Room) error {
 	return nil
 }
 
+func (v *Room) ToRow(vdb *db.Room) error {
+	vdb.EID = v.ID
+	vdb.VenueID = v.VenueID
+	vdb.Name = v.Name
+	vdb.Capacity = v.Capacity
+	return nil
+}
+
 func (v *Room) Create(tx *db.Tx) error {
 	if v.ID == "" {
 		v.ID = UUID()
 	}
 
 	vdb := db.Room{}
-	vdb.EID = v.ID
-	vdb.VenueID = v.VenueID
-	vdb.Name = v.Name
-	vdb.Capacity = v.Capacity
+	v.ToRow(&vdb)
 	if err := vdb.Create(tx); err != nil {
 		return err
 	}
@@ -148,6 +153,30 @@ func (v *Room) Create(tx *db.Tx) error {
 		return err
 	}
 	return nil
+}
+
+func (v *Room) Update(tx *db.Tx) (err error) {
+	if pdebug.Enabled {
+		g := pdebug.Marker("Room.Update (%s)", v.ID).BindError(&err)
+		defer g.End()
+	}
+
+	vdb := db.Room{}
+	v.ToRow(&vdb)
+	if err := vdb.Update(tx); err != nil {
+		return err
+	}
+
+	return v.L10N.Foreach(func(l, k, x string) error {
+		ls := db.LocalizedString{
+			ParentType: "Room",
+			ParentID:   v.ID,
+			Language:   l,
+			Name:       k,
+			Localized:  x,
+		}
+		return ls.Upsert(tx)
+	})
 }
 
 func (v *Room) Delete(tx *db.Tx) error {

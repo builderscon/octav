@@ -89,7 +89,7 @@
     },
     "datestr": {
       "type": "string",
-      "pattern": "^\\d+-\\d+-\\d+$"
+      "pattern": "^\\d+-\\d+-\\d+(,\\d+-\\d+-\\d+-)*$"
     },
     "date_array": {
       "type": "array",
@@ -104,7 +104,12 @@
         "slug": { "$ref": "#/definitions/string_en" },
         "description": { "$ref": "#/definitions/string_en" },
         "venue": { "$ref": "#/definitions/venue" },
-        "dates": { "$ref": "#/definitions/date_array" }
+        "dates": {
+          "oneOf": [
+            { "type": "null" },
+            { "$ref": "#/definitions/date_array" }
+          ]
+        }
       },
       "patternProperties": {
         "title#[a-z]+": { "$ref": "#/definitions/string_i18n" },
@@ -456,7 +461,7 @@
           "sub_title": { "$ref": "#/definitions/string_en" },
           "slug": { "$ref": "#/definitions/string_en" },
           "description": { "$ref": "#/definitions/string_en" },
-          "starts-on": { "$ref": "#/definitions/datetime" }
+          "starts_on": { "$ref": "#/definitions/datetime" }
         },
         "patternProperties": {
           "title#[a-z]+": { "$ref": "#/definitions/string_i18n" },
@@ -493,7 +498,7 @@
           "sub_title": { "$ref": "#/definitions/string_en" },
           "slug": { "$ref": "#/definitions/string_en" },
           "description": { "$ref": "#/definitions/string_en" },
-          "starts-on": { "$ref": "#/definitions/datetime" }
+          "starts_on": { "$ref": "#/definitions/datetime" }
         },
         "patternProperties": {
           "title#[a-z]+": { "$ref": "#/definitions/string_i18n" },

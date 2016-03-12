@@ -575,13 +575,7 @@ func generateModelFile(ctx *genctx, m Model) error {
 		buf.WriteString("\n}")
 	}
 
-	fmt.Fprintf(&buf, "\n\nfunc (v *%s) Create(tx *db.Tx) error {", m.Name)
-	if hasID {
-		buf.WriteString("\n" + `if v.ID == "" {`)
-		buf.WriteString("\nv.ID = UUID()")
-		buf.WriteString("\n}")
-	}
-	fmt.Fprintf(&buf, "\n\nvdb := db.%s{}", m.Name)
+	fmt.Fprintf(&buf, "\n\nfunc (v *%s) ToRow(vdb *db.%s) error {", m.Name, m.Name)
 	for _, f := range m.Fields {
 		if f.Name == "ID" {
 			buf.WriteString("\nvdb.EID = v.ID")
@@ -599,6 +593,17 @@ func generateModelFile(ctx *genctx, m Model) error {
 			}
 		}
 	}
+	buf.WriteString("\nreturn nil")
+	buf.WriteString("\n}")
+
+	fmt.Fprintf(&buf, "\n\nfunc (v *%s) Create(tx *db.Tx) error {", m.Name)
+	if hasID {
+		buf.WriteString("\n" + `if v.ID == "" {`)
+		buf.WriteString("\nv.ID = UUID()")
+		buf.WriteString("\n}")
+	}
+	fmt.Fprintf(&buf, "\n\nvdb := db.%s{}", m.Name)
+	buf.WriteString("\nv.ToRow(&vdb)")
 	buf.WriteString("\nif err := vdb.Create(tx); err != nil {")
 	buf.WriteString("\nreturn err")
 	buf.WriteString("\n}\n")
@@ -608,6 +613,28 @@ func generateModelFile(ctx *genctx, m Model) error {
 		buf.WriteString("\n}")
 	}
 	buf.WriteString("\nreturn nil")
+	buf.WriteString("\n}")
+
+	fmt.Fprintf(&buf, "\n\nfunc (v *%s) Update(tx *db.Tx) (err error) {", m.Name)
+	buf.WriteString("\nif pdebug.Enabled {")
+	fmt.Fprintf(&buf, "\n" + `g := pdebug.Marker("%s.Update (%%s)", v.ID).BindError(&err)`, m.Name)
+	buf.WriteString("\ndefer g.End()")
+	buf.WriteString("\n}")
+	fmt.Fprintf(&buf, "\n\nvdb := db.%s{}", m.Name)
+	buf.WriteString("\nv.ToRow(&vdb)")
+	buf.WriteString("\nif err := vdb.Update(tx); err != nil {")
+	buf.WriteString("\nreturn err")
+	buf.WriteString("\n}")
+	buf.WriteString("\n\nreturn v.L10N.Foreach(func(l, k, x string) error {")
+	buf.WriteString("\nls := db.LocalizedString{")
+	fmt.Fprintf(&buf, "\nParentType: %s,", strconv.Quote(m.Name))
+	buf.WriteString("\nParentID: v.ID,")
+	buf.WriteString("\nLanguage: l,")
+	buf.WriteString("\nName: k,")
+	buf.WriteString("\nLocalized: x,")
+	buf.WriteString("\n}")
+	buf.WriteString("\nreturn ls.Upsert(tx)")
+	buf.WriteString("\n})")
 	buf.WriteString("\n}")
 
 	fmt.Fprintf(&buf, "\n\nfunc (v *%s) Delete(tx *db.Tx) error {", m.Name)

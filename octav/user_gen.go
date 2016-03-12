@@ -154,18 +154,23 @@ func (v *User) FromRow(vdb db.User) error {
 	return nil
 }
 
-func (v *User) Create(tx *db.Tx) error {
-	if v.ID == "" {
-		v.ID = UUID()
-	}
-
-	vdb := db.User{}
+func (v *User) ToRow(vdb *db.User) error {
 	vdb.EID = v.ID
 	vdb.FirstName = v.FirstName
 	vdb.LastName = v.LastName
 	vdb.Nickname = v.Nickname
 	vdb.Email = v.Email
 	vdb.TshirtSize = v.TshirtSize
+	return nil
+}
+
+func (v *User) Create(tx *db.Tx) error {
+	if v.ID == "" {
+		v.ID = UUID()
+	}
+
+	vdb := db.User{}
+	v.ToRow(&vdb)
 	if err := vdb.Create(tx); err != nil {
 		return err
 	}
@@ -174,6 +179,30 @@ func (v *User) Create(tx *db.Tx) error {
 		return err
 	}
 	return nil
+}
+
+func (v *User) Update(tx *db.Tx) (err error) {
+	if pdebug.Enabled {
+		g := pdebug.Marker("User.Update (%s)", v.ID).BindError(&err)
+		defer g.End()
+	}
+
+	vdb := db.User{}
+	v.ToRow(&vdb)
+	if err := vdb.Update(tx); err != nil {
+		return err
+	}
+
+	return v.L10N.Foreach(func(l, k, x string) error {
+		ls := db.LocalizedString{
+			ParentType: "User",
+			ParentID:   v.ID,
+			Language:   l,
+			Name:       k,
+			Localized:  x,
+		}
+		return ls.Upsert(tx)
+	})
 }
 
 func (v *User) Delete(tx *db.Tx) error {

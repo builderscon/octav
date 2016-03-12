@@ -9,7 +9,7 @@ import (
 
 func (v Conference) GetPropNames() ([]string, error) {
 	l, _ := v.L10N.GetPropNames()
-	return append(l, "id", "title", "sub_title", "slug", "dates"), nil
+	return append(l, "id", "title", "sub_title", "slug"), nil
 }
 
 func (v Conference) GetPropValue(s string) (interface{}, error) {
@@ -22,8 +22,6 @@ func (v Conference) GetPropValue(s string) (interface{}, error) {
 		return v.SubTitle, nil
 	case "slug":
 		return v.Slug, nil
-	case "dates":
-		return v.Dates, nil
 	default:
 		return v.L10N.GetPropValue(s)
 	}
@@ -35,7 +33,6 @@ func (v Conference) MarshalJSON() ([]byte, error) {
 	m["title"] = v.Title
 	m["sub_title"] = v.SubTitle
 	m["slug"] = v.Slug
-	m["dates"] = v.Dates
 	buf, err := json.Marshal(m)
 	if err != nil {
 		return nil, err
@@ -89,14 +86,8 @@ func (v *Conference) UnmarshalJSON(data []byte) error {
 		}
 	}
 
-	if jv, ok := m["dates"]; ok {
-		switch jv.(type) {
-		case []ConferenceDate:
-			v.Dates = jv.([]ConferenceDate)
-			delete(m, "dates")
-		default:
-			return ErrInvalidFieldType{Field: "dates"}
-		}
+	if err := ExtractL10NFields(m, &v.L10N, []string{"title", "sub_title"}); err != nil {
+		return err
 	}
 	return nil
 }
@@ -141,17 +132,22 @@ func (v *Conference) FromRow(vdb db.Conference) error {
 	return nil
 }
 
+func (v *Conference) ToRow(vdb *db.Conference) error {
+	vdb.EID = v.ID
+	vdb.Title = v.Title
+	vdb.SubTitle.Valid = true
+	vdb.SubTitle.String = v.SubTitle
+	vdb.Slug = v.Slug
+	return nil
+}
+
 func (v *Conference) Create(tx *db.Tx) error {
 	if v.ID == "" {
 		v.ID = UUID()
 	}
 
 	vdb := db.Conference{}
-	vdb.EID = v.ID
-	vdb.Title = v.Title
-	vdb.SubTitle.Valid = true
-	vdb.SubTitle.String = v.SubTitle
-	vdb.Slug = v.Slug
+	v.ToRow(&vdb)
 	if err := vdb.Create(tx); err != nil {
 		return err
 	}
@@ -160,6 +156,30 @@ func (v *Conference) Create(tx *db.Tx) error {
 		return err
 	}
 	return nil
+}
+
+func (v *Conference) Update(tx *db.Tx) (err error) {
+	if pdebug.Enabled {
+		g := pdebug.Marker("Conference.Update (%s)", v.ID).BindError(&err)
+		defer g.End()
+	}
+
+	vdb := db.Conference{}
+	v.ToRow(&vdb)
+	if err := vdb.Update(tx); err != nil {
+		return err
+	}
+
+	return v.L10N.Foreach(func(l, k, x string) error {
+		ls := db.LocalizedString{
+			ParentType: "Conference",
+			ParentID:   v.ID,
+			Language:   l,
+			Name:       k,
+			Localized:  x,
+		}
+		return ls.Upsert(tx)
+	})
 }
 
 func (v *Conference) Delete(tx *db.Tx) error {

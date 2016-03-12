@@ -144,17 +144,22 @@ func (v *Venue) FromRow(vdb db.Venue) error {
 	return nil
 }
 
+func (v *Venue) ToRow(vdb *db.Venue) error {
+	vdb.EID = v.ID
+	vdb.Name = v.Name
+	vdb.Address = v.Address
+	vdb.Longitude = v.Longitude
+	vdb.Latitude = v.Latitude
+	return nil
+}
+
 func (v *Venue) Create(tx *db.Tx) error {
 	if v.ID == "" {
 		v.ID = UUID()
 	}
 
 	vdb := db.Venue{}
-	vdb.EID = v.ID
-	vdb.Name = v.Name
-	vdb.Address = v.Address
-	vdb.Longitude = v.Longitude
-	vdb.Latitude = v.Latitude
+	v.ToRow(&vdb)
 	if err := vdb.Create(tx); err != nil {
 		return err
 	}
@@ -163,6 +168,30 @@ func (v *Venue) Create(tx *db.Tx) error {
 		return err
 	}
 	return nil
+}
+
+func (v *Venue) Update(tx *db.Tx) (err error) {
+	if pdebug.Enabled {
+		g := pdebug.Marker("Venue.Update (%s)", v.ID).BindError(&err)
+		defer g.End()
+	}
+
+	vdb := db.Venue{}
+	v.ToRow(&vdb)
+	if err := vdb.Update(tx); err != nil {
+		return err
+	}
+
+	return v.L10N.Foreach(func(l, k, x string) error {
+		ls := db.LocalizedString{
+			ParentType: "Venue",
+			ParentID:   v.ID,
+			Language:   l,
+			Name:       k,
+			Localized:  x,
+		}
+		return ls.Upsert(tx)
+	})
 }
 
 func (v *Venue) Delete(tx *db.Tx) error {
