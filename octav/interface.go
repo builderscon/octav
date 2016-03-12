@@ -154,12 +154,11 @@ type LookupVenueRequest struct {
 }
 
 type Conference struct {
-	ID       string           `json:"id"`
-	Title    string           `json:"title"`
-	SubTitle string           `json:"sub_title"`
-	Slug     string           `json:"slug"`
-	Dates    []ConferenceDate `json:"dates"` // only populated for JSON response
-	L10N     LocalizedFields  `json:"-"`
+	ID       string          `json:"id"`
+	Title    string          `json:"title" l10n:"true"`
+	SubTitle string          `json:"sub_title" l10n:"true"`
+	Slug     string          `json:"slug"`
+	L10N     LocalizedFields `json:"-"`
 }
 type ConferenceList []Conference
 type CreateConferenceRequest struct {
