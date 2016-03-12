@@ -1,18 +1,22 @@
 package octav_test
 
 import (
+	"encoding/json"
 	"fmt"
 	"net/http/httptest"
+	"os"
 	"testing"
 
 	"github.com/builderscon/octav/octav"
 	"github.com/builderscon/octav/octav/client"
+	"github.com/builderscon/octav/octav/service"
+	"github.com/builderscon/octav/octav/tools"
 	"github.com/builderscon/octav/octav/validator"
 	"github.com/stretchr/testify/assert"
 )
 
 func bigsight() *octav.Venue {
-	lf := octav.LocalizedFields{}
+	lf := tools.LocalizedFields{}
 	lf.Set("ja", "name", `東京ビッグサイト`)
 	lf.Set("ja", "address", `〒135-0063 東京都江東区有明３丁目１０−１`)
 	return &octav.Venue{
@@ -25,7 +29,7 @@ func bigsight() *octav.Venue {
 }
 
 func intlConferenceRoom(venueID string) *octav.Room {
-	lf := octav.LocalizedFields{}
+	lf := tools.LocalizedFields{}
 	lf.Set("ja", "name", `国際会議場`)
 	return &octav.Room{
 		Capacity: 1000,
@@ -107,14 +111,14 @@ func testDeleteVenue(t *testing.T, cl *client.Client, id string) error {
 	return err
 }
 
-func yapcasia() *octav.CreateConferenceRequest {
-	return &octav.CreateConferenceRequest{
+func yapcasia() *service.CreateConferenceRequest {
+	return &service.CreateConferenceRequest{
 		Title: "YAPC::Asia Tokyo",
 		Slug:  "yapcasia",
 	}
 }
 
-func testCreateConference(t *testing.T, cl *client.Client, in *octav.CreateConferenceRequest) (*octav.Conference, error) {
+func testCreateConference(t *testing.T, cl *client.Client, in *service.CreateConferenceRequest) (*octav.Conference, error) {
 	res, err := cl.CreateConference(in)
 	if !assert.NoError(t, err, "CreateConference should succeed") {
 		return nil, err
@@ -237,7 +241,7 @@ func TestCreateRoom(t *testing.T) {
 	}
 }
 
-func testCreateSession(t *testing.T, cl *client.Client, in *octav.CreateSessionRequest) (*octav.Session, error) {
+func testCreateSession(t *testing.T, cl *client.Client, in *service.CreateSessionRequest) (*octav.Session, error) {
 	res, err := cl.CreateSession(in)
 	if !assert.NoError(t, err, "CreateSession should succeed") {
 		return nil, err
@@ -261,13 +265,13 @@ func TestCreateSession(t *testing.T) {
 		return
 	}
 
-	in := octav.CreateSessionRequest{}
+	in := service.CreateSessionRequest{}
 	in.ConferenceID.Set(conference.ID)
 	in.SpeakerID.Set(user.ID)
 	in.Title.Set("How To Write A Conference Backend")
 	in.Duration.Set(60)
 	in.Abstract.Set("Use lots of reflection and generate lots of code")
-	//	json.NewEncoder(os.Stdout).Encode(in)
+	json.NewEncoder(os.Stdout).Encode(in)
 	res, err := testCreateSession(t, cl, &in)
 	if err != nil {
 		return
@@ -279,7 +283,7 @@ func TestCreateSession(t *testing.T) {
 }
 
 func johndoe() *octav.CreateUserRequest {
-	lf := octav.LocalizedFields{}
+	lf := tools.LocalizedFields{}
 	lf.Set("ja", "first_name", "ジョン")
 	lf.Set("ja", "last_name", "ドー")
 	return &octav.CreateUserRequest{
@@ -408,7 +412,7 @@ func TestListSessionsByConference(t *testing.T) {
 	}
 
 	for i := 0; i < 10; i++ {
-		sin := octav.CreateSessionRequest{}
+		sin := service.CreateSessionRequest{}
 		sin.ConferenceID.Set(conference.ID)
 		sin.SpeakerID.Set(user.ID)
 		sin.Title.Set(fmt.Sprintf("Title %d", i))

@@ -3,9 +3,14 @@ package octav
 
 import (
 	"encoding/json"
+	"time"
+
 	"github.com/builderscon/octav/octav/db"
+	"github.com/builderscon/octav/octav/tools"
 	"github.com/lestrrat/go-pdebug"
 )
+
+var _ = time.Time{}
 
 func (v Room) GetPropNames() ([]string, error) {
 	l, _ := v.L10N.GetPropNames()
@@ -37,7 +42,7 @@ func (v Room) MarshalJSON() ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-	return marshalJSONWithL10N(buf, v.L10N)
+	return tools.MarshalJSONWithL10N(buf, v.L10N)
 }
 
 func (v *Room) UnmarshalJSON(data []byte) error {
@@ -86,7 +91,7 @@ func (v *Room) UnmarshalJSON(data []byte) error {
 		}
 	}
 
-	if err := ExtractL10NFields(m, &v.L10N, []string{"name"}); err != nil {
+	if err := tools.ExtractL10NFields(m, &v.L10N, []string{"name"}); err != nil {
 		return err
 	}
 	return nil
@@ -114,7 +119,7 @@ func (v *Room) LoadLocalizedFields(tx *db.Tx) error {
 	}
 
 	if len(ls) > 0 {
-		v.L10N = LocalizedFields{}
+		v.L10N = tools.LocalizedFields{}
 		for _, l := range ls {
 			v.L10N.Set(l.Language, l.Name, l.Localized)
 		}
@@ -140,7 +145,7 @@ func (v *Room) ToRow(vdb *db.Room) error {
 
 func (v *Room) Create(tx *db.Tx) error {
 	if v.ID == "" {
-		v.ID = UUID()
+		v.ID = tools.UUID()
 	}
 
 	vdb := db.Room{}

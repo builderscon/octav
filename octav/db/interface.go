@@ -43,16 +43,16 @@ type Session struct {
 	Memo              sql.NullString // Correspondence between the speaker and the organizer. Should not be publicly available
 	StartsOn          NullTime       // Time that this session is scheduled to start on
 	Duration          int            // Length of this session in minutes.
-	MaterialLevel     string
+	MaterialLevel     sql.NullString
 	Tags              sql.NullString // Comma separated tags
-	Category          string
-	SpokenLanguage    string
-	SlideLanguage     string
-	SlideSubtitles    string
+	Category          sql.NullString
+	SpokenLanguage    sql.NullString
+	SlideLanguage     sql.NullString
+	SlideSubtitles    sql.NullString
 	SlideURL          sql.NullString
 	VideoURL          sql.NullString
-	PhotoPermission   string
-	VideoPermission   string
+	PhotoPermission   sql.NullString
+	VideoPermission   sql.NullString
 	HasInterpretation bool
 	Status            string
 	SortOrder         int

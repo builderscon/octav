@@ -3,9 +3,14 @@ package octav
 
 import (
 	"encoding/json"
+	"time"
+
 	"github.com/builderscon/octav/octav/db"
+	"github.com/builderscon/octav/octav/tools"
 	"github.com/lestrrat/go-pdebug"
 )
+
+var _ = time.Time{}
 
 func (v User) GetPropNames() ([]string, error) {
 	l, _ := v.L10N.GetPropNames()
@@ -43,7 +48,7 @@ func (v User) MarshalJSON() ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-	return marshalJSONWithL10N(buf, v.L10N)
+	return tools.MarshalJSONWithL10N(buf, v.L10N)
 }
 
 func (v *User) UnmarshalJSON(data []byte) error {
@@ -136,7 +141,7 @@ func (v *User) LoadLocalizedFields(tx *db.Tx) error {
 	}
 
 	if len(ls) > 0 {
-		v.L10N = LocalizedFields{}
+		v.L10N = tools.LocalizedFields{}
 		for _, l := range ls {
 			v.L10N.Set(l.Language, l.Name, l.Localized)
 		}
@@ -166,7 +171,7 @@ func (v *User) ToRow(vdb *db.User) error {
 
 func (v *User) Create(tx *db.Tx) error {
 	if v.ID == "" {
-		v.ID = UUID()
+		v.ID = tools.UUID()
 	}
 
 	vdb := db.User{}

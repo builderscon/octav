@@ -3,9 +3,14 @@ package octav
 
 import (
 	"encoding/json"
+	"time"
+
 	"github.com/builderscon/octav/octav/db"
+	"github.com/builderscon/octav/octav/tools"
 	"github.com/lestrrat/go-pdebug"
 )
+
+var _ = time.Time{}
 
 func (v Conference) GetPropNames() ([]string, error) {
 	l, _ := v.L10N.GetPropNames()
@@ -37,7 +42,7 @@ func (v Conference) MarshalJSON() ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-	return marshalJSONWithL10N(buf, v.L10N)
+	return tools.MarshalJSONWithL10N(buf, v.L10N)
 }
 
 func (v *Conference) UnmarshalJSON(data []byte) error {
@@ -86,7 +91,7 @@ func (v *Conference) UnmarshalJSON(data []byte) error {
 		}
 	}
 
-	if err := ExtractL10NFields(m, &v.L10N, []string{"title", "sub_title"}); err != nil {
+	if err := tools.ExtractL10NFields(m, &v.L10N, []string{"title", "sub_title"}); err != nil {
 		return err
 	}
 	return nil
@@ -114,7 +119,7 @@ func (v *Conference) LoadLocalizedFields(tx *db.Tx) error {
 	}
 
 	if len(ls) > 0 {
-		v.L10N = LocalizedFields{}
+		v.L10N = tools.LocalizedFields{}
 		for _, l := range ls {
 			v.L10N.Set(l.Language, l.Name, l.Localized)
 		}
@@ -138,23 +143,6 @@ func (v *Conference) ToRow(vdb *db.Conference) error {
 	vdb.SubTitle.Valid = true
 	vdb.SubTitle.String = v.SubTitle
 	vdb.Slug = v.Slug
-	return nil
-}
-
-func (v *Conference) Create(tx *db.Tx) error {
-	if v.ID == "" {
-		v.ID = UUID()
-	}
-
-	vdb := db.Conference{}
-	v.ToRow(&vdb)
-	if err := vdb.Create(tx); err != nil {
-		return err
-	}
-
-	if err := v.L10N.CreateLocalizedStrings(tx, "Conference", v.ID); err != nil {
-		return err
-	}
 	return nil
 }
 

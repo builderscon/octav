@@ -8,6 +8,7 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/builderscon/octav/octav/service"
 	"github.com/builderscon/octav/octav/validator"
 	"github.com/gorilla/mux"
 	"github.com/lestrrat/go-pdebug"
@@ -69,7 +70,7 @@ func httpCreateConference(w http.ResponseWriter, r *http.Request) {
 		httpError(w, `Method was `+r.Method, http.StatusNotFound, nil)
 	}
 
-	var payload CreateConferenceRequest
+	var payload service.CreateConferenceRequest
 	if err := json.NewDecoder(r.Body).Decode(&payload); err != nil {
 		httpError(w, `Invalid input`, http.StatusInternalServerError, err)
 		return
@@ -113,16 +114,23 @@ func httpCreateSession(w http.ResponseWriter, r *http.Request) {
 		httpError(w, `Method was `+r.Method, http.StatusNotFound, nil)
 	}
 
-	var payload CreateSessionRequest
+	var payload service.CreateSessionRequest
 	if err := json.NewDecoder(r.Body).Decode(&payload); err != nil {
 		httpError(w, `Invalid input`, http.StatusInternalServerError, err)
 		return
 	}
 
+{
+buf, _ := json.MarshalIndent(payload, "", "  ")
+pdebug.Printf("%s", buf)
+}
+
 	if err := validator.HTTPCreateSessionRequest.Validate(&payload); err != nil {
 		httpError(w, `Invalid input`, http.StatusInternalServerError, err)
 		return
 	}
+
+pdebug.Printf("Validation done")
 	doCreateSession(context.Background(), w, r, payload)
 }
 
@@ -456,6 +464,28 @@ func httpUpdateConference(w http.ResponseWriter, r *http.Request) {
 	doUpdateConference(context.Background(), w, r, payload)
 }
 
+func httpUpdateSession(w http.ResponseWriter, r *http.Request) {
+	if pdebug.Enabled {
+		g := pdebug.Marker("httpUpdateSession")
+		defer g.End()
+	}
+	if strings.ToLower(r.Method) != `post` {
+		httpError(w, `Method was `+r.Method, http.StatusNotFound, nil)
+	}
+
+	var payload UpdateSessionRequest
+	if err := json.NewDecoder(r.Body).Decode(&payload); err != nil {
+		httpError(w, `Invalid input`, http.StatusInternalServerError, err)
+		return
+	}
+
+	if err := validator.HTTPUpdateSessionRequest.Validate(&payload); err != nil {
+		httpError(w, `Invalid input`, http.StatusInternalServerError, err)
+		return
+	}
+	doUpdateSession(context.Background(), w, r, payload)
+}
+
 func (s *Server) SetupRoutes() {
 	r := s.Router
 	r.HandleFunc(`/v1/conference/create`, httpCreateConference)
@@ -469,6 +499,7 @@ func (s *Server) SetupRoutes() {
 	r.HandleFunc(`/v1/schedule/list`, httpListSessionsByConference)
 	r.HandleFunc(`/v1/session/create`, httpCreateSession)
 	r.HandleFunc(`/v1/session/lookup`, httpLookupSession)
+	r.HandleFunc(`/v1/session/update`, httpUpdateSession)
 	r.HandleFunc(`/v1/user/create`, httpCreateUser)
 	r.HandleFunc(`/v1/user/delete`, httpDeleteUser)
 	r.HandleFunc(`/v1/user/lookup`, httpLookupUser)

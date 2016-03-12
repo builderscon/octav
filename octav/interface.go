@@ -1,9 +1,9 @@
 package octav
 
 import (
-	"sync"
 	"time"
 
+	"github.com/builderscon/octav/octav/tools"
 	"github.com/lestrrat/go-jsval"
 )
 
@@ -38,7 +38,7 @@ type Room struct {
 	VenueID  string          `json:"venue_id"`
 	Name     string          `json:"name" l10n:"true"`
 	Capacity uint            `json:"capacity"`
-	L10N     LocalizedFields `json:"-"`
+	L10N     tools.LocalizedFields `json:"-"`
 }
 type RoomList []Room
 type DeleteRoomRequest struct {
@@ -54,6 +54,7 @@ type LookupRoomRequest struct {
 	ID string `json:"id" urlenc:"id"`
 }
 
+type TagString string
 type Session struct {
 	ID                string          `json:"id"`
 	ConferenceID      string          `json:"conference_id"`
@@ -65,7 +66,7 @@ type Session struct {
 	StartsOn          time.Time       `json:"starts_on"`
 	Duration          int             `json:"duration"`
 	MaterialLevel     string          `json:"material_level"`
-	Tags              []string        `json:"tags,omitempty"`
+	Tags              TagString       `json:"tags,omitempty" assign:"convert"`
 	Category          string          `json:"category,omitempty"`
 	SpokenLanguage    string          `json:"spoken_language,omitempty"`
 	SlideLanguage     string          `json:"slide_language,omitempty"`
@@ -74,34 +75,39 @@ type Session struct {
 	VideoURL          string          `json:"video_url,omitempty"`
 	PhotoPermission   string          `json:"photo_permission"`
 	VideoPermission   string          `json:"video_permission"`
+	SortOrder         int             `json:"-"`
 	HasInterpretation bool            `json:"has_interpretation"`
 	Status            string          `json:"status"`
-	SortOrder         int             `json:"-"`
 	Confirmed         bool            `json:"confirmed"`
 	Conference        *Conference     `json:"conference"` // only populated for JSON response
 	Room              *Room           `json:"room"`       // only populated for JSON response
 	Speaker           *User           `json:"speaker"`    // only populated for JSON response
-	L10N              LocalizedFields `json:"-"`
+	L10N              tools.LocalizedFields `json:"-"`
 }
 type SessionList []Session
-type CreateSessionRequest struct {
-	ConferenceID    jsval.MaybeString `json:"conference_id,omitempty"`
-	SpeakerID       jsval.MaybeString `json:"speaker_id,omitempty"`
-	Title           jsval.MaybeString `json:"title,omitempty"`
-	Abstract        jsval.MaybeString `json:"abstract,omitempty"`
-	Memo            jsval.MaybeString `json:"memo,omitempty"`
-	Duration        jsval.MaybeInt    `json:"duration,omitempty"`
-	MaterialLevel   jsval.MaybeString `json:"material_level,omitempty"`
-	Tags            jsval.MaybeString `json:"tags,omitempty"`
-	Category        jsval.MaybeString `json:"category,omitempty"`
-	SpokenLanguage  jsval.MaybeString `json:"spoken_language,omitempty"`
-	SlideLanguage   jsval.MaybeString `json:"slide_language,omitempty"`
-	SlideSubtitles  jsval.MaybeString `json:"slide_subtitles,omitempty"`
-	SlideURL        jsval.MaybeString `json:"slide_url,omitempty"`
-	VideoURL        jsval.MaybeString `json:"video_url,omitempty"`
-	PhotoPermission jsval.MaybeString `json:"photo_permission,omitempty"`
-	VideoPermission jsval.MaybeString `json:"video_permission,omitempty"`
-	L10N            LocalizedFields   `json:"-"`
+type UpdateSessionRequest struct {
+	ID                string            `json:"id"`
+	ConferenceID      jsval.MaybeString `json:"conference_id,omitempty"`
+	SpeakerID         jsval.MaybeString `json:"speaker_id,omitempty"`
+	Title             jsval.MaybeString `json:"title,omitempty"`
+	Abstract          jsval.MaybeString `json:"abstract,omitempty"`
+	Memo              jsval.MaybeString `json:"memo,omitempty"`
+	Duration          jsval.MaybeInt    `json:"duration,omitempty"`
+	MaterialLevel     jsval.MaybeString `json:"material_level,omitempty"`
+	Tags              jsval.MaybeString `json:"tags,omitempty"`
+	Category          jsval.MaybeString `json:"category,omitempty"`
+	SpokenLanguage    jsval.MaybeString `json:"spoken_language,omitempty"`
+	SlideLanguage     jsval.MaybeString `json:"slide_language,omitempty"`
+	SlideSubtitles    jsval.MaybeString `json:"slide_subtitles,omitempty"`
+	SlideURL          jsval.MaybeString `json:"slide_url,omitempty"`
+	VideoURL          jsval.MaybeString `json:"video_url,omitempty"`
+	PhotoPermission   jsval.MaybeString `json:"photo_permission,omitempty"`
+	VideoPermission   jsval.MaybeString `json:"video_permission,omitempty"`
+	SortOrder         jsval.MaybeInt    `json:"sort_order,omitempty"`
+	HasInterpretation jsval.MaybeBool   `json:"has_interpretation"`
+	Status            jsval.MaybeString `json:"status"`
+	Confirmed         jsval.MaybeBool   `json:"confirmed"`
+	L10N              tools.LocalizedFields   `json:"-"`
 }
 type LookupSessionRequest struct {
 	ID string `json:"id" urlenc:"id"`
@@ -114,7 +120,7 @@ type User struct {
 	Nickname   string          `json:"nickname"`
 	Email      string          `json:"email"`
 	TshirtSize string          `json:"tshirt_size"`
-	L10N       LocalizedFields `json:"-"`
+	L10N       tools.LocalizedFields `json:"-"`
 }
 type UserList []User
 type CreateUserRequest struct {
@@ -123,7 +129,7 @@ type CreateUserRequest struct {
 	Nickname   string          `json:"nickname"`
 	Email      string          `json:"email"`
 	TshirtSize string          `json:"tshirt_size"`
-	L10N       LocalizedFields `json:"-"`
+	L10N       tools.LocalizedFields `json:"-"`
 }
 type LookupUserRequest struct {
 	ID string `json:"id" urlenc:"id"`
@@ -138,7 +144,7 @@ type Venue struct {
 	Address   string          `json:"address" l10n:"true"`
 	Longitude float64         `json:"longitude,omitempty"`
 	Latitude  float64         `json:"latitude,omitempty"`
-	L10N      LocalizedFields `json:"-"`
+	L10N      tools.LocalizedFields `json:"-"`
 }
 type VenueList []Venue
 type DeleteVenueRequest struct {
@@ -158,22 +164,16 @@ type Conference struct {
 	Title    string          `json:"title" l10n:"true"`
 	SubTitle string          `json:"sub_title" l10n:"true"`
 	Slug     string          `json:"slug"`
-	L10N     LocalizedFields `json:"-"`
+	L10N     tools.LocalizedFields `json:"-"`
 }
 type ConferenceList []Conference
-type CreateConferenceRequest struct {
-	Title    string          `json:"title"`
-	SubTitle string          `json:"sub_title"`
-	Slug     string          `json:"slug"`
-	L10N     LocalizedFields `json:"-"`
-}
 type UpdateConferenceRequest struct {
 	ID       string            `json:"id"`
 	Title    jsval.MaybeString `json:"title,omitempty"`
 	SubTitle jsval.MaybeString `json:"sub_title,omitempty"`
 	Slug     jsval.MaybeString `json:"slug,omitempty"`
 	// TODO dates
-	L10N LocalizedFields `json:"-"`
+	L10N tools.LocalizedFields `json:"-"`
 }
 type DeleteConferenceRequest struct {
 	ID string `json:"id" urlenc:"id"`
@@ -186,8 +186,3 @@ type ListSessionsByConferenceRequest struct {
 	Date         jsval.MaybeString `json:"date" urlenc:"date,omitempty,string"`
 }
 
-type LocalizedFields struct {
-	lock sync.RWMutex
-	// Language -> field/value
-	fields map[string]map[string]string
-}

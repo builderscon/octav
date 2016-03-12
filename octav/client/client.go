@@ -9,6 +9,7 @@ import (
 	"net/url"
 
 	"github.com/builderscon/octav/octav"
+	"github.com/builderscon/octav/octav/service"
 	"github.com/lestrrat/go-pdebug"
 	"github.com/lestrrat/go-urlenc"
 )
@@ -25,7 +26,7 @@ func New(s string) *Client {
 	}
 }
 
-func (c *Client) CreateConference(in *octav.CreateConferenceRequest) (ret *octav.Conference, err error) {
+func (c *Client) CreateConference(in *service.CreateConferenceRequest) (ret *octav.Conference, err error) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("client.CreateConference").BindError(&err)
 		defer g.End()
@@ -89,7 +90,7 @@ func (c *Client) CreateRoom(in *octav.Room) (ret *octav.Room, err error) {
 	return &payload, nil
 }
 
-func (c *Client) CreateSession(in *octav.CreateSessionRequest) (ret *octav.Session, err error) {
+func (c *Client) CreateSession(in *service.CreateSessionRequest) (ret *octav.Session, err error) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("client.CreateSession").BindError(&err)
 		defer g.End()
@@ -555,6 +556,33 @@ func (c *Client) UpdateConference(in *octav.UpdateConferenceRequest) (err error)
 		defer g.End()
 	}
 	u, err := url.Parse(c.Endpoint + "/v1/conference/update")
+	if err != nil {
+		return err
+	}
+	buf := bytes.Buffer{}
+	err = json.NewEncoder(&buf).Encode(in)
+	if err != nil {
+		return err
+	}
+	if pdebug.Enabled {
+		pdebug.Printf("POST to %s", u.String())
+	}
+	res, err := c.Client.Post(u.String(), "application/json", &buf)
+	if err != nil {
+		return err
+	}
+	if res.StatusCode != http.StatusOK {
+		return fmt.Errorf(`Invalid response: '%s'`, res.Status)
+	}
+	return nil
+}
+
+func (c *Client) UpdateSession(in *octav.UpdateSessionRequest) (err error) {
+	if pdebug.Enabled {
+		g := pdebug.Marker("client.UpdateSession").BindError(&err)
+		defer g.End()
+	}
+	u, err := url.Parse(c.Endpoint + "/v1/session/update")
 	if err != nil {
 		return err
 	}

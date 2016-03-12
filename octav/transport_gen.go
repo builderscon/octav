@@ -5,11 +5,13 @@ import (
 	"encoding/json"
 	"errors"
 
+	"github.com/builderscon/octav/octav/tools"
 	"github.com/lestrrat/go-urlenc"
 )
 
-func (r CreateSessionRequest) collectMarshalData() map[string]interface{} {
+func (r UpdateSessionRequest) collectMarshalData() map[string]interface{} {
 	m := make(map[string]interface{})
+	m["id"] = r.ID
 	if r.ConferenceID.Valid() {
 		m["conference_id"] = r.ConferenceID.Value()
 	}
@@ -58,31 +60,52 @@ func (r CreateSessionRequest) collectMarshalData() map[string]interface{} {
 	if r.VideoPermission.Valid() {
 		m["video_permission"] = r.VideoPermission.Value()
 	}
+	if r.SortOrder.Valid() {
+		m["sort_order"] = r.SortOrder.Value()
+	}
+	if r.HasInterpretation.Valid() {
+		m["has_interpretation"] = r.HasInterpretation.Value()
+	}
+	if r.Status.Valid() {
+		m["status"] = r.Status.Value()
+	}
+	if r.Confirmed.Valid() {
+		m["confirmed"] = r.Confirmed.Value()
+	}
 	return m
 }
 
-func (r CreateSessionRequest) MarshalJSON() ([]byte, error) {
+func (r UpdateSessionRequest) MarshalJSON() ([]byte, error) {
 	m := r.collectMarshalData()
 	buf, err := json.Marshal(m)
 	if err != nil {
 		return nil, err
 	}
-	return marshalJSONWithL10N(buf, r.L10N)
+	return tools.MarshalJSONWithL10N(buf, r.L10N)
 }
 
-func (r CreateSessionRequest) MarshalURL() ([]byte, error) {
+func (r UpdateSessionRequest) MarshalURL() ([]byte, error) {
 	m := r.collectMarshalData()
 	buf, err := urlenc.Marshal(m)
 	if err != nil {
 		return nil, err
 	}
-	return marshalURLWithL10N(buf, r.L10N)
+	return tools.MarshalURLWithL10N(buf, r.L10N)
 }
 
-func (r *CreateSessionRequest) UnmarshalJSON(data []byte) error {
+func (r *UpdateSessionRequest) UnmarshalJSON(data []byte) error {
 	m := make(map[string]interface{})
 	if err := json.Unmarshal(data, &m); err != nil {
 		return err
+	}
+	if jv, ok := m["id"]; ok {
+		switch jv.(type) {
+		case string:
+			r.ID = jv.(string)
+			delete(m, "id")
+		default:
+			return ErrInvalidJSONFieldType{Field: "id"}
+		}
 	}
 	if jv, ok := m["conference_id"]; ok {
 		if err := r.ConferenceID.Set(jv); err != nil {
@@ -180,19 +203,48 @@ func (r *CreateSessionRequest) UnmarshalJSON(data []byte) error {
 		}
 		delete(m, "video_permission")
 	}
-	if err := ExtractL10NFields(m, &r.L10N, []string{"conference_id", "speaker_id", "title", "abstract", "memo", "duration", "material_level", "tags", "category", "spoken_language", "slide_language", "slide_subtitles", "slide_url", "video_url", "photo_permission", "video_permission"}); err != nil {
+	if jv, ok := m["sort_order"]; ok {
+		if err := r.SortOrder.Set(jv); err != nil {
+			return errors.New("set field SortOrder failed: " + err.Error())
+		}
+		delete(m, "sort_order")
+	}
+	if jv, ok := m["has_interpretation"]; ok {
+		if err := r.HasInterpretation.Set(jv); err != nil {
+			return errors.New("set field HasInterpretation failed: " + err.Error())
+		}
+		delete(m, "has_interpretation")
+	}
+	if jv, ok := m["status"]; ok {
+		if err := r.Status.Set(jv); err != nil {
+			return errors.New("set field Status failed: " + err.Error())
+		}
+		delete(m, "status")
+	}
+	if jv, ok := m["confirmed"]; ok {
+		if err := r.Confirmed.Set(jv); err != nil {
+			return errors.New("set field Confirmed failed: " + err.Error())
+		}
+		delete(m, "confirmed")
+	}
+	if err := tools.ExtractL10NFields(m, &r.L10N, []string{"id", "conference_id", "speaker_id", "title", "abstract", "memo", "duration", "material_level", "tags", "category", "spoken_language", "slide_language", "slide_subtitles", "slide_url", "video_url", "photo_permission", "video_permission", "sort_order", "has_interpretation", "status", "confirmed"}); err != nil {
 		return err
 	}
 	return nil
 }
 
-func (r *CreateSessionRequest) GetPropNames() ([]string, error) {
+func (r *UpdateSessionRequest) GetPropNames() ([]string, error) {
 	l, _ := r.L10N.GetPropNames()
-	return append(l, "conference_id", "speaker_id", "title", "abstract", "memo", "duration", "material_level", "tags", "category", "spoken_language", "slide_language", "slide_subtitles", "slide_url", "video_url", "photo_permission", "video_permission"), nil
+	return append(l, "id", "conference_id", "speaker_id", "title", "abstract", "memo", "duration", "material_level", "tags", "category", "spoken_language", "slide_language", "slide_subtitles", "slide_url", "video_url", "photo_permission", "video_permission", "sort_order", "has_interpretation", "status", "confirmed"), nil
 }
 
-func (r *CreateSessionRequest) SetPropValue(s string, v interface{}) error {
+func (r *UpdateSessionRequest) SetPropValue(s string, v interface{}) error {
 	switch s {
+	case "id":
+		if jv, ok := v.(string); ok {
+			r.ID = jv
+			return nil
+		}
 	case "conference_id":
 		return r.ConferenceID.Set(v)
 	case "speaker_id":
@@ -225,6 +277,14 @@ func (r *CreateSessionRequest) SetPropValue(s string, v interface{}) error {
 		return r.PhotoPermission.Set(v)
 	case "video_permission":
 		return r.VideoPermission.Set(v)
+	case "sort_order":
+		return r.SortOrder.Set(v)
+	case "has_interpretation":
+		return r.HasInterpretation.Set(v)
+	case "status":
+		return r.Status.Set(v)
+	case "confirmed":
+		return r.Confirmed.Set(v)
 	default:
 		return errors.New("unknown column '" + s + "'")
 	}
@@ -310,7 +370,7 @@ func (r UpdateConferenceRequest) MarshalJSON() ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-	return marshalJSONWithL10N(buf, r.L10N)
+	return tools.MarshalJSONWithL10N(buf, r.L10N)
 }
 
 func (r UpdateConferenceRequest) MarshalURL() ([]byte, error) {
@@ -319,7 +379,7 @@ func (r UpdateConferenceRequest) MarshalURL() ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-	return marshalURLWithL10N(buf, r.L10N)
+	return tools.MarshalURLWithL10N(buf, r.L10N)
 }
 
 func (r *UpdateConferenceRequest) UnmarshalJSON(data []byte) error {
@@ -354,7 +414,7 @@ func (r *UpdateConferenceRequest) UnmarshalJSON(data []byte) error {
 		}
 		delete(m, "slug")
 	}
-	if err := ExtractL10NFields(m, &r.L10N, []string{"id", "title", "sub_title", "slug"}); err != nil {
+	if err := tools.ExtractL10NFields(m, &r.L10N, []string{"id", "title", "sub_title", "slug"}); err != nil {
 		return err
 	}
 	return nil

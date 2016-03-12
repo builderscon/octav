@@ -36,6 +36,7 @@ var HTTPLookupUserResponse *jsval.JSVal
 var HTTPLookupVenueRequest *jsval.JSVal
 var HTTPLookupVenueResponse *jsval.JSVal
 var HTTPUpdateConferenceRequest *jsval.JSVal
+var HTTPUpdateSessionRequest *jsval.JSVal
 var M *jsval.ConstraintMap
 var R0 jsval.Constraint
 var R1 jsval.Constraint
@@ -67,12 +68,14 @@ var R26 jsval.Constraint
 var R27 jsval.Constraint
 var R28 jsval.Constraint
 var R29 jsval.Constraint
+var R30 jsval.Constraint
 
 func init() {
 	M = &jsval.ConstraintMap{}
 	R0 = jsval.String().Enum("pending", "accepted", "rejected").Default("pending")
 	R1 = jsval.String().Enum("allow", "disallow").Default("allow")
-	R2 = jsval.Object().
+	R2 = jsval.Boolean().Default(false)
+	R3 = jsval.Object().
 		AdditionalProperties(
 			jsval.EmptyConstraint,
 		).
@@ -114,19 +117,19 @@ func init() {
 			"title#[a-z]+",
 			jsval.Reference(M).RefersTo("#/definitions/string_i18n"),
 		)
-	R3 = jsval.Object().
+	R4 = jsval.Object().
 		AdditionalProperties(
 			jsval.EmptyConstraint,
 		)
-	R4 = jsval.Array().
+	R5 = jsval.Array().
 		Items(
 			jsval.Reference(M).RefersTo("#/definitions/date"),
 		).
 		AdditionalItems(
 			jsval.EmptyConstraint,
 		)
-	R5 = jsval.String().RegexpString("^\\d+-\\d+-\\d+(,\\d+-\\d+-\\d+-)*$")
-	R6 = jsval.OneOf().
+	R6 = jsval.String().RegexpString("^\\d+-\\d+-\\d+(,\\d+-\\d+-\\d+-)*$")
+	R7 = jsval.OneOf().
 		Add(
 			jsval.String().Format("date-time"),
 		).
@@ -136,17 +139,17 @@ func init() {
 					jsval.EmptyConstraint,
 				),
 		)
-	R7 = jsval.Integer()
-	R8 = jsval.String().Format("email")
-	R9 = jsval.String().Default("en")
-	R10 = jsval.Number()
+	R8 = jsval.Integer()
+	R9 = jsval.String().Format("email")
+	R10 = jsval.String().Default("en")
 	R11 = jsval.Number()
-	R12 = jsval.String()
+	R12 = jsval.Number()
 	R13 = jsval.String()
-	R14 = jsval.String().Enum("beginner", "intermediate", "advanced").Default("beginner")
-	R15 = jsval.Integer().Minimum(0)
-	R16 = jsval.Integer().Minimum(0).Default(10)
-	R17 = jsval.Object().
+	R14 = jsval.String()
+	R15 = jsval.String().Enum("beginner", "intermediate", "advanced").Default("beginner")
+	R16 = jsval.Integer().Minimum(0)
+	R17 = jsval.Integer().Minimum(0).Default(10)
+	R18 = jsval.Object().
 		AdditionalProperties(
 			jsval.EmptyConstraint,
 		).
@@ -170,7 +173,7 @@ func init() {
 			"name#[a-z]+",
 			jsval.Reference(M).RefersTo("#/definitions/string_i18n"),
 		)
-	R18 = jsval.Object().
+	R19 = jsval.Object().
 		AdditionalProperties(
 			jsval.EmptyConstraint,
 		).
@@ -194,7 +197,7 @@ func init() {
 		).
 		AddProp(
 			"confirmed",
-			jsval.Boolean().Default(false),
+			jsval.Reference(M).RefersTo("#/definitions/boolean_default_false"),
 		).
 		AddProp(
 			"duration",
@@ -202,7 +205,7 @@ func init() {
 		).
 		AddProp(
 			"has_interpretation",
-			jsval.Boolean().Default(false),
+			jsval.Reference(M).RefersTo("#/definitions/boolean_default_false"),
 		).
 		AddProp(
 			"material_level",
@@ -237,10 +240,6 @@ func init() {
 		AddProp(
 			"slide_url",
 			jsval.Reference(M).RefersTo("#/definitions/url"),
-		).
-		AddProp(
-			"sort-order",
-			jsval.Reference(M).RefersTo("#/definitions/positiveInteger"),
 		).
 		AddProp(
 			"speaker",
@@ -286,7 +285,7 @@ func init() {
 			"video_url",
 			jsval.Reference(M).RefersTo("#/definitions/url"),
 		)
-	R19 = jsval.Object().
+	R20 = jsval.Object().
 		AdditionalProperties(
 			jsval.Object().
 				AdditionalProperties(
@@ -312,28 +311,31 @@ func init() {
 			"name",
 			jsval.String(),
 		)
-	R20 = jsval.Array().
+	R21 = jsval.Array().
 		Items(
 			jsval.Reference(M).RefersTo("#/definitions/speaker"),
 		).
 		AdditionalItems(
 			jsval.EmptyConstraint,
 		)
-	R21 = jsval.String()
 	R22 = jsval.String()
 	R23 = jsval.String()
-	R24 = jsval.Array().
+	R24 = jsval.String()
+	R25 = jsval.OneOf().
+		Add(jsval.NullConstraint).
+		Add(jsval.String()).
+		Add(jsval.Array().
 		Items(
 			jsval.Reference(M).RefersTo("#/definitions/tag"),
 		).
 		AdditionalItems(
 			jsval.EmptyConstraint,
-		)
-	R25 = jsval.String().Enum("XXXL", "XXL", "XL", "L", "M", "S", "XS")
-	R26 = jsval.String().Format("url")
-	R27 = jsval.String().RegexpString("^[a-fA-F0-9-]+$")
-	R28 = jsval.String().RegexpString("^[a-fA-F0-9-]+$").Default("")
-	R29 = jsval.Object().
+		))
+	R26 = jsval.String().Enum("XXXL", "XXL", "XL", "L", "M", "S", "XS")
+	R27 = jsval.String().Format("url")
+	R28 = jsval.String().RegexpString("^[a-fA-F0-9-]+$")
+	R29 = jsval.String().RegexpString("^[a-fA-F0-9-]+$").Default("")
+	R30 = jsval.Object().
 		AdditionalProperties(
 			jsval.EmptyConstraint,
 		).
@@ -351,34 +353,35 @@ func init() {
 		)
 	M.SetReference("#/definitions/acceptance_status", R0)
 	M.SetReference("#/definitions/binary_permission_default_allow", R1)
-	M.SetReference("#/definitions/conference", R2)
-	M.SetReference("#/definitions/date", R3)
-	M.SetReference("#/definitions/date_array", R4)
-	M.SetReference("#/definitions/datestr", R5)
-	M.SetReference("#/definitions/datetime", R6)
-	M.SetReference("#/definitions/duration", R7)
-	M.SetReference("#/definitions/email", R8)
-	M.SetReference("#/definitions/language", R9)
-	M.SetReference("#/definitions/latitude", R10)
-	M.SetReference("#/definitions/longitude", R11)
-	M.SetReference("#/definitions/markdown_en", R12)
-	M.SetReference("#/definitions/markdown_i18n", R13)
-	M.SetReference("#/definitions/material_level", R14)
-	M.SetReference("#/definitions/positiveInteger", R15)
-	M.SetReference("#/definitions/positiveIntegerDefault10", R16)
-	M.SetReference("#/definitions/room", R17)
-	M.SetReference("#/definitions/session", R18)
-	M.SetReference("#/definitions/speaker", R19)
-	M.SetReference("#/definitions/speaker_array", R20)
-	M.SetReference("#/definitions/string_en", R21)
-	M.SetReference("#/definitions/string_i18n", R22)
-	M.SetReference("#/definitions/tag", R23)
-	M.SetReference("#/definitions/tag_array", R24)
-	M.SetReference("#/definitions/tshirt_size", R25)
-	M.SetReference("#/definitions/url", R26)
-	M.SetReference("#/definitions/uuid", R27)
-	M.SetReference("#/definitions/uuidDefaultEmpty", R28)
-	M.SetReference("#/definitions/venue", R29)
+	M.SetReference("#/definitions/boolean_default_false", R2)
+	M.SetReference("#/definitions/conference", R3)
+	M.SetReference("#/definitions/date", R4)
+	M.SetReference("#/definitions/date_array", R5)
+	M.SetReference("#/definitions/datestr", R6)
+	M.SetReference("#/definitions/datetime", R7)
+	M.SetReference("#/definitions/duration", R8)
+	M.SetReference("#/definitions/email", R9)
+	M.SetReference("#/definitions/language", R10)
+	M.SetReference("#/definitions/latitude", R11)
+	M.SetReference("#/definitions/longitude", R12)
+	M.SetReference("#/definitions/markdown_en", R13)
+	M.SetReference("#/definitions/markdown_i18n", R14)
+	M.SetReference("#/definitions/material_level", R15)
+	M.SetReference("#/definitions/positiveInteger", R16)
+	M.SetReference("#/definitions/positiveIntegerDefault10", R17)
+	M.SetReference("#/definitions/room", R18)
+	M.SetReference("#/definitions/session", R19)
+	M.SetReference("#/definitions/speaker", R20)
+	M.SetReference("#/definitions/speaker_array", R21)
+	M.SetReference("#/definitions/string_en", R22)
+	M.SetReference("#/definitions/string_i18n", R23)
+	M.SetReference("#/definitions/tag", R24)
+	M.SetReference("#/definitions/tag_array", R25)
+	M.SetReference("#/definitions/tshirt_size", R26)
+	M.SetReference("#/definitions/url", R27)
+	M.SetReference("#/definitions/uuid", R28)
+	M.SetReference("#/definitions/uuidDefaultEmpty", R29)
+	M.SetReference("#/definitions/venue", R30)
 	HTTPCreateConferenceRequest = jsval.New().
 		SetConstraintMap(M).
 		SetRoot(
@@ -628,7 +631,7 @@ func init() {
 				).
 				AddProp(
 					"confirmed",
-					jsval.Boolean().Default(false),
+					jsval.Reference(M).RefersTo("#/definitions/boolean_default_false"),
 				).
 				AddProp(
 					"duration",
@@ -636,7 +639,7 @@ func init() {
 				).
 				AddProp(
 					"has_interpretation",
-					jsval.Boolean().Default(false),
+					jsval.Reference(M).RefersTo("#/definitions/boolean_default_false"),
 				).
 				AddProp(
 					"material_level",
@@ -671,10 +674,6 @@ func init() {
 				AddProp(
 					"slide_url",
 					jsval.Reference(M).RefersTo("#/definitions/url"),
-				).
-				AddProp(
-					"sort-order",
-					jsval.Reference(M).RefersTo("#/definitions/positiveInteger"),
 				).
 				AddProp(
 					"speaker",
@@ -1149,7 +1148,7 @@ func init() {
 				).
 				AddProp(
 					"confirmed",
-					jsval.Boolean().Default(false),
+					jsval.Reference(M).RefersTo("#/definitions/boolean_default_false"),
 				).
 				AddProp(
 					"duration",
@@ -1157,7 +1156,7 @@ func init() {
 				).
 				AddProp(
 					"has_interpretation",
-					jsval.Boolean().Default(false),
+					jsval.Reference(M).RefersTo("#/definitions/boolean_default_false"),
 				).
 				AddProp(
 					"material_level",
@@ -1192,10 +1191,6 @@ func init() {
 				AddProp(
 					"slide_url",
 					jsval.Reference(M).RefersTo("#/definitions/url"),
-				).
-				AddProp(
-					"sort-order",
-					jsval.Reference(M).RefersTo("#/definitions/positiveInteger"),
 				).
 				AddProp(
 					"speaker",
@@ -1368,6 +1363,108 @@ func init() {
 				PatternPropertiesString(
 					"description#[a-z]+",
 					jsval.Reference(M).RefersTo("#/definitions/string_i18n"),
+				).
+				PatternPropertiesString(
+					"title#[a-z]+",
+					jsval.Reference(M).RefersTo("#/definitions/string_i18n"),
+				),
+		)
+
+	HTTPUpdateSessionRequest = jsval.New().
+		SetConstraintMap(M).
+		SetRoot(
+			jsval.Object().
+				Required("id").
+				AdditionalProperties(
+					jsval.EmptyConstraint,
+				).
+				AddProp(
+					"abstract",
+					jsval.Reference(M).RefersTo("#/definitions/markdown_en"),
+				).
+				AddProp(
+					"category",
+					jsval.String(),
+				).
+				AddProp(
+					"conference_id",
+					jsval.Reference(M).RefersTo("#/definitions/uuid"),
+				).
+				AddProp(
+					"confirmed",
+					jsval.Reference(M).RefersTo("#/definitions/boolean_default_false"),
+				).
+				AddProp(
+					"duration",
+					jsval.Reference(M).RefersTo("#/definitions/duration"),
+				).
+				AddProp(
+					"has_interpretation",
+					jsval.Reference(M).RefersTo("#/definitions/boolean_default_false"),
+				).
+				AddProp(
+					"id",
+					jsval.Reference(M).RefersTo("#/definitions/uuid"),
+				).
+				AddProp(
+					"material_level",
+					jsval.Reference(M).RefersTo("#/definitions/material_level"),
+				).
+				AddProp(
+					"memo",
+					jsval.String(),
+				).
+				AddProp(
+					"photo_permission",
+					jsval.Reference(M).RefersTo("#/definitions/binary_permission_default_allow"),
+				).
+				AddProp(
+					"slide_language",
+					jsval.Reference(M).RefersTo("#/definitions/language"),
+				).
+				AddProp(
+					"slide_subtitles",
+					jsval.Reference(M).RefersTo("#/definitions/language"),
+				).
+				AddProp(
+					"slide_url",
+					jsval.Reference(M).RefersTo("#/definitions/url"),
+				).
+				AddProp(
+					"sort_order",
+					jsval.Reference(M).RefersTo("#/definitions/positiveInteger"),
+				).
+				AddProp(
+					"speaker_id",
+					jsval.Reference(M).RefersTo("#/definitions/uuid"),
+				).
+				AddProp(
+					"spoken_language",
+					jsval.Reference(M).RefersTo("#/definitions/language"),
+				).
+				AddProp(
+					"status",
+					jsval.Reference(M).RefersTo("#/definitions/acceptance_status"),
+				).
+				AddProp(
+					"tags",
+					jsval.String(),
+				).
+				AddProp(
+					"title",
+					jsval.Reference(M).RefersTo("#/definitions/string_en"),
+				).
+				AddProp(
+					"video_permission",
+					jsval.Reference(M).RefersTo("#/definitions/binary_permission_default_allow"),
+				).
+				AddProp(
+					"video_url",
+					jsval.Reference(M).RefersTo("#/definitions/url"),
+				).
+				PatternPropertiesString(
+					"abstract#[a-z]+",
+					jsval.Reference(M).RefersTo("#/definitions/markdown_i18n"),
 				).
 				PatternPropertiesString(
 					"title#[a-z]+",

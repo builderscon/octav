@@ -5,8 +5,8 @@ import (
 	"os"
 	"testing"
 
-	"github.com/builderscon/octav/octav"
 	"github.com/builderscon/octav/octav/db"
+	"github.com/builderscon/octav/octav/tools"
 	"github.com/lestrrat/go-pdebug"
 	"github.com/stretchr/testify/assert"
 )
@@ -58,7 +58,7 @@ func setupAndRun(m *testing.M) int {
 }
 
 func TestVenueDB(t *testing.T) {
-	v := db.Venue{EID: octav.UUID()}
+	v := db.Venue{EID: tools.UUID()}
 	if err := testVenueDBCreate(t, &v); err != nil {
 		return
 	}
