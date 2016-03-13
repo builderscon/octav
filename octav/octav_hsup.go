@@ -215,6 +215,28 @@ func httpDeleteRoom(w http.ResponseWriter, r *http.Request) {
 	doDeleteRoom(context.Background(), w, r, payload)
 }
 
+func httpDeleteSession(w http.ResponseWriter, r *http.Request) {
+	if pdebug.Enabled {
+		g := pdebug.Marker("httpDeleteSession")
+		defer g.End()
+	}
+	if strings.ToLower(r.Method) != `post` {
+		httpError(w, `Method was `+r.Method, http.StatusNotFound, nil)
+	}
+
+	var payload service.DeleteSessionRequest
+	if err := json.NewDecoder(r.Body).Decode(&payload); err != nil {
+		httpError(w, `Invalid input`, http.StatusInternalServerError, err)
+		return
+	}
+
+	if err := validator.HTTPDeleteSessionRequest.Validate(&payload); err != nil {
+		httpError(w, `Invalid input`, http.StatusInternalServerError, err)
+		return
+	}
+	doDeleteSession(context.Background(), w, r, payload)
+}
+
 func httpDeleteUser(w http.ResponseWriter, r *http.Request) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("httpDeleteUser")
@@ -514,6 +536,7 @@ func (s *Server) SetupRoutes() {
 	r.HandleFunc(`/v1/room/update`, httpUpdateRoom)
 	r.HandleFunc(`/v1/schedule/list`, httpListSessionsByConference)
 	r.HandleFunc(`/v1/session/create`, httpCreateSession)
+	r.HandleFunc(`/v1/session/delete`, httpDeleteSession)
 	r.HandleFunc(`/v1/session/lookup`, httpLookupSession)
 	r.HandleFunc(`/v1/session/update`, httpUpdateSession)
 	r.HandleFunc(`/v1/user/create`, httpCreateUser)

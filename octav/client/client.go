@@ -240,6 +240,33 @@ func (c *Client) DeleteRoom(in *service.DeleteRoomRequest) (err error) {
 	return nil
 }
 
+func (c *Client) DeleteSession(in *service.DeleteSessionRequest) (err error) {
+	if pdebug.Enabled {
+		g := pdebug.Marker("client.DeleteSession").BindError(&err)
+		defer g.End()
+	}
+	u, err := url.Parse(c.Endpoint + "/v1/session/delete")
+	if err != nil {
+		return err
+	}
+	buf := bytes.Buffer{}
+	err = json.NewEncoder(&buf).Encode(in)
+	if err != nil {
+		return err
+	}
+	if pdebug.Enabled {
+		pdebug.Printf("POST to %s", u.String())
+	}
+	res, err := c.Client.Post(u.String(), "application/json", &buf)
+	if err != nil {
+		return err
+	}
+	if res.StatusCode != http.StatusOK {
+		return fmt.Errorf(`Invalid response: '%s'`, res.Status)
+	}
+	return nil
+}
+
 func (c *Client) DeleteUser(in *service.DeleteUserRequest) (err error) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("client.DeleteUser").BindError(&err)

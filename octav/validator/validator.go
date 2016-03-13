@@ -17,6 +17,7 @@ var HTTPCreateVenueRequest *jsval.JSVal
 var HTTPCreateVenueResponse *jsval.JSVal
 var HTTPDeleteConferenceRequest *jsval.JSVal
 var HTTPDeleteRoomRequest *jsval.JSVal
+var HTTPDeleteSessionRequest *jsval.JSVal
 var HTTPDeleteUserRequest *jsval.JSVal
 var HTTPDeleteVenueRequest *jsval.JSVal
 var HTTPListRoomsRequest *jsval.JSVal
@@ -880,6 +881,20 @@ func init() {
 		)
 
 	HTTPDeleteRoomRequest = jsval.New().
+		SetConstraintMap(M).
+		SetRoot(
+			jsval.Object().
+				Required("id").
+				AdditionalProperties(
+					jsval.EmptyConstraint,
+				).
+				AddProp(
+					"id",
+					jsval.Reference(M).RefersTo("#/definitions/uuid"),
+				),
+		)
+
+	HTTPDeleteSessionRequest = jsval.New().
 		SetConstraintMap(M).
 		SetRoot(
 			jsval.Object().

@@ -282,7 +282,45 @@ func testCreateSession(t *testing.T, cl *client.Client, in *service.CreateSessio
 	return res, nil
 }
 
-func TestCreateSession(t *testing.T) {
+func testLookupSession(t *testing.T, cl *client.Client, id, lang string) (*model.Session, error) {
+	r := &service.LookupSessionRequest{ID: id}
+	if lang != "" {
+		r.Lang.Set(lang)
+	}
+	v, err := cl.LookupSession(r)
+	if !assert.NoError(t, err, "LookupSession succeeds") {
+		return nil, err
+	}
+	return v, nil
+}
+
+func testUpdateSession(t *testing.T, cl *client.Client, in *service.UpdateSessionRequest) error {
+	err := cl.UpdateSession(in)
+	if !assert.NoError(t, err, "UpdateSession succeeds") {
+		return err
+	}
+	return nil
+}
+
+func testDeleteSession(t *testing.T, cl *client.Client, id string) error {
+	err := cl.DeleteSession(&service.DeleteSessionRequest{ID: id})
+	if !assert.NoError(t, err, "DeleteSession should be successful") {
+		return err
+	}
+	return err
+}
+
+func bconsession(cid, uid string) *service.CreateSessionRequest {
+	in := service.CreateSessionRequest{}
+	in.ConferenceID.Set(cid)
+	in.SpeakerID.Set(uid)
+	in.Title.Set("How To Write A Conference Backend")
+	in.Duration.Set(60)
+	in.Abstract.Set("Use lots of reflection and generate lots of code")
+	return &in
+}
+
+func TestSessionCRUD(t *testing.T) {
 	ts := httptest.NewServer(octav.New())
 	defer ts.Close()
 
@@ -298,18 +336,44 @@ func TestCreateSession(t *testing.T) {
 		return
 	}
 
-	in := service.CreateSessionRequest{}
-	in.ConferenceID.Set(conference.ID)
-	in.SpeakerID.Set(user.ID)
-	in.Title.Set("How To Write A Conference Backend")
-	in.Duration.Set(60)
-	in.Abstract.Set("Use lots of reflection and generate lots of code")
-	res, err := testCreateSession(t, cl, &in)
+	res, err := testCreateSession(t, cl, bconsession(conference.ID, user.ID))
 	if err != nil {
 		return
 	}
 
 	if !assert.NoError(t, validator.HTTPCreateSessionResponse.Validate(res), "Validation should succeed") {
+		return
+	}
+
+	res2, err := testLookupSession(t, cl, res.ID, "")
+	if err != nil {
+		return
+	}
+
+	if !assert.Equal(t, res2, res, "LookupSession is the same as the room created") {
+		return
+	}
+
+	in := service.UpdateSessionRequest{ID: res.ID}
+	in.L10N.Set("ja", "title", "カンファレンス用ソフトウェアの作り方")
+	if err := testUpdateSession(t, cl, &in); err != nil {
+		return
+	}
+
+	res3, err := testLookupSession(t, cl, res.ID, "ja")
+	if err != nil {
+		return
+	}
+
+	if !assert.Equal(t, "カンファレンス用ソフトウェアの作り方", res3.Title, "Session.title#ja is the same as the conference updated") {
+		return
+	}
+
+	if err := testDeleteSession(t, cl, res.ID); err != nil {
+		return
+	}
+
+	if err := testDeleteConference(t, cl, conference.ID); err != nil {
 		return
 	}
 }

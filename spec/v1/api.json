@@ -599,6 +599,20 @@
       "targetSchema": { "$ref": "#/definitions/session" }
     },
     {
+      "title": "Delete session",
+      "href": "/session/delete",
+      "method": "POST",
+      "rel": "lookup",
+      "encType": "application/x-www-form-urlencoded",
+      "schema": {
+        "hsup.type": "service.DeleteSessionRequest",
+        "required": ["id"],
+        "properties": {
+          "id": { "$ref": "#/definitions/uuid" }
+        }
+      }
+    },
+    {
       "title": "Update session",
       "rel": "update",
       "method": "POST",

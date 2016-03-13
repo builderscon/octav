@@ -273,6 +273,31 @@ func doUpdateSession(ctx context.Context, w http.ResponseWriter, r *http.Request
 	httpJSON(w, v)
 }
 
+func doDeleteSession(ctx context.Context, w http.ResponseWriter, r *http.Request, payload service.DeleteSessionRequest) {
+	if pdebug.Enabled {
+		g := pdebug.Marker("doDeleteSession")
+		defer g.End()
+	}
+
+	tx, err := db.Begin()
+	if err != nil {
+		httpError(w, `DeleteSession`, http.StatusInternalServerError, err)
+		return
+	}
+	defer tx.AutoRollback()
+
+	s := service.Session{}
+	if err := s.Delete(tx, payload.ID); err != nil {
+		httpError(w, `DeleteSession`, http.StatusInternalServerError, err)
+		return
+	}
+	if err := tx.Commit(); err != nil {
+		httpError(w, `DeleteSession`, http.StatusInternalServerError, err)
+		return
+	}
+	httpJSON(w, map[string]string{"status": "success"})
+}
+
 func doCreateUser(ctx context.Context, w http.ResponseWriter, r *http.Request, payload service.CreateUserRequest) {
 	tx, err := db.Begin()
 	if err != nil {
@@ -539,15 +564,21 @@ func doLookupSession(ctx context.Context, w http.ResponseWriter, r *http.Request
 	}
 	defer tx.AutoRollback()
 
-	s := model.Session{}
-	if err := s.Load(tx, payload.ID); err != nil {
+	v := model.Session{}
+	if err := v.Load(tx, payload.ID); err != nil {
 		httpError(w, `LookupSession`, http.StatusInternalServerError, err)
 		return
 	}
 
-	sl10n := model.SessionL10N{Session: s}
+	if payload.Lang.Valid() {
+		s := service.Session{}
+		if err := s.ReplaceL10NStrings(tx, &v, payload.Lang.String); err != nil {
+			httpError(w, `LookupSession`, http.StatusInternalServerError, err)
+			return
+		}
+	}
 
-	httpJSON(w, sl10n)
+	httpJSON(w, v)
 }
 
 func doListSessionsByConference(ctx context.Context, w http.ResponseWriter, r *http.Request, payload service.ListSessionsByConferenceRequest) {
