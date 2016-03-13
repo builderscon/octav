@@ -193,6 +193,181 @@ func (r *UpdateConferenceRequest) SetPropValue(s string, v interface{}) error {
 	return ErrInvalidFieldType{Field: s}
 }
 
+func (r CreateRoomRequest) collectMarshalData() map[string]interface{} {
+	m := make(map[string]interface{})
+	if r.VenueID.Valid() {
+		m["venue_id"] = r.VenueID.Value()
+	}
+	if r.Name.Valid() {
+		m["name"] = r.Name.Value()
+	}
+	if r.Capacity.Valid() {
+		m["capacity"] = r.Capacity.Value()
+	}
+	return m
+}
+
+func (r CreateRoomRequest) MarshalJSON() ([]byte, error) {
+	m := r.collectMarshalData()
+	buf, err := json.Marshal(m)
+	if err != nil {
+		return nil, err
+	}
+	return tools.MarshalJSONWithL10N(buf, r.L10N)
+}
+
+func (r CreateRoomRequest) MarshalURL() ([]byte, error) {
+	m := r.collectMarshalData()
+	buf, err := urlenc.Marshal(m)
+	if err != nil {
+		return nil, err
+	}
+	return tools.MarshalURLWithL10N(buf, r.L10N)
+}
+
+func (r *CreateRoomRequest) UnmarshalJSON(data []byte) error {
+	m := make(map[string]interface{})
+	if err := json.Unmarshal(data, &m); err != nil {
+		return err
+	}
+	if jv, ok := m["venue_id"]; ok {
+		if err := r.VenueID.Set(jv); err != nil {
+			return errors.New("set field VenueID failed: " + err.Error())
+		}
+		delete(m, "venue_id")
+	}
+	if jv, ok := m["name"]; ok {
+		if err := r.Name.Set(jv); err != nil {
+			return errors.New("set field Name failed: " + err.Error())
+		}
+		delete(m, "name")
+	}
+	if jv, ok := m["capacity"]; ok {
+		if err := r.Capacity.Set(jv); err != nil {
+			return errors.New("set field Capacity failed: " + err.Error())
+		}
+		delete(m, "capacity")
+	}
+	if err := tools.ExtractL10NFields(m, &r.L10N, []string{"venue_id", "name", "capacity"}); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (r *CreateRoomRequest) GetPropNames() ([]string, error) {
+	l, _ := r.L10N.GetPropNames()
+	return append(l, "venue_id", "name", "capacity"), nil
+}
+
+func (r *CreateRoomRequest) SetPropValue(s string, v interface{}) error {
+	switch s {
+	case "venue_id":
+		return r.VenueID.Set(v)
+	case "name":
+		return r.Name.Set(v)
+	case "capacity":
+		return r.Capacity.Set(v)
+	default:
+		return errors.New("unknown column '" + s + "'")
+	}
+	return ErrInvalidFieldType{Field: s}
+}
+
+func (r UpdateRoomRequest) collectMarshalData() map[string]interface{} {
+	m := make(map[string]interface{})
+	m["id"] = r.ID
+	if r.VenueID.Valid() {
+		m["venue_id"] = r.VenueID.Value()
+	}
+	if r.Name.Valid() {
+		m["name"] = r.Name.Value()
+	}
+	if r.Capacity.Valid() {
+		m["capacity"] = r.Capacity.Value()
+	}
+	return m
+}
+
+func (r UpdateRoomRequest) MarshalJSON() ([]byte, error) {
+	m := r.collectMarshalData()
+	buf, err := json.Marshal(m)
+	if err != nil {
+		return nil, err
+	}
+	return tools.MarshalJSONWithL10N(buf, r.L10N)
+}
+
+func (r UpdateRoomRequest) MarshalURL() ([]byte, error) {
+	m := r.collectMarshalData()
+	buf, err := urlenc.Marshal(m)
+	if err != nil {
+		return nil, err
+	}
+	return tools.MarshalURLWithL10N(buf, r.L10N)
+}
+
+func (r *UpdateRoomRequest) UnmarshalJSON(data []byte) error {
+	m := make(map[string]interface{})
+	if err := json.Unmarshal(data, &m); err != nil {
+		return err
+	}
+	if jv, ok := m["id"]; ok {
+		switch jv.(type) {
+		case string:
+			r.ID = jv.(string)
+			delete(m, "id")
+		default:
+			return ErrInvalidJSONFieldType{Field: "id"}
+		}
+	}
+	if jv, ok := m["venue_id"]; ok {
+		if err := r.VenueID.Set(jv); err != nil {
+			return errors.New("set field VenueID failed: " + err.Error())
+		}
+		delete(m, "venue_id")
+	}
+	if jv, ok := m["name"]; ok {
+		if err := r.Name.Set(jv); err != nil {
+			return errors.New("set field Name failed: " + err.Error())
+		}
+		delete(m, "name")
+	}
+	if jv, ok := m["capacity"]; ok {
+		if err := r.Capacity.Set(jv); err != nil {
+			return errors.New("set field Capacity failed: " + err.Error())
+		}
+		delete(m, "capacity")
+	}
+	if err := tools.ExtractL10NFields(m, &r.L10N, []string{"id", "venue_id", "name", "capacity"}); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (r *UpdateRoomRequest) GetPropNames() ([]string, error) {
+	l, _ := r.L10N.GetPropNames()
+	return append(l, "id", "venue_id", "name", "capacity"), nil
+}
+
+func (r *UpdateRoomRequest) SetPropValue(s string, v interface{}) error {
+	switch s {
+	case "id":
+		if jv, ok := v.(string); ok {
+			r.ID = jv
+			return nil
+		}
+	case "venue_id":
+		return r.VenueID.Set(v)
+	case "name":
+		return r.Name.Set(v)
+	case "capacity":
+		return r.Capacity.Set(v)
+	default:
+		return errors.New("unknown column '" + s + "'")
+	}
+	return ErrInvalidFieldType{Field: s}
+}
+
 func (r CreateSessionRequest) collectMarshalData() map[string]interface{} {
 	m := make(map[string]interface{})
 	if r.ConferenceID.Valid() {

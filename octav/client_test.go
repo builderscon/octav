@@ -58,8 +58,12 @@ func testCreateVenue(t *testing.T, cl *client.Client, v *service.CreateVenueRequ
 	return res, nil
 }
 
-func testLookupRoom(t *testing.T, cl *client.Client, id string) (*model.Room, error) {
-	venue, err := cl.LookupRoom(&service.LookupRoomRequest{ID: id})
+func testLookupRoom(t *testing.T, cl *client.Client, id, lang string) (*model.Room, error) {
+	r := &service.LookupRoomRequest{ID: id}
+	if lang != "" {
+		r.Lang.Set(lang)
+	}
+	venue, err := cl.LookupRoom(r)
 	if !assert.NoError(t, err, "LookupRoom succeeds") {
 		return nil, err
 	}
@@ -96,6 +100,14 @@ func testLookupVenue(t *testing.T, cl *client.Client, id string) (*model.Venue, 
 		return nil, err
 	}
 	return venue, nil
+}
+
+func testUpdateRoom(t *testing.T, cl *client.Client, in *service.UpdateRoomRequest) error {
+	err := cl.UpdateRoom(in)
+	if !assert.NoError(t, err, "UpdateRoom succeeds") {
+		return err
+	}
+	return nil
 }
 
 func testDeleteRoom(t *testing.T, cl *client.Client, id string) error {
@@ -205,7 +217,7 @@ func TestConferenceCRUD(t *testing.T) {
 	}
 }
 
-func TestCreateRoom(t *testing.T) {
+func TestRoomCRUD(t *testing.T) {
 	ts := httptest.NewServer(octav.New())
 	defer ts.Close()
 
@@ -229,12 +241,28 @@ func TestCreateRoom(t *testing.T) {
 		return
 	}
 
-	res2, err := testLookupRoom(t, cl, res.ID)
+	res2, err := testLookupRoom(t, cl, res.ID, "")
 	if err != nil {
 		return
 	}
 
 	if !assert.Equal(t, res2, res, "LookupRoom is the same as the room created") {
+		return
+	}
+
+	in := service.UpdateRoomRequest{ID: res.ID}
+	in.L10N.Set("ja", "name", "国際会議場")
+t.Logf("%#v", in)
+	if err := testUpdateRoom(t, cl, &in); err != nil {
+		return
+	}
+
+	res3, err := testLookupRoom(t, cl, res.ID, "ja")
+	if err != nil {
+		return
+	}
+
+	if !assert.Equal(t, "国際会議場", res3.Name, "Room.name#ja is the same as the conference updated") {
 		return
 	}
 

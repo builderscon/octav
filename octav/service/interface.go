@@ -40,12 +40,11 @@ type CreateRoomRequest struct {
 	Capacity jsval.MaybeUint       `json:"capacity"`
 	L10N     tools.LocalizedFields `json:"-"`
 }
-
 type UpdateRoomRequest struct {
 	ID       string                `json:"id"`
-	VenueID  jsval.MaybeString     `json:"venue_id"`
-	Name     jsval.MaybeString     `json:"name" l10n:"true"`
-	Capacity jsval.MaybeUint       `json:"capacity"`
+	VenueID  jsval.MaybeString     `json:"venue_id,omitempty"`
+	Name     jsval.MaybeString     `json:"name,omitempty" l10n:"true"`
+	Capacity jsval.MaybeUint       `json:"capacity,omitempty"`
 	L10N     tools.LocalizedFields `json:"-"`
 }
 
@@ -132,7 +131,8 @@ type ListRoomRequest struct {
 	Limit   jsval.MaybeInt    `json:"limit,omitempty" urlenc:"limit,omitempty,int64"`
 }
 type LookupRoomRequest struct {
-	ID string `json:"id" urlenc:"id"`
+	ID   string            `json:"id" urlenc:"id"`
+	Lang jsval.MaybeString `json:"lang" urlenc:"lang,omitempty,string"`
 }
 type LookupSessionRequest struct {
 	ID string `json:"id" urlenc:"id"`

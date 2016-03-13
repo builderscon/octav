@@ -24,5 +24,17 @@ func (v *Room) populateRowForCreate(vdb *db.Room, payload CreateRoomRequest) err
 }
 
 func (v *Room) populateRowForUpdate(vdb *db.Room, payload UpdateRoomRequest) error {
+	if payload.VenueID.Valid() {
+		vdb.VenueID = payload.VenueID.String
+	}
+
+	if payload.Name.Valid() {
+		vdb.Name = payload.Name.String
+	}
+
+	if payload.Capacity.Valid() {
+		vdb.Capacity = uint(payload.Capacity.Uint)
+	}
+
 	return nil
 }

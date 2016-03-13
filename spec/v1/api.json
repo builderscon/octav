@@ -395,14 +395,8 @@
         "type": "object",
         "hsup.type": "service.CreateRoomRequest",
         "properties": {
-          "venue_id": {
-            "$ref": "#/definitions/uuid",
-            "description": "venue id that this room belongs to"
-          },
-          "name": {
-            "type": "string",
-            "description": "room name in English"
-          },
+          "venue_id": { "$ref": "#/definitions/uuid" },
+          "name": { "$ref": "#/definitions/string_en" },
           "capacity": { "$ref": "#/definitions/positiveInteger" }
         },
         "required": ["venue_id", "name"],
@@ -411,6 +405,27 @@
         }
       },
       "targetSchema": { "$ref": "#/definitions/room" }
+    },
+    {
+      "title": "Update room",
+      "rel": "update",
+      "href": "/room/update",
+      "method": "POST",
+      "encType": "application/x-www-form-urlencoded",
+      "schema": {
+        "type": "object",
+        "hsup.type": "service.UpdateRoomRequest",
+        "properties": {
+          "id": { "$ref": "#/definitions/uuid" },
+          "venue_id": { "$ref": "#/definitions/uuid" },
+          "name": { "$ref": "#/definitions/string_en" },
+          "capacity": { "$ref": "#/definitions/positiveInteger" }
+        },
+        "required": ["id"],
+        "patternProperties": {
+          "name#[a-z]+": { "$ref": "#/definitions/string_i18n" }
+        }
+      }
     },
     {
       "title": "Lookup room",

@@ -457,6 +457,28 @@ func httpUpdateConference(w http.ResponseWriter, r *http.Request) {
 	doUpdateConference(context.Background(), w, r, payload)
 }
 
+func httpUpdateRoom(w http.ResponseWriter, r *http.Request) {
+	if pdebug.Enabled {
+		g := pdebug.Marker("httpUpdateRoom")
+		defer g.End()
+	}
+	if strings.ToLower(r.Method) != `post` {
+		httpError(w, `Method was `+r.Method, http.StatusNotFound, nil)
+	}
+
+	var payload service.UpdateRoomRequest
+	if err := json.NewDecoder(r.Body).Decode(&payload); err != nil {
+		httpError(w, `Invalid input`, http.StatusInternalServerError, err)
+		return
+	}
+
+	if err := validator.HTTPUpdateRoomRequest.Validate(&payload); err != nil {
+		httpError(w, `Invalid input`, http.StatusInternalServerError, err)
+		return
+	}
+	doUpdateRoom(context.Background(), w, r, payload)
+}
+
 func httpUpdateSession(w http.ResponseWriter, r *http.Request) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("httpUpdateSession")
@@ -489,6 +511,7 @@ func (s *Server) SetupRoutes() {
 	r.HandleFunc(`/v1/room/delete`, httpDeleteRoom)
 	r.HandleFunc(`/v1/room/list`, httpListRooms)
 	r.HandleFunc(`/v1/room/lookup`, httpLookupRoom)
+	r.HandleFunc(`/v1/room/update`, httpUpdateRoom)
 	r.HandleFunc(`/v1/schedule/list`, httpListSessionsByConference)
 	r.HandleFunc(`/v1/session/create`, httpCreateSession)
 	r.HandleFunc(`/v1/session/lookup`, httpLookupSession)

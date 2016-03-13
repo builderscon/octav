@@ -79,12 +79,10 @@ func doLookupConference(ctx context.Context, w http.ResponseWriter, r *http.Requ
 	if payload.Lang.Valid() {
 		s := service.Conference{}
 		if err := s.ReplaceL10NStrings(tx, &c, payload.Lang.String); err != nil {
-		httpError(w, `LookupConference`, http.StatusInternalServerError, err)
-		return
+			httpError(w, `LookupConference`, http.StatusInternalServerError, err)
+			return
 		}
 	}
-
-pdebug.Printf("%#v", c)
 
 	httpJSON(w, c)
 }
@@ -174,8 +172,39 @@ func doCreateRoom(ctx context.Context, w http.ResponseWriter, r *http.Request, p
 		return
 	}
 
-	pdebug.Printf("%#v", v)
 	httpJSON(w, v)
+}
+
+func doUpdateRoom(ctx context.Context, w http.ResponseWriter, r *http.Request, payload service.UpdateRoomRequest) {
+	if pdebug.Enabled {
+		g := pdebug.Marker("doUpdateRoom")
+		defer g.End()
+	}
+
+	tx, err := db.Begin()
+	if err != nil {
+		httpError(w, `UpdateRoom`, http.StatusInternalServerError, err)
+		return
+	}
+	defer tx.AutoRollback()
+
+	vdb := db.Room{}
+	if err := vdb.LoadByEID(tx, payload.ID); err != nil {
+		httpError(w, `UpdateRoom`, http.StatusNotFound, err)
+		return
+	}
+
+	s := service.Room{}
+	if err := s.Update(tx, &vdb, payload); err != nil {
+		httpError(w, `UpdateRoom`, http.StatusInternalServerError, err)
+		return
+	}
+	if err := tx.Commit(); err != nil {
+		httpError(w, `UpdateRoom`, http.StatusInternalServerError, err)
+		return
+	}
+
+	httpJSON(w, map[string]string{"status": "success"})
 }
 
 func doCreateSession(ctx context.Context, w http.ResponseWriter, r *http.Request, payload service.CreateSessionRequest) {
@@ -382,13 +411,21 @@ func doLookupRoom(ctx context.Context, w http.ResponseWriter, r *http.Request, p
 	}
 	defer tx.AutoRollback()
 
-	s := model.Room{}
-	if err := s.Load(tx, payload.ID); err != nil {
+	v := model.Room{}
+	if err := v.Load(tx, payload.ID); err != nil {
 		httpError(w, `LookupRoom`, http.StatusInternalServerError, err)
 		return
 	}
 
-	httpJSON(w, s)
+	if payload.Lang.Valid() {
+		s := service.Room{}
+		if err := s.ReplaceL10NStrings(tx, &v, payload.Lang.String); err != nil {
+			httpError(w, `LookupRoom`, http.StatusInternalServerError, err)
+			return
+		}
+	}
+
+	httpJSON(w, v)
 }
 
 func doDeleteRoom(ctx context.Context, w http.ResponseWriter, r *http.Request, payload service.DeleteRoomRequest) {
