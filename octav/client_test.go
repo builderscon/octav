@@ -252,7 +252,6 @@ func TestRoomCRUD(t *testing.T) {
 
 	in := service.UpdateRoomRequest{ID: res.ID}
 	in.L10N.Set("ja", "name", "国際会議場")
-t.Logf("%#v", in)
 	if err := testUpdateRoom(t, cl, &in); err != nil {
 		return
 	}
