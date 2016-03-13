@@ -318,13 +318,6 @@ func (c *InspectionCtx) ExtractStructs(n ast.Node) bool {
 }
 
 func (ctx *InspectionCtx) ExtractStructsFromDecl(decl *ast.GenDecl) error {
-	cacheEnabled := true
-	noScanner := false
-	tablename := ""
-	preCreate := ""
-	postCreate := ""
-	cacheExpires := "1800"
-
 	for _, spec := range decl.Specs {
 		var t *ast.TypeSpec
 		var s *ast.StructType
@@ -338,23 +331,26 @@ func (ctx *InspectionCtx) ExtractStructsFromDecl(decl *ast.GenDecl) error {
 			return ErrAnnotatedStructNotFound
 		}
 
-		if tablename == "" {
-			tablename = fmt.Sprintf("%s_%s",
-				ctx.Package,
-				snakeCase(t.Name.Name),
-			)
+		cgroup := decl.Doc
+		if cgroup == nil {
+			continue
+		}
+		istransport := false
+		for _, c := range cgroup.List {
+pdebug.Printf("--> %s", c.Text)
+			if strings.HasPrefix(strings.TrimSpace(strings.TrimPrefix(c.Text, "//")), "+transport") {
+				istransport = true
+				break
+			}
+		}
+		if !istransport {
+			continue
 		}
 
 		st := Struct{
 			PackageName:  ctx.Package,
-			CacheEnabled: cacheEnabled,
-			CacheExpires: cacheExpires,
 			Fields:       make([]StructField, 0, len(s.Fields.List)),
 			Name:         t.Name.Name,
-			NoScanner:    noScanner,
-			PreCreate:    preCreate,
-			PostCreate:   postCreate,
-			Tablename:    tablename,
 			HasL10N:      false,
 		}
 
