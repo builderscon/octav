@@ -734,6 +734,7 @@ func init() {
 		SetConstraintMap(M).
 		SetRoot(
 			jsval.Object().
+				Required("email", "first_name", "last_name", "nickname", "tshirt_size").
 				AdditionalProperties(
 					jsval.EmptyConstraint,
 				).

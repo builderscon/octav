@@ -1,45 +1,48 @@
 package octav_test
 
 import (
-	"encoding/json"
 	"fmt"
 	"net/http/httptest"
-	"os"
 	"testing"
 
 	"github.com/builderscon/octav/octav"
 	"github.com/builderscon/octav/octav/client"
+	"github.com/builderscon/octav/octav/model"
 	"github.com/builderscon/octav/octav/service"
 	"github.com/builderscon/octav/octav/tools"
 	"github.com/builderscon/octav/octav/validator"
 	"github.com/stretchr/testify/assert"
 )
 
-func bigsight() *octav.Venue {
+func bigsight() *service.CreateVenueRequest {
 	lf := tools.LocalizedFields{}
 	lf.Set("ja", "name", `東京ビッグサイト`)
 	lf.Set("ja", "address", `〒135-0063 東京都江東区有明３丁目１０−１`)
-	return &octav.Venue{
-		Name:      "Tokyo Bigsight",
-		Address:   "Ariake 3-10-1, Koto-ku, Tokyo",
-		L10N:      lf,
-		Longitude: 35.6320326,
-		Latitude:  139.7976891,
-	}
+
+	r := service.CreateVenueRequest{}
+	r.L10N = lf
+	r.Name.Set("Tokyo Bigsight")
+	r.Address.Set("Ariake 3-10-1, Koto-ku, Tokyo")
+	r.Longitude.Set(35.6320326)
+	r.Latitude.Set(139.7976891)
+
+	return &r
 }
 
-func intlConferenceRoom(venueID string) *octav.Room {
+func intlConferenceRoom(venueID string) *service.CreateRoomRequest {
 	lf := tools.LocalizedFields{}
 	lf.Set("ja", "name", `国際会議場`)
-	return &octav.Room{
-		Capacity: 1000,
-		L10N:     lf,
-		Name:     "International Conference Hall",
-		VenueID:  venueID,
-	}
+
+	r := service.CreateRoomRequest{}
+	r.L10N = lf
+	r.Capacity.Set(1000)
+	r.Name.Set("International Conference Hall")
+	r.VenueID.Set(venueID)
+
+	return &r
 }
 
-func testCreateRoom(t *testing.T, cl *client.Client, r *octav.Room) (*octav.Room, error) {
+func testCreateRoom(t *testing.T, cl *client.Client, r *service.CreateRoomRequest) (*model.Room, error) {
 	res, err := cl.CreateRoom(r)
 	if !assert.NoError(t, err, "CreateRoom should succeed") {
 		return nil, err
@@ -47,7 +50,7 @@ func testCreateRoom(t *testing.T, cl *client.Client, r *octav.Room) (*octav.Room
 	return res, nil
 }
 
-func testCreateVenue(t *testing.T, cl *client.Client, v *octav.Venue) (*octav.Venue, error) {
+func testCreateVenue(t *testing.T, cl *client.Client, v *service.CreateVenueRequest) (*model.Venue, error) {
 	res, err := cl.CreateVenue(v)
 	if !assert.NoError(t, err, "CreateVenue should succeed") {
 		return nil, err
@@ -55,15 +58,15 @@ func testCreateVenue(t *testing.T, cl *client.Client, v *octav.Venue) (*octav.Ve
 	return res, nil
 }
 
-func testLookupRoom(t *testing.T, cl *client.Client, id string) (*octav.Room, error) {
-	venue, err := cl.LookupRoom(&octav.LookupRoomRequest{ID: id})
+func testLookupRoom(t *testing.T, cl *client.Client, id string) (*model.Room, error) {
+	venue, err := cl.LookupRoom(&service.LookupRoomRequest{ID: id})
 	if !assert.NoError(t, err, "LookupRoom succeeds") {
 		return nil, err
 	}
 	return venue, nil
 }
 
-func testCreateUser(t *testing.T, cl *client.Client, in *octav.CreateUserRequest) (*octav.User, error) {
+func testCreateUser(t *testing.T, cl *client.Client, in *service.CreateUserRequest) (*model.User, error) {
 	res, err := cl.CreateUser(in)
 	if !assert.NoError(t, err, "CreateUser should succeed") {
 		return nil, err
@@ -71,8 +74,8 @@ func testCreateUser(t *testing.T, cl *client.Client, in *octav.CreateUserRequest
 	return res, nil
 }
 
-func testLookupUser(t *testing.T, cl *client.Client, id string) (*octav.User, error) {
-	user, err := cl.LookupUser(&octav.LookupUserRequest{ID: id})
+func testLookupUser(t *testing.T, cl *client.Client, id string) (*model.User, error) {
+	user, err := cl.LookupUser(&service.LookupUserRequest{ID: id})
 	if !assert.NoError(t, err, "LookupUser succeeds") {
 		return nil, err
 	}
@@ -80,15 +83,15 @@ func testLookupUser(t *testing.T, cl *client.Client, id string) (*octav.User, er
 }
 
 func testDeleteUser(t *testing.T, cl *client.Client, id string) error {
-	err := cl.DeleteUser(&octav.DeleteUserRequest{ID: id})
+	err := cl.DeleteUser(&service.DeleteUserRequest{ID: id})
 	if !assert.NoError(t, err, "DeleteUser should succeed") {
 		return err
 	}
 	return nil
 }
 
-func testLookupVenue(t *testing.T, cl *client.Client, id string) (*octav.Venue, error) {
-	venue, err := cl.LookupVenue(&octav.LookupVenueRequest{ID: id})
+func testLookupVenue(t *testing.T, cl *client.Client, id string) (*model.Venue, error) {
+	venue, err := cl.LookupVenue(&service.LookupVenueRequest{ID: id})
 	if !assert.NoError(t, err, "LookupVenue succeeds") {
 		return nil, err
 	}
@@ -96,7 +99,7 @@ func testLookupVenue(t *testing.T, cl *client.Client, id string) (*octav.Venue, 
 }
 
 func testDeleteRoom(t *testing.T, cl *client.Client, id string) error {
-	err := cl.DeleteRoom(&octav.DeleteRoomRequest{ID: id})
+	err := cl.DeleteRoom(&service.DeleteRoomRequest{ID: id})
 	if !assert.NoError(t, err, "DeleteRoom should be successful") {
 		return err
 	}
@@ -104,7 +107,7 @@ func testDeleteRoom(t *testing.T, cl *client.Client, id string) error {
 }
 
 func testDeleteVenue(t *testing.T, cl *client.Client, id string) error {
-	err := cl.DeleteVenue(&octav.DeleteVenueRequest{ID: id})
+	err := cl.DeleteVenue(&service.DeleteVenueRequest{ID: id})
 	if !assert.NoError(t, err, "DeleteVenue should be successful") {
 		return err
 	}
@@ -118,7 +121,7 @@ func yapcasia() *service.CreateConferenceRequest {
 	}
 }
 
-func testCreateConference(t *testing.T, cl *client.Client, in *service.CreateConferenceRequest) (*octav.Conference, error) {
+func testCreateConference(t *testing.T, cl *client.Client, in *service.CreateConferenceRequest) (*model.Conference, error) {
 	res, err := cl.CreateConference(in)
 	if !assert.NoError(t, err, "CreateConference should succeed") {
 		return nil, err
@@ -126,15 +129,19 @@ func testCreateConference(t *testing.T, cl *client.Client, in *service.CreateCon
 	return res, nil
 }
 
-func testLookupConference(t *testing.T, cl *client.Client, id string) (*octav.Conference, error) {
-	conference, err := cl.LookupConference(&octav.LookupConferenceRequest{ID: id})
+func testLookupConference(t *testing.T, cl *client.Client, id, lang string) (*model.Conference, error) {
+	r := &service.LookupConferenceRequest{ID: id}
+	if lang != "" {
+		r.Lang.Set(lang)
+	}
+	conference, err := cl.LookupConference(r)
 	if !assert.NoError(t, err, "LookupConference succeeds") {
 		return nil, err
 	}
 	return conference, nil
 }
 
-func testUpdateConference(t *testing.T, cl *client.Client, in *octav.UpdateConferenceRequest) error {
+func testUpdateConference(t *testing.T, cl *client.Client, in *service.UpdateConferenceRequest) error {
 	err := cl.UpdateConference(in)
 	if !assert.NoError(t, err, "UpdateConference succeeds") {
 		return err
@@ -143,7 +150,7 @@ func testUpdateConference(t *testing.T, cl *client.Client, in *octav.UpdateConfe
 }
 
 func testDeleteConference(t *testing.T, cl *client.Client, id string) error {
-	err := cl.DeleteConference(&octav.DeleteConferenceRequest{ID: id})
+	err := cl.DeleteConference(&service.DeleteConferenceRequest{ID: id})
 	if !assert.NoError(t, err, "DeleteConference should be successful") {
 		return err
 	}
@@ -164,7 +171,7 @@ func TestConferenceCRUD(t *testing.T) {
 		return
 	}
 
-	res2, err := testLookupConference(t, cl, res.ID)
+	res2, err := testLookupConference(t, cl, res.ID, "")
 	if err != nil {
 		return
 	}
@@ -173,14 +180,14 @@ func TestConferenceCRUD(t *testing.T) {
 		return
 	}
 
-	in := octav.UpdateConferenceRequest{ID: res.ID}
+	in := service.UpdateConferenceRequest{ID: res.ID}
 	in.SubTitle.Set("Big Bang!")
 	in.L10N.Set("ja", "title", "ヤップシー エイジア")
 	if err := testUpdateConference(t, cl, &in); err != nil {
 		return
 	}
 
-	res3, err := testLookupConference(t, cl, res.ID)
+	res3, err := testLookupConference(t, cl, res.ID, "ja")
 	if err != nil {
 		return
 	}
@@ -189,8 +196,7 @@ func TestConferenceCRUD(t *testing.T) {
 		return
 	}
 
-	jatitle, _ := res3.L10N.Get("ja", "title")
-	if !assert.Equal(t, jatitle, "ヤップシー エイジア", "Conference.title#ja is the same as the conference updated") {
+	if !assert.Equal(t, "ヤップシー エイジア", res3.Title, "Conference.title#ja is the same as the conference updated") {
 		return
 	}
 
@@ -241,7 +247,7 @@ func TestCreateRoom(t *testing.T) {
 	}
 }
 
-func testCreateSession(t *testing.T, cl *client.Client, in *service.CreateSessionRequest) (*octav.Session, error) {
+func testCreateSession(t *testing.T, cl *client.Client, in *service.CreateSessionRequest) (*model.Session, error) {
 	res, err := cl.CreateSession(in)
 	if !assert.NoError(t, err, "CreateSession should succeed") {
 		return nil, err
@@ -271,7 +277,6 @@ func TestCreateSession(t *testing.T) {
 	in.Title.Set("How To Write A Conference Backend")
 	in.Duration.Set(60)
 	in.Abstract.Set("Use lots of reflection and generate lots of code")
-	json.NewEncoder(os.Stdout).Encode(in)
 	res, err := testCreateSession(t, cl, &in)
 	if err != nil {
 		return
@@ -282,11 +287,11 @@ func TestCreateSession(t *testing.T) {
 	}
 }
 
-func johndoe() *octav.CreateUserRequest {
+func johndoe() *service.CreateUserRequest {
 	lf := tools.LocalizedFields{}
 	lf.Set("ja", "first_name", "ジョン")
 	lf.Set("ja", "last_name", "ドー")
-	return &octav.CreateUserRequest{
+	return &service.CreateUserRequest{
 		FirstName:  "John",
 		LastName:   "Doe",
 		Nickname:   "enigma621",
@@ -379,7 +384,7 @@ func TestListRooms(t *testing.T) {
 		return
 	}
 
-	in := octav.ListRoomRequest{
+	in := service.ListRoomRequest{
 		VenueID: venue.ID,
 	}
 	res, err := cl.ListRooms(&in)
@@ -424,7 +429,7 @@ func TestListSessionsByConference(t *testing.T) {
 		}
 	}
 
-	in := octav.ListSessionsByConferenceRequest{
+	in := service.ListSessionsByConferenceRequest{
 		ConferenceID: conference.ID,
 	}
 	res, err := cl.ListSessionsByConference(&in)
@@ -445,7 +450,7 @@ func TestListVenues(t *testing.T) {
 	defer ts.Close()
 
 	cl := client.New(ts.URL)
-	in := octav.ListVenueRequest{}
+	in := service.ListVenueRequest{}
 	res, err := cl.ListVenues(&in)
 	if !assert.NoError(t, err, "ListVenues should succeed") {
 		return

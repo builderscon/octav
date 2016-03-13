@@ -5,7 +5,7 @@ import (
 	"github.com/builderscon/octav/octav/tools"
 )
 
-func (v *Conference) Create(tx *db.Tx, payload CreateConferenceRequest, vdb *db.Conference) error {
+func (v *Conference) populateRowForCreate(vdb *db.Conference, payload CreateConferenceRequest) error {
 	vdb.EID = tools.UUID()
 	vdb.Slug = payload.Slug
 	vdb.Title = payload.Title
@@ -14,13 +14,22 @@ func (v *Conference) Create(tx *db.Tx, payload CreateConferenceRequest, vdb *db.
 		vdb.SubTitle.Valid = true
 		vdb.SubTitle.String = payload.SubTitle.String
 	}
+	return nil
+}
 
-	if err := vdb.Create(tx); err != nil {
-		return err
+func (v *Conference) populateRowForUpdate(vdb *db.Conference, payload UpdateConferenceRequest) error {
+	if payload.Slug.Valid() {
+		vdb.Slug = payload.Slug.String
 	}
 
-	if err := payload.L10N.CreateLocalizedStrings(tx, "Conference", vdb.EID); err != nil {
-		return err
+	if payload.Slug.Valid() {
+		vdb.Title = payload.Title.String
+	}
+
+	if payload.SubTitle.Valid() {
+		vdb.SubTitle.Valid = true
+		vdb.SubTitle.String = payload.SubTitle.String
 	}
 	return nil
 }
+

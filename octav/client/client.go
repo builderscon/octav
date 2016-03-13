@@ -8,7 +8,7 @@ import (
 	"net/http"
 	"net/url"
 
-	"github.com/builderscon/octav/octav"
+	"github.com/builderscon/octav/octav/model"
 	"github.com/builderscon/octav/octav/service"
 	"github.com/lestrrat/go-pdebug"
 	"github.com/lestrrat/go-urlenc"
@@ -26,7 +26,7 @@ func New(s string) *Client {
 	}
 }
 
-func (c *Client) CreateConference(in *service.CreateConferenceRequest) (ret *octav.Conference, err error) {
+func (c *Client) CreateConference(in *service.CreateConferenceRequest) (ret *model.Conference, err error) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("client.CreateConference").BindError(&err)
 		defer g.End()
@@ -50,7 +50,7 @@ func (c *Client) CreateConference(in *service.CreateConferenceRequest) (ret *oct
 	if res.StatusCode != http.StatusOK {
 		return nil, fmt.Errorf(`Invalid response: '%s'`, res.Status)
 	}
-	var payload octav.Conference
+	var payload model.Conference
 	err = json.NewDecoder(res.Body).Decode(&payload)
 	if err != nil {
 		return nil, err
@@ -58,7 +58,7 @@ func (c *Client) CreateConference(in *service.CreateConferenceRequest) (ret *oct
 	return &payload, nil
 }
 
-func (c *Client) CreateRoom(in *octav.Room) (ret *octav.Room, err error) {
+func (c *Client) CreateRoom(in *service.CreateRoomRequest) (ret *model.Room, err error) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("client.CreateRoom").BindError(&err)
 		defer g.End()
@@ -82,7 +82,7 @@ func (c *Client) CreateRoom(in *octav.Room) (ret *octav.Room, err error) {
 	if res.StatusCode != http.StatusOK {
 		return nil, fmt.Errorf(`Invalid response: '%s'`, res.Status)
 	}
-	var payload octav.Room
+	var payload model.Room
 	err = json.NewDecoder(res.Body).Decode(&payload)
 	if err != nil {
 		return nil, err
@@ -90,7 +90,7 @@ func (c *Client) CreateRoom(in *octav.Room) (ret *octav.Room, err error) {
 	return &payload, nil
 }
 
-func (c *Client) CreateSession(in *service.CreateSessionRequest) (ret *octav.Session, err error) {
+func (c *Client) CreateSession(in *service.CreateSessionRequest) (ret *model.Session, err error) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("client.CreateSession").BindError(&err)
 		defer g.End()
@@ -114,7 +114,7 @@ func (c *Client) CreateSession(in *service.CreateSessionRequest) (ret *octav.Ses
 	if res.StatusCode != http.StatusOK {
 		return nil, fmt.Errorf(`Invalid response: '%s'`, res.Status)
 	}
-	var payload octav.Session
+	var payload model.Session
 	err = json.NewDecoder(res.Body).Decode(&payload)
 	if err != nil {
 		return nil, err
@@ -122,7 +122,7 @@ func (c *Client) CreateSession(in *service.CreateSessionRequest) (ret *octav.Ses
 	return &payload, nil
 }
 
-func (c *Client) CreateUser(in *octav.CreateUserRequest) (ret *octav.User, err error) {
+func (c *Client) CreateUser(in *service.CreateUserRequest) (ret *model.User, err error) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("client.CreateUser").BindError(&err)
 		defer g.End()
@@ -146,7 +146,7 @@ func (c *Client) CreateUser(in *octav.CreateUserRequest) (ret *octav.User, err e
 	if res.StatusCode != http.StatusOK {
 		return nil, fmt.Errorf(`Invalid response: '%s'`, res.Status)
 	}
-	var payload octav.User
+	var payload model.User
 	err = json.NewDecoder(res.Body).Decode(&payload)
 	if err != nil {
 		return nil, err
@@ -154,7 +154,7 @@ func (c *Client) CreateUser(in *octav.CreateUserRequest) (ret *octav.User, err e
 	return &payload, nil
 }
 
-func (c *Client) CreateVenue(in *octav.Venue) (ret *octav.Venue, err error) {
+func (c *Client) CreateVenue(in *service.CreateVenueRequest) (ret *model.Venue, err error) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("client.CreateVenue").BindError(&err)
 		defer g.End()
@@ -178,7 +178,7 @@ func (c *Client) CreateVenue(in *octav.Venue) (ret *octav.Venue, err error) {
 	if res.StatusCode != http.StatusOK {
 		return nil, fmt.Errorf(`Invalid response: '%s'`, res.Status)
 	}
-	var payload octav.Venue
+	var payload model.Venue
 	err = json.NewDecoder(res.Body).Decode(&payload)
 	if err != nil {
 		return nil, err
@@ -186,7 +186,7 @@ func (c *Client) CreateVenue(in *octav.Venue) (ret *octav.Venue, err error) {
 	return &payload, nil
 }
 
-func (c *Client) DeleteConference(in *octav.DeleteConferenceRequest) (err error) {
+func (c *Client) DeleteConference(in *service.DeleteConferenceRequest) (err error) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("client.DeleteConference").BindError(&err)
 		defer g.End()
@@ -213,7 +213,7 @@ func (c *Client) DeleteConference(in *octav.DeleteConferenceRequest) (err error)
 	return nil
 }
 
-func (c *Client) DeleteRoom(in *octav.DeleteRoomRequest) (err error) {
+func (c *Client) DeleteRoom(in *service.DeleteRoomRequest) (err error) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("client.DeleteRoom").BindError(&err)
 		defer g.End()
@@ -240,7 +240,7 @@ func (c *Client) DeleteRoom(in *octav.DeleteRoomRequest) (err error) {
 	return nil
 }
 
-func (c *Client) DeleteUser(in *octav.DeleteUserRequest) (err error) {
+func (c *Client) DeleteUser(in *service.DeleteUserRequest) (err error) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("client.DeleteUser").BindError(&err)
 		defer g.End()
@@ -267,7 +267,7 @@ func (c *Client) DeleteUser(in *octav.DeleteUserRequest) (err error) {
 	return nil
 }
 
-func (c *Client) DeleteVenue(in *octav.DeleteVenueRequest) (err error) {
+func (c *Client) DeleteVenue(in *service.DeleteVenueRequest) (err error) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("client.DeleteVenue").BindError(&err)
 		defer g.End()
@@ -294,7 +294,7 @@ func (c *Client) DeleteVenue(in *octav.DeleteVenueRequest) (err error) {
 	return nil
 }
 
-func (c *Client) ListRooms(in *octav.ListRoomRequest) (ret []octav.Room, err error) {
+func (c *Client) ListRooms(in *service.ListRoomRequest) (ret []model.Room, err error) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("client.ListRooms").BindError(&err)
 		defer g.End()
@@ -318,7 +318,7 @@ func (c *Client) ListRooms(in *octav.ListRoomRequest) (ret []octav.Room, err err
 	if res.StatusCode != http.StatusOK {
 		return nil, fmt.Errorf(`Invalid response: '%s'`, res.Status)
 	}
-	var payload []octav.Room
+	var payload []model.Room
 	err = json.NewDecoder(res.Body).Decode(&payload)
 	if err != nil {
 		return nil, err
@@ -326,7 +326,7 @@ func (c *Client) ListRooms(in *octav.ListRoomRequest) (ret []octav.Room, err err
 	return payload, nil
 }
 
-func (c *Client) ListSessionsByConference(in *octav.ListSessionsByConferenceRequest) (ret interface{}, err error) {
+func (c *Client) ListSessionsByConference(in *service.ListSessionsByConferenceRequest) (ret interface{}, err error) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("client.ListSessionsByConference").BindError(&err)
 		defer g.End()
@@ -358,7 +358,7 @@ func (c *Client) ListSessionsByConference(in *octav.ListSessionsByConferenceRequ
 	return payload, nil
 }
 
-func (c *Client) ListVenues(in *octav.ListVenueRequest) (ret []octav.Venue, err error) {
+func (c *Client) ListVenues(in *service.ListVenueRequest) (ret []model.Venue, err error) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("client.ListVenues").BindError(&err)
 		defer g.End()
@@ -382,7 +382,7 @@ func (c *Client) ListVenues(in *octav.ListVenueRequest) (ret []octav.Venue, err 
 	if res.StatusCode != http.StatusOK {
 		return nil, fmt.Errorf(`Invalid response: '%s'`, res.Status)
 	}
-	var payload []octav.Venue
+	var payload []model.Venue
 	err = json.NewDecoder(res.Body).Decode(&payload)
 	if err != nil {
 		return nil, err
@@ -390,7 +390,7 @@ func (c *Client) ListVenues(in *octav.ListVenueRequest) (ret []octav.Venue, err 
 	return payload, nil
 }
 
-func (c *Client) LookupConference(in *octav.LookupConferenceRequest) (ret *octav.Conference, err error) {
+func (c *Client) LookupConference(in *service.LookupConferenceRequest) (ret *model.Conference, err error) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("client.LookupConference").BindError(&err)
 		defer g.End()
@@ -414,7 +414,7 @@ func (c *Client) LookupConference(in *octav.LookupConferenceRequest) (ret *octav
 	if res.StatusCode != http.StatusOK {
 		return nil, fmt.Errorf(`Invalid response: '%s'`, res.Status)
 	}
-	var payload octav.Conference
+	var payload model.Conference
 	err = json.NewDecoder(res.Body).Decode(&payload)
 	if err != nil {
 		return nil, err
@@ -422,7 +422,7 @@ func (c *Client) LookupConference(in *octav.LookupConferenceRequest) (ret *octav
 	return &payload, nil
 }
 
-func (c *Client) LookupRoom(in *octav.LookupRoomRequest) (ret *octav.Room, err error) {
+func (c *Client) LookupRoom(in *service.LookupRoomRequest) (ret *model.Room, err error) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("client.LookupRoom").BindError(&err)
 		defer g.End()
@@ -446,7 +446,7 @@ func (c *Client) LookupRoom(in *octav.LookupRoomRequest) (ret *octav.Room, err e
 	if res.StatusCode != http.StatusOK {
 		return nil, fmt.Errorf(`Invalid response: '%s'`, res.Status)
 	}
-	var payload octav.Room
+	var payload model.Room
 	err = json.NewDecoder(res.Body).Decode(&payload)
 	if err != nil {
 		return nil, err
@@ -454,7 +454,7 @@ func (c *Client) LookupRoom(in *octav.LookupRoomRequest) (ret *octav.Room, err e
 	return &payload, nil
 }
 
-func (c *Client) LookupSession(in *octav.LookupSessionRequest) (ret *octav.Session, err error) {
+func (c *Client) LookupSession(in *service.LookupSessionRequest) (ret *model.Session, err error) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("client.LookupSession").BindError(&err)
 		defer g.End()
@@ -478,7 +478,7 @@ func (c *Client) LookupSession(in *octav.LookupSessionRequest) (ret *octav.Sessi
 	if res.StatusCode != http.StatusOK {
 		return nil, fmt.Errorf(`Invalid response: '%s'`, res.Status)
 	}
-	var payload octav.Session
+	var payload model.Session
 	err = json.NewDecoder(res.Body).Decode(&payload)
 	if err != nil {
 		return nil, err
@@ -486,7 +486,7 @@ func (c *Client) LookupSession(in *octav.LookupSessionRequest) (ret *octav.Sessi
 	return &payload, nil
 }
 
-func (c *Client) LookupUser(in *octav.LookupUserRequest) (ret *octav.User, err error) {
+func (c *Client) LookupUser(in *service.LookupUserRequest) (ret *model.User, err error) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("client.LookupUser").BindError(&err)
 		defer g.End()
@@ -510,7 +510,7 @@ func (c *Client) LookupUser(in *octav.LookupUserRequest) (ret *octav.User, err e
 	if res.StatusCode != http.StatusOK {
 		return nil, fmt.Errorf(`Invalid response: '%s'`, res.Status)
 	}
-	var payload octav.User
+	var payload model.User
 	err = json.NewDecoder(res.Body).Decode(&payload)
 	if err != nil {
 		return nil, err
@@ -518,7 +518,7 @@ func (c *Client) LookupUser(in *octav.LookupUserRequest) (ret *octav.User, err e
 	return &payload, nil
 }
 
-func (c *Client) LookupVenue(in *octav.LookupVenueRequest) (ret *octav.Venue, err error) {
+func (c *Client) LookupVenue(in *service.LookupVenueRequest) (ret *model.Venue, err error) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("client.LookupVenue").BindError(&err)
 		defer g.End()
@@ -542,7 +542,7 @@ func (c *Client) LookupVenue(in *octav.LookupVenueRequest) (ret *octav.Venue, er
 	if res.StatusCode != http.StatusOK {
 		return nil, fmt.Errorf(`Invalid response: '%s'`, res.Status)
 	}
-	var payload octav.Venue
+	var payload model.Venue
 	err = json.NewDecoder(res.Body).Decode(&payload)
 	if err != nil {
 		return nil, err
@@ -550,7 +550,7 @@ func (c *Client) LookupVenue(in *octav.LookupVenueRequest) (ret *octav.Venue, er
 	return &payload, nil
 }
 
-func (c *Client) UpdateConference(in *octav.UpdateConferenceRequest) (err error) {
+func (c *Client) UpdateConference(in *service.UpdateConferenceRequest) (err error) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("client.UpdateConference").BindError(&err)
 		defer g.End()
@@ -577,7 +577,7 @@ func (c *Client) UpdateConference(in *octav.UpdateConferenceRequest) (err error)
 	return nil
 }
 
-func (c *Client) UpdateSession(in *octav.UpdateSessionRequest) (err error) {
+func (c *Client) UpdateSession(in *service.UpdateSessionRequest) (err error) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("client.UpdateSession").BindError(&err)
 		defer g.End()
