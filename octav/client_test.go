@@ -456,10 +456,6 @@ func TestCreateVenue(t *testing.T) {
 	}
 }
 
-type setPropValuer interface {
-	SetPropValue(string, interface{}) error
-}
-
 func TestListRooms(t *testing.T) {
 	ts := httptest.NewServer(octav.New())
 	defer ts.Close()
