@@ -1,4 +1,4 @@
-//go:generate gendb -t Conference -t Room -t Session -t User -t Venue -t LocalizedString -d db
+//go:generate gendb -d db
 //go:generate genmodel -d .
 //go:generate gentransport -d .
 
