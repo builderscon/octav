@@ -13,6 +13,9 @@ import (
 	"github.com/lestrrat/go-urlenc"
 )
 
+var _ = bytes.MinRead
+var _ = json.Decoder{}
+
 type Client struct {
 	Client   *http.Client
 	Endpoint string
