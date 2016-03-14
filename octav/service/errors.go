@@ -1,4 +1,4 @@
-package octav
+package service
 
 func (e ErrInvalidJSONFieldType) Error() string {
 	return "invalid JSON field type for property " +e.Field

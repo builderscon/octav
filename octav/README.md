@@ -11,6 +11,25 @@ octav - The main API server
 octav is the API server that does the basic CRUD operations on data.
 No authentication is done on this component.
 
+All basic text data is expected to be registered using English, but
+each data component may have elements that can be localized.
+You can register such data by providing data with keys such as `name#ja`
+
+Localized data can be retrieved by providing the `lang` key to each of
+the `Lookup*` endpoints. For example, to fetch sessions with localized
+title and abstract, you can issue a request like the following:
+
+```
+http://******/v1/session/lookup?id=*******&lang=ja
+```
+
+As you can see, endpoints that fetch data are normally represented using
+GET endpoints, with data encoded in query strings.
+
+For other endpoints that require register, update, or delete data are
+represented using POST endpoints. In this case the data should be
+encoded as JSON text.
+
 # Code generation directions
 
 ## If you edited spec/v1/api.json

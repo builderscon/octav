@@ -1,12 +1,14 @@
-package octav
+package tools
 
 import (
 	"bytes"
 	"encoding/json"
 	"errors"
+	"regexp"
 	"strings"
 
 	"github.com/builderscon/octav/octav/db"
+	"github.com/lestrrat/go-pdebug"
 	"golang.org/x/text/language"
 )
 
@@ -17,7 +19,7 @@ func (lf LocalizedFields) GetPropNames() ([]string, error) {
 	var ret []string
 	for lang, kv := range lf.fields {
 		for k := range kv {
-			ret = append(ret, k + "#" + lang)
+			ret = append(ret, k+"#"+lang)
 		}
 	}
 	return ret, nil
@@ -129,10 +131,21 @@ func (lf *LocalizedFields) Set(lang, key, value string) error {
 }
 
 func (lf *LocalizedFields) CreateLocalizedStrings(tx *db.Tx, parentType, parentID string) error {
+	if pdebug.Enabled {
+		g := pdebug.Marker("LocalizedFields.CreateLocalizedStrings (%s)", parentType)
+		defer g.End()
+	}
+
 	if lf.Len() <= 0 {
+		if pdebug.Enabled {
+			pdebug.Printf("Nothing to register, bailing out")
+		}
 		return nil
 	}
 	err := lf.Foreach(func(lang, key, val string) error {
+		if pdebug.Enabled {
+			pdebug.Printf("Creating l10n string for '%s' (%s)", key, lang)
+		}
 		ldb := db.LocalizedString{
 			ParentType: parentType,
 			ParentID:   parentID,
@@ -161,6 +174,8 @@ func splitFQKey(k string) (string, string, error) {
 	return t.String(), sp[0], nil
 }
 
+var l10nKeyRx = regexp.MustCompile(`^[^#]+#[^#]+$`)
+
 func ExtractL10NFields(m map[string]interface{}, lf *LocalizedFields, keys []string) error {
 	km := make(map[string]struct{})
 	for _, k := range keys {
@@ -171,6 +186,11 @@ func ExtractL10NFields(m map[string]interface{}, lf *LocalizedFields, keys []str
 		switch lv.(type) {
 		case string:
 		default:
+			continue
+		}
+
+		// Ignore names that do not match key#lang pattern
+		if !l10nKeyRx.MatchString(lk) {
 			continue
 		}
 

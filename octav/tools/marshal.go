@@ -1,4 +1,4 @@
-package octav
+package tools
 
 import (
 	"bytes"
@@ -7,7 +7,7 @@ import (
 	"github.com/lestrrat/go-urlenc"
 )
 
-func marshalJSONWithL10N(buf []byte, lf LocalizedFields) ([]byte, error) {
+func MarshalJSONWithL10N(buf []byte, lf LocalizedFields) ([]byte, error) {
 	if lf.Len() == 0 {
 		return buf, nil
 	}
@@ -23,7 +23,7 @@ func marshalJSONWithL10N(buf []byte, lf LocalizedFields) ([]byte, error) {
 	return b.Bytes(), nil
 }
 
-func marshalURLWithL10N(buf []byte, lf LocalizedFields) ([]byte, error) {
+func MarshalURLWithL10N(buf []byte, lf LocalizedFields) ([]byte, error) {
 	if lf.Len() == 0 {
 		return buf, nil
 	}
@@ -35,4 +35,3 @@ func marshalURLWithL10N(buf []byte, lf LocalizedFields) ([]byte, error) {
 
 	return append(append(buf, '&'), l10buf...), nil
 }
-

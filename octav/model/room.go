@@ -1,4 +1,4 @@
-package octav
+package model
 
 import "github.com/builderscon/octav/octav/db"
 
@@ -8,16 +8,17 @@ func (v *RoomList) LoadForVenue(tx *db.Tx, venueID, since string, limit int) err
 		return err
 	}
 
-	res := make([]Room, len(vdbl))
+	res := make([]RoomL10N, len(vdbl))
 	for i, vdb := range vdbl {
 		v := Room{}
 		if err := v.FromRow(vdb); err != nil {
 			return err
 		}
-		if err := v.LoadLocalizedFields(tx); err != nil {
+		vl := RoomL10N{Room: v}
+		if err := vl.LoadLocalizedFields(tx); err != nil {
 			return err
 		}
-		res[i] = v
+		res[i] = vl
 	}
 	*v = res
 	return nil

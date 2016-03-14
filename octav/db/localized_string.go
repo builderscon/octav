@@ -2,8 +2,8 @@ package db
 
 import "github.com/lestrrat/go-pdebug"
 
-func (l *LocalizedString) LoadByLangKey(tx *Tx, name, language string) error {
-	row := tx.QueryRow(`SELECT oid, parent_id, parent_type, name, language, localized FROM `+LocalizedStringTable+` WHERE name = ? AND language = ?`, name, language)
+func (l *LocalizedString) LoadByLangKey(tx *Tx, language, name, parentType, parentID string) error {
+	row := tx.QueryRow(`SELECT oid, parent_id, parent_type, name, language, localized FROM `+LocalizedStringTable+` WHERE parent_type = ? AND parent_id = ? AND name = ? AND language = ?`, parentType, parentID, name, language)
 	if err := l.Scan(row); err != nil {
 		return err
 	}
