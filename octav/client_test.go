@@ -1,6 +1,7 @@
 package octav_test
 
 import (
+	"encoding/json"
 	"fmt"
 	"net/http/httptest"
 	"testing"
@@ -94,8 +95,12 @@ func testDeleteUser(t *testing.T, cl *client.Client, id string) error {
 	return nil
 }
 
-func testLookupVenue(t *testing.T, cl *client.Client, id string) (*model.Venue, error) {
-	venue, err := cl.LookupVenue(&service.LookupVenueRequest{ID: id})
+func testLookupVenue(t *testing.T, cl *client.Client, id, lang string) (*model.Venue, error) {
+	r := &service.LookupVenueRequest{ID: id}
+	if lang != "" {
+		r.Lang.Set(lang)
+	}
+	venue, err := cl.LookupVenue(r)
 	if !assert.NoError(t, err, "LookupVenue succeeds") {
 		return nil, err
 	}
@@ -116,6 +121,14 @@ func testDeleteRoom(t *testing.T, cl *client.Client, id string) error {
 		return err
 	}
 	return err
+}
+
+func testUpdateVenue(t *testing.T, cl *client.Client, in *service.UpdateVenueRequest) error {
+	err := cl.UpdateVenue(in)
+	if !assert.NoError(t, err, "UpdateVenue succeeds") {
+		return err
+	}
+	return nil
 }
 
 func testDeleteVenue(t *testing.T, cl *client.Client, id string) error {
@@ -424,7 +437,7 @@ func TestCreateUser(t *testing.T) {
 	}
 }
 
-func TestCreateVenue(t *testing.T) {
+func TestVenueCRUD(t *testing.T) {
 	ts := httptest.NewServer(octav.New())
 	defer ts.Close()
 
@@ -442,12 +455,32 @@ func TestCreateVenue(t *testing.T) {
 		return
 	}
 
-	res2, err := testLookupVenue(t, cl, res.ID)
+	res2, err := testLookupVenue(t, cl, res.ID, "")
 	if err != nil {
 		return
 	}
 
 	if !assert.Equal(t, res2, res, "LookupVenue is the same as the venue created") {
+		return
+	}
+
+	in := service.UpdateVenueRequest{ID: res.ID}
+	in.L10N.Set("ja", "name", "東京ビッグサイト")
+	t.Logf("%#v", in)
+	{
+		buf, _ := json.MarshalIndent(in, "", "  ")
+		t.Logf("%s", buf)
+	}
+	if err := testUpdateVenue(t, cl, &in); err != nil {
+		return
+	}
+
+	res3, err := testLookupVenue(t, cl, res.ID, "ja")
+	if err != nil {
+		return
+	}
+
+	if !assert.Equal(t, "東京ビッグサイト", res3.Name, "Venue.name#ja is the same as the object updated") {
 		return
 	}
 

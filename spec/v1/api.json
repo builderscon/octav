@@ -371,6 +371,21 @@
       "targetSchema": { "$ref": "#/definitions/venue" }
     },
     {
+      "title": "Update venue",
+      "rel": "update",
+      "href": "/venue/update",
+      "method": "POST",
+      "encType": "application/json",
+      "schema": {
+        "type": "object",
+        "hsup.type": "service.UpdateVenueRequest",
+        "required": ["id"],
+        "properties": {
+          "id": { "$ref": "#/definitions/uuid" }
+        }
+      }
+    },
+    {
       "title": "Delete venue",
       "rel": "delete",
       "href": "/venue/delete",

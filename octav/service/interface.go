@@ -188,9 +188,9 @@ type CreateVenueRequest struct {
 
 // +transport
 type UpdateVenueRequest struct {
-	ID        jsval.MaybeString     `json:"id"`
-	Name      jsval.MaybeString     `json:"name"`
-	Address   jsval.MaybeString     `json:"address"`
+	ID        string                `json:"id"`
+	Name      jsval.MaybeString     `json:"name,omitempty"`
+	Address   jsval.MaybeString     `json:"address,omitempty"`
 	Longitude jsval.MaybeFloat      `json:"longitude,omitempty"`
 	Latitude  jsval.MaybeFloat      `json:"latitude,omitempty"`
 	L10N      tools.LocalizedFields `json:"-"`
@@ -210,7 +210,8 @@ type ListVenueRequest struct {
 
 // +transport
 type LookupVenueRequest struct {
-	ID string `json:"id" urlenc:"id"`
+	ID   string            `json:"id" urlenc:"id"`
+	Lang jsval.MaybeString `json:"lang,omitempty" urlenc:"lang,omitempty,string"`
 }
 
 // +transport

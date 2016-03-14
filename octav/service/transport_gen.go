@@ -1626,9 +1626,7 @@ func (r *CreateVenueRequest) SetPropValue(s string, v interface{}) error {
 
 func (r UpdateVenueRequest) collectMarshalData() map[string]interface{} {
 	m := make(map[string]interface{})
-	if r.ID.Valid() {
-		m["id"] = r.ID.Value()
-	}
+	m["id"] = r.ID
 	if r.Name.Valid() {
 		m["name"] = r.Name.Value()
 	}
@@ -1668,10 +1666,13 @@ func (r *UpdateVenueRequest) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	if jv, ok := m["id"]; ok {
-		if err := r.ID.Set(jv); err != nil {
-			return errors.New("set field ID failed: " + err.Error())
+		switch jv.(type) {
+		case string:
+			r.ID = jv.(string)
+			delete(m, "id")
+		default:
+			return ErrInvalidJSONFieldType{Field: "id"}
 		}
-		delete(m, "id")
 	}
 	if jv, ok := m["name"]; ok {
 		if err := r.Name.Set(jv); err != nil {
@@ -1711,7 +1712,10 @@ func (r *UpdateVenueRequest) GetPropNames() ([]string, error) {
 func (r *UpdateVenueRequest) SetPropValue(s string, v interface{}) error {
 	switch s {
 	case "id":
-		return r.ID.Set(v)
+		if jv, ok := v.(string); ok {
+			r.ID = jv
+			return nil
+		}
 	case "name":
 		return r.Name.Set(v)
 	case "address":
@@ -1828,6 +1832,9 @@ func (r *ListVenueRequest) UnmarshalJSON(data []byte) error {
 func (r LookupVenueRequest) collectMarshalData() map[string]interface{} {
 	m := make(map[string]interface{})
 	m["id"] = r.ID
+	if r.Lang.Valid() {
+		m["lang"] = r.Lang.Value()
+	}
 	return m
 }
 
@@ -1862,6 +1869,12 @@ func (r *LookupVenueRequest) UnmarshalJSON(data []byte) error {
 		default:
 			return ErrInvalidJSONFieldType{Field: "id"}
 		}
+	}
+	if jv, ok := m["lang"]; ok {
+		if err := r.Lang.Set(jv); err != nil {
+			return errors.New("set field Lang failed: " + err.Error())
+		}
+		delete(m, "lang")
 	}
 	return nil
 }

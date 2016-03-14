@@ -523,6 +523,28 @@ func httpUpdateSession(w http.ResponseWriter, r *http.Request) {
 	doUpdateSession(context.Background(), w, r, payload)
 }
 
+func httpUpdateVenue(w http.ResponseWriter, r *http.Request) {
+	if pdebug.Enabled {
+		g := pdebug.Marker("httpUpdateVenue")
+		defer g.End()
+	}
+	if strings.ToLower(r.Method) != `post` {
+		httpError(w, `Method was `+r.Method, http.StatusNotFound, nil)
+	}
+
+	var payload service.UpdateVenueRequest
+	if err := json.NewDecoder(r.Body).Decode(&payload); err != nil {
+		httpError(w, `Invalid input`, http.StatusInternalServerError, err)
+		return
+	}
+
+	if err := validator.HTTPUpdateVenueRequest.Validate(&payload); err != nil {
+		httpError(w, `Invalid input`, http.StatusInternalServerError, err)
+		return
+	}
+	doUpdateVenue(context.Background(), w, r, payload)
+}
+
 func (s *Server) SetupRoutes() {
 	r := s.Router
 	r.HandleFunc(`/v1/conference/create`, httpCreateConference)
@@ -546,4 +568,5 @@ func (s *Server) SetupRoutes() {
 	r.HandleFunc(`/v1/venue/delete`, httpDeleteVenue)
 	r.HandleFunc(`/v1/venue/list`, httpListVenues)
 	r.HandleFunc(`/v1/venue/lookup`, httpLookupVenue)
+	r.HandleFunc(`/v1/venue/update`, httpUpdateVenue)
 }

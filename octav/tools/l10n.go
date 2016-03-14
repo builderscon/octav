@@ -8,6 +8,7 @@ import (
 	"strings"
 
 	"github.com/builderscon/octav/octav/db"
+	"github.com/lestrrat/go-pdebug"
 	"golang.org/x/text/language"
 )
 
@@ -130,10 +131,21 @@ func (lf *LocalizedFields) Set(lang, key, value string) error {
 }
 
 func (lf *LocalizedFields) CreateLocalizedStrings(tx *db.Tx, parentType, parentID string) error {
+	if pdebug.Enabled {
+		g := pdebug.Marker("LocalizedFields.CreateLocalizedStrings (%s)", parentType)
+		defer g.End()
+	}
+
 	if lf.Len() <= 0 {
+		if pdebug.Enabled {
+			pdebug.Printf("Nothing to register, bailing out")
+		}
 		return nil
 	}
 	err := lf.Foreach(func(lang, key, val string) error {
+		if pdebug.Enabled {
+			pdebug.Printf("Creating l10n string for '%s' (%s)", key, lang)
+		}
 		ldb := db.LocalizedString{
 			ParentType: parentType,
 			ParentID:   parentID,

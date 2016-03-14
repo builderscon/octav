@@ -54,6 +54,9 @@ func (v *Session) Update(tx *db.Tx, vdb *db.Session, payload UpdateSessionReques
 	}
 
 	return payload.L10N.Foreach(func(l, k, x string) error {
+		if pdebug.Enabled {
+			pdebug.Printf("Updating l10n string for '%s' (%s)", k, l)
+		}
 		ls := db.LocalizedString{
 			ParentType: "Session",
 			ParentID:   vdb.EID,

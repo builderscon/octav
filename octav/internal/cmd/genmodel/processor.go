@@ -741,6 +741,9 @@ func generateServiceFile(ctx *genctx, m Model) error {
 	buf.WriteString("\n}")
 	if hasL10N {
 		buf.WriteString("\n\nreturn payload.L10N.Foreach(func(l, k, x string) error {")
+		buf.WriteString("\nif pdebug.Enabled {")
+		buf.WriteString("\n" + `pdebug.Printf("Updating l10n string for '%s' (%s)", k, l)`)
+		buf.WriteString("\n}")
 		buf.WriteString("\nls := db.LocalizedString{")
 		fmt.Fprintf(&buf, "\nParentType: %s,", strconv.Quote(m.Name))
 		buf.WriteString("\nParentID: vdb.EID,")

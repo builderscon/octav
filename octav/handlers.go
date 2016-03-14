@@ -515,13 +515,58 @@ func doLookupVenue(ctx context.Context, w http.ResponseWriter, r *http.Request, 
 	}
 	defer tx.AutoRollback()
 
-	s := model.Venue{}
-	if err := s.Load(tx, payload.ID); err != nil {
+	v := model.Venue{}
+	if err := v.Load(tx, payload.ID); err != nil {
 		httpError(w, `LookupVenue`, http.StatusInternalServerError, err)
 		return
 	}
 
-	httpJSON(w, s)
+	if payload.Lang.Valid() {
+		s := service.Venue{}
+		if err := s.ReplaceL10NStrings(tx, &v, payload.Lang.String); err != nil {
+			httpError(w, `LookupVenue`, http.StatusInternalServerError, err)
+			return
+		}
+	}
+
+	httpJSON(w, v)
+}
+
+func doUpdateVenue(ctx context.Context, w http.ResponseWriter, r *http.Request, payload service.UpdateVenueRequest) {
+	tx, err := db.Begin()
+	if err != nil {
+		httpError(w, `UpdateVenue`, http.StatusInternalServerError, err)
+		return
+	}
+	defer tx.AutoRollback()
+
+	s := service.Venue{}
+	vdb := db.Venue{}
+	if err := vdb.LoadByEID(tx, payload.ID); err != nil {
+		httpError(w, `UpdateConference`, http.StatusNotFound, err)
+		return
+	}
+
+	// TODO: We must protect the API server from changing important
+	// fields like conference_id, speaker_id, room_id, etc from regular
+	// users, but allow administrators to do anything they want
+	if err := s.Update(tx, &vdb, payload); err != nil {
+		httpError(w, `UpdateVenue`, http.StatusInternalServerError, err)
+		return
+	}
+
+	if err := tx.Commit(); err != nil {
+		httpError(w, `UpdateVenue`, http.StatusInternalServerError, err)
+		return
+	}
+
+	v := model.Venue{}
+	if err := v.FromRow(vdb); err != nil {
+		httpError(w, `UpdateVenue`, http.StatusInternalServerError, err)
+		return
+	}
+
+	httpJSON(w, v)
 }
 
 func doListVenues(ctx context.Context, w http.ResponseWriter, r *http.Request, payload service.ListVenueRequest) {

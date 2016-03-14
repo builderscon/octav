@@ -39,6 +39,7 @@ var HTTPLookupVenueResponse *jsval.JSVal
 var HTTPUpdateConferenceRequest *jsval.JSVal
 var HTTPUpdateRoomRequest *jsval.JSVal
 var HTTPUpdateSessionRequest *jsval.JSVal
+var HTTPUpdateVenueRequest *jsval.JSVal
 var M *jsval.ConstraintMap
 var R0 jsval.Constraint
 var R1 jsval.Constraint
@@ -1531,6 +1532,20 @@ func init() {
 				PatternPropertiesString(
 					"title#[a-z]+",
 					jsval.Reference(M).RefersTo("#/definitions/string_i18n"),
+				),
+		)
+
+	HTTPUpdateVenueRequest = jsval.New().
+		SetConstraintMap(M).
+		SetRoot(
+			jsval.Object().
+				Required("id").
+				AdditionalProperties(
+					jsval.EmptyConstraint,
+				).
+				AddProp(
+					"id",
+					jsval.Reference(M).RefersTo("#/definitions/uuid"),
 				),
 		)
 
