@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/builderscon/octav/octav/db"
+	"github.com/builderscon/octav/octav/model"
 	"github.com/lestrrat/go-pdebug"
 )
 
@@ -28,6 +29,9 @@ func (v *User) Create(tx *db.Tx, vdb *db.User, payload CreateUserRequest) (err e
 		return err
 	}
 
+	if err := payload.L10N.CreateLocalizedStrings(tx, "User", vdb.EID); err != nil {
+		return err
+	}
 	return nil
 }
 
@@ -48,6 +52,51 @@ func (v *User) Update(tx *db.Tx, vdb *db.User, payload UpdateUserRequest) (err e
 	if err := vdb.Update(tx); err != nil {
 		return err
 	}
+
+	return payload.L10N.Foreach(func(l, k, x string) error {
+		if pdebug.Enabled {
+			pdebug.Printf("Updating l10n string for '%s' (%s)", k, l)
+		}
+		ls := db.LocalizedString{
+			ParentType: "User",
+			ParentID:   vdb.EID,
+			Language:   l,
+			Name:       k,
+			Localized:  x,
+		}
+		return ls.Upsert(tx)
+	})
+}
+
+func (v *User) ReplaceL10NStrings(tx *db.Tx, m *model.User, lang string) error {
+	if pdebug.Enabled {
+		g := pdebug.Marker("service.User.ReplaceL10NStrings")
+		defer g.End()
+	}
+	rows, err := tx.Query(`SELECT oid, parent_id, parent_type, name, language, localized FROM localized_strings WHERE parent_type = ? AND parent_id = ? AND language = ?`, "User", m.ID, lang)
+	if err != nil {
+		return err
+	}
+
+	var l db.LocalizedString
+	for rows.Next() {
+		if err := l.Scan(rows); err != nil {
+			return err
+		}
+
+		switch l.Name {
+		case "first_name":
+			if pdebug.Enabled {
+				pdebug.Printf("Replacing for key 'first_name'")
+			}
+			m.FirstName = l.Localized
+		case "last_name":
+			if pdebug.Enabled {
+				pdebug.Printf("Replacing for key 'last_name'")
+			}
+			m.LastName = l.Localized
+		}
+	}
 	return nil
 }
 
@@ -59,6 +108,9 @@ func (v *User) Delete(tx *db.Tx, id string) error {
 
 	vdb := db.User{EID: id}
 	if err := vdb.Delete(tx); err != nil {
+		return err
+	}
+	if err := db.DeleteLocalizedStringsForParent(tx, id, "User"); err != nil {
 		return err
 	}
 	return nil

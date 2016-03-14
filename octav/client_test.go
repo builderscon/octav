@@ -79,8 +79,12 @@ func testCreateUser(t *testing.T, cl *client.Client, in *service.CreateUserReque
 	return res, nil
 }
 
-func testLookupUser(t *testing.T, cl *client.Client, id string) (*model.User, error) {
-	user, err := cl.LookupUser(&service.LookupUserRequest{ID: id})
+func testLookupUser(t *testing.T, cl *client.Client, id, lang string) (*model.User, error) {
+	r := &service.LookupUserRequest{ID: id}
+	if lang != "" {
+		r.Lang.Set(lang)
+	}
+	user, err := cl.LookupUser(r)
 	if !assert.NoError(t, err, "LookupUser succeeds") {
 		return nil, err
 	}
@@ -423,12 +427,25 @@ func TestCreateUser(t *testing.T) {
 		return
 	}
 
-	res2, err := testLookupUser(t, cl, res.ID)
+	res2, err := testLookupUser(t, cl, res.ID, "")
 	if err != nil {
 		return
 	}
 
 	if !assert.Equal(t, res2, res, "LookupUser is the same as the user created") {
+		return
+	}
+
+	res3, err := testLookupUser(t, cl, res.ID, "ja")
+	if err != nil {
+		return
+	}
+
+	if !assert.Equal(t, "ジョン", res3.FirstName, "User.first_name#ja is localized") {
+		return
+	}
+
+	if !assert.Equal(t, "ドー", res3.LastName, "User.last_name#ja is localized") {
 		return
 	}
 

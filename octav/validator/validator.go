@@ -39,6 +39,7 @@ var HTTPLookupVenueResponse *jsval.JSVal
 var HTTPUpdateConferenceRequest *jsval.JSVal
 var HTTPUpdateRoomRequest *jsval.JSVal
 var HTTPUpdateSessionRequest *jsval.JSVal
+var HTTPUpdateUserRequest *jsval.JSVal
 var HTTPUpdateVenueRequest *jsval.JSVal
 var M *jsval.ConstraintMap
 var R0 jsval.Constraint
@@ -1531,6 +1532,48 @@ func init() {
 				).
 				PatternPropertiesString(
 					"title#[a-z]+",
+					jsval.Reference(M).RefersTo("#/definitions/string_i18n"),
+				),
+		)
+
+	HTTPUpdateUserRequest = jsval.New().
+		SetConstraintMap(M).
+		SetRoot(
+			jsval.Object().
+				Required("id").
+				AdditionalProperties(
+					jsval.EmptyConstraint,
+				).
+				AddProp(
+					"email",
+					jsval.Reference(M).RefersTo("#/definitions/email"),
+				).
+				AddProp(
+					"first_name",
+					jsval.Reference(M).RefersTo("#/definitions/string_en"),
+				).
+				AddProp(
+					"id",
+					jsval.Reference(M).RefersTo("#/definitions/uuid"),
+				).
+				AddProp(
+					"last_name",
+					jsval.Reference(M).RefersTo("#/definitions/string_en"),
+				).
+				AddProp(
+					"nickname",
+					jsval.Reference(M).RefersTo("#/definitions/string_en"),
+				).
+				AddProp(
+					"tshirt_size",
+					jsval.Reference(M).RefersTo("#/definitions/tshirt_size"),
+				).
+				PatternPropertiesString(
+					"first_name#[a-z]+",
+					jsval.Reference(M).RefersTo("#/definitions/string_i18n"),
+				).
+				PatternPropertiesString(
+					"last_name#[a-z]+",
 					jsval.Reference(M).RefersTo("#/definitions/string_i18n"),
 				),
 		)

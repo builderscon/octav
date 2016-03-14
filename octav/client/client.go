@@ -671,6 +671,34 @@ func (c *Client) UpdateSession(in *service.UpdateSessionRequest) (err error) {
 	return nil
 }
 
+func (c *Client) UpdateUser(in *service.UpdateUserRequest) (err error) {
+	if pdebug.Enabled {
+		g := pdebug.Marker("client.UpdateUser").BindError(&err)
+		defer g.End()
+	}
+	u, err := url.Parse(c.Endpoint + "/v1/user/update")
+	if err != nil {
+		return err
+	}
+	buf := bytes.Buffer{}
+	err = json.NewEncoder(&buf).Encode(in)
+	if err != nil {
+		return err
+	}
+	if pdebug.Enabled {
+		pdebug.Printf("POST to %s", u.String())
+		pdebug.Printf("%s", buf.String())
+	}
+	res, err := c.Client.Post(u.String(), "application/json", &buf)
+	if err != nil {
+		return err
+	}
+	if res.StatusCode != http.StatusOK {
+		return fmt.Errorf(`Invalid response: '%s'`, res.Status)
+	}
+	return nil
+}
+
 func (c *Client) UpdateVenue(in *service.UpdateVenueRequest) (err error) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("client.UpdateVenue").BindError(&err)

@@ -523,6 +523,28 @@ func httpUpdateSession(w http.ResponseWriter, r *http.Request) {
 	doUpdateSession(context.Background(), w, r, payload)
 }
 
+func httpUpdateUser(w http.ResponseWriter, r *http.Request) {
+	if pdebug.Enabled {
+		g := pdebug.Marker("httpUpdateUser")
+		defer g.End()
+	}
+	if strings.ToLower(r.Method) != `post` {
+		httpError(w, `Method was `+r.Method, http.StatusNotFound, nil)
+	}
+
+	var payload service.UpdateUserRequest
+	if err := json.NewDecoder(r.Body).Decode(&payload); err != nil {
+		httpError(w, `Invalid input`, http.StatusInternalServerError, err)
+		return
+	}
+
+	if err := validator.HTTPUpdateUserRequest.Validate(&payload); err != nil {
+		httpError(w, `Invalid input`, http.StatusInternalServerError, err)
+		return
+	}
+	doUpdateUser(context.Background(), w, r, payload)
+}
+
 func httpUpdateVenue(w http.ResponseWriter, r *http.Request) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("httpUpdateVenue")
@@ -564,6 +586,7 @@ func (s *Server) SetupRoutes() {
 	r.HandleFunc(`/v1/user/create`, httpCreateUser)
 	r.HandleFunc(`/v1/user/delete`, httpDeleteUser)
 	r.HandleFunc(`/v1/user/lookup`, httpLookupUser)
+	r.HandleFunc(`/v1/user/update`, httpUpdateUser)
 	r.HandleFunc(`/v1/venue/create`, httpCreateVenue)
 	r.HandleFunc(`/v1/venue/delete`, httpDeleteVenue)
 	r.HandleFunc(`/v1/venue/list`, httpListVenues)

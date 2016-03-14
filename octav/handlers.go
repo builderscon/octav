@@ -364,13 +364,21 @@ func doLookupUser(ctx context.Context, w http.ResponseWriter, r *http.Request, p
 	}
 	defer tx.AutoRollback()
 
-	s := model.User{}
-	if err := s.Load(tx, payload.ID); err != nil {
+	v := model.User{}
+	if err := v.Load(tx, payload.ID); err != nil {
 		httpError(w, `LookupUser`, http.StatusInternalServerError, err)
 		return
 	}
 
-	httpJSON(w, s)
+	if payload.Lang.Valid() {
+		s := service.User{}
+		if err := s.ReplaceL10NStrings(tx, &v, payload.Lang.String); err != nil {
+			httpError(w, `LookupUser`, http.StatusInternalServerError, err)
+			return
+		}
+	}
+
+	httpJSON(w, v)
 }
 
 func doCreateVenue(ctx context.Context, w http.ResponseWriter, r *http.Request, payload service.CreateVenueRequest) {
@@ -405,6 +413,40 @@ func doCreateVenue(ctx context.Context, w http.ResponseWriter, r *http.Request, 
 	}
 
 	httpJSON(w, v)
+}
+
+func doUpdateUser(ctx context.Context, w http.ResponseWriter, r *http.Request, payload service.UpdateUserRequest) {
+	if pdebug.Enabled {
+		g := pdebug.Marker("doUpdateUser")
+		defer g.End()
+	}
+
+	pdebug.Printf("%#v", payload)
+
+	tx, err := db.Begin()
+	if err != nil {
+		httpError(w, `UpdateUser`, http.StatusInternalServerError, err)
+		return
+	}
+	defer tx.AutoRollback()
+
+	vdb := db.User{}
+	if err := vdb.LoadByEID(tx, payload.ID); err != nil {
+		httpError(w, `UpdateUser`, http.StatusNotFound, err)
+		return
+	}
+
+	s := service.User{}
+	if err := s.Update(tx, &vdb, payload); err != nil {
+		httpError(w, `UpdateUser`, http.StatusInternalServerError, err)
+		return
+	}
+	if err := tx.Commit(); err != nil {
+		httpError(w, `UpdateUser`, http.StatusInternalServerError, err)
+		return
+	}
+
+	httpJSON(w, map[string]string{"status": "success"})
 }
 
 func doListRooms(ctx context.Context, w http.ResponseWriter, r *http.Request, payload service.ListRoomRequest) {

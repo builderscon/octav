@@ -18,5 +18,25 @@ func (v *User) populateRowForCreate(vdb *db.User, payload CreateUserRequest) err
 }
 
 func (v *User) populateRowForUpdate(vdb *db.User, payload UpdateUserRequest) error {
+	if payload.FirstName.Valid() {
+		vdb.FirstName = payload.FirstName.String
+	}
+
+	if payload.LastName.Valid() {
+		vdb.LastName = payload.LastName.String
+	}
+
+	if payload.Nickname.Valid() {
+		vdb.Nickname = payload.Nickname.String
+	}
+
+	if payload.Email.Valid() {
+		vdb.Email = payload.Email.String
+	}
+
+	if payload.TshirtSize.Valid() {
+		vdb.TshirtSize = payload.TshirtSize.String
+	}
+
 	return nil
 }

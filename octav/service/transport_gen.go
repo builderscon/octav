@@ -1351,6 +1351,9 @@ func (r UpdateUserRequest) collectMarshalData() map[string]interface{} {
 	if r.Email.Valid() {
 		m["email"] = r.Email.Value()
 	}
+	if r.TshirtSize.Valid() {
+		m["tshirt_size"] = r.TshirtSize.Value()
+	}
 	return m
 }
 
@@ -1410,7 +1413,13 @@ func (r *UpdateUserRequest) UnmarshalJSON(data []byte) error {
 		}
 		delete(m, "email")
 	}
-	if err := tools.ExtractL10NFields(m, &r.L10N, []string{"id", "first_name", "last_name", "nickname", "email"}); err != nil {
+	if jv, ok := m["tshirt_size"]; ok {
+		if err := r.TshirtSize.Set(jv); err != nil {
+			return errors.New("set field TshirtSize failed: " + err.Error())
+		}
+		delete(m, "tshirt_size")
+	}
+	if err := tools.ExtractL10NFields(m, &r.L10N, []string{"id", "first_name", "last_name", "nickname", "email", "tshirt_size"}); err != nil {
 		return err
 	}
 	return nil
@@ -1418,7 +1427,7 @@ func (r *UpdateUserRequest) UnmarshalJSON(data []byte) error {
 
 func (r *UpdateUserRequest) GetPropNames() ([]string, error) {
 	l, _ := r.L10N.GetPropNames()
-	return append(l, "id", "first_name", "last_name", "nickname", "email"), nil
+	return append(l, "id", "first_name", "last_name", "nickname", "email", "tshirt_size"), nil
 }
 
 func (r *UpdateUserRequest) SetPropValue(s string, v interface{}) error {
@@ -1436,6 +1445,8 @@ func (r *UpdateUserRequest) SetPropValue(s string, v interface{}) error {
 		return r.Nickname.Set(v)
 	case "email":
 		return r.Email.Set(v)
+	case "tshirt_size":
+		return r.TshirtSize.Set(v)
 	default:
 		return errors.New("unknown column '" + s + "'")
 	}

@@ -301,6 +301,31 @@
       "targetSchema": { "$ref": "#/definitions/user" }
     },
     {
+      "title": "Update user",
+      "description": "A user can be a staff/organizer, speaker, or a regular attendee. Information should be obtained from facebook/twitter/github",
+      "rel": "create",
+      "href": "/user/update",
+      "method": "POST",
+      "encType": "application/x-www-form-urlencoded",
+      "schema": {
+        "type": "object",
+        "hsup.type": "service.UpdateUserRequest",
+        "properties": {
+          "id": { "$ref": "#/definitions/uuid" },
+          "first_name": { "$ref": "#/definitions/string_en" },
+          "last_name": { "$ref": "#/definitions/string_en" },
+          "nickname": { "$ref": "#/definitions/string_en" },
+          "email": { "$ref": "#/definitions/email" },
+          "tshirt_size": { "$ref": "#/definitions/tshirt_size" }
+        },
+        "patternProperties": {
+          "first_name#[a-z]+": { "$ref": "#/definitions/string_i18n" },
+          "last_name#[a-z]+": { "$ref": "#/definitions/string_i18n" }
+        },
+        "required": [ "id" ]
+      }
+    },
+    {
       "title": "Delete user",
       "rel": "delete",
       "href": "/user/delete",

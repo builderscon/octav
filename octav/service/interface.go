@@ -156,12 +156,13 @@ type CreateUserRequest struct {
 
 // +transport
 type UpdateUserRequest struct {
-	ID        string                `json:"id"`
-	FirstName jsval.MaybeString     `json:"first_name,omitempty"`
-	LastName  jsval.MaybeString     `json:"last_name,omitempty"`
-	Nickname  jsval.MaybeString     `json:"nickname,omitempty"`
-	Email     jsval.MaybeString     `json:"email,omitempty"`
-	L10N      tools.LocalizedFields `json:"-"`
+	ID         string                `json:"id"`
+	FirstName  jsval.MaybeString     `json:"first_name,omitempty"`
+	LastName   jsval.MaybeString     `json:"last_name,omitempty"`
+	Nickname   jsval.MaybeString     `json:"nickname,omitempty"`
+	Email      jsval.MaybeString     `json:"email,omitempty"`
+	TshirtSize jsval.MaybeString     `json:"tshirt_size,omitempty"`
+	L10N       tools.LocalizedFields `json:"-"`
 }
 
 // +transport
