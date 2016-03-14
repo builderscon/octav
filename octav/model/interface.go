@@ -66,8 +66,8 @@ type TagString string
 
 type User struct {
 	ID         string                `json:"id"`
-	FirstName  string                `json:"first_name"`
-	LastName   string                `json:"last_name"`
+	FirstName  string                `json:"first_name" l10n:"true"`
+	LastName   string                `json:"last_name" l10n:"true"`
 	Nickname   string                `json:"nickname"`
 	Email      string                `json:"email"`
 	TshirtSize string                `json:"tshirt_size"`
