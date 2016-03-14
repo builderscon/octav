@@ -46,7 +46,7 @@ This will regenerate
 
 If you add more endpoints, you need to write additional `doXXXX` handlers in handlers.go
 
-## If you edited interface.go or db/interface.go
+## If you edited model/interface.go or db/interface.go
 
 Technically, you do NOT need to do this every time, but if you want to be safe, whenever you touch these files you should regenerate auto-generated files
 
@@ -54,6 +54,15 @@ To regenerate files, run:
 
 ```
 make generate
+```
+
+If you add transport types (e.g. `CreateSessionRequest`, `UpdateSessionRequest`, etc) make sure to include a flag in the comment, or otherwise the code generation tools do not pick them up:
+
+```go
+// +transport
+type CreateFooRequest struct {
+   ...
+}
 ```
 
 ## Useful Debugging Tips
