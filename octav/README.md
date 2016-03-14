@@ -56,6 +56,15 @@ To regenerate files, run:
 make generate
 ```
 
+If you add transport types (e.g. `CreateSessionRequest`, `UpdateSessionRequest`, etc) make sure to include a flag in the comment, or otherwise the code generation tools do not pick them up:
+
+```go
+// +transport
+type CreateFooRequest struct {
+   ...
+}
+```
+
 ## Useful Debugging Tips
 
 ### Enable Debug Prints
