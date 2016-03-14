@@ -16,6 +16,7 @@ type ErrInvalidFieldType struct {
 	Field string
 }
 
+// +model
 type Conference struct {
 	ID       string `json:"id"`
 	Title    string `json:"title" l10n:"true"`
@@ -24,6 +25,7 @@ type Conference struct {
 }
 type ConferenceList []Conference
 
+// +model
 type Room struct {
 	ID       string                `json:"id"`
 	VenueID  string                `json:"venue_id"`
@@ -33,6 +35,7 @@ type Room struct {
 }
 type RoomList []RoomL10N
 
+// +model
 type Session struct {
 	ID                string      `json:"id"`
 	ConferenceID      string      `json:"conference_id"`
@@ -65,6 +68,7 @@ type SessionL10NList []SessionL10N
 
 type TagString string
 
+// +model
 type User struct {
 	ID         string                `json:"id"`
 	FirstName  string                `json:"first_name" l10n:"true"`
@@ -76,6 +80,7 @@ type User struct {
 }
 type UserList []User
 
+// +model
 type Venue struct {
 	ID        string                `json:"id,omitempty"`
 	Name      string                `json:"name" l10n:"true"`

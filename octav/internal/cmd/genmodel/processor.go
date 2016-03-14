@@ -239,6 +239,21 @@ func (ctx *genctx) extractModelStructs(n ast.Node) bool {
 			continue
 		}
 
+		cgroup := decl.Doc
+		if cgroup == nil {
+			continue
+		}
+		ismodel := false
+		for _, c := range cgroup.List {
+			if strings.HasPrefix(strings.TrimSpace(strings.TrimPrefix(c.Text, "//")), "+model") {
+				ismodel = true
+				break
+			}
+		}
+		if !ismodel {
+			continue
+		}
+
 		st := Model{
 			Fields:  make([]Field, 0, len(s.Fields.List)),
 			Name:    t.Name.Name,
