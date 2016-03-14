@@ -1,6 +1,18 @@
 ---
 layout: default
 ---
-<h2>カンファレンス: {{page.conference-name}}</h2>
+<h2>{{page.conference-name}}</h2>
+
+<div class="collection">
+  <a href="./edit" class="collection-item">Edit</a>
+  <a href="./delete" class="collection-item">Delete</a>
+</div>
+
+<h2>TODO</h2>
+<div class="collection">
+  <a href="#" class="collection-item">Edit title, subtitle</a>
+  <a href="#" class="collection-item">Select a venue</a>
+  <a href="#" class="collection-item">Register a talk</a>
+</div>
 
 {{content}}
