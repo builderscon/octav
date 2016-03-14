@@ -692,9 +692,7 @@ func generateServiceFile(ctx *genctx, m Model) error {
 	buf.WriteString("\n" + strconv.Quote("errors"))
 	buf.WriteString("\n" + strconv.Quote("time"))
 	buf.WriteString("\n\n" + strconv.Quote("github.com/builderscon/octav/octav/db"))
-	if hasL10N {
-		buf.WriteString("\n" + strconv.Quote("github.com/builderscon/octav/octav/model"))
-	}
+	buf.WriteString("\n" + strconv.Quote("github.com/builderscon/octav/octav/model"))
 	buf.WriteString("\n" + strconv.Quote("github.com/lestrrat/go-pdebug"))
 	buf.WriteString("\n)")
 	buf.WriteString("\n\nvar _ = time.Time{}")
@@ -702,7 +700,7 @@ func generateServiceFile(ctx *genctx, m Model) error {
 	buf.WriteString("\n\n// Create takes in the transaction, the incoming payload, and a reference to")
 	buf.WriteString("\n// a database row. The database row is initialized/populated so that the")
 	buf.WriteString("\n// caller can use it afterwards")
-	fmt.Fprintf(&buf, "\nfunc (v *%s) Create(tx *db.Tx, vdb *db.%s, payload Create%sRequest) (err error) {", m.Name, m.Name, m.Name)
+	fmt.Fprintf(&buf, "\nfunc (v *%s) Create(tx *db.Tx, vdb *db.%s, payload model.Create%sRequest) (err error) {", m.Name, m.Name, m.Name)
 	buf.WriteString("\nif pdebug.Enabled {")
 	fmt.Fprintf(&buf, "\n"+`g := pdebug.Marker("service.%s.Create").BindError(&err)`, m.Name)
 	buf.WriteString("\ndefer g.End()")
@@ -721,7 +719,7 @@ func generateServiceFile(ctx *genctx, m Model) error {
 	buf.WriteString("\nreturn nil")
 	buf.WriteString("\n}")
 
-	fmt.Fprintf(&buf, "\n\nfunc (v *%s) Update(tx *db.Tx, vdb *db.%s, payload Update%sRequest) (err error) {", m.Name, m.Name, m.Name)
+	fmt.Fprintf(&buf, "\n\nfunc (v *%s) Update(tx *db.Tx, vdb *db.%s, payload model.Update%sRequest) (err error) {", m.Name, m.Name, m.Name)
 	buf.WriteString("\nif pdebug.Enabled {")
 	fmt.Fprintf(&buf, "\n"+`g := pdebug.Marker("service.%s.Update (%%s)", vdb.EID).BindError(&err)`, m.Name)
 	buf.WriteString("\ndefer g.End()")

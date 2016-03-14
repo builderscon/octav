@@ -16,7 +16,7 @@ var _ = time.Time{}
 // Create takes in the transaction, the incoming payload, and a reference to
 // a database row. The database row is initialized/populated so that the
 // caller can use it afterwards
-func (v *Session) Create(tx *db.Tx, vdb *db.Session, payload CreateSessionRequest) (err error) {
+func (v *Session) Create(tx *db.Tx, vdb *db.Session, payload model.CreateSessionRequest) (err error) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("service.Session.Create").BindError(&err)
 		defer g.End()
@@ -36,7 +36,7 @@ func (v *Session) Create(tx *db.Tx, vdb *db.Session, payload CreateSessionReques
 	return nil
 }
 
-func (v *Session) Update(tx *db.Tx, vdb *db.Session, payload UpdateSessionRequest) (err error) {
+func (v *Session) Update(tx *db.Tx, vdb *db.Session, payload model.UpdateSessionRequest) (err error) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("service.Session.Update (%s)", vdb.EID).BindError(&err)
 		defer g.End()

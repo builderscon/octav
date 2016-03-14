@@ -9,7 +9,6 @@ import (
 	"net/url"
 
 	"github.com/builderscon/octav/octav/model"
-	"github.com/builderscon/octav/octav/service"
 	"github.com/lestrrat/go-pdebug"
 	"github.com/lestrrat/go-urlenc"
 )
@@ -26,7 +25,7 @@ func New(s string) *Client {
 	}
 }
 
-func (c *Client) CreateConference(in *service.CreateConferenceRequest) (ret *model.Conference, err error) {
+func (c *Client) CreateConference(in *model.CreateConferenceRequest) (ret *model.Conference, err error) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("client.CreateConference").BindError(&err)
 		defer g.End()
@@ -59,7 +58,7 @@ func (c *Client) CreateConference(in *service.CreateConferenceRequest) (ret *mod
 	return &payload, nil
 }
 
-func (c *Client) CreateRoom(in *service.CreateRoomRequest) (ret *model.Room, err error) {
+func (c *Client) CreateRoom(in *model.CreateRoomRequest) (ret *model.Room, err error) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("client.CreateRoom").BindError(&err)
 		defer g.End()
@@ -92,7 +91,7 @@ func (c *Client) CreateRoom(in *service.CreateRoomRequest) (ret *model.Room, err
 	return &payload, nil
 }
 
-func (c *Client) CreateSession(in *service.CreateSessionRequest) (ret *model.Session, err error) {
+func (c *Client) CreateSession(in *model.CreateSessionRequest) (ret *model.Session, err error) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("client.CreateSession").BindError(&err)
 		defer g.End()
@@ -125,7 +124,7 @@ func (c *Client) CreateSession(in *service.CreateSessionRequest) (ret *model.Ses
 	return &payload, nil
 }
 
-func (c *Client) CreateUser(in *service.CreateUserRequest) (ret *model.User, err error) {
+func (c *Client) CreateUser(in *model.CreateUserRequest) (ret *model.User, err error) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("client.CreateUser").BindError(&err)
 		defer g.End()
@@ -158,7 +157,7 @@ func (c *Client) CreateUser(in *service.CreateUserRequest) (ret *model.User, err
 	return &payload, nil
 }
 
-func (c *Client) CreateVenue(in *service.CreateVenueRequest) (ret *model.Venue, err error) {
+func (c *Client) CreateVenue(in *model.CreateVenueRequest) (ret *model.Venue, err error) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("client.CreateVenue").BindError(&err)
 		defer g.End()
@@ -191,7 +190,7 @@ func (c *Client) CreateVenue(in *service.CreateVenueRequest) (ret *model.Venue, 
 	return &payload, nil
 }
 
-func (c *Client) DeleteConference(in *service.DeleteConferenceRequest) (err error) {
+func (c *Client) DeleteConference(in *model.DeleteConferenceRequest) (err error) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("client.DeleteConference").BindError(&err)
 		defer g.End()
@@ -219,7 +218,7 @@ func (c *Client) DeleteConference(in *service.DeleteConferenceRequest) (err erro
 	return nil
 }
 
-func (c *Client) DeleteRoom(in *service.DeleteRoomRequest) (err error) {
+func (c *Client) DeleteRoom(in *model.DeleteRoomRequest) (err error) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("client.DeleteRoom").BindError(&err)
 		defer g.End()
@@ -247,7 +246,7 @@ func (c *Client) DeleteRoom(in *service.DeleteRoomRequest) (err error) {
 	return nil
 }
 
-func (c *Client) DeleteSession(in *service.DeleteSessionRequest) (err error) {
+func (c *Client) DeleteSession(in *model.DeleteSessionRequest) (err error) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("client.DeleteSession").BindError(&err)
 		defer g.End()
@@ -275,7 +274,7 @@ func (c *Client) DeleteSession(in *service.DeleteSessionRequest) (err error) {
 	return nil
 }
 
-func (c *Client) DeleteUser(in *service.DeleteUserRequest) (err error) {
+func (c *Client) DeleteUser(in *model.DeleteUserRequest) (err error) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("client.DeleteUser").BindError(&err)
 		defer g.End()
@@ -303,7 +302,7 @@ func (c *Client) DeleteUser(in *service.DeleteUserRequest) (err error) {
 	return nil
 }
 
-func (c *Client) DeleteVenue(in *service.DeleteVenueRequest) (err error) {
+func (c *Client) DeleteVenue(in *model.DeleteVenueRequest) (err error) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("client.DeleteVenue").BindError(&err)
 		defer g.End()
@@ -331,7 +330,7 @@ func (c *Client) DeleteVenue(in *service.DeleteVenueRequest) (err error) {
 	return nil
 }
 
-func (c *Client) ListRooms(in *service.ListRoomRequest) (ret []model.Room, err error) {
+func (c *Client) ListRooms(in *model.ListRoomRequest) (ret []model.Room, err error) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("client.ListRooms").BindError(&err)
 		defer g.End()
@@ -363,7 +362,7 @@ func (c *Client) ListRooms(in *service.ListRoomRequest) (ret []model.Room, err e
 	return payload, nil
 }
 
-func (c *Client) ListSessionsByConference(in *service.ListSessionsByConferenceRequest) (ret interface{}, err error) {
+func (c *Client) ListSessionsByConference(in *model.ListSessionsByConferenceRequest) (ret interface{}, err error) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("client.ListSessionsByConference").BindError(&err)
 		defer g.End()
@@ -395,7 +394,7 @@ func (c *Client) ListSessionsByConference(in *service.ListSessionsByConferenceRe
 	return payload, nil
 }
 
-func (c *Client) ListVenues(in *service.ListVenueRequest) (ret []model.Venue, err error) {
+func (c *Client) ListVenues(in *model.ListVenueRequest) (ret []model.Venue, err error) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("client.ListVenues").BindError(&err)
 		defer g.End()
@@ -427,7 +426,7 @@ func (c *Client) ListVenues(in *service.ListVenueRequest) (ret []model.Venue, er
 	return payload, nil
 }
 
-func (c *Client) LookupConference(in *service.LookupConferenceRequest) (ret *model.Conference, err error) {
+func (c *Client) LookupConference(in *model.LookupConferenceRequest) (ret *model.Conference, err error) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("client.LookupConference").BindError(&err)
 		defer g.End()
@@ -459,7 +458,7 @@ func (c *Client) LookupConference(in *service.LookupConferenceRequest) (ret *mod
 	return &payload, nil
 }
 
-func (c *Client) LookupRoom(in *service.LookupRoomRequest) (ret *model.Room, err error) {
+func (c *Client) LookupRoom(in *model.LookupRoomRequest) (ret *model.Room, err error) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("client.LookupRoom").BindError(&err)
 		defer g.End()
@@ -491,7 +490,7 @@ func (c *Client) LookupRoom(in *service.LookupRoomRequest) (ret *model.Room, err
 	return &payload, nil
 }
 
-func (c *Client) LookupSession(in *service.LookupSessionRequest) (ret *model.Session, err error) {
+func (c *Client) LookupSession(in *model.LookupSessionRequest) (ret *model.Session, err error) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("client.LookupSession").BindError(&err)
 		defer g.End()
@@ -523,7 +522,7 @@ func (c *Client) LookupSession(in *service.LookupSessionRequest) (ret *model.Ses
 	return &payload, nil
 }
 
-func (c *Client) LookupUser(in *service.LookupUserRequest) (ret *model.User, err error) {
+func (c *Client) LookupUser(in *model.LookupUserRequest) (ret *model.User, err error) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("client.LookupUser").BindError(&err)
 		defer g.End()
@@ -555,7 +554,7 @@ func (c *Client) LookupUser(in *service.LookupUserRequest) (ret *model.User, err
 	return &payload, nil
 }
 
-func (c *Client) LookupVenue(in *service.LookupVenueRequest) (ret *model.Venue, err error) {
+func (c *Client) LookupVenue(in *model.LookupVenueRequest) (ret *model.Venue, err error) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("client.LookupVenue").BindError(&err)
 		defer g.End()
@@ -587,7 +586,7 @@ func (c *Client) LookupVenue(in *service.LookupVenueRequest) (ret *model.Venue, 
 	return &payload, nil
 }
 
-func (c *Client) UpdateConference(in *service.UpdateConferenceRequest) (err error) {
+func (c *Client) UpdateConference(in *model.UpdateConferenceRequest) (err error) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("client.UpdateConference").BindError(&err)
 		defer g.End()
@@ -615,7 +614,7 @@ func (c *Client) UpdateConference(in *service.UpdateConferenceRequest) (err erro
 	return nil
 }
 
-func (c *Client) UpdateRoom(in *service.UpdateRoomRequest) (err error) {
+func (c *Client) UpdateRoom(in *model.UpdateRoomRequest) (err error) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("client.UpdateRoom").BindError(&err)
 		defer g.End()
@@ -643,7 +642,7 @@ func (c *Client) UpdateRoom(in *service.UpdateRoomRequest) (err error) {
 	return nil
 }
 
-func (c *Client) UpdateSession(in *service.UpdateSessionRequest) (err error) {
+func (c *Client) UpdateSession(in *model.UpdateSessionRequest) (err error) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("client.UpdateSession").BindError(&err)
 		defer g.End()
@@ -671,7 +670,7 @@ func (c *Client) UpdateSession(in *service.UpdateSessionRequest) (err error) {
 	return nil
 }
 
-func (c *Client) UpdateUser(in *service.UpdateUserRequest) (err error) {
+func (c *Client) UpdateUser(in *model.UpdateUserRequest) (err error) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("client.UpdateUser").BindError(&err)
 		defer g.End()
@@ -699,7 +698,7 @@ func (c *Client) UpdateUser(in *service.UpdateUserRequest) (err error) {
 	return nil
 }
 
-func (c *Client) UpdateVenue(in *service.UpdateVenueRequest) (err error) {
+func (c *Client) UpdateVenue(in *model.UpdateVenueRequest) (err error) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("client.UpdateVenue").BindError(&err)
 		defer g.End()

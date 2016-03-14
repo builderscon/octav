@@ -2,10 +2,11 @@ package service
 
 import (
 	"github.com/builderscon/octav/octav/db"
+	"github.com/builderscon/octav/octav/model"
 	"github.com/builderscon/octav/octav/tools"
 )
 
-func (v *User) populateRowForCreate(vdb *db.User, payload CreateUserRequest) error {
+func (v *User) populateRowForCreate(vdb *db.User, payload model.CreateUserRequest) error {
 	vdb.EID = tools.UUID()
 
 	vdb.FirstName = payload.FirstName
@@ -17,7 +18,7 @@ func (v *User) populateRowForCreate(vdb *db.User, payload CreateUserRequest) err
 	return nil
 }
 
-func (v *User) populateRowForUpdate(vdb *db.User, payload UpdateUserRequest) error {
+func (v *User) populateRowForUpdate(vdb *db.User, payload model.UpdateUserRequest) error {
 	if payload.FirstName.Valid() {
 		vdb.FirstName = payload.FirstName.String
 	}

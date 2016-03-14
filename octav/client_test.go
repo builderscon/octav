@@ -9,18 +9,17 @@ import (
 	"github.com/builderscon/octav/octav"
 	"github.com/builderscon/octav/octav/client"
 	"github.com/builderscon/octav/octav/model"
-	"github.com/builderscon/octav/octav/service"
 	"github.com/builderscon/octav/octav/tools"
 	"github.com/builderscon/octav/octav/validator"
 	"github.com/stretchr/testify/assert"
 )
 
-func bigsight() *service.CreateVenueRequest {
+func bigsight() *model.CreateVenueRequest {
 	lf := tools.LocalizedFields{}
 	lf.Set("ja", "name", `東京ビッグサイト`)
 	lf.Set("ja", "address", `〒135-0063 東京都江東区有明３丁目１０−１`)
 
-	r := service.CreateVenueRequest{}
+	r := model.CreateVenueRequest{}
 	r.L10N = lf
 	r.Name.Set("Tokyo Bigsight")
 	r.Address.Set("Ariake 3-10-1, Koto-ku, Tokyo")
@@ -30,11 +29,11 @@ func bigsight() *service.CreateVenueRequest {
 	return &r
 }
 
-func intlConferenceRoom(venueID string) *service.CreateRoomRequest {
+func intlConferenceRoom(venueID string) *model.CreateRoomRequest {
 	lf := tools.LocalizedFields{}
 	lf.Set("ja", "name", `国際会議場`)
 
-	r := service.CreateRoomRequest{}
+	r := model.CreateRoomRequest{}
 	r.L10N = lf
 	r.Capacity.Set(1000)
 	r.Name.Set("International Conference Hall")
@@ -43,7 +42,7 @@ func intlConferenceRoom(venueID string) *service.CreateRoomRequest {
 	return &r
 }
 
-func testCreateRoom(t *testing.T, cl *client.Client, r *service.CreateRoomRequest) (*model.Room, error) {
+func testCreateRoom(t *testing.T, cl *client.Client, r *model.CreateRoomRequest) (*model.Room, error) {
 	res, err := cl.CreateRoom(r)
 	if !assert.NoError(t, err, "CreateRoom should succeed") {
 		return nil, err
@@ -51,7 +50,7 @@ func testCreateRoom(t *testing.T, cl *client.Client, r *service.CreateRoomReques
 	return res, nil
 }
 
-func testCreateVenue(t *testing.T, cl *client.Client, v *service.CreateVenueRequest) (*model.Venue, error) {
+func testCreateVenue(t *testing.T, cl *client.Client, v *model.CreateVenueRequest) (*model.Venue, error) {
 	res, err := cl.CreateVenue(v)
 	if !assert.NoError(t, err, "CreateVenue should succeed") {
 		return nil, err
@@ -60,7 +59,7 @@ func testCreateVenue(t *testing.T, cl *client.Client, v *service.CreateVenueRequ
 }
 
 func testLookupRoom(t *testing.T, cl *client.Client, id, lang string) (*model.Room, error) {
-	r := &service.LookupRoomRequest{ID: id}
+	r := &model.LookupRoomRequest{ID: id}
 	if lang != "" {
 		r.Lang.Set(lang)
 	}
@@ -71,7 +70,7 @@ func testLookupRoom(t *testing.T, cl *client.Client, id, lang string) (*model.Ro
 	return venue, nil
 }
 
-func testCreateUser(t *testing.T, cl *client.Client, in *service.CreateUserRequest) (*model.User, error) {
+func testCreateUser(t *testing.T, cl *client.Client, in *model.CreateUserRequest) (*model.User, error) {
 	res, err := cl.CreateUser(in)
 	if !assert.NoError(t, err, "CreateUser should succeed") {
 		return nil, err
@@ -80,7 +79,7 @@ func testCreateUser(t *testing.T, cl *client.Client, in *service.CreateUserReque
 }
 
 func testLookupUser(t *testing.T, cl *client.Client, id, lang string) (*model.User, error) {
-	r := &service.LookupUserRequest{ID: id}
+	r := &model.LookupUserRequest{ID: id}
 	if lang != "" {
 		r.Lang.Set(lang)
 	}
@@ -92,7 +91,7 @@ func testLookupUser(t *testing.T, cl *client.Client, id, lang string) (*model.Us
 }
 
 func testDeleteUser(t *testing.T, cl *client.Client, id string) error {
-	err := cl.DeleteUser(&service.DeleteUserRequest{ID: id})
+	err := cl.DeleteUser(&model.DeleteUserRequest{ID: id})
 	if !assert.NoError(t, err, "DeleteUser should succeed") {
 		return err
 	}
@@ -100,7 +99,7 @@ func testDeleteUser(t *testing.T, cl *client.Client, id string) error {
 }
 
 func testLookupVenue(t *testing.T, cl *client.Client, id, lang string) (*model.Venue, error) {
-	r := &service.LookupVenueRequest{ID: id}
+	r := &model.LookupVenueRequest{ID: id}
 	if lang != "" {
 		r.Lang.Set(lang)
 	}
@@ -111,7 +110,7 @@ func testLookupVenue(t *testing.T, cl *client.Client, id, lang string) (*model.V
 	return venue, nil
 }
 
-func testUpdateRoom(t *testing.T, cl *client.Client, in *service.UpdateRoomRequest) error {
+func testUpdateRoom(t *testing.T, cl *client.Client, in *model.UpdateRoomRequest) error {
 	err := cl.UpdateRoom(in)
 	if !assert.NoError(t, err, "UpdateRoom succeeds") {
 		return err
@@ -120,14 +119,14 @@ func testUpdateRoom(t *testing.T, cl *client.Client, in *service.UpdateRoomReque
 }
 
 func testDeleteRoom(t *testing.T, cl *client.Client, id string) error {
-	err := cl.DeleteRoom(&service.DeleteRoomRequest{ID: id})
+	err := cl.DeleteRoom(&model.DeleteRoomRequest{ID: id})
 	if !assert.NoError(t, err, "DeleteRoom should be successful") {
 		return err
 	}
 	return err
 }
 
-func testUpdateVenue(t *testing.T, cl *client.Client, in *service.UpdateVenueRequest) error {
+func testUpdateVenue(t *testing.T, cl *client.Client, in *model.UpdateVenueRequest) error {
 	err := cl.UpdateVenue(in)
 	if !assert.NoError(t, err, "UpdateVenue succeeds") {
 		return err
@@ -136,21 +135,21 @@ func testUpdateVenue(t *testing.T, cl *client.Client, in *service.UpdateVenueReq
 }
 
 func testDeleteVenue(t *testing.T, cl *client.Client, id string) error {
-	err := cl.DeleteVenue(&service.DeleteVenueRequest{ID: id})
+	err := cl.DeleteVenue(&model.DeleteVenueRequest{ID: id})
 	if !assert.NoError(t, err, "DeleteVenue should be successful") {
 		return err
 	}
 	return err
 }
 
-func yapcasia() *service.CreateConferenceRequest {
-	return &service.CreateConferenceRequest{
+func yapcasia() *model.CreateConferenceRequest {
+	return &model.CreateConferenceRequest{
 		Title: "YAPC::Asia Tokyo",
 		Slug:  "yapcasia",
 	}
 }
 
-func testCreateConference(t *testing.T, cl *client.Client, in *service.CreateConferenceRequest) (*model.Conference, error) {
+func testCreateConference(t *testing.T, cl *client.Client, in *model.CreateConferenceRequest) (*model.Conference, error) {
 	res, err := cl.CreateConference(in)
 	if !assert.NoError(t, err, "CreateConference should succeed") {
 		return nil, err
@@ -159,7 +158,7 @@ func testCreateConference(t *testing.T, cl *client.Client, in *service.CreateCon
 }
 
 func testLookupConference(t *testing.T, cl *client.Client, id, lang string) (*model.Conference, error) {
-	r := &service.LookupConferenceRequest{ID: id}
+	r := &model.LookupConferenceRequest{ID: id}
 	if lang != "" {
 		r.Lang.Set(lang)
 	}
@@ -170,7 +169,7 @@ func testLookupConference(t *testing.T, cl *client.Client, id, lang string) (*mo
 	return conference, nil
 }
 
-func testUpdateConference(t *testing.T, cl *client.Client, in *service.UpdateConferenceRequest) error {
+func testUpdateConference(t *testing.T, cl *client.Client, in *model.UpdateConferenceRequest) error {
 	err := cl.UpdateConference(in)
 	if !assert.NoError(t, err, "UpdateConference succeeds") {
 		return err
@@ -179,7 +178,7 @@ func testUpdateConference(t *testing.T, cl *client.Client, in *service.UpdateCon
 }
 
 func testDeleteConference(t *testing.T, cl *client.Client, id string) error {
-	err := cl.DeleteConference(&service.DeleteConferenceRequest{ID: id})
+	err := cl.DeleteConference(&model.DeleteConferenceRequest{ID: id})
 	if !assert.NoError(t, err, "DeleteConference should be successful") {
 		return err
 	}
@@ -209,7 +208,7 @@ func TestConferenceCRUD(t *testing.T) {
 		return
 	}
 
-	in := service.UpdateConferenceRequest{ID: res.ID}
+	in := model.UpdateConferenceRequest{ID: res.ID}
 	in.SubTitle.Set("Big Bang!")
 	in.L10N.Set("ja", "title", "ヤップシー エイジア")
 	if err := testUpdateConference(t, cl, &in); err != nil {
@@ -267,7 +266,7 @@ func TestRoomCRUD(t *testing.T) {
 		return
 	}
 
-	in := service.UpdateRoomRequest{ID: res.ID}
+	in := model.UpdateRoomRequest{ID: res.ID}
 	in.L10N.Set("ja", "name", "国際会議場")
 	if err := testUpdateRoom(t, cl, &in); err != nil {
 		return
@@ -291,7 +290,7 @@ func TestRoomCRUD(t *testing.T) {
 	}
 }
 
-func testCreateSession(t *testing.T, cl *client.Client, in *service.CreateSessionRequest) (*model.Session, error) {
+func testCreateSession(t *testing.T, cl *client.Client, in *model.CreateSessionRequest) (*model.Session, error) {
 	res, err := cl.CreateSession(in)
 	if !assert.NoError(t, err, "CreateSession should succeed") {
 		return nil, err
@@ -300,7 +299,7 @@ func testCreateSession(t *testing.T, cl *client.Client, in *service.CreateSessio
 }
 
 func testLookupSession(t *testing.T, cl *client.Client, id, lang string) (*model.Session, error) {
-	r := &service.LookupSessionRequest{ID: id}
+	r := &model.LookupSessionRequest{ID: id}
 	if lang != "" {
 		r.Lang.Set(lang)
 	}
@@ -311,7 +310,7 @@ func testLookupSession(t *testing.T, cl *client.Client, id, lang string) (*model
 	return v, nil
 }
 
-func testUpdateSession(t *testing.T, cl *client.Client, in *service.UpdateSessionRequest) error {
+func testUpdateSession(t *testing.T, cl *client.Client, in *model.UpdateSessionRequest) error {
 	err := cl.UpdateSession(in)
 	if !assert.NoError(t, err, "UpdateSession succeeds") {
 		return err
@@ -320,15 +319,15 @@ func testUpdateSession(t *testing.T, cl *client.Client, in *service.UpdateSessio
 }
 
 func testDeleteSession(t *testing.T, cl *client.Client, id string) error {
-	err := cl.DeleteSession(&service.DeleteSessionRequest{ID: id})
+	err := cl.DeleteSession(&model.DeleteSessionRequest{ID: id})
 	if !assert.NoError(t, err, "DeleteSession should be successful") {
 		return err
 	}
 	return err
 }
 
-func bconsession(cid, uid string) *service.CreateSessionRequest {
-	in := service.CreateSessionRequest{}
+func bconsession(cid, uid string) *model.CreateSessionRequest {
+	in := model.CreateSessionRequest{}
 	in.ConferenceID.Set(cid)
 	in.SpeakerID.Set(uid)
 	in.Title.Set("How To Write A Conference Backend")
@@ -371,7 +370,7 @@ func TestSessionCRUD(t *testing.T) {
 		return
 	}
 
-	in := service.UpdateSessionRequest{ID: res.ID}
+	in := model.UpdateSessionRequest{ID: res.ID}
 	in.L10N.Set("ja", "title", "カンファレンス用ソフトウェアの作り方")
 	if err := testUpdateSession(t, cl, &in); err != nil {
 		return
@@ -395,11 +394,11 @@ func TestSessionCRUD(t *testing.T) {
 	}
 }
 
-func johndoe() *service.CreateUserRequest {
+func johndoe() *model.CreateUserRequest {
 	lf := tools.LocalizedFields{}
 	lf.Set("ja", "first_name", "ジョン")
 	lf.Set("ja", "last_name", "ドー")
-	return &service.CreateUserRequest{
+	return &model.CreateUserRequest{
 		FirstName:  "John",
 		LastName:   "Doe",
 		Nickname:   "enigma621",
@@ -481,7 +480,7 @@ func TestVenueCRUD(t *testing.T) {
 		return
 	}
 
-	in := service.UpdateVenueRequest{ID: res.ID}
+	in := model.UpdateVenueRequest{ID: res.ID}
 	in.L10N.Set("ja", "name", "東京ビッグサイト")
 	t.Logf("%#v", in)
 	{
@@ -521,7 +520,7 @@ func TestListRooms(t *testing.T) {
 		return
 	}
 
-	in := service.ListRoomRequest{
+	in := model.ListRoomRequest{
 		VenueID: venue.ID,
 	}
 	res, err := cl.ListRooms(&in)
@@ -554,7 +553,7 @@ func TestListSessionsByConference(t *testing.T) {
 	}
 
 	for i := 0; i < 10; i++ {
-		sin := service.CreateSessionRequest{}
+		sin := model.CreateSessionRequest{}
 		sin.ConferenceID.Set(conference.ID)
 		sin.SpeakerID.Set(user.ID)
 		sin.Title.Set(fmt.Sprintf("Title %d", i))
@@ -566,7 +565,7 @@ func TestListSessionsByConference(t *testing.T) {
 		}
 	}
 
-	in := service.ListSessionsByConferenceRequest{
+	in := model.ListSessionsByConferenceRequest{
 		ConferenceID: conference.ID,
 	}
 	res, err := cl.ListSessionsByConference(&in)
@@ -587,7 +586,7 @@ func TestListVenues(t *testing.T) {
 	defer ts.Close()
 
 	cl := client.New(ts.URL)
-	in := service.ListVenueRequest{}
+	in := model.ListVenueRequest{}
 	res, err := cl.ListVenues(&in)
 	if !assert.NoError(t, err, "ListVenues should succeed") {
 		return

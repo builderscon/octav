@@ -2,10 +2,11 @@ package service
 
 import (
 	"github.com/builderscon/octav/octav/db"
+	"github.com/builderscon/octav/octav/model"
 	"github.com/builderscon/octav/octav/tools"
 )
 
-func (v *Room) populateRowForCreate(vdb *db.Room, payload CreateRoomRequest) error {
+func (v *Room) populateRowForCreate(vdb *db.Room, payload model.CreateRoomRequest) error {
 	vdb.EID = tools.UUID()
 
 	if payload.VenueID.Valid() {
@@ -23,7 +24,7 @@ func (v *Room) populateRowForCreate(vdb *db.Room, payload CreateRoomRequest) err
 	return nil
 }
 
-func (v *Room) populateRowForUpdate(vdb *db.Room, payload UpdateRoomRequest) error {
+func (v *Room) populateRowForUpdate(vdb *db.Room, payload model.UpdateRoomRequest) error {
 	if payload.VenueID.Valid() {
 		vdb.VenueID = payload.VenueID.String
 	}

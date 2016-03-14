@@ -2,10 +2,11 @@ package service
 
 import (
 	"github.com/builderscon/octav/octav/db"
+	"github.com/builderscon/octav/octav/model"
 	"github.com/builderscon/octav/octav/tools"
 )
 
-func (v *Venue) populateRowForCreate(vdb *db.Venue, payload CreateVenueRequest) error {
+func (v *Venue) populateRowForCreate(vdb *db.Venue, payload model.CreateVenueRequest) error {
 	vdb.EID = tools.UUID()
 	vdb.Name = payload.Name.String
 	vdb.Address = payload.Address.String
@@ -14,7 +15,7 @@ func (v *Venue) populateRowForCreate(vdb *db.Venue, payload CreateVenueRequest) 
 	return nil
 }
 
-func (v *Venue) populateRowForUpdate(vdb *db.Venue, payload UpdateVenueRequest) error {
+func (v *Venue) populateRowForUpdate(vdb *db.Venue, payload model.UpdateVenueRequest) error {
 	if payload.Name.Valid() {
 	vdb.Name = payload.Name.String
 	}

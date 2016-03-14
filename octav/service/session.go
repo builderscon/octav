@@ -2,10 +2,11 @@ package service
 
 import (
 	"github.com/builderscon/octav/octav/db"
+	"github.com/builderscon/octav/octav/model"
 	"github.com/builderscon/octav/octav/tools"
 )
 
-func (v *Session) populateRowForCreate(vdb *db.Session, payload CreateSessionRequest) error {
+func (v *Session) populateRowForCreate(vdb *db.Session, payload model.CreateSessionRequest) error {
 	vdb.EID = tools.UUID()
 	vdb.ConferenceID = payload.ConferenceID.String
 	vdb.SpeakerID = payload.SpeakerID.String
@@ -83,7 +84,7 @@ func (v *Session) populateRowForCreate(vdb *db.Session, payload CreateSessionReq
 	return nil
 }
 
-func (v *Session) populateRowForUpdate(vdb *db.Session, payload UpdateSessionRequest) error {
+func (v *Session) populateRowForUpdate(vdb *db.Session, payload model.UpdateSessionRequest) error {
 	if payload.ConferenceID.Valid() {
 		vdb.ConferenceID = payload.ConferenceID.String
 	}

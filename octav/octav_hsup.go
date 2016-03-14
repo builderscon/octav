@@ -8,7 +8,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/builderscon/octav/octav/service"
+	"github.com/builderscon/octav/octav/model"
 	"github.com/builderscon/octav/octav/validator"
 	"github.com/gorilla/mux"
 	"github.com/lestrrat/go-pdebug"
@@ -70,7 +70,7 @@ func httpCreateConference(w http.ResponseWriter, r *http.Request) {
 		httpError(w, `Method was `+r.Method, http.StatusNotFound, nil)
 	}
 
-	var payload service.CreateConferenceRequest
+	var payload model.CreateConferenceRequest
 	if err := json.NewDecoder(r.Body).Decode(&payload); err != nil {
 		httpError(w, `Invalid input`, http.StatusInternalServerError, err)
 		return
@@ -92,7 +92,7 @@ func httpCreateRoom(w http.ResponseWriter, r *http.Request) {
 		httpError(w, `Method was `+r.Method, http.StatusNotFound, nil)
 	}
 
-	var payload service.CreateRoomRequest
+	var payload model.CreateRoomRequest
 	if err := json.NewDecoder(r.Body).Decode(&payload); err != nil {
 		httpError(w, `Invalid input`, http.StatusInternalServerError, err)
 		return
@@ -114,7 +114,7 @@ func httpCreateSession(w http.ResponseWriter, r *http.Request) {
 		httpError(w, `Method was `+r.Method, http.StatusNotFound, nil)
 	}
 
-	var payload service.CreateSessionRequest
+	var payload model.CreateSessionRequest
 	if err := json.NewDecoder(r.Body).Decode(&payload); err != nil {
 		httpError(w, `Invalid input`, http.StatusInternalServerError, err)
 		return
@@ -136,7 +136,7 @@ func httpCreateUser(w http.ResponseWriter, r *http.Request) {
 		httpError(w, `Method was `+r.Method, http.StatusNotFound, nil)
 	}
 
-	var payload service.CreateUserRequest
+	var payload model.CreateUserRequest
 	if err := json.NewDecoder(r.Body).Decode(&payload); err != nil {
 		httpError(w, `Invalid input`, http.StatusInternalServerError, err)
 		return
@@ -158,7 +158,7 @@ func httpCreateVenue(w http.ResponseWriter, r *http.Request) {
 		httpError(w, `Method was `+r.Method, http.StatusNotFound, nil)
 	}
 
-	var payload service.CreateVenueRequest
+	var payload model.CreateVenueRequest
 	if err := json.NewDecoder(r.Body).Decode(&payload); err != nil {
 		httpError(w, `Invalid input`, http.StatusInternalServerError, err)
 		return
@@ -180,7 +180,7 @@ func httpDeleteConference(w http.ResponseWriter, r *http.Request) {
 		httpError(w, `Method was `+r.Method, http.StatusNotFound, nil)
 	}
 
-	var payload service.DeleteConferenceRequest
+	var payload model.DeleteConferenceRequest
 	if err := json.NewDecoder(r.Body).Decode(&payload); err != nil {
 		httpError(w, `Invalid input`, http.StatusInternalServerError, err)
 		return
@@ -202,7 +202,7 @@ func httpDeleteRoom(w http.ResponseWriter, r *http.Request) {
 		httpError(w, `Method was `+r.Method, http.StatusNotFound, nil)
 	}
 
-	var payload service.DeleteRoomRequest
+	var payload model.DeleteRoomRequest
 	if err := json.NewDecoder(r.Body).Decode(&payload); err != nil {
 		httpError(w, `Invalid input`, http.StatusInternalServerError, err)
 		return
@@ -224,7 +224,7 @@ func httpDeleteSession(w http.ResponseWriter, r *http.Request) {
 		httpError(w, `Method was `+r.Method, http.StatusNotFound, nil)
 	}
 
-	var payload service.DeleteSessionRequest
+	var payload model.DeleteSessionRequest
 	if err := json.NewDecoder(r.Body).Decode(&payload); err != nil {
 		httpError(w, `Invalid input`, http.StatusInternalServerError, err)
 		return
@@ -246,7 +246,7 @@ func httpDeleteUser(w http.ResponseWriter, r *http.Request) {
 		httpError(w, `Method was `+r.Method, http.StatusNotFound, nil)
 	}
 
-	var payload service.DeleteUserRequest
+	var payload model.DeleteUserRequest
 	if err := json.NewDecoder(r.Body).Decode(&payload); err != nil {
 		httpError(w, `Invalid input`, http.StatusInternalServerError, err)
 		return
@@ -268,7 +268,7 @@ func httpDeleteVenue(w http.ResponseWriter, r *http.Request) {
 		httpError(w, `Method was `+r.Method, http.StatusNotFound, nil)
 	}
 
-	var payload service.DeleteVenueRequest
+	var payload model.DeleteVenueRequest
 	if err := json.NewDecoder(r.Body).Decode(&payload); err != nil {
 		httpError(w, `Invalid input`, http.StatusInternalServerError, err)
 		return
@@ -290,7 +290,7 @@ func httpListRooms(w http.ResponseWriter, r *http.Request) {
 		httpError(w, `Method was `+r.Method, http.StatusNotFound, nil)
 	}
 
-	var payload service.ListRoomRequest
+	var payload model.ListRoomRequest
 	if err := urlenc.Unmarshal([]byte(r.URL.RawQuery), &payload); err != nil {
 		httpError(w, `Failed to parse url query string`, http.StatusInternalServerError, err)
 		return
@@ -312,7 +312,7 @@ func httpListSessionsByConference(w http.ResponseWriter, r *http.Request) {
 		httpError(w, `Method was `+r.Method, http.StatusNotFound, nil)
 	}
 
-	var payload service.ListSessionsByConferenceRequest
+	var payload model.ListSessionsByConferenceRequest
 	if err := urlenc.Unmarshal([]byte(r.URL.RawQuery), &payload); err != nil {
 		httpError(w, `Failed to parse url query string`, http.StatusInternalServerError, err)
 		return
@@ -334,7 +334,7 @@ func httpListVenues(w http.ResponseWriter, r *http.Request) {
 		httpError(w, `Method was `+r.Method, http.StatusNotFound, nil)
 	}
 
-	var payload service.ListVenueRequest
+	var payload model.ListVenueRequest
 	if err := urlenc.Unmarshal([]byte(r.URL.RawQuery), &payload); err != nil {
 		httpError(w, `Failed to parse url query string`, http.StatusInternalServerError, err)
 		return
@@ -356,7 +356,7 @@ func httpLookupConference(w http.ResponseWriter, r *http.Request) {
 		httpError(w, `Method was `+r.Method, http.StatusNotFound, nil)
 	}
 
-	var payload service.LookupConferenceRequest
+	var payload model.LookupConferenceRequest
 	if err := urlenc.Unmarshal([]byte(r.URL.RawQuery), &payload); err != nil {
 		httpError(w, `Failed to parse url query string`, http.StatusInternalServerError, err)
 		return
@@ -378,7 +378,7 @@ func httpLookupRoom(w http.ResponseWriter, r *http.Request) {
 		httpError(w, `Method was `+r.Method, http.StatusNotFound, nil)
 	}
 
-	var payload service.LookupRoomRequest
+	var payload model.LookupRoomRequest
 	if err := urlenc.Unmarshal([]byte(r.URL.RawQuery), &payload); err != nil {
 		httpError(w, `Failed to parse url query string`, http.StatusInternalServerError, err)
 		return
@@ -400,7 +400,7 @@ func httpLookupSession(w http.ResponseWriter, r *http.Request) {
 		httpError(w, `Method was `+r.Method, http.StatusNotFound, nil)
 	}
 
-	var payload service.LookupSessionRequest
+	var payload model.LookupSessionRequest
 	if err := urlenc.Unmarshal([]byte(r.URL.RawQuery), &payload); err != nil {
 		httpError(w, `Failed to parse url query string`, http.StatusInternalServerError, err)
 		return
@@ -422,7 +422,7 @@ func httpLookupUser(w http.ResponseWriter, r *http.Request) {
 		httpError(w, `Method was `+r.Method, http.StatusNotFound, nil)
 	}
 
-	var payload service.LookupUserRequest
+	var payload model.LookupUserRequest
 	if err := urlenc.Unmarshal([]byte(r.URL.RawQuery), &payload); err != nil {
 		httpError(w, `Failed to parse url query string`, http.StatusInternalServerError, err)
 		return
@@ -444,7 +444,7 @@ func httpLookupVenue(w http.ResponseWriter, r *http.Request) {
 		httpError(w, `Method was `+r.Method, http.StatusNotFound, nil)
 	}
 
-	var payload service.LookupVenueRequest
+	var payload model.LookupVenueRequest
 	if err := urlenc.Unmarshal([]byte(r.URL.RawQuery), &payload); err != nil {
 		httpError(w, `Failed to parse url query string`, http.StatusInternalServerError, err)
 		return
@@ -466,7 +466,7 @@ func httpUpdateConference(w http.ResponseWriter, r *http.Request) {
 		httpError(w, `Method was `+r.Method, http.StatusNotFound, nil)
 	}
 
-	var payload service.UpdateConferenceRequest
+	var payload model.UpdateConferenceRequest
 	if err := json.NewDecoder(r.Body).Decode(&payload); err != nil {
 		httpError(w, `Invalid input`, http.StatusInternalServerError, err)
 		return
@@ -488,7 +488,7 @@ func httpUpdateRoom(w http.ResponseWriter, r *http.Request) {
 		httpError(w, `Method was `+r.Method, http.StatusNotFound, nil)
 	}
 
-	var payload service.UpdateRoomRequest
+	var payload model.UpdateRoomRequest
 	if err := json.NewDecoder(r.Body).Decode(&payload); err != nil {
 		httpError(w, `Invalid input`, http.StatusInternalServerError, err)
 		return
@@ -510,7 +510,7 @@ func httpUpdateSession(w http.ResponseWriter, r *http.Request) {
 		httpError(w, `Method was `+r.Method, http.StatusNotFound, nil)
 	}
 
-	var payload service.UpdateSessionRequest
+	var payload model.UpdateSessionRequest
 	if err := json.NewDecoder(r.Body).Decode(&payload); err != nil {
 		httpError(w, `Invalid input`, http.StatusInternalServerError, err)
 		return
@@ -532,7 +532,7 @@ func httpUpdateUser(w http.ResponseWriter, r *http.Request) {
 		httpError(w, `Method was `+r.Method, http.StatusNotFound, nil)
 	}
 
-	var payload service.UpdateUserRequest
+	var payload model.UpdateUserRequest
 	if err := json.NewDecoder(r.Body).Decode(&payload); err != nil {
 		httpError(w, `Invalid input`, http.StatusInternalServerError, err)
 		return
@@ -554,7 +554,7 @@ func httpUpdateVenue(w http.ResponseWriter, r *http.Request) {
 		httpError(w, `Method was `+r.Method, http.StatusNotFound, nil)
 	}
 
-	var payload service.UpdateVenueRequest
+	var payload model.UpdateVenueRequest
 	if err := json.NewDecoder(r.Body).Decode(&payload); err != nil {
 		httpError(w, `Invalid input`, http.StatusInternalServerError, err)
 		return

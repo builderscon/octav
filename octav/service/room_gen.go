@@ -16,7 +16,7 @@ var _ = time.Time{}
 // Create takes in the transaction, the incoming payload, and a reference to
 // a database row. The database row is initialized/populated so that the
 // caller can use it afterwards
-func (v *Room) Create(tx *db.Tx, vdb *db.Room, payload CreateRoomRequest) (err error) {
+func (v *Room) Create(tx *db.Tx, vdb *db.Room, payload model.CreateRoomRequest) (err error) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("service.Room.Create").BindError(&err)
 		defer g.End()
@@ -36,7 +36,7 @@ func (v *Room) Create(tx *db.Tx, vdb *db.Room, payload CreateRoomRequest) (err e
 	return nil
 }
 
-func (v *Room) Update(tx *db.Tx, vdb *db.Room, payload UpdateRoomRequest) (err error) {
+func (v *Room) Update(tx *db.Tx, vdb *db.Room, payload model.UpdateRoomRequest) (err error) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("service.Room.Update (%s)", vdb.EID).BindError(&err)
 		defer g.End()
