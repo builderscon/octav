@@ -1,7 +1,6 @@
 package octav_test
 
 import (
-	"encoding/json"
 	"fmt"
 	"net/http/httptest"
 	"testing"
