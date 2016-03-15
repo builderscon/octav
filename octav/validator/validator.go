@@ -393,7 +393,7 @@ func init() {
 		SetConstraintMap(M).
 		SetRoot(
 			jsval.Object().
-				Required("slug", "title").
+				Required("slug", "title", "user_id").
 				AdditionalProperties(
 					jsval.EmptyConstraint,
 				).
@@ -406,16 +406,16 @@ func init() {
 					jsval.Reference(M).RefersTo("#/definitions/string_en"),
 				).
 				AddProp(
-					"starts_on",
-					jsval.Reference(M).RefersTo("#/definitions/datetime"),
-				).
-				AddProp(
 					"sub_title",
 					jsval.Reference(M).RefersTo("#/definitions/string_en"),
 				).
 				AddProp(
 					"title",
 					jsval.Reference(M).RefersTo("#/definitions/string_en"),
+				).
+				AddProp(
+					"user_id",
+					jsval.Reference(M).RefersTo("#/definitions/uuid"),
 				).
 				PatternPropertiesString(
 					"description#[a-z]+",

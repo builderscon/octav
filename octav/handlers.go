@@ -44,6 +44,11 @@ func doCreateConference(ctx context.Context, w http.ResponseWriter, r *http.Requ
 		return
 	}
 
+	if err := s.AddAdministrator(tx, vdb.EID, payload.UserID); err != nil {
+		httpError(w, `CreateConference`, http.StatusInternalServerError, err)
+		return
+	}
+
 	if err := tx.Commit(); err != nil {
 		httpError(w, `CreateConference`, http.StatusInternalServerError, err)
 		return

@@ -18,6 +18,7 @@ func (r CreateConferenceRequest) collectMarshalData() map[string]interface{} {
 		m["sub_title"] = r.SubTitle.Value()
 	}
 	m["slug"] = r.Slug
+	m["user_id"] = r.UserID
 	return m
 }
 
@@ -68,7 +69,16 @@ func (r *CreateConferenceRequest) UnmarshalJSON(data []byte) error {
 			return ErrInvalidJSONFieldType{Field: "slug"}
 		}
 	}
-	if err := tools.ExtractL10NFields(m, &r.L10N, []string{"title", "sub_title", "slug"}); err != nil {
+	if jv, ok := m["user_id"]; ok {
+		switch jv.(type) {
+		case string:
+			r.UserID = jv.(string)
+			delete(m, "user_id")
+		default:
+			return ErrInvalidJSONFieldType{Field: "user_id"}
+		}
+	}
+	if err := tools.ExtractL10NFields(m, &r.L10N, []string{"title", "sub_title", "slug", "user_id"}); err != nil {
 		return err
 	}
 	return nil
@@ -76,7 +86,7 @@ func (r *CreateConferenceRequest) UnmarshalJSON(data []byte) error {
 
 func (r *CreateConferenceRequest) GetPropNames() ([]string, error) {
 	l, _ := r.L10N.GetPropNames()
-	return append(l, "title", "sub_title", "slug"), nil
+	return append(l, "title", "sub_title", "slug", "user_id"), nil
 }
 
 func (r *CreateConferenceRequest) SetPropValue(s string, v interface{}) error {
@@ -91,6 +101,11 @@ func (r *CreateConferenceRequest) SetPropValue(s string, v interface{}) error {
 	case "slug":
 		if jv, ok := v.(string); ok {
 			r.Slug = jv
+			return nil
+		}
+	case "user_id":
+		if jv, ok := v.(string); ok {
+			r.UserID = jv
 			return nil
 		}
 	default:

@@ -96,6 +96,7 @@ type CreateConferenceRequest struct {
 	Title    string                `json:"title" l10n:"true"`
 	SubTitle jsval.MaybeString     `json:"sub_title" l10n:"true"`
 	Slug     string                `json:"slug"`
+	UserID   string                `json:"user_id"`
 	L10N     tools.LocalizedFields `json:"-"`
 }
 
