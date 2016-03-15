@@ -337,7 +337,6 @@ func (ctx *InspectionCtx) ExtractStructsFromDecl(decl *ast.GenDecl) error {
 		}
 		istransport := false
 		for _, c := range cgroup.List {
-pdebug.Printf("--> %s", c.Text)
 			if strings.HasPrefix(strings.TrimSpace(strings.TrimPrefix(c.Text, "//")), "+transport") {
 				istransport = true
 				break
