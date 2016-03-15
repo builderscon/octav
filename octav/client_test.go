@@ -482,11 +482,6 @@ func TestVenueCRUD(t *testing.T) {
 
 	in := model.UpdateVenueRequest{ID: res.ID}
 	in.L10N.Set("ja", "name", "東京ビッグサイト")
-	t.Logf("%#v", in)
-	{
-		buf, _ := json.MarshalIndent(in, "", "  ")
-		t.Logf("%s", buf)
-	}
 	if err := testUpdateVenue(t, cl, &in); err != nil {
 		return
 	}
