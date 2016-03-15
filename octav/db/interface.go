@@ -16,8 +16,18 @@ type Conference struct {
 	Slug       string
 	Title      string
 	SubTitle   sql.NullString
+	CreatedBy  string // User ID that creates this conference
 	CreatedOn  time.Time
 	ModifiedOn NullTime
+}
+
+// +DB tablename:"conference_administrators"
+type ConferenceAdministrator struct {
+	OID          int64 // OID is the internal id, used for sorting and what not
+	ConferenceID string
+	UserID       string
+	CreatedOn    time.Time
+	ModifiedOn   NullTime
 }
 
 // +DB tablename:"rooms"
@@ -58,7 +68,7 @@ type Session struct {
 	SortOrder         int
 	Confirmed         bool
 	CreatedOn         time.Time
-	ModifiedOn NullTime
+	ModifiedOn        NullTime
 }
 
 // +DB tablename:"users"

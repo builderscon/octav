@@ -141,10 +141,11 @@ func testDeleteVenue(t *testing.T, cl *client.Client, id string) error {
 	return err
 }
 
-func yapcasia() *model.CreateConferenceRequest {
+func yapcasia(userID string) *model.CreateConferenceRequest {
 	return &model.CreateConferenceRequest{
-		Title: "YAPC::Asia Tokyo",
-		Slug:  "yapcasia",
+		Title:  "YAPC::Asia Tokyo",
+		Slug:   "yapcasia",
+		UserID: userID,
 	}
 }
 
@@ -189,10 +190,18 @@ func TestConferenceCRUD(t *testing.T) {
 	defer ts.Close()
 
 	cl := client.New(ts.URL)
-	res, err := testCreateConference(t, cl, yapcasia())
+
+	user, err := testCreateUser(t, cl, johndoe())
 	if err != nil {
 		return
 	}
+	defer testDeleteUser(t, cl, user.ID)
+
+	res, err := testCreateConference(t, cl, yapcasia(user.ID))
+	if err != nil {
+		return
+	}
+	defer testDeleteConference(t, cl, res.ID)
 
 	if !assert.NoError(t, validator.HTTPCreateConferenceResponse.Validate(res), "Validation should succeed") {
 		return
@@ -224,10 +233,6 @@ func TestConferenceCRUD(t *testing.T) {
 	}
 
 	if !assert.Equal(t, "ヤップシー エイジア", res3.Title, "Conference.title#ja is the same as the conference updated") {
-		return
-	}
-
-	if err := testDeleteConference(t, cl, res.ID); err != nil {
 		return
 	}
 }
@@ -341,12 +346,13 @@ func TestSessionCRUD(t *testing.T) {
 
 	cl := client.New(ts.URL)
 
-	conference, err := testCreateConference(t, cl, yapcasia())
+	user, err := testCreateUser(t, cl, johndoe())
 	if err != nil {
 		return
 	}
+	defer testDeleteUser(t, cl, user.ID)
 
-	user, err := testCreateUser(t, cl, johndoe())
+	conference, err := testCreateConference(t, cl, yapcasia(user.ID))
 	if err != nil {
 		return
 	}
@@ -536,12 +542,13 @@ func TestListSessionsByConference(t *testing.T) {
 	defer ts.Close()
 
 	cl := client.New(ts.URL)
-	conference, err := testCreateConference(t, cl, yapcasia())
+
+	user, err := testCreateUser(t, cl, johndoe())
 	if err != nil {
 		return
 	}
-
-	user, err := testCreateUser(t, cl, johndoe())
+	defer testDeleteUser(t, cl, user.ID)
+	conference, err := testCreateConference(t, cl, yapcasia(user.ID))
 	if err != nil {
 		return
 	}

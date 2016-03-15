@@ -34,3 +34,10 @@ func (v *Conference) populateRowForUpdate(vdb *db.Conference, payload model.Upda
 	return nil
 }
 
+func (v *Conference) AddAdministrator(tx *db.Tx, cid, uid string) error {
+	c := db.ConferenceAdministrator{
+		ConferenceID: cid,
+		UserID: uid,
+	}
+	return c.Create(tx)
+}

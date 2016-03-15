@@ -529,13 +529,13 @@
           "sub_title": { "$ref": "#/definitions/string_en" },
           "slug": { "$ref": "#/definitions/string_en" },
           "description": { "$ref": "#/definitions/string_en" },
-          "starts_on": { "$ref": "#/definitions/datetime" }
+          "user_id": { "$ref": "#/definitions/uuid"}
         },
         "patternProperties": {
           "title#[a-z]+": { "$ref": "#/definitions/string_i18n" },
           "description#[a-z]+": { "$ref": "#/definitions/string_i18n" }
         },
-        "required": ["title", "slug"]
+        "required": ["title", "slug", "user_id"]
       },
       "targetSchema": { "$ref": "#/definitions/conference" }
     },

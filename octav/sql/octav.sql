@@ -40,9 +40,19 @@ CREATE TABLE conferences (
     slug TEXT NOT NULL,
     title TEXT NOT NULL,
     sub_title TEXT,
+    created_by CHAR(64) CHARACTER SET latin1 NOT NULL,
     created_on DATETIME NOT NULL,
     modified_on TIMESTAMP NOT NULL ON UPDAte CURRENT_TIMESTAMP,
     KEY(eid)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE conference_administrators (
+    oid INTEGER UNSIGNED NOT NULL PRIMARY KEY AUTO_INCREMENT,
+    conference_id CHAR(64) CHARACTER SET latin1 NOT NULL,
+    user_id CHAR(64) CHARACTER SET latin1 NOT NULL,
+    created_on DATETIME NOT NULL,
+    modified_on TIMESTAMP NOT NULL ON UPDAte CURRENT_TIMESTAMP,
+    UNIQUE KEY(conference_id, user_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 CREATE TABLE sessions (
