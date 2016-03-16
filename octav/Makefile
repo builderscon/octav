@@ -58,3 +58,7 @@ init_db:
 	mysql -u root -e "DROP DATABASE IF EXISTS $(OCTAV_DB_NAME)"
 	mysql -u root -e "CREATE DATABASE $(OCTAV_DB_NAME)"
 	mysql -u root octav < sql/octav.sql
+
+appserve:
+	@echo "Starting appengine local server via 'goapp serve'"
+	@cd appengine && goapp serve
