@@ -62,3 +62,8 @@ init_db:
 appserve:
 	@echo "Starting appengine local server via 'goapp serve'"
 	@cd appengine && goapp serve
+
+appdeploy:
+	@echo "Deploying to App Engine builderscon-1248 (builderscon-1248.appspot.com)"
+	@cd appengine && goapp deploy -application builderscon-1248 app.yaml
+
