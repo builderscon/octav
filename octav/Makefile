@@ -2,6 +2,7 @@ INTERNAL_BIN_DIR = _internal_bin
 INTERNAL_CMDS    = gendb genmodel gentransport
 BIN_DIR          = _bin
 GCLOUD_CONFIG_DIR = .gcloud
+GCLOUD_PROJECT_ID = builderscon-1248
 CLOUDSQL_ADDRESS_FILE = $(GCLOUD_CONFIG_DIR)/sql/address
 CLOUDSQL_SSL_FILES    = \
 	$(GCLOUD_CONFIG_DIR)/sql/server-ca.pem \
@@ -70,8 +71,8 @@ appserve:
 	@cd appengine && goapp serve
 
 appdeploy:
-	@echo "Deploying to App Engine builderscon-1248 (builderscon-1248.appspot.com)"
-	@cd appengine && goapp deploy -application builderscon-1248 app.yaml
+	@echo "Deploying to App Engine $(GCLOUD_PROJECT_ID) ($(GCLOUD_PROJECT_ID).appspot.com)"
+	@cd appengine && goapp deploy -application $(GCLOUD_PROJECT_ID) app.yaml
 
 $(CLOUDSQL_ADDRESS_FILE):
 ifeq (,$(wildcard $@))
