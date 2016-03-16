@@ -1,6 +1,12 @@
 INTERNAL_BIN_DIR = _internal_bin
 INTERNAL_CMDS    = gendb genmodel gentransport
 BIN_DIR          = _bin
+GCLOUD_CONFIG_DIR = .gcloud
+CLOUDSQL_ADDRESS_FILE = $(GCLOUD_CONFIG_DIR)/sql/address
+CLOUDSQL_SSL_FILES    = \
+	$(GCLOUD_CONFIG_DIR)/sql/server-ca.pem \
+	$(GCLOUD_CONFIG_DIR)/sql/client-key.pem \
+	$(GCLOUD_CONFIG_DIR)/sql/client-cert.pem
 
 ifndef OCTAV_DB_NAME
 	OCTAV_DB_NAME = octav
@@ -67,3 +73,22 @@ appdeploy:
 	@echo "Deploying to App Engine builderscon-1248 (builderscon-1248.appspot.com)"
 	@cd appengine && goapp deploy -application builderscon-1248 app.yaml
 
+$(CLOUDSQL_ADDRESS_FILE):
+ifeq (,$(wildcard $@))
+	@echo "Missing '$@'"
+	@echo "CloudSQL address needed. Please ask a builderscon admin to provide it for you"
+	@exit 1
+endif
+
+$(CLOUDSQL_SSL_FILES):
+ifeq (,$(wildcard $@))
+	@echo "Missing '$@'"
+	@echo "CloudSQL requires SSL certificates to connect. Please ask a builderscon admin to provide one for you"
+	@exit 1
+endif
+
+cloudsql_files: $(CLOUDSQL_ADDRESS_FILE) $(CLOUDSQL_SSL_FILES)
+
+cloudsql: cloudsql_files
+	@echo "Connecting to mysql..."
+	@mysql -uroot -h `cat $(GCLOUD_CONFIG_DIR)/sql/address` -p --ssl-ca=$(GCLOUD_CONFIG_DIR)/sql/server-ca.pem --ssl-cert=$(GCLOUD_CONFIG_DIR)/sql/client-cert.pem --ssl-key=$(GCLOUD_CONFIG_DIR)/sql/client-key.pem
