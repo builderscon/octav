@@ -109,3 +109,54 @@ OCTAV_TEST_DSN='root:@:/octav?parseTime=true' go test .
 
 Currently, the tests are still failing.
 
+# Deploying to GKE
+
+There are LOTS of things that needs to be automated. Please HELP!
+
+## Get CloudSQL Credentials
+
+Ask an administrator for them.
+
+Once you have them, you will be able to access the CloudSQL from your
+terminal by typing:
+
+```
+make cloudsql
+```
+
+## Build and Deploy the container
+
+```
+cd gke/containers/apiserver
+make docker
+make publish # Remember the tag that is printed
+make deploy TAG=XXXXX
+```
+
+`make docker` builds octav, and creates a docker container.
+
+`make publish` will display a line like the following:
+
+```
+Publishing [ asia.gcr.io/builderscon-1248/apiserver:20160317.212833 ]
+```
+
+You need to know the tag (20160317.212833) to deploy. You can also find it
+in the GCP console page.
+
+`make deploy` deploys the specified tag using `kubectl rolling-update`
+
+## kubectl
+
+Random `kubectl` commands that are good to know:
+
+| Command | Description |
+|:--------|:------------|
+| kubectl get pods | List all pods |
+| kubectl get rc   | List all replication controllers |
+| kubectl get service | List all services |
+| kubectl delete pod -l name=apiserver | Delete all `apiserver` pods. If there's a replication controller, new instances will be brought up |
+| kubectl delete rc -l name=apiserver | Delete all `apiserver` replication controllers. This also kills associated pods |
+| kubectl logs \[-f\] \[pod name\] | Show standard output logs. -f does the equivalent of `tail` |
+| kubectl describe \[name\] | name can be any name like pod name, rc name, service name, etc. Gives detail information about the resource |
+| kubectl exec -it \[pod name\] /bin/sh | Open a shell session to the named pod. Note: if you have multiple containers in a pod, you need add the container name |
