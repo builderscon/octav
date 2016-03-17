@@ -50,11 +50,14 @@ test: generate buildspec
 	$(GO_TEST_CMD) ./...
 
 $(CURDIR)/_bin/octav: cmd/octav/octav.go $(SRC_FILES)
+	@echo "Building $(@F) for $(GOOS)/$(GOARCH)..."
 ifeq ($(DEBUG),1)
+	@echo "DEBUG specified, enabling debug0"
 	$(eval EXTRA_TAGS=debug0)
 endif
-	@echo "Building $(@F) for $(GOOS)/$(GOARCH)..."
-ifneq ($(EXTRA_TAGS),)
+	@echo "EXTRA_TAGS = $(EXTRA_TAGS)"
+ifneq ("$(EXTRA_TAGS)",)
+	@echo "EXTRA_TAGS found: Enabling -tags $(EXTRA_TAGS)"
 	@$(eval $@_EXTRA_TAGS=-tags $(EXTRA_TAGS))
 endif
 	go build $($@_EXTRA_TAGS) -o $@ $<
