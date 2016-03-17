@@ -23,7 +23,7 @@ if [ -z "$CLUSTER_NODE_SIZE" ]; then
 fi
 
 if [ -z "$CLUSTER_MACHINE_TYPE" ]; then
-    CLUSTER_MACHINE_TYPE=f1-micro
+    CLUSTER_MACHINE_TYPE=g1-small
 fi
 
 SECRETS="cloudsql logging"

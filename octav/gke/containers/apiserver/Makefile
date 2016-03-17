@@ -26,8 +26,9 @@ endif
 
 .PHONY: all octav
 
-octav: 
-	@cd $(OCTAV_DIR) ; make build GOOS=linux GOARCH=amd64; cd $(CURDIR)
+$(CURDIR)/octav:
+	@echo "Building octav"
+	@cd $(OCTAV_DIR) ; make build GOOS=linux GOARCH=amd64 DEBUG=$(DEBUG) ; cd $(CURDIR)
 	@cp $(OCTAV_DIR)/_bin/octav .
 
 dm-running:
@@ -36,7 +37,7 @@ ifneq (,$(strip $(shell docker-machine env default 2>&1 | grep -o 'not running')
 	@docker-machine start default
 endif
 
-docker: dm-running 
+docker: dm-running $(CURDIR)/octav
 	$(DOCKER_MACHINE_ENV)
 	@docker build -t octav/$(APPNAME) .
 
@@ -45,10 +46,16 @@ publish:
 	docker tag octav/$(APPNAME) $(IMAGE_NAME)
 	gcloud docker push $(IMAGE_NAME)
 
-clean:
+clean_images:
 	@echo "Deleting old images"
 	@-docker images -q --filter dangling=true | xargs docker rmi
 
+clean_executables:
+	@echo "Deleting generated executables"
+	@-rm octav
+
+clean: clean_images clean_executables
+
 deploy:
 	@echo "Deploying $(IMAGE_NAME) via rolling update"
-	@kubectl rolling-update --update-period=5s --image=$(IMAGE_NAME) $(APPNAME)
+	kubectl rolling-update --update-period=5s --image=$(IMAGE_NAME) $(APPNAME)

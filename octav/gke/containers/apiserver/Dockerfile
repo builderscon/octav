@@ -1,4 +1,4 @@
-FROM alpine:latest
+FROM busybox:latest
 
 ADD octav /octav
 

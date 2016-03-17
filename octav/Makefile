@@ -52,13 +52,8 @@ test: generate buildspec
 $(CURDIR)/_bin/octav: cmd/octav/octav.go $(SRC_FILES)
 	@echo "Building $(@F) for $(GOOS)/$(GOARCH)..."
 ifeq ($(DEBUG),1)
-	@echo "DEBUG specified, enabling debug0"
-	$(eval EXTRA_TAGS=debug0)
-endif
-	@echo "EXTRA_TAGS = $(EXTRA_TAGS)"
-ifneq ("$(EXTRA_TAGS)",)
-	@echo "EXTRA_TAGS found: Enabling -tags $(EXTRA_TAGS)"
-	@$(eval $@_EXTRA_TAGS=-tags $(EXTRA_TAGS))
+	@echo "DEBUG specified, enabling '-tags debug0'"
+	$(eval $@_EXTRA_TAGS=-tags debug0)
 endif
 	go build $($@_EXTRA_TAGS) -o $@ $<
 
@@ -113,6 +108,6 @@ cloudsql: cloudsql_files
 # Kubernetes site shows that you can do this from the kubectl command line
 # alone, but as of this writing at least kubectl that comes with the
 # gcloud toolset doesn't, so... this workaround
-cloudsql_secret:
+cloudsql_secret: cloudsql_files
 	./devtools/make_cloudsql_secret.sh | kubectl create -f -
 
