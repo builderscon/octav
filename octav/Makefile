@@ -54,7 +54,7 @@ ifeq ($(DEBUG),1)
 	$(eval EXTRA_TAGS=debug0)
 endif
 	@echo "Building $(@F) for $(GOOS)/$(GOARCH)..."
-ifeq ($(EXTRA_TAGS),)
+ifneq ($(EXTRA_TAGS),)
 	@$(eval $@_EXTRA_TAGS=-tags $(EXTRA_TAGS))
 endif
 	go build $($@_EXTRA_TAGS) -o $@ $<
