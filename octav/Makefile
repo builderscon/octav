@@ -2,11 +2,16 @@ INTERNAL_BIN_DIR = _internal_bin
 INTERNAL_CMDS    = gendb genmodel gentransport
 BIN_DIR          = _bin
 GCLOUD_CONFIG_DIR = .gcloud
-CLOUDSQL_ADDRESS_FILE = $(GCLOUD_CONFIG_DIR)/sql/address
+CLOUDSQL_DIR=$(GCLOUD_CONFIG_DIR)/sql
+CLOUDSQL_ADDRESS_FILE = $(CLOUDSQL_DIR)/address
+CLOUDSQL_ADDRESS = $(shell cat $(CLOUDSQL_ADDRESS_FILE))
 CLOUDSQL_SSL_FILES    = \
-	$(GCLOUD_CONFIG_DIR)/sql/server-ca.pem \
-	$(GCLOUD_CONFIG_DIR)/sql/client-key.pem \
-	$(GCLOUD_CONFIG_DIR)/sql/client-cert.pem
+	$(CLOUDSQL_DIR)/server-ca.pem \
+	$(CLOUDSQL_DIR)/client-key.pem \
+	$(CLOUDSQL_DIR)/client-cert.pem
+GOVERSION=$(shell go version)
+GOOS=$(word 1,$(subst /, ,$(word 4, $(GOVERSION))))
+GOARCH=$(word 2,$(subst /, ,$(word 4, $(GOVERSION))))
 
 ifndef OCTAV_DB_NAME
 	OCTAV_DB_NAME = octav
@@ -44,7 +49,7 @@ test: generate buildspec
 	$(GO_TEST_CMD) ./...
 
 $(CURDIR)/_bin/octav: cmd/octav/octav.go $(SRC_FILES)
-	@echo "Building $(@F)..."
+	@echo "Building $(@F) for $(GOOS)/$(GOARCH)..."
 	@go build -o $@ $<
 
 buildspec: $(INTERNAL_BIN_DIR)/hsup ../spec/v1/api.json
@@ -65,6 +70,12 @@ init_db:
 	mysql -u root -e "CREATE DATABASE $(OCTAV_DB_NAME)"
 	mysql -u root octav < sql/octav.sql
 
+k8s-bootstrap:
+	./devtools/k8s-bootstrap.sh
+
+k8s-shutdown:
+	./devtools/k8s-shutdown.sh
+
 $(CLOUDSQL_ADDRESS_FILE):
 ifeq (,$(wildcard $@))
 	@echo "Missing '$@'"
@@ -83,4 +94,15 @@ cloudsql_files: $(CLOUDSQL_ADDRESS_FILE) $(CLOUDSQL_SSL_FILES)
 
 cloudsql: cloudsql_files
 	@echo "Connecting to mysql..."
-	@mysql -uroot -h `cat $(GCLOUD_CONFIG_DIR)/sql/address` -p --ssl-ca=$(GCLOUD_CONFIG_DIR)/sql/server-ca.pem --ssl-cert=$(GCLOUD_CONFIG_DIR)/sql/client-cert.pem --ssl-key=$(GCLOUD_CONFIG_DIR)/sql/client-key.pem
+	mysql -uroot -h $(CLOUDSQL_ADDRESS) -p --ssl-ca=$(GCLOUD_CONFIG_DIR)/sql/server-ca.pem --ssl-cert=$(GCLOUD_CONFIG_DIR)/sql/client-cert.pem --ssl-key=$(GCLOUD_CONFIG_DIR)/sql/client-key.pem
+
+# This rule creates a secrets file so that it can be fed into kubectl.
+# We go through this hoopla to create the secret so that we don't have to
+# commit extra files that otherwise may reveal sensitive information.
+#
+# Kubernetes site shows that you can do this from the kubectl command line
+# alone, but as of this writing at least kubectl that comes with the
+# gcloud toolset doesn't, so... this workaround
+cloudsql_secret:
+	./devtools/make_cloudsql_secret.sh | kubectl create -f -
+

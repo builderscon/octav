@@ -39,7 +39,7 @@ trap "gcloud config configurations activate $OLDCONFIG > /dev/null" EXIT
 
 echo "* Checking if we have cluster '$CLUSTER_NAME'..."
 set +e
-RETVAL=$(gcloud contaier clusters describe $CLUSTER_NAME > /dev/null 2>&1; echo $?)
+RETVAL=$(gcloud container clusters describe $CLUSTER_NAME > /dev/null 2>&1; echo $?)
 set -e
 
 if [ $RETVAL == 0 ]; then
@@ -73,7 +73,7 @@ for name in $REPLICATION_CONTROLLERS; do
         kubectl delete rc -l name=$name
     fi
     echo " + Creating replication controller $name ..."
-    kubectl create -f gke/rc/$name.yml
+    kubectl create -f gke/rc/$name.yaml
 done
 
 echo "* Creating service(s)..."
@@ -89,6 +89,6 @@ for name in $SERVICES; do
     fi
 
     echo " + Creating service $name..."
-    kubectl create -f gke/service/$name.yml
-    
+    kubectl create -f gke/service/$name.yaml
+done
 

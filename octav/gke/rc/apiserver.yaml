@@ -1,0 +1,37 @@
+kind: ReplicationController
+apiVersion: v1
+metadata:
+  name: apiserver
+spec:
+  replicas: 3
+  selector:
+    name: apiserver
+    group: octav
+  template:
+    metadata:
+      labels:
+        name: apiserver
+        group: octav
+    spec:
+      volumes:
+        - name: cloudsql
+          secret:
+            secretName: cloudsql-dev
+      containers:
+        - image: asia.gcr.io/builderscon-1248/apiserver:20160317.113427
+          name: apiserver
+          env:
+            - name: OCTAV_MYSQL_DBNAME
+              value: octav
+            - name: OCTAV_MYSQL_ADDRESS
+              value: /cloudsql/address
+            - name: OCTAV_MYSQL_USERNAME
+              value: root
+            - name: OCTAV_MYSQL_PASSWORD
+              value: /cloudsql/password
+            - name: OCTAV_MYSQL_CA_CERT
+              value: /cloudsql/ca-cert.pem
+            - name: OCTAV_MYSQL_CLIENT_CERT
+              value: /cloudsql/client-cert.pem
+            - name: OCTAV_MYSQL_CLIENT_KEY
+              value: /cloudsql/client-key.pem
