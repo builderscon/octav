@@ -30,28 +30,20 @@ func init() {
 	}
 }
 
-func Init(dsn string) error {
+func Init(dsn string) (err error) {
+	if pdebug.Enabled {
+		g := pdebug.Marker("db.Init").BindError(&err)
+		defer g.End()
+	}
+
 	if dsn == "" {
-		c, err := DSNConfig()
+		dsn, err = ConfigureDSN()
 		if err != nil {
 			return err
 		}
-
-		dsn = c.FormatDSN()
-	}
-
-	switch err := trySetupTLS(); err {
-	case ErrNoTLSRequested:
-		// no op. we weren't requested to do TLS
-	default:
-		// now *this* is an error
-		return err
 	}
 
 	dn := driverName()
-	if pdebug.Enabled {
-		pdebug.Printf("Connecting to %s %s", dn, dsn)
-	}
 	conn, err := sql.Open(dn, dsn)
 	if err != nil {
 		return err
