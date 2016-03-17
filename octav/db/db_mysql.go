@@ -20,16 +20,57 @@ type NullTime struct {
 	mysql.NullTime
 }
 
-func defaultDSNVars() dsnvars {
-	return dsnvars{
-		Address:  "127.0.0.1",
-		DBName:   "octav",
-		Port:     3306,
-		Username: "octav",
+func readEnvConfig(name, ename string, dst *string) error {
+	f := os.Getenv(ename)
+	if f == "" {
+		return nil
 	}
+
+	if pdebug.Enabled {
+		pdebug.Printf("Using %s from file specified in environment variable %s", name, ename)
+	}
+
+	v, err := ioutil.ReadFile(f)
+	if err != nil {
+		if pdebug.Enabled {
+			pdebug.Printf("Failed to read file %s: %s", v, err)
+		}
+		return err
+	}
+	*dst = string(v)
+	return nil
 }
 
-var DefaultDSN = "root:@/octav?parseTime=true"
+func DSNConfig() (*mysql.Config, error) {
+	if pdebug.Enabled {
+		g := pdebug.Marker("DSNConfig")
+		defer g.End()
+	}
+
+	c := mysql.Config{
+		User:      "root",
+		DBName:    "octav",
+		ParseTime: true,
+	}
+
+	if err := readEnvConfig("username", "OCTAV_MYSQL_USERNAME", &c.User); err != nil {
+		return nil, err
+	}
+
+	if err := readEnvConfig("password", "OCTAV_MYSQL_PASSWORD", &c.User); err != nil {
+		return nil, err
+	}
+
+	if err := readEnvConfig("address", "OCTAV_MYSQL_ADDRESS", &c.User); err != nil {
+		return nil, err
+	}
+
+	if err := readEnvConfig("dbname", "OCTAV_MYSQL_DBNAME", &c.User); err != nil {
+		return nil, err
+	}
+
+	return &c, nil
+}
 
 func driverName() string {
 	driverName := "mysql"
