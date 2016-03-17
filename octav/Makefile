@@ -1,6 +1,7 @@
+BIN_DIR          = _bin
+EXTRA_TAGS       =
 INTERNAL_BIN_DIR = _internal_bin
 INTERNAL_CMDS    = gendb genmodel gentransport
-BIN_DIR          = _bin
 GCLOUD_CONFIG_DIR = .gcloud
 CLOUDSQL_DIR=$(GCLOUD_CONFIG_DIR)/sql
 CLOUDSQL_ADDRESS_FILE = $(CLOUDSQL_DIR)/address
@@ -16,6 +17,9 @@ GOARCH=$(word 2,$(subst /, ,$(word 4, $(GOVERSION))))
 ifndef OCTAV_DB_NAME
 	OCTAV_DB_NAME = octav
 endif
+
+
+
 
 SRC_FILES = $(wildcard *.go validator/*.go client/*.go db/*.go)
 
@@ -49,8 +53,13 @@ test: generate buildspec
 	$(GO_TEST_CMD) ./...
 
 $(CURDIR)/_bin/octav: cmd/octav/octav.go $(SRC_FILES)
+ifeq ($(DEBUG),1)
+	$(eval EXTRA_TAGS=debug0)
+endif
 	@echo "Building $(@F) for $(GOOS)/$(GOARCH)..."
-	@go build -o $@ $<
+	@$(eval $@_EXTRA_TAGS=-tags $(EXTRA_TAGS))
+endif
+	go build $($@_EXTRA_TAGS) -o $@ $<
 
 buildspec: $(INTERNAL_BIN_DIR)/hsup ../spec/v1/api.json
 	@echo "Regenerating files based on ../spec/v1/api.json"
@@ -62,8 +71,8 @@ run: build
 	./_bin/octav
 
 clean:
-	rm _internal_bin/*
-	rm _bin/*
+	-rm _internal_bin/*
+	-rm _bin/*
 
 init_db:
 	mysql -u root -e "DROP DATABASE IF EXISTS $(OCTAV_DB_NAME)"
