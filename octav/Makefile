@@ -18,9 +18,6 @@ ifndef OCTAV_DB_NAME
 	OCTAV_DB_NAME = octav
 endif
 
-
-
-
 SRC_FILES = $(wildcard *.go validator/*.go client/*.go db/*.go)
 
 GO_TEST_CMD      = OCTAV_TEST_DSN="root:@/$(OCTAV_DB_NAME)?parseTime=true" go test -v $(GO_TAGS_OPT)
@@ -57,6 +54,7 @@ ifeq ($(DEBUG),1)
 	$(eval EXTRA_TAGS=debug0)
 endif
 	@echo "Building $(@F) for $(GOOS)/$(GOARCH)..."
+ifeq ($(EXTRA_TAGS),)
 	@$(eval $@_EXTRA_TAGS=-tags $(EXTRA_TAGS))
 endif
 	go build $($@_EXTRA_TAGS) -o $@ $<
