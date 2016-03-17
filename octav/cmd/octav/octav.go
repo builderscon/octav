@@ -28,7 +28,14 @@ func _main() int {
 		return 1
 	}
 
-	if fn := opts.Config; fn != "" {
+	fn := opts.Config
+	if fn == "" {
+		// No configuration? do the best we can
+		if err := db.Init(""); err != nil {
+			log.Printf("%s", err)
+			return 1
+		}
+	} else {
 		var c config
 		fh, err := os.Open(fn)
 		if err != nil {

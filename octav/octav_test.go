@@ -40,11 +40,6 @@ func setupAndRun(m *testing.M) int {
 		if pdebug.Enabled {
 			pdebug.Printf("OCTAV_TEST_DSN (%s) is available", dsn)
 		}
-	} else {
-		dsn = db.DefaultDSN
-		if pdebug.Enabled {
-			pdebug.Printf("Using default DSN '%s'", dsn)
-		}
 	}
 
 	if pdebug.Enabled {

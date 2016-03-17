@@ -1,13 +1,10 @@
 package db
 
 import (
-	"bytes"
 	"database/sql"
 	"errors"
-	"io/ioutil"
 	"os"
 	"strconv"
-	"text/template"
 
 	"github.com/lestrrat/go-pdebug"
 	"github.com/lestrrat/go-tx-guard"
@@ -19,15 +16,6 @@ type DB struct {
 
 type Tx struct {
 	*guard.Tx
-}
-
-type dsnvars struct {
-	Address   string
-	DBName    string
-	EnableTLS bool
-	Password  string
-	Port      int
-	Username  string
 }
 
 var _db *DB // global database connection
@@ -42,64 +30,20 @@ func init() {
 	}
 }
 
-func Init(dsn string) error {
+func Init(dsn string) (err error) {
+	if pdebug.Enabled {
+		g := pdebug.Marker("db.Init").BindError(&err)
+		defer g.End()
+	}
+
 	if dsn == "" {
-		dsn = DefaultDSN
-	}
-
-	// dsn can be a template, so we can incorporate automatically
-	// acquired data
-	t, err := template.New("dsn").Parse(dsn)
-	if err != nil {
-		return err
-	}
-
-	vars := defaultDSNVars()
-	switch err := trySetupTLS(); err {
-	case ErrNoTLSRequested:
-		// no op. we weren't requested to do TLS
-	case nil:
-		// successfully connectd using TLS
-		vars.EnableTLS = true
-	default:
-		// now *this* is an error
-		return err
-	}
-
-	// This is usually not a good idea, except when using along with
-	// stuff like Kubernetes secrets
-	if f := os.Getenv("OCTAV_MYSQL_PASSWORD_FILE"); f != "" {
-		if v, err := ioutil.ReadFile(f); err == nil {
-			vars.Password = string(v)
+		dsn, err = ConfigureDSN()
+		if err != nil {
+			return err
 		}
-	}
-	if v := os.Getenv("OCTAV_MYSQL_USERNAME"); v != "" {
-		vars.Username = v
-	}
-
-	if v := os.Getenv("OCTAV_MYSQL_PORT"); v != "" {
-		if p, err := strconv.ParseInt(v, 10, 64); err == nil {
-			vars.Port = int(p)
-		}
-	}
-
-	if v := os.Getenv("OCTAV_MYSQL_ADDRESS"); v != "" {
-		vars.Address = v
-	}
-
-	if v := os.Getenv("OCTAV_MYSQL_DBNAME"); v != "" {
-		vars.DBName = v
-	}
-
-	buf := bytes.Buffer{}
-	if err := t.Execute(&buf, vars); err != nil {
-		dsn = buf.String()
 	}
 
 	dn := driverName()
-	if pdebug.Enabled {
-		pdebug.Printf("Connecting to %s %s", dn, dsn)
-	}
 	conn, err := sql.Open(dn, dsn)
 	if err != nil {
 		return err
