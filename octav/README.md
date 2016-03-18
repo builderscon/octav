@@ -45,6 +45,18 @@ Conferences must have at least 1 administrator associated, but can have
 multiple administrators. The account that created the conference is
 automatically registered as administrator. To add more administrators,
 use `AddAdminisrator` (note: unimplemented).
+
+## ConferenceDates
+
+Conference dates take the following format:
+
+```
+YYYY-MM-DD[HH:MM-HH:MM]
+YYYY-MM-DD[HH:MM]
+YYYY-MM-DD
+```
+
+When you specify the time, it's in one of these forms `[OpenTime-CloseTime]`, `[OpenTime]`
  
 ## Venues
 
