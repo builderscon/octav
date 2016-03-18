@@ -29,8 +29,8 @@ type ConferenceDate struct {
 	OID          int64
 	ConferenceID string
 	Date         time.Time
-	StartTime    string
-	EndTime      string
+	StartTime    sql.NullString
+	EndTime      sql.NullString
 }
 
 // +DB tablename:"conference_administrators"
