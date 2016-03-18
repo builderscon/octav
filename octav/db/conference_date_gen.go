@@ -8,7 +8,7 @@ import (
 	"errors"
 )
 
-const ConferenceDateStdSelectColumns = "oid, conference_id, date, start_time, end_time"
+const ConferenceDateStdSelectColumns = "oid, conference_id, date, open, close"
 const ConferenceDateTable = "conference_dates"
 
 type ConferenceDateList []ConferenceDate
@@ -16,7 +16,7 @@ type ConferenceDateList []ConferenceDate
 func (c *ConferenceDate) Scan(scanner interface {
 	Scan(...interface{}) error
 }) error {
-	return scanner.Scan(&c.OID, &c.ConferenceID, &c.Date, &c.StartTime, &c.EndTime)
+	return scanner.Scan(&c.OID, &c.ConferenceID, &c.Date, &c.Open, &c.Close)
 }
 
 func (c *ConferenceDate) Create(tx *Tx, opts ...InsertOption) error {
@@ -35,8 +35,8 @@ func (c *ConferenceDate) Create(tx *Tx, opts ...InsertOption) error {
 	}
 	stmt.WriteString("INTO ")
 	stmt.WriteString(ConferenceDateTable)
-	stmt.WriteString(` (conference_id, date, start_time, end_time) VALUES (?, ?, ?, ?)`)
-	result, err := tx.Exec(stmt.String(), c.ConferenceID, c.Date, c.StartTime, c.EndTime)
+	stmt.WriteString(` (conference_id, date, open, close) VALUES (?, ?, ?, ?)`)
+	result, err := tx.Exec(stmt.String(), c.ConferenceID, c.Date, c.Open, c.Close)
 	if err != nil {
 		return err
 	}
@@ -52,7 +52,7 @@ func (c *ConferenceDate) Create(tx *Tx, opts ...InsertOption) error {
 
 func (c ConferenceDate) Update(tx *Tx) error {
 	if c.OID != 0 {
-		_, err := tx.Exec(`UPDATE `+ConferenceDateTable+` SET conference_id = ?, date = ?, start_time = ?, end_time = ? WHERE oid = ?`, c.ConferenceID, c.Date, c.StartTime, c.EndTime, c.OID)
+		_, err := tx.Exec(`UPDATE `+ConferenceDateTable+` SET conference_id = ?, date = ?, open = ?, close = ? WHERE oid = ?`, c.ConferenceID, c.Date, c.Open, c.Close, c.OID)
 		return err
 	}
 	return errors.New("either OID/EID must be filled")

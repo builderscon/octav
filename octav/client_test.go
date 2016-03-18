@@ -505,6 +505,57 @@ func TestVenueCRUD(t *testing.T) {
 	}
 }
 
+func TestDeleteConferenceDates(t *testing.T) {
+	ts := httptest.NewServer(octav.New())
+	defer ts.Close()
+
+	cl := client.New(ts.URL)
+
+	user, err := testCreateUser(t, cl, johndoe())
+	if err != nil {
+		return
+	}
+	defer testDeleteUser(t, cl, user.ID)
+
+	conf, err := testCreateConference(t, cl, &model.CreateConferenceRequest{
+		UserID: user.ID,
+	})
+	if err != nil {
+		return
+	}
+
+	err = cl.AddConferenceDates(&model.AddConferenceDatesRequest{
+		ConferenceID: conf.ID,
+		Dates: []model.ConferenceDate{
+			model.ConferenceDate{
+				Date: model.NewDate(2016,3,22),
+				Open: model.NewWallClock(10,0),
+				Close: model.NewWallClock(19,0),
+			},
+		},
+	})
+	if !assert.NoError(t, err, "AddConferenceDates works") {
+		return
+	}
+
+	err = cl.DeleteConferenceDates(&model.DeleteConferenceDatesRequest{
+		ConferenceID: conf.ID,
+		Dates: []string{ "2016-03-22" },
+	})
+	if !assert.NoError(t, err, "DeleteConferenceDates works") {
+		return
+	}
+
+	conf2, err := testLookupConference(t, cl, conf.ID, "")
+	if err != nil {
+		return
+	}
+
+	if !assert.Len(t, conf2.Dates, 0, "There should be no dates set") {
+		return
+	}
+}
+
 func TestListConferences(t *testing.T) {
 	ts := httptest.NewServer(octav.New())
 	defer ts.Close()
@@ -527,7 +578,13 @@ func TestListConferences(t *testing.T) {
 
 		err = cl.AddConferenceDates(&model.AddConferenceDatesRequest{
 			ConferenceID: conf.ID,
-			Dates: []string{ "2016-03-22" },
+			Dates: []model.ConferenceDate{
+				model.ConferenceDate{
+					Date: model.NewDate(2016,3,22),
+					Open: model.NewWallClock(10,0),
+					Close: model.NewWallClock(19,0),
+				},
+			},
 		})
 		if !assert.NoError(t, err, "AddConferenceDates works") {
 			return

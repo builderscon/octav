@@ -10,9 +10,26 @@
     ]
   },
   "definitions": {
+    "binary_permission_default_allow": {
+      "type": "string",
+      "enum": ["allow","disallow"],
+      "default": "allow"
+    },
     "boolean_default_false": {
       "type": "boolean",
       "default": false
+    },
+    "date": {
+      "type": "object",
+      "property": {
+        "date": { "$ref": "#/definitions/datestr" },
+        "start_time": "#/definitions/time",
+        "end_time": "#/definitions/time"
+      }
+    },
+    "date_array": {
+      "type": "array",
+      "items": { "$ref": "#/definitions/date" }
     },
     "datestr": {
       "type": "string",
@@ -29,20 +46,24 @@
         { "type": "object", "description": "implementation specific object representing time" }
       ]
     },
-    "string_en": {
-      "description": "a string in English.",
-      "type": "string"
+    "email": {
+      "type": "string",
+      "format": "email"
     },
     "markdown_en": {
       "description": "a string with markdown markup in English.",
       "type": "string"
     },
-    "string_i18n": {
-      "description": "a string for a particular language, where language is presented as the suffix of the property in the form of <foo>#<language>.",
-      "type": "string"
-    },
     "markdown_i18n": {
       "description": "a string with markdown markup for a particular language, where language is presented as the suffix of the property in the form of <foo>#<language>.",
+      "type": "string"
+    },
+    "string_en": {
+      "description": "a string in English.",
+      "type": "string"
+    },
+    "string_i18n": {
+      "description": "a string for a particular language, where language is presented as the suffix of the property in the form of <foo>#<language>.",
       "type": "string"
     },
     "positiveInteger": {
@@ -54,19 +75,10 @@
       "minimum": 0,
       "default": 10
     },
-    "email": {
-      "type": "string",
-      "format": "email"
-    },
     "material_level": {
       "type": "string",
       "enum": ["beginner", "intermediate", "advanced"],
       "default": "beginner"
-    },
-    "binary_permission_default_allow": {
-      "type": "string",
-      "enum": ["allow","disallow"],
-      "default": "allow"
     },
     "url": {
       "type": "string",
@@ -96,23 +108,6 @@
       "description": "latitude of an object",
       "type": "number"
     },
-    "date": {
-      "hsup.type": "octav.Date",
-      "type": "object",
-      "property": {
-        "date": { "$ref": "#/definitions/datestr" },
-        "open": { "$ref": "#/definitions/time" },
-        "close": { "$ref": "#/definitions/time" }
-      }
-    },
-    "datestr": {
-      "type": "string",
-      "pattern": "^\\d+-\\d+-\\d+(,\\d+-\\d+-\\d+-)*$"
-    },
-    "date_array": {
-      "type": "array",
-      "items": { "$ref": "#/definitions/date" }
-    },
     "conference_array": {
       "type": "array",
       "items": {"$ref": "#/definitions/conference" }
@@ -126,12 +121,7 @@
         "slug": { "$ref": "#/definitions/string_en" },
         "description": { "$ref": "#/definitions/string_en" },
         "venue": { "$ref": "#/definitions/venue" },
-        "dates": {
-          "oneOf": [
-            { "type": "null" },
-            { "$ref": "#/definitions/date_array" }
-          ]
-        }
+        "dates": { "$ref": "#/definitions/date_array" }
       },
       "patternProperties": {
         "title#[a-z]+": { "$ref": "#/definitions/string_i18n" },
@@ -555,6 +545,21 @@
       "encType": "application/json",
       "schema": {
         "hsup.type": "model.AddConferenceDatesRequest",
+        "properties": {
+          "conference_id": {"$ref": "#/definitions/uuid"},
+          "dates": {"$ref":"#/definitions/date_array"}
+        },
+        "required": ["conference_id","dates"]
+      }
+    },
+    {
+      "title": "Delete conference dates",
+      "rel": "delete",
+      "method": "POST",
+      "href": "/conference/date/delete",
+      "ecnType": "application/json",
+      "schema": {
+        "hsup.type": "model.DeleteConferenceDatesRequest",
         "properties": {
           "conference_id": {"$ref": "#/definitions/uuid"},
           "dates": {"$ref":"#/definitions/datestr_array"}

@@ -16,6 +16,7 @@ var HTTPCreateUserRequest *jsval.JSVal
 var HTTPCreateUserResponse *jsval.JSVal
 var HTTPCreateVenueRequest *jsval.JSVal
 var HTTPCreateVenueResponse *jsval.JSVal
+var HTTPDeleteConferenceDatesRequest *jsval.JSVal
 var HTTPDeleteConferenceRequest *jsval.JSVal
 var HTTPDeleteRoomRequest *jsval.JSVal
 var HTTPDeleteSessionRequest *jsval.JSVal
@@ -89,13 +90,7 @@ func init() {
 		).
 		AddProp(
 			"dates",
-			jsval.OneOf().
-				Add(
-					jsval.NullConstraint,
-				).
-				Add(
-					jsval.Reference(M).RefersTo("#/definitions/date_array"),
-				),
+			jsval.Reference(M).RefersTo("#/definitions/date_array"),
 		).
 		AddProp(
 			"description",
@@ -136,7 +131,7 @@ func init() {
 		AdditionalItems(
 			jsval.EmptyConstraint,
 		)
-	R6 = jsval.String().RegexpString("^\\d+-\\d+-\\d+(,\\d+-\\d+-\\d+-)*$")
+	R6 = jsval.String().RegexpString("\\d{4}-\\d{2}-\\d{2}")
 	R7 = jsval.Array().
 		Items(
 			jsval.Reference(M).RefersTo("#/definitions/datestr"),
@@ -415,7 +410,7 @@ func init() {
 				).
 				AddProp(
 					"dates",
-					jsval.Reference(M).RefersTo("#/definitions/datestr_array"),
+					jsval.Reference(M).RefersTo("#/definitions/date_array"),
 				),
 		)
 
@@ -466,13 +461,7 @@ func init() {
 				).
 				AddProp(
 					"dates",
-					jsval.OneOf().
-						Add(
-							jsval.NullConstraint,
-						).
-						Add(
-							jsval.Reference(M).RefersTo("#/definitions/date_array"),
-						),
+					jsval.Reference(M).RefersTo("#/definitions/date_array"),
 				).
 				AddProp(
 					"description",
@@ -898,6 +887,24 @@ func init() {
 				),
 		)
 
+	HTTPDeleteConferenceDatesRequest = jsval.New().
+		SetConstraintMap(M).
+		SetRoot(
+			jsval.Object().
+				Required("conference_id", "dates").
+				AdditionalProperties(
+					jsval.EmptyConstraint,
+				).
+				AddProp(
+					"conference_id",
+					jsval.Reference(M).RefersTo("#/definitions/uuid"),
+				).
+				AddProp(
+					"dates",
+					jsval.Reference(M).RefersTo("#/definitions/datestr_array"),
+				),
+		)
+
 	HTTPDeleteConferenceRequest = jsval.New().
 		SetConstraintMap(M).
 		SetRoot(
@@ -1125,13 +1132,7 @@ func init() {
 				).
 				AddProp(
 					"dates",
-					jsval.OneOf().
-						Add(
-							jsval.NullConstraint,
-						).
-						Add(
-							jsval.Reference(M).RefersTo("#/definitions/date_array"),
-						),
+					jsval.Reference(M).RefersTo("#/definitions/date_array"),
 				).
 				AddProp(
 					"description",

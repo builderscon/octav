@@ -15,7 +15,8 @@ func (v *ConferenceList) LoadByRange(tx *Tx, since string, rangeStart, rangeEnd 
 		if err := vdb.LoadByEID(tx, since); err != nil {
 			return err
 		}
-		where.WriteString("oid > ?")
+		where.WriteString(ConferenceTable)
+		where.WriteString(".conference.oid > ?")
 		args = append(args, vdb.OID)
 	}
 
@@ -40,6 +41,8 @@ func (v *ConferenceList) LoadByRange(tx *Tx, since string, rangeStart, rangeEnd 
 
 	qbuf := bytes.Buffer{}
 	qbuf.WriteString(`SELECT `)
+	qbuf.WriteString(ConferenceTable) // Super dirty hack to qualify oid :D
+	qbuf.WriteByte('.')
 	qbuf.WriteString(ConferenceStdSelectColumns)
 	qbuf.WriteString(` FROM `)
 	qbuf.WriteString(ConferenceTable)

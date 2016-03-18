@@ -1,11 +1,14 @@
 package model
 
 import (
+	"errors"
 	"time"
 
 	"github.com/builderscon/octav/octav/tools"
 	"github.com/lestrrat/go-jsval"
 )
+
+var ErrInvalidConferenceHour = errors.New("invalid conference hour specification")
 
 type ErrInvalidJSONFieldType struct {
 	Field string
@@ -18,10 +21,11 @@ type ErrInvalidFieldType struct {
 
 // +model
 type Conference struct {
-	ID       string `json:"id"`
-	Title    string `json:"title" l10n:"true"`
-	SubTitle string `json:"sub_title" l10n:"true"`
-	Slug     string `json:"slug"`
+	ID       string             `json:"id"`
+	Title    string             `json:"title" l10n:"true"`
+	SubTitle string             `json:"sub_title" l10n:"true"`
+	Slug     string             `json:"slug"`
+	Dates    ConferenceDateList `json:"dates,omitempty"`
 }
 type ConferenceL10NList []ConferenceL10N
 type ConferenceList []Conference
@@ -114,8 +118,35 @@ type UpdateConferenceRequest struct {
 	L10N tools.LocalizedFields `json:"-"`
 }
 
+// Date is used to store simple dates YYYY-MM-DD
+type Date struct {
+	year  int
+	month int
+	day   int
+}
+
+// WallClock is used to store simple time HH:MM
+type WallClock struct {
+	hour   int
+	minute int
+	Valid  bool // True if set
+}
+
+// YYYY-MM-DD[HH:MM-HH:MM]
+type ConferenceDate struct {
+	Date  Date
+	Open  WallClock
+	Close WallClock
+}
+type ConferenceDateList []ConferenceDate
+
 // +transport
 type AddConferenceDatesRequest struct {
+	ConferenceID string             `json:"conference_id"`
+	Dates        ConferenceDateList `json:"dates" extract:"true"`
+}
+
+type DeleteConferenceDatesRequest struct {
 	ConferenceID string   `json:"conference_id"`
 	Dates        []string `json:"dates"`
 }

@@ -1,6 +1,8 @@
 package service
 
 import (
+	"database/sql"
+	"strings"
 	"time"
 
 	"github.com/builderscon/octav/octav/db"
@@ -45,6 +47,7 @@ func (v *Conference) AddAdministrator(tx *db.Tx, cid, uid string) error {
 }
 
 const datefmt = `2006-01-02`
+
 func (v *Conference) LoadByRange(tx *db.Tx, vdbl *db.ConferenceList, since, lang, rangeStart, rangeEnd string, limit int) error {
 	var rs time.Time
 	var re time.Time
@@ -71,20 +74,63 @@ func (v *Conference) LoadByRange(tx *db.Tx, vdbl *db.ConferenceList, since, lang
 	return nil
 }
 
-func (v *Conference) AddDates(tx *db.Tx, cid string, dates ...string) error {
+func (v *Conference) AddDates(tx *db.Tx, cid string, dates ...model.ConferenceDate) error {
 	for _, date := range dates {
-		dt, err := time.Parse(datefmt, date)
-		if err != nil {
-			return err
-		}
 		cd := db.ConferenceDate{
 			ConferenceID: cid,
-			Date: dt,
+			Date:         date.Date.String(),
+			Open:         sql.NullString{String: date.Open.String(), Valid: true},
+			Close:        sql.NullString{String: date.Close.String(), Valid: true},
 		}
 		if err := cd.Create(tx, db.WithInsertIgnore(true)); err != nil {
 			return err
 		}
 	}
 
+	return nil
+}
+
+func (v *Conference) DeleteDates(tx *db.Tx, cid string, dates ...string) error {
+	vdb := db.ConferenceDate{}
+	return vdb.DeleteDates(tx, cid, dates...)
+}
+
+func (v *Conference) LoadDates(tx *db.Tx, cdl *model.ConferenceDateList, cid string) error {
+	vdbl := db.ConferenceDateList{}
+	if err := vdbl.LoadByConferenceID(tx, cid); err != nil {
+		return err
+	}
+
+	res := make(model.ConferenceDateList, len(vdbl))
+	for i, vdb := range vdbl {
+		dt := vdb.Date
+		if i := strings.IndexByte(dt, 'T'); i > -1 { // Cheat. Loading from DB contains time....!!!!
+			dt = dt[:i]
+		}
+		if err := res[i].Date.Parse(dt); err != nil {
+			return err
+		}
+
+		if vdb.Open.Valid {
+			t := vdb.Open.String
+			if len(t) > 5 {
+				t = t[:5]
+			}
+			if err := res[i].Open.Parse(t); err != nil {
+				return err
+			}
+		}
+
+		if vdb.Close.Valid {
+			t := vdb.Close.String
+			if len(t) > 5 {
+				t = t[:5]
+			}
+			if err := res[i].Close.Parse(t); err != nil {
+				return err
+			}
+		}
+	}
+	*cdl = res
 	return nil
 }
