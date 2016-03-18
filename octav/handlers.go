@@ -14,7 +14,7 @@ import (
 
 func httpJSON(w http.ResponseWriter, v interface{}) {
 	buf := bytes.Buffer{}
-	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	if err := json.NewEncoder(&buf).Encode(v); err != nil {
 		httpError(w, `encode json`, http.StatusInternalServerError, err)
 		return
