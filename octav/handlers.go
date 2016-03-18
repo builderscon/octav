@@ -14,7 +14,7 @@ import (
 
 func httpJSON(w http.ResponseWriter, v interface{}) {
 	buf := bytes.Buffer{}
-	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	if err := json.NewEncoder(&buf).Encode(v); err != nil {
 		httpError(w, `encode json`, http.StatusInternalServerError, err)
 		return
@@ -98,8 +98,6 @@ func doUpdateConference(ctx context.Context, w http.ResponseWriter, r *http.Requ
 		defer g.End()
 	}
 
-	pdebug.Printf("%#v", payload)
-
 	tx, err := db.Begin()
 	if err != nil {
 		httpError(w, `UpdateConference`, http.StatusInternalServerError, err)
@@ -149,6 +147,62 @@ func doDeleteConference(ctx context.Context, w http.ResponseWriter, r *http.Requ
 		return
 	}
 	httpJSON(w, map[string]string{"status": "success"})
+}
+
+func doAddConferenceDates(ctx context.Context, w http.ResponseWriter, r *http.Request, payload model.AddConferenceDatesRequest) {
+	tx, err := db.Begin()
+	if err != nil {
+		httpError(w, `AddConferenceDates`, http.StatusInternalServerError, err)
+		return
+	}
+	defer tx.AutoRollback()
+
+	s := service.Conference{}
+	if err := s.AddDates(tx, payload.ConferenceID, payload.Dates...); err != nil {
+		httpError(w, `AddConferenceDates`, http.StatusInternalServerError, err)
+		return
+	}
+
+	if err := tx.Commit(); err != nil {
+		httpError(w, `DeleteConference`, http.StatusInternalServerError, err)
+		return
+	}
+	httpJSON(w, map[string]string{"status": "success"})
+}
+
+func doListConferences(ctx context.Context, w http.ResponseWriter, r *http.Request, payload model.ListConferencesRequest) {
+	tx, err := db.Begin()
+	if err != nil {
+		httpError(w, `ListConferences`, http.StatusInternalServerError, err)
+		return
+	}
+	defer tx.AutoRollback()
+
+	s := service.Conference{}
+	vdbl := db.ConferenceList{}
+	if err := s.LoadByRange(tx, &vdbl, payload.Since.String, payload.Lang.String, payload.RangeStart.String, payload.RangeEnd.String, int(payload.Limit.Int)); err != nil {
+		httpError(w, `ListConferences`, http.StatusInternalServerError, err)
+		return
+	}
+
+	l := make(model.ConferenceL10NList, len(vdbl))
+	for i, vdb := range vdbl {
+		v := model.Conference{}
+		if err := v.FromRow(vdb); err != nil {
+			httpError(w, `ListConferences`, http.StatusInternalServerError, err)
+			return
+		}
+		vl := model.ConferenceL10N{Conference: v}
+		if err := vl.LoadLocalizedFields(tx); err != nil {
+			httpError(w, `ListConferences`, http.StatusInternalServerError, err)
+			return
+		}
+		l[i] = vl
+	}
+
+
+
+	httpJSON(w, l)
 }
 
 func doCreateRoom(ctx context.Context, w http.ResponseWriter, r *http.Request, payload model.CreateRoomRequest) {
@@ -426,8 +480,6 @@ func doUpdateUser(ctx context.Context, w http.ResponseWriter, r *http.Request, p
 		defer g.End()
 	}
 
-	pdebug.Printf("%#v", payload)
-
 	tx, err := db.Begin()
 	if err != nil {
 		httpError(w, `UpdateUser`, http.StatusInternalServerError, err)
@@ -676,7 +728,7 @@ func doLookupSession(ctx context.Context, w http.ResponseWriter, r *http.Request
 func doListSessionsByConference(ctx context.Context, w http.ResponseWriter, r *http.Request, payload model.ListSessionsByConferenceRequest) {
 	tx, err := db.Begin()
 	if err != nil {
-		httpError(w, `ListVenuesByConference`, http.StatusInternalServerError, err)
+		httpError(w, `ListSessionsByConference`, http.StatusInternalServerError, err)
 		return
 	}
 	defer tx.AutoRollback()

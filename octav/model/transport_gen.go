@@ -259,6 +259,66 @@ func (r *UpdateConferenceRequest) SetPropValue(s string, v interface{}) error {
 	return ErrInvalidFieldType{Field: s}
 }
 
+func (r AddConferenceDatesRequest) collectMarshalData() map[string]interface{} {
+	m := make(map[string]interface{})
+	m["conference_id"] = r.ConferenceID
+	m["dates"] = r.Dates
+	return m
+}
+
+func (r AddConferenceDatesRequest) MarshalJSON() ([]byte, error) {
+	m := r.collectMarshalData()
+	buf, err := json.Marshal(m)
+	if err != nil {
+		return nil, err
+	}
+	return buf, nil
+}
+
+func (r AddConferenceDatesRequest) MarshalURL() ([]byte, error) {
+	m := r.collectMarshalData()
+	buf, err := urlenc.Marshal(m)
+	if err != nil {
+		return nil, err
+	}
+	return buf, nil
+}
+
+func (r *AddConferenceDatesRequest) UnmarshalJSON(data []byte) error {
+	m := make(map[string]interface{})
+	if err := json.Unmarshal(data, &m); err != nil {
+		return err
+	}
+	if jv, ok := m["conference_id"]; ok {
+		switch jv.(type) {
+		case string:
+			r.ConferenceID = jv.(string)
+			delete(m, "conference_id")
+		default:
+			return ErrInvalidJSONFieldType{Field: "conference_id"}
+		}
+	}
+	if jv, ok := m["dates"]; ok {
+		switch jv.(type) {
+		case []interface{}:
+			jvl := jv.([]interface{})
+			list := make([]string, len(jvl))
+			for i, el := range jvl {
+				switch el.(type) {
+				case string:
+					list[i] = el.(string)
+				default:
+					return ErrInvalidJSONFieldType{Field: "dates"}
+				}
+			}
+			r.Dates = list
+		default:
+			return ErrInvalidJSONFieldType{Field: "dates"}
+		}
+	}
+	return nil
+}
+
 func (r DeleteConferenceRequest) collectMarshalData() map[string]interface{} {
 	m := make(map[string]interface{})
 	m["id"] = r.ID
@@ -296,6 +356,82 @@ func (r *DeleteConferenceRequest) UnmarshalJSON(data []byte) error {
 		default:
 			return ErrInvalidJSONFieldType{Field: "id"}
 		}
+	}
+	return nil
+}
+
+func (r ListConferencesRequest) collectMarshalData() map[string]interface{} {
+	m := make(map[string]interface{})
+	if r.RangeEnd.Valid() {
+		m["range_end"] = r.RangeEnd.Value()
+	}
+	if r.RangeStart.Valid() {
+		m["range_start"] = r.RangeStart.Value()
+	}
+	if r.Since.Valid() {
+		m["since"] = r.Since.Value()
+	}
+	if r.Lang.Valid() {
+		m["lang"] = r.Lang.Value()
+	}
+	if r.Limit.Valid() {
+		m["limit"] = r.Limit.Value()
+	}
+	return m
+}
+
+func (r ListConferencesRequest) MarshalJSON() ([]byte, error) {
+	m := r.collectMarshalData()
+	buf, err := json.Marshal(m)
+	if err != nil {
+		return nil, err
+	}
+	return buf, nil
+}
+
+func (r ListConferencesRequest) MarshalURL() ([]byte, error) {
+	m := r.collectMarshalData()
+	buf, err := urlenc.Marshal(m)
+	if err != nil {
+		return nil, err
+	}
+	return buf, nil
+}
+
+func (r *ListConferencesRequest) UnmarshalJSON(data []byte) error {
+	m := make(map[string]interface{})
+	if err := json.Unmarshal(data, &m); err != nil {
+		return err
+	}
+	if jv, ok := m["range_end"]; ok {
+		if err := r.RangeEnd.Set(jv); err != nil {
+			return errors.New("set field RangeEnd failed: " + err.Error())
+		}
+		delete(m, "range_end")
+	}
+	if jv, ok := m["range_start"]; ok {
+		if err := r.RangeStart.Set(jv); err != nil {
+			return errors.New("set field RangeStart failed: " + err.Error())
+		}
+		delete(m, "range_start")
+	}
+	if jv, ok := m["since"]; ok {
+		if err := r.Since.Set(jv); err != nil {
+			return errors.New("set field Since failed: " + err.Error())
+		}
+		delete(m, "since")
+	}
+	if jv, ok := m["lang"]; ok {
+		if err := r.Lang.Set(jv); err != nil {
+			return errors.New("set field Lang failed: " + err.Error())
+		}
+		delete(m, "lang")
+	}
+	if jv, ok := m["limit"]; ok {
+		if err := r.Limit.Set(jv); err != nil {
+			return errors.New("set field Limit failed: " + err.Error())
+		}
+		delete(m, "limit")
 	}
 	return nil
 }

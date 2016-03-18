@@ -505,6 +505,54 @@ func TestVenueCRUD(t *testing.T) {
 	}
 }
 
+func TestListConferences(t *testing.T) {
+	ts := httptest.NewServer(octav.New())
+	defer ts.Close()
+
+	cl := client.New(ts.URL)
+
+	user, err := testCreateUser(t, cl, johndoe())
+	if err != nil {
+		return
+	}
+	defer testDeleteUser(t, cl, user.ID)
+
+	for i := 0; i < 10; i++ {
+		conf, err := testCreateConference(t, cl, &model.CreateConferenceRequest{
+			UserID: user.ID,
+		})
+		if err != nil {
+			return
+		}
+
+		err = cl.AddConferenceDates(&model.AddConferenceDatesRequest{
+			ConferenceID: conf.ID,
+			Dates: []string{ "2016-03-22" },
+		})
+		if !assert.NoError(t, err, "AddConferenceDates works") {
+			return
+		}
+
+		defer testDeleteConference(t, cl, conf.ID)
+	}
+
+	in := model.ListConferencesRequest{}
+	in.RangeStart.Set("2016-03-21")
+	in.RangeEnd.Set("2016-03-23")
+	res, err := cl.ListConferences(&in)
+	if !assert.NoError(t, err, "ListConferences should succeed") {
+		return
+	}
+
+	if !assert.NoError(t, validator.HTTPListConferencesResponse.Validate(res), "Validation should succeed") {
+		return
+	}
+
+	if !assert.Len(t, res, 10, "ListConferences returns 10 rooms") {
+		return
+	}
+}
+
 func TestListRooms(t *testing.T) {
 	ts := httptest.NewServer(octav.New())
 	defer ts.Close()

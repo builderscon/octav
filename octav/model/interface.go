@@ -23,15 +23,15 @@ type Conference struct {
 	SubTitle string `json:"sub_title" l10n:"true"`
 	Slug     string `json:"slug"`
 }
+type ConferenceL10NList []ConferenceL10N
 type ConferenceList []Conference
 
 // +model
 type Room struct {
-	ID       string                `json:"id"`
-	VenueID  string                `json:"venue_id"`
-	Name     string                `json:"name" l10n:"true"`
-	Capacity uint                  `json:"capacity"`
-	L10N     tools.LocalizedFields `json:"-"`
+	ID       string `json:"id"`
+	VenueID  string `json:"venue_id"`
+	Name     string `json:"name" l10n:"true"`
+	Capacity uint   `json:"capacity"`
 }
 type RoomList []RoomL10N
 
@@ -70,24 +70,22 @@ type TagString string
 
 // +model
 type User struct {
-	ID         string                `json:"id"`
-	FirstName  string                `json:"first_name" l10n:"true"`
-	LastName   string                `json:"last_name" l10n:"true"`
-	Nickname   string                `json:"nickname"`
-	Email      string                `json:"email"`
-	TshirtSize string                `json:"tshirt_size"`
-	L10N       tools.LocalizedFields `json:"-"`
+	ID         string `json:"id"`
+	FirstName  string `json:"first_name" l10n:"true"`
+	LastName   string `json:"last_name" l10n:"true"`
+	Nickname   string `json:"nickname"`
+	Email      string `json:"email"`
+	TshirtSize string `json:"tshirt_size"`
 }
 type UserList []User
 
 // +model
 type Venue struct {
-	ID        string                `json:"id,omitempty"`
-	Name      string                `json:"name" l10n:"true"`
-	Address   string                `json:"address" l10n:"true"`
-	Longitude float64               `json:"longitude,omitempty"`
-	Latitude  float64               `json:"latitude,omitempty"`
-	L10N      tools.LocalizedFields `json:"-"`
+	ID        string  `json:"id,omitempty"`
+	Name      string  `json:"name" l10n:"true"`
+	Address   string  `json:"address" l10n:"true"`
+	Longitude float64 `json:"longitude,omitempty"`
+	Latitude  float64 `json:"latitude,omitempty"`
 }
 type VenueL10NList []VenueL10N
 
@@ -117,8 +115,23 @@ type UpdateConferenceRequest struct {
 }
 
 // +transport
+type AddConferenceDatesRequest struct {
+	ConferenceID string   `json:"conference_id"`
+	Dates        []string `json:"dates"`
+}
+
+// +transport
 type DeleteConferenceRequest struct {
 	ID string `json:"id" urlenc:"id"`
+}
+
+// +transport
+type ListConferencesRequest struct {
+	RangeEnd   jsval.MaybeString `json:"range_end" urlenc:"range_end,omitempty,string"`
+	RangeStart jsval.MaybeString `json:"range_start" urlenc:"range_start,omitempty,string"`
+	Since      jsval.MaybeString `json:"since" urlenc:"since,omitempty,string"`
+	Lang       jsval.MaybeString `json:"lang" urlenc:"lang,omitempty,string"`
+	Limit      jsval.MaybeInt    `json:"limit,omitempty" urlenc:"limit,omitempty,int64"`
 }
 
 // +transport

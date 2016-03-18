@@ -28,6 +28,34 @@ func New(s string) *Client {
 	}
 }
 
+func (c *Client) AddConferenceDates(in *model.AddConferenceDatesRequest) (err error) {
+	if pdebug.Enabled {
+		g := pdebug.Marker("client.AddConferenceDates").BindError(&err)
+		defer g.End()
+	}
+	u, err := url.Parse(c.Endpoint + "/v1/conference/date/add")
+	if err != nil {
+		return err
+	}
+	buf := bytes.Buffer{}
+	err = json.NewEncoder(&buf).Encode(in)
+	if err != nil {
+		return err
+	}
+	if pdebug.Enabled {
+		pdebug.Printf("POST to %s", u.String())
+		pdebug.Printf("%s", buf.String())
+	}
+	res, err := c.Client.Post(u.String(), "application/json", &buf)
+	if err != nil {
+		return err
+	}
+	if res.StatusCode != http.StatusOK {
+		return fmt.Errorf(`Invalid response: '%s'`, res.Status)
+	}
+	return nil
+}
+
 func (c *Client) CreateConference(in *model.CreateConferenceRequest) (ret *model.Conference, err error) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("client.CreateConference").BindError(&err)
@@ -331,6 +359,38 @@ func (c *Client) DeleteVenue(in *model.DeleteVenueRequest) (err error) {
 		return fmt.Errorf(`Invalid response: '%s'`, res.Status)
 	}
 	return nil
+}
+
+func (c *Client) ListConferences(in *model.ListConferencesRequest) (ret interface{}, err error) {
+	if pdebug.Enabled {
+		g := pdebug.Marker("client.ListConferences").BindError(&err)
+		defer g.End()
+	}
+	u, err := url.Parse(c.Endpoint + "/v1/conference/list")
+	if err != nil {
+		return nil, err
+	}
+	buf, err := urlenc.Marshal(in)
+	if err != nil {
+		return nil, err
+	}
+	u.RawQuery = string(buf)
+	if pdebug.Enabled {
+		pdebug.Printf("GET to %s", u.String())
+	}
+	res, err := c.Client.Get(u.String())
+	if err != nil {
+		return nil, err
+	}
+	if res.StatusCode != http.StatusOK {
+		return nil, fmt.Errorf(`Invalid response: '%s'`, res.Status)
+	}
+	var payload interface{}
+	err = json.NewDecoder(res.Body).Decode(&payload)
+	if err != nil {
+		return nil, err
+	}
+	return payload, nil
 }
 
 func (c *Client) ListRooms(in *model.ListRoomRequest) (ret []model.Room, err error) {

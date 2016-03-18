@@ -274,6 +274,23 @@ sub create_conference {
     return JSON::decode_json($res->content);
 }
 
+sub add_conference_dates {
+    my ($self, $payload) = @_;
+    for my $required (qw(conference_id dates)) {
+        if (!$payload->{$required}) {
+            die qq|property "$required" must be provided|;
+        }
+    }
+    my $uri = URI->new($self->{endpoint} . qq|/v1/conference/date/add|);
+    my $json_payload = JSON::encode_json($payload);
+    my $res = $self->{user_agent}->post($uri, Content => $json_payload);
+    if (!$res->is_success) {
+        $self->{last_error} = $res->status_line;
+        return;
+    }
+    return 1
+}
+
 sub lookup_conference {
     my ($self, $payload) = @_;
     for my $required (qw(id)) {
@@ -291,7 +308,7 @@ sub lookup_conference {
     return JSON::decode_json($res->content);
 }
 
-sub list_conference {
+sub list_conferences {
     my ($self, $payload) = @_;
     my $uri = URI->new($self->{endpoint} . qq|/v1/conference/list|);
     $uri->query_form($payload);

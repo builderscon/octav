@@ -9,6 +9,9 @@ type Config struct {
 	DSN string // DSN, can be a template string
 }
 
+type InsertOption interface{}
+type insertIgnoreOption bool
+
 // +DB tablename:"conferences"
 type Conference struct {
 	OID        int64  // intenral id, used for sorting and what not
@@ -19,6 +22,15 @@ type Conference struct {
 	CreatedBy  string // User ID that creates this conference
 	CreatedOn  time.Time
 	ModifiedOn NullTime
+}
+
+// +DB tablename:"conference_dates"
+type ConferenceDate struct {
+	OID          int64
+	ConferenceID string
+	Date         time.Time
+	StartTime    sql.NullString
+	EndTime      sql.NullString
 }
 
 // +DB tablename:"conference_administrators"

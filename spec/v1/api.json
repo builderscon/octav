@@ -19,6 +19,10 @@
       "pattern": "\\d{4}-\\d{2}-\\d{2}",
       "description": "date in YYYY-MM-DD format"
     },
+    "datestr_array": {
+      "type": "array",
+      "items": {"$ref": "#/definitions/datestr"}
+    },
     "datetime": {
       "oneOf": [
         { "type": "string", "format": "date-time" },
@@ -108,6 +112,10 @@
     "date_array": {
       "type": "array",
       "items": { "$ref": "#/definitions/date" }
+    },
+    "conference_array": {
+      "type": "array",
+      "items": {"$ref": "#/definitions/conference" }
     },
     "conference": {
       "type": "object",
@@ -540,6 +548,21 @@
       "targetSchema": { "$ref": "#/definitions/conference" }
     },
     {
+      "title": "Add conference dates",
+      "rel": "update",
+      "method": "POST",
+      "href": "/conference/date/add",
+      "encType": "application/json",
+      "schema": {
+        "hsup.type": "model.AddConferenceDatesRequest",
+        "properties": {
+          "conference_id": {"$ref": "#/definitions/uuid"},
+          "dates": {"$ref":"#/definitions/datestr_array"}
+        },
+        "required": ["conference_id","dates"]
+      }
+    },
+    {
       "title": "Lookup conference",
       "href": "/conference/lookup",
       "rel": "lookup",
@@ -551,6 +574,22 @@
         }
       },
       "targetSchema": { "$ref": "#/definitions/conference" }
+    },
+    {
+      "title": "List conferences",
+      "href": "/conference/list",
+      "rel": "list",
+      "schema": {
+        "hsup.type": "model.ListConferencesRequest",
+        "properties": {
+          "lang": { "$ref": "#/definitions/language" },
+          "limit": { "$ref": "#/definitions/positiveIntegerDefault10" },
+          "range_end": { "$ref": "#/definitions/datestr" },
+          "range_start": { "$ref": "#/definitions/datestr" },
+          "since": { "$ref": "#/definitions/uuidDefaultEmpty" }
+        }
+      },
+      "targetSchema": { "$ref": "#/definitions/conference_array" }
     },
     {
       "title": "Update conference",
