@@ -30,6 +30,34 @@ For other endpoints that require register, update, or delete data are
 represented using POST endpoints. In this case the data should be
 encoded as JSON text.
 
+# Data structure
+
+## Conferences
+
+Conferences have title, sub title, and slug. The slug is used to create
+URL (TBD, but e.g. http://*slug*.conf.builderscon.io or http://conf.builderscon.io/*slug*)
+
+Conferences can have multiple dates. Most conferences will be 1 day only,
+but sometimes they span multiple days. Use `AddConferenceDates` to
+add dates to a conference.
+
+Conferences must have at least 1 administrator associated, but can have
+multiple administrators. The account that created the conference is
+automatically registered as administrator. To add more administrators,
+use `AddAdminisrator` (note: unimplemented).
+ 
+## Venues
+
+Venues can contain multiple rooms.
+
+## Rooms
+
+TODO
+
+## Sessions
+
+Sessions can be regeistered to be presented at a room.
+
 # Code generation directions
 
 ## If you edited spec/v1/api.json
