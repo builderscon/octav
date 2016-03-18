@@ -8,7 +8,7 @@ CREATE TABLE users (
     tshirt_size CHAR(4) CHARACTER SET latin1 NOT NULL DEFAULT 'M',
     created_on DATETIME NOT NULL,
     modified_on TIMESTAMP NOT NULL ON UPDAte CURRENT_TIMESTAMP,
-    KEY(eid)
+    UNIQUE KEY(eid)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 CREATE TABLE venues (
@@ -20,7 +20,7 @@ CREATE TABLE venues (
     longitude DECIMAL(10,7),
     created_on DATETIME NOT NULL,
     modified_on TIMESTAMP NOT NULL ON UPDAte CURRENT_TIMESTAMP,
-    KEY(eid)
+    UNIQUE KEY(eid)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 CREATE TABLE rooms (
@@ -31,6 +31,7 @@ CREATE TABLE rooms (
     capacity INT UNSIGNED NOT NULL DEFAULT 0,
     created_on DATETIME NOT NULL,
     modified_on TIMESTAMP NOT NULL ON UPDAte CURRENT_TIMESTAMP,
+    UNIQUE KEY (eid),
     KEY(venue_id, eid)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
@@ -43,7 +44,16 @@ CREATE TABLE conferences (
     created_by CHAR(64) CHARACTER SET latin1 NOT NULL,
     created_on DATETIME NOT NULL,
     modified_on TIMESTAMP NOT NULL ON UPDAte CURRENT_TIMESTAMP,
-    KEY(eid)
+    UNIQUE KEY(eid)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE conference_dates (
+    conference_id CHAR(64) CHARACTER SET latin1 NOT NULL,
+    date          DATE NOT NULL,
+    start_time    TIME,
+    end_time      TIME,
+    KEY(date),
+    FOREIGN KEY (conference_id) REFERENCES conferences(eid) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 CREATE TABLE conference_administrators (
@@ -52,6 +62,7 @@ CREATE TABLE conference_administrators (
     user_id CHAR(64) CHARACTER SET latin1 NOT NULL,
     created_on DATETIME NOT NULL,
     modified_on TIMESTAMP NOT NULL ON UPDAte CURRENT_TIMESTAMP,
+    FOREIGN KEY (conference_id) REFERENCES conferences(eid) ON DELETE CASCADE,
     UNIQUE KEY(conference_id, user_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
@@ -82,6 +93,7 @@ CREATE TABLE sessions (
     confirmed TINYINT(1) NOT NULL DEFAULT 0,
     created_on DATETIME NOT NULL,
     modified_on TIMESTAMP NOT NULL ON UPDAte CURRENT_TIMESTAMP,
+    UNIQUE KEY (eid),
     KEY(eid, conference_id, room_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 

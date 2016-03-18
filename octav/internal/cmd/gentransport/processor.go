@@ -176,6 +176,17 @@ func (p *Processor) ProcessStruct(buf *bytes.Buffer, s Struct) error {
 	for _, f := range s.Fields {
 		if !f.Maybe {
 			fmt.Fprintf(buf, "\nm[%s] = r.%s", strconv.Quote(f.JSONName), f.Name)
+			/*
+				if strings.HasPrefix(f.Type, "[]") {
+					t := f.Type[2:]
+					fmt.Fprintf(buf, "\nlist := make(%s, len(r.%s)", f.Type, f.Name)
+					fmt.Fprintf(buf, "\nfor i, el := range r.%s {", f.Name)
+					buf.WriteString("\nswitch el.(type) {")
+					fmt.Fprintf(buf, "\ncase %s:", t)
+					fmt.Fprintf(buf, "\nlist[i] = el.(%s)", t)
+					buf.WriteString("\ndefault:")
+					buf.
+			*/
 		} else {
 			fmt.Fprintf(buf, "\nif r.%s.Valid() {", f.Name)
 			fmt.Fprintf(buf, "\nm[%s] = r.%s.Value()", strconv.Quote(f.JSONName), f.Name)
@@ -220,17 +231,36 @@ func (p *Processor) ProcessStruct(buf *bytes.Buffer, s Struct) error {
 			// XXX dirty hack. this should be fixed
 			convert := ""
 			typ := f.Type
-			if rx.MatchString(f.Type) {
-				convert = f.Type
-				typ = "float64"
-			}
-			fmt.Fprintf(buf, "\ncase %s:", typ)
-			if convert == "" {
-				fmt.Fprintf(buf, "\nr.%s = jv.(%s)", f.Name, typ)
+
+			if !strings.HasPrefix(typ, "[]") {
+				if rx.MatchString(f.Type) {
+					convert = f.Type
+					typ = "float64"
+				}
+
+				fmt.Fprintf(buf, "\ncase %s:", typ)
+				if convert == "" {
+					fmt.Fprintf(buf, "\nr.%s = jv.(%s)", f.Name, typ)
+				} else {
+					fmt.Fprintf(buf, "\nr.%s = %s(jv.(%s))", f.Name, convert, typ)
+				}
+				fmt.Fprintf(buf, "\ndelete(m, %s)", strconv.Quote(f.JSONName))
 			} else {
-				fmt.Fprintf(buf, "\nr.%s = %s(jv.(%s))", f.Name, convert, typ)
+				ltyp := typ[2:]
+				buf.WriteString("\ncase []interface{}:")
+				buf.WriteString("\njvl := jv.([]interface{})")
+				fmt.Fprintf(buf, "\nlist := make(%s, len(jvl))", typ)
+				buf.WriteString("\nfor i, el := range jvl {")
+				buf.WriteString("\nswitch el.(type) {")
+				fmt.Fprintf(buf, "\ncase %s:", ltyp)
+				fmt.Fprintf(buf, "\nlist[i] = el.(%s)", ltyp)
+				buf.WriteString("\ndefault:")
+				fmt.Fprintf(buf, "\nreturn ErrInvalidJSONFieldType{Field:%s}", strconv.Quote(f.JSONName))
+				buf.WriteString("\n}")
+				buf.WriteString("\n}")
+				fmt.Fprintf(buf, "\nr.%s = list", f.Name)
 			}
-			fmt.Fprintf(buf, "\ndelete(m, %s)", strconv.Quote(f.JSONName))
+
 			buf.WriteString("\ndefault:")
 			fmt.Fprintf(buf, "\nreturn ErrInvalidJSONFieldType{Field:%s}", strconv.Quote(f.JSONName))
 			buf.WriteString("\n}")
@@ -347,10 +377,10 @@ func (ctx *InspectionCtx) ExtractStructsFromDecl(decl *ast.GenDecl) error {
 		}
 
 		st := Struct{
-			PackageName:  ctx.Package,
-			Fields:       make([]StructField, 0, len(s.Fields.List)),
-			Name:         t.Name.Name,
-			HasL10N:      false,
+			PackageName: ctx.Package,
+			Fields:      make([]StructField, 0, len(s.Fields.List)),
+			Name:        t.Name.Name,
+			HasL10N:     false,
 		}
 
 		for _, f := range s.Fields.List {
