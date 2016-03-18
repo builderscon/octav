@@ -249,6 +249,34 @@ func (c *Client) DeleteConference(in *model.DeleteConferenceRequest) (err error)
 	return nil
 }
 
+func (c *Client) DeleteConferenceDates(in *model.DeleteConferenceDatesRequest) (err error) {
+	if pdebug.Enabled {
+		g := pdebug.Marker("client.DeleteConferenceDates").BindError(&err)
+		defer g.End()
+	}
+	u, err := url.Parse(c.Endpoint + "/v1/conference/date/delete")
+	if err != nil {
+		return err
+	}
+	buf := bytes.Buffer{}
+	err = json.NewEncoder(&buf).Encode(in)
+	if err != nil {
+		return err
+	}
+	if pdebug.Enabled {
+		pdebug.Printf("POST to %s", u.String())
+		pdebug.Printf("%s", buf.String())
+	}
+	res, err := c.Client.Post(u.String(), "application/json", &buf)
+	if err != nil {
+		return err
+	}
+	if res.StatusCode != http.StatusOK {
+		return fmt.Errorf(`Invalid response: '%s'`, res.Status)
+	}
+	return nil
+}
+
 func (c *Client) DeleteRoom(in *model.DeleteRoomRequest) (err error) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("client.DeleteRoom").BindError(&err)

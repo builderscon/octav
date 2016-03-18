@@ -299,22 +299,10 @@ func (r *AddConferenceDatesRequest) UnmarshalJSON(data []byte) error {
 		}
 	}
 	if jv, ok := m["dates"]; ok {
-		switch jv.(type) {
-		case []interface{}:
-			jvl := jv.([]interface{})
-			list := make([]string, len(jvl))
-			for i, el := range jvl {
-				switch el.(type) {
-				case string:
-					list[i] = el.(string)
-				default:
-					return ErrInvalidJSONFieldType{Field: "dates"}
-				}
-			}
-			r.Dates = list
-		default:
-			return ErrInvalidJSONFieldType{Field: "dates"}
+		if err := r.Dates.Extract(jv); err != nil {
+			return errors.New("extract field Dates failed: " + err.Error())
 		}
+		delete(m, "dates")
 	}
 	return nil
 }

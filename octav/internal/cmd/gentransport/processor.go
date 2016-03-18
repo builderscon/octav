@@ -226,6 +226,11 @@ func (p *Processor) ProcessStruct(buf *bytes.Buffer, s Struct) error {
 			fmt.Fprintf(buf, "\n"+`return errors.New("set field %s failed: " + err.Error())`, f.Name)
 			buf.WriteString("\n}")
 			fmt.Fprintf(buf, "\ndelete(m, %s)", strconv.Quote(f.JSONName))
+		} else if f.HasExtract {
+			fmt.Fprintf(buf, "\nif err := r.%s.Extract(jv); err != nil {", f.Name)
+			fmt.Fprintf(buf, "\n"+`return errors.New("extract field %s failed: " + err.Error())`, f.Name)
+			buf.WriteString("\n}")
+			fmt.Fprintf(buf, "\ndelete(m, %s)", strconv.Quote(f.JSONName))
 		} else {
 			buf.WriteString("\nswitch jv.(type) {")
 			// XXX dirty hack. this should be fixed
@@ -400,6 +405,7 @@ func (ctx *InspectionCtx) ExtractStructsFromDecl(decl *ast.GenDecl) error {
 			var jsname string
 			var urlname string
 			var l10n bool
+			var hasExtract bool
 			if f.Tag != nil {
 				v := f.Tag.Value
 				if len(v) >= 2 {
@@ -436,6 +442,10 @@ func (ctx *InspectionCtx) ExtractStructsFromDecl(decl *ast.GenDecl) error {
 						l10n = true
 					}
 				}
+
+				if tag := sf.Get("extract"); tag == "true" {
+					hasExtract = true
+				}
 			}
 
 			typ, err := getTypeName(f.Type)
@@ -448,12 +458,13 @@ func (ctx *InspectionCtx) ExtractStructsFromDecl(decl *ast.GenDecl) error {
 				maybe = true
 			}
 			field := StructField{
-				L10N:     l10n,
-				Maybe:    maybe,
-				Name:     f.Names[0].Name,
-				JSONName: jsname,
-				URLName:  urlname,
-				Type:     typ,
+				HasExtract: hasExtract,
+				L10N:       l10n,
+				Maybe:      maybe,
+				Name:       f.Names[0].Name,
+				JSONName:   jsname,
+				URLName:    urlname,
+				Type:       typ,
 			}
 
 			st.Fields = append(st.Fields, field)

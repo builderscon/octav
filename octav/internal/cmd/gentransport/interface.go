@@ -1,12 +1,13 @@
 package main
 
 type StructField struct {
-	JSONName string
-	URLName  string
-	L10N     bool
-	Maybe    bool
-	Name     string
-	Type     string
+	HasExtract bool
+	JSONName   string
+	URLName    string
+	L10N       bool
+	Maybe      bool
+	Name       string
+	Type       string
 }
 
 type Struct struct {

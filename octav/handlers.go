@@ -19,6 +19,7 @@ func httpJSON(w http.ResponseWriter, v interface{}) {
 		httpError(w, `encode json`, http.StatusInternalServerError, err)
 		return
 	}
+pdebug.Printf("JSON -> '%s'", buf.String())
 
 	w.WriteHeader(http.StatusOK)
 	buf.WriteTo(w)
@@ -81,12 +82,17 @@ func doLookupConference(ctx context.Context, w http.ResponseWriter, r *http.Requ
 		return
 	}
 
+	s := service.Conference{}
 	if payload.Lang.Valid() {
-		s := service.Conference{}
 		if err := s.ReplaceL10NStrings(tx, &c, payload.Lang.String); err != nil {
 			httpError(w, `LookupConference`, http.StatusInternalServerError, err)
 			return
 		}
+	}
+
+	if err := s.LoadDates(tx, &c.Dates, c.ID); err != nil {
+		httpError(w, `LookupConference`, http.StatusInternalServerError, err)
+		return
 	}
 
 	httpJSON(w, c)
@@ -149,6 +155,27 @@ func doDeleteConference(ctx context.Context, w http.ResponseWriter, r *http.Requ
 	httpJSON(w, map[string]string{"status": "success"})
 }
 
+func doDeleteConferenceDates(ctx context.Context, w http.ResponseWriter, r *http.Request, payload model.DeleteConferenceDatesRequest) {
+	tx, err := db.Begin()
+	if err != nil {
+		httpError(w, `DeleteConferenceDates`, http.StatusInternalServerError, err)
+		return
+	}
+	defer tx.AutoRollback()
+
+	s := service.Conference{}
+	if err := s.DeleteDates(tx, payload.ConferenceID, payload.Dates...); err != nil {
+		httpError(w, `DeleteConferenceDates`, http.StatusInternalServerError, err)
+		return
+	}
+
+	if err := tx.Commit(); err != nil {
+		httpError(w, `DeleteConferenceDates`, http.StatusInternalServerError, err)
+		return
+	}
+	httpJSON(w, map[string]string{"status": "success"})
+}
+
 func doAddConferenceDates(ctx context.Context, w http.ResponseWriter, r *http.Request, payload model.AddConferenceDatesRequest) {
 	tx, err := db.Begin()
 	if err != nil {
@@ -158,6 +185,7 @@ func doAddConferenceDates(ctx context.Context, w http.ResponseWriter, r *http.Re
 	defer tx.AutoRollback()
 
 	s := service.Conference{}
+pdebug.Printf("%#v", payload.Dates)
 	if err := s.AddDates(tx, payload.ConferenceID, payload.Dates...); err != nil {
 		httpError(w, `AddConferenceDates`, http.StatusInternalServerError, err)
 		return
