@@ -134,3 +134,37 @@ func (v *Conference) LoadDates(tx *db.Tx, cdl *model.ConferenceDateList, cid str
 	*cdl = res
 	return nil
 }
+
+func (v *Conference) AddAdmin(tx *db.Tx, cid, uid string) error {
+	cd := db.ConferenceAdministrator{
+		ConferenceID: cid,
+		UserID: uid,
+	}
+	if err := cd.Create(tx, db.WithInsertIgnore(true)); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (v *Conference) DeleteAdmin(tx *db.Tx, cid, uid string) error {
+	return db.DeleteConferenceAdministrator(tx, cid, uid)
+}
+
+func (v *Conference) LoadAdmins(tx *db.Tx, cdl *model.UserList, cid string) error {
+	var vdbl db.UserList
+	if err := db.LoadConferenceAdministrators(tx, &vdbl, cid); err != nil {
+		return err
+	}
+
+	res := make(model.UserList, len(vdbl))
+	for i, vdb := range vdbl {
+		var u model.User
+		if err := u.FromRow(vdb); err != nil {
+			return err
+		}
+		res[i] = u
+	}
+	*cdl = res
+	return nil
+}

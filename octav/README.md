@@ -44,7 +44,7 @@ add dates to a conference.
 Conferences must have at least 1 administrator associated, but can have
 multiple administrators. The account that created the conference is
 automatically registered as administrator. To add more administrators,
-use `AddAdminisrator` (note: unimplemented).
+use `AddAdminisrator`
 
 ## ConferenceDates
 
@@ -57,6 +57,16 @@ YYYY-MM-DD
 ```
 
 When you specify the time, it's in one of these forms `[OpenTime-CloseTime]`, `[OpenTime]`
+
+You can add a new date using `AddConferenceDates` API call, and remove them using `DeleteConferenceDates`.
+
+## Conference Administrators
+
+You may register as many conference administrators as you like. The original creator
+of the conference resource is automatically associated as the administrator.
+
+You can add more administrators by using the `AddConferenceAdmin` API call, and remove
+them using `DeleteConferenceAdmin`
  
 ## Venues
 

@@ -121,7 +121,8 @@
         "slug": { "$ref": "#/definitions/string_en" },
         "description": { "$ref": "#/definitions/string_en" },
         "venue": { "$ref": "#/definitions/venue" },
-        "dates": { "$ref": "#/definitions/date_array" }
+        "dates": { "$ref": "#/definitions/date_array" },
+        "administrators": { "$ref": "#/definitions/user_array" }
       },
       "patternProperties": {
         "title#[a-z]+": { "$ref": "#/definitions/string_i18n" },
@@ -237,6 +238,10 @@
     "tshirt_size": {
       "type": "string",
       "enum": ["XXXL","XXL","XL","L","M","S","XS"]
+    },
+    "user_array": {
+      "type": "array",
+      "items": {"$ref": "#/definitions/user" }
     },
     "user": {
       "type": "object",
@@ -565,6 +570,36 @@
           "dates": {"$ref":"#/definitions/datestr_array"}
         },
         "required": ["conference_id","dates"]
+      }
+    },
+    {
+      "title": "Add conference admin",
+      "rel": "update",
+      "method": "POST",
+      "href": "/conference/admin/add",
+      "ecnType": "application/json",
+      "schema": {
+        "hsup.type": "model.AddConferenceAdminRequest",
+        "properties": {
+          "conference_id": {"$ref": "#/definitions/uuid"},
+          "user_id": {"$ref":"#/definitions/uuid"}
+        },
+        "required": ["conference_id","user_id"]
+      }
+    },
+    {
+      "title": "Delete conference admin",
+      "rel": "delete",
+      "method": "POST",
+      "href": "/conference/admin/delete",
+      "ecnType": "application/json",
+      "schema": {
+        "hsup.type": "model.DeleteConferenceAdminRequest",
+        "properties": {
+          "conference_id": {"$ref": "#/definitions/uuid"},
+          "user_id": {"$ref":"#/definitions/uuid"}
+        },
+        "required": ["conference_id","user_id"]
       }
     },
     {

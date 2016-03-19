@@ -41,13 +41,17 @@ func (v *ConferenceList) LoadByRange(tx *Tx, since string, rangeStart, rangeEnd 
 
 	qbuf := bytes.Buffer{}
 	qbuf.WriteString(`SELECT `)
-	qbuf.WriteString(ConferenceTable) // Super dirty hack to qualify oid :D
-	qbuf.WriteByte('.')
 	qbuf.WriteString(ConferenceStdSelectColumns)
 	qbuf.WriteString(` FROM `)
 	qbuf.WriteString(ConferenceTable)
 	if hasDate {
-		qbuf.WriteString(` JOIN conference_dates ON conferences.eid = conference_dates.conference_id `)
+		qbuf.WriteString(` JOIN `)
+		qbuf.WriteString(ConferenceDateTable)
+		qbuf.WriteString(` ON `)
+		qbuf.WriteString(ConferenceTable)
+		qbuf.WriteString(`.eid = `)
+		qbuf.WriteString(ConferenceDateTable)
+		qbuf.WriteString(`.conference_id `)
 	}
 
 	if where.Len() > 0 {
@@ -56,7 +60,9 @@ func (v *ConferenceList) LoadByRange(tx *Tx, since string, rangeStart, rangeEnd 
 	}
 
 	if hasDate {
-		qbuf.WriteString(` ORDER BY conference_dates.date DESC`)
+		qbuf.WriteString(` ORDER BY `)
+		qbuf.WriteString(ConferenceDateTable)
+		qbuf.WriteString(`.date DESC`)
 	} else {
 		qbuf.WriteString(` ORDER BY oid DESC`)
 	}

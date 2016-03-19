@@ -76,6 +76,10 @@ func (v ConferenceL10N) GetPropValue(s string) (interface{}, error) {
 		return v.SubTitle, nil
 	case "slug":
 		return v.Slug, nil
+	case "dates":
+		return v.Dates, nil
+	case "administrators":
+		return v.Administrators, nil
 	default:
 		return v.L10N.GetPropValue(s)
 	}

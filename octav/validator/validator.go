@@ -5,6 +5,7 @@ import (
 	"github.com/lestrrat/go-jsval"
 )
 
+var HTTPAddConferenceAdminRequest *jsval.JSVal
 var HTTPAddConferenceDatesRequest *jsval.JSVal
 var HTTPCreateConferenceRequest *jsval.JSVal
 var HTTPCreateConferenceResponse *jsval.JSVal
@@ -16,6 +17,7 @@ var HTTPCreateUserRequest *jsval.JSVal
 var HTTPCreateUserResponse *jsval.JSVal
 var HTTPCreateVenueRequest *jsval.JSVal
 var HTTPCreateVenueResponse *jsval.JSVal
+var HTTPDeleteConferenceAdminRequest *jsval.JSVal
 var HTTPDeleteConferenceDatesRequest *jsval.JSVal
 var HTTPDeleteConferenceRequest *jsval.JSVal
 var HTTPDeleteRoomRequest *jsval.JSVal
@@ -78,6 +80,8 @@ var R28 jsval.Constraint
 var R29 jsval.Constraint
 var R30 jsval.Constraint
 var R31 jsval.Constraint
+var R32 jsval.Constraint
+var R33 jsval.Constraint
 
 func init() {
 	M = &jsval.ConstraintMap{}
@@ -87,6 +91,10 @@ func init() {
 	R3 = jsval.Object().
 		AdditionalProperties(
 			jsval.EmptyConstraint,
+		).
+		AddProp(
+			"administrators",
+			jsval.Reference(M).RefersTo("#/definitions/user_array"),
 		).
 		AddProp(
 			"dates",
@@ -346,9 +354,52 @@ func init() {
 		)
 	R27 = jsval.String().Enum("XXXL", "XXL", "XL", "L", "M", "S", "XS")
 	R28 = jsval.String().Format("url")
-	R29 = jsval.String().RegexpString("^[a-fA-F0-9-]+$")
-	R30 = jsval.String().RegexpString("^[a-fA-F0-9-]+$").Default("")
-	R31 = jsval.Object().
+	R29 = jsval.Object().
+		AdditionalProperties(
+			jsval.EmptyConstraint,
+		).
+		AddProp(
+			"email",
+			jsval.Reference(M).RefersTo("#/definitions/email"),
+		).
+		AddProp(
+			"first_name",
+			jsval.Reference(M).RefersTo("#/definitions/string_en"),
+		).
+		AddProp(
+			"id",
+			jsval.Reference(M).RefersTo("#/definitions/uuid"),
+		).
+		AddProp(
+			"last_name",
+			jsval.Reference(M).RefersTo("#/definitions/string_en"),
+		).
+		AddProp(
+			"nickname",
+			jsval.Reference(M).RefersTo("#/definitions/string_en"),
+		).
+		AddProp(
+			"tshirt_size",
+			jsval.Reference(M).RefersTo("#/definitions/tshirt_size"),
+		).
+		PatternPropertiesString(
+			"first_name#[a-z]+",
+			jsval.Reference(M).RefersTo("#/definitions/string_i18n"),
+		).
+		PatternPropertiesString(
+			"last_name#[a-z]+",
+			jsval.Reference(M).RefersTo("#/definitions/string_i18n"),
+		)
+	R30 = jsval.Array().
+		Items(
+			jsval.Reference(M).RefersTo("#/definitions/user"),
+		).
+		AdditionalItems(
+			jsval.EmptyConstraint,
+		)
+	R31 = jsval.String().RegexpString("^[a-fA-F0-9-]+$")
+	R32 = jsval.String().RegexpString("^[a-fA-F0-9-]+$").Default("")
+	R33 = jsval.Object().
 		AdditionalProperties(
 			jsval.EmptyConstraint,
 		).
@@ -393,9 +444,29 @@ func init() {
 	M.SetReference("#/definitions/tag_array", R26)
 	M.SetReference("#/definitions/tshirt_size", R27)
 	M.SetReference("#/definitions/url", R28)
-	M.SetReference("#/definitions/uuid", R29)
-	M.SetReference("#/definitions/uuidDefaultEmpty", R30)
-	M.SetReference("#/definitions/venue", R31)
+	M.SetReference("#/definitions/user", R29)
+	M.SetReference("#/definitions/user_array", R30)
+	M.SetReference("#/definitions/uuid", R31)
+	M.SetReference("#/definitions/uuidDefaultEmpty", R32)
+	M.SetReference("#/definitions/venue", R33)
+	HTTPAddConferenceAdminRequest = jsval.New().
+		SetConstraintMap(M).
+		SetRoot(
+			jsval.Object().
+				Required("conference_id", "user_id").
+				AdditionalProperties(
+					jsval.EmptyConstraint,
+				).
+				AddProp(
+					"conference_id",
+					jsval.Reference(M).RefersTo("#/definitions/uuid"),
+				).
+				AddProp(
+					"user_id",
+					jsval.Reference(M).RefersTo("#/definitions/uuid"),
+				),
+		)
+
 	HTTPAddConferenceDatesRequest = jsval.New().
 		SetConstraintMap(M).
 		SetRoot(
@@ -458,6 +529,10 @@ func init() {
 			jsval.Object().
 				AdditionalProperties(
 					jsval.EmptyConstraint,
+				).
+				AddProp(
+					"administrators",
+					jsval.Reference(M).RefersTo("#/definitions/user_array"),
 				).
 				AddProp(
 					"dates",
@@ -887,6 +962,24 @@ func init() {
 				),
 		)
 
+	HTTPDeleteConferenceAdminRequest = jsval.New().
+		SetConstraintMap(M).
+		SetRoot(
+			jsval.Object().
+				Required("conference_id", "user_id").
+				AdditionalProperties(
+					jsval.EmptyConstraint,
+				).
+				AddProp(
+					"conference_id",
+					jsval.Reference(M).RefersTo("#/definitions/uuid"),
+				).
+				AddProp(
+					"user_id",
+					jsval.Reference(M).RefersTo("#/definitions/uuid"),
+				),
+		)
+
 	HTTPDeleteConferenceDatesRequest = jsval.New().
 		SetConstraintMap(M).
 		SetRoot(
@@ -1129,6 +1222,10 @@ func init() {
 			jsval.Object().
 				AdditionalProperties(
 					jsval.EmptyConstraint,
+				).
+				AddProp(
+					"administrators",
+					jsval.Reference(M).RefersTo("#/definitions/user_array"),
 				).
 				AddProp(
 					"dates",

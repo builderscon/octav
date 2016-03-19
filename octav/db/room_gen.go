@@ -10,7 +10,7 @@ import (
 	"time"
 )
 
-const RoomStdSelectColumns = "oid, eid, venue_id, name, capacity, created_on, modified_on"
+const RoomStdSelectColumns = "rooms.oid, rooms.eid, rooms.venue_id, rooms.name, rooms.capacity, rooms.created_on, rooms.modified_on"
 const RoomTable = "rooms"
 
 type RoomList []Room
@@ -22,7 +22,7 @@ func (r *Room) Scan(scanner interface {
 }
 
 func (r *Room) LoadByEID(tx *Tx, eid string) error {
-	row := tx.QueryRow(`SELECT `+RoomStdSelectColumns+` FROM `+RoomTable+` WHERE eid = ?`, eid)
+	row := tx.QueryRow(`SELECT `+RoomStdSelectColumns+` FROM `+RoomTable+` WHERE rooms.eid = ?`, eid)
 	if err := r.Scan(row); err != nil {
 		return err
 	}
@@ -124,7 +124,7 @@ func (v *RoomList) LoadSinceEID(tx *Tx, since string, limit int) error {
 }
 
 func (v *RoomList) LoadSince(tx *Tx, since int64, limit int) error {
-	rows, err := tx.Query(`SELECT `+RoomStdSelectColumns+` FROM `+RoomTable+` WHERE oid > ? ORDER BY oid ASC LIMIT `+strconv.Itoa(limit), since)
+	rows, err := tx.Query(`SELECT `+RoomStdSelectColumns+` FROM `+RoomTable+` WHERE rooms.oid > ? ORDER BY oid ASC LIMIT `+strconv.Itoa(limit), since)
 	if err != nil {
 		return err
 	}

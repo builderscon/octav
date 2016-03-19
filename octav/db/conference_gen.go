@@ -10,7 +10,7 @@ import (
 	"time"
 )
 
-const ConferenceStdSelectColumns = "oid, eid, slug, title, sub_title, created_by, created_on, modified_on"
+const ConferenceStdSelectColumns = "conferences.oid, conferences.eid, conferences.slug, conferences.title, conferences.sub_title, conferences.created_by, conferences.created_on, conferences.modified_on"
 const ConferenceTable = "conferences"
 
 type ConferenceList []Conference
@@ -22,7 +22,7 @@ func (c *Conference) Scan(scanner interface {
 }
 
 func (c *Conference) LoadByEID(tx *Tx, eid string) error {
-	row := tx.QueryRow(`SELECT `+ConferenceStdSelectColumns+` FROM `+ConferenceTable+` WHERE eid = ?`, eid)
+	row := tx.QueryRow(`SELECT `+ConferenceStdSelectColumns+` FROM `+ConferenceTable+` WHERE conferences.eid = ?`, eid)
 	if err := c.Scan(row); err != nil {
 		return err
 	}
@@ -124,7 +124,7 @@ func (v *ConferenceList) LoadSinceEID(tx *Tx, since string, limit int) error {
 }
 
 func (v *ConferenceList) LoadSince(tx *Tx, since int64, limit int) error {
-	rows, err := tx.Query(`SELECT `+ConferenceStdSelectColumns+` FROM `+ConferenceTable+` WHERE oid > ? ORDER BY oid ASC LIMIT `+strconv.Itoa(limit), since)
+	rows, err := tx.Query(`SELECT `+ConferenceStdSelectColumns+` FROM `+ConferenceTable+` WHERE conferences.oid > ? ORDER BY oid ASC LIMIT `+strconv.Itoa(limit), since)
 	if err != nil {
 		return err
 	}

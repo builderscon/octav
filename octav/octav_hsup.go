@@ -72,6 +72,28 @@ func getInteger(v url.Values, f string) ([]int64, error) {
 	return ret, nil
 }
 
+func httpAddConferenceAdmin(w http.ResponseWriter, r *http.Request) {
+	if pdebug.Enabled {
+		g := pdebug.Marker("httpAddConferenceAdmin")
+		defer g.End()
+	}
+	if strings.ToLower(r.Method) != `post` {
+		httpError(w, `Method was `+r.Method, http.StatusNotFound, nil)
+	}
+
+	var payload model.AddConferenceAdminRequest
+	if err := json.NewDecoder(r.Body).Decode(&payload); err != nil {
+		httpError(w, `Invalid JSON input`, http.StatusInternalServerError, err)
+		return
+	}
+
+	if err := validator.HTTPAddConferenceAdminRequest.Validate(&payload); err != nil {
+		httpError(w, `Invalid input (validation failed)`, http.StatusInternalServerError, err)
+		return
+	}
+	doAddConferenceAdmin(NewContext(r), w, r, payload)
+}
+
 func httpAddConferenceDates(w http.ResponseWriter, r *http.Request) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("httpAddConferenceDates")
@@ -224,6 +246,28 @@ func httpDeleteConference(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	doDeleteConference(NewContext(r), w, r, payload)
+}
+
+func httpDeleteConferenceAdmin(w http.ResponseWriter, r *http.Request) {
+	if pdebug.Enabled {
+		g := pdebug.Marker("httpDeleteConferenceAdmin")
+		defer g.End()
+	}
+	if strings.ToLower(r.Method) != `post` {
+		httpError(w, `Method was `+r.Method, http.StatusNotFound, nil)
+	}
+
+	var payload model.DeleteConferenceAdminRequest
+	if err := json.NewDecoder(r.Body).Decode(&payload); err != nil {
+		httpError(w, `Invalid JSON input`, http.StatusInternalServerError, err)
+		return
+	}
+
+	if err := validator.HTTPDeleteConferenceAdminRequest.Validate(&payload); err != nil {
+		httpError(w, `Invalid input (validation failed)`, http.StatusInternalServerError, err)
+		return
+	}
+	doDeleteConferenceAdmin(NewContext(r), w, r, payload)
 }
 
 func httpDeleteConferenceDates(w http.ResponseWriter, r *http.Request) {
@@ -646,6 +690,8 @@ func httpUpdateVenue(w http.ResponseWriter, r *http.Request) {
 
 func (s *Server) SetupRoutes() {
 	r := s.Router
+	r.HandleFunc(`/v1/conference/admin/add`, httpAddConferenceAdmin)
+	r.HandleFunc(`/v1/conference/admin/delete`, httpDeleteConferenceAdmin)
 	r.HandleFunc(`/v1/conference/create`, httpCreateConference)
 	r.HandleFunc(`/v1/conference/date/add`, httpAddConferenceDates)
 	r.HandleFunc(`/v1/conference/date/delete`, httpDeleteConferenceDates)

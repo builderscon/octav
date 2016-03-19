@@ -212,7 +212,15 @@ func TestConferenceCRUD(t *testing.T) {
 		return
 	}
 
+	// The result from LookupConference contains the administrator field
+	// Remove that (and make sure it's populated), then do the comparison
+	admins := res2.Administrators
+	res2.Administrators = model.UserList(nil)
 	if !assert.Equal(t, res2, res, "LookupConference is the same as the conference created") {
+		return
+	}
+
+	if !assert.Len(t, admins, 1, "There should be 1 administrator") {
 		return
 	}
 
@@ -523,6 +531,7 @@ func TestDeleteConferenceDates(t *testing.T) {
 	if err != nil {
 		return
 	}
+	defer testDeleteConference(t, cl, conf.ID)
 
 	err = cl.AddConferenceDates(&model.AddConferenceDatesRequest{
 		ConferenceID: conf.ID,
@@ -554,6 +563,72 @@ func TestDeleteConferenceDates(t *testing.T) {
 	if !assert.Len(t, conf2.Dates, 0, "There should be no dates set") {
 		return
 	}
+}
+
+func TestConferenceAdmins(t *testing.T) {
+	ts := httptest.NewServer(octav.New())
+	defer ts.Close()
+
+	cl := client.New(ts.URL)
+
+	user, err := testCreateUser(t, cl, johndoe())
+	if err != nil {
+		return
+	}
+	defer testDeleteUser(t, cl, user.ID)
+
+	conf, err := testCreateConference(t, cl, &model.CreateConferenceRequest{
+		UserID: user.ID,
+	})
+	if err != nil {
+		return
+	}
+	defer testDeleteConference(t, cl, conf.ID)
+
+	for i := 0; i < 9; i++ {
+		extraAdmin, err := testCreateUser(t, cl, johndoe())
+		if err != nil {
+			return
+		}
+		defer testDeleteUser(t, cl, extraAdmin.ID)
+
+		err = cl.AddConferenceAdmin(&model.AddConferenceAdminRequest{
+			ConferenceID: conf.ID,
+			UserID: extraAdmin.ID,
+		})
+		if !assert.NoError(t, err, "AddConferenceAdmin should succeed") {
+			return
+		}
+	}
+
+	conf2, err := testLookupConference(t, cl, conf.ID, "")
+	if err != nil {
+		return
+	}
+
+	if !assert.Len(t, conf2.Administrators, 10, "There should be 10 admins") {
+		return
+	}
+
+	for _, admin := range conf2.Administrators {
+		err = cl.DeleteConferenceAdmin(&model.DeleteConferenceAdminRequest{
+			ConferenceID: conf.ID,
+			UserID: admin.ID,
+		})
+		if !assert.NoError(t, err, "DeleteConferenceAdmin should succeed") {
+			return
+		}
+	}
+
+	conf3, err := testLookupConference(t, cl, conf.ID, "")
+	if err != nil {
+		return
+	}
+
+	if !assert.Len(t, conf3.Administrators, 0, "There should be 0 admins") {
+		return
+	}
+
 }
 
 func TestListConferences(t *testing.T) {

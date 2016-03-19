@@ -10,7 +10,7 @@ import (
 	"time"
 )
 
-const SessionStdSelectColumns = "oid, eid, conference_id, room_id, speaker_id, title, abstract, memo, starts_on, duration, material_level, tags, category, spoken_language, slide_language, slide_subtitles, slide_url, video_url, photo_permission, video_permission, has_interpretation, status, sort_order, confirmed, created_on, modified_on"
+const SessionStdSelectColumns = "sessions.oid, sessions.eid, sessions.conference_id, sessions.room_id, sessions.speaker_id, sessions.title, sessions.abstract, sessions.memo, sessions.starts_on, sessions.duration, sessions.material_level, sessions.tags, sessions.category, sessions.spoken_language, sessions.slide_language, sessions.slide_subtitles, sessions.slide_url, sessions.video_url, sessions.photo_permission, sessions.video_permission, sessions.has_interpretation, sessions.status, sessions.sort_order, sessions.confirmed, sessions.created_on, sessions.modified_on"
 const SessionTable = "sessions"
 
 type SessionList []Session
@@ -22,7 +22,7 @@ func (s *Session) Scan(scanner interface {
 }
 
 func (s *Session) LoadByEID(tx *Tx, eid string) error {
-	row := tx.QueryRow(`SELECT `+SessionStdSelectColumns+` FROM `+SessionTable+` WHERE eid = ?`, eid)
+	row := tx.QueryRow(`SELECT `+SessionStdSelectColumns+` FROM `+SessionTable+` WHERE sessions.eid = ?`, eid)
 	if err := s.Scan(row); err != nil {
 		return err
 	}
@@ -124,7 +124,7 @@ func (v *SessionList) LoadSinceEID(tx *Tx, since string, limit int) error {
 }
 
 func (v *SessionList) LoadSince(tx *Tx, since int64, limit int) error {
-	rows, err := tx.Query(`SELECT `+SessionStdSelectColumns+` FROM `+SessionTable+` WHERE oid > ? ORDER BY oid ASC LIMIT `+strconv.Itoa(limit), since)
+	rows, err := tx.Query(`SELECT `+SessionStdSelectColumns+` FROM `+SessionTable+` WHERE sessions.oid > ? ORDER BY oid ASC LIMIT `+strconv.Itoa(limit), since)
 	if err != nil {
 		return err
 	}
