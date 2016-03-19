@@ -28,6 +28,34 @@ func New(s string) *Client {
 	}
 }
 
+func (c *Client) AddConferenceAdmin(in *model.AddConferenceAdminRequest) (err error) {
+	if pdebug.Enabled {
+		g := pdebug.Marker("client.AddConferenceAdmin").BindError(&err)
+		defer g.End()
+	}
+	u, err := url.Parse(c.Endpoint + "/v1/conference/admin/add")
+	if err != nil {
+		return err
+	}
+	buf := bytes.Buffer{}
+	err = json.NewEncoder(&buf).Encode(in)
+	if err != nil {
+		return err
+	}
+	if pdebug.Enabled {
+		pdebug.Printf("POST to %s", u.String())
+		pdebug.Printf("%s", buf.String())
+	}
+	res, err := c.Client.Post(u.String(), "application/json", &buf)
+	if err != nil {
+		return err
+	}
+	if res.StatusCode != http.StatusOK {
+		return fmt.Errorf(`Invalid response: '%s'`, res.Status)
+	}
+	return nil
+}
+
 func (c *Client) AddConferenceDates(in *model.AddConferenceDatesRequest) (err error) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("client.AddConferenceDates").BindError(&err)
@@ -227,6 +255,34 @@ func (c *Client) DeleteConference(in *model.DeleteConferenceRequest) (err error)
 		defer g.End()
 	}
 	u, err := url.Parse(c.Endpoint + "/v1/conference/delete")
+	if err != nil {
+		return err
+	}
+	buf := bytes.Buffer{}
+	err = json.NewEncoder(&buf).Encode(in)
+	if err != nil {
+		return err
+	}
+	if pdebug.Enabled {
+		pdebug.Printf("POST to %s", u.String())
+		pdebug.Printf("%s", buf.String())
+	}
+	res, err := c.Client.Post(u.String(), "application/json", &buf)
+	if err != nil {
+		return err
+	}
+	if res.StatusCode != http.StatusOK {
+		return fmt.Errorf(`Invalid response: '%s'`, res.Status)
+	}
+	return nil
+}
+
+func (c *Client) DeleteConferenceAdmin(in *model.DeleteConferenceAdminRequest) (err error) {
+	if pdebug.Enabled {
+		g := pdebug.Marker("client.DeleteConferenceAdmin").BindError(&err)
+		defer g.End()
+	}
+	u, err := url.Parse(c.Endpoint + "/v1/conference/admin/delete")
 	if err != nil {
 		return err
 	}

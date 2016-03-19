@@ -10,7 +10,7 @@ import (
 	"time"
 )
 
-const UserStdSelectColumns = "oid, eid, first_name, last_name, nickname, email, tshirt_size, created_on, modified_on"
+const UserStdSelectColumns = "users.oid, users.eid, users.first_name, users.last_name, users.nickname, users.email, users.tshirt_size, users.created_on, users.modified_on"
 const UserTable = "users"
 
 type UserList []User
@@ -22,7 +22,7 @@ func (u *User) Scan(scanner interface {
 }
 
 func (u *User) LoadByEID(tx *Tx, eid string) error {
-	row := tx.QueryRow(`SELECT `+UserStdSelectColumns+` FROM `+UserTable+` WHERE eid = ?`, eid)
+	row := tx.QueryRow(`SELECT `+UserStdSelectColumns+` FROM `+UserTable+` WHERE users.eid = ?`, eid)
 	if err := u.Scan(row); err != nil {
 		return err
 	}
@@ -124,7 +124,7 @@ func (v *UserList) LoadSinceEID(tx *Tx, since string, limit int) error {
 }
 
 func (v *UserList) LoadSince(tx *Tx, since int64, limit int) error {
-	rows, err := tx.Query(`SELECT `+UserStdSelectColumns+` FROM `+UserTable+` WHERE oid > ? ORDER BY oid ASC LIMIT `+strconv.Itoa(limit), since)
+	rows, err := tx.Query(`SELECT `+UserStdSelectColumns+` FROM `+UserTable+` WHERE users.oid > ? ORDER BY oid ASC LIMIT `+strconv.Itoa(limit), since)
 	if err != nil {
 		return err
 	}

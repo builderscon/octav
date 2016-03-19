@@ -10,7 +10,7 @@ import (
 	"time"
 )
 
-const VenueStdSelectColumns = "oid, eid, name, address, latitude, longitude, created_on, modified_on"
+const VenueStdSelectColumns = "venues.oid, venues.eid, venues.name, venues.address, venues.latitude, venues.longitude, venues.created_on, venues.modified_on"
 const VenueTable = "venues"
 
 type VenueList []Venue
@@ -22,7 +22,7 @@ func (v *Venue) Scan(scanner interface {
 }
 
 func (v *Venue) LoadByEID(tx *Tx, eid string) error {
-	row := tx.QueryRow(`SELECT `+VenueStdSelectColumns+` FROM `+VenueTable+` WHERE eid = ?`, eid)
+	row := tx.QueryRow(`SELECT `+VenueStdSelectColumns+` FROM `+VenueTable+` WHERE venues.eid = ?`, eid)
 	if err := v.Scan(row); err != nil {
 		return err
 	}
@@ -124,7 +124,7 @@ func (v *VenueList) LoadSinceEID(tx *Tx, since string, limit int) error {
 }
 
 func (v *VenueList) LoadSince(tx *Tx, since int64, limit int) error {
-	rows, err := tx.Query(`SELECT `+VenueStdSelectColumns+` FROM `+VenueTable+` WHERE oid > ? ORDER BY oid ASC LIMIT `+strconv.Itoa(limit), since)
+	rows, err := tx.Query(`SELECT `+VenueStdSelectColumns+` FROM `+VenueTable+` WHERE venues.oid > ? ORDER BY oid ASC LIMIT `+strconv.Itoa(limit), since)
 	if err != nil {
 		return err
 	}

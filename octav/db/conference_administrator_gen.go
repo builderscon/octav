@@ -9,7 +9,7 @@ import (
 	"time"
 )
 
-const ConferenceAdministratorStdSelectColumns = "oid, conference_id, user_id, created_on, modified_on"
+const ConferenceAdministratorStdSelectColumns = "conference_administrators.oid, conference_administrators.conference_id, conference_administrators.user_id, conference_administrators.created_on, conference_administrators.modified_on"
 const ConferenceAdministratorTable = "conference_administrators"
 
 type ConferenceAdministratorList []ConferenceAdministrator

@@ -95,6 +95,11 @@ func doLookupConference(ctx context.Context, w http.ResponseWriter, r *http.Requ
 		return
 	}
 
+	if err := s.LoadAdmins(tx, &c.Administrators, c.ID); err != nil {
+		httpError(w, `LookupConference`, http.StatusInternalServerError, err)
+		return
+	}
+
 	httpJSON(w, c)
 }
 
@@ -185,14 +190,55 @@ func doAddConferenceDates(ctx context.Context, w http.ResponseWriter, r *http.Re
 	defer tx.AutoRollback()
 
 	s := service.Conference{}
-pdebug.Printf("%#v", payload.Dates)
 	if err := s.AddDates(tx, payload.ConferenceID, payload.Dates...); err != nil {
 		httpError(w, `AddConferenceDates`, http.StatusInternalServerError, err)
 		return
 	}
 
 	if err := tx.Commit(); err != nil {
-		httpError(w, `DeleteConference`, http.StatusInternalServerError, err)
+		httpError(w, `AddConferenceDates`, http.StatusInternalServerError, err)
+		return
+	}
+	httpJSON(w, map[string]string{"status": "success"})
+}
+
+func doDeleteConferenceAdmin(ctx context.Context, w http.ResponseWriter, r *http.Request, payload model.DeleteConferenceAdminRequest) {
+	tx, err := db.Begin()
+	if err != nil {
+		httpError(w, `DeleteConferenceAdmin`, http.StatusInternalServerError, err)
+		return
+	}
+	defer tx.AutoRollback()
+
+	s := service.Conference{}
+	if err := s.DeleteAdmin(tx, payload.ConferenceID, payload.UserID); err != nil {
+		httpError(w, `DeleteConferenceAdmin`, http.StatusInternalServerError, err)
+		return
+	}
+
+	if err := tx.Commit(); err != nil {
+		httpError(w, `DeleteConferenceAdmin`, http.StatusInternalServerError, err)
+		return
+	}
+	httpJSON(w, map[string]string{"status": "success"})
+}
+
+func doAddConferenceAdmin(ctx context.Context, w http.ResponseWriter, r *http.Request, payload model.AddConferenceAdminRequest) {
+	tx, err := db.Begin()
+	if err != nil {
+		httpError(w, `AddConferenceAdmin`, http.StatusInternalServerError, err)
+		return
+	}
+	defer tx.AutoRollback()
+
+	s := service.Conference{}
+	if err := s.AddAdmin(tx, payload.ConferenceID, payload.UserID); err != nil {
+		httpError(w, `AddConferenceAdmin`, http.StatusInternalServerError, err)
+		return
+	}
+
+	if err := tx.Commit(); err != nil {
+		httpError(w, `AddConferenceAdmin`, http.StatusInternalServerError, err)
 		return
 	}
 	httpJSON(w, map[string]string{"status": "success"})

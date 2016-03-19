@@ -8,7 +8,7 @@ import (
 	"errors"
 )
 
-const ConferenceDateStdSelectColumns = "oid, conference_id, date, open, close"
+const ConferenceDateStdSelectColumns = "conference_dates.oid, conference_dates.conference_id, conference_dates.date, conference_dates.open, conference_dates.close"
 const ConferenceDateTable = "conference_dates"
 
 type ConferenceDateList []ConferenceDate

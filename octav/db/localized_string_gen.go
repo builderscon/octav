@@ -8,7 +8,7 @@ import (
 	"errors"
 )
 
-const LocalizedStringStdSelectColumns = "oid, parent_id, parent_type, name, language, localized"
+const LocalizedStringStdSelectColumns = "localized_strings.oid, localized_strings.parent_id, localized_strings.parent_type, localized_strings.name, localized_strings.language, localized_strings.localized"
 const LocalizedStringTable = "localized_strings"
 
 type LocalizedStringList []LocalizedString

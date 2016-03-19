@@ -21,11 +21,12 @@ type ErrInvalidFieldType struct {
 
 // +model
 type Conference struct {
-	ID       string             `json:"id"`
-	Title    string             `json:"title" l10n:"true"`
-	SubTitle string             `json:"sub_title" l10n:"true"`
-	Slug     string             `json:"slug"`
-	Dates    ConferenceDateList `json:"dates,omitempty"`
+	ID             string             `json:"id"`
+	Title          string             `json:"title" l10n:"true"`
+	SubTitle       string             `json:"sub_title" l10n:"true"`
+	Slug           string             `json:"slug"`
+	Dates          ConferenceDateList `json:"dates,omitempty"`
+	Administrators UserList           `json:"administrators,omitempty"`
 }
 type ConferenceL10NList []ConferenceL10N
 type ConferenceList []Conference
@@ -146,9 +147,22 @@ type AddConferenceDatesRequest struct {
 	Dates        ConferenceDateList `json:"dates" extract:"true"`
 }
 
+// +transport
+type AddConferenceAdminRequest struct {
+	ConferenceID string `json:"conference_id"`
+	UserID       string `json:"user_id"`
+}
+
+// +transport
 type DeleteConferenceDatesRequest struct {
 	ConferenceID string   `json:"conference_id"`
 	Dates        []string `json:"dates"`
+}
+
+// +transport
+type DeleteConferenceAdminRequest struct {
+	ConferenceID string   `json:"conference_id"`
+	UserID       string   `json:"user_id"`
 }
 
 // +transport

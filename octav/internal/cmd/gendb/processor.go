@@ -213,6 +213,8 @@ func (p *Processor) ProcessStruct(s Struct) error {
 	}
 
 	for i, f := range s.Fields {
+		scols.WriteString(s.Tablename)
+		scols.WriteByte('.')
 		scols.WriteString(f.ColumnName)
 		sfields.WriteRune('&')
 		sfields.WriteRune(varname)
@@ -234,7 +236,7 @@ func (p *Processor) ProcessStruct(s Struct) error {
 
 	if hasEID {
 		fmt.Fprintf(&buf, "\nfunc (%c *%s) LoadByEID(tx *Tx, eid string) error {", varname, s.Name)
-		fmt.Fprintf(&buf, "\nrow := tx.QueryRow(`SELECT ` + %sStdSelectColumns + ` FROM ` + %sTable + ` WHERE eid = ?`, eid)", s.Name, s.Name)
+		fmt.Fprintf(&buf, "\nrow := tx.QueryRow(`SELECT ` + %sStdSelectColumns + ` FROM ` + %sTable + ` WHERE %s.eid = ?`, eid)", s.Name, s.Name, s.Tablename)
 		fmt.Fprintf(&buf, "\nif err := %c.Scan(row); err != nil {", varname)
 		buf.WriteString("\nreturn err")
 		buf.WriteString("\n}")
@@ -347,7 +349,7 @@ func (p *Processor) ProcessStruct(s Struct) error {
 		buf.WriteString("\n}\n")
 
 		fmt.Fprintf(&buf, "\n\nfunc (v *%sList) LoadSince(tx *Tx, since int64, limit int) error {", s.Name)
-		fmt.Fprintf(&buf, "\nrows, err := tx.Query(`SELECT ` + %sStdSelectColumns + ` FROM ` + %sTable + ` WHERE oid > ? ORDER BY oid ASC LIMIT ` + strconv.Itoa(limit), since)", s.Name, s.Name)
+		fmt.Fprintf(&buf, "\nrows, err := tx.Query(`SELECT ` + %sStdSelectColumns + ` FROM ` + %sTable + ` WHERE %s.oid > ? ORDER BY oid ASC LIMIT ` + strconv.Itoa(limit), since)", s.Name, s.Name, s.Tablename)
 		buf.WriteString("\nif err != nil {")
 		buf.WriteString("\nreturn err")
 		buf.WriteString("\n}")
