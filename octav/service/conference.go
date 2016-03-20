@@ -90,9 +90,13 @@ func (v *Conference) AddDates(tx *db.Tx, cid string, dates ...model.ConferenceDa
 	return nil
 }
 
-func (v *Conference) DeleteDates(tx *db.Tx, cid string, dates ...string) error {
+func (v *Conference) DeleteDates(tx *db.Tx, cid string, dates ...model.Date) error {
 	vdb := db.ConferenceDate{}
-	return vdb.DeleteDates(tx, cid, dates...)
+	sdatelist := make([]string, len(dates))
+	for i, dt := range dates {
+		sdatelist[i] = dt.String()
+	}
+	return vdb.DeleteDates(tx, cid, sdatelist...)
 }
 
 func (v *Conference) LoadDates(tx *db.Tx, cdl *model.ConferenceDateList, cid string) error {

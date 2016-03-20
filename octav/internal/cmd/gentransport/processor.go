@@ -217,7 +217,10 @@ func (p *Processor) ProcessStruct(buf *bytes.Buffer, s Struct) error {
 	buf.WriteString("\nif err := json.Unmarshal(data, &m); err != nil {")
 	buf.WriteString("\nreturn err")
 	buf.WriteString("\n}")
+	buf.WriteString("\nreturn r.Populate(m)")
+	buf.WriteString("\n}")
 
+	fmt.Fprintf(buf, "\n\nfunc (r *%s) Populate(m map[string]interface{}) error {", s.Name)
 	rx := regexp.MustCompile(`^(u?int\d*|float(32|64))`)
 	for _, f := range s.Fields {
 		fmt.Fprintf(buf, "\nif jv, ok := m[%s]; ok {", strconv.Quote(f.JSONName))

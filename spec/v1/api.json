@@ -19,17 +19,44 @@
       "type": "boolean",
       "default": false
     },
+    "conference_date": {
+      "type": "object",
+      "properties": {
+        "date": {
+          "oneOf": [
+            {"$ref": "#/definitions/date" },
+            {"$ref": "#/definitions/datestr" }
+          ]
+        },
+        "start_time": {"$ref": "#/definitions/time"},
+        "end_time": {"$ref": "#/definitions/time"}
+      }
+    },
+    "conference_date_array": {
+      "type": "array",
+      "items": { "$ref": "#/definitions/conference_date" }
+    },
     "date": {
       "type": "object",
-      "property": {
-        "date": { "$ref": "#/definitions/datestr" },
-        "start_time": "#/definitions/time",
-        "end_time": "#/definitions/time"
-      }
+      "properties": {
+        "year": {"$ref":"#/definitions/positiveInteger"},
+        "month": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 12
+        },
+        "day": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 31
+        }
+      },
+      "required": ["year", "month", "day"],
+      "additionalProperties": false
     },
     "date_array": {
       "type": "array",
-      "items": { "$ref": "#/definitions/date" }
+      "items": {"$ref": "#/definitions/date"}
     },
     "datestr": {
       "type": "string",
@@ -45,6 +72,10 @@
         { "type": "string", "format": "date-time" },
         { "type": "object", "description": "implementation specific object representing time" }
       ]
+    },
+    "time": {
+      "type": "string",
+      "pattern": "^\\d\\d:\\d\\d$"
     },
     "email": {
       "type": "string",
@@ -121,7 +152,7 @@
         "slug": { "$ref": "#/definitions/string_en" },
         "description": { "$ref": "#/definitions/string_en" },
         "venue": { "$ref": "#/definitions/venue" },
-        "dates": { "$ref": "#/definitions/date_array" },
+        "dates": { "$ref": "#/definitions/conference_date_array" },
         "administrators": { "$ref": "#/definitions/user_array" }
       },
       "patternProperties": {
@@ -552,7 +583,7 @@
         "hsup.type": "model.AddConferenceDatesRequest",
         "properties": {
           "conference_id": {"$ref": "#/definitions/uuid"},
-          "dates": {"$ref":"#/definitions/date_array"}
+          "dates": {"$ref":"#/definitions/conference_date_array"}
         },
         "required": ["conference_id","dates"]
       }
@@ -567,7 +598,12 @@
         "hsup.type": "model.DeleteConferenceDatesRequest",
         "properties": {
           "conference_id": {"$ref": "#/definitions/uuid"},
-          "dates": {"$ref":"#/definitions/datestr_array"}
+          "dates": {
+            "oneOf": [
+              {"$ref":"#/definitions/date_array"},
+              {"$ref":"#/definitions/datestr_array"}
+            ]
+          }
         },
         "required": ["conference_id","dates"]
       }
@@ -624,8 +660,18 @@
         "properties": {
           "lang": { "$ref": "#/definitions/language" },
           "limit": { "$ref": "#/definitions/positiveIntegerDefault10" },
-          "range_end": { "$ref": "#/definitions/datestr" },
-          "range_start": { "$ref": "#/definitions/datestr" },
+          "range_end": {
+            "oneOf": [
+              {"$ref": "#/definitions/date" },
+              {"$ref": "#/definitions/datestr" }
+            ]
+          },
+          "range_start": {
+            "oneOf": [
+              {"$ref": "#/definitions/date" },
+              {"$ref": "#/definitions/datestr" }
+            ]
+          },
           "since": { "$ref": "#/definitions/uuidDefaultEmpty" }
         }
       },
@@ -777,7 +823,12 @@
         "hsup.type": "model.ListSessionsByConferenceRequest",
         "required": ["conference_id"],
         "properties": {
-          "date": { "$ref": "#/definitions/datestr" },
+          "date": {
+            "oneOf": [
+              { "$ref": "#/definitions/date" },
+              { "$ref": "#/definitions/datestr" }
+            ]
+          },
           "conference_id": { "$ref": "#/definitions/uuid" }
         }
       },

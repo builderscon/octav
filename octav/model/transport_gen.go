@@ -45,6 +45,10 @@ func (r *CreateConferenceRequest) UnmarshalJSON(data []byte) error {
 	if err := json.Unmarshal(data, &m); err != nil {
 		return err
 	}
+	return r.Populate(m)
+}
+
+func (r *CreateConferenceRequest) Populate(m map[string]interface{}) error {
 	if jv, ok := m["title"]; ok {
 		switch jv.(type) {
 		case string:
@@ -146,6 +150,10 @@ func (r *LookupConferenceRequest) UnmarshalJSON(data []byte) error {
 	if err := json.Unmarshal(data, &m); err != nil {
 		return err
 	}
+	return r.Populate(m)
+}
+
+func (r *LookupConferenceRequest) Populate(m map[string]interface{}) error {
 	if jv, ok := m["id"]; ok {
 		switch jv.(type) {
 		case string:
@@ -202,6 +210,10 @@ func (r *UpdateConferenceRequest) UnmarshalJSON(data []byte) error {
 	if err := json.Unmarshal(data, &m); err != nil {
 		return err
 	}
+	return r.Populate(m)
+}
+
+func (r *UpdateConferenceRequest) Populate(m map[string]interface{}) error {
 	if jv, ok := m["id"]; ok {
 		switch jv.(type) {
 		case string:
@@ -289,6 +301,10 @@ func (r *AddConferenceDatesRequest) UnmarshalJSON(data []byte) error {
 	if err := json.Unmarshal(data, &m); err != nil {
 		return err
 	}
+	return r.Populate(m)
+}
+
+func (r *AddConferenceDatesRequest) Populate(m map[string]interface{}) error {
 	if jv, ok := m["conference_id"]; ok {
 		switch jv.(type) {
 		case string:
@@ -337,6 +353,10 @@ func (r *AddConferenceAdminRequest) UnmarshalJSON(data []byte) error {
 	if err := json.Unmarshal(data, &m); err != nil {
 		return err
 	}
+	return r.Populate(m)
+}
+
+func (r *AddConferenceAdminRequest) Populate(m map[string]interface{}) error {
 	if jv, ok := m["conference_id"]; ok {
 		switch jv.(type) {
 		case string:
@@ -388,6 +408,10 @@ func (r *DeleteConferenceDatesRequest) UnmarshalJSON(data []byte) error {
 	if err := json.Unmarshal(data, &m); err != nil {
 		return err
 	}
+	return r.Populate(m)
+}
+
+func (r *DeleteConferenceDatesRequest) Populate(m map[string]interface{}) error {
 	if jv, ok := m["conference_id"]; ok {
 		switch jv.(type) {
 		case string:
@@ -398,22 +422,10 @@ func (r *DeleteConferenceDatesRequest) UnmarshalJSON(data []byte) error {
 		}
 	}
 	if jv, ok := m["dates"]; ok {
-		switch jv.(type) {
-		case []interface{}:
-			jvl := jv.([]interface{})
-			list := make([]string, len(jvl))
-			for i, el := range jvl {
-				switch el.(type) {
-				case string:
-					list[i] = el.(string)
-				default:
-					return ErrInvalidJSONFieldType{Field: "dates"}
-				}
-			}
-			r.Dates = list
-		default:
-			return ErrInvalidJSONFieldType{Field: "dates"}
+		if err := r.Dates.Extract(jv); err != nil {
+			return errors.New("extract field Dates failed: " + err.Error())
 		}
+		delete(m, "dates")
 	}
 	return nil
 }
@@ -448,6 +460,10 @@ func (r *DeleteConferenceAdminRequest) UnmarshalJSON(data []byte) error {
 	if err := json.Unmarshal(data, &m); err != nil {
 		return err
 	}
+	return r.Populate(m)
+}
+
+func (r *DeleteConferenceAdminRequest) Populate(m map[string]interface{}) error {
 	if jv, ok := m["conference_id"]; ok {
 		switch jv.(type) {
 		case string:
@@ -498,6 +514,10 @@ func (r *DeleteConferenceRequest) UnmarshalJSON(data []byte) error {
 	if err := json.Unmarshal(data, &m); err != nil {
 		return err
 	}
+	return r.Populate(m)
+}
+
+func (r *DeleteConferenceRequest) Populate(m map[string]interface{}) error {
 	if jv, ok := m["id"]; ok {
 		switch jv.(type) {
 		case string:
@@ -553,6 +573,10 @@ func (r *ListConferencesRequest) UnmarshalJSON(data []byte) error {
 	if err := json.Unmarshal(data, &m); err != nil {
 		return err
 	}
+	return r.Populate(m)
+}
+
+func (r *ListConferencesRequest) Populate(m map[string]interface{}) error {
 	if jv, ok := m["range_end"]; ok {
 		if err := r.RangeEnd.Set(jv); err != nil {
 			return errors.New("set field RangeEnd failed: " + err.Error())
@@ -623,6 +647,10 @@ func (r *CreateRoomRequest) UnmarshalJSON(data []byte) error {
 	if err := json.Unmarshal(data, &m); err != nil {
 		return err
 	}
+	return r.Populate(m)
+}
+
+func (r *CreateRoomRequest) Populate(m map[string]interface{}) error {
 	if jv, ok := m["venue_id"]; ok {
 		if err := r.VenueID.Set(jv); err != nil {
 			return errors.New("set field VenueID failed: " + err.Error())
@@ -698,6 +726,10 @@ func (r *LookupRoomRequest) UnmarshalJSON(data []byte) error {
 	if err := json.Unmarshal(data, &m); err != nil {
 		return err
 	}
+	return r.Populate(m)
+}
+
+func (r *LookupRoomRequest) Populate(m map[string]interface{}) error {
 	if jv, ok := m["id"]; ok {
 		switch jv.(type) {
 		case string:
@@ -754,6 +786,10 @@ func (r *UpdateRoomRequest) UnmarshalJSON(data []byte) error {
 	if err := json.Unmarshal(data, &m); err != nil {
 		return err
 	}
+	return r.Populate(m)
+}
+
+func (r *UpdateRoomRequest) Populate(m map[string]interface{}) error {
 	if jv, ok := m["id"]; ok {
 		switch jv.(type) {
 		case string:
@@ -840,6 +876,10 @@ func (r *DeleteRoomRequest) UnmarshalJSON(data []byte) error {
 	if err := json.Unmarshal(data, &m); err != nil {
 		return err
 	}
+	return r.Populate(m)
+}
+
+func (r *DeleteRoomRequest) Populate(m map[string]interface{}) error {
 	if jv, ok := m["id"]; ok {
 		switch jv.(type) {
 		case string:
@@ -890,6 +930,10 @@ func (r *ListRoomRequest) UnmarshalJSON(data []byte) error {
 	if err := json.Unmarshal(data, &m); err != nil {
 		return err
 	}
+	return r.Populate(m)
+}
+
+func (r *ListRoomRequest) Populate(m map[string]interface{}) error {
 	if jv, ok := m["venue_id"]; ok {
 		switch jv.(type) {
 		case string:
@@ -996,6 +1040,10 @@ func (r *CreateSessionRequest) UnmarshalJSON(data []byte) error {
 	if err := json.Unmarshal(data, &m); err != nil {
 		return err
 	}
+	return r.Populate(m)
+}
+
+func (r *CreateSessionRequest) Populate(m map[string]interface{}) error {
 	if jv, ok := m["conference_id"]; ok {
 		if err := r.ConferenceID.Set(jv); err != nil {
 			return errors.New("set field ConferenceID failed: " + err.Error())
@@ -1175,6 +1223,10 @@ func (r *LookupSessionRequest) UnmarshalJSON(data []byte) error {
 	if err := json.Unmarshal(data, &m); err != nil {
 		return err
 	}
+	return r.Populate(m)
+}
+
+func (r *LookupSessionRequest) Populate(m map[string]interface{}) error {
 	if jv, ok := m["id"]; ok {
 		switch jv.(type) {
 		case string:
@@ -1282,6 +1334,10 @@ func (r *UpdateSessionRequest) UnmarshalJSON(data []byte) error {
 	if err := json.Unmarshal(data, &m); err != nil {
 		return err
 	}
+	return r.Populate(m)
+}
+
+func (r *UpdateSessionRequest) Populate(m map[string]interface{}) error {
 	if jv, ok := m["id"]; ok {
 		switch jv.(type) {
 		case string:
@@ -1504,6 +1560,10 @@ func (r *DeleteSessionRequest) UnmarshalJSON(data []byte) error {
 	if err := json.Unmarshal(data, &m); err != nil {
 		return err
 	}
+	return r.Populate(m)
+}
+
+func (r *DeleteSessionRequest) Populate(m map[string]interface{}) error {
 	if jv, ok := m["id"]; ok {
 		switch jv.(type) {
 		case string:
@@ -1549,6 +1609,10 @@ func (r *CreateUserRequest) UnmarshalJSON(data []byte) error {
 	if err := json.Unmarshal(data, &m); err != nil {
 		return err
 	}
+	return r.Populate(m)
+}
+
+func (r *CreateUserRequest) Populate(m map[string]interface{}) error {
 	if jv, ok := m["first_name"]; ok {
 		switch jv.(type) {
 		case string:
@@ -1682,6 +1746,10 @@ func (r *UpdateUserRequest) UnmarshalJSON(data []byte) error {
 	if err := json.Unmarshal(data, &m); err != nil {
 		return err
 	}
+	return r.Populate(m)
+}
+
+func (r *UpdateUserRequest) Populate(m map[string]interface{}) error {
 	if jv, ok := m["id"]; ok {
 		switch jv.(type) {
 		case string:
@@ -1787,6 +1855,10 @@ func (r *LookupUserRequest) UnmarshalJSON(data []byte) error {
 	if err := json.Unmarshal(data, &m); err != nil {
 		return err
 	}
+	return r.Populate(m)
+}
+
+func (r *LookupUserRequest) Populate(m map[string]interface{}) error {
 	if jv, ok := m["id"]; ok {
 		switch jv.(type) {
 		case string:
@@ -1834,6 +1906,10 @@ func (r *DeleteUserRequest) UnmarshalJSON(data []byte) error {
 	if err := json.Unmarshal(data, &m); err != nil {
 		return err
 	}
+	return r.Populate(m)
+}
+
+func (r *DeleteUserRequest) Populate(m map[string]interface{}) error {
 	if jv, ok := m["id"]; ok {
 		switch jv.(type) {
 		case string:
@@ -1886,6 +1962,10 @@ func (r *CreateVenueRequest) UnmarshalJSON(data []byte) error {
 	if err := json.Unmarshal(data, &m); err != nil {
 		return err
 	}
+	return r.Populate(m)
+}
+
+func (r *CreateVenueRequest) Populate(m map[string]interface{}) error {
 	if jv, ok := m["name"]; ok {
 		if err := r.Name.Set(jv); err != nil {
 			return errors.New("set field Name failed: " + err.Error())
@@ -1978,6 +2058,10 @@ func (r *UpdateVenueRequest) UnmarshalJSON(data []byte) error {
 	if err := json.Unmarshal(data, &m); err != nil {
 		return err
 	}
+	return r.Populate(m)
+}
+
+func (r *UpdateVenueRequest) Populate(m map[string]interface{}) error {
 	if jv, ok := m["id"]; ok {
 		switch jv.(type) {
 		case string:
@@ -2072,6 +2156,10 @@ func (r *DeleteVenueRequest) UnmarshalJSON(data []byte) error {
 	if err := json.Unmarshal(data, &m); err != nil {
 		return err
 	}
+	return r.Populate(m)
+}
+
+func (r *DeleteVenueRequest) Populate(m map[string]interface{}) error {
 	if jv, ok := m["id"]; ok {
 		switch jv.(type) {
 		case string:
@@ -2121,6 +2209,10 @@ func (r *ListVenueRequest) UnmarshalJSON(data []byte) error {
 	if err := json.Unmarshal(data, &m); err != nil {
 		return err
 	}
+	return r.Populate(m)
+}
+
+func (r *ListVenueRequest) Populate(m map[string]interface{}) error {
 	if jv, ok := m["since"]; ok {
 		if err := r.Since.Set(jv); err != nil {
 			return errors.New("set field Since failed: " + err.Error())
@@ -2174,6 +2266,10 @@ func (r *LookupVenueRequest) UnmarshalJSON(data []byte) error {
 	if err := json.Unmarshal(data, &m); err != nil {
 		return err
 	}
+	return r.Populate(m)
+}
+
+func (r *LookupVenueRequest) Populate(m map[string]interface{}) error {
 	if jv, ok := m["id"]; ok {
 		switch jv.(type) {
 		case string:
@@ -2224,6 +2320,10 @@ func (r *ListSessionsByConferenceRequest) UnmarshalJSON(data []byte) error {
 	if err := json.Unmarshal(data, &m); err != nil {
 		return err
 	}
+	return r.Populate(m)
+}
+
+func (r *ListSessionsByConferenceRequest) Populate(m map[string]interface{}) error {
 	if jv, ok := m["conference_id"]; ok {
 		switch jv.(type) {
 		case string:

@@ -121,10 +121,11 @@ type UpdateConferenceRequest struct {
 
 // Date is used to store simple dates YYYY-MM-DD
 type Date struct {
-	year  int
-	month int
-	day   int
+	Year  int `json:"year"`
+	Month int `json:"month"`
+	Day   int `json:"day"`
 }
+type DateList []Date
 
 // WallClock is used to store simple time HH:MM
 type WallClock struct {
@@ -156,7 +157,7 @@ type AddConferenceAdminRequest struct {
 // +transport
 type DeleteConferenceDatesRequest struct {
 	ConferenceID string   `json:"conference_id"`
-	Dates        []string `json:"dates"`
+	Dates        DateList `json:"dates" extract:"true"`
 }
 
 // +transport

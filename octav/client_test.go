@@ -549,7 +549,7 @@ func TestDeleteConferenceDates(t *testing.T) {
 
 	err = cl.DeleteConferenceDates(&model.DeleteConferenceDatesRequest{
 		ConferenceID: conf.ID,
-		Dates: []string{ "2016-03-22" },
+		Dates: []model.Date{ model.NewDate(2016, 3, 22) },
 	})
 	if !assert.NoError(t, err, "DeleteConferenceDates works") {
 		return
