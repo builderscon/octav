@@ -27,6 +27,10 @@
           "actions": ["add", "delete"]
         }
       ]
+    },
+    {
+      "name": "venue",
+      "actions": ["create", "lookup", "delete"]
     }
   ]
 }

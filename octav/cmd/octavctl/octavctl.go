@@ -105,6 +105,10 @@ func (l *stringList) String() string {
 	return buf.String()
 }
 
+func (l stringList) Valid() bool {
+	return len(l) > 0
+}
+
 func (l stringList) Get() interface{} {
 	return []string(l)
 }
@@ -147,11 +151,21 @@ func doConferenceCreate(args cmdargs) int {
 	}
 
 	m := make(map[string]interface{})
-	m["description"] = description
-	m["slug"] = slug
-	m["sub_title"] = sub_title
-	m["title"] = title
-	m["user_id"] = user_id
+	if description != "" {
+		m["description"] = description
+	}
+	if slug != "" {
+		m["slug"] = slug
+	}
+	if sub_title != "" {
+		m["sub_title"] = sub_title
+	}
+	if title != "" {
+		m["title"] = title
+	}
+	if user_id != "" {
+		m["user_id"] = user_id
+	}
 	r := model.CreateConferenceRequest{}
 	if err := r.Populate(m); err != nil {
 		return errOut(err)
@@ -183,7 +197,9 @@ func doConferenceLookup(args cmdargs) int {
 	}
 
 	m := make(map[string]interface{})
-	m["id"] = id
+	if id != "" {
+		m["id"] = id
+	}
 	r := model.LookupConferenceRequest{}
 	if err := r.Populate(m); err != nil {
 		return errOut(err)
@@ -215,7 +231,9 @@ func doConferenceDelete(args cmdargs) int {
 	}
 
 	m := make(map[string]interface{})
-	m["id"] = id
+	if id != "" {
+		m["id"] = id
+	}
 	r := model.DeleteConferenceRequest{}
 	if err := r.Populate(m); err != nil {
 		return errOut(err)
@@ -245,8 +263,12 @@ func doConferenceDatesAdd(args cmdargs) int {
 	}
 
 	m := make(map[string]interface{})
-	m["conference_id"] = id
-	m["dates"] = dates.Get()
+	if id != "" {
+		m["conference_id"] = id
+	}
+	if dates.Valid() {
+		m["dates"] = dates.Get()
+	}
 	r := model.AddConferenceDatesRequest{}
 	if err := r.Populate(m); err != nil {
 		return errOut(err)
@@ -276,8 +298,12 @@ func doConferenceDatesDelete(args cmdargs) int {
 	}
 
 	m := make(map[string]interface{})
-	m["conference_id"] = id
-	m["dates"] = dates.Get()
+	if id != "" {
+		m["conference_id"] = id
+	}
+	if dates.Valid() {
+		m["dates"] = dates.Get()
+	}
 	r := model.DeleteConferenceDatesRequest{}
 	if err := r.Populate(m); err != nil {
 		return errOut(err)
@@ -320,8 +346,12 @@ func doConferenceAdminAdd(args cmdargs) int {
 	}
 
 	m := make(map[string]interface{})
-	m["conference_id"] = id
-	m["user_id"] = user_id
+	if id != "" {
+		m["conference_id"] = id
+	}
+	if user_id != "" {
+		m["user_id"] = user_id
+	}
 	r := model.AddConferenceAdminRequest{}
 	if err := r.Populate(m); err != nil {
 		return errOut(err)
@@ -351,8 +381,12 @@ func doConferenceAdminDelete(args cmdargs) int {
 	}
 
 	m := make(map[string]interface{})
-	m["conference_id"] = id
-	m["user_id"] = user_id
+	if id != "" {
+		m["conference_id"] = id
+	}
+	if user_id != "" {
+		m["user_id"] = user_id
+	}
 	r := model.DeleteConferenceAdminRequest{}
 	if err := r.Populate(m); err != nil {
 		return errOut(err)
@@ -402,10 +436,140 @@ func doConferenceSubcmd(args cmdargs) int {
 	return 0
 }
 
+func doVenueCreate(args cmdargs) int {
+	fs := flag.NewFlagSet("octavctl venue create", flag.ContinueOnError)
+	var address string
+	fs.StringVar(&address, "address", "", "")
+	var latitude float64
+	fs.Float64Var(&latitude, "latitude", 0, "")
+	var longitude float64
+	fs.Float64Var(&longitude, "longitude", 0, "")
+	var name string
+	fs.StringVar(&name, "name", "", "")
+	prepGlobalFlags(fs)
+	if err := fs.Parse([]string(args)); err != nil {
+		return errOut(err)
+	}
+
+	m := make(map[string]interface{})
+	if address != "" {
+		m["address"] = address
+	}
+	if latitude != 0 {
+		m["latitude"] = latitude
+	}
+	if longitude != 0 {
+		m["longitude"] = longitude
+	}
+	if name != "" {
+		m["name"] = name
+	}
+	r := model.CreateVenueRequest{}
+	if err := r.Populate(m); err != nil {
+		return errOut(err)
+	}
+
+	if err := validator.HTTPCreateVenueRequest.Validate(r); err != nil {
+		return errOut(err)
+	}
+
+	cl := newClient()
+	res, err := cl.CreateVenue(&r)
+	if err != nil {
+		return errOut(err)
+	}
+	if err := printJSON(res); err != nil {
+		return errOut(err)
+	}
+
+	return 0
+}
+
+func doVenueLookup(args cmdargs) int {
+	fs := flag.NewFlagSet("octavctl venue lookup", flag.ContinueOnError)
+	var id string
+	fs.StringVar(&id, "id", "", "")
+	prepGlobalFlags(fs)
+	if err := fs.Parse([]string(args)); err != nil {
+		return errOut(err)
+	}
+
+	m := make(map[string]interface{})
+	if id != "" {
+		m["id"] = id
+	}
+	r := model.LookupVenueRequest{}
+	if err := r.Populate(m); err != nil {
+		return errOut(err)
+	}
+
+	if err := validator.HTTPLookupVenueRequest.Validate(r); err != nil {
+		return errOut(err)
+	}
+
+	cl := newClient()
+	res, err := cl.LookupVenue(&r)
+	if err != nil {
+		return errOut(err)
+	}
+	if err := printJSON(res); err != nil {
+		return errOut(err)
+	}
+
+	return 0
+}
+
+func doVenueDelete(args cmdargs) int {
+	fs := flag.NewFlagSet("octavctl venue delete", flag.ContinueOnError)
+	var id string
+	fs.StringVar(&id, "id", "", "")
+	prepGlobalFlags(fs)
+	if err := fs.Parse([]string(args)); err != nil {
+		return errOut(err)
+	}
+
+	m := make(map[string]interface{})
+	if id != "" {
+		m["id"] = id
+	}
+	r := model.DeleteVenueRequest{}
+	if err := r.Populate(m); err != nil {
+		return errOut(err)
+	}
+
+	if err := validator.HTTPDeleteVenueRequest.Validate(r); err != nil {
+		return errOut(err)
+	}
+
+	cl := newClient()
+	if err := cl.DeleteVenue(&r); err != nil {
+		return errOut(err)
+	}
+
+	return 0
+}
+
+func doVenueSubcmd(args cmdargs) int {
+	switch v := args.Get(0); v {
+	case "create":
+		return doVenueCreate(args.WithFrontPopped())
+	case "lookup":
+		return doVenueLookup(args.WithFrontPopped())
+	case "delete":
+		return doVenueDelete(args.WithFrontPopped())
+	default:
+		log.Printf("unimplemented (conference): %s", v)
+		return 1
+	}
+	return 0
+}
+
 func doSubcmd(args cmdargs) int {
 	switch v := args.Get(0); v {
 	case "conference":
 		return doConferenceSubcmd(args.WithFrontPopped())
+	case "venue":
+		return doVenueSubcmd(args.WithFrontPopped())
 	default:
 		log.Printf("unimplemented (conference): %s", v)
 		return 1

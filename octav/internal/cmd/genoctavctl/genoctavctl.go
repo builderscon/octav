@@ -16,6 +16,7 @@ import (
 	"unicode"
 
 	"github.com/lestrrat/go-jshschema"
+	"github.com/lestrrat/go-jsschema"
 )
 
 type Cmd struct {
@@ -225,6 +226,10 @@ func (l *stringList) String() string {
 	}
 	return buf.String()
 }
+
+func (l stringList) Valid() bool {
+	return len(l) > 0
+}
  
 func (l stringList) Get() interface{} {
 	return []string(l)
@@ -339,37 +344,72 @@ func processAction(ctx *genctx, action Action) error {
 	fmt.Fprintf(&buf, "\n\nfunc do%s(args cmdargs) int {", methodName)
 	fmt.Fprintf(&buf, "\nfs := flag.NewFlagSet(%s, flag.ContinueOnError)", strconv.Quote(cmdall))
 
-	for _, pname := range propnames {
-		pname = strings.TrimPrefix(pname, exclprefix)
+	setbuf := bytes.Buffer{}
 
-		_ = link.Schema.Properties[pname]
+	for _, pname := range propnames {
+		pdef, ok := link.Schema.Properties[pname]
+		if !ok {
+			panic("Could not find property definition for '" + pname + "'")
+		}
+		if !pdef.IsResolved() {
+			rs, err := pdef.Resolve(ctx.schema)
+			if err != nil {
+				return err
+			}
+			pdef = rs
+		}
+
+		sansprefix := strings.TrimPrefix(pname, exclprefix)
 
 		argt := "string"
-		if hint, ok := action.ArgsHint[pname]; ok {
+		argm := "StringVar"
+		argv := `""`
+		argz := `""`
+		if hint, ok := action.ArgsHint[sansprefix]; ok {
 			if t, ok := hint["type"]; ok {
 				argt = t // Must implement reflect.Setter and reflect.Getter
+				argm = "Var"
+			}
+		} else if len(pdef.Type) == 1 { // Can't handle multiple types, too darn hard
+			switch pdef.Type[0] {
+			case schema.IntegerType:
+				argt = "int64"
+				argm = "Int64Var"
+				argv = "0"
+				argz = "0"
+			case schema.NumberType:
+				argt = "float64"
+				argm = "Float64Var"
+				argv = "0"
+				argz = "0"
 			}
 		}
-		fmt.Fprintf(&buf, "\nvar %s %s", pname, argt)
-		if argt == "string" {
-			fmt.Fprintf(&buf, "\n"+`fs.StringVar(&%s, %s, "", "")`, pname, strconv.Quote(pname))
+		fmt.Fprintf(&buf, "\nvar %s %s", sansprefix, argt)
+		if argm == "Var" {
+			fmt.Fprintf(&buf, "\n"+`fs.Var(&%s, %s, "")`, sansprefix, strconv.Quote(sansprefix))
 		} else {
-			fmt.Fprintf(&buf, "\n"+`fs.Var(&%s, %s, "")`, pname, strconv.Quote(pname))
+			fmt.Fprintf(&buf, "\n"+`fs.%s(&%s, %s, %s, "")`, argm, sansprefix, strconv.Quote(sansprefix), argv)
 		}
+
+		_, hasHint := action.ArgsHint[pname]
+		if hasHint {
+			fmt.Fprintf(&setbuf, "\nif %s.Valid() {", sansprefix)
+		} else {
+			fmt.Fprintf(&setbuf, "\nif %s != %s {", sansprefix, argz)
+		}
+		fmt.Fprintf(&setbuf, "\nm[%s] = %s", strconv.Quote(pname), sansprefix)
+		if hasHint {
+			// Must implement reflect.Setter and reflect.Getter
+			setbuf.WriteString(".Get()")
+		}
+		setbuf.WriteString("\n}")
 	}
 	buf.WriteString("\nprepGlobalFlags(fs)")
 	buf.WriteString("\nif err := fs.Parse([]string(args)); err != nil {")
 	buf.WriteString("\nreturn errOut(err)")
 	buf.WriteString("\n}")
 	buf.WriteString("\n\nm := make(map[string]interface{})")
-	for _, pname := range propnames {
-		sansprefix := strings.TrimPrefix(pname, exclprefix)
-		fmt.Fprintf(&buf, "\nm[%s] = %s", strconv.Quote(pname), sansprefix)
-		if _, ok := action.ArgsHint[pname]; ok {
-			// Must implement reflect.Setter and reflect.Getter
-			buf.WriteString(".Get()")
-		}
-	}
+	setbuf.WriteTo(&buf)
 
 	transport := link.Schema.Extras["hsup.type"].(string)
 	fmt.Fprintf(&buf, "\nr := %s{}", transport)

@@ -136,7 +136,7 @@
       "type": "number"
     },
     "longitude": {
-      "description": "latitude of an object",
+      "description": "longitude of an object",
       "type": "number"
     },
     "conference_array": {
