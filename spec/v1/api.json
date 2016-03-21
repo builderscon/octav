@@ -397,7 +397,7 @@
       "targetSchema": { "$ref": "#/definitions/venue" }
     },
     {
-      "title": "List venues",
+      "title": "List venue",
       "rel": "list",
       "href": "/venue/list",
       "schema": {
@@ -531,7 +531,7 @@
       }
     },
     {
-      "title": "List rooms",
+      "title": "List room",
       "rel": "list",
       "href": "/room/list",
       "method": "GET",
@@ -652,11 +652,11 @@
       "targetSchema": { "$ref": "#/definitions/conference" }
     },
     {
-      "title": "List conferences",
+      "title": "List conference",
       "href": "/conference/list",
       "rel": "list",
       "schema": {
-        "hsup.type": "model.ListConferencesRequest",
+        "hsup.type": "model.ListConferenceRequest",
         "properties": {
           "lang": { "$ref": "#/definitions/language" },
           "limit": { "$ref": "#/definitions/positiveIntegerDefault10" },
@@ -815,7 +815,7 @@
       }
     },
     {
-      "title": "List sessions by conference",
+      "title": "List session by conference",
       "href": "/schedule/list",
       "rel": "list",
       "schema": {

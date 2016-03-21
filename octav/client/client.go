@@ -445,9 +445,9 @@ func (c *Client) DeleteVenue(in *model.DeleteVenueRequest) (err error) {
 	return nil
 }
 
-func (c *Client) ListConferences(in *model.ListConferencesRequest) (ret interface{}, err error) {
+func (c *Client) ListConference(in *model.ListConferenceRequest) (ret interface{}, err error) {
 	if pdebug.Enabled {
-		g := pdebug.Marker("client.ListConferences").BindError(&err)
+		g := pdebug.Marker("client.ListConference").BindError(&err)
 		defer g.End()
 	}
 	u, err := url.Parse(c.Endpoint + "/v1/conference/list")
@@ -477,9 +477,9 @@ func (c *Client) ListConferences(in *model.ListConferencesRequest) (ret interfac
 	return payload, nil
 }
 
-func (c *Client) ListRooms(in *model.ListRoomRequest) (ret []model.Room, err error) {
+func (c *Client) ListRoom(in *model.ListRoomRequest) (ret []model.Room, err error) {
 	if pdebug.Enabled {
-		g := pdebug.Marker("client.ListRooms").BindError(&err)
+		g := pdebug.Marker("client.ListRoom").BindError(&err)
 		defer g.End()
 	}
 	u, err := url.Parse(c.Endpoint + "/v1/room/list")
@@ -509,9 +509,9 @@ func (c *Client) ListRooms(in *model.ListRoomRequest) (ret []model.Room, err err
 	return payload, nil
 }
 
-func (c *Client) ListSessionsByConference(in *model.ListSessionsByConferenceRequest) (ret interface{}, err error) {
+func (c *Client) ListSessionByConference(in *model.ListSessionsByConferenceRequest) (ret interface{}, err error) {
 	if pdebug.Enabled {
-		g := pdebug.Marker("client.ListSessionsByConference").BindError(&err)
+		g := pdebug.Marker("client.ListSessionByConference").BindError(&err)
 		defer g.End()
 	}
 	u, err := url.Parse(c.Endpoint + "/v1/schedule/list")
@@ -541,9 +541,9 @@ func (c *Client) ListSessionsByConference(in *model.ListSessionsByConferenceRequ
 	return payload, nil
 }
 
-func (c *Client) ListVenues(in *model.ListVenueRequest) (ret []model.Venue, err error) {
+func (c *Client) ListVenue(in *model.ListVenueRequest) (ret []model.Venue, err error) {
 	if pdebug.Enabled {
-		g := pdebug.Marker("client.ListVenues").BindError(&err)
+		g := pdebug.Marker("client.ListVenue").BindError(&err)
 		defer g.End()
 	}
 	u, err := url.Parse(c.Endpoint + "/v1/venue/list")

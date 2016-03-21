@@ -530,7 +530,7 @@ func (r *DeleteConferenceRequest) Populate(m map[string]interface{}) error {
 	return nil
 }
 
-func (r ListConferencesRequest) collectMarshalData() map[string]interface{} {
+func (r ListConferenceRequest) collectMarshalData() map[string]interface{} {
 	m := make(map[string]interface{})
 	if r.RangeEnd.Valid() {
 		m["range_end"] = r.RangeEnd.Value()
@@ -550,7 +550,7 @@ func (r ListConferencesRequest) collectMarshalData() map[string]interface{} {
 	return m
 }
 
-func (r ListConferencesRequest) MarshalJSON() ([]byte, error) {
+func (r ListConferenceRequest) MarshalJSON() ([]byte, error) {
 	m := r.collectMarshalData()
 	buf, err := json.Marshal(m)
 	if err != nil {
@@ -559,7 +559,7 @@ func (r ListConferencesRequest) MarshalJSON() ([]byte, error) {
 	return buf, nil
 }
 
-func (r ListConferencesRequest) MarshalURL() ([]byte, error) {
+func (r ListConferenceRequest) MarshalURL() ([]byte, error) {
 	m := r.collectMarshalData()
 	buf, err := urlenc.Marshal(m)
 	if err != nil {
@@ -568,7 +568,7 @@ func (r ListConferencesRequest) MarshalURL() ([]byte, error) {
 	return buf, nil
 }
 
-func (r *ListConferencesRequest) UnmarshalJSON(data []byte) error {
+func (r *ListConferenceRequest) UnmarshalJSON(data []byte) error {
 	m := make(map[string]interface{})
 	if err := json.Unmarshal(data, &m); err != nil {
 		return err
@@ -576,7 +576,7 @@ func (r *ListConferencesRequest) UnmarshalJSON(data []byte) error {
 	return r.Populate(m)
 }
 
-func (r *ListConferencesRequest) Populate(m map[string]interface{}) error {
+func (r *ListConferenceRequest) Populate(m map[string]interface{}) error {
 	if jv, ok := m["range_end"]; ok {
 		if err := r.RangeEnd.Set(jv); err != nil {
 			return errors.New("set field RangeEnd failed: " + err.Error())

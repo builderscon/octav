@@ -24,14 +24,14 @@ var HTTPDeleteRoomRequest *jsval.JSVal
 var HTTPDeleteSessionRequest *jsval.JSVal
 var HTTPDeleteUserRequest *jsval.JSVal
 var HTTPDeleteVenueRequest *jsval.JSVal
-var HTTPListConferencesRequest *jsval.JSVal
-var HTTPListConferencesResponse *jsval.JSVal
-var HTTPListRoomsRequest *jsval.JSVal
-var HTTPListRoomsResponse *jsval.JSVal
-var HTTPListSessionsByConferenceRequest *jsval.JSVal
-var HTTPListSessionsByConferenceResponse *jsval.JSVal
-var HTTPListVenuesRequest *jsval.JSVal
-var HTTPListVenuesResponse *jsval.JSVal
+var HTTPListConferenceRequest *jsval.JSVal
+var HTTPListConferenceResponse *jsval.JSVal
+var HTTPListRoomRequest *jsval.JSVal
+var HTTPListRoomResponse *jsval.JSVal
+var HTTPListSessionByConferenceRequest *jsval.JSVal
+var HTTPListSessionByConferenceResponse *jsval.JSVal
+var HTTPListVenueRequest *jsval.JSVal
+var HTTPListVenueResponse *jsval.JSVal
 var HTTPLookupConferenceRequest *jsval.JSVal
 var HTTPLookupConferenceResponse *jsval.JSVal
 var HTTPLookupRoomRequest *jsval.JSVal
@@ -1117,7 +1117,7 @@ func init() {
 				),
 		)
 
-	HTTPListConferencesRequest = jsval.New().
+	HTTPListConferenceRequest = jsval.New().
 		SetConstraintMap(M).
 		SetRoot(
 			jsval.Object().
@@ -1158,7 +1158,7 @@ func init() {
 				),
 		)
 
-	HTTPListConferencesResponse = jsval.New().
+	HTTPListConferenceResponse = jsval.New().
 		SetConstraintMap(M).
 		SetRoot(
 			jsval.Array().
@@ -1170,7 +1170,7 @@ func init() {
 				),
 		)
 
-	HTTPListRoomsRequest = jsval.New().
+	HTTPListRoomRequest = jsval.New().
 		SetConstraintMap(M).
 		SetRoot(
 			jsval.Object().
@@ -1192,7 +1192,7 @@ func init() {
 				),
 		)
 
-	HTTPListRoomsResponse = jsval.New().
+	HTTPListRoomResponse = jsval.New().
 		SetConstraintMap(M).
 		SetRoot(
 			jsval.Array().
@@ -1204,7 +1204,7 @@ func init() {
 				),
 		)
 
-	HTTPListSessionsByConferenceRequest = jsval.New().
+	HTTPListSessionByConferenceRequest = jsval.New().
 		SetConstraintMap(M).
 		SetRoot(
 			jsval.Object().
@@ -1228,7 +1228,7 @@ func init() {
 				),
 		)
 
-	HTTPListSessionsByConferenceResponse = jsval.New().
+	HTTPListSessionByConferenceResponse = jsval.New().
 		SetConstraintMap(M).
 		SetRoot(
 			jsval.Array().
@@ -1240,7 +1240,7 @@ func init() {
 				),
 		)
 
-	HTTPListVenuesRequest = jsval.New().
+	HTTPListVenueRequest = jsval.New().
 		SetConstraintMap(M).
 		SetRoot(
 			jsval.Object().
@@ -1257,7 +1257,7 @@ func init() {
 				),
 		)
 
-	HTTPListVenuesResponse = jsval.New().
+	HTTPListVenueResponse = jsval.New().
 		SetConstraintMap(M).
 		SetRoot(
 			jsval.Array().

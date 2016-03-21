@@ -284,17 +284,17 @@ func doConferenceList(args cmdargs) int {
 	if since != "" {
 		m["since"] = since
 	}
-	r := model.ListConferencesRequest{}
+	r := model.ListConferenceRequest{}
 	if err := r.Populate(m); err != nil {
 		return errOut(err)
 	}
 
-	if err := validator.HTTPListConferencesRequest.Validate(&r); err != nil {
+	if err := validator.HTTPListConferenceRequest.Validate(&r); err != nil {
 		return errOut(err)
 	}
 
 	cl := newClient()
-	res, err := cl.ListConferences(&r)
+	res, err := cl.ListConference(&r)
 	if err != nil {
 		return errOut(err)
 	}
@@ -541,6 +541,45 @@ func doVenueCreate(args cmdargs) int {
 	return 0
 }
 
+func doVenueList(args cmdargs) int {
+	fs := flag.NewFlagSet("octavctl venue list", flag.ContinueOnError)
+	var lang string
+	fs.StringVar(&lang, "lang", "", "")
+	var since string
+	fs.StringVar(&since, "since", "", "")
+	prepGlobalFlags(fs)
+	if err := fs.Parse([]string(args)); err != nil {
+		return errOut(err)
+	}
+
+	m := make(map[string]interface{})
+	if lang != "" {
+		m["lang"] = lang
+	}
+	if since != "" {
+		m["since"] = since
+	}
+	r := model.ListVenueRequest{}
+	if err := r.Populate(m); err != nil {
+		return errOut(err)
+	}
+
+	if err := validator.HTTPListVenueRequest.Validate(&r); err != nil {
+		return errOut(err)
+	}
+
+	cl := newClient()
+	res, err := cl.ListVenue(&r)
+	if err != nil {
+		return errOut(err)
+	}
+	if err := printJSON(res); err != nil {
+		return errOut(err)
+	}
+
+	return 0
+}
+
 func doVenueLookup(args cmdargs) int {
 	fs := flag.NewFlagSet("octavctl venue lookup", flag.ContinueOnError)
 	var id string
@@ -609,10 +648,369 @@ func doVenueSubcmd(args cmdargs) int {
 	switch v := args.Get(0); v {
 	case "create":
 		return doVenueCreate(args.WithFrontPopped())
+	case "list":
+		return doVenueList(args.WithFrontPopped())
 	case "lookup":
 		return doVenueLookup(args.WithFrontPopped())
 	case "delete":
 		return doVenueDelete(args.WithFrontPopped())
+	default:
+		log.Printf("unimplemented (conference): %s", v)
+		return 1
+	}
+	return 0
+}
+
+func doRoomCreate(args cmdargs) int {
+	fs := flag.NewFlagSet("octavctl room create", flag.ContinueOnError)
+	var capacity int64
+	fs.Int64Var(&capacity, "capacity", 0, "")
+	var name string
+	fs.StringVar(&name, "name", "", "")
+	var venue_id string
+	fs.StringVar(&venue_id, "venue_id", "", "")
+	prepGlobalFlags(fs)
+	if err := fs.Parse([]string(args)); err != nil {
+		return errOut(err)
+	}
+
+	m := make(map[string]interface{})
+	if capacity != 0 {
+		m["capacity"] = capacity
+	}
+	if name != "" {
+		m["name"] = name
+	}
+	if venue_id != "" {
+		m["venue_id"] = venue_id
+	}
+	r := model.CreateRoomRequest{}
+	if err := r.Populate(m); err != nil {
+		return errOut(err)
+	}
+
+	if err := validator.HTTPCreateRoomRequest.Validate(&r); err != nil {
+		return errOut(err)
+	}
+
+	cl := newClient()
+	res, err := cl.CreateRoom(&r)
+	if err != nil {
+		return errOut(err)
+	}
+	if err := printJSON(res); err != nil {
+		return errOut(err)
+	}
+
+	return 0
+}
+
+func doRoomList(args cmdargs) int {
+	fs := flag.NewFlagSet("octavctl room list", flag.ContinueOnError)
+	var lang string
+	fs.StringVar(&lang, "lang", "", "")
+	var limit int64
+	fs.Int64Var(&limit, "limit", 0, "")
+	var venue_id string
+	fs.StringVar(&venue_id, "venue_id", "", "")
+	prepGlobalFlags(fs)
+	if err := fs.Parse([]string(args)); err != nil {
+		return errOut(err)
+	}
+
+	m := make(map[string]interface{})
+	if lang != "" {
+		m["lang"] = lang
+	}
+	if limit != 0 {
+		m["limit"] = limit
+	}
+	if venue_id != "" {
+		m["venue_id"] = venue_id
+	}
+	r := model.ListRoomRequest{}
+	if err := r.Populate(m); err != nil {
+		return errOut(err)
+	}
+
+	if err := validator.HTTPListRoomRequest.Validate(&r); err != nil {
+		return errOut(err)
+	}
+
+	cl := newClient()
+	res, err := cl.ListRoom(&r)
+	if err != nil {
+		return errOut(err)
+	}
+	if err := printJSON(res); err != nil {
+		return errOut(err)
+	}
+
+	return 0
+}
+
+func doRoomLookup(args cmdargs) int {
+	fs := flag.NewFlagSet("octavctl room lookup", flag.ContinueOnError)
+	var id string
+	fs.StringVar(&id, "id", "", "")
+	prepGlobalFlags(fs)
+	if err := fs.Parse([]string(args)); err != nil {
+		return errOut(err)
+	}
+
+	m := make(map[string]interface{})
+	if id != "" {
+		m["id"] = id
+	}
+	r := model.LookupRoomRequest{}
+	if err := r.Populate(m); err != nil {
+		return errOut(err)
+	}
+
+	if err := validator.HTTPLookupRoomRequest.Validate(&r); err != nil {
+		return errOut(err)
+	}
+
+	cl := newClient()
+	res, err := cl.LookupRoom(&r)
+	if err != nil {
+		return errOut(err)
+	}
+	if err := printJSON(res); err != nil {
+		return errOut(err)
+	}
+
+	return 0
+}
+
+func doRoomDelete(args cmdargs) int {
+	fs := flag.NewFlagSet("octavctl room delete", flag.ContinueOnError)
+	var id string
+	fs.StringVar(&id, "id", "", "")
+	prepGlobalFlags(fs)
+	if err := fs.Parse([]string(args)); err != nil {
+		return errOut(err)
+	}
+
+	m := make(map[string]interface{})
+	if id != "" {
+		m["id"] = id
+	}
+	r := model.DeleteRoomRequest{}
+	if err := r.Populate(m); err != nil {
+		return errOut(err)
+	}
+
+	if err := validator.HTTPDeleteRoomRequest.Validate(&r); err != nil {
+		return errOut(err)
+	}
+
+	cl := newClient()
+	if err := cl.DeleteRoom(&r); err != nil {
+		return errOut(err)
+	}
+
+	return 0
+}
+
+func doRoomSubcmd(args cmdargs) int {
+	switch v := args.Get(0); v {
+	case "create":
+		return doRoomCreate(args.WithFrontPopped())
+	case "list":
+		return doRoomList(args.WithFrontPopped())
+	case "lookup":
+		return doRoomLookup(args.WithFrontPopped())
+	case "delete":
+		return doRoomDelete(args.WithFrontPopped())
+	default:
+		log.Printf("unimplemented (conference): %s", v)
+		return 1
+	}
+	return 0
+}
+
+func doSessionCreate(args cmdargs) int {
+	fs := flag.NewFlagSet("octavctl session create", flag.ContinueOnError)
+	var abstract string
+	fs.StringVar(&abstract, "abstract", "", "")
+	var category string
+	fs.StringVar(&category, "category", "", "")
+	var conference_id string
+	fs.StringVar(&conference_id, "conference_id", "", "")
+	var duration int64
+	fs.Int64Var(&duration, "duration", 0, "")
+	var material_level string
+	fs.StringVar(&material_level, "material_level", "", "")
+	var memo string
+	fs.StringVar(&memo, "memo", "", "")
+	var photo_permission string
+	fs.StringVar(&photo_permission, "photo_permission", "", "")
+	var slide_language string
+	fs.StringVar(&slide_language, "slide_language", "", "")
+	var slide_subtitles string
+	fs.StringVar(&slide_subtitles, "slide_subtitles", "", "")
+	var slide_url string
+	fs.StringVar(&slide_url, "slide_url", "", "")
+	var speaker_id string
+	fs.StringVar(&speaker_id, "speaker_id", "", "")
+	var spoken_language string
+	fs.StringVar(&spoken_language, "spoken_language", "", "")
+	var tags string
+	fs.StringVar(&tags, "tags", "", "")
+	var title string
+	fs.StringVar(&title, "title", "", "")
+	var video_permission string
+	fs.StringVar(&video_permission, "video_permission", "", "")
+	var video_url string
+	fs.StringVar(&video_url, "video_url", "", "")
+	prepGlobalFlags(fs)
+	if err := fs.Parse([]string(args)); err != nil {
+		return errOut(err)
+	}
+
+	m := make(map[string]interface{})
+	if abstract != "" {
+		m["abstract"] = abstract
+	}
+	if category != "" {
+		m["category"] = category
+	}
+	if conference_id != "" {
+		m["conference_id"] = conference_id
+	}
+	if duration != 0 {
+		m["duration"] = duration
+	}
+	if material_level != "" {
+		m["material_level"] = material_level
+	}
+	if memo != "" {
+		m["memo"] = memo
+	}
+	if photo_permission != "" {
+		m["photo_permission"] = photo_permission
+	}
+	if slide_language != "" {
+		m["slide_language"] = slide_language
+	}
+	if slide_subtitles != "" {
+		m["slide_subtitles"] = slide_subtitles
+	}
+	if slide_url != "" {
+		m["slide_url"] = slide_url
+	}
+	if speaker_id != "" {
+		m["speaker_id"] = speaker_id
+	}
+	if spoken_language != "" {
+		m["spoken_language"] = spoken_language
+	}
+	if tags != "" {
+		m["tags"] = tags
+	}
+	if title != "" {
+		m["title"] = title
+	}
+	if video_permission != "" {
+		m["video_permission"] = video_permission
+	}
+	if video_url != "" {
+		m["video_url"] = video_url
+	}
+	r := model.CreateSessionRequest{}
+	if err := r.Populate(m); err != nil {
+		return errOut(err)
+	}
+
+	if err := validator.HTTPCreateSessionRequest.Validate(&r); err != nil {
+		return errOut(err)
+	}
+
+	cl := newClient()
+	res, err := cl.CreateSession(&r)
+	if err != nil {
+		return errOut(err)
+	}
+	if err := printJSON(res); err != nil {
+		return errOut(err)
+	}
+
+	return 0
+}
+
+func doSessionLookup(args cmdargs) int {
+	fs := flag.NewFlagSet("octavctl session lookup", flag.ContinueOnError)
+	var id string
+	fs.StringVar(&id, "id", "", "")
+	prepGlobalFlags(fs)
+	if err := fs.Parse([]string(args)); err != nil {
+		return errOut(err)
+	}
+
+	m := make(map[string]interface{})
+	if id != "" {
+		m["id"] = id
+	}
+	r := model.LookupSessionRequest{}
+	if err := r.Populate(m); err != nil {
+		return errOut(err)
+	}
+
+	if err := validator.HTTPLookupSessionRequest.Validate(&r); err != nil {
+		return errOut(err)
+	}
+
+	cl := newClient()
+	res, err := cl.LookupSession(&r)
+	if err != nil {
+		return errOut(err)
+	}
+	if err := printJSON(res); err != nil {
+		return errOut(err)
+	}
+
+	return 0
+}
+
+func doSessionDelete(args cmdargs) int {
+	fs := flag.NewFlagSet("octavctl session delete", flag.ContinueOnError)
+	var id string
+	fs.StringVar(&id, "id", "", "")
+	prepGlobalFlags(fs)
+	if err := fs.Parse([]string(args)); err != nil {
+		return errOut(err)
+	}
+
+	m := make(map[string]interface{})
+	if id != "" {
+		m["id"] = id
+	}
+	r := model.DeleteSessionRequest{}
+	if err := r.Populate(m); err != nil {
+		return errOut(err)
+	}
+
+	if err := validator.HTTPDeleteSessionRequest.Validate(&r); err != nil {
+		return errOut(err)
+	}
+
+	cl := newClient()
+	if err := cl.DeleteSession(&r); err != nil {
+		return errOut(err)
+	}
+
+	return 0
+}
+
+func doSessionSubcmd(args cmdargs) int {
+	switch v := args.Get(0); v {
+	case "create":
+		return doSessionCreate(args.WithFrontPopped())
+	case "lookup":
+		return doSessionLookup(args.WithFrontPopped())
+	case "delete":
+		return doSessionDelete(args.WithFrontPopped())
 	default:
 		log.Printf("unimplemented (conference): %s", v)
 		return 1
@@ -626,6 +1024,10 @@ func doSubcmd(args cmdargs) int {
 		return doConferenceSubcmd(args.WithFrontPopped())
 	case "venue":
 		return doVenueSubcmd(args.WithFrontPopped())
+	case "room":
+		return doRoomSubcmd(args.WithFrontPopped())
+	case "session":
+		return doSessionSubcmd(args.WithFrontPopped())
 	default:
 		log.Printf("unimplemented (conference): %s", v)
 		return 1

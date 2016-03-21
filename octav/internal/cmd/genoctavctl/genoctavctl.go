@@ -310,6 +310,10 @@ func processCmd(ctx *genctx, cmd Cmd) error {
 }
 
 func toMethodName(s []string) string {
+	if len(s) == 0 {
+		return ""
+	}
+
 	buf := bytes.Buffer{}
 	for _, v := range s {
 		buf.WriteRune(unicode.ToUpper(rune(v[0])))
