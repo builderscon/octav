@@ -63,8 +63,11 @@ func (l *l10nvars) Set(v string) error {
 	return nil
 }
 
-func newClient() *client.Client {
-	return client.New(endpoint)
+func newClient() (*client.Client, error) {
+	if endpoint == "" {
+		return nil, errors.New("-endpoint is required")
+	}
+	return client.New(endpoint), nil
 }
 
 type cmdargs []string
@@ -175,7 +178,10 @@ func doConferenceCreate(args cmdargs) int {
 		return errOut(err)
 	}
 
-	cl := newClient()
+	cl, err := newClient()
+	if err != nil {
+		return errOut(err)
+	}
 	res, err := cl.CreateConference(&r)
 	if err != nil {
 		return errOut(err)
@@ -209,7 +215,10 @@ func doConferenceLookup(args cmdargs) int {
 		return errOut(err)
 	}
 
-	cl := newClient()
+	cl, err := newClient()
+	if err != nil {
+		return errOut(err)
+	}
 	res, err := cl.LookupConference(&r)
 	if err != nil {
 		return errOut(err)
@@ -243,7 +252,10 @@ func doConferenceDelete(args cmdargs) int {
 		return errOut(err)
 	}
 
-	cl := newClient()
+	cl, err := newClient()
+	if err != nil {
+		return errOut(err)
+	}
 	if err := cl.DeleteConference(&r); err != nil {
 		return errOut(err)
 	}
@@ -293,7 +305,10 @@ func doConferenceList(args cmdargs) int {
 		return errOut(err)
 	}
 
-	cl := newClient()
+	cl, err := newClient()
+	if err != nil {
+		return errOut(err)
+	}
 	res, err := cl.ListConference(&r)
 	if err != nil {
 		return errOut(err)
@@ -332,7 +347,10 @@ func doConferenceDatesAdd(args cmdargs) int {
 		return errOut(err)
 	}
 
-	cl := newClient()
+	cl, err := newClient()
+	if err != nil {
+		return errOut(err)
+	}
 	if err := cl.AddConferenceDates(&r); err != nil {
 		return errOut(err)
 	}
@@ -367,7 +385,10 @@ func doConferenceDatesDelete(args cmdargs) int {
 		return errOut(err)
 	}
 
-	cl := newClient()
+	cl, err := newClient()
+	if err != nil {
+		return errOut(err)
+	}
 	if err := cl.DeleteConferenceDates(&r); err != nil {
 		return errOut(err)
 	}
@@ -415,7 +436,10 @@ func doConferenceAdminAdd(args cmdargs) int {
 		return errOut(err)
 	}
 
-	cl := newClient()
+	cl, err := newClient()
+	if err != nil {
+		return errOut(err)
+	}
 	if err := cl.AddConferenceAdmin(&r); err != nil {
 		return errOut(err)
 	}
@@ -450,7 +474,10 @@ func doConferenceAdminDelete(args cmdargs) int {
 		return errOut(err)
 	}
 
-	cl := newClient()
+	cl, err := newClient()
+	if err != nil {
+		return errOut(err)
+	}
 	if err := cl.DeleteConferenceAdmin(&r); err != nil {
 		return errOut(err)
 	}
@@ -529,7 +556,10 @@ func doVenueCreate(args cmdargs) int {
 		return errOut(err)
 	}
 
-	cl := newClient()
+	cl, err := newClient()
+	if err != nil {
+		return errOut(err)
+	}
 	res, err := cl.CreateVenue(&r)
 	if err != nil {
 		return errOut(err)
@@ -568,7 +598,10 @@ func doVenueList(args cmdargs) int {
 		return errOut(err)
 	}
 
-	cl := newClient()
+	cl, err := newClient()
+	if err != nil {
+		return errOut(err)
+	}
 	res, err := cl.ListVenue(&r)
 	if err != nil {
 		return errOut(err)
@@ -602,7 +635,10 @@ func doVenueLookup(args cmdargs) int {
 		return errOut(err)
 	}
 
-	cl := newClient()
+	cl, err := newClient()
+	if err != nil {
+		return errOut(err)
+	}
 	res, err := cl.LookupVenue(&r)
 	if err != nil {
 		return errOut(err)
@@ -636,7 +672,10 @@ func doVenueDelete(args cmdargs) int {
 		return errOut(err)
 	}
 
-	cl := newClient()
+	cl, err := newClient()
+	if err != nil {
+		return errOut(err)
+	}
 	if err := cl.DeleteVenue(&r); err != nil {
 		return errOut(err)
 	}
@@ -693,7 +732,10 @@ func doRoomCreate(args cmdargs) int {
 		return errOut(err)
 	}
 
-	cl := newClient()
+	cl, err := newClient()
+	if err != nil {
+		return errOut(err)
+	}
 	res, err := cl.CreateRoom(&r)
 	if err != nil {
 		return errOut(err)
@@ -737,7 +779,10 @@ func doRoomList(args cmdargs) int {
 		return errOut(err)
 	}
 
-	cl := newClient()
+	cl, err := newClient()
+	if err != nil {
+		return errOut(err)
+	}
 	res, err := cl.ListRoom(&r)
 	if err != nil {
 		return errOut(err)
@@ -771,7 +816,10 @@ func doRoomLookup(args cmdargs) int {
 		return errOut(err)
 	}
 
-	cl := newClient()
+	cl, err := newClient()
+	if err != nil {
+		return errOut(err)
+	}
 	res, err := cl.LookupRoom(&r)
 	if err != nil {
 		return errOut(err)
@@ -805,7 +853,10 @@ func doRoomDelete(args cmdargs) int {
 		return errOut(err)
 	}
 
-	cl := newClient()
+	cl, err := newClient()
+	if err != nil {
+		return errOut(err)
+	}
 	if err := cl.DeleteRoom(&r); err != nil {
 		return errOut(err)
 	}
@@ -927,7 +978,10 @@ func doSessionCreate(args cmdargs) int {
 		return errOut(err)
 	}
 
-	cl := newClient()
+	cl, err := newClient()
+	if err != nil {
+		return errOut(err)
+	}
 	res, err := cl.CreateSession(&r)
 	if err != nil {
 		return errOut(err)
@@ -961,7 +1015,10 @@ func doSessionLookup(args cmdargs) int {
 		return errOut(err)
 	}
 
-	cl := newClient()
+	cl, err := newClient()
+	if err != nil {
+		return errOut(err)
+	}
 	res, err := cl.LookupSession(&r)
 	if err != nil {
 		return errOut(err)
@@ -995,7 +1052,10 @@ func doSessionDelete(args cmdargs) int {
 		return errOut(err)
 	}
 
-	cl := newClient()
+	cl, err := newClient()
+	if err != nil {
+		return errOut(err)
+	}
 	if err := cl.DeleteSession(&r); err != nil {
 		return errOut(err)
 	}

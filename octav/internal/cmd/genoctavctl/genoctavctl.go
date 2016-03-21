@@ -186,8 +186,11 @@ func (l *l10nvars) Set(v string) error {
 	return nil
 }
 
-func newClient() *client.Client {
-	return client.New(endpoint)
+func newClient() (*client.Client, error) {
+	if endpoint == "" {
+		return nil, errors.New("-endpoint is required")
+	}
+	return client.New(endpoint), nil
 }
 
 type cmdargs []string
@@ -426,7 +429,10 @@ func processAction(ctx *genctx, action Action) error {
 	buf.WriteString("\nreturn errOut(err)")
 	buf.WriteString("\n}")
 
-	buf.WriteString("\n\ncl := newClient()")
+	buf.WriteString("\n\ncl, err := newClient()")
+	buf.WriteString("\nif err != nil {")
+	buf.WriteString("\nreturn errOut(err)")
+	buf.WriteString("\n}")
 	targetSchema := link.TargetSchema
 	if targetSchema == nil {
 		fmt.Fprintf(&buf, "\nif err := cl.%s(&r); err != nil {", guessClientMethodName(transport))
