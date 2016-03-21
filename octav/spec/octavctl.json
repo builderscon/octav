@@ -1,0 +1,32 @@
+{
+  "name": "octavctl",
+  "subcmds": [
+    {
+      "name": "conference",
+      "actions": ["create", "lookup", "delete"],
+      "subcmds": [
+        {
+          "name": "dates",
+          "actions": [
+            {
+              "name": "add",
+              "args_hint": {
+                "dates": { "type": "stringList" }
+              }
+            },
+            {
+              "name": "delete",
+              "args_hint": {
+                "dates": { "type": "stringList" }
+              }
+            }
+          ]
+        },
+        {
+          "name": "admin",
+          "actions": ["add", "delete"]
+        }
+      ]
+    }
+  ]
+}

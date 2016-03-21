@@ -15,9 +15,6 @@ import (
 	"github.com/builderscon/octav/octav/validator"
 )
 
-// TODO: We should consider auto-generating this whole file,
-// but I'm not sure if we can do it from the JSON Hyper Schema file :/
-
 // Global options
 var endpoint string
 
@@ -66,10 +63,6 @@ func (l *l10nvars) Set(v string) error {
 	return nil
 }
 
-func main() {
-	os.Exit(_main())
-}
-
 func newClient() *client.Client {
 	return client.New(endpoint)
 }
@@ -94,15 +87,36 @@ func (a cmdargs) Len() int {
 	return len(a)
 }
 
-func _main() int {
-	args := cmdargs(os.Args).WithFrontPopped()
-	switch args.Get(0) {
-	case "conference":
-		return doConferenceSubcmd(args.WithFrontPopped())
-	default:
-		log.Printf("unimplemented (main)")
-		return 1
+type stringList []string
+
+func (l *stringList) Set(s string) error {
+	*l = append(*l, s)
+	return nil
+}
+
+func (l *stringList) String() string {
+	buf := bytes.Buffer{}
+	for i, v := range *l {
+		buf.WriteString(v)
+		if i != len(*l)-1 {
+			buf.WriteByte(' ')
+		}
 	}
+	return buf.String()
+}
+
+func (l stringList) Get() interface{} {
+	return []string(l)
+}
+
+func main() {
+	args := cmdargs(os.Args).WithFrontPopped()
+	os.Exit(doSubcmd(args))
+}
+
+func errOut(err error) int {
+	log.Printf("%s", err)
+	return 1
 }
 
 func printJSON(v interface{}) error {
@@ -115,57 +129,57 @@ func printJSON(v interface{}) error {
 	return nil
 }
 
-func doConferenceSubcmd(args cmdargs) int {
-	switch v := args.Get(0); v {
-	case "create":
-		return doConferenceCreate(args.WithFrontPopped())
-	case "lookup":
-		return doConferenceLookup(args.WithFrontPopped())
-	case "dates":
-		return doConferenceDatesSubcmd(args.WithFrontPopped())
-	default:
-		log.Printf("unimplemented (conference): %s", v)
-		return 1
-	}
-}
-
 func doConferenceCreate(args cmdargs) int {
-	l10n := l10nvars{}
 	fs := flag.NewFlagSet("octavctl conference create", flag.ContinueOnError)
-	fs.Var(&l10n, "l10n", "localized strings")
+	var description string
+	fs.StringVar(&description, "description", "", "")
+	var slug string
+	fs.StringVar(&slug, "slug", "", "")
+	var sub_title string
+	fs.StringVar(&sub_title, "sub_title", "", "")
+	var title string
+	fs.StringVar(&title, "title", "", "")
+	var user_id string
+	fs.StringVar(&user_id, "user_id", "", "")
 	prepGlobalFlags(fs)
 	if err := fs.Parse([]string(args)); err != nil {
-		log.Printf("%s", err)
-		return 1
+		return errOut(err)
 	}
 
-	log.Printf("%#v", l10n)
-	/*
-		cl := newClient()
-		conf, err := cl.LookupConference(&model.LookupConferenceRequest{
-			ID: id,
-		})
-		if err != nil {
-			log.Printf("%s", err)
-			return 1
-		}
+	m := make(map[string]interface{})
+	m["description"] = description
+	m["slug"] = slug
+	m["sub_title"] = sub_title
+	m["title"] = title
+	m["user_id"] = user_id
+	r := model.CreateConferenceRequest{}
+	if err := r.Populate(m); err != nil {
+		return errOut(err)
+	}
 
-		if err := printJSON(conf); err != nil {
-			log.Printf("%s", err)
-			return 1
-		}
-	*/
+	if err := validator.HTTPCreateConferenceRequest.Validate(r); err != nil {
+		return errOut(err)
+	}
+
+	cl := newClient()
+	res, err := cl.CreateConference(&r)
+	if err != nil {
+		return errOut(err)
+	}
+	if err := printJSON(res); err != nil {
+		return errOut(err)
+	}
+
 	return 0
 }
 
 func doConferenceLookup(args cmdargs) int {
-	var id string
 	fs := flag.NewFlagSet("octavctl conference lookup", flag.ContinueOnError)
-	fs.StringVar(&id, "id", "", "ID of the conference to lookup")
+	var id string
+	fs.StringVar(&id, "id", "", "")
 	prepGlobalFlags(fs)
 	if err := fs.Parse([]string(args)); err != nil {
-		log.Printf("%s", err)
-		return 1
+		return errOut(err)
 	}
 
 	m := make(map[string]interface{})
@@ -174,72 +188,65 @@ func doConferenceLookup(args cmdargs) int {
 	if err := r.Populate(m); err != nil {
 		return errOut(err)
 	}
+
 	if err := validator.HTTPLookupConferenceRequest.Validate(r); err != nil {
 		return errOut(err)
 	}
 
 	cl := newClient()
-	conf, err := cl.LookupConference(&r)
+	res, err := cl.LookupConference(&r)
 	if err != nil {
 		return errOut(err)
 	}
-
-	if err := printJSON(conf); err != nil {
+	if err := printJSON(res); err != nil {
 		return errOut(err)
 	}
 
 	return 0
 }
 
-func doConferenceDatesSubcmd(args cmdargs) int {
-	switch args.Get(0) {
-	case "add":
-		return doConferenceDatesAdd(args.WithFrontPopped())
-	case "delete":
-		return doConferenceDatesDelete(args.WithFrontPopped())
-	default:
-		log.Printf("unimplemented (conference dates)")
+func doConferenceDelete(args cmdargs) int {
+	fs := flag.NewFlagSet("octavctl conference delete", flag.ContinueOnError)
+	var id string
+	fs.StringVar(&id, "id", "", "")
+	prepGlobalFlags(fs)
+	if err := fs.Parse([]string(args)); err != nil {
+		return errOut(err)
 	}
 
-	return 1
-}
-
-type stringList []string
-func (l *stringList) Set(s string) error {
-	*l = append(*l, s)
-	return nil
-}
-
-func (l *stringList) String() string {
-	buf := bytes.Buffer{}
-	for i, v := range *l {
-		buf.WriteString(v)
-		if i != len(*l) - 1 {
-			buf.WriteByte(' ')
-		}
+	m := make(map[string]interface{})
+	m["id"] = id
+	r := model.DeleteConferenceRequest{}
+	if err := r.Populate(m); err != nil {
+		return errOut(err)
 	}
-	return buf.String()
-}
 
-func (l stringList) List() []string {
-	return []string(l)
+	if err := validator.HTTPDeleteConferenceRequest.Validate(r); err != nil {
+		return errOut(err)
+	}
+
+	cl := newClient()
+	if err := cl.DeleteConference(&r); err != nil {
+		return errOut(err)
+	}
+
+	return 0
 }
 
 func doConferenceDatesAdd(args cmdargs) int {
+	fs := flag.NewFlagSet("octavctl conference dates add", flag.ContinueOnError)
 	var id string
-	fs := flag.NewFlagSet("octavctl conference add dates", flag.ContinueOnError)
-	fs.StringVar(&id, "id", "", "ID of the target conference")
-	var dtlist stringList
-	fs.Var(&dtlist, "date", "Date(s) to add (may be repeated)")
+	fs.StringVar(&id, "id", "", "")
+	var dates stringList
+	fs.Var(&dates, "dates", "")
 	prepGlobalFlags(fs)
 	if err := fs.Parse([]string(args)); err != nil {
-		log.Printf("%s", err)
-		return 1
+		return errOut(err)
 	}
 
 	m := make(map[string]interface{})
 	m["conference_id"] = id
-	m["dates"] = dtlist.List()
+	m["dates"] = dates.Get()
 	r := model.AddConferenceDatesRequest{}
 	if err := r.Populate(m); err != nil {
 		return errOut(err)
@@ -248,6 +255,7 @@ func doConferenceDatesAdd(args cmdargs) int {
 	if err := validator.HTTPAddConferenceDatesRequest.Validate(r); err != nil {
 		return errOut(err)
 	}
+
 	cl := newClient()
 	if err := cl.AddConferenceDates(&r); err != nil {
 		return errOut(err)
@@ -256,17 +264,12 @@ func doConferenceDatesAdd(args cmdargs) int {
 	return 0
 }
 
-func errOut(err error) int {
-	log.Printf("%s", err)
-	return 1
-}
-
 func doConferenceDatesDelete(args cmdargs) int {
+	fs := flag.NewFlagSet("octavctl conference dates delete", flag.ContinueOnError)
 	var id string
-	fs := flag.NewFlagSet("octavctl conference delete dates", flag.ContinueOnError)
-	fs.StringVar(&id, "id", "", "ID of the target conference")
-	var dtlist stringList
-	fs.Var(&dtlist, "date", "Date(s) to delete (may be repeated)")
+	fs.StringVar(&id, "id", "", "")
+	var dates stringList
+	fs.Var(&dates, "dates", "")
 	prepGlobalFlags(fs)
 	if err := fs.Parse([]string(args)); err != nil {
 		return errOut(err)
@@ -274,14 +277,11 @@ func doConferenceDatesDelete(args cmdargs) int {
 
 	m := make(map[string]interface{})
 	m["conference_id"] = id
-	m["dates"] = dtlist.List()
-
+	m["dates"] = dates.Get()
 	r := model.DeleteConferenceDatesRequest{}
 	if err := r.Populate(m); err != nil {
 		return errOut(err)
 	}
-
-log.Printf("%#v", r)
 
 	if err := validator.HTTPDeleteConferenceDatesRequest.Validate(r); err != nil {
 		return errOut(err)
@@ -292,5 +292,123 @@ log.Printf("%#v", r)
 		return errOut(err)
 	}
 
+	return 0
+}
+
+func doConferenceDatesSubcmd(args cmdargs) int {
+	switch v := args.Get(0); v {
+	case "add":
+		return doConferenceDatesAdd(args.WithFrontPopped())
+	case "delete":
+		return doConferenceDatesDelete(args.WithFrontPopped())
+	default:
+		log.Printf("unimplemented (conference): %s", v)
+		return 1
+	}
+	return 0
+}
+
+func doConferenceAdminAdd(args cmdargs) int {
+	fs := flag.NewFlagSet("octavctl conference admin add", flag.ContinueOnError)
+	var id string
+	fs.StringVar(&id, "id", "", "")
+	var user_id string
+	fs.StringVar(&user_id, "user_id", "", "")
+	prepGlobalFlags(fs)
+	if err := fs.Parse([]string(args)); err != nil {
+		return errOut(err)
+	}
+
+	m := make(map[string]interface{})
+	m["conference_id"] = id
+	m["user_id"] = user_id
+	r := model.AddConferenceAdminRequest{}
+	if err := r.Populate(m); err != nil {
+		return errOut(err)
+	}
+
+	if err := validator.HTTPAddConferenceAdminRequest.Validate(r); err != nil {
+		return errOut(err)
+	}
+
+	cl := newClient()
+	if err := cl.AddConferenceAdmin(&r); err != nil {
+		return errOut(err)
+	}
+
+	return 0
+}
+
+func doConferenceAdminDelete(args cmdargs) int {
+	fs := flag.NewFlagSet("octavctl conference admin delete", flag.ContinueOnError)
+	var id string
+	fs.StringVar(&id, "id", "", "")
+	var user_id string
+	fs.StringVar(&user_id, "user_id", "", "")
+	prepGlobalFlags(fs)
+	if err := fs.Parse([]string(args)); err != nil {
+		return errOut(err)
+	}
+
+	m := make(map[string]interface{})
+	m["conference_id"] = id
+	m["user_id"] = user_id
+	r := model.DeleteConferenceAdminRequest{}
+	if err := r.Populate(m); err != nil {
+		return errOut(err)
+	}
+
+	if err := validator.HTTPDeleteConferenceAdminRequest.Validate(r); err != nil {
+		return errOut(err)
+	}
+
+	cl := newClient()
+	if err := cl.DeleteConferenceAdmin(&r); err != nil {
+		return errOut(err)
+	}
+
+	return 0
+}
+
+func doConferenceAdminSubcmd(args cmdargs) int {
+	switch v := args.Get(0); v {
+	case "add":
+		return doConferenceAdminAdd(args.WithFrontPopped())
+	case "delete":
+		return doConferenceAdminDelete(args.WithFrontPopped())
+	default:
+		log.Printf("unimplemented (conference): %s", v)
+		return 1
+	}
+	return 0
+}
+
+func doConferenceSubcmd(args cmdargs) int {
+	switch v := args.Get(0); v {
+	case "create":
+		return doConferenceCreate(args.WithFrontPopped())
+	case "lookup":
+		return doConferenceLookup(args.WithFrontPopped())
+	case "delete":
+		return doConferenceDelete(args.WithFrontPopped())
+	case "dates":
+		return doConferenceDatesSubcmd(args.WithFrontPopped())
+	case "admin":
+		return doConferenceAdminSubcmd(args.WithFrontPopped())
+	default:
+		log.Printf("unimplemented (conference): %s", v)
+		return 1
+	}
+	return 0
+}
+
+func doSubcmd(args cmdargs) int {
+	switch v := args.Get(0); v {
+	case "conference":
+		return doConferenceSubcmd(args.WithFrontPopped())
+	default:
+		log.Printf("unimplemented (conference): %s", v)
+		return 1
+	}
 	return 0
 }

@@ -577,7 +577,7 @@
       "title": "Add conference dates",
       "rel": "update",
       "method": "POST",
-      "href": "/conference/date/add",
+      "href": "/conference/dates/add",
       "encType": "application/json",
       "schema": {
         "hsup.type": "model.AddConferenceDatesRequest",
@@ -592,7 +592,7 @@
       "title": "Delete conference dates",
       "rel": "delete",
       "method": "POST",
-      "href": "/conference/date/delete",
+      "href": "/conference/dates/delete",
       "ecnType": "application/json",
       "schema": {
         "hsup.type": "model.DeleteConferenceDatesRequest",

@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"reflect"
 	"time"
 )
 
@@ -200,6 +201,24 @@ func (cd *ConferenceDate) Parse(s string) error {
 	return nil
 }
 
+type ErrInvalidConferenceDateType struct {
+	Type reflect.Type
+}
+
+func (e ErrInvalidConferenceDateType) Error() string {
+	buf := bytes.Buffer{}
+	buf.WriteString("invalid value type to parse for conference date: ")
+
+	var ts string
+	if e.Type == nil {
+		ts = "(nil)"
+	} else {
+		ts = e.Type.String()
+	}
+	buf.WriteString(ts)
+	return buf.String()
+}
+
 func (cdl *ConferenceDateList) Extract(v interface{}) error {
 	var ret []ConferenceDate
 	switch v.(type) {
@@ -219,7 +238,7 @@ func (cdl *ConferenceDateList) Extract(v interface{}) error {
 			switch s.(type) {
 			case string:
 			default:
-				return errors.New("invalid value to parse for conference date")
+				return ErrInvalidConferenceDateType{Type: reflect.TypeOf(s)}
 			}
 
 			var dt ConferenceDate
@@ -229,7 +248,7 @@ func (cdl *ConferenceDateList) Extract(v interface{}) error {
 			ret[i] = dt
 		}
 	default:
-		return errors.New("invaid value to parse for conference date")
+		return ErrInvalidConferenceDateType{Type: reflect.TypeOf(v)}
 	}
 
 	*cdl = ret

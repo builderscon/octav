@@ -1,7 +1,7 @@
 BIN_DIR          = _bin
 EXTRA_TAGS       =
 INTERNAL_BIN_DIR = _internal_bin
-INTERNAL_CMDS    = gendb genmodel gentransport
+INTERNAL_CMDS    = gendb genmodel gentransport genoctavctl
 GCLOUD_CONFIG_DIR = .gcloud
 CLOUDSQL_DIR=$(GCLOUD_CONFIG_DIR)/sql
 CLOUDSQL_ADDRESS_FILE = $(CLOUDSQL_DIR)/address
