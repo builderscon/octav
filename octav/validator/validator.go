@@ -84,7 +84,6 @@ var R32 jsval.Constraint
 var R33 jsval.Constraint
 var R34 jsval.Constraint
 var R35 jsval.Constraint
-var R36 jsval.Constraint
 
 func init() {
 	M = &jsval.ConstraintMap{}
@@ -441,8 +440,7 @@ func init() {
 			jsval.EmptyConstraint,
 		)
 	R34 = jsval.String().RegexpString("^[a-fA-F0-9-]+$")
-	R35 = jsval.String().RegexpString("^[a-fA-F0-9-]+$").Default("")
-	R36 = jsval.Object().
+	R35 = jsval.Object().
 		AdditionalProperties(
 			jsval.EmptyConstraint,
 		).
@@ -493,8 +491,7 @@ func init() {
 	M.SetReference("#/definitions/user", R32)
 	M.SetReference("#/definitions/user_array", R33)
 	M.SetReference("#/definitions/uuid", R34)
-	M.SetReference("#/definitions/uuidDefaultEmpty", R35)
-	M.SetReference("#/definitions/venue", R36)
+	M.SetReference("#/definitions/venue", R35)
 	HTTPAddConferenceAdminRequest = jsval.New().
 		SetConstraintMap(M).
 		SetRoot(
@@ -1157,7 +1154,7 @@ func init() {
 				).
 				AddProp(
 					"since",
-					jsval.Reference(M).RefersTo("#/definitions/uuidDefaultEmpty"),
+					jsval.Reference(M).RefersTo("#/definitions/uuid"),
 				),
 		)
 
@@ -1256,7 +1253,7 @@ func init() {
 				).
 				AddProp(
 					"since",
-					jsval.Reference(M).RefersTo("#/definitions/uuidDefaultEmpty"),
+					jsval.Reference(M).RefersTo("#/definitions/uuid"),
 				),
 		)
 

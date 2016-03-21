@@ -173,10 +173,10 @@ type DeleteConferenceRequest struct {
 
 // +transport
 type ListConferencesRequest struct {
-	RangeEnd   jsval.MaybeString `json:"range_end" urlenc:"range_end,omitempty,string"`
-	RangeStart jsval.MaybeString `json:"range_start" urlenc:"range_start,omitempty,string"`
-	Since      jsval.MaybeString `json:"since" urlenc:"since,omitempty,string"`
-	Lang       jsval.MaybeString `json:"lang" urlenc:"lang,omitempty,string"`
+	RangeEnd   jsval.MaybeString `json:"range_end,omitempty" urlenc:"range_end,omitempty,string"`
+	RangeStart jsval.MaybeString `json:"range_start,omitempty" urlenc:"range_start,omitempty,string"`
+	Since      jsval.MaybeString `json:"since,omitempty" urlenc:"since,omitempty,string"`
+	Lang       jsval.MaybeString `json:"lang,omitempty" urlenc:"lang,omitempty,string"`
 	Limit      jsval.MaybeInt    `json:"limit,omitempty" urlenc:"limit,omitempty,int64"`
 }
 

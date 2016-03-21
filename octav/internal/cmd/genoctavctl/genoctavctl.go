@@ -418,7 +418,7 @@ func processAction(ctx *genctx, action Action) error {
 	buf.WriteString("\n}")
 
 	validatorName := guessValidatorName(transport)
-	fmt.Fprintf(&buf, "\n\nif err := %s.Validate(r); err != nil {", validatorName)
+	fmt.Fprintf(&buf, "\n\nif err := %s.Validate(&r); err != nil {", validatorName)
 	buf.WriteString("\nreturn errOut(err)")
 	buf.WriteString("\n}")
 

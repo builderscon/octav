@@ -61,7 +61,7 @@ func (c *Client) AddConferenceDates(in *model.AddConferenceDatesRequest) (err er
 		g := pdebug.Marker("client.AddConferenceDates").BindError(&err)
 		defer g.End()
 	}
-	u, err := url.Parse(c.Endpoint + "/v1/conference/date/add")
+	u, err := url.Parse(c.Endpoint + "/v1/conference/dates/add")
 	if err != nil {
 		return err
 	}
@@ -310,7 +310,7 @@ func (c *Client) DeleteConferenceDates(in *model.DeleteConferenceDatesRequest) (
 		g := pdebug.Marker("client.DeleteConferenceDates").BindError(&err)
 		defer g.End()
 	}
-	u, err := url.Parse(c.Endpoint + "/v1/conference/date/delete")
+	u, err := url.Parse(c.Endpoint + "/v1/conference/dates/delete")
 	if err != nil {
 		return err
 	}

@@ -171,7 +171,7 @@ func doConferenceCreate(args cmdargs) int {
 		return errOut(err)
 	}
 
-	if err := validator.HTTPCreateConferenceRequest.Validate(r); err != nil {
+	if err := validator.HTTPCreateConferenceRequest.Validate(&r); err != nil {
 		return errOut(err)
 	}
 
@@ -205,7 +205,7 @@ func doConferenceLookup(args cmdargs) int {
 		return errOut(err)
 	}
 
-	if err := validator.HTTPLookupConferenceRequest.Validate(r); err != nil {
+	if err := validator.HTTPLookupConferenceRequest.Validate(&r); err != nil {
 		return errOut(err)
 	}
 
@@ -239,12 +239,66 @@ func doConferenceDelete(args cmdargs) int {
 		return errOut(err)
 	}
 
-	if err := validator.HTTPDeleteConferenceRequest.Validate(r); err != nil {
+	if err := validator.HTTPDeleteConferenceRequest.Validate(&r); err != nil {
 		return errOut(err)
 	}
 
 	cl := newClient()
 	if err := cl.DeleteConference(&r); err != nil {
+		return errOut(err)
+	}
+
+	return 0
+}
+
+func doConferenceList(args cmdargs) int {
+	fs := flag.NewFlagSet("octavctl conference list", flag.ContinueOnError)
+	var lang string
+	fs.StringVar(&lang, "lang", "", "")
+	var limit int64
+	fs.Int64Var(&limit, "limit", 0, "")
+	var range_end string
+	fs.StringVar(&range_end, "range_end", "", "")
+	var range_start string
+	fs.StringVar(&range_start, "range_start", "", "")
+	var since string
+	fs.StringVar(&since, "since", "", "")
+	prepGlobalFlags(fs)
+	if err := fs.Parse([]string(args)); err != nil {
+		return errOut(err)
+	}
+
+	m := make(map[string]interface{})
+	if lang != "" {
+		m["lang"] = lang
+	}
+	if limit != 0 {
+		m["limit"] = limit
+	}
+	if range_end != "" {
+		m["range_end"] = range_end
+	}
+	if range_start != "" {
+		m["range_start"] = range_start
+	}
+	if since != "" {
+		m["since"] = since
+	}
+	r := model.ListConferencesRequest{}
+	if err := r.Populate(m); err != nil {
+		return errOut(err)
+	}
+
+	if err := validator.HTTPListConferencesRequest.Validate(&r); err != nil {
+		return errOut(err)
+	}
+
+	cl := newClient()
+	res, err := cl.ListConferences(&r)
+	if err != nil {
+		return errOut(err)
+	}
+	if err := printJSON(res); err != nil {
 		return errOut(err)
 	}
 
@@ -274,7 +328,7 @@ func doConferenceDatesAdd(args cmdargs) int {
 		return errOut(err)
 	}
 
-	if err := validator.HTTPAddConferenceDatesRequest.Validate(r); err != nil {
+	if err := validator.HTTPAddConferenceDatesRequest.Validate(&r); err != nil {
 		return errOut(err)
 	}
 
@@ -309,7 +363,7 @@ func doConferenceDatesDelete(args cmdargs) int {
 		return errOut(err)
 	}
 
-	if err := validator.HTTPDeleteConferenceDatesRequest.Validate(r); err != nil {
+	if err := validator.HTTPDeleteConferenceDatesRequest.Validate(&r); err != nil {
 		return errOut(err)
 	}
 
@@ -357,7 +411,7 @@ func doConferenceAdminAdd(args cmdargs) int {
 		return errOut(err)
 	}
 
-	if err := validator.HTTPAddConferenceAdminRequest.Validate(r); err != nil {
+	if err := validator.HTTPAddConferenceAdminRequest.Validate(&r); err != nil {
 		return errOut(err)
 	}
 
@@ -392,7 +446,7 @@ func doConferenceAdminDelete(args cmdargs) int {
 		return errOut(err)
 	}
 
-	if err := validator.HTTPDeleteConferenceAdminRequest.Validate(r); err != nil {
+	if err := validator.HTTPDeleteConferenceAdminRequest.Validate(&r); err != nil {
 		return errOut(err)
 	}
 
@@ -425,6 +479,8 @@ func doConferenceSubcmd(args cmdargs) int {
 		return doConferenceLookup(args.WithFrontPopped())
 	case "delete":
 		return doConferenceDelete(args.WithFrontPopped())
+	case "list":
+		return doConferenceList(args.WithFrontPopped())
 	case "dates":
 		return doConferenceDatesSubcmd(args.WithFrontPopped())
 	case "admin":
@@ -469,7 +525,7 @@ func doVenueCreate(args cmdargs) int {
 		return errOut(err)
 	}
 
-	if err := validator.HTTPCreateVenueRequest.Validate(r); err != nil {
+	if err := validator.HTTPCreateVenueRequest.Validate(&r); err != nil {
 		return errOut(err)
 	}
 
@@ -503,7 +559,7 @@ func doVenueLookup(args cmdargs) int {
 		return errOut(err)
 	}
 
-	if err := validator.HTTPLookupVenueRequest.Validate(r); err != nil {
+	if err := validator.HTTPLookupVenueRequest.Validate(&r); err != nil {
 		return errOut(err)
 	}
 
@@ -537,7 +593,7 @@ func doVenueDelete(args cmdargs) int {
 		return errOut(err)
 	}
 
-	if err := validator.HTTPDeleteVenueRequest.Validate(r); err != nil {
+	if err := validator.HTTPDeleteVenueRequest.Validate(&r); err != nil {
 		return errOut(err)
 	}
 
