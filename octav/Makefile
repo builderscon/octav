@@ -74,7 +74,7 @@ run: build
 
 clean:
 	-rm _internal_bin/*
-	-rm _bin/*
+	-rm -rf _bin/*
 
 init_db:
 	mysql -u root -e "DROP DATABASE IF EXISTS $(OCTAV_DB_NAME)"
