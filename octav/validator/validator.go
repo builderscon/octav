@@ -1252,6 +1252,10 @@ func init() {
 					jsval.Reference(M).RefersTo("#/definitions/language"),
 				).
 				AddProp(
+					"limit",
+					jsval.Reference(M).RefersTo("#/definitions/positiveIntegerDefault10"),
+				).
+				AddProp(
 					"since",
 					jsval.Reference(M).RefersTo("#/definitions/uuid"),
 				),

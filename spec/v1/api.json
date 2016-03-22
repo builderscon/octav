@@ -405,6 +405,7 @@
         "hsup.type": "model.ListVenueRequest",
         "properties": {
           "lang": { "$ref": "#/definitions/language" },
+          "limit": { "$ref": "#/definitions/positiveIntegerDefault10" },
           "since": { "$ref": "#/definitions/uuid" }
         }
       },
