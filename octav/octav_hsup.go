@@ -23,6 +23,14 @@ type Server struct {
 	*mux.Router
 }
 
+// NewContext creates a cteonxt.Context object from the request.
+// If you are using appengine, for example, you probably want to set this
+// function to something that create a context, and then sets
+// the appengine context to it so it can be referred to later.
+var NewContext func(*http.Request) context.Context = func(r *http.Request) context.Context {
+	return context.Background()
+}
+
 func Run(l string) error {
 	return http.ListenAndServe(l, New())
 }
@@ -75,15 +83,15 @@ func httpAddConferenceAdmin(w http.ResponseWriter, r *http.Request) {
 
 	var payload model.AddConferenceAdminRequest
 	if err := json.NewDecoder(r.Body).Decode(&payload); err != nil {
-		httpError(w, `Invalid input`, http.StatusInternalServerError, err)
+		httpError(w, `Invalid JSON input`, http.StatusInternalServerError, err)
 		return
 	}
 
 	if err := validator.HTTPAddConferenceAdminRequest.Validate(&payload); err != nil {
-		httpError(w, `Invalid input`, http.StatusInternalServerError, err)
+		httpError(w, `Invalid input (validation failed)`, http.StatusInternalServerError, err)
 		return
 	}
-	doAddConferenceAdmin(context.Background(), w, r, payload)
+	doAddConferenceAdmin(NewContext(r), w, r, payload)
 }
 
 func httpAddConferenceDates(w http.ResponseWriter, r *http.Request) {
@@ -97,15 +105,15 @@ func httpAddConferenceDates(w http.ResponseWriter, r *http.Request) {
 
 	var payload model.AddConferenceDatesRequest
 	if err := json.NewDecoder(r.Body).Decode(&payload); err != nil {
-		httpError(w, `Invalid input`, http.StatusInternalServerError, err)
+		httpError(w, `Invalid JSON input`, http.StatusInternalServerError, err)
 		return
 	}
 
 	if err := validator.HTTPAddConferenceDatesRequest.Validate(&payload); err != nil {
-		httpError(w, `Invalid input`, http.StatusInternalServerError, err)
+		httpError(w, `Invalid input (validation failed)`, http.StatusInternalServerError, err)
 		return
 	}
-	doAddConferenceDates(context.Background(), w, r, payload)
+	doAddConferenceDates(NewContext(r), w, r, payload)
 }
 
 func httpCreateConference(w http.ResponseWriter, r *http.Request) {
@@ -119,15 +127,15 @@ func httpCreateConference(w http.ResponseWriter, r *http.Request) {
 
 	var payload model.CreateConferenceRequest
 	if err := json.NewDecoder(r.Body).Decode(&payload); err != nil {
-		httpError(w, `Invalid input`, http.StatusInternalServerError, err)
+		httpError(w, `Invalid JSON input`, http.StatusInternalServerError, err)
 		return
 	}
 
 	if err := validator.HTTPCreateConferenceRequest.Validate(&payload); err != nil {
-		httpError(w, `Invalid input`, http.StatusInternalServerError, err)
+		httpError(w, `Invalid input (validation failed)`, http.StatusInternalServerError, err)
 		return
 	}
-	doCreateConference(context.Background(), w, r, payload)
+	doCreateConference(NewContext(r), w, r, payload)
 }
 
 func httpCreateRoom(w http.ResponseWriter, r *http.Request) {
@@ -141,15 +149,15 @@ func httpCreateRoom(w http.ResponseWriter, r *http.Request) {
 
 	var payload model.CreateRoomRequest
 	if err := json.NewDecoder(r.Body).Decode(&payload); err != nil {
-		httpError(w, `Invalid input`, http.StatusInternalServerError, err)
+		httpError(w, `Invalid JSON input`, http.StatusInternalServerError, err)
 		return
 	}
 
 	if err := validator.HTTPCreateRoomRequest.Validate(&payload); err != nil {
-		httpError(w, `Invalid input`, http.StatusInternalServerError, err)
+		httpError(w, `Invalid input (validation failed)`, http.StatusInternalServerError, err)
 		return
 	}
-	doCreateRoom(context.Background(), w, r, payload)
+	doCreateRoom(NewContext(r), w, r, payload)
 }
 
 func httpCreateSession(w http.ResponseWriter, r *http.Request) {
@@ -163,15 +171,15 @@ func httpCreateSession(w http.ResponseWriter, r *http.Request) {
 
 	var payload model.CreateSessionRequest
 	if err := json.NewDecoder(r.Body).Decode(&payload); err != nil {
-		httpError(w, `Invalid input`, http.StatusInternalServerError, err)
+		httpError(w, `Invalid JSON input`, http.StatusInternalServerError, err)
 		return
 	}
 
 	if err := validator.HTTPCreateSessionRequest.Validate(&payload); err != nil {
-		httpError(w, `Invalid input`, http.StatusInternalServerError, err)
+		httpError(w, `Invalid input (validation failed)`, http.StatusInternalServerError, err)
 		return
 	}
-	doCreateSession(context.Background(), w, r, payload)
+	doCreateSession(NewContext(r), w, r, payload)
 }
 
 func httpCreateUser(w http.ResponseWriter, r *http.Request) {
@@ -185,15 +193,15 @@ func httpCreateUser(w http.ResponseWriter, r *http.Request) {
 
 	var payload model.CreateUserRequest
 	if err := json.NewDecoder(r.Body).Decode(&payload); err != nil {
-		httpError(w, `Invalid input`, http.StatusInternalServerError, err)
+		httpError(w, `Invalid JSON input`, http.StatusInternalServerError, err)
 		return
 	}
 
 	if err := validator.HTTPCreateUserRequest.Validate(&payload); err != nil {
-		httpError(w, `Invalid input`, http.StatusInternalServerError, err)
+		httpError(w, `Invalid input (validation failed)`, http.StatusInternalServerError, err)
 		return
 	}
-	doCreateUser(context.Background(), w, r, payload)
+	doCreateUser(NewContext(r), w, r, payload)
 }
 
 func httpCreateVenue(w http.ResponseWriter, r *http.Request) {
@@ -207,15 +215,15 @@ func httpCreateVenue(w http.ResponseWriter, r *http.Request) {
 
 	var payload model.CreateVenueRequest
 	if err := json.NewDecoder(r.Body).Decode(&payload); err != nil {
-		httpError(w, `Invalid input`, http.StatusInternalServerError, err)
+		httpError(w, `Invalid JSON input`, http.StatusInternalServerError, err)
 		return
 	}
 
 	if err := validator.HTTPCreateVenueRequest.Validate(&payload); err != nil {
-		httpError(w, `Invalid input`, http.StatusInternalServerError, err)
+		httpError(w, `Invalid input (validation failed)`, http.StatusInternalServerError, err)
 		return
 	}
-	doCreateVenue(context.Background(), w, r, payload)
+	doCreateVenue(NewContext(r), w, r, payload)
 }
 
 func httpDeleteConference(w http.ResponseWriter, r *http.Request) {
@@ -229,15 +237,15 @@ func httpDeleteConference(w http.ResponseWriter, r *http.Request) {
 
 	var payload model.DeleteConferenceRequest
 	if err := json.NewDecoder(r.Body).Decode(&payload); err != nil {
-		httpError(w, `Invalid input`, http.StatusInternalServerError, err)
+		httpError(w, `Invalid JSON input`, http.StatusInternalServerError, err)
 		return
 	}
 
 	if err := validator.HTTPDeleteConferenceRequest.Validate(&payload); err != nil {
-		httpError(w, `Invalid input`, http.StatusInternalServerError, err)
+		httpError(w, `Invalid input (validation failed)`, http.StatusInternalServerError, err)
 		return
 	}
-	doDeleteConference(context.Background(), w, r, payload)
+	doDeleteConference(NewContext(r), w, r, payload)
 }
 
 func httpDeleteConferenceAdmin(w http.ResponseWriter, r *http.Request) {
@@ -251,15 +259,15 @@ func httpDeleteConferenceAdmin(w http.ResponseWriter, r *http.Request) {
 
 	var payload model.DeleteConferenceAdminRequest
 	if err := json.NewDecoder(r.Body).Decode(&payload); err != nil {
-		httpError(w, `Invalid input`, http.StatusInternalServerError, err)
+		httpError(w, `Invalid JSON input`, http.StatusInternalServerError, err)
 		return
 	}
 
 	if err := validator.HTTPDeleteConferenceAdminRequest.Validate(&payload); err != nil {
-		httpError(w, `Invalid input`, http.StatusInternalServerError, err)
+		httpError(w, `Invalid input (validation failed)`, http.StatusInternalServerError, err)
 		return
 	}
-	doDeleteConferenceAdmin(context.Background(), w, r, payload)
+	doDeleteConferenceAdmin(NewContext(r), w, r, payload)
 }
 
 func httpDeleteConferenceDates(w http.ResponseWriter, r *http.Request) {
@@ -273,15 +281,15 @@ func httpDeleteConferenceDates(w http.ResponseWriter, r *http.Request) {
 
 	var payload model.DeleteConferenceDatesRequest
 	if err := json.NewDecoder(r.Body).Decode(&payload); err != nil {
-		httpError(w, `Invalid input`, http.StatusInternalServerError, err)
+		httpError(w, `Invalid JSON input`, http.StatusInternalServerError, err)
 		return
 	}
 
 	if err := validator.HTTPDeleteConferenceDatesRequest.Validate(&payload); err != nil {
-		httpError(w, `Invalid input`, http.StatusInternalServerError, err)
+		httpError(w, `Invalid input (validation failed)`, http.StatusInternalServerError, err)
 		return
 	}
-	doDeleteConferenceDates(context.Background(), w, r, payload)
+	doDeleteConferenceDates(NewContext(r), w, r, payload)
 }
 
 func httpDeleteRoom(w http.ResponseWriter, r *http.Request) {
@@ -295,15 +303,15 @@ func httpDeleteRoom(w http.ResponseWriter, r *http.Request) {
 
 	var payload model.DeleteRoomRequest
 	if err := json.NewDecoder(r.Body).Decode(&payload); err != nil {
-		httpError(w, `Invalid input`, http.StatusInternalServerError, err)
+		httpError(w, `Invalid JSON input`, http.StatusInternalServerError, err)
 		return
 	}
 
 	if err := validator.HTTPDeleteRoomRequest.Validate(&payload); err != nil {
-		httpError(w, `Invalid input`, http.StatusInternalServerError, err)
+		httpError(w, `Invalid input (validation failed)`, http.StatusInternalServerError, err)
 		return
 	}
-	doDeleteRoom(context.Background(), w, r, payload)
+	doDeleteRoom(NewContext(r), w, r, payload)
 }
 
 func httpDeleteSession(w http.ResponseWriter, r *http.Request) {
@@ -317,15 +325,15 @@ func httpDeleteSession(w http.ResponseWriter, r *http.Request) {
 
 	var payload model.DeleteSessionRequest
 	if err := json.NewDecoder(r.Body).Decode(&payload); err != nil {
-		httpError(w, `Invalid input`, http.StatusInternalServerError, err)
+		httpError(w, `Invalid JSON input`, http.StatusInternalServerError, err)
 		return
 	}
 
 	if err := validator.HTTPDeleteSessionRequest.Validate(&payload); err != nil {
-		httpError(w, `Invalid input`, http.StatusInternalServerError, err)
+		httpError(w, `Invalid input (validation failed)`, http.StatusInternalServerError, err)
 		return
 	}
-	doDeleteSession(context.Background(), w, r, payload)
+	doDeleteSession(NewContext(r), w, r, payload)
 }
 
 func httpDeleteUser(w http.ResponseWriter, r *http.Request) {
@@ -339,15 +347,15 @@ func httpDeleteUser(w http.ResponseWriter, r *http.Request) {
 
 	var payload model.DeleteUserRequest
 	if err := json.NewDecoder(r.Body).Decode(&payload); err != nil {
-		httpError(w, `Invalid input`, http.StatusInternalServerError, err)
+		httpError(w, `Invalid JSON input`, http.StatusInternalServerError, err)
 		return
 	}
 
 	if err := validator.HTTPDeleteUserRequest.Validate(&payload); err != nil {
-		httpError(w, `Invalid input`, http.StatusInternalServerError, err)
+		httpError(w, `Invalid input (validation failed)`, http.StatusInternalServerError, err)
 		return
 	}
-	doDeleteUser(context.Background(), w, r, payload)
+	doDeleteUser(NewContext(r), w, r, payload)
 }
 
 func httpDeleteVenue(w http.ResponseWriter, r *http.Request) {
@@ -361,15 +369,15 @@ func httpDeleteVenue(w http.ResponseWriter, r *http.Request) {
 
 	var payload model.DeleteVenueRequest
 	if err := json.NewDecoder(r.Body).Decode(&payload); err != nil {
-		httpError(w, `Invalid input`, http.StatusInternalServerError, err)
+		httpError(w, `Invalid JSON input`, http.StatusInternalServerError, err)
 		return
 	}
 
 	if err := validator.HTTPDeleteVenueRequest.Validate(&payload); err != nil {
-		httpError(w, `Invalid input`, http.StatusInternalServerError, err)
+		httpError(w, `Invalid input (validation failed)`, http.StatusInternalServerError, err)
 		return
 	}
-	doDeleteVenue(context.Background(), w, r, payload)
+	doDeleteVenue(NewContext(r), w, r, payload)
 }
 
 func httpListConference(w http.ResponseWriter, r *http.Request) {
@@ -388,10 +396,10 @@ func httpListConference(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if err := validator.HTTPListConferenceRequest.Validate(&payload); err != nil {
-		httpError(w, `Invalid input`, http.StatusInternalServerError, err)
+		httpError(w, `Invalid input (validation failed)`, http.StatusInternalServerError, err)
 		return
 	}
-	doListConference(context.Background(), w, r, payload)
+	doListConference(NewContext(r), w, r, payload)
 }
 
 func httpListRoom(w http.ResponseWriter, r *http.Request) {
@@ -410,10 +418,10 @@ func httpListRoom(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if err := validator.HTTPListRoomRequest.Validate(&payload); err != nil {
-		httpError(w, `Invalid input`, http.StatusInternalServerError, err)
+		httpError(w, `Invalid input (validation failed)`, http.StatusInternalServerError, err)
 		return
 	}
-	doListRoom(context.Background(), w, r, payload)
+	doListRoom(NewContext(r), w, r, payload)
 }
 
 func httpListSessionByConference(w http.ResponseWriter, r *http.Request) {
@@ -432,10 +440,10 @@ func httpListSessionByConference(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if err := validator.HTTPListSessionByConferenceRequest.Validate(&payload); err != nil {
-		httpError(w, `Invalid input`, http.StatusInternalServerError, err)
+		httpError(w, `Invalid input (validation failed)`, http.StatusInternalServerError, err)
 		return
 	}
-	doListSessionByConference(context.Background(), w, r, payload)
+	doListSessionByConference(NewContext(r), w, r, payload)
 }
 
 func httpListVenue(w http.ResponseWriter, r *http.Request) {
@@ -454,10 +462,10 @@ func httpListVenue(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if err := validator.HTTPListVenueRequest.Validate(&payload); err != nil {
-		httpError(w, `Invalid input`, http.StatusInternalServerError, err)
+		httpError(w, `Invalid input (validation failed)`, http.StatusInternalServerError, err)
 		return
 	}
-	doListVenue(context.Background(), w, r, payload)
+	doListVenue(NewContext(r), w, r, payload)
 }
 
 func httpLookupConference(w http.ResponseWriter, r *http.Request) {
@@ -476,10 +484,10 @@ func httpLookupConference(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if err := validator.HTTPLookupConferenceRequest.Validate(&payload); err != nil {
-		httpError(w, `Invalid input`, http.StatusInternalServerError, err)
+		httpError(w, `Invalid input (validation failed)`, http.StatusInternalServerError, err)
 		return
 	}
-	doLookupConference(context.Background(), w, r, payload)
+	doLookupConference(NewContext(r), w, r, payload)
 }
 
 func httpLookupRoom(w http.ResponseWriter, r *http.Request) {
@@ -498,10 +506,10 @@ func httpLookupRoom(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if err := validator.HTTPLookupRoomRequest.Validate(&payload); err != nil {
-		httpError(w, `Invalid input`, http.StatusInternalServerError, err)
+		httpError(w, `Invalid input (validation failed)`, http.StatusInternalServerError, err)
 		return
 	}
-	doLookupRoom(context.Background(), w, r, payload)
+	doLookupRoom(NewContext(r), w, r, payload)
 }
 
 func httpLookupSession(w http.ResponseWriter, r *http.Request) {
@@ -520,10 +528,10 @@ func httpLookupSession(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if err := validator.HTTPLookupSessionRequest.Validate(&payload); err != nil {
-		httpError(w, `Invalid input`, http.StatusInternalServerError, err)
+		httpError(w, `Invalid input (validation failed)`, http.StatusInternalServerError, err)
 		return
 	}
-	doLookupSession(context.Background(), w, r, payload)
+	doLookupSession(NewContext(r), w, r, payload)
 }
 
 func httpLookupUser(w http.ResponseWriter, r *http.Request) {
@@ -542,10 +550,10 @@ func httpLookupUser(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if err := validator.HTTPLookupUserRequest.Validate(&payload); err != nil {
-		httpError(w, `Invalid input`, http.StatusInternalServerError, err)
+		httpError(w, `Invalid input (validation failed)`, http.StatusInternalServerError, err)
 		return
 	}
-	doLookupUser(context.Background(), w, r, payload)
+	doLookupUser(NewContext(r), w, r, payload)
 }
 
 func httpLookupVenue(w http.ResponseWriter, r *http.Request) {
@@ -564,10 +572,10 @@ func httpLookupVenue(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if err := validator.HTTPLookupVenueRequest.Validate(&payload); err != nil {
-		httpError(w, `Invalid input`, http.StatusInternalServerError, err)
+		httpError(w, `Invalid input (validation failed)`, http.StatusInternalServerError, err)
 		return
 	}
-	doLookupVenue(context.Background(), w, r, payload)
+	doLookupVenue(NewContext(r), w, r, payload)
 }
 
 func httpUpdateConference(w http.ResponseWriter, r *http.Request) {
@@ -581,15 +589,15 @@ func httpUpdateConference(w http.ResponseWriter, r *http.Request) {
 
 	var payload model.UpdateConferenceRequest
 	if err := json.NewDecoder(r.Body).Decode(&payload); err != nil {
-		httpError(w, `Invalid input`, http.StatusInternalServerError, err)
+		httpError(w, `Invalid JSON input`, http.StatusInternalServerError, err)
 		return
 	}
 
 	if err := validator.HTTPUpdateConferenceRequest.Validate(&payload); err != nil {
-		httpError(w, `Invalid input`, http.StatusInternalServerError, err)
+		httpError(w, `Invalid input (validation failed)`, http.StatusInternalServerError, err)
 		return
 	}
-	doUpdateConference(context.Background(), w, r, payload)
+	doUpdateConference(NewContext(r), w, r, payload)
 }
 
 func httpUpdateRoom(w http.ResponseWriter, r *http.Request) {
@@ -603,15 +611,15 @@ func httpUpdateRoom(w http.ResponseWriter, r *http.Request) {
 
 	var payload model.UpdateRoomRequest
 	if err := json.NewDecoder(r.Body).Decode(&payload); err != nil {
-		httpError(w, `Invalid input`, http.StatusInternalServerError, err)
+		httpError(w, `Invalid JSON input`, http.StatusInternalServerError, err)
 		return
 	}
 
 	if err := validator.HTTPUpdateRoomRequest.Validate(&payload); err != nil {
-		httpError(w, `Invalid input`, http.StatusInternalServerError, err)
+		httpError(w, `Invalid input (validation failed)`, http.StatusInternalServerError, err)
 		return
 	}
-	doUpdateRoom(context.Background(), w, r, payload)
+	doUpdateRoom(NewContext(r), w, r, payload)
 }
 
 func httpUpdateSession(w http.ResponseWriter, r *http.Request) {
@@ -625,15 +633,15 @@ func httpUpdateSession(w http.ResponseWriter, r *http.Request) {
 
 	var payload model.UpdateSessionRequest
 	if err := json.NewDecoder(r.Body).Decode(&payload); err != nil {
-		httpError(w, `Invalid input`, http.StatusInternalServerError, err)
+		httpError(w, `Invalid JSON input`, http.StatusInternalServerError, err)
 		return
 	}
 
 	if err := validator.HTTPUpdateSessionRequest.Validate(&payload); err != nil {
-		httpError(w, `Invalid input`, http.StatusInternalServerError, err)
+		httpError(w, `Invalid input (validation failed)`, http.StatusInternalServerError, err)
 		return
 	}
-	doUpdateSession(context.Background(), w, r, payload)
+	doUpdateSession(NewContext(r), w, r, payload)
 }
 
 func httpUpdateUser(w http.ResponseWriter, r *http.Request) {
@@ -647,15 +655,15 @@ func httpUpdateUser(w http.ResponseWriter, r *http.Request) {
 
 	var payload model.UpdateUserRequest
 	if err := json.NewDecoder(r.Body).Decode(&payload); err != nil {
-		httpError(w, `Invalid input`, http.StatusInternalServerError, err)
+		httpError(w, `Invalid JSON input`, http.StatusInternalServerError, err)
 		return
 	}
 
 	if err := validator.HTTPUpdateUserRequest.Validate(&payload); err != nil {
-		httpError(w, `Invalid input`, http.StatusInternalServerError, err)
+		httpError(w, `Invalid input (validation failed)`, http.StatusInternalServerError, err)
 		return
 	}
-	doUpdateUser(context.Background(), w, r, payload)
+	doUpdateUser(NewContext(r), w, r, payload)
 }
 
 func httpUpdateVenue(w http.ResponseWriter, r *http.Request) {
@@ -669,15 +677,15 @@ func httpUpdateVenue(w http.ResponseWriter, r *http.Request) {
 
 	var payload model.UpdateVenueRequest
 	if err := json.NewDecoder(r.Body).Decode(&payload); err != nil {
-		httpError(w, `Invalid input`, http.StatusInternalServerError, err)
+		httpError(w, `Invalid JSON input`, http.StatusInternalServerError, err)
 		return
 	}
 
 	if err := validator.HTTPUpdateVenueRequest.Validate(&payload); err != nil {
-		httpError(w, `Invalid input`, http.StatusInternalServerError, err)
+		httpError(w, `Invalid input (validation failed)`, http.StatusInternalServerError, err)
 		return
 	}
-	doUpdateVenue(context.Background(), w, r, payload)
+	doUpdateVenue(NewContext(r), w, r, payload)
 }
 
 func (s *Server) SetupRoutes() {
