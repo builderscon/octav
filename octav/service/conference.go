@@ -27,7 +27,7 @@ func (v *Conference) populateRowForUpdate(vdb *db.Conference, payload model.Upda
 		vdb.Slug = payload.Slug.String
 	}
 
-	if payload.Slug.Valid() {
+	if payload.Title.Valid() {
 		vdb.Title = payload.Title.String
 	}
 
