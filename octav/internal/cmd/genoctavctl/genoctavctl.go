@@ -123,6 +123,8 @@ func _main() int {
 const preamble = `
 package main
 
+// AUTO GENERATED FILE! DO NOT EDIT
+
 import (
 	"bytes"
 	"encoding/json"
