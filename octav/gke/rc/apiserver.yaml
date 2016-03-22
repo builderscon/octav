@@ -18,7 +18,7 @@ spec:
           secret:
             secretName: cloudsql-dev
       containers:
-        - image: asia.gcr.io/builderscon-1248/apiserver:20160317.211619
+        - image: asia.gcr.io/builderscon-1248/apiserver:20160322.112511
           name: apiserver
           env:
             - name: OCTAV_MYSQL_DBNAME
@@ -35,6 +35,8 @@ spec:
               value: /cloudsql/client-cert.pem
             - name: OCTAV_MYSQL_CLIENT_KEY_FILE
               value: /cloudsql/client-key.pem
+            - name: OCTAV_TRACE_DB
+              value: "1"
           ports:
             - containerPort: 8080
               protocol: TCP
