@@ -9,10 +9,12 @@ import (
 	"flag"
 	"log"
 	"os"
+	"path/filepath"
 	"sort"
 	"strings"
 
 	"github.com/builderscon/octav/octav/client"
+	"github.com/builderscon/octav/octav/internal/homedir"
 	"github.com/builderscon/octav/octav/model"
 	"github.com/builderscon/octav/octav/validator"
 )
@@ -21,7 +23,7 @@ import (
 var endpoint string
 
 func prepGlobalFlags(fs *flag.FlagSet) {
-	fs.StringVar(&endpoint, "endpoint", "", "Base URL of the octav server (required)")
+	fs.StringVar(&endpoint, "endpoint", endpoint, "Base URL of the octav server (required)")
 }
 
 // Special case for l10n strings, where users need say:
@@ -118,7 +120,40 @@ func (l stringList) Get() interface{} {
 	return []string(l)
 }
 
+func readConfigFile() error {
+	// This is a placeholder. We probably should implement a real
+	// Config object later
+	dir, err := homedir.Get()
+	if err != nil {
+		return err
+	}
+
+	f := filepath.Join(dir, ".octavrc")
+	if _, err := os.Stat(f); err != nil {
+		return nil // doesn't exist. that's fine
+	}
+
+	cf, err := os.Open(f)
+	if err != nil {
+		return err
+	}
+	defer cf.Close()
+
+	config := map[string]string{}
+	if err := json.NewDecoder(cf).Decode(&config); err != nil {
+		return err
+	}
+	if v, ok := config["endpoint"]; ok {
+		endpoint = v
+	}
+	return nil
+}
+
 func main() {
+	if err := readConfigFile(); err != nil {
+		os.Exit(errOut(err))
+	}
+
 	args := cmdargs(os.Args).WithFrontPopped()
 	os.Exit(doSubcmd(args))
 }
