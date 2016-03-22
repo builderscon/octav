@@ -2288,7 +2288,7 @@ func (r *LookupVenueRequest) Populate(m map[string]interface{}) error {
 	return nil
 }
 
-func (r ListSessionsByConferenceRequest) collectMarshalData() map[string]interface{} {
+func (r ListSessionByConferenceRequest) collectMarshalData() map[string]interface{} {
 	m := make(map[string]interface{})
 	m["conference_id"] = r.ConferenceID
 	if r.Date.Valid() {
@@ -2297,7 +2297,7 @@ func (r ListSessionsByConferenceRequest) collectMarshalData() map[string]interfa
 	return m
 }
 
-func (r ListSessionsByConferenceRequest) MarshalJSON() ([]byte, error) {
+func (r ListSessionByConferenceRequest) MarshalJSON() ([]byte, error) {
 	m := r.collectMarshalData()
 	buf, err := json.Marshal(m)
 	if err != nil {
@@ -2306,7 +2306,7 @@ func (r ListSessionsByConferenceRequest) MarshalJSON() ([]byte, error) {
 	return buf, nil
 }
 
-func (r ListSessionsByConferenceRequest) MarshalURL() ([]byte, error) {
+func (r ListSessionByConferenceRequest) MarshalURL() ([]byte, error) {
 	m := r.collectMarshalData()
 	buf, err := urlenc.Marshal(m)
 	if err != nil {
@@ -2315,7 +2315,7 @@ func (r ListSessionsByConferenceRequest) MarshalURL() ([]byte, error) {
 	return buf, nil
 }
 
-func (r *ListSessionsByConferenceRequest) UnmarshalJSON(data []byte) error {
+func (r *ListSessionByConferenceRequest) UnmarshalJSON(data []byte) error {
 	m := make(map[string]interface{})
 	if err := json.Unmarshal(data, &m); err != nil {
 		return err
@@ -2323,7 +2323,7 @@ func (r *ListSessionsByConferenceRequest) UnmarshalJSON(data []byte) error {
 	return r.Populate(m)
 }
 
-func (r *ListSessionsByConferenceRequest) Populate(m map[string]interface{}) error {
+func (r *ListSessionByConferenceRequest) Populate(m map[string]interface{}) error {
 	if jv, ok := m["conference_id"]; ok {
 		switch jv.(type) {
 		case string:

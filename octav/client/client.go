@@ -5,6 +5,8 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"io"
+	"io/ioutil"
 	"net/http"
 	"net/url"
 
@@ -109,8 +111,19 @@ func (c *Client) CreateConference(in *model.CreateConferenceRequest) (ret *model
 	if res.StatusCode != http.StatusOK {
 		return nil, fmt.Errorf(`Invalid response: '%s'`, res.Status)
 	}
+	var body io.Reader = res.Body
+	if pdebug.Enabled {
+		jsbuf, err := ioutil.ReadAll(res.Body)
+		if err != nil {
+			pdebug.Printf("failed to read respons buffer: %s", err)
+		} else {
+			pdebug.Printf("response buffer: %s", jsbuf)
+		}
+		body = bytes.NewReader(jsbuf)
+	}
+
 	var payload model.Conference
-	err = json.NewDecoder(res.Body).Decode(&payload)
+	err = json.NewDecoder(body).Decode(&payload)
 	if err != nil {
 		return nil, err
 	}
@@ -142,8 +155,19 @@ func (c *Client) CreateRoom(in *model.CreateRoomRequest) (ret *model.Room, err e
 	if res.StatusCode != http.StatusOK {
 		return nil, fmt.Errorf(`Invalid response: '%s'`, res.Status)
 	}
+	var body io.Reader = res.Body
+	if pdebug.Enabled {
+		jsbuf, err := ioutil.ReadAll(res.Body)
+		if err != nil {
+			pdebug.Printf("failed to read respons buffer: %s", err)
+		} else {
+			pdebug.Printf("response buffer: %s", jsbuf)
+		}
+		body = bytes.NewReader(jsbuf)
+	}
+
 	var payload model.Room
-	err = json.NewDecoder(res.Body).Decode(&payload)
+	err = json.NewDecoder(body).Decode(&payload)
 	if err != nil {
 		return nil, err
 	}
@@ -175,8 +199,19 @@ func (c *Client) CreateSession(in *model.CreateSessionRequest) (ret *model.Sessi
 	if res.StatusCode != http.StatusOK {
 		return nil, fmt.Errorf(`Invalid response: '%s'`, res.Status)
 	}
+	var body io.Reader = res.Body
+	if pdebug.Enabled {
+		jsbuf, err := ioutil.ReadAll(res.Body)
+		if err != nil {
+			pdebug.Printf("failed to read respons buffer: %s", err)
+		} else {
+			pdebug.Printf("response buffer: %s", jsbuf)
+		}
+		body = bytes.NewReader(jsbuf)
+	}
+
 	var payload model.Session
-	err = json.NewDecoder(res.Body).Decode(&payload)
+	err = json.NewDecoder(body).Decode(&payload)
 	if err != nil {
 		return nil, err
 	}
@@ -208,8 +243,19 @@ func (c *Client) CreateUser(in *model.CreateUserRequest) (ret *model.User, err e
 	if res.StatusCode != http.StatusOK {
 		return nil, fmt.Errorf(`Invalid response: '%s'`, res.Status)
 	}
+	var body io.Reader = res.Body
+	if pdebug.Enabled {
+		jsbuf, err := ioutil.ReadAll(res.Body)
+		if err != nil {
+			pdebug.Printf("failed to read respons buffer: %s", err)
+		} else {
+			pdebug.Printf("response buffer: %s", jsbuf)
+		}
+		body = bytes.NewReader(jsbuf)
+	}
+
 	var payload model.User
-	err = json.NewDecoder(res.Body).Decode(&payload)
+	err = json.NewDecoder(body).Decode(&payload)
 	if err != nil {
 		return nil, err
 	}
@@ -241,8 +287,19 @@ func (c *Client) CreateVenue(in *model.CreateVenueRequest) (ret *model.Venue, er
 	if res.StatusCode != http.StatusOK {
 		return nil, fmt.Errorf(`Invalid response: '%s'`, res.Status)
 	}
+	var body io.Reader = res.Body
+	if pdebug.Enabled {
+		jsbuf, err := ioutil.ReadAll(res.Body)
+		if err != nil {
+			pdebug.Printf("failed to read respons buffer: %s", err)
+		} else {
+			pdebug.Printf("response buffer: %s", jsbuf)
+		}
+		body = bytes.NewReader(jsbuf)
+	}
+
 	var payload model.Venue
-	err = json.NewDecoder(res.Body).Decode(&payload)
+	err = json.NewDecoder(body).Decode(&payload)
 	if err != nil {
 		return nil, err
 	}
@@ -469,8 +526,19 @@ func (c *Client) ListConference(in *model.ListConferenceRequest) (ret interface{
 	if res.StatusCode != http.StatusOK {
 		return nil, fmt.Errorf(`Invalid response: '%s'`, res.Status)
 	}
+	var body io.Reader = res.Body
+	if pdebug.Enabled {
+		jsbuf, err := ioutil.ReadAll(res.Body)
+		if err != nil {
+			pdebug.Printf("failed to read respons buffer: %s", err)
+		} else {
+			pdebug.Printf("response buffer: %s", jsbuf)
+		}
+		body = bytes.NewReader(jsbuf)
+	}
+
 	var payload interface{}
-	err = json.NewDecoder(res.Body).Decode(&payload)
+	err = json.NewDecoder(body).Decode(&payload)
 	if err != nil {
 		return nil, err
 	}
@@ -501,15 +569,26 @@ func (c *Client) ListRoom(in *model.ListRoomRequest) (ret []model.Room, err erro
 	if res.StatusCode != http.StatusOK {
 		return nil, fmt.Errorf(`Invalid response: '%s'`, res.Status)
 	}
+	var body io.Reader = res.Body
+	if pdebug.Enabled {
+		jsbuf, err := ioutil.ReadAll(res.Body)
+		if err != nil {
+			pdebug.Printf("failed to read respons buffer: %s", err)
+		} else {
+			pdebug.Printf("response buffer: %s", jsbuf)
+		}
+		body = bytes.NewReader(jsbuf)
+	}
+
 	var payload []model.Room
-	err = json.NewDecoder(res.Body).Decode(&payload)
+	err = json.NewDecoder(body).Decode(&payload)
 	if err != nil {
 		return nil, err
 	}
 	return payload, nil
 }
 
-func (c *Client) ListSessionByConference(in *model.ListSessionsByConferenceRequest) (ret interface{}, err error) {
+func (c *Client) ListSessionByConference(in *model.ListSessionByConferenceRequest) (ret interface{}, err error) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("client.ListSessionByConference").BindError(&err)
 		defer g.End()
@@ -533,8 +612,19 @@ func (c *Client) ListSessionByConference(in *model.ListSessionsByConferenceReque
 	if res.StatusCode != http.StatusOK {
 		return nil, fmt.Errorf(`Invalid response: '%s'`, res.Status)
 	}
+	var body io.Reader = res.Body
+	if pdebug.Enabled {
+		jsbuf, err := ioutil.ReadAll(res.Body)
+		if err != nil {
+			pdebug.Printf("failed to read respons buffer: %s", err)
+		} else {
+			pdebug.Printf("response buffer: %s", jsbuf)
+		}
+		body = bytes.NewReader(jsbuf)
+	}
+
 	var payload interface{}
-	err = json.NewDecoder(res.Body).Decode(&payload)
+	err = json.NewDecoder(body).Decode(&payload)
 	if err != nil {
 		return nil, err
 	}
@@ -565,8 +655,19 @@ func (c *Client) ListVenue(in *model.ListVenueRequest) (ret []model.Venue, err e
 	if res.StatusCode != http.StatusOK {
 		return nil, fmt.Errorf(`Invalid response: '%s'`, res.Status)
 	}
+	var body io.Reader = res.Body
+	if pdebug.Enabled {
+		jsbuf, err := ioutil.ReadAll(res.Body)
+		if err != nil {
+			pdebug.Printf("failed to read respons buffer: %s", err)
+		} else {
+			pdebug.Printf("response buffer: %s", jsbuf)
+		}
+		body = bytes.NewReader(jsbuf)
+	}
+
 	var payload []model.Venue
-	err = json.NewDecoder(res.Body).Decode(&payload)
+	err = json.NewDecoder(body).Decode(&payload)
 	if err != nil {
 		return nil, err
 	}
@@ -597,8 +698,19 @@ func (c *Client) LookupConference(in *model.LookupConferenceRequest) (ret *model
 	if res.StatusCode != http.StatusOK {
 		return nil, fmt.Errorf(`Invalid response: '%s'`, res.Status)
 	}
+	var body io.Reader = res.Body
+	if pdebug.Enabled {
+		jsbuf, err := ioutil.ReadAll(res.Body)
+		if err != nil {
+			pdebug.Printf("failed to read respons buffer: %s", err)
+		} else {
+			pdebug.Printf("response buffer: %s", jsbuf)
+		}
+		body = bytes.NewReader(jsbuf)
+	}
+
 	var payload model.Conference
-	err = json.NewDecoder(res.Body).Decode(&payload)
+	err = json.NewDecoder(body).Decode(&payload)
 	if err != nil {
 		return nil, err
 	}
@@ -629,8 +741,19 @@ func (c *Client) LookupRoom(in *model.LookupRoomRequest) (ret *model.Room, err e
 	if res.StatusCode != http.StatusOK {
 		return nil, fmt.Errorf(`Invalid response: '%s'`, res.Status)
 	}
+	var body io.Reader = res.Body
+	if pdebug.Enabled {
+		jsbuf, err := ioutil.ReadAll(res.Body)
+		if err != nil {
+			pdebug.Printf("failed to read respons buffer: %s", err)
+		} else {
+			pdebug.Printf("response buffer: %s", jsbuf)
+		}
+		body = bytes.NewReader(jsbuf)
+	}
+
 	var payload model.Room
-	err = json.NewDecoder(res.Body).Decode(&payload)
+	err = json.NewDecoder(body).Decode(&payload)
 	if err != nil {
 		return nil, err
 	}
@@ -661,8 +784,19 @@ func (c *Client) LookupSession(in *model.LookupSessionRequest) (ret *model.Sessi
 	if res.StatusCode != http.StatusOK {
 		return nil, fmt.Errorf(`Invalid response: '%s'`, res.Status)
 	}
+	var body io.Reader = res.Body
+	if pdebug.Enabled {
+		jsbuf, err := ioutil.ReadAll(res.Body)
+		if err != nil {
+			pdebug.Printf("failed to read respons buffer: %s", err)
+		} else {
+			pdebug.Printf("response buffer: %s", jsbuf)
+		}
+		body = bytes.NewReader(jsbuf)
+	}
+
 	var payload model.Session
-	err = json.NewDecoder(res.Body).Decode(&payload)
+	err = json.NewDecoder(body).Decode(&payload)
 	if err != nil {
 		return nil, err
 	}
@@ -693,8 +827,19 @@ func (c *Client) LookupUser(in *model.LookupUserRequest) (ret *model.User, err e
 	if res.StatusCode != http.StatusOK {
 		return nil, fmt.Errorf(`Invalid response: '%s'`, res.Status)
 	}
+	var body io.Reader = res.Body
+	if pdebug.Enabled {
+		jsbuf, err := ioutil.ReadAll(res.Body)
+		if err != nil {
+			pdebug.Printf("failed to read respons buffer: %s", err)
+		} else {
+			pdebug.Printf("response buffer: %s", jsbuf)
+		}
+		body = bytes.NewReader(jsbuf)
+	}
+
 	var payload model.User
-	err = json.NewDecoder(res.Body).Decode(&payload)
+	err = json.NewDecoder(body).Decode(&payload)
 	if err != nil {
 		return nil, err
 	}
@@ -725,8 +870,19 @@ func (c *Client) LookupVenue(in *model.LookupVenueRequest) (ret *model.Venue, er
 	if res.StatusCode != http.StatusOK {
 		return nil, fmt.Errorf(`Invalid response: '%s'`, res.Status)
 	}
+	var body io.Reader = res.Body
+	if pdebug.Enabled {
+		jsbuf, err := ioutil.ReadAll(res.Body)
+		if err != nil {
+			pdebug.Printf("failed to read respons buffer: %s", err)
+		} else {
+			pdebug.Printf("response buffer: %s", jsbuf)
+		}
+		body = bytes.NewReader(jsbuf)
+	}
+
 	var payload model.Venue
-	err = json.NewDecoder(res.Body).Decode(&payload)
+	err = json.NewDecoder(body).Decode(&payload)
 	if err != nil {
 		return nil, err
 	}

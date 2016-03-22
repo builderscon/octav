@@ -244,7 +244,7 @@ func doAddConferenceAdmin(ctx context.Context, w http.ResponseWriter, r *http.Re
 	httpJSON(w, map[string]string{"status": "success"})
 }
 
-func doListConferences(ctx context.Context, w http.ResponseWriter, r *http.Request, payload model.ListConferencesRequest) {
+func doListConference(ctx context.Context, w http.ResponseWriter, r *http.Request, payload model.ListConferenceRequest) {
 	tx, err := db.Begin()
 	if err != nil {
 		httpError(w, `ListConferences`, http.StatusInternalServerError, err)
@@ -580,7 +580,7 @@ func doUpdateUser(ctx context.Context, w http.ResponseWriter, r *http.Request, p
 	httpJSON(w, map[string]string{"status": "success"})
 }
 
-func doListRooms(ctx context.Context, w http.ResponseWriter, r *http.Request, payload model.ListRoomRequest) {
+func doListRoom(ctx context.Context, w http.ResponseWriter, r *http.Request, payload model.ListRoomRequest) {
 	tx, err := db.Begin()
 	if err != nil {
 		httpError(w, `ListRoom`, http.StatusInternalServerError, err)
@@ -742,7 +742,7 @@ func doUpdateVenue(ctx context.Context, w http.ResponseWriter, r *http.Request, 
 	httpJSON(w, v)
 }
 
-func doListVenues(ctx context.Context, w http.ResponseWriter, r *http.Request, payload model.ListVenueRequest) {
+func doListVenue(ctx context.Context, w http.ResponseWriter, r *http.Request, payload model.ListVenueRequest) {
 	tx, err := db.Begin()
 	if err != nil {
 		httpError(w, `ListVenues`, http.StatusInternalServerError, err)
@@ -799,7 +799,7 @@ func doLookupSession(ctx context.Context, w http.ResponseWriter, r *http.Request
 	httpJSON(w, v)
 }
 
-func doListSessionsByConference(ctx context.Context, w http.ResponseWriter, r *http.Request, payload model.ListSessionsByConferenceRequest) {
+func doListSessionByConference(ctx context.Context, w http.ResponseWriter, r *http.Request, payload model.ListSessionByConferenceRequest) {
 	tx, err := db.Begin()
 	if err != nil {
 		httpError(w, `ListSessionsByConference`, http.StatusInternalServerError, err)

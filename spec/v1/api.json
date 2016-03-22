@@ -820,7 +820,7 @@
       "rel": "list",
       "schema": {
         "type": "object",
-        "hsup.type": "model.ListSessionsByConferenceRequest",
+        "hsup.type": "model.ListSessionByConferenceRequest",
         "required": ["conference_id"],
         "properties": {
           "date": {

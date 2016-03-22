@@ -631,7 +631,7 @@ func TestConferenceAdmins(t *testing.T) {
 
 }
 
-func TestListConferences(t *testing.T) {
+func TestListConference(t *testing.T) {
 	ts := httptest.NewServer(octav.New())
 	defer ts.Close()
 
@@ -668,24 +668,24 @@ func TestListConferences(t *testing.T) {
 		defer testDeleteConference(t, cl, conf.ID)
 	}
 
-	in := model.ListConferencesRequest{}
+	in := model.ListConferenceRequest{}
 	in.RangeStart.Set("2016-03-21")
 	in.RangeEnd.Set("2016-03-23")
-	res, err := cl.ListConferences(&in)
-	if !assert.NoError(t, err, "ListConferences should succeed") {
+	res, err := cl.ListConference(&in)
+	if !assert.NoError(t, err, "ListConference should succeed") {
 		return
 	}
 
-	if !assert.NoError(t, validator.HTTPListConferencesResponse.Validate(res), "Validation should succeed") {
+	if !assert.NoError(t, validator.HTTPListConferenceResponse.Validate(res), "Validation should succeed") {
 		return
 	}
 
-	if !assert.Len(t, res, 10, "ListConferences returns 10 rooms") {
+	if !assert.Len(t, res, 10, "ListConference returns 10 rooms") {
 		return
 	}
 }
 
-func TestListRooms(t *testing.T) {
+func TestListRoom(t *testing.T) {
 	ts := httptest.NewServer(octav.New())
 	defer ts.Close()
 
@@ -703,21 +703,21 @@ func TestListRooms(t *testing.T) {
 	in := model.ListRoomRequest{
 		VenueID: venue.ID,
 	}
-	res, err := cl.ListRooms(&in)
-	if !assert.NoError(t, err, "ListRooms should succeed") {
+	res, err := cl.ListRoom(&in)
+	if !assert.NoError(t, err, "ListRoom should succeed") {
 		return
 	}
 
-	if !assert.NoError(t, validator.HTTPListRoomsResponse.Validate(res), "Validation should succeed") {
+	if !assert.NoError(t, validator.HTTPListRoomResponse.Validate(res), "Validation should succeed") {
 		return
 	}
 
-	if !assert.Len(t, res, 1, "ListRooms returns 1 rooms") {
+	if !assert.Len(t, res, 1, "ListRoom returns 1 rooms") {
 		return
 	}
 }
 
-func TestListSessionsByConference(t *testing.T) {
+func TestListSessionByConference(t *testing.T) {
 	ts := httptest.NewServer(octav.New())
 	defer ts.Close()
 
@@ -746,14 +746,14 @@ func TestListSessionsByConference(t *testing.T) {
 		}
 	}
 
-	in := model.ListSessionsByConferenceRequest{
+	in := model.ListSessionByConferenceRequest{
 		ConferenceID: conference.ID,
 	}
-	res, err := cl.ListSessionsByConference(&in)
-	if !assert.NoError(t, err, "ListSessionsByConference should succeed") {
+	res, err := cl.ListSessionByConference(&in)
+	if !assert.NoError(t, err, "ListSessionByConference should succeed") {
 		return
 	}
-	if !assert.NoError(t, validator.HTTPListSessionsByConferenceResponse.Validate(res), "Validation should succeed") {
+	if !assert.NoError(t, validator.HTTPListSessionByConferenceResponse.Validate(res), "Validation should succeed") {
 		return
 	}
 
@@ -762,17 +762,17 @@ func TestListSessionsByConference(t *testing.T) {
 	}
 }
 
-func TestListVenues(t *testing.T) {
+func TestListVenue(t *testing.T) {
 	ts := httptest.NewServer(octav.New())
 	defer ts.Close()
 
 	cl := client.New(ts.URL)
 	in := model.ListVenueRequest{}
-	res, err := cl.ListVenues(&in)
-	if !assert.NoError(t, err, "ListVenues should succeed") {
+	res, err := cl.ListVenue(&in)
+	if !assert.NoError(t, err, "ListVenue should succeed") {
 		return
 	}
-	if !assert.NoError(t, validator.HTTPListVenuesResponse.Validate(res), "Validation should succeed") {
+	if !assert.NoError(t, validator.HTTPListVenueResponse.Validate(res), "Validation should succeed") {
 		return
 	}
 }
