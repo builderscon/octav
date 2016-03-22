@@ -948,6 +948,148 @@ func doRoomSubcmd(args cmdargs) int {
 	return 0
 }
 
+func doUserCreate(args cmdargs) int {
+	fs := flag.NewFlagSet("octavctl user create", flag.ContinueOnError)
+	var email string
+	fs.StringVar(&email, "email", "", "")
+	var first_name string
+	fs.StringVar(&first_name, "first_name", "", "")
+	var last_name string
+	fs.StringVar(&last_name, "last_name", "", "")
+	var nickname string
+	fs.StringVar(&nickname, "nickname", "", "")
+	var tshirt_size string
+	fs.StringVar(&tshirt_size, "tshirt_size", "", "")
+	prepGlobalFlags(fs)
+	if err := fs.Parse([]string(args)); err != nil {
+		return errOut(err)
+	}
+
+	m := make(map[string]interface{})
+	if email != "" {
+		m["email"] = email
+	}
+	if first_name != "" {
+		m["first_name"] = first_name
+	}
+	if last_name != "" {
+		m["last_name"] = last_name
+	}
+	if nickname != "" {
+		m["nickname"] = nickname
+	}
+	if tshirt_size != "" {
+		m["tshirt_size"] = tshirt_size
+	}
+	r := model.CreateUserRequest{}
+	if err := r.Populate(m); err != nil {
+		return errOut(err)
+	}
+
+	if err := validator.HTTPCreateUserRequest.Validate(&r); err != nil {
+		return errOut(err)
+	}
+
+	cl, err := newClient()
+	if err != nil {
+		return errOut(err)
+	}
+	res, err := cl.CreateUser(&r)
+	if err != nil {
+		return errOut(err)
+	}
+	if err := printJSON(res); err != nil {
+		return errOut(err)
+	}
+
+	return 0
+}
+
+func doUserLookup(args cmdargs) int {
+	fs := flag.NewFlagSet("octavctl user lookup", flag.ContinueOnError)
+	var id string
+	fs.StringVar(&id, "id", "", "")
+	prepGlobalFlags(fs)
+	if err := fs.Parse([]string(args)); err != nil {
+		return errOut(err)
+	}
+
+	m := make(map[string]interface{})
+	if id != "" {
+		m["id"] = id
+	}
+	r := model.LookupUserRequest{}
+	if err := r.Populate(m); err != nil {
+		return errOut(err)
+	}
+
+	if err := validator.HTTPLookupUserRequest.Validate(&r); err != nil {
+		return errOut(err)
+	}
+
+	cl, err := newClient()
+	if err != nil {
+		return errOut(err)
+	}
+	res, err := cl.LookupUser(&r)
+	if err != nil {
+		return errOut(err)
+	}
+	if err := printJSON(res); err != nil {
+		return errOut(err)
+	}
+
+	return 0
+}
+
+func doUserDelete(args cmdargs) int {
+	fs := flag.NewFlagSet("octavctl user delete", flag.ContinueOnError)
+	var id string
+	fs.StringVar(&id, "id", "", "")
+	prepGlobalFlags(fs)
+	if err := fs.Parse([]string(args)); err != nil {
+		return errOut(err)
+	}
+
+	m := make(map[string]interface{})
+	if id != "" {
+		m["id"] = id
+	}
+	r := model.DeleteUserRequest{}
+	if err := r.Populate(m); err != nil {
+		return errOut(err)
+	}
+
+	if err := validator.HTTPDeleteUserRequest.Validate(&r); err != nil {
+		return errOut(err)
+	}
+
+	cl, err := newClient()
+	if err != nil {
+		return errOut(err)
+	}
+	if err := cl.DeleteUser(&r); err != nil {
+		return errOut(err)
+	}
+
+	return 0
+}
+
+func doUserSubcmd(args cmdargs) int {
+	switch v := args.Get(0); v {
+	case "create":
+		return doUserCreate(args.WithFrontPopped())
+	case "lookup":
+		return doUserLookup(args.WithFrontPopped())
+	case "delete":
+		return doUserDelete(args.WithFrontPopped())
+	default:
+		log.Printf("unimplemented (conference): %s", v)
+		return 1
+	}
+	return 0
+}
+
 func doSessionCreate(args cmdargs) int {
 	fs := flag.NewFlagSet("octavctl session create", flag.ContinueOnError)
 	var abstract string
@@ -1153,6 +1295,8 @@ func doSubcmd(args cmdargs) int {
 		return doVenueSubcmd(args.WithFrontPopped())
 	case "room":
 		return doRoomSubcmd(args.WithFrontPopped())
+	case "user":
+		return doUserSubcmd(args.WithFrontPopped())
 	case "session":
 		return doSessionSubcmd(args.WithFrontPopped())
 	default:

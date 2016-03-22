@@ -37,6 +37,10 @@
       "actions": ["create", "list", "lookup", "delete"]
     },
     {
+      "name": "user",
+      "actions": ["create", "lookup", "delete"]
+    },
+    {
       "name": "session",
       "actions": ["create", "lookup", "delete"]
     }

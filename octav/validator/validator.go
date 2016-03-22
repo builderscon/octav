@@ -84,6 +84,7 @@ var R32 jsval.Constraint
 var R33 jsval.Constraint
 var R34 jsval.Constraint
 var R35 jsval.Constraint
+var R36 jsval.Constraint
 
 func init() {
 	M = &jsval.ConstraintMap{}
@@ -384,19 +385,20 @@ func init() {
 			jsval.EmptyConstraint,
 		)
 	R25 = jsval.String()
-	R26 = jsval.String()
+	R26 = jsval.String().MinLength(1)
 	R27 = jsval.String()
-	R28 = jsval.Array().
+	R28 = jsval.String()
+	R29 = jsval.Array().
 		Items(
 			jsval.Reference(M).RefersTo("#/definitions/tag"),
 		).
 		AdditionalItems(
 			jsval.EmptyConstraint,
 		)
-	R29 = jsval.String().RegexpString("^\\d\\d:\\d\\d$")
-	R30 = jsval.String().Enum("XXXL", "XXL", "XL", "L", "M", "S", "XS")
-	R31 = jsval.String().Format("url")
-	R32 = jsval.Object().
+	R30 = jsval.String().RegexpString("^\\d\\d:\\d\\d$")
+	R31 = jsval.String().Enum("XXXL", "XXL", "XL", "L", "M", "S", "XS")
+	R32 = jsval.String().Format("url")
+	R33 = jsval.Object().
 		AdditionalProperties(
 			jsval.EmptyConstraint,
 		).
@@ -432,15 +434,15 @@ func init() {
 			"last_name#[a-z]+",
 			jsval.Reference(M).RefersTo("#/definitions/string_i18n"),
 		)
-	R33 = jsval.Array().
+	R34 = jsval.Array().
 		Items(
 			jsval.Reference(M).RefersTo("#/definitions/user"),
 		).
 		AdditionalItems(
 			jsval.EmptyConstraint,
 		)
-	R34 = jsval.String().RegexpString("^[a-fA-F0-9-]+$")
-	R35 = jsval.Object().
+	R35 = jsval.String().RegexpString("^[a-fA-F0-9-]+$")
+	R36 = jsval.Object().
 		AdditionalProperties(
 			jsval.EmptyConstraint,
 		).
@@ -482,16 +484,17 @@ func init() {
 	M.SetReference("#/definitions/speaker", R23)
 	M.SetReference("#/definitions/speaker_array", R24)
 	M.SetReference("#/definitions/string_en", R25)
-	M.SetReference("#/definitions/string_i18n", R26)
-	M.SetReference("#/definitions/tag", R27)
-	M.SetReference("#/definitions/tag_array", R28)
-	M.SetReference("#/definitions/time", R29)
-	M.SetReference("#/definitions/tshirt_size", R30)
-	M.SetReference("#/definitions/url", R31)
-	M.SetReference("#/definitions/user", R32)
-	M.SetReference("#/definitions/user_array", R33)
-	M.SetReference("#/definitions/uuid", R34)
-	M.SetReference("#/definitions/venue", R35)
+	M.SetReference("#/definitions/string_en_not_empty", R26)
+	M.SetReference("#/definitions/string_i18n", R27)
+	M.SetReference("#/definitions/tag", R28)
+	M.SetReference("#/definitions/tag_array", R29)
+	M.SetReference("#/definitions/time", R30)
+	M.SetReference("#/definitions/tshirt_size", R31)
+	M.SetReference("#/definitions/url", R32)
+	M.SetReference("#/definitions/user", R33)
+	M.SetReference("#/definitions/user_array", R34)
+	M.SetReference("#/definitions/uuid", R35)
+	M.SetReference("#/definitions/venue", R36)
 	HTTPAddConferenceAdminRequest = jsval.New().
 		SetConstraintMap(M).
 		SetRoot(
@@ -885,15 +888,15 @@ func init() {
 				).
 				AddProp(
 					"first_name",
-					jsval.Reference(M).RefersTo("#/definitions/string_en"),
+					jsval.Reference(M).RefersTo("#/definitions/string_en_not_empty"),
 				).
 				AddProp(
 					"last_name",
-					jsval.Reference(M).RefersTo("#/definitions/string_en"),
+					jsval.Reference(M).RefersTo("#/definitions/string_en_not_empty"),
 				).
 				AddProp(
 					"nickname",
-					jsval.Reference(M).RefersTo("#/definitions/string_en"),
+					jsval.Reference(M).RefersTo("#/definitions/string_en_not_empty"),
 				).
 				AddProp(
 					"tshirt_size",
