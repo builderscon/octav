@@ -322,6 +322,64 @@ func doConferenceList(args cmdargs) int {
 	return 0
 }
 
+func doConferenceUpdate(args cmdargs) int {
+	fs := flag.NewFlagSet("octavctl conference update", flag.ContinueOnError)
+	var description string
+	fs.StringVar(&description, "description", "", "")
+	var id string
+	fs.StringVar(&id, "id", "", "")
+	var slug string
+	fs.StringVar(&slug, "slug", "", "")
+	var starts_on string
+	fs.StringVar(&starts_on, "starts_on", "", "")
+	var sub_title string
+	fs.StringVar(&sub_title, "sub_title", "", "")
+	var title string
+	fs.StringVar(&title, "title", "", "")
+	prepGlobalFlags(fs)
+	if err := fs.Parse([]string(args)); err != nil {
+		return errOut(err)
+	}
+
+	m := make(map[string]interface{})
+	if description != "" {
+		m["description"] = description
+	}
+	if id != "" {
+		m["id"] = id
+	}
+	if slug != "" {
+		m["slug"] = slug
+	}
+	if starts_on != "" {
+		m["starts_on"] = starts_on
+	}
+	if sub_title != "" {
+		m["sub_title"] = sub_title
+	}
+	if title != "" {
+		m["title"] = title
+	}
+	r := model.UpdateConferenceRequest{}
+	if err := r.Populate(m); err != nil {
+		return errOut(err)
+	}
+
+	if err := validator.HTTPUpdateConferenceRequest.Validate(&r); err != nil {
+		return errOut(err)
+	}
+
+	cl, err := newClient()
+	if err != nil {
+		return errOut(err)
+	}
+	if err := cl.UpdateConference(&r); err != nil {
+		return errOut(err)
+	}
+
+	return 0
+}
+
 func doConferenceDatesAdd(args cmdargs) int {
 	fs := flag.NewFlagSet("octavctl conference dates add", flag.ContinueOnError)
 	var id string
@@ -510,6 +568,8 @@ func doConferenceSubcmd(args cmdargs) int {
 		return doConferenceDelete(args.WithFrontPopped())
 	case "list":
 		return doConferenceList(args.WithFrontPopped())
+	case "update":
+		return doConferenceUpdate(args.WithFrontPopped())
 	case "dates":
 		return doConferenceDatesSubcmd(args.WithFrontPopped())
 	case "admin":
@@ -577,6 +637,8 @@ func doVenueList(args cmdargs) int {
 	fs := flag.NewFlagSet("octavctl venue list", flag.ContinueOnError)
 	var lang string
 	fs.StringVar(&lang, "lang", "", "")
+	var limit int64
+	fs.Int64Var(&limit, "limit", 0, "")
 	var since string
 	fs.StringVar(&since, "since", "", "")
 	prepGlobalFlags(fs)
@@ -587,6 +649,9 @@ func doVenueList(args cmdargs) int {
 	m := make(map[string]interface{})
 	if lang != "" {
 		m["lang"] = lang
+	}
+	if limit != 0 {
+		m["limit"] = limit
 	}
 	if since != "" {
 		m["since"] = since

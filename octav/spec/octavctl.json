@@ -3,7 +3,7 @@
   "subcmds": [
     {
       "name": "conference",
-      "actions": ["create", "lookup", "delete", "list"],
+      "actions": ["create", "lookup", "delete", "list", "update"],
       "subcmds": [
         {
           "name": "dates",
