@@ -3,6 +3,9 @@ OCTAV_DIR = $(CURDIR)/../../..
 REPOSITORY_HOST=asia.gcr.io
 PROJECT_ID=$(shell gcloud config list 2>&1 | grep 'project = ' | sed -e 's/project = //')
 
+# Unfortunately this had to be replicated from top Makefile
+SRC_FILES = $(wildcard $(OCTAV_DIR)/*.go $(OCTAV_DIR)/validator/*.go $(OCTAV_DIR)/client/*.go $(OCTAV_DIR)/db/*.go $(OCTAV_DIR)/model/*.go)
+
 TAG:=$(shell date +"%Y%m%d.%H%M%S")
 IMAGE_NAME:=$(REPOSITORY_HOST)/$(PROJECT_ID)/$(APPNAME):$(TAG)
 
@@ -24,12 +27,20 @@ ifeq ($(strip $(DOCKER_MACHINE_EV4)),)
 	DOCKER_MACHINE_ENV = @echo "\n Docker environment missing, run: eval \"\$$(docker-machine env default)\"\n" && exit 1
 endif
 
-.PHONY: all octav
+.PHONY: all octav always-rebuild
 
-$(CURDIR)/octav:
+$(CURDIR)/octav: $(SRC_FILES)
 	@echo "Building octav"
-	@cd $(OCTAV_DIR) ; make build GOOS=linux GOARCH=amd64 DEBUG=$(DEBUG) ; cd $(CURDIR)
-	@cp $(OCTAV_DIR)/_bin/octav .
+	cd $(OCTAV_DIR) ; make GOOS=linux GOARCH=amd64 octav; cd $(CURDIR)
+	@cp $(OCTAV_DIR)/_bin/linux/amd64/octav .
+
+$(CURDIR)/octav-debug: $(SRC_FILES)
+	@echo "Building octav-debug"
+	cd $(OCTAV_DIR) ; make GOOS=linux GOARCH=amd64 octav-debug; cd $(CURDIR)
+	@cp $(OCTAV_DIR)/_bin/linux/amd64/octav-debug .
+
+build-octav: $(CURDIR)/octav
+build-octav-debug: $(CURDIR)/octav-debug
 
 dm-running:
 ifneq (,$(strip $(shell docker-machine env default 2>&1 | grep -o 'not running')))
@@ -37,7 +48,14 @@ ifneq (,$(strip $(shell docker-machine env default 2>&1 | grep -o 'not running')
 	@docker-machine start default
 endif
 
-docker: dm-running $(CURDIR)/octav
+
+
+docker-debug: dm-running build-octav-debug
+	$(DOCKER_MACHINE_ENV)
+	cp octav-debug octav
+	@docker build -t octav/$(APPNAME) .
+
+docker: dm-running build-octav
 	$(DOCKER_MACHINE_ENV)
 	@docker build -t octav/$(APPNAME) .
 
