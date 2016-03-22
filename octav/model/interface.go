@@ -82,6 +82,7 @@ type User struct {
 	Email      string `json:"email"`
 	TshirtSize string `json:"tshirt_size"`
 }
+type UserL10NList []UserL10N
 type UserList []User
 
 // +model
@@ -304,6 +305,13 @@ type LookupUserRequest struct {
 // +transport
 type DeleteUserRequest struct {
 	ID string `json:"id"`
+}
+
+// +transport
+type ListUserRequest struct {
+	Since jsval.MaybeString `json:"since" urlenc:"since,omitempty,string"`
+	Lang  jsval.MaybeString `json:"lang" urlenc:"lang,omitempty,string"`
+	Limit jsval.MaybeInt    `json:"limit" urlenc:"limit,omitempty,int64"`
 }
 
 // +transport

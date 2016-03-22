@@ -631,6 +631,49 @@ func (c *Client) ListSessionByConference(in *model.ListSessionByConferenceReques
 	return payload, nil
 }
 
+func (c *Client) ListUser(in *model.ListUserRequest) (ret []model.User, err error) {
+	if pdebug.Enabled {
+		g := pdebug.Marker("client.ListUser").BindError(&err)
+		defer g.End()
+	}
+	u, err := url.Parse(c.Endpoint + "/v1/user/list")
+	if err != nil {
+		return nil, err
+	}
+	buf, err := urlenc.Marshal(in)
+	if err != nil {
+		return nil, err
+	}
+	u.RawQuery = string(buf)
+	if pdebug.Enabled {
+		pdebug.Printf("GET to %s", u.String())
+	}
+	res, err := c.Client.Get(u.String())
+	if err != nil {
+		return nil, err
+	}
+	if res.StatusCode != http.StatusOK {
+		return nil, fmt.Errorf(`Invalid response: '%s'`, res.Status)
+	}
+	var body io.Reader = res.Body
+	if pdebug.Enabled {
+		jsbuf, err := ioutil.ReadAll(res.Body)
+		if err != nil {
+			pdebug.Printf("failed to read respons buffer: %s", err)
+		} else {
+			pdebug.Printf("response buffer: %s", jsbuf)
+		}
+		body = bytes.NewReader(jsbuf)
+	}
+
+	var payload []model.User
+	err = json.NewDecoder(body).Decode(&payload)
+	if err != nil {
+		return nil, err
+	}
+	return payload, nil
+}
+
 func (c *Client) ListVenue(in *model.ListVenueRequest) (ret []model.Venue, err error) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("client.ListVenue").BindError(&err)

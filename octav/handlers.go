@@ -19,7 +19,6 @@ func httpJSON(w http.ResponseWriter, v interface{}) {
 		httpError(w, `encode json`, http.StatusInternalServerError, err)
 		return
 	}
-pdebug.Printf("JSON -> '%s'", buf.String())
 
 	w.WriteHeader(http.StatusOK)
 	buf.WriteTo(w)
@@ -483,6 +482,38 @@ func doDeleteUser(ctx context.Context, w http.ResponseWriter, r *http.Request, p
 		return
 	}
 	httpJSON(w, map[string]string{"status": "success"})
+}
+
+func doListUser(ctx context.Context, w http.ResponseWriter, r *http.Request, payload model.ListUserRequest) {
+	tx, err := db.Begin()
+	if err != nil {
+		httpError(w, `ListUsers`, http.StatusInternalServerError, err)
+		return
+	}
+	defer tx.AutoRollback()
+
+	s := service.User{}
+	vdbl := db.UserList{}
+	if err := s.LoadList(tx, &vdbl, payload.Since.String, int(payload.Limit.Int)); err != nil {
+		httpError(w, `ListUsers`, http.StatusInternalServerError, err)
+		return
+	}
+
+	l := make(model.UserL10NList, len(vdbl))
+	for i, vdb := range vdbl {
+		v := model.User{}
+		if err := v.FromRow(vdb); err != nil {
+			httpError(w, `ListUsers`, http.StatusInternalServerError, err)
+			return
+		}
+		vl := model.UserL10N{User: v}
+		if err := vl.LoadLocalizedFields(tx); err != nil {
+			httpError(w, `ListUsers`, http.StatusInternalServerError, err)
+			return
+		}
+		l[i] = vl
+	}
+	httpJSON(w, l)
 }
 
 func doLookupUser(ctx context.Context, w http.ResponseWriter, r *http.Request, payload model.LookupUserRequest) {

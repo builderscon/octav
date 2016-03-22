@@ -379,6 +379,24 @@
       }
     },
     {
+      "title": "List user",
+      "rel": "list",
+      "href": "/user/list",
+      "schema": {
+        "type": "object",
+        "hsup.type": "model.ListUserRequest",
+        "properties": {
+          "lang": { "$ref": "#/definitions/language" },
+          "limit": { "$ref": "#/definitions/positiveIntegerDefault10" },
+          "since": { "$ref": "#/definitions/uuid" }
+        }
+      },
+      "targetSchema": {
+        "hsup.type": "[]model.User",
+        "items": { "$ref": "#/definitions/user" }
+      }
+    },
+    {
       "title": "Create venue",
       "description": "venue describes the establishment in which the conference takes place. a venue contains multiple rooms",
       "rel": "create",

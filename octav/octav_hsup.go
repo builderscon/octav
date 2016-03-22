@@ -446,6 +446,28 @@ func httpListSessionByConference(w http.ResponseWriter, r *http.Request) {
 	doListSessionByConference(NewContext(r), w, r, payload)
 }
 
+func httpListUser(w http.ResponseWriter, r *http.Request) {
+	if pdebug.Enabled {
+		g := pdebug.Marker("httpListUser")
+		defer g.End()
+	}
+	if strings.ToLower(r.Method) != `get` {
+		httpError(w, `Method was `+r.Method, http.StatusNotFound, nil)
+	}
+
+	var payload model.ListUserRequest
+	if err := urlenc.Unmarshal([]byte(r.URL.RawQuery), &payload); err != nil {
+		httpError(w, `Failed to parse url query string`, http.StatusInternalServerError, err)
+		return
+	}
+
+	if err := validator.HTTPListUserRequest.Validate(&payload); err != nil {
+		httpError(w, `Invalid input (validation failed)`, http.StatusInternalServerError, err)
+		return
+	}
+	doListUser(NewContext(r), w, r, payload)
+}
+
 func httpListVenue(w http.ResponseWriter, r *http.Request) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("httpListVenue")
@@ -711,6 +733,7 @@ func (s *Server) SetupRoutes() {
 	r.HandleFunc(`/v1/session/update`, httpUpdateSession)
 	r.HandleFunc(`/v1/user/create`, httpCreateUser)
 	r.HandleFunc(`/v1/user/delete`, httpDeleteUser)
+	r.HandleFunc(`/v1/user/list`, httpListUser)
 	r.HandleFunc(`/v1/user/lookup`, httpLookupUser)
 	r.HandleFunc(`/v1/user/update`, httpUpdateUser)
 	r.HandleFunc(`/v1/venue/create`, httpCreateVenue)

@@ -1040,6 +1040,53 @@ func doUserCreate(args cmdargs) int {
 	return 0
 }
 
+func doUserList(args cmdargs) int {
+	fs := flag.NewFlagSet("octavctl user list", flag.ContinueOnError)
+	var lang string
+	fs.StringVar(&lang, "lang", "", "")
+	var limit int64
+	fs.Int64Var(&limit, "limit", 0, "")
+	var since string
+	fs.StringVar(&since, "since", "", "")
+	prepGlobalFlags(fs)
+	if err := fs.Parse([]string(args)); err != nil {
+		return errOut(err)
+	}
+
+	m := make(map[string]interface{})
+	if lang != "" {
+		m["lang"] = lang
+	}
+	if limit != 0 {
+		m["limit"] = limit
+	}
+	if since != "" {
+		m["since"] = since
+	}
+	r := model.ListUserRequest{}
+	if err := r.Populate(m); err != nil {
+		return errOut(err)
+	}
+
+	if err := validator.HTTPListUserRequest.Validate(&r); err != nil {
+		return errOut(err)
+	}
+
+	cl, err := newClient()
+	if err != nil {
+		return errOut(err)
+	}
+	res, err := cl.ListUser(&r)
+	if err != nil {
+		return errOut(err)
+	}
+	if err := printJSON(res); err != nil {
+		return errOut(err)
+	}
+
+	return 0
+}
+
 func doUserLookup(args cmdargs) int {
 	fs := flag.NewFlagSet("octavctl user lookup", flag.ContinueOnError)
 	var id string
@@ -1114,6 +1161,8 @@ func doUserSubcmd(args cmdargs) int {
 	switch v := args.Get(0); v {
 	case "create":
 		return doUserCreate(args.WithFrontPopped())
+	case "list":
+		return doUserList(args.WithFrontPopped())
 	case "lookup":
 		return doUserLookup(args.WithFrontPopped())
 	case "delete":

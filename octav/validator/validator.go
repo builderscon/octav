@@ -30,6 +30,8 @@ var HTTPListRoomRequest *jsval.JSVal
 var HTTPListRoomResponse *jsval.JSVal
 var HTTPListSessionByConferenceRequest *jsval.JSVal
 var HTTPListSessionByConferenceResponse *jsval.JSVal
+var HTTPListUserRequest *jsval.JSVal
+var HTTPListUserResponse *jsval.JSVal
 var HTTPListVenueRequest *jsval.JSVal
 var HTTPListVenueResponse *jsval.JSVal
 var HTTPLookupConferenceRequest *jsval.JSVal
@@ -1237,6 +1239,39 @@ func init() {
 			jsval.Array().
 				Items(
 					jsval.Reference(M).RefersTo("#/definitions/session"),
+				).
+				AdditionalItems(
+					jsval.EmptyConstraint,
+				),
+		)
+
+	HTTPListUserRequest = jsval.New().
+		SetConstraintMap(M).
+		SetRoot(
+			jsval.Object().
+				AdditionalProperties(
+					jsval.EmptyConstraint,
+				).
+				AddProp(
+					"lang",
+					jsval.Reference(M).RefersTo("#/definitions/language"),
+				).
+				AddProp(
+					"limit",
+					jsval.Reference(M).RefersTo("#/definitions/positiveIntegerDefault10"),
+				).
+				AddProp(
+					"since",
+					jsval.Reference(M).RefersTo("#/definitions/uuid"),
+				),
+		)
+
+	HTTPListUserResponse = jsval.New().
+		SetConstraintMap(M).
+		SetRoot(
+			jsval.Array().
+				Items(
+					jsval.Reference(M).RefersTo("#/definitions/user"),
 				).
 				AdditionalItems(
 					jsval.EmptyConstraint,
