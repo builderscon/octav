@@ -344,7 +344,7 @@ type LookupVenueRequest struct {
 }
 
 // +transport
-type ListSessionsByConferenceRequest struct {
+type ListSessionByConferenceRequest struct {
 	ConferenceID string            `json:"conference_id" urlenc:"conference_id"`
 	Date         jsval.MaybeString `json:"date" urlenc:"date,omitempty,string"`
 }

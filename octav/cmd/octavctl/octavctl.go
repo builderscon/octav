@@ -1,5 +1,7 @@
 package main
 
+// AUTO GENERATED FILE! DO NOT EDIT
+
 import (
 	"bytes"
 	"encoding/json"

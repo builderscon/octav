@@ -405,6 +405,7 @@
         "hsup.type": "model.ListVenueRequest",
         "properties": {
           "lang": { "$ref": "#/definitions/language" },
+          "limit": { "$ref": "#/definitions/positiveIntegerDefault10" },
           "since": { "$ref": "#/definitions/uuid" }
         }
       },
@@ -820,7 +821,7 @@
       "rel": "list",
       "schema": {
         "type": "object",
-        "hsup.type": "model.ListSessionsByConferenceRequest",
+        "hsup.type": "model.ListSessionByConferenceRequest",
         "required": ["conference_id"],
         "properties": {
           "date": {
