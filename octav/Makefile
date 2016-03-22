@@ -1,7 +1,7 @@
-BIN_DIR          = _bin
 EXTRA_TAGS       =
+OCTAV_EXECUTABLE = octav
 INTERNAL_BIN_DIR = _internal_bin
-INTERNAL_CMDS    = gendb genmodel gentransport
+INTERNAL_CMDS    = gendb genmodel gentransport genoctavctl
 GCLOUD_CONFIG_DIR = .gcloud
 CLOUDSQL_DIR=$(GCLOUD_CONFIG_DIR)/sql
 CLOUDSQL_ADDRESS_FILE = $(CLOUDSQL_DIR)/address
@@ -13,12 +13,13 @@ CLOUDSQL_SSL_FILES    = \
 GOVERSION=$(shell go version)
 GOOS=$(word 1,$(subst /, ,$(word 4, $(GOVERSION))))
 GOARCH=$(word 2,$(subst /, ,$(word 4, $(GOVERSION))))
+BIN_DIR=$(CURDIR)/_bin/$(GOOS)/$(GOARCH)
 
 ifndef OCTAV_DB_NAME
 	OCTAV_DB_NAME = octav
 endif
 
-SRC_FILES = $(wildcard *.go validator/*.go client/*.go db/*.go)
+SRC_FILES = $(wildcard *.go validator/*.go client/*.go db/*.go model/*.go)
 
 GO_TEST_CMD      = OCTAV_TEST_DSN="root:@/$(OCTAV_DB_NAME)?parseTime=true" go test -v $(GO_TAGS_OPT)
 ifdef OCTAV_TEST_DSN
@@ -26,6 +27,7 @@ ifdef OCTAV_TEST_DSN
 endif
 
 .PHONY: install_deps build_internal_cmd generate build run all clean test init_db
+
 all: test build
 
 install_deps:
@@ -49,26 +51,30 @@ generate: build_internal_cmd
 test: generate buildspec
 	$(GO_TEST_CMD) ./...
 
-$(CURDIR)/_bin/octav: cmd/octav/octav.go $(SRC_FILES)
+$(BIN_DIR)/octav: cmd/octav/octav.go $(SRC_FILES)
 	@echo "Building $(@F) for $(GOOS)/$(GOARCH)..."
-ifeq ($(DEBUG),1)
-	@echo "DEBUG specified, enabling '-tags debug0'"
-	$(eval $@_EXTRA_TAGS=-tags debug0)
-endif
-	go build $($@_EXTRA_TAGS) -o $@ $<
+	go build -o $@ $<
+
+octav: $(BIN_DIR)/octav
+
+$(BIN_DIR)/octav-debug: cmd/octav/octav.go $(SRC_FILES)
+	@echo "Building $(@F) for $(GOOS)/$(GOARCH)..."
+	go build -tags debug0 -o $@ $<
+
+octav-debug: $(BIN_DIR)/octav-debug
 
 buildspec: $(INTERNAL_BIN_DIR)/hsup ../spec/v1/api.json
 	@echo "Regenerating files based on ../spec/v1/api.json"
 	@PATH=$(CURDIR)/_internal_bin:$(PATH) hsup -s ../spec/v1/api.json -d . -O
 
-build: $(CURDIR)/_bin/octav
+build: $(BIN_DIR)/octav
 
 run: build
-	./_bin/octav
+	$(BIN_DIR)/octav
 
 clean:
 	-rm _internal_bin/*
-	-rm _bin/*
+	-rm -rf _bin/*
 
 init_db:
 	mysql -u root -e "DROP DATABASE IF EXISTS $(OCTAV_DB_NAME)"

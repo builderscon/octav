@@ -19,17 +19,44 @@
       "type": "boolean",
       "default": false
     },
+    "conference_date": {
+      "type": "object",
+      "properties": {
+        "date": {
+          "oneOf": [
+            {"$ref": "#/definitions/date" },
+            {"$ref": "#/definitions/datestr" }
+          ]
+        },
+        "start_time": {"$ref": "#/definitions/time"},
+        "end_time": {"$ref": "#/definitions/time"}
+      }
+    },
+    "conference_date_array": {
+      "type": "array",
+      "items": { "$ref": "#/definitions/conference_date" }
+    },
     "date": {
       "type": "object",
-      "property": {
-        "date": { "$ref": "#/definitions/datestr" },
-        "start_time": "#/definitions/time",
-        "end_time": "#/definitions/time"
-      }
+      "properties": {
+        "year": {"$ref":"#/definitions/positiveInteger"},
+        "month": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 12
+        },
+        "day": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 31
+        }
+      },
+      "required": ["year", "month", "day"],
+      "additionalProperties": false
     },
     "date_array": {
       "type": "array",
-      "items": { "$ref": "#/definitions/date" }
+      "items": {"$ref": "#/definitions/date"}
     },
     "datestr": {
       "type": "string",
@@ -46,6 +73,10 @@
         { "type": "object", "description": "implementation specific object representing time" }
       ]
     },
+    "time": {
+      "type": "string",
+      "pattern": "^\\d\\d:\\d\\d$"
+    },
     "email": {
       "type": "string",
       "format": "email"
@@ -61,6 +92,11 @@
     "string_en": {
       "description": "a string in English.",
       "type": "string"
+    },
+    "string_en_not_empty": {
+      "description": "a string in English, cannot be the empty string.",
+      "type": "string",
+      "minLength": 1
     },
     "string_i18n": {
       "description": "a string for a particular language, where language is presented as the suffix of the property in the form of <foo>#<language>.",
@@ -105,7 +141,7 @@
       "type": "number"
     },
     "longitude": {
-      "description": "latitude of an object",
+      "description": "longitude of an object",
       "type": "number"
     },
     "conference_array": {
@@ -121,7 +157,7 @@
         "slug": { "$ref": "#/definitions/string_en" },
         "description": { "$ref": "#/definitions/string_en" },
         "venue": { "$ref": "#/definitions/venue" },
-        "dates": { "$ref": "#/definitions/date_array" },
+        "dates": { "$ref": "#/definitions/conference_date_array" },
         "administrators": { "$ref": "#/definitions/user_array" }
       },
       "patternProperties": {
@@ -273,9 +309,9 @@
         "type": "object",
         "hsup.type": "model.CreateUserRequest",
         "properties": {
-          "first_name": { "$ref": "#/definitions/string_en" },
-          "last_name": { "$ref": "#/definitions/string_en" },
-          "nickname": { "$ref": "#/definitions/string_en" },
+          "first_name": { "$ref": "#/definitions/string_en_not_empty" },
+          "last_name": { "$ref": "#/definitions/string_en_not_empty" },
+          "nickname": { "$ref": "#/definitions/string_en_not_empty" },
           "email": { "$ref": "#/definitions/email" },
           "tshirt_size": { "$ref": "#/definitions/tshirt_size" }
         },
@@ -343,6 +379,24 @@
       }
     },
     {
+      "title": "List user",
+      "rel": "list",
+      "href": "/user/list",
+      "schema": {
+        "type": "object",
+        "hsup.type": "model.ListUserRequest",
+        "properties": {
+          "lang": { "$ref": "#/definitions/language" },
+          "limit": { "$ref": "#/definitions/positiveIntegerDefault10" },
+          "since": { "$ref": "#/definitions/uuid" }
+        }
+      },
+      "targetSchema": {
+        "hsup.type": "[]model.User",
+        "items": { "$ref": "#/definitions/user" }
+      }
+    },
+    {
       "title": "Create venue",
       "description": "venue describes the establishment in which the conference takes place. a venue contains multiple rooms",
       "rel": "create",
@@ -366,7 +420,7 @@
       "targetSchema": { "$ref": "#/definitions/venue" }
     },
     {
-      "title": "List venues",
+      "title": "List venue",
       "rel": "list",
       "href": "/venue/list",
       "schema": {
@@ -374,7 +428,8 @@
         "hsup.type": "model.ListVenueRequest",
         "properties": {
           "lang": { "$ref": "#/definitions/language" },
-          "since": { "$ref": "#/definitions/uuidDefaultEmpty" }
+          "limit": { "$ref": "#/definitions/positiveIntegerDefault10" },
+          "since": { "$ref": "#/definitions/uuid" }
         }
       },
       "targetSchema": {
@@ -500,7 +555,7 @@
       }
     },
     {
-      "title": "List rooms",
+      "title": "List room",
       "rel": "list",
       "href": "/room/list",
       "method": "GET",
@@ -546,13 +601,13 @@
       "title": "Add conference dates",
       "rel": "update",
       "method": "POST",
-      "href": "/conference/date/add",
+      "href": "/conference/dates/add",
       "encType": "application/json",
       "schema": {
         "hsup.type": "model.AddConferenceDatesRequest",
         "properties": {
           "conference_id": {"$ref": "#/definitions/uuid"},
-          "dates": {"$ref":"#/definitions/date_array"}
+          "dates": {"$ref":"#/definitions/conference_date_array"}
         },
         "required": ["conference_id","dates"]
       }
@@ -561,13 +616,18 @@
       "title": "Delete conference dates",
       "rel": "delete",
       "method": "POST",
-      "href": "/conference/date/delete",
+      "href": "/conference/dates/delete",
       "ecnType": "application/json",
       "schema": {
         "hsup.type": "model.DeleteConferenceDatesRequest",
         "properties": {
           "conference_id": {"$ref": "#/definitions/uuid"},
-          "dates": {"$ref":"#/definitions/datestr_array"}
+          "dates": {
+            "oneOf": [
+              {"$ref":"#/definitions/date_array"},
+              {"$ref":"#/definitions/datestr_array"}
+            ]
+          }
         },
         "required": ["conference_id","dates"]
       }
@@ -616,17 +676,27 @@
       "targetSchema": { "$ref": "#/definitions/conference" }
     },
     {
-      "title": "List conferences",
+      "title": "List conference",
       "href": "/conference/list",
       "rel": "list",
       "schema": {
-        "hsup.type": "model.ListConferencesRequest",
+        "hsup.type": "model.ListConferenceRequest",
         "properties": {
           "lang": { "$ref": "#/definitions/language" },
           "limit": { "$ref": "#/definitions/positiveIntegerDefault10" },
-          "range_end": { "$ref": "#/definitions/datestr" },
-          "range_start": { "$ref": "#/definitions/datestr" },
-          "since": { "$ref": "#/definitions/uuidDefaultEmpty" }
+          "range_end": {
+            "oneOf": [
+              {"$ref": "#/definitions/date" },
+              {"$ref": "#/definitions/datestr" }
+            ]
+          },
+          "range_start": {
+            "oneOf": [
+              {"$ref": "#/definitions/date" },
+              {"$ref": "#/definitions/datestr" }
+            ]
+          },
+          "since": { "$ref": "#/definitions/uuid" }
         }
       },
       "targetSchema": { "$ref": "#/definitions/conference_array" }
@@ -769,15 +839,20 @@
       }
     },
     {
-      "title": "List sessions by conference",
+      "title": "List session by conference",
       "href": "/schedule/list",
       "rel": "list",
       "schema": {
         "type": "object",
-        "hsup.type": "model.ListSessionsByConferenceRequest",
+        "hsup.type": "model.ListSessionByConferenceRequest",
         "required": ["conference_id"],
         "properties": {
-          "date": { "$ref": "#/definitions/datestr" },
+          "date": {
+            "oneOf": [
+              { "$ref": "#/definitions/date" },
+              { "$ref": "#/definitions/datestr" }
+            ]
+          },
           "conference_id": { "$ref": "#/definitions/uuid" }
         }
       },

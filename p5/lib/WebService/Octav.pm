@@ -92,6 +92,18 @@ sub delete_user {
     return 1
 }
 
+sub list_user {
+    my ($self, $payload) = @_;
+    my $uri = URI->new($self->{endpoint} . qq|/v1/user/list|);
+    $uri->query_form($payload);
+    my $res = $self->{user_agent}->get($uri);
+    if (!$res->is_success) {
+        $self->{last_error} = $res->status_line;
+        return;
+    }
+    return JSON::decode_json($res->content);
+}
+
 sub create_venue {
     my ($self, $payload) = @_;
     for my $required (qw(name address)) {
@@ -109,7 +121,7 @@ sub create_venue {
     return JSON::decode_json($res->content);
 }
 
-sub list_venues {
+sub list_venue {
     my ($self, $payload) = @_;
     my $uri = URI->new($self->{endpoint} . qq|/v1/venue/list|);
     $uri->query_form($payload);
@@ -240,7 +252,7 @@ sub delete_room {
     return 1
 }
 
-sub list_rooms {
+sub list_room {
     my ($self, $payload) = @_;
     for my $required (qw(venue_id)) {
         if (!$payload->{$required}) {
@@ -281,7 +293,7 @@ sub add_conference_dates {
             die qq|property "$required" must be provided|;
         }
     }
-    my $uri = URI->new($self->{endpoint} . qq|/v1/conference/date/add|);
+    my $uri = URI->new($self->{endpoint} . qq|/v1/conference/dates/add|);
     my $json_payload = JSON::encode_json($payload);
     my $res = $self->{user_agent}->post($uri, Content => $json_payload);
     if (!$res->is_success) {
@@ -298,7 +310,7 @@ sub delete_conference_dates {
             die qq|property "$required" must be provided|;
         }
     }
-    my $uri = URI->new($self->{endpoint} . qq|/v1/conference/date/delete|);
+    my $uri = URI->new($self->{endpoint} . qq|/v1/conference/dates/delete|);
     my $json_payload = JSON::encode_json($payload);
     my $res = $self->{user_agent}->post($uri, Content => $json_payload);
     if (!$res->is_success) {
@@ -359,7 +371,7 @@ sub lookup_conference {
     return JSON::decode_json($res->content);
 }
 
-sub list_conferences {
+sub list_conference {
     my ($self, $payload) = @_;
     my $uri = URI->new($self->{endpoint} . qq|/v1/conference/list|);
     $uri->query_form($payload);
@@ -473,7 +485,7 @@ sub update_session {
     return 1
 }
 
-sub list_sessions_by_conference {
+sub list_session_by_conference {
     my ($self, $payload) = @_;
     for my $required (qw(conference_id)) {
         if (!$payload->{$required}) {

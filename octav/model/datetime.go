@@ -5,15 +5,16 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"reflect"
 	"time"
 )
 
 func NewDate(y, m, d int) Date {
-	return Date{year: y, month: m, day: d}
+	return Date{Year: y, Month: m, Day: d}
 }
 
 func (d Date) String() string {
-	return fmt.Sprintf("%04d-%02d-%02d", d.year, d.month, d.day)
+	return fmt.Sprintf("%04d-%02d-%02d", d.Year, d.Month, d.Day)
 }
 
 func (d Date) MarshalJSON() ([]byte, error) {
@@ -36,9 +37,45 @@ func (d *Date) Parse(s string) error {
 		return errors.New("failed to parse model.Date: " + err.Error())
 	}
 
-	d.year = t.Year()
-	d.month = int(t.Month())
-	d.day = t.Day()
+	d.Year = t.Year()
+	d.Month = int(t.Month())
+	d.Day = t.Day()
+	return nil
+}
+
+func (dl *DateList) Extract(v interface{}) error {
+	var ret []Date
+	switch v.(type) {
+	case []string:
+		ret = make([]Date, len(v.([]string)))
+		for i, s := range v.([]string) {
+			var dt Date
+			if err := dt.Parse(s); err != nil {
+				return err
+			}
+			ret[i] = dt
+		}
+	case []interface{}:
+		vl := v.([]interface{})
+		ret = make([]Date, len(vl))
+		for i, s := range vl {
+			switch s.(type) {
+			case string:
+			default:
+				return errors.New("invalid value to parse for conference date")
+			}
+
+			var dt Date
+			if err := dt.Parse(s.(string)); err != nil {
+				return err
+			}
+			ret[i] = dt
+		}
+	default:
+		return errors.New("invaid value to parse for date")
+	}
+
+	*dl = ret
 	return nil
 }
 
@@ -164,6 +201,24 @@ func (cd *ConferenceDate) Parse(s string) error {
 	return nil
 }
 
+type ErrInvalidConferenceDateType struct {
+	Type reflect.Type
+}
+
+func (e ErrInvalidConferenceDateType) Error() string {
+	buf := bytes.Buffer{}
+	buf.WriteString("invalid value type to parse for conference date: ")
+
+	var ts string
+	if e.Type == nil {
+		ts = "(nil)"
+	} else {
+		ts = e.Type.String()
+	}
+	buf.WriteString(ts)
+	return buf.String()
+}
+
 func (cdl *ConferenceDateList) Extract(v interface{}) error {
 	var ret []ConferenceDate
 	switch v.(type) {
@@ -183,7 +238,7 @@ func (cdl *ConferenceDateList) Extract(v interface{}) error {
 			switch s.(type) {
 			case string:
 			default:
-				return errors.New("invalid value to parse conference date")
+				return ErrInvalidConferenceDateType{Type: reflect.TypeOf(s)}
 			}
 
 			var dt ConferenceDate
@@ -193,7 +248,7 @@ func (cdl *ConferenceDateList) Extract(v interface{}) error {
 			ret[i] = dt
 		}
 	default:
-		return errors.New("invaid value to parse conference date")
+		return ErrInvalidConferenceDateType{Type: reflect.TypeOf(v)}
 	}
 
 	*cdl = ret

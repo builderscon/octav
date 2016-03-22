@@ -1,0 +1,48 @@
+{
+  "name": "octavctl",
+  "subcmds": [
+    {
+      "name": "conference",
+      "actions": ["create", "lookup", "delete", "list", "update"],
+      "subcmds": [
+        {
+          "name": "dates",
+          "actions": [
+            {
+              "name": "add",
+              "args_hint": {
+                "dates": { "type": "stringList" }
+              }
+            },
+            {
+              "name": "delete",
+              "args_hint": {
+                "dates": { "type": "stringList" }
+              }
+            }
+          ]
+        },
+        {
+          "name": "admin",
+          "actions": ["add", "delete"]
+        }
+      ]
+    },
+    {
+      "name": "venue",
+      "actions": ["create", "list", "lookup", "delete"]
+    },
+    {
+      "name": "room",
+      "actions": ["create", "list", "lookup", "delete"]
+    },
+    {
+      "name": "user",
+      "actions": ["create", "list", "lookup", "delete"]
+    },
+    {
+      "name": "session",
+      "actions": ["create", "lookup", "delete"]
+    }
+  ]
+}

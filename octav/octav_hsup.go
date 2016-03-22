@@ -380,31 +380,31 @@ func httpDeleteVenue(w http.ResponseWriter, r *http.Request) {
 	doDeleteVenue(NewContext(r), w, r, payload)
 }
 
-func httpListConferences(w http.ResponseWriter, r *http.Request) {
+func httpListConference(w http.ResponseWriter, r *http.Request) {
 	if pdebug.Enabled {
-		g := pdebug.Marker("httpListConferences")
+		g := pdebug.Marker("httpListConference")
 		defer g.End()
 	}
 	if strings.ToLower(r.Method) != `get` {
 		httpError(w, `Method was `+r.Method, http.StatusNotFound, nil)
 	}
 
-	var payload model.ListConferencesRequest
+	var payload model.ListConferenceRequest
 	if err := urlenc.Unmarshal([]byte(r.URL.RawQuery), &payload); err != nil {
 		httpError(w, `Failed to parse url query string`, http.StatusInternalServerError, err)
 		return
 	}
 
-	if err := validator.HTTPListConferencesRequest.Validate(&payload); err != nil {
+	if err := validator.HTTPListConferenceRequest.Validate(&payload); err != nil {
 		httpError(w, `Invalid input (validation failed)`, http.StatusInternalServerError, err)
 		return
 	}
-	doListConferences(NewContext(r), w, r, payload)
+	doListConference(NewContext(r), w, r, payload)
 }
 
-func httpListRooms(w http.ResponseWriter, r *http.Request) {
+func httpListRoom(w http.ResponseWriter, r *http.Request) {
 	if pdebug.Enabled {
-		g := pdebug.Marker("httpListRooms")
+		g := pdebug.Marker("httpListRoom")
 		defer g.End()
 	}
 	if strings.ToLower(r.Method) != `get` {
@@ -417,38 +417,60 @@ func httpListRooms(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if err := validator.HTTPListRoomsRequest.Validate(&payload); err != nil {
+	if err := validator.HTTPListRoomRequest.Validate(&payload); err != nil {
 		httpError(w, `Invalid input (validation failed)`, http.StatusInternalServerError, err)
 		return
 	}
-	doListRooms(NewContext(r), w, r, payload)
+	doListRoom(NewContext(r), w, r, payload)
 }
 
-func httpListSessionsByConference(w http.ResponseWriter, r *http.Request) {
+func httpListSessionByConference(w http.ResponseWriter, r *http.Request) {
 	if pdebug.Enabled {
-		g := pdebug.Marker("httpListSessionsByConference")
+		g := pdebug.Marker("httpListSessionByConference")
 		defer g.End()
 	}
 	if strings.ToLower(r.Method) != `get` {
 		httpError(w, `Method was `+r.Method, http.StatusNotFound, nil)
 	}
 
-	var payload model.ListSessionsByConferenceRequest
+	var payload model.ListSessionByConferenceRequest
 	if err := urlenc.Unmarshal([]byte(r.URL.RawQuery), &payload); err != nil {
 		httpError(w, `Failed to parse url query string`, http.StatusInternalServerError, err)
 		return
 	}
 
-	if err := validator.HTTPListSessionsByConferenceRequest.Validate(&payload); err != nil {
+	if err := validator.HTTPListSessionByConferenceRequest.Validate(&payload); err != nil {
 		httpError(w, `Invalid input (validation failed)`, http.StatusInternalServerError, err)
 		return
 	}
-	doListSessionsByConference(NewContext(r), w, r, payload)
+	doListSessionByConference(NewContext(r), w, r, payload)
 }
 
-func httpListVenues(w http.ResponseWriter, r *http.Request) {
+func httpListUser(w http.ResponseWriter, r *http.Request) {
 	if pdebug.Enabled {
-		g := pdebug.Marker("httpListVenues")
+		g := pdebug.Marker("httpListUser")
+		defer g.End()
+	}
+	if strings.ToLower(r.Method) != `get` {
+		httpError(w, `Method was `+r.Method, http.StatusNotFound, nil)
+	}
+
+	var payload model.ListUserRequest
+	if err := urlenc.Unmarshal([]byte(r.URL.RawQuery), &payload); err != nil {
+		httpError(w, `Failed to parse url query string`, http.StatusInternalServerError, err)
+		return
+	}
+
+	if err := validator.HTTPListUserRequest.Validate(&payload); err != nil {
+		httpError(w, `Invalid input (validation failed)`, http.StatusInternalServerError, err)
+		return
+	}
+	doListUser(NewContext(r), w, r, payload)
+}
+
+func httpListVenue(w http.ResponseWriter, r *http.Request) {
+	if pdebug.Enabled {
+		g := pdebug.Marker("httpListVenue")
 		defer g.End()
 	}
 	if strings.ToLower(r.Method) != `get` {
@@ -461,11 +483,11 @@ func httpListVenues(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if err := validator.HTTPListVenuesRequest.Validate(&payload); err != nil {
+	if err := validator.HTTPListVenueRequest.Validate(&payload); err != nil {
 		httpError(w, `Invalid input (validation failed)`, http.StatusInternalServerError, err)
 		return
 	}
-	doListVenues(NewContext(r), w, r, payload)
+	doListVenue(NewContext(r), w, r, payload)
 }
 
 func httpLookupConference(w http.ResponseWriter, r *http.Request) {
@@ -693,29 +715,30 @@ func (s *Server) SetupRoutes() {
 	r.HandleFunc(`/v1/conference/admin/add`, httpAddConferenceAdmin)
 	r.HandleFunc(`/v1/conference/admin/delete`, httpDeleteConferenceAdmin)
 	r.HandleFunc(`/v1/conference/create`, httpCreateConference)
-	r.HandleFunc(`/v1/conference/date/add`, httpAddConferenceDates)
-	r.HandleFunc(`/v1/conference/date/delete`, httpDeleteConferenceDates)
+	r.HandleFunc(`/v1/conference/dates/add`, httpAddConferenceDates)
+	r.HandleFunc(`/v1/conference/dates/delete`, httpDeleteConferenceDates)
 	r.HandleFunc(`/v1/conference/delete`, httpDeleteConference)
-	r.HandleFunc(`/v1/conference/list`, httpListConferences)
+	r.HandleFunc(`/v1/conference/list`, httpListConference)
 	r.HandleFunc(`/v1/conference/lookup`, httpLookupConference)
 	r.HandleFunc(`/v1/conference/update`, httpUpdateConference)
 	r.HandleFunc(`/v1/room/create`, httpCreateRoom)
 	r.HandleFunc(`/v1/room/delete`, httpDeleteRoom)
-	r.HandleFunc(`/v1/room/list`, httpListRooms)
+	r.HandleFunc(`/v1/room/list`, httpListRoom)
 	r.HandleFunc(`/v1/room/lookup`, httpLookupRoom)
 	r.HandleFunc(`/v1/room/update`, httpUpdateRoom)
-	r.HandleFunc(`/v1/schedule/list`, httpListSessionsByConference)
+	r.HandleFunc(`/v1/schedule/list`, httpListSessionByConference)
 	r.HandleFunc(`/v1/session/create`, httpCreateSession)
 	r.HandleFunc(`/v1/session/delete`, httpDeleteSession)
 	r.HandleFunc(`/v1/session/lookup`, httpLookupSession)
 	r.HandleFunc(`/v1/session/update`, httpUpdateSession)
 	r.HandleFunc(`/v1/user/create`, httpCreateUser)
 	r.HandleFunc(`/v1/user/delete`, httpDeleteUser)
+	r.HandleFunc(`/v1/user/list`, httpListUser)
 	r.HandleFunc(`/v1/user/lookup`, httpLookupUser)
 	r.HandleFunc(`/v1/user/update`, httpUpdateUser)
 	r.HandleFunc(`/v1/venue/create`, httpCreateVenue)
 	r.HandleFunc(`/v1/venue/delete`, httpDeleteVenue)
-	r.HandleFunc(`/v1/venue/list`, httpListVenues)
+	r.HandleFunc(`/v1/venue/list`, httpListVenue)
 	r.HandleFunc(`/v1/venue/lookup`, httpLookupVenue)
 	r.HandleFunc(`/v1/venue/update`, httpUpdateVenue)
 }

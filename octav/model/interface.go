@@ -82,6 +82,7 @@ type User struct {
 	Email      string `json:"email"`
 	TshirtSize string `json:"tshirt_size"`
 }
+type UserL10NList []UserL10N
 type UserList []User
 
 // +model
@@ -121,10 +122,11 @@ type UpdateConferenceRequest struct {
 
 // Date is used to store simple dates YYYY-MM-DD
 type Date struct {
-	year  int
-	month int
-	day   int
+	Year  int `json:"year"`
+	Month int `json:"month"`
+	Day   int `json:"day"`
 }
+type DateList []Date
 
 // WallClock is used to store simple time HH:MM
 type WallClock struct {
@@ -156,7 +158,7 @@ type AddConferenceAdminRequest struct {
 // +transport
 type DeleteConferenceDatesRequest struct {
 	ConferenceID string   `json:"conference_id"`
-	Dates        []string `json:"dates"`
+	Dates        DateList `json:"dates" extract:"true"`
 }
 
 // +transport
@@ -171,11 +173,11 @@ type DeleteConferenceRequest struct {
 }
 
 // +transport
-type ListConferencesRequest struct {
-	RangeEnd   jsval.MaybeString `json:"range_end" urlenc:"range_end,omitempty,string"`
-	RangeStart jsval.MaybeString `json:"range_start" urlenc:"range_start,omitempty,string"`
-	Since      jsval.MaybeString `json:"since" urlenc:"since,omitempty,string"`
-	Lang       jsval.MaybeString `json:"lang" urlenc:"lang,omitempty,string"`
+type ListConferenceRequest struct {
+	RangeEnd   jsval.MaybeString `json:"range_end,omitempty" urlenc:"range_end,omitempty,string"`
+	RangeStart jsval.MaybeString `json:"range_start,omitempty" urlenc:"range_start,omitempty,string"`
+	Since      jsval.MaybeString `json:"since,omitempty" urlenc:"since,omitempty,string"`
+	Lang       jsval.MaybeString `json:"lang,omitempty" urlenc:"lang,omitempty,string"`
 	Limit      jsval.MaybeInt    `json:"limit,omitempty" urlenc:"limit,omitempty,int64"`
 }
 
@@ -306,6 +308,13 @@ type DeleteUserRequest struct {
 }
 
 // +transport
+type ListUserRequest struct {
+	Since jsval.MaybeString `json:"since" urlenc:"since,omitempty,string"`
+	Lang  jsval.MaybeString `json:"lang" urlenc:"lang,omitempty,string"`
+	Limit jsval.MaybeInt    `json:"limit" urlenc:"limit,omitempty,int64"`
+}
+
+// +transport
 type CreateVenueRequest struct {
 	Name      jsval.MaybeString     `json:"name"`
 	Address   jsval.MaybeString     `json:"address"`
@@ -343,7 +352,7 @@ type LookupVenueRequest struct {
 }
 
 // +transport
-type ListSessionsByConferenceRequest struct {
+type ListSessionByConferenceRequest struct {
 	ConferenceID string            `json:"conference_id" urlenc:"conference_id"`
 	Date         jsval.MaybeString `json:"date" urlenc:"date,omitempty,string"`
 }

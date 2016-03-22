@@ -5,6 +5,8 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"io"
+	"io/ioutil"
 	"net/http"
 	"net/url"
 
@@ -61,7 +63,7 @@ func (c *Client) AddConferenceDates(in *model.AddConferenceDatesRequest) (err er
 		g := pdebug.Marker("client.AddConferenceDates").BindError(&err)
 		defer g.End()
 	}
-	u, err := url.Parse(c.Endpoint + "/v1/conference/date/add")
+	u, err := url.Parse(c.Endpoint + "/v1/conference/dates/add")
 	if err != nil {
 		return err
 	}
@@ -109,8 +111,19 @@ func (c *Client) CreateConference(in *model.CreateConferenceRequest) (ret *model
 	if res.StatusCode != http.StatusOK {
 		return nil, fmt.Errorf(`Invalid response: '%s'`, res.Status)
 	}
+	var body io.Reader = res.Body
+	if pdebug.Enabled {
+		jsbuf, err := ioutil.ReadAll(res.Body)
+		if err != nil {
+			pdebug.Printf("failed to read respons buffer: %s", err)
+		} else {
+			pdebug.Printf("response buffer: %s", jsbuf)
+		}
+		body = bytes.NewReader(jsbuf)
+	}
+
 	var payload model.Conference
-	err = json.NewDecoder(res.Body).Decode(&payload)
+	err = json.NewDecoder(body).Decode(&payload)
 	if err != nil {
 		return nil, err
 	}
@@ -142,8 +155,19 @@ func (c *Client) CreateRoom(in *model.CreateRoomRequest) (ret *model.Room, err e
 	if res.StatusCode != http.StatusOK {
 		return nil, fmt.Errorf(`Invalid response: '%s'`, res.Status)
 	}
+	var body io.Reader = res.Body
+	if pdebug.Enabled {
+		jsbuf, err := ioutil.ReadAll(res.Body)
+		if err != nil {
+			pdebug.Printf("failed to read respons buffer: %s", err)
+		} else {
+			pdebug.Printf("response buffer: %s", jsbuf)
+		}
+		body = bytes.NewReader(jsbuf)
+	}
+
 	var payload model.Room
-	err = json.NewDecoder(res.Body).Decode(&payload)
+	err = json.NewDecoder(body).Decode(&payload)
 	if err != nil {
 		return nil, err
 	}
@@ -175,8 +199,19 @@ func (c *Client) CreateSession(in *model.CreateSessionRequest) (ret *model.Sessi
 	if res.StatusCode != http.StatusOK {
 		return nil, fmt.Errorf(`Invalid response: '%s'`, res.Status)
 	}
+	var body io.Reader = res.Body
+	if pdebug.Enabled {
+		jsbuf, err := ioutil.ReadAll(res.Body)
+		if err != nil {
+			pdebug.Printf("failed to read respons buffer: %s", err)
+		} else {
+			pdebug.Printf("response buffer: %s", jsbuf)
+		}
+		body = bytes.NewReader(jsbuf)
+	}
+
 	var payload model.Session
-	err = json.NewDecoder(res.Body).Decode(&payload)
+	err = json.NewDecoder(body).Decode(&payload)
 	if err != nil {
 		return nil, err
 	}
@@ -208,8 +243,19 @@ func (c *Client) CreateUser(in *model.CreateUserRequest) (ret *model.User, err e
 	if res.StatusCode != http.StatusOK {
 		return nil, fmt.Errorf(`Invalid response: '%s'`, res.Status)
 	}
+	var body io.Reader = res.Body
+	if pdebug.Enabled {
+		jsbuf, err := ioutil.ReadAll(res.Body)
+		if err != nil {
+			pdebug.Printf("failed to read respons buffer: %s", err)
+		} else {
+			pdebug.Printf("response buffer: %s", jsbuf)
+		}
+		body = bytes.NewReader(jsbuf)
+	}
+
 	var payload model.User
-	err = json.NewDecoder(res.Body).Decode(&payload)
+	err = json.NewDecoder(body).Decode(&payload)
 	if err != nil {
 		return nil, err
 	}
@@ -241,8 +287,19 @@ func (c *Client) CreateVenue(in *model.CreateVenueRequest) (ret *model.Venue, er
 	if res.StatusCode != http.StatusOK {
 		return nil, fmt.Errorf(`Invalid response: '%s'`, res.Status)
 	}
+	var body io.Reader = res.Body
+	if pdebug.Enabled {
+		jsbuf, err := ioutil.ReadAll(res.Body)
+		if err != nil {
+			pdebug.Printf("failed to read respons buffer: %s", err)
+		} else {
+			pdebug.Printf("response buffer: %s", jsbuf)
+		}
+		body = bytes.NewReader(jsbuf)
+	}
+
 	var payload model.Venue
-	err = json.NewDecoder(res.Body).Decode(&payload)
+	err = json.NewDecoder(body).Decode(&payload)
 	if err != nil {
 		return nil, err
 	}
@@ -310,7 +367,7 @@ func (c *Client) DeleteConferenceDates(in *model.DeleteConferenceDatesRequest) (
 		g := pdebug.Marker("client.DeleteConferenceDates").BindError(&err)
 		defer g.End()
 	}
-	u, err := url.Parse(c.Endpoint + "/v1/conference/date/delete")
+	u, err := url.Parse(c.Endpoint + "/v1/conference/dates/delete")
 	if err != nil {
 		return err
 	}
@@ -445,9 +502,9 @@ func (c *Client) DeleteVenue(in *model.DeleteVenueRequest) (err error) {
 	return nil
 }
 
-func (c *Client) ListConferences(in *model.ListConferencesRequest) (ret interface{}, err error) {
+func (c *Client) ListConference(in *model.ListConferenceRequest) (ret interface{}, err error) {
 	if pdebug.Enabled {
-		g := pdebug.Marker("client.ListConferences").BindError(&err)
+		g := pdebug.Marker("client.ListConference").BindError(&err)
 		defer g.End()
 	}
 	u, err := url.Parse(c.Endpoint + "/v1/conference/list")
@@ -469,17 +526,28 @@ func (c *Client) ListConferences(in *model.ListConferencesRequest) (ret interfac
 	if res.StatusCode != http.StatusOK {
 		return nil, fmt.Errorf(`Invalid response: '%s'`, res.Status)
 	}
+	var body io.Reader = res.Body
+	if pdebug.Enabled {
+		jsbuf, err := ioutil.ReadAll(res.Body)
+		if err != nil {
+			pdebug.Printf("failed to read respons buffer: %s", err)
+		} else {
+			pdebug.Printf("response buffer: %s", jsbuf)
+		}
+		body = bytes.NewReader(jsbuf)
+	}
+
 	var payload interface{}
-	err = json.NewDecoder(res.Body).Decode(&payload)
+	err = json.NewDecoder(body).Decode(&payload)
 	if err != nil {
 		return nil, err
 	}
 	return payload, nil
 }
 
-func (c *Client) ListRooms(in *model.ListRoomRequest) (ret []model.Room, err error) {
+func (c *Client) ListRoom(in *model.ListRoomRequest) (ret []model.Room, err error) {
 	if pdebug.Enabled {
-		g := pdebug.Marker("client.ListRooms").BindError(&err)
+		g := pdebug.Marker("client.ListRoom").BindError(&err)
 		defer g.End()
 	}
 	u, err := url.Parse(c.Endpoint + "/v1/room/list")
@@ -501,17 +569,28 @@ func (c *Client) ListRooms(in *model.ListRoomRequest) (ret []model.Room, err err
 	if res.StatusCode != http.StatusOK {
 		return nil, fmt.Errorf(`Invalid response: '%s'`, res.Status)
 	}
+	var body io.Reader = res.Body
+	if pdebug.Enabled {
+		jsbuf, err := ioutil.ReadAll(res.Body)
+		if err != nil {
+			pdebug.Printf("failed to read respons buffer: %s", err)
+		} else {
+			pdebug.Printf("response buffer: %s", jsbuf)
+		}
+		body = bytes.NewReader(jsbuf)
+	}
+
 	var payload []model.Room
-	err = json.NewDecoder(res.Body).Decode(&payload)
+	err = json.NewDecoder(body).Decode(&payload)
 	if err != nil {
 		return nil, err
 	}
 	return payload, nil
 }
 
-func (c *Client) ListSessionsByConference(in *model.ListSessionsByConferenceRequest) (ret interface{}, err error) {
+func (c *Client) ListSessionByConference(in *model.ListSessionByConferenceRequest) (ret interface{}, err error) {
 	if pdebug.Enabled {
-		g := pdebug.Marker("client.ListSessionsByConference").BindError(&err)
+		g := pdebug.Marker("client.ListSessionByConference").BindError(&err)
 		defer g.End()
 	}
 	u, err := url.Parse(c.Endpoint + "/v1/schedule/list")
@@ -533,17 +612,71 @@ func (c *Client) ListSessionsByConference(in *model.ListSessionsByConferenceRequ
 	if res.StatusCode != http.StatusOK {
 		return nil, fmt.Errorf(`Invalid response: '%s'`, res.Status)
 	}
+	var body io.Reader = res.Body
+	if pdebug.Enabled {
+		jsbuf, err := ioutil.ReadAll(res.Body)
+		if err != nil {
+			pdebug.Printf("failed to read respons buffer: %s", err)
+		} else {
+			pdebug.Printf("response buffer: %s", jsbuf)
+		}
+		body = bytes.NewReader(jsbuf)
+	}
+
 	var payload interface{}
-	err = json.NewDecoder(res.Body).Decode(&payload)
+	err = json.NewDecoder(body).Decode(&payload)
 	if err != nil {
 		return nil, err
 	}
 	return payload, nil
 }
 
-func (c *Client) ListVenues(in *model.ListVenueRequest) (ret []model.Venue, err error) {
+func (c *Client) ListUser(in *model.ListUserRequest) (ret []model.User, err error) {
 	if pdebug.Enabled {
-		g := pdebug.Marker("client.ListVenues").BindError(&err)
+		g := pdebug.Marker("client.ListUser").BindError(&err)
+		defer g.End()
+	}
+	u, err := url.Parse(c.Endpoint + "/v1/user/list")
+	if err != nil {
+		return nil, err
+	}
+	buf, err := urlenc.Marshal(in)
+	if err != nil {
+		return nil, err
+	}
+	u.RawQuery = string(buf)
+	if pdebug.Enabled {
+		pdebug.Printf("GET to %s", u.String())
+	}
+	res, err := c.Client.Get(u.String())
+	if err != nil {
+		return nil, err
+	}
+	if res.StatusCode != http.StatusOK {
+		return nil, fmt.Errorf(`Invalid response: '%s'`, res.Status)
+	}
+	var body io.Reader = res.Body
+	if pdebug.Enabled {
+		jsbuf, err := ioutil.ReadAll(res.Body)
+		if err != nil {
+			pdebug.Printf("failed to read respons buffer: %s", err)
+		} else {
+			pdebug.Printf("response buffer: %s", jsbuf)
+		}
+		body = bytes.NewReader(jsbuf)
+	}
+
+	var payload []model.User
+	err = json.NewDecoder(body).Decode(&payload)
+	if err != nil {
+		return nil, err
+	}
+	return payload, nil
+}
+
+func (c *Client) ListVenue(in *model.ListVenueRequest) (ret []model.Venue, err error) {
+	if pdebug.Enabled {
+		g := pdebug.Marker("client.ListVenue").BindError(&err)
 		defer g.End()
 	}
 	u, err := url.Parse(c.Endpoint + "/v1/venue/list")
@@ -565,8 +698,19 @@ func (c *Client) ListVenues(in *model.ListVenueRequest) (ret []model.Venue, err 
 	if res.StatusCode != http.StatusOK {
 		return nil, fmt.Errorf(`Invalid response: '%s'`, res.Status)
 	}
+	var body io.Reader = res.Body
+	if pdebug.Enabled {
+		jsbuf, err := ioutil.ReadAll(res.Body)
+		if err != nil {
+			pdebug.Printf("failed to read respons buffer: %s", err)
+		} else {
+			pdebug.Printf("response buffer: %s", jsbuf)
+		}
+		body = bytes.NewReader(jsbuf)
+	}
+
 	var payload []model.Venue
-	err = json.NewDecoder(res.Body).Decode(&payload)
+	err = json.NewDecoder(body).Decode(&payload)
 	if err != nil {
 		return nil, err
 	}
@@ -597,8 +741,19 @@ func (c *Client) LookupConference(in *model.LookupConferenceRequest) (ret *model
 	if res.StatusCode != http.StatusOK {
 		return nil, fmt.Errorf(`Invalid response: '%s'`, res.Status)
 	}
+	var body io.Reader = res.Body
+	if pdebug.Enabled {
+		jsbuf, err := ioutil.ReadAll(res.Body)
+		if err != nil {
+			pdebug.Printf("failed to read respons buffer: %s", err)
+		} else {
+			pdebug.Printf("response buffer: %s", jsbuf)
+		}
+		body = bytes.NewReader(jsbuf)
+	}
+
 	var payload model.Conference
-	err = json.NewDecoder(res.Body).Decode(&payload)
+	err = json.NewDecoder(body).Decode(&payload)
 	if err != nil {
 		return nil, err
 	}
@@ -629,8 +784,19 @@ func (c *Client) LookupRoom(in *model.LookupRoomRequest) (ret *model.Room, err e
 	if res.StatusCode != http.StatusOK {
 		return nil, fmt.Errorf(`Invalid response: '%s'`, res.Status)
 	}
+	var body io.Reader = res.Body
+	if pdebug.Enabled {
+		jsbuf, err := ioutil.ReadAll(res.Body)
+		if err != nil {
+			pdebug.Printf("failed to read respons buffer: %s", err)
+		} else {
+			pdebug.Printf("response buffer: %s", jsbuf)
+		}
+		body = bytes.NewReader(jsbuf)
+	}
+
 	var payload model.Room
-	err = json.NewDecoder(res.Body).Decode(&payload)
+	err = json.NewDecoder(body).Decode(&payload)
 	if err != nil {
 		return nil, err
 	}
@@ -661,8 +827,19 @@ func (c *Client) LookupSession(in *model.LookupSessionRequest) (ret *model.Sessi
 	if res.StatusCode != http.StatusOK {
 		return nil, fmt.Errorf(`Invalid response: '%s'`, res.Status)
 	}
+	var body io.Reader = res.Body
+	if pdebug.Enabled {
+		jsbuf, err := ioutil.ReadAll(res.Body)
+		if err != nil {
+			pdebug.Printf("failed to read respons buffer: %s", err)
+		} else {
+			pdebug.Printf("response buffer: %s", jsbuf)
+		}
+		body = bytes.NewReader(jsbuf)
+	}
+
 	var payload model.Session
-	err = json.NewDecoder(res.Body).Decode(&payload)
+	err = json.NewDecoder(body).Decode(&payload)
 	if err != nil {
 		return nil, err
 	}
@@ -693,8 +870,19 @@ func (c *Client) LookupUser(in *model.LookupUserRequest) (ret *model.User, err e
 	if res.StatusCode != http.StatusOK {
 		return nil, fmt.Errorf(`Invalid response: '%s'`, res.Status)
 	}
+	var body io.Reader = res.Body
+	if pdebug.Enabled {
+		jsbuf, err := ioutil.ReadAll(res.Body)
+		if err != nil {
+			pdebug.Printf("failed to read respons buffer: %s", err)
+		} else {
+			pdebug.Printf("response buffer: %s", jsbuf)
+		}
+		body = bytes.NewReader(jsbuf)
+	}
+
 	var payload model.User
-	err = json.NewDecoder(res.Body).Decode(&payload)
+	err = json.NewDecoder(body).Decode(&payload)
 	if err != nil {
 		return nil, err
 	}
@@ -725,8 +913,19 @@ func (c *Client) LookupVenue(in *model.LookupVenueRequest) (ret *model.Venue, er
 	if res.StatusCode != http.StatusOK {
 		return nil, fmt.Errorf(`Invalid response: '%s'`, res.Status)
 	}
+	var body io.Reader = res.Body
+	if pdebug.Enabled {
+		jsbuf, err := ioutil.ReadAll(res.Body)
+		if err != nil {
+			pdebug.Printf("failed to read respons buffer: %s", err)
+		} else {
+			pdebug.Printf("response buffer: %s", jsbuf)
+		}
+		body = bytes.NewReader(jsbuf)
+	}
+
 	var payload model.Venue
-	err = json.NewDecoder(res.Body).Decode(&payload)
+	err = json.NewDecoder(body).Decode(&payload)
 	if err != nil {
 		return nil, err
 	}

@@ -19,7 +19,6 @@ func httpJSON(w http.ResponseWriter, v interface{}) {
 		httpError(w, `encode json`, http.StatusInternalServerError, err)
 		return
 	}
-pdebug.Printf("JSON -> '%s'", buf.String())
 
 	w.WriteHeader(http.StatusOK)
 	buf.WriteTo(w)
@@ -244,7 +243,7 @@ func doAddConferenceAdmin(ctx context.Context, w http.ResponseWriter, r *http.Re
 	httpJSON(w, map[string]string{"status": "success"})
 }
 
-func doListConferences(ctx context.Context, w http.ResponseWriter, r *http.Request, payload model.ListConferencesRequest) {
+func doListConference(ctx context.Context, w http.ResponseWriter, r *http.Request, payload model.ListConferenceRequest) {
 	tx, err := db.Begin()
 	if err != nil {
 		httpError(w, `ListConferences`, http.StatusInternalServerError, err)
@@ -485,6 +484,38 @@ func doDeleteUser(ctx context.Context, w http.ResponseWriter, r *http.Request, p
 	httpJSON(w, map[string]string{"status": "success"})
 }
 
+func doListUser(ctx context.Context, w http.ResponseWriter, r *http.Request, payload model.ListUserRequest) {
+	tx, err := db.Begin()
+	if err != nil {
+		httpError(w, `ListUsers`, http.StatusInternalServerError, err)
+		return
+	}
+	defer tx.AutoRollback()
+
+	s := service.User{}
+	vdbl := db.UserList{}
+	if err := s.LoadList(tx, &vdbl, payload.Since.String, int(payload.Limit.Int)); err != nil {
+		httpError(w, `ListUsers`, http.StatusInternalServerError, err)
+		return
+	}
+
+	l := make(model.UserL10NList, len(vdbl))
+	for i, vdb := range vdbl {
+		v := model.User{}
+		if err := v.FromRow(vdb); err != nil {
+			httpError(w, `ListUsers`, http.StatusInternalServerError, err)
+			return
+		}
+		vl := model.UserL10N{User: v}
+		if err := vl.LoadLocalizedFields(tx); err != nil {
+			httpError(w, `ListUsers`, http.StatusInternalServerError, err)
+			return
+		}
+		l[i] = vl
+	}
+	httpJSON(w, l)
+}
+
 func doLookupUser(ctx context.Context, w http.ResponseWriter, r *http.Request, payload model.LookupUserRequest) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("doLookupUser")
@@ -580,7 +611,7 @@ func doUpdateUser(ctx context.Context, w http.ResponseWriter, r *http.Request, p
 	httpJSON(w, map[string]string{"status": "success"})
 }
 
-func doListRooms(ctx context.Context, w http.ResponseWriter, r *http.Request, payload model.ListRoomRequest) {
+func doListRoom(ctx context.Context, w http.ResponseWriter, r *http.Request, payload model.ListRoomRequest) {
 	tx, err := db.Begin()
 	if err != nil {
 		httpError(w, `ListRoom`, http.StatusInternalServerError, err)
@@ -742,7 +773,7 @@ func doUpdateVenue(ctx context.Context, w http.ResponseWriter, r *http.Request, 
 	httpJSON(w, v)
 }
 
-func doListVenues(ctx context.Context, w http.ResponseWriter, r *http.Request, payload model.ListVenueRequest) {
+func doListVenue(ctx context.Context, w http.ResponseWriter, r *http.Request, payload model.ListVenueRequest) {
 	tx, err := db.Begin()
 	if err != nil {
 		httpError(w, `ListVenues`, http.StatusInternalServerError, err)
@@ -799,7 +830,7 @@ func doLookupSession(ctx context.Context, w http.ResponseWriter, r *http.Request
 	httpJSON(w, v)
 }
 
-func doListSessionsByConference(ctx context.Context, w http.ResponseWriter, r *http.Request, payload model.ListSessionsByConferenceRequest) {
+func doListSessionByConference(ctx context.Context, w http.ResponseWriter, r *http.Request, payload model.ListSessionByConferenceRequest) {
 	tx, err := db.Begin()
 	if err != nil {
 		httpError(w, `ListSessionsByConference`, http.StatusInternalServerError, err)
