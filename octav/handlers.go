@@ -529,19 +529,38 @@ func doListUser(ctx context.Context, w http.ResponseWriter, r *http.Request, pay
 		return
 	}
 
+	if !payload.Lang.Valid() {
+		l := make(model.UserList, len(vdbl))
+		for i, vdb := range vdbl {
+			if err := l[i].FromRow(vdb); err != nil {
+				httpError(w, `ListConferences`, http.StatusInternalServerError, err)
+				return
+			}
+		}
+		httpJSON(w, l)
+		return
+	}
+
 	l := make(model.UserL10NList, len(vdbl))
 	for i, vdb := range vdbl {
 		v := model.User{}
 		if err := v.FromRow(vdb); err != nil {
-			httpError(w, `ListUsers`, http.StatusInternalServerError, err)
+			httpError(w, `ListUser`, http.StatusInternalServerError, err)
 			return
 		}
-		vl := model.UserL10N{User: v}
-		if err := vl.LoadLocalizedFields(tx); err != nil {
-			httpError(w, `ListUsers`, http.StatusInternalServerError, err)
-			return
+		l[i].User = v
+		switch payload.Lang.String {
+		case "all":
+			if err := l[i].LoadLocalizedFields(tx); err != nil {
+				httpError(w, `ListUser`, http.StatusInternalServerError, err)
+				return
+			}
+		default:
+			if err := s.ReplaceL10NStrings(tx, &(l[i].User), payload.Lang.String); err != nil {
+				httpError(w, `ListUser`, http.StatusInternalServerError, err)
+				return
+			}
 		}
-		l[i] = vl
 	}
 	httpJSON(w, l)
 }
@@ -924,7 +943,7 @@ func doLookupSession(ctx context.Context, w http.ResponseWriter, r *http.Request
 func doListSessionByConference(ctx context.Context, w http.ResponseWriter, r *http.Request, payload model.ListSessionByConferenceRequest) {
 	tx, err := db.Begin()
 	if err != nil {
-		httpError(w, `ListSessionsByConference`, http.StatusInternalServerError, err)
+		httpError(w, `ListSessionByConference`, http.StatusInternalServerError, err)
 		return
 	}
 	defer tx.AutoRollback()
@@ -932,7 +951,19 @@ func doListSessionByConference(ctx context.Context, w http.ResponseWriter, r *ht
 	s := service.Session{}
 	vdbl := db.SessionList{}
 	if err := s.LoadByConference(tx, &vdbl, payload.ConferenceID, payload.Date.String); err != nil {
-		httpError(w, `ListSessionsByConference`, http.StatusInternalServerError, err)
+		httpError(w, `ListSessionByConference`, http.StatusInternalServerError, err)
+		return
+	}
+
+	if !payload.Lang.Valid() {
+		l := make(model.SessionList, len(vdbl))
+		for i, vdb := range vdbl {
+			if err := l[i].FromRow(vdb); err != nil {
+				httpError(w, `ListSessionByConference`, http.StatusInternalServerError, err)
+				return
+			}
+		}
+		httpJSON(w, l)
 		return
 	}
 
@@ -940,15 +971,22 @@ func doListSessionByConference(ctx context.Context, w http.ResponseWriter, r *ht
 	for i, vdb := range vdbl {
 		v := model.Session{}
 		if err := v.FromRow(vdb); err != nil {
-			httpError(w, `ListSessionsByConference`, http.StatusInternalServerError, err)
+			httpError(w, `ListSessionByConference`, http.StatusInternalServerError, err)
 			return
 		}
-		vl := model.SessionL10N{Session: v}
-		if err := vl.LoadLocalizedFields(tx); err != nil {
-			httpError(w, `ListSessionsByConference`, http.StatusInternalServerError, err)
-			return
+		l[i].Session = v
+		switch payload.Lang.String {
+		case "all":
+			if err := l[i].LoadLocalizedFields(tx); err != nil {
+				httpError(w, `ListSessionByConference`, http.StatusInternalServerError, err)
+				return
+			}
+		default:
+			if err := s.ReplaceL10NStrings(tx, &(l[i].Session), payload.Lang.String); err != nil {
+				httpError(w, `ListSessionByConference`, http.StatusInternalServerError, err)
+				return
+			}
 		}
-		l[i] = vl
 	}
 	httpJSON(w, l)
 }

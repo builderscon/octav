@@ -37,7 +37,7 @@ type Room struct {
 	Name     string `json:"name" l10n:"true"`
 	Capacity uint   `json:"capacity"`
 }
-type RoomList []RoomL10N
+type RoomList []Room
 
 // +model
 type Session struct {
@@ -68,6 +68,7 @@ type Session struct {
 	Room              *Room       `json:"room"`       // only populated for JSON response
 	Speaker           *User       `json:"speaker"`    // only populated for JSON response
 }
+type SessionList []Session
 
 type TagString string
 
@@ -160,8 +161,8 @@ type DeleteConferenceDatesRequest struct {
 
 // +transport
 type DeleteConferenceAdminRequest struct {
-	ConferenceID string   `json:"conference_id"`
-	UserID       string   `json:"user_id"`
+	ConferenceID string `json:"conference_id"`
+	UserID       string `json:"user_id"`
 }
 
 // +transport
@@ -355,4 +356,5 @@ type LookupVenueRequest struct {
 type ListSessionByConferenceRequest struct {
 	ConferenceID string            `json:"conference_id" urlenc:"conference_id"`
 	Date         jsval.MaybeString `json:"date" urlenc:"date,omitempty,string"`
+	Lang         jsval.MaybeString `json:"lang,omitempty" urlenc:"lang,omitempty,string"`
 }
