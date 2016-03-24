@@ -1,0 +1,2 @@
+[% WRAPPER "layout/main.html.tx" %]
+[% END %]

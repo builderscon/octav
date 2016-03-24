@@ -1,0 +1,10 @@
+requires 'perl', '5.008001';
+
+on 'test' => sub {
+    requires 'Test::More', '0.98';
+};
+
+requires 'Mojolicious';
+requires 'Mojolicious::Plugin::XslateRenderer';
+requires 'Plack';
+requires 'Text::Xslate::Bridge::TT2Like';
