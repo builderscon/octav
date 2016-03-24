@@ -77,3 +77,5 @@ clean: clean_images clean_executables
 deploy:
 	@echo "Deploying $(IMAGE_NAME) via rolling update"
 	kubectl rolling-update --update-period=5s --image=$(IMAGE_NAME) $(APPNAME)
+
+publish-deploy: publish deploy

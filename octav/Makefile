@@ -15,6 +15,8 @@ GOOS=$(word 1,$(subst /, ,$(word 4, $(GOVERSION))))
 GOARCH=$(word 2,$(subst /, ,$(word 4, $(GOVERSION))))
 BIN_DIR=$(CURDIR)/_bin/$(GOOS)/$(GOARCH)
 
+CONTAINER_DIR=$(CURDIR)/gke/containers
+
 ifndef OCTAV_DB_NAME
 	OCTAV_DB_NAME = octav
 endif
@@ -26,7 +28,7 @@ ifdef OCTAV_TEST_DSN
 	GO_TEST_CMD = go test -v $(GO_TAGS_OPT)
 endif
 
-.PHONY: install_deps build_internal_cmd generate build run all clean test init_db
+.PHONY: install_deps build_internal_cmd generate build run all clean test init_db gke-apiserver
 
 all: test build
 
@@ -116,4 +118,9 @@ cloudsql: cloudsql_files
 # gcloud toolset doesn't, so... this workaround
 cloudsql_secret: cloudsql_files
 	./devtools/make_cloudsql_secret.sh | kubectl create -f -
+
+gke-apiserver:
+	$(MAKE) -C $(CONTAINER_DIR)/apiserver clean
+	$(MAKE) -C $(CONTAINER_DIR)/apiserver docker DEBUG=1
+	$(MAKE) -C $(CONTAINER_DIR)/apiserver publish-deploy
 
