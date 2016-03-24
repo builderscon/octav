@@ -514,6 +514,7 @@ func generateModelFile(ctx *genctx, m Model) error {
 		fmt.Fprintf(&buf, "\n%s", m.Name)
 		buf.WriteString("\nL10N tools.LocalizedFields `json:" + `"-"` + "`")
 		buf.WriteString("\n}")
+		fmt.Fprintf(&buf, "\ntype %sL10NList []%sL10N", m.Name, m.Name)
 
 		fmt.Fprintf(&buf, "\n\nfunc (v %sL10N) MarshalJSON() ([]byte, error) {", m.Name)
 		fmt.Fprintf(&buf, "\nbuf, err := json.Marshal(v.%s)", m.Name)

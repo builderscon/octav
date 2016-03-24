@@ -17,6 +17,7 @@ type UserL10N struct {
 	User
 	L10N tools.LocalizedFields `json:"-"`
 }
+type UserL10NList []UserL10N
 
 func (v UserL10N) MarshalJSON() ([]byte, error) {
 	buf, err := json.Marshal(v.User)

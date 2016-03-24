@@ -17,6 +17,7 @@ type SessionL10N struct {
 	Session
 	L10N tools.LocalizedFields `json:"-"`
 }
+type SessionL10NList []SessionL10N
 
 func (v SessionL10N) MarshalJSON() ([]byte, error) {
 	buf, err := json.Marshal(v.Session)

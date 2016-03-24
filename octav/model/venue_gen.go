@@ -17,6 +17,7 @@ type VenueL10N struct {
 	Venue
 	L10N tools.LocalizedFields `json:"-"`
 }
+type VenueL10NList []VenueL10N
 
 func (v VenueL10N) MarshalJSON() ([]byte, error) {
 	buf, err := json.Marshal(v.Venue)

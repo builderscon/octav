@@ -17,6 +17,7 @@ type RoomL10N struct {
 	Room
 	L10N tools.LocalizedFields `json:"-"`
 }
+type RoomL10NList []RoomL10N
 
 func (v RoomL10N) MarshalJSON() ([]byte, error) {
 	buf, err := json.Marshal(v.Room)

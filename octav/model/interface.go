@@ -28,7 +28,6 @@ type Conference struct {
 	Dates          ConferenceDateList `json:"dates,omitempty"`
 	Administrators UserList           `json:"administrators,omitempty"`
 }
-type ConferenceL10NList []ConferenceL10N
 type ConferenceList []Conference
 
 // +model
@@ -69,7 +68,6 @@ type Session struct {
 	Room              *Room       `json:"room"`       // only populated for JSON response
 	Speaker           *User       `json:"speaker"`    // only populated for JSON response
 }
-type SessionL10NList []SessionL10N
 
 type TagString string
 
@@ -82,7 +80,6 @@ type User struct {
 	Email      string `json:"email"`
 	TshirtSize string `json:"tshirt_size"`
 }
-type UserL10NList []UserL10N
 type UserList []User
 
 // +model
@@ -93,7 +90,7 @@ type Venue struct {
 	Longitude float64 `json:"longitude,omitempty"`
 	Latitude  float64 `json:"latitude,omitempty"`
 }
-type VenueL10NList []VenueL10N
+type VenueList []Venue
 
 // +transport
 type CreateConferenceRequest struct {
