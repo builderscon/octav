@@ -8,17 +8,11 @@ func (v *RoomList) LoadForVenue(tx *db.Tx, venueID, since string, limit int) err
 		return err
 	}
 
-	res := make([]RoomL10N, len(vdbl))
+	res := make([]Room, len(vdbl))
 	for i, vdb := range vdbl {
-		v := Room{}
-		if err := v.FromRow(vdb); err != nil {
+		if err := res[i].FromRow(vdb); err != nil {
 			return err
 		}
-		vl := RoomL10N{Room: v}
-		if err := vl.LoadLocalizedFields(tx); err != nil {
-			return err
-		}
-		res[i] = vl
 	}
 	*v = res
 	return nil
