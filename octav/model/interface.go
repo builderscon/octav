@@ -182,6 +182,9 @@ type ListConferenceRequest struct {
 }
 
 // +transport
+type ListConferenceReponse []Conference
+
+// +transport
 type CreateRoomRequest struct {
 	VenueID  jsval.MaybeString     `json:"venue_id"`
 	Name     jsval.MaybeString     `json:"name" l10n:"true"`
