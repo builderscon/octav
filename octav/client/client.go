@@ -502,7 +502,7 @@ func (c *Client) DeleteVenue(in *model.DeleteVenueRequest) (err error) {
 	return nil
 }
 
-func (c *Client) ListConference(in *model.ListConferenceRequest) (ret interface{}, err error) {
+func (c *Client) ListConference(in *model.ListConferenceRequest) (ret []model.Conference, err error) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("client.ListConference").BindError(&err)
 		defer g.End()
@@ -537,7 +537,7 @@ func (c *Client) ListConference(in *model.ListConferenceRequest) (ret interface{
 		body = bytes.NewReader(jsbuf)
 	}
 
-	var payload interface{}
+	var payload []model.Conference
 	err = json.NewDecoder(body).Decode(&payload)
 	if err != nil {
 		return nil, err
@@ -588,7 +588,7 @@ func (c *Client) ListRoom(in *model.ListRoomRequest) (ret []model.Room, err erro
 	return payload, nil
 }
 
-func (c *Client) ListSessionByConference(in *model.ListSessionByConferenceRequest) (ret interface{}, err error) {
+func (c *Client) ListSessionByConference(in *model.ListSessionByConferenceRequest) (ret []model.Session, err error) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("client.ListSessionByConference").BindError(&err)
 		defer g.End()
@@ -623,7 +623,7 @@ func (c *Client) ListSessionByConference(in *model.ListSessionByConferenceReques
 		body = bytes.NewReader(jsbuf)
 	}
 
-	var payload interface{}
+	var payload []model.Session
 	err = json.NewDecoder(body).Decode(&payload)
 	if err != nil {
 		return nil, err

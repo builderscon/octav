@@ -10,6 +10,7 @@ import (
 	"io"
 	"log"
 	"os"
+	"regexp"
 	"sort"
 	"strconv"
 	"strings"
@@ -362,6 +363,28 @@ func toMethodName(s []string) string {
 	return buf.String()
 }
 
+var wsrx = regexp.MustCompile(`\s+`)
+
+func titleToName(s string) string {
+	buf := bytes.Buffer{}
+	for _, p := range wsrx.Split(s, -1) {
+		if len(p) > 0 {
+			buf.WriteString(strings.ToUpper(p[:1]))
+			buf.WriteString(p[1:])
+		}
+	}
+	return buf.String()
+}
+
+func methodNameToRequestTransportName(s *hschema.HyperSchema, name string) string {
+	transportNs, ok := s.Extras["hsup.transport_ns"]
+	if !ok {
+		transportNs = "model"
+	}
+
+	return fmt.Sprintf("%s.%sRequest", transportNs, name)
+}
+
 func processAction(ctx *genctx, action Action) error {
 	ctx.cmdchain = append(ctx.cmdchain, action.Name)
 	defer func() {
@@ -455,7 +478,9 @@ func processAction(ctx *genctx, action Action) error {
 	buf.WriteString("\n\nm := make(map[string]interface{})")
 	setbuf.WriteTo(&buf)
 
-	transport := link.Schema.Extras["hsup.type"].(string)
+	clMethodName := titleToName(link.Title)
+	transport := methodNameToRequestTransportName(ctx.schema, clMethodName)
+
 	fmt.Fprintf(&buf, "\nr := %s{}", transport)
 	buf.WriteString("\nif err := r.Populate(m); err != nil {")
 	buf.WriteString("\nreturn errOut(err)")
@@ -472,11 +497,11 @@ func processAction(ctx *genctx, action Action) error {
 	buf.WriteString("\n}")
 	targetSchema := link.TargetSchema
 	if targetSchema == nil {
-		fmt.Fprintf(&buf, "\nif err := cl.%s(&r); err != nil {", guessClientMethodName(transport))
+		fmt.Fprintf(&buf, "\nif err := cl.%s(&r); err != nil {", clMethodName)
 		buf.WriteString("\nreturn errOut(err)")
 		buf.WriteString("\n}")
 	} else {
-		fmt.Fprintf(&buf, "\nres, err := cl.%s(&r)", guessClientMethodName(transport))
+		fmt.Fprintf(&buf, "\nres, err := cl.%s(&r)", clMethodName)
 		buf.WriteString("\nif err != nil {")
 		buf.WriteString("\nreturn errOut(err)")
 		buf.WriteString("\n}")
@@ -496,12 +521,6 @@ func processAction(ctx *genctx, action Action) error {
 func guessValidatorName(s string) string {
 	s = strings.TrimPrefix(s, "model.")
 	return "validator.HTTP" + s
-}
-
-func guessClientMethodName(s string) string {
-	s = strings.TrimPrefix(s, "model.")
-	s = strings.TrimSuffix(s, "Request")
-	return s
 }
 
 func lookupLink(ctx *genctx, endpoint string) (*hschema.Link, error) {
