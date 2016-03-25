@@ -1,5 +1,5 @@
-hash: fcfba46aaf0d04c7929117cf86713fb89e329da9ffa3b5c898e617481e7ee72f
-updated: 2016-03-25T16:49:16.368315526+09:00
+hash: 473eae6d87b5849b4577dab733d25c04769d36a0a07a78bcdcb4d98663ad8fff
+updated: 2016-03-25T20:12:09.91552957+09:00
 imports:
 - name: github.com/davecgh/go-spew
   version: 5215b55f46b2b919f50a1df0eaa5886afe4e3b3d
@@ -37,6 +37,10 @@ imports:
   version: 3fbec6e98ec8c1db27dbb9d9aa2c945574b597bc
 - name: github.com/shogo82148/go-sql-proxy
   version: 6e789550f4594aa9990507295b5e969cd250bacf
+- name: github.com/stretchr/testify
+  version: 6fe211e493929a8aac0469b93f28b1d0688a9a3a
+  subpackages:
+  - assert
 - name: golang.org/x/net
   version: 991d3e32f76f19ee6d9caadb3a22eae8d23315f7
   subpackages:
