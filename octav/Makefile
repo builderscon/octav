@@ -19,29 +19,28 @@ all: test build
 installdeps:
 	@PATH=$(INTERNAL_BIN_DIR):$(PATH) glide up
 
-$(INTERNAL_BIN_DIR):
-	@mkdir $(INTERNAL_BIN_DIR)
-
-$(INTERNAL_BIN_DIR)/%: $(INTERNAL_BIN_DIR) internal/cmd/%/*.go
+$(INTERNAL_BIN_DIR)/%: internal/cmd/%/*.go
+	@mkdir -p $(INTERNAL_BIN_DIR)
 	@echo "Building $(@F)..."
-	@go build -o $@ $^
+	go build -o $@ $^
 
-$(INTERNAL_BIN_DIR)/hsup: $(INTERNAL_BIN_DIR)
+$(INTERNAL_BIN_DIR)/hsup:
+	@mkdir -p $(INTERNAL_BIN_DIR)
 	@echo "Building hsup..."
 	@go get -d github.com/lestrrat/go-hsup
 	@go build -o $@ github.com/lestrrat/go-hsup/cmd/hsup
 
 glide: $(INTERNAL_BIN_DIR)/glide
 
-$(INTERNAL_BIN_DIR)/glide: $(INTERNAL_BIN_DIR) $(INTERNAL_BIN_DIR)/glide-$(GOOS)-$(GOARCH)
+$(INTERNAL_BIN_DIR)/glide: $(INTERNAL_BIN_DIR)/glide-$(GOOS)-$(GOARCH)
 
 $(INTERNAL_BIN_DIR)/glide-$(GOOS)-$(GOARCH):
+	@mkdir -p $(INTERNAL_BIN_DIR)
 	@echo "Installing glide for $(GOOS)/$(GOARCH)..."
 	@wget -O - https://github.com/Masterminds/glide/releases/download/0.10.0/glide-0.10.0-$(GOOS)-$(GOARCH).tar.gz | tar xvz
 	@mv $(GOOS)-$(GOARCH)/glide $(INTERNAL_BIN_DIR)/glide-$(GOOS)-$(GOARCH)
 	@rm -rf $(GOOS)-$(GOARCH)
 	@ln -sf glide-$(GOOS)-$(GOARCH) $(INTERNAL_BIN_DIR)/glide 
-	PATH=$(INTERNAL_BIN_DIR):$(PATH) which glide
 
 build_internal_cmd: $(patsubst %,$(INTERNAL_BIN_DIR)/%, $(INTERNAL_CMDS))
 
