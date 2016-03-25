@@ -1,0 +1,49 @@
+hash: fcfba46aaf0d04c7929117cf86713fb89e329da9ffa3b5c898e617481e7ee72f
+updated: 2016-03-25T16:49:16.368315526+09:00
+imports:
+- name: github.com/davecgh/go-spew
+  version: 5215b55f46b2b919f50a1df0eaa5886afe4e3b3d
+  subpackages:
+  - spew
+- name: github.com/go-sql-driver/mysql
+  version: 66312f7fe2678aa0f5ec770f96702f4c4ec5aa8e
+- name: github.com/gorilla/context
+  version: 1ea25387ff6f684839d82767c1733ff4d4d15d0a
+- name: github.com/gorilla/mux
+  version: 0eeaf8392f5b04950925b8a69fe70f110fa7cbfc
+- name: github.com/jessevdk/go-flags
+  version: 6b9493b3cb60367edd942144879646604089e3f7
+- name: github.com/lestrrat/go-jshschema
+  version: 4514acd168a63041862eb3d223a09a789cae6b3b
+- name: github.com/lestrrat/go-jspointer
+  version: f4881e611bdbe9fb413a7780721ef8400a1f2341
+- name: github.com/lestrrat/go-jsref
+  version: abc2d3e204518e66d391722814667f2707de3447
+  subpackages:
+  - provider
+- name: github.com/lestrrat/go-jsschema
+  version: 29ed749b2386595fd62b5d919e8cff759c38185a
+- name: github.com/lestrrat/go-jsval
+  version: 8f072535da03ced2bba6832045278c6538015b20
+- name: github.com/lestrrat/go-pdebug
+  version: a45b04725d5819f9f30fb68085be53b90a1d55f1
+- name: github.com/lestrrat/go-simple-guard
+  version: 9558d700d27518c2737bad3d5f6c1c5e481e1a29
+- name: github.com/lestrrat/go-structinfo
+  version: f74c056fe41f860aa6264478c664a6fff8a64298
+- name: github.com/lestrrat/go-tx-guard
+  version: 40dc337a64f229bb420dc224b6f2981115d686fa
+- name: github.com/lestrrat/go-urlenc
+  version: 3fbec6e98ec8c1db27dbb9d9aa2c945574b597bc
+- name: github.com/shogo82148/go-sql-proxy
+  version: 6e789550f4594aa9990507295b5e969cd250bacf
+- name: golang.org/x/net
+  version: 991d3e32f76f19ee6d9caadb3a22eae8d23315f7
+  subpackages:
+  - context
+- name: golang.org/x/text
+  version: 1b466db55e0ba5d56ef5315c728216b42f796491
+  subpackages:
+  - language
+  - internal/tag
+devImports: []
