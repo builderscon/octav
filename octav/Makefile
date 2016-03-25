@@ -48,7 +48,7 @@ generate: build_internal_cmd
 	@echo "go generate ."
 	@PATH=$(CURDIR)/_internal_bin:$(PATH) go generate .
 
-test: generate buildspec
+test:
 	@OCTAV_TEST_DSN=$(OCTAV_TEST_DSN) go test -v $(GO_TAGS_OPT) $(shell glide novendor)
 
 $(BIN_DIR)/octav: cmd/octav/octav.go $(SRC_FILES)
