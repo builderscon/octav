@@ -38,7 +38,7 @@ $(INTERNAL_BIN_DIR)/glide:
 	@$(MAKE) $(INTERNAL_BIN_DIR)/glide-$(GOOS)-$(GOARCH)
 
 $(INTERNAL_BIN_DIR)/glide-$(GOOS)-$(GOARCH):
-	@wget -O - https://github.com/Masterminds/glide/releases/download/0.10.0/glide-0.10.0-$(GOOS)-$(GOARCH).tar.gz | tar xz
+	@wget -O - https://github.com/Masterminds/glide/releases/download/0.10.0/glide-0.10.0-$(GOOS)-$(GOARCH).tar.gz | tar xvz
 	@mv $(GOOS)-$(GOARCH)/glide $(INTERNAL_BIN_DIR)/glide-$(GOOS)-$(GOARCH)
 	@rm -rf $(GOOS)-$(GOARCH)
 	@ln -sf $(INTERNAL_BIN_DIR)/glide-$(GOOS)-$(GOARCH) $(INTERNAL_BIN_DIR)/glide 
