@@ -31,6 +31,8 @@ $(INTERNAL_BIN_DIR)/hsup: $(INTERNAL_BIN_DIR)
 	@go get -d github.com/lestrrat/go-hsup
 	@go build -o $@ github.com/lestrrat/go-hsup/cmd/hsup
 
+glide: $(INTERNAL_BIN_DIR)/glide
+
 $(INTERNAL_BIN_DIR)/glide: $(INTERNAL_BIN_DIR) $(INTERNAL_BIN_DIR)/glide-$(GOOS)-$(GOARCH)
 
 $(INTERNAL_BIN_DIR)/glide-$(GOOS)-$(GOARCH):
