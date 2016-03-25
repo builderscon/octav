@@ -27,7 +27,7 @@ ifeq ($(strip $(DOCKER_MACHINE_EV4)),)
 endif
 
 
-.PHONY: gke-apiserver gke-adminweb k8-bootstrap k8-shutdown cloudsql init-db
+.PHONY: gke-apiserver gke-adminweb k8-bootstrap k8-shutdown cloudsql initdb
 
 k8s-bootstrap:
 	./devtools/k8s-bootstrap.sh
@@ -65,7 +65,7 @@ cloudsql: cloudsql_files
 cloudsql_secret: cloudsql_files
 	./devtools/make_cloudsql_secret.sh | kubectl create -f -
 
-init-db:
+initdb:
 	@echo "Initializing database..."
 	@echo "  --> dropping old database $(OCTAV_DB_NAME) (if it exists)"
 	@mysql -u root -e "DROP DATABASE IF EXISTS $(OCTAV_DB_NAME)"

@@ -6,7 +6,6 @@ GOVERSION=$(shell go version)
 GOOS=$(word 1,$(subst /, ,$(word 4, $(GOVERSION))))
 GOARCH=$(word 2,$(subst /, ,$(word 4, $(GOVERSION))))
 BIN_DIR=$(CURDIR)/_bin/$(GOOS)/$(GOARCH)
-
 ifndef OCTAV_DB_NAME
 	OCTAV_DB_NAME = octav
 endif
@@ -18,12 +17,12 @@ ifndef OCTAV_TEST_DSN
 GO_TEST:= OCTAV_TEST_DSN="root:@/$(OCTAV_DB_NAME)?parseTime=true" $(GO_TEST)
 endif
 
-.PHONY: install_deps build_internal_cmd generate build run all clean test init-db gke-apiserver
+.PHONY: installdeps build_internal_cmd generate build run all clean test initdb gke-apiserver $(INTERNAL_BIN_DIR)/glide
 
 all: test build
 
-install_deps:
-	@glide up
+installdeps:
+	@PATH=$(CURDIR)/_internal_bin:$(PATH) glide up
 
 $(INTERNAL_BIN_DIR)/%: internal/cmd/%/*.go
 	@echo "Building $(@F)..."
@@ -33,6 +32,16 @@ $(INTERNAL_BIN_DIR)/hsup:
 	@echo "Building hsup..."
 	@go get -d github.com/lestrrat/go-hsup
 	@go build -o $@ github.com/lestrrat/go-hsup/cmd/hsup
+
+$(INTERNAL_BIN_DIR)/glide:
+	@echo "Install glide for $(GOOS)/$(GOARCH)..."
+	@$(MAKE) $(INTERNAL_BIN_DIR)/glide-$(GOOS)-$(GOARCH)
+
+$(INTERNAL_BIN_DIR)/glide-$(GOOS)-$(GOARCH):
+	@wget -O - https://github.com/Masterminds/glide/releases/download/0.10.0/glide-0.10.0-$(GOOS)-$(GOARCH).tar.gz | tar xz
+	@mv $(GOOS)-$(GOARCH)/glide $(INTERNAL_BIN_DIR)/glide-$(GOOS)-$(GOARCH)
+	@rm -rf $(GOOS)-$(GOARCH)
+	@ln -sf $(INTERNAL_BIN_DIR)/glide-$(GOOS)-$(GOARCH) $(INTERNAL_BIN_DIR)/glide 
 
 build_internal_cmd: $(patsubst %,$(INTERNAL_BIN_DIR)/%, $(INTERNAL_CMDS))
 
@@ -68,5 +77,5 @@ clean:
 	-rm _internal_bin/*
 	-rm -rf _bin/*
 
-init-db:
-	$(MAKE) -C ../ init-db
+initdb:
+	$(MAKE) -C ../ initdb
