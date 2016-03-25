@@ -12,8 +12,8 @@ if [ "$TRAVIS" == "true" ]; then
     echo " + Detected running under Travis CI"
     echo " + Creating database '$OCTAV_DB_NAME'"
     make initdb
-    make installdeps
     make _internal_bin/glide
+    make installdeps
 fi
 
 export OCTAV_TEST_DSN="root:@/$OCTAV_DB_NAME?parseTime=true"
