@@ -45,6 +45,7 @@ $(INTERNAL_BIN_DIR)/glide-$(GOOS)-$(GOARCH):
 	@mv $(GOOS)-$(GOARCH)/glide $(INTERNAL_BIN_DIR)/glide-$(GOOS)-$(GOARCH)
 	@rm -rf $(GOOS)-$(GOARCH)
 	@ln -sf $(INTERNAL_BIN_DIR)/glide-$(GOOS)-$(GOARCH) $(INTERNAL_BIN_DIR)/glide 
+	find $(INTERNAL_BIN_DIR)
 
 build_internal_cmd: $(patsubst %,$(INTERNAL_BIN_DIR)/%, $(INTERNAL_CMDS))
 

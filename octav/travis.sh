@@ -10,9 +10,8 @@ export GO_TAGS_OPT="-tags debug0"
 
 if [ "$TRAVIS" == "true" ]; then
     echo " + Detected running under Travis CI"
-    echo " + Creating database '$OCTAV_DB_NAME'"
-    make initdb
     make _internal_bin/glide
+    make initdb
     make installdeps
 fi
 
