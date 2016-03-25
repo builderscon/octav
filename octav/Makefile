@@ -49,7 +49,7 @@ generate: build_internal_cmd
 	@PATH=$(CURDIR)/_internal_bin:$(PATH) go generate .
 
 test:
-	@OCTAV_TEST_DSN=$(OCTAV_TEST_DSN) go test -v $(GO_TAGS_OPT) $(shell glide novendor)
+	@OCTAV_TEST_DSN=$(OCTAV_TEST_DSN) go test -v $(GO_TAGS_OPT) $(shell PATH=$(INTERNAL_BIN_DIR):$(PATH) glide novendor)
 
 $(BIN_DIR)/octav: cmd/octav/octav.go $(SRC_FILES)
 	@echo "Building $(@F) for $(GOOS)/$(GOARCH)..."
