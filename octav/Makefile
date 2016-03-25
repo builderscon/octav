@@ -1,6 +1,6 @@
 EXTRA_TAGS       =
 OCTAV_EXECUTABLE = octav
-INTERNAL_BIN_DIR = _internal_bin
+INTERNAL_BIN_DIR = $(CURDIR)/_internal_bin
 INTERNAL_CMDS    = gendb genmodel gentransport genoctavctl
 GOVERSION=$(shell go version)
 GOOS=$(word 1,$(subst /, ,$(word 4, $(GOVERSION))))
@@ -17,7 +17,7 @@ SRC_FILES = $(wildcard *.go validator/*.go client/*.go db/*.go model/*.go)
 all: test build
 
 installdeps:
-	@PATH=$(CURDIR)/_internal_bin:$(PATH) glide up
+	@PATH=$(INTERNAL_BIN_DIR):$(PATH) glide up
 
 $(INTERNAL_BIN_DIR):
 	@mkdir $(INTERNAL_BIN_DIR)
@@ -39,7 +39,7 @@ $(INTERNAL_BIN_DIR)/glide-$(GOOS)-$(GOARCH):
 	@mv $(GOOS)-$(GOARCH)/glide $(INTERNAL_BIN_DIR)/glide-$(GOOS)-$(GOARCH)
 	@rm -rf $(GOOS)-$(GOARCH)
 	@ln -sf glide-$(GOOS)-$(GOARCH) $(INTERNAL_BIN_DIR)/glide 
-	PATH=$(INTERNAL_BIN):$PATH which glide
+	PATH=$(INTERNAL_BIN_DIR):$(PATH) which glide
 
 build_internal_cmd: $(patsubst %,$(INTERNAL_BIN_DIR)/%, $(INTERNAL_CMDS))
 
