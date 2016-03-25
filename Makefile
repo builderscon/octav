@@ -1,3 +1,6 @@
+ifndef OCTAV_DB_NAME
+	OCTAV_DB_NAME = octav
+endif
 GCLOUD_CONFIG_DIR = .gcloud
 CONTAINER_DIR=$(CURDIR)/gke/containers
 CLOUDSQL_DIR=$(GCLOUD_CONFIG_DIR)/sql
@@ -72,7 +75,7 @@ initdb:
 	@echo "  --> creating new database $(OCTAV_DB_NAME)"
 	@mysql -u root -e "CREATE DATABASE $(OCTAV_DB_NAME)"
 	@echo "  --> running DDL..."
-	@mysql -u root octav < sql/octav.sql
+	@mysql -u root octav < octav/sql/octav.sql
 
 docker-env-ready:
 	$(DOCKER_MACHINE_ENV)
