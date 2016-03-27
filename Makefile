@@ -80,6 +80,10 @@ initdb:
 docker-env-ready:
 	$(DOCKER_MACHINE_ENV)
 
+clean-docker-images:
+	@echo "Deleting old images"
+	@-docker images -q --filter dangling=true | xargs docker rmi
+
 gke-apiserver:
 	@$(MAKE) -C $(CONTAINER_DIR)/apiserver clean
 	@$(MAKE) -C $(CONTAINER_DIR)/apiserver docker DEBUG=1

@@ -43,15 +43,14 @@ docker: dm-running build-octav
 publish:
 	$(MAKE) -C $(TOPDIR) gke-publish IMAGE_NAME=$(IMAGE_NAME) APPNAME=$(APPNAME)
 
-clean_images:
-	@echo "Deleting old images"
-	@-docker images -q --filter dangling=true | xargs docker rmi
+clean-docker-images:
+	$(MAKE) -C $(TOPDIR) clean-docker-images
 
 clean_executables:
 	@echo "Deleting generated executables"
 	@-rm octav
 
-clean: clean_images clean_executables
+clean: clean-docker-images clean_executables
 
 deploy:
 	$(MAKE) -C $(TOPDIR) gke-deploy IMAGE_NAME=$(IMAGE_NAME) APPNAME=$(APPNAME)
