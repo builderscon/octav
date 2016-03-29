@@ -15,6 +15,8 @@ import (
 	"github.com/lestrrat/go-urlenc"
 )
 
+const MaxResponseSize = (1 << 20) * 2
+
 var _ = bytes.MinRead
 var _ = json.Decoder{}
 var transportJSONBufferPool = sync.Pool{
@@ -129,7 +131,7 @@ func (c *Client) CreateConference(in *model.CreateConferenceRequest) (ret *model
 	}
 	jsonbuf := getTransportJSONBuffer()
 	defer releaseTransportJSONBuffer(jsonbuf)
-	_, err = io.Copy(jsonbuf, res.Body)
+	_, err = io.Copy(jsonbuf, io.LimitReader(res.Body, MaxResponseSize))
 	defer res.Body.Close()
 	if pdebug.Enabled {
 		if err != nil {
@@ -177,7 +179,7 @@ func (c *Client) CreateRoom(in *model.CreateRoomRequest) (ret *model.Room, err e
 	}
 	jsonbuf := getTransportJSONBuffer()
 	defer releaseTransportJSONBuffer(jsonbuf)
-	_, err = io.Copy(jsonbuf, res.Body)
+	_, err = io.Copy(jsonbuf, io.LimitReader(res.Body, MaxResponseSize))
 	defer res.Body.Close()
 	if pdebug.Enabled {
 		if err != nil {
@@ -225,7 +227,7 @@ func (c *Client) CreateSession(in *model.CreateSessionRequest) (ret *model.Sessi
 	}
 	jsonbuf := getTransportJSONBuffer()
 	defer releaseTransportJSONBuffer(jsonbuf)
-	_, err = io.Copy(jsonbuf, res.Body)
+	_, err = io.Copy(jsonbuf, io.LimitReader(res.Body, MaxResponseSize))
 	defer res.Body.Close()
 	if pdebug.Enabled {
 		if err != nil {
@@ -273,7 +275,7 @@ func (c *Client) CreateUser(in *model.CreateUserRequest) (ret *model.User, err e
 	}
 	jsonbuf := getTransportJSONBuffer()
 	defer releaseTransportJSONBuffer(jsonbuf)
-	_, err = io.Copy(jsonbuf, res.Body)
+	_, err = io.Copy(jsonbuf, io.LimitReader(res.Body, MaxResponseSize))
 	defer res.Body.Close()
 	if pdebug.Enabled {
 		if err != nil {
@@ -321,7 +323,7 @@ func (c *Client) CreateVenue(in *model.CreateVenueRequest) (ret *model.Venue, er
 	}
 	jsonbuf := getTransportJSONBuffer()
 	defer releaseTransportJSONBuffer(jsonbuf)
-	_, err = io.Copy(jsonbuf, res.Body)
+	_, err = io.Copy(jsonbuf, io.LimitReader(res.Body, MaxResponseSize))
 	defer res.Body.Close()
 	if pdebug.Enabled {
 		if err != nil {
@@ -564,7 +566,7 @@ func (c *Client) ListConference(in *model.ListConferenceRequest) (ret []model.Co
 	}
 	jsonbuf := getTransportJSONBuffer()
 	defer releaseTransportJSONBuffer(jsonbuf)
-	_, err = io.Copy(jsonbuf, res.Body)
+	_, err = io.Copy(jsonbuf, io.LimitReader(res.Body, MaxResponseSize))
 	defer res.Body.Close()
 	if pdebug.Enabled {
 		if err != nil {
@@ -611,7 +613,7 @@ func (c *Client) ListRoom(in *model.ListRoomRequest) (ret []model.Room, err erro
 	}
 	jsonbuf := getTransportJSONBuffer()
 	defer releaseTransportJSONBuffer(jsonbuf)
-	_, err = io.Copy(jsonbuf, res.Body)
+	_, err = io.Copy(jsonbuf, io.LimitReader(res.Body, MaxResponseSize))
 	defer res.Body.Close()
 	if pdebug.Enabled {
 		if err != nil {
@@ -658,7 +660,7 @@ func (c *Client) ListSessionByConference(in *model.ListSessionByConferenceReques
 	}
 	jsonbuf := getTransportJSONBuffer()
 	defer releaseTransportJSONBuffer(jsonbuf)
-	_, err = io.Copy(jsonbuf, res.Body)
+	_, err = io.Copy(jsonbuf, io.LimitReader(res.Body, MaxResponseSize))
 	defer res.Body.Close()
 	if pdebug.Enabled {
 		if err != nil {
@@ -705,7 +707,7 @@ func (c *Client) ListUser(in *model.ListUserRequest) (ret []model.User, err erro
 	}
 	jsonbuf := getTransportJSONBuffer()
 	defer releaseTransportJSONBuffer(jsonbuf)
-	_, err = io.Copy(jsonbuf, res.Body)
+	_, err = io.Copy(jsonbuf, io.LimitReader(res.Body, MaxResponseSize))
 	defer res.Body.Close()
 	if pdebug.Enabled {
 		if err != nil {
@@ -752,7 +754,7 @@ func (c *Client) ListVenue(in *model.ListVenueRequest) (ret []model.Venue, err e
 	}
 	jsonbuf := getTransportJSONBuffer()
 	defer releaseTransportJSONBuffer(jsonbuf)
-	_, err = io.Copy(jsonbuf, res.Body)
+	_, err = io.Copy(jsonbuf, io.LimitReader(res.Body, MaxResponseSize))
 	defer res.Body.Close()
 	if pdebug.Enabled {
 		if err != nil {
@@ -799,7 +801,7 @@ func (c *Client) LookupConference(in *model.LookupConferenceRequest) (ret *model
 	}
 	jsonbuf := getTransportJSONBuffer()
 	defer releaseTransportJSONBuffer(jsonbuf)
-	_, err = io.Copy(jsonbuf, res.Body)
+	_, err = io.Copy(jsonbuf, io.LimitReader(res.Body, MaxResponseSize))
 	defer res.Body.Close()
 	if pdebug.Enabled {
 		if err != nil {
@@ -846,7 +848,7 @@ func (c *Client) LookupRoom(in *model.LookupRoomRequest) (ret *model.Room, err e
 	}
 	jsonbuf := getTransportJSONBuffer()
 	defer releaseTransportJSONBuffer(jsonbuf)
-	_, err = io.Copy(jsonbuf, res.Body)
+	_, err = io.Copy(jsonbuf, io.LimitReader(res.Body, MaxResponseSize))
 	defer res.Body.Close()
 	if pdebug.Enabled {
 		if err != nil {
@@ -893,7 +895,7 @@ func (c *Client) LookupSession(in *model.LookupSessionRequest) (ret *model.Sessi
 	}
 	jsonbuf := getTransportJSONBuffer()
 	defer releaseTransportJSONBuffer(jsonbuf)
-	_, err = io.Copy(jsonbuf, res.Body)
+	_, err = io.Copy(jsonbuf, io.LimitReader(res.Body, MaxResponseSize))
 	defer res.Body.Close()
 	if pdebug.Enabled {
 		if err != nil {
@@ -940,7 +942,7 @@ func (c *Client) LookupUser(in *model.LookupUserRequest) (ret *model.User, err e
 	}
 	jsonbuf := getTransportJSONBuffer()
 	defer releaseTransportJSONBuffer(jsonbuf)
-	_, err = io.Copy(jsonbuf, res.Body)
+	_, err = io.Copy(jsonbuf, io.LimitReader(res.Body, MaxResponseSize))
 	defer res.Body.Close()
 	if pdebug.Enabled {
 		if err != nil {
@@ -987,7 +989,7 @@ func (c *Client) LookupVenue(in *model.LookupVenueRequest) (ret *model.Venue, er
 	}
 	jsonbuf := getTransportJSONBuffer()
 	defer releaseTransportJSONBuffer(jsonbuf)
-	_, err = io.Copy(jsonbuf, res.Body)
+	_, err = io.Copy(jsonbuf, io.LimitReader(res.Body, MaxResponseSize))
 	defer res.Body.Close()
 	if pdebug.Enabled {
 		if err != nil {

@@ -19,6 +19,8 @@ import (
 	"golang.org/x/net/context"
 )
 
+const MaxPostSize = (1 << 20) * 2
+
 var _ = json.Decoder{}
 var _ = urlenc.Marshal
 var transportJSONBufferPool = sync.Pool{
@@ -103,7 +105,7 @@ func httpAddConferenceAdmin(w http.ResponseWriter, r *http.Request) {
 	var payload model.AddConferenceAdminRequest
 	jsonbuf := getTransportJSONBuffer()
 	defer releaseTransportJSONBuffer(jsonbuf)
-	if _, err := io.Copy(jsonbuf, r.Body); err != nil {
+	if _, err := io.Copy(jsonbuf, http.MaxBytesReader(w, r.Body, MaxPostSize)); err != nil {
 		httpError(w, `Failed to read request body`, http.StatusInternalServerError, err)
 	}
 	defer r.Body.Close()
@@ -132,7 +134,7 @@ func httpAddConferenceDates(w http.ResponseWriter, r *http.Request) {
 	var payload model.AddConferenceDatesRequest
 	jsonbuf := getTransportJSONBuffer()
 	defer releaseTransportJSONBuffer(jsonbuf)
-	if _, err := io.Copy(jsonbuf, r.Body); err != nil {
+	if _, err := io.Copy(jsonbuf, http.MaxBytesReader(w, r.Body, MaxPostSize)); err != nil {
 		httpError(w, `Failed to read request body`, http.StatusInternalServerError, err)
 	}
 	defer r.Body.Close()
@@ -161,7 +163,7 @@ func httpCreateConference(w http.ResponseWriter, r *http.Request) {
 	var payload model.CreateConferenceRequest
 	jsonbuf := getTransportJSONBuffer()
 	defer releaseTransportJSONBuffer(jsonbuf)
-	if _, err := io.Copy(jsonbuf, r.Body); err != nil {
+	if _, err := io.Copy(jsonbuf, http.MaxBytesReader(w, r.Body, MaxPostSize)); err != nil {
 		httpError(w, `Failed to read request body`, http.StatusInternalServerError, err)
 	}
 	defer r.Body.Close()
@@ -190,7 +192,7 @@ func httpCreateRoom(w http.ResponseWriter, r *http.Request) {
 	var payload model.CreateRoomRequest
 	jsonbuf := getTransportJSONBuffer()
 	defer releaseTransportJSONBuffer(jsonbuf)
-	if _, err := io.Copy(jsonbuf, r.Body); err != nil {
+	if _, err := io.Copy(jsonbuf, http.MaxBytesReader(w, r.Body, MaxPostSize)); err != nil {
 		httpError(w, `Failed to read request body`, http.StatusInternalServerError, err)
 	}
 	defer r.Body.Close()
@@ -219,7 +221,7 @@ func httpCreateSession(w http.ResponseWriter, r *http.Request) {
 	var payload model.CreateSessionRequest
 	jsonbuf := getTransportJSONBuffer()
 	defer releaseTransportJSONBuffer(jsonbuf)
-	if _, err := io.Copy(jsonbuf, r.Body); err != nil {
+	if _, err := io.Copy(jsonbuf, http.MaxBytesReader(w, r.Body, MaxPostSize)); err != nil {
 		httpError(w, `Failed to read request body`, http.StatusInternalServerError, err)
 	}
 	defer r.Body.Close()
@@ -248,7 +250,7 @@ func httpCreateUser(w http.ResponseWriter, r *http.Request) {
 	var payload model.CreateUserRequest
 	jsonbuf := getTransportJSONBuffer()
 	defer releaseTransportJSONBuffer(jsonbuf)
-	if _, err := io.Copy(jsonbuf, r.Body); err != nil {
+	if _, err := io.Copy(jsonbuf, http.MaxBytesReader(w, r.Body, MaxPostSize)); err != nil {
 		httpError(w, `Failed to read request body`, http.StatusInternalServerError, err)
 	}
 	defer r.Body.Close()
@@ -277,7 +279,7 @@ func httpCreateVenue(w http.ResponseWriter, r *http.Request) {
 	var payload model.CreateVenueRequest
 	jsonbuf := getTransportJSONBuffer()
 	defer releaseTransportJSONBuffer(jsonbuf)
-	if _, err := io.Copy(jsonbuf, r.Body); err != nil {
+	if _, err := io.Copy(jsonbuf, http.MaxBytesReader(w, r.Body, MaxPostSize)); err != nil {
 		httpError(w, `Failed to read request body`, http.StatusInternalServerError, err)
 	}
 	defer r.Body.Close()
@@ -306,7 +308,7 @@ func httpDeleteConference(w http.ResponseWriter, r *http.Request) {
 	var payload model.DeleteConferenceRequest
 	jsonbuf := getTransportJSONBuffer()
 	defer releaseTransportJSONBuffer(jsonbuf)
-	if _, err := io.Copy(jsonbuf, r.Body); err != nil {
+	if _, err := io.Copy(jsonbuf, http.MaxBytesReader(w, r.Body, MaxPostSize)); err != nil {
 		httpError(w, `Failed to read request body`, http.StatusInternalServerError, err)
 	}
 	defer r.Body.Close()
@@ -335,7 +337,7 @@ func httpDeleteConferenceAdmin(w http.ResponseWriter, r *http.Request) {
 	var payload model.DeleteConferenceAdminRequest
 	jsonbuf := getTransportJSONBuffer()
 	defer releaseTransportJSONBuffer(jsonbuf)
-	if _, err := io.Copy(jsonbuf, r.Body); err != nil {
+	if _, err := io.Copy(jsonbuf, http.MaxBytesReader(w, r.Body, MaxPostSize)); err != nil {
 		httpError(w, `Failed to read request body`, http.StatusInternalServerError, err)
 	}
 	defer r.Body.Close()
@@ -364,7 +366,7 @@ func httpDeleteConferenceDates(w http.ResponseWriter, r *http.Request) {
 	var payload model.DeleteConferenceDatesRequest
 	jsonbuf := getTransportJSONBuffer()
 	defer releaseTransportJSONBuffer(jsonbuf)
-	if _, err := io.Copy(jsonbuf, r.Body); err != nil {
+	if _, err := io.Copy(jsonbuf, http.MaxBytesReader(w, r.Body, MaxPostSize)); err != nil {
 		httpError(w, `Failed to read request body`, http.StatusInternalServerError, err)
 	}
 	defer r.Body.Close()
@@ -393,7 +395,7 @@ func httpDeleteRoom(w http.ResponseWriter, r *http.Request) {
 	var payload model.DeleteRoomRequest
 	jsonbuf := getTransportJSONBuffer()
 	defer releaseTransportJSONBuffer(jsonbuf)
-	if _, err := io.Copy(jsonbuf, r.Body); err != nil {
+	if _, err := io.Copy(jsonbuf, http.MaxBytesReader(w, r.Body, MaxPostSize)); err != nil {
 		httpError(w, `Failed to read request body`, http.StatusInternalServerError, err)
 	}
 	defer r.Body.Close()
@@ -422,7 +424,7 @@ func httpDeleteSession(w http.ResponseWriter, r *http.Request) {
 	var payload model.DeleteSessionRequest
 	jsonbuf := getTransportJSONBuffer()
 	defer releaseTransportJSONBuffer(jsonbuf)
-	if _, err := io.Copy(jsonbuf, r.Body); err != nil {
+	if _, err := io.Copy(jsonbuf, http.MaxBytesReader(w, r.Body, MaxPostSize)); err != nil {
 		httpError(w, `Failed to read request body`, http.StatusInternalServerError, err)
 	}
 	defer r.Body.Close()
@@ -451,7 +453,7 @@ func httpDeleteUser(w http.ResponseWriter, r *http.Request) {
 	var payload model.DeleteUserRequest
 	jsonbuf := getTransportJSONBuffer()
 	defer releaseTransportJSONBuffer(jsonbuf)
-	if _, err := io.Copy(jsonbuf, r.Body); err != nil {
+	if _, err := io.Copy(jsonbuf, http.MaxBytesReader(w, r.Body, MaxPostSize)); err != nil {
 		httpError(w, `Failed to read request body`, http.StatusInternalServerError, err)
 	}
 	defer r.Body.Close()
@@ -480,7 +482,7 @@ func httpDeleteVenue(w http.ResponseWriter, r *http.Request) {
 	var payload model.DeleteVenueRequest
 	jsonbuf := getTransportJSONBuffer()
 	defer releaseTransportJSONBuffer(jsonbuf)
-	if _, err := io.Copy(jsonbuf, r.Body); err != nil {
+	if _, err := io.Copy(jsonbuf, http.MaxBytesReader(w, r.Body, MaxPostSize)); err != nil {
 		httpError(w, `Failed to read request body`, http.StatusInternalServerError, err)
 	}
 	defer r.Body.Close()
@@ -729,7 +731,7 @@ func httpUpdateConference(w http.ResponseWriter, r *http.Request) {
 	var payload model.UpdateConferenceRequest
 	jsonbuf := getTransportJSONBuffer()
 	defer releaseTransportJSONBuffer(jsonbuf)
-	if _, err := io.Copy(jsonbuf, r.Body); err != nil {
+	if _, err := io.Copy(jsonbuf, http.MaxBytesReader(w, r.Body, MaxPostSize)); err != nil {
 		httpError(w, `Failed to read request body`, http.StatusInternalServerError, err)
 	}
 	defer r.Body.Close()
@@ -758,7 +760,7 @@ func httpUpdateRoom(w http.ResponseWriter, r *http.Request) {
 	var payload model.UpdateRoomRequest
 	jsonbuf := getTransportJSONBuffer()
 	defer releaseTransportJSONBuffer(jsonbuf)
-	if _, err := io.Copy(jsonbuf, r.Body); err != nil {
+	if _, err := io.Copy(jsonbuf, http.MaxBytesReader(w, r.Body, MaxPostSize)); err != nil {
 		httpError(w, `Failed to read request body`, http.StatusInternalServerError, err)
 	}
 	defer r.Body.Close()
@@ -787,7 +789,7 @@ func httpUpdateSession(w http.ResponseWriter, r *http.Request) {
 	var payload model.UpdateSessionRequest
 	jsonbuf := getTransportJSONBuffer()
 	defer releaseTransportJSONBuffer(jsonbuf)
-	if _, err := io.Copy(jsonbuf, r.Body); err != nil {
+	if _, err := io.Copy(jsonbuf, http.MaxBytesReader(w, r.Body, MaxPostSize)); err != nil {
 		httpError(w, `Failed to read request body`, http.StatusInternalServerError, err)
 	}
 	defer r.Body.Close()
@@ -816,7 +818,7 @@ func httpUpdateUser(w http.ResponseWriter, r *http.Request) {
 	var payload model.UpdateUserRequest
 	jsonbuf := getTransportJSONBuffer()
 	defer releaseTransportJSONBuffer(jsonbuf)
-	if _, err := io.Copy(jsonbuf, r.Body); err != nil {
+	if _, err := io.Copy(jsonbuf, http.MaxBytesReader(w, r.Body, MaxPostSize)); err != nil {
 		httpError(w, `Failed to read request body`, http.StatusInternalServerError, err)
 	}
 	defer r.Body.Close()
@@ -845,7 +847,7 @@ func httpUpdateVenue(w http.ResponseWriter, r *http.Request) {
 	var payload model.UpdateVenueRequest
 	jsonbuf := getTransportJSONBuffer()
 	defer releaseTransportJSONBuffer(jsonbuf)
-	if _, err := io.Copy(jsonbuf, r.Body); err != nil {
+	if _, err := io.Copy(jsonbuf, http.MaxBytesReader(w, r.Body, MaxPostSize)); err != nil {
 		httpError(w, `Failed to read request body`, http.StatusInternalServerError, err)
 	}
 	defer r.Body.Close()
