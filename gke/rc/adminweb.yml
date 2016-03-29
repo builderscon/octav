@@ -1,0 +1,21 @@
+kind: ReplicationController
+apiVersion: v1
+metadata:
+  name: adminweb
+spec:
+  replicas: 3
+  selector:
+    name: adminweb
+    group: octav
+  template:
+    metadata:
+      labels:
+        name: adminweb
+        group: octav
+    spec:
+      containers:
+        - image: asia.gcr.io/builderscon-1248/adminweb:20160329.140602
+          name: adminweb
+          ports:
+            - containerPort: 5000
+              protocol: TCP
