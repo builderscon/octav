@@ -23,6 +23,10 @@ func httpJSONWithStatus(w http.ResponseWriter, v interface{}, st int) {
 		return
 	}
 
+	if pdebug.Enabled {
+		pdebug.Printf("error: %s", buf.String())
+	}
+
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(st)
 	buf.WriteTo(w)
