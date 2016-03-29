@@ -2356,6 +2356,9 @@ func (r ListSessionByConferenceRequest) collectMarshalData() map[string]interfac
 	if r.Date.Valid() {
 		m["date"] = r.Date.Value()
 	}
+	if r.Lang.Valid() {
+		m["lang"] = r.Lang.Value()
+	}
 	return m
 }
 
@@ -2400,6 +2403,12 @@ func (r *ListSessionByConferenceRequest) Populate(m map[string]interface{}) erro
 			return errors.New("set field Date failed: " + err.Error())
 		}
 		delete(m, "date")
+	}
+	if jv, ok := m["lang"]; ok {
+		if err := r.Lang.Set(jv); err != nil {
+			return errors.New("set field Lang failed: " + err.Error())
+		}
+		delete(m, "lang")
 	}
 	return nil
 }
