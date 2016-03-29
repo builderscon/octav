@@ -12,16 +12,38 @@ import (
 	"golang.org/x/net/context"
 )
 
-func httpJSON(w http.ResponseWriter, v interface{}) {
+func init() {
+	httpError = httpErrorAsJSON
+}
+
+func httpJSONWithStatus(w http.ResponseWriter, v interface{}, st int) {
 	buf := bytes.Buffer{}
-	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	if err := json.NewEncoder(&buf).Encode(v); err != nil {
 		httpError(w, `encode json`, http.StatusInternalServerError, err)
 		return
 	}
 
-	w.WriteHeader(http.StatusOK)
+	w.Header().Set("Content-Type", "application/json; charset=utf-8")
+	w.WriteHeader(st)
 	buf.WriteTo(w)
+}
+
+type jsonerr struct {
+	Message string `json:"message"`
+	Error string `json:"error,omitempty"`
+}
+func httpErrorAsJSON(w http.ResponseWriter, message string, st int, err error) {
+	v := jsonerr{
+		Message: message,
+	}
+	if err != nil {
+		v.Error = err.Error()
+	}
+	httpJSONWithStatus(w, v, st)
+}
+
+func httpJSON(w http.ResponseWriter, v interface{}) {
+	httpJSONWithStatus(w, v, http.StatusOK)
 }
 
 func doCreateConference(ctx context.Context, w http.ResponseWriter, r *http.Request, payload model.CreateConferenceRequest) {
