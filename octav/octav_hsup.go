@@ -64,7 +64,9 @@ func New() *Server {
 	return s
 }
 
-func httpError(w http.ResponseWriter, message string, st int, err error) {
+var httpError func(http.ResponseWriter, string, int, error) = defaultHTTPError
+
+func defaultHTTPError(w http.ResponseWriter, message string, st int, err error) {
 	if pdebug.Enabled {
 		if err == nil {
 			pdebug.Printf("HTTP Error %s", message)
@@ -99,17 +101,20 @@ func httpAddConferenceAdmin(w http.ResponseWriter, r *http.Request) {
 		defer g.End()
 	}
 	if strings.ToLower(r.Method) != `post` {
-		httpError(w, `Method was `+r.Method, http.StatusNotFound, nil)
+		httpError(w, `Method was `+r.Method+`, expected post`, http.StatusNotFound, nil)
+		return
 	}
 
 	var payload model.AddConferenceAdminRequest
 	jsonbuf := getTransportJSONBuffer()
 	defer releaseTransportJSONBuffer(jsonbuf)
-	if _, err := io.Copy(jsonbuf, http.MaxBytesReader(w, r.Body, MaxPostSize)); err != nil {
+	if _, err := io.Copy(jsonbuf, io.LimitReader(r.Body, MaxPostSize)); err != nil {
 		httpError(w, `Failed to read request body`, http.StatusInternalServerError, err)
 	}
 	defer r.Body.Close()
-	pdebug.Printf(`-----> %s`, jsonbuf.Bytes())
+	if pdebug.Enabled {
+		pdebug.Printf(`-----> %s`, jsonbuf.Bytes())
+	}
 	if err := json.Unmarshal(jsonbuf.Bytes(), &payload); err != nil {
 		httpError(w, `Invalid JSON input`, http.StatusInternalServerError, err)
 		return
@@ -128,17 +133,20 @@ func httpAddConferenceDates(w http.ResponseWriter, r *http.Request) {
 		defer g.End()
 	}
 	if strings.ToLower(r.Method) != `post` {
-		httpError(w, `Method was `+r.Method, http.StatusNotFound, nil)
+		httpError(w, `Method was `+r.Method+`, expected post`, http.StatusNotFound, nil)
+		return
 	}
 
 	var payload model.AddConferenceDatesRequest
 	jsonbuf := getTransportJSONBuffer()
 	defer releaseTransportJSONBuffer(jsonbuf)
-	if _, err := io.Copy(jsonbuf, http.MaxBytesReader(w, r.Body, MaxPostSize)); err != nil {
+	if _, err := io.Copy(jsonbuf, io.LimitReader(r.Body, MaxPostSize)); err != nil {
 		httpError(w, `Failed to read request body`, http.StatusInternalServerError, err)
 	}
 	defer r.Body.Close()
-	pdebug.Printf(`-----> %s`, jsonbuf.Bytes())
+	if pdebug.Enabled {
+		pdebug.Printf(`-----> %s`, jsonbuf.Bytes())
+	}
 	if err := json.Unmarshal(jsonbuf.Bytes(), &payload); err != nil {
 		httpError(w, `Invalid JSON input`, http.StatusInternalServerError, err)
 		return
@@ -157,17 +165,20 @@ func httpCreateConference(w http.ResponseWriter, r *http.Request) {
 		defer g.End()
 	}
 	if strings.ToLower(r.Method) != `post` {
-		httpError(w, `Method was `+r.Method, http.StatusNotFound, nil)
+		httpError(w, `Method was `+r.Method+`, expected post`, http.StatusNotFound, nil)
+		return
 	}
 
 	var payload model.CreateConferenceRequest
 	jsonbuf := getTransportJSONBuffer()
 	defer releaseTransportJSONBuffer(jsonbuf)
-	if _, err := io.Copy(jsonbuf, http.MaxBytesReader(w, r.Body, MaxPostSize)); err != nil {
+	if _, err := io.Copy(jsonbuf, io.LimitReader(r.Body, MaxPostSize)); err != nil {
 		httpError(w, `Failed to read request body`, http.StatusInternalServerError, err)
 	}
 	defer r.Body.Close()
-	pdebug.Printf(`-----> %s`, jsonbuf.Bytes())
+	if pdebug.Enabled {
+		pdebug.Printf(`-----> %s`, jsonbuf.Bytes())
+	}
 	if err := json.Unmarshal(jsonbuf.Bytes(), &payload); err != nil {
 		httpError(w, `Invalid JSON input`, http.StatusInternalServerError, err)
 		return
@@ -186,17 +197,20 @@ func httpCreateRoom(w http.ResponseWriter, r *http.Request) {
 		defer g.End()
 	}
 	if strings.ToLower(r.Method) != `post` {
-		httpError(w, `Method was `+r.Method, http.StatusNotFound, nil)
+		httpError(w, `Method was `+r.Method+`, expected post`, http.StatusNotFound, nil)
+		return
 	}
 
 	var payload model.CreateRoomRequest
 	jsonbuf := getTransportJSONBuffer()
 	defer releaseTransportJSONBuffer(jsonbuf)
-	if _, err := io.Copy(jsonbuf, http.MaxBytesReader(w, r.Body, MaxPostSize)); err != nil {
+	if _, err := io.Copy(jsonbuf, io.LimitReader(r.Body, MaxPostSize)); err != nil {
 		httpError(w, `Failed to read request body`, http.StatusInternalServerError, err)
 	}
 	defer r.Body.Close()
-	pdebug.Printf(`-----> %s`, jsonbuf.Bytes())
+	if pdebug.Enabled {
+		pdebug.Printf(`-----> %s`, jsonbuf.Bytes())
+	}
 	if err := json.Unmarshal(jsonbuf.Bytes(), &payload); err != nil {
 		httpError(w, `Invalid JSON input`, http.StatusInternalServerError, err)
 		return
@@ -215,17 +229,20 @@ func httpCreateSession(w http.ResponseWriter, r *http.Request) {
 		defer g.End()
 	}
 	if strings.ToLower(r.Method) != `post` {
-		httpError(w, `Method was `+r.Method, http.StatusNotFound, nil)
+		httpError(w, `Method was `+r.Method+`, expected post`, http.StatusNotFound, nil)
+		return
 	}
 
 	var payload model.CreateSessionRequest
 	jsonbuf := getTransportJSONBuffer()
 	defer releaseTransportJSONBuffer(jsonbuf)
-	if _, err := io.Copy(jsonbuf, http.MaxBytesReader(w, r.Body, MaxPostSize)); err != nil {
+	if _, err := io.Copy(jsonbuf, io.LimitReader(r.Body, MaxPostSize)); err != nil {
 		httpError(w, `Failed to read request body`, http.StatusInternalServerError, err)
 	}
 	defer r.Body.Close()
-	pdebug.Printf(`-----> %s`, jsonbuf.Bytes())
+	if pdebug.Enabled {
+		pdebug.Printf(`-----> %s`, jsonbuf.Bytes())
+	}
 	if err := json.Unmarshal(jsonbuf.Bytes(), &payload); err != nil {
 		httpError(w, `Invalid JSON input`, http.StatusInternalServerError, err)
 		return
@@ -244,17 +261,20 @@ func httpCreateUser(w http.ResponseWriter, r *http.Request) {
 		defer g.End()
 	}
 	if strings.ToLower(r.Method) != `post` {
-		httpError(w, `Method was `+r.Method, http.StatusNotFound, nil)
+		httpError(w, `Method was `+r.Method+`, expected post`, http.StatusNotFound, nil)
+		return
 	}
 
 	var payload model.CreateUserRequest
 	jsonbuf := getTransportJSONBuffer()
 	defer releaseTransportJSONBuffer(jsonbuf)
-	if _, err := io.Copy(jsonbuf, http.MaxBytesReader(w, r.Body, MaxPostSize)); err != nil {
+	if _, err := io.Copy(jsonbuf, io.LimitReader(r.Body, MaxPostSize)); err != nil {
 		httpError(w, `Failed to read request body`, http.StatusInternalServerError, err)
 	}
 	defer r.Body.Close()
-	pdebug.Printf(`-----> %s`, jsonbuf.Bytes())
+	if pdebug.Enabled {
+		pdebug.Printf(`-----> %s`, jsonbuf.Bytes())
+	}
 	if err := json.Unmarshal(jsonbuf.Bytes(), &payload); err != nil {
 		httpError(w, `Invalid JSON input`, http.StatusInternalServerError, err)
 		return
@@ -273,17 +293,20 @@ func httpCreateVenue(w http.ResponseWriter, r *http.Request) {
 		defer g.End()
 	}
 	if strings.ToLower(r.Method) != `post` {
-		httpError(w, `Method was `+r.Method, http.StatusNotFound, nil)
+		httpError(w, `Method was `+r.Method+`, expected post`, http.StatusNotFound, nil)
+		return
 	}
 
 	var payload model.CreateVenueRequest
 	jsonbuf := getTransportJSONBuffer()
 	defer releaseTransportJSONBuffer(jsonbuf)
-	if _, err := io.Copy(jsonbuf, http.MaxBytesReader(w, r.Body, MaxPostSize)); err != nil {
+	if _, err := io.Copy(jsonbuf, io.LimitReader(r.Body, MaxPostSize)); err != nil {
 		httpError(w, `Failed to read request body`, http.StatusInternalServerError, err)
 	}
 	defer r.Body.Close()
-	pdebug.Printf(`-----> %s`, jsonbuf.Bytes())
+	if pdebug.Enabled {
+		pdebug.Printf(`-----> %s`, jsonbuf.Bytes())
+	}
 	if err := json.Unmarshal(jsonbuf.Bytes(), &payload); err != nil {
 		httpError(w, `Invalid JSON input`, http.StatusInternalServerError, err)
 		return
@@ -302,17 +325,20 @@ func httpDeleteConference(w http.ResponseWriter, r *http.Request) {
 		defer g.End()
 	}
 	if strings.ToLower(r.Method) != `post` {
-		httpError(w, `Method was `+r.Method, http.StatusNotFound, nil)
+		httpError(w, `Method was `+r.Method+`, expected post`, http.StatusNotFound, nil)
+		return
 	}
 
 	var payload model.DeleteConferenceRequest
 	jsonbuf := getTransportJSONBuffer()
 	defer releaseTransportJSONBuffer(jsonbuf)
-	if _, err := io.Copy(jsonbuf, http.MaxBytesReader(w, r.Body, MaxPostSize)); err != nil {
+	if _, err := io.Copy(jsonbuf, io.LimitReader(r.Body, MaxPostSize)); err != nil {
 		httpError(w, `Failed to read request body`, http.StatusInternalServerError, err)
 	}
 	defer r.Body.Close()
-	pdebug.Printf(`-----> %s`, jsonbuf.Bytes())
+	if pdebug.Enabled {
+		pdebug.Printf(`-----> %s`, jsonbuf.Bytes())
+	}
 	if err := json.Unmarshal(jsonbuf.Bytes(), &payload); err != nil {
 		httpError(w, `Invalid JSON input`, http.StatusInternalServerError, err)
 		return
@@ -331,17 +357,20 @@ func httpDeleteConferenceAdmin(w http.ResponseWriter, r *http.Request) {
 		defer g.End()
 	}
 	if strings.ToLower(r.Method) != `post` {
-		httpError(w, `Method was `+r.Method, http.StatusNotFound, nil)
+		httpError(w, `Method was `+r.Method+`, expected post`, http.StatusNotFound, nil)
+		return
 	}
 
 	var payload model.DeleteConferenceAdminRequest
 	jsonbuf := getTransportJSONBuffer()
 	defer releaseTransportJSONBuffer(jsonbuf)
-	if _, err := io.Copy(jsonbuf, http.MaxBytesReader(w, r.Body, MaxPostSize)); err != nil {
+	if _, err := io.Copy(jsonbuf, io.LimitReader(r.Body, MaxPostSize)); err != nil {
 		httpError(w, `Failed to read request body`, http.StatusInternalServerError, err)
 	}
 	defer r.Body.Close()
-	pdebug.Printf(`-----> %s`, jsonbuf.Bytes())
+	if pdebug.Enabled {
+		pdebug.Printf(`-----> %s`, jsonbuf.Bytes())
+	}
 	if err := json.Unmarshal(jsonbuf.Bytes(), &payload); err != nil {
 		httpError(w, `Invalid JSON input`, http.StatusInternalServerError, err)
 		return
@@ -360,17 +389,20 @@ func httpDeleteConferenceDates(w http.ResponseWriter, r *http.Request) {
 		defer g.End()
 	}
 	if strings.ToLower(r.Method) != `post` {
-		httpError(w, `Method was `+r.Method, http.StatusNotFound, nil)
+		httpError(w, `Method was `+r.Method+`, expected post`, http.StatusNotFound, nil)
+		return
 	}
 
 	var payload model.DeleteConferenceDatesRequest
 	jsonbuf := getTransportJSONBuffer()
 	defer releaseTransportJSONBuffer(jsonbuf)
-	if _, err := io.Copy(jsonbuf, http.MaxBytesReader(w, r.Body, MaxPostSize)); err != nil {
+	if _, err := io.Copy(jsonbuf, io.LimitReader(r.Body, MaxPostSize)); err != nil {
 		httpError(w, `Failed to read request body`, http.StatusInternalServerError, err)
 	}
 	defer r.Body.Close()
-	pdebug.Printf(`-----> %s`, jsonbuf.Bytes())
+	if pdebug.Enabled {
+		pdebug.Printf(`-----> %s`, jsonbuf.Bytes())
+	}
 	if err := json.Unmarshal(jsonbuf.Bytes(), &payload); err != nil {
 		httpError(w, `Invalid JSON input`, http.StatusInternalServerError, err)
 		return
@@ -389,17 +421,20 @@ func httpDeleteRoom(w http.ResponseWriter, r *http.Request) {
 		defer g.End()
 	}
 	if strings.ToLower(r.Method) != `post` {
-		httpError(w, `Method was `+r.Method, http.StatusNotFound, nil)
+		httpError(w, `Method was `+r.Method+`, expected post`, http.StatusNotFound, nil)
+		return
 	}
 
 	var payload model.DeleteRoomRequest
 	jsonbuf := getTransportJSONBuffer()
 	defer releaseTransportJSONBuffer(jsonbuf)
-	if _, err := io.Copy(jsonbuf, http.MaxBytesReader(w, r.Body, MaxPostSize)); err != nil {
+	if _, err := io.Copy(jsonbuf, io.LimitReader(r.Body, MaxPostSize)); err != nil {
 		httpError(w, `Failed to read request body`, http.StatusInternalServerError, err)
 	}
 	defer r.Body.Close()
-	pdebug.Printf(`-----> %s`, jsonbuf.Bytes())
+	if pdebug.Enabled {
+		pdebug.Printf(`-----> %s`, jsonbuf.Bytes())
+	}
 	if err := json.Unmarshal(jsonbuf.Bytes(), &payload); err != nil {
 		httpError(w, `Invalid JSON input`, http.StatusInternalServerError, err)
 		return
@@ -418,17 +453,20 @@ func httpDeleteSession(w http.ResponseWriter, r *http.Request) {
 		defer g.End()
 	}
 	if strings.ToLower(r.Method) != `post` {
-		httpError(w, `Method was `+r.Method, http.StatusNotFound, nil)
+		httpError(w, `Method was `+r.Method+`, expected post`, http.StatusNotFound, nil)
+		return
 	}
 
 	var payload model.DeleteSessionRequest
 	jsonbuf := getTransportJSONBuffer()
 	defer releaseTransportJSONBuffer(jsonbuf)
-	if _, err := io.Copy(jsonbuf, http.MaxBytesReader(w, r.Body, MaxPostSize)); err != nil {
+	if _, err := io.Copy(jsonbuf, io.LimitReader(r.Body, MaxPostSize)); err != nil {
 		httpError(w, `Failed to read request body`, http.StatusInternalServerError, err)
 	}
 	defer r.Body.Close()
-	pdebug.Printf(`-----> %s`, jsonbuf.Bytes())
+	if pdebug.Enabled {
+		pdebug.Printf(`-----> %s`, jsonbuf.Bytes())
+	}
 	if err := json.Unmarshal(jsonbuf.Bytes(), &payload); err != nil {
 		httpError(w, `Invalid JSON input`, http.StatusInternalServerError, err)
 		return
@@ -447,17 +485,20 @@ func httpDeleteUser(w http.ResponseWriter, r *http.Request) {
 		defer g.End()
 	}
 	if strings.ToLower(r.Method) != `post` {
-		httpError(w, `Method was `+r.Method, http.StatusNotFound, nil)
+		httpError(w, `Method was `+r.Method+`, expected post`, http.StatusNotFound, nil)
+		return
 	}
 
 	var payload model.DeleteUserRequest
 	jsonbuf := getTransportJSONBuffer()
 	defer releaseTransportJSONBuffer(jsonbuf)
-	if _, err := io.Copy(jsonbuf, http.MaxBytesReader(w, r.Body, MaxPostSize)); err != nil {
+	if _, err := io.Copy(jsonbuf, io.LimitReader(r.Body, MaxPostSize)); err != nil {
 		httpError(w, `Failed to read request body`, http.StatusInternalServerError, err)
 	}
 	defer r.Body.Close()
-	pdebug.Printf(`-----> %s`, jsonbuf.Bytes())
+	if pdebug.Enabled {
+		pdebug.Printf(`-----> %s`, jsonbuf.Bytes())
+	}
 	if err := json.Unmarshal(jsonbuf.Bytes(), &payload); err != nil {
 		httpError(w, `Invalid JSON input`, http.StatusInternalServerError, err)
 		return
@@ -476,17 +517,20 @@ func httpDeleteVenue(w http.ResponseWriter, r *http.Request) {
 		defer g.End()
 	}
 	if strings.ToLower(r.Method) != `post` {
-		httpError(w, `Method was `+r.Method, http.StatusNotFound, nil)
+		httpError(w, `Method was `+r.Method+`, expected post`, http.StatusNotFound, nil)
+		return
 	}
 
 	var payload model.DeleteVenueRequest
 	jsonbuf := getTransportJSONBuffer()
 	defer releaseTransportJSONBuffer(jsonbuf)
-	if _, err := io.Copy(jsonbuf, http.MaxBytesReader(w, r.Body, MaxPostSize)); err != nil {
+	if _, err := io.Copy(jsonbuf, io.LimitReader(r.Body, MaxPostSize)); err != nil {
 		httpError(w, `Failed to read request body`, http.StatusInternalServerError, err)
 	}
 	defer r.Body.Close()
-	pdebug.Printf(`-----> %s`, jsonbuf.Bytes())
+	if pdebug.Enabled {
+		pdebug.Printf(`-----> %s`, jsonbuf.Bytes())
+	}
 	if err := json.Unmarshal(jsonbuf.Bytes(), &payload); err != nil {
 		httpError(w, `Invalid JSON input`, http.StatusInternalServerError, err)
 		return
@@ -505,7 +549,8 @@ func httpListConference(w http.ResponseWriter, r *http.Request) {
 		defer g.End()
 	}
 	if strings.ToLower(r.Method) != `get` {
-		httpError(w, `Method was `+r.Method, http.StatusNotFound, nil)
+		httpError(w, `Method was `+r.Method+`, expected get`, http.StatusNotFound, nil)
+		return
 	}
 
 	var payload model.ListConferenceRequest
@@ -527,7 +572,8 @@ func httpListRoom(w http.ResponseWriter, r *http.Request) {
 		defer g.End()
 	}
 	if strings.ToLower(r.Method) != `get` {
-		httpError(w, `Method was `+r.Method, http.StatusNotFound, nil)
+		httpError(w, `Method was `+r.Method+`, expected get`, http.StatusNotFound, nil)
+		return
 	}
 
 	var payload model.ListRoomRequest
@@ -549,7 +595,8 @@ func httpListSessionByConference(w http.ResponseWriter, r *http.Request) {
 		defer g.End()
 	}
 	if strings.ToLower(r.Method) != `get` {
-		httpError(w, `Method was `+r.Method, http.StatusNotFound, nil)
+		httpError(w, `Method was `+r.Method+`, expected get`, http.StatusNotFound, nil)
+		return
 	}
 
 	var payload model.ListSessionByConferenceRequest
@@ -571,7 +618,8 @@ func httpListUser(w http.ResponseWriter, r *http.Request) {
 		defer g.End()
 	}
 	if strings.ToLower(r.Method) != `get` {
-		httpError(w, `Method was `+r.Method, http.StatusNotFound, nil)
+		httpError(w, `Method was `+r.Method+`, expected get`, http.StatusNotFound, nil)
+		return
 	}
 
 	var payload model.ListUserRequest
@@ -593,7 +641,8 @@ func httpListVenue(w http.ResponseWriter, r *http.Request) {
 		defer g.End()
 	}
 	if strings.ToLower(r.Method) != `get` {
-		httpError(w, `Method was `+r.Method, http.StatusNotFound, nil)
+		httpError(w, `Method was `+r.Method+`, expected get`, http.StatusNotFound, nil)
+		return
 	}
 
 	var payload model.ListVenueRequest
@@ -615,7 +664,8 @@ func httpLookupConference(w http.ResponseWriter, r *http.Request) {
 		defer g.End()
 	}
 	if strings.ToLower(r.Method) != `get` {
-		httpError(w, `Method was `+r.Method, http.StatusNotFound, nil)
+		httpError(w, `Method was `+r.Method+`, expected get`, http.StatusNotFound, nil)
+		return
 	}
 
 	var payload model.LookupConferenceRequest
@@ -637,7 +687,8 @@ func httpLookupRoom(w http.ResponseWriter, r *http.Request) {
 		defer g.End()
 	}
 	if strings.ToLower(r.Method) != `get` {
-		httpError(w, `Method was `+r.Method, http.StatusNotFound, nil)
+		httpError(w, `Method was `+r.Method+`, expected get`, http.StatusNotFound, nil)
+		return
 	}
 
 	var payload model.LookupRoomRequest
@@ -659,7 +710,8 @@ func httpLookupSession(w http.ResponseWriter, r *http.Request) {
 		defer g.End()
 	}
 	if strings.ToLower(r.Method) != `get` {
-		httpError(w, `Method was `+r.Method, http.StatusNotFound, nil)
+		httpError(w, `Method was `+r.Method+`, expected get`, http.StatusNotFound, nil)
+		return
 	}
 
 	var payload model.LookupSessionRequest
@@ -681,7 +733,8 @@ func httpLookupUser(w http.ResponseWriter, r *http.Request) {
 		defer g.End()
 	}
 	if strings.ToLower(r.Method) != `get` {
-		httpError(w, `Method was `+r.Method, http.StatusNotFound, nil)
+		httpError(w, `Method was `+r.Method+`, expected get`, http.StatusNotFound, nil)
+		return
 	}
 
 	var payload model.LookupUserRequest
@@ -703,7 +756,8 @@ func httpLookupVenue(w http.ResponseWriter, r *http.Request) {
 		defer g.End()
 	}
 	if strings.ToLower(r.Method) != `get` {
-		httpError(w, `Method was `+r.Method, http.StatusNotFound, nil)
+		httpError(w, `Method was `+r.Method+`, expected get`, http.StatusNotFound, nil)
+		return
 	}
 
 	var payload model.LookupVenueRequest
@@ -725,17 +779,20 @@ func httpUpdateConference(w http.ResponseWriter, r *http.Request) {
 		defer g.End()
 	}
 	if strings.ToLower(r.Method) != `post` {
-		httpError(w, `Method was `+r.Method, http.StatusNotFound, nil)
+		httpError(w, `Method was `+r.Method+`, expected post`, http.StatusNotFound, nil)
+		return
 	}
 
 	var payload model.UpdateConferenceRequest
 	jsonbuf := getTransportJSONBuffer()
 	defer releaseTransportJSONBuffer(jsonbuf)
-	if _, err := io.Copy(jsonbuf, http.MaxBytesReader(w, r.Body, MaxPostSize)); err != nil {
+	if _, err := io.Copy(jsonbuf, io.LimitReader(r.Body, MaxPostSize)); err != nil {
 		httpError(w, `Failed to read request body`, http.StatusInternalServerError, err)
 	}
 	defer r.Body.Close()
-	pdebug.Printf(`-----> %s`, jsonbuf.Bytes())
+	if pdebug.Enabled {
+		pdebug.Printf(`-----> %s`, jsonbuf.Bytes())
+	}
 	if err := json.Unmarshal(jsonbuf.Bytes(), &payload); err != nil {
 		httpError(w, `Invalid JSON input`, http.StatusInternalServerError, err)
 		return
@@ -754,17 +811,20 @@ func httpUpdateRoom(w http.ResponseWriter, r *http.Request) {
 		defer g.End()
 	}
 	if strings.ToLower(r.Method) != `post` {
-		httpError(w, `Method was `+r.Method, http.StatusNotFound, nil)
+		httpError(w, `Method was `+r.Method+`, expected post`, http.StatusNotFound, nil)
+		return
 	}
 
 	var payload model.UpdateRoomRequest
 	jsonbuf := getTransportJSONBuffer()
 	defer releaseTransportJSONBuffer(jsonbuf)
-	if _, err := io.Copy(jsonbuf, http.MaxBytesReader(w, r.Body, MaxPostSize)); err != nil {
+	if _, err := io.Copy(jsonbuf, io.LimitReader(r.Body, MaxPostSize)); err != nil {
 		httpError(w, `Failed to read request body`, http.StatusInternalServerError, err)
 	}
 	defer r.Body.Close()
-	pdebug.Printf(`-----> %s`, jsonbuf.Bytes())
+	if pdebug.Enabled {
+		pdebug.Printf(`-----> %s`, jsonbuf.Bytes())
+	}
 	if err := json.Unmarshal(jsonbuf.Bytes(), &payload); err != nil {
 		httpError(w, `Invalid JSON input`, http.StatusInternalServerError, err)
 		return
@@ -783,17 +843,20 @@ func httpUpdateSession(w http.ResponseWriter, r *http.Request) {
 		defer g.End()
 	}
 	if strings.ToLower(r.Method) != `post` {
-		httpError(w, `Method was `+r.Method, http.StatusNotFound, nil)
+		httpError(w, `Method was `+r.Method+`, expected post`, http.StatusNotFound, nil)
+		return
 	}
 
 	var payload model.UpdateSessionRequest
 	jsonbuf := getTransportJSONBuffer()
 	defer releaseTransportJSONBuffer(jsonbuf)
-	if _, err := io.Copy(jsonbuf, http.MaxBytesReader(w, r.Body, MaxPostSize)); err != nil {
+	if _, err := io.Copy(jsonbuf, io.LimitReader(r.Body, MaxPostSize)); err != nil {
 		httpError(w, `Failed to read request body`, http.StatusInternalServerError, err)
 	}
 	defer r.Body.Close()
-	pdebug.Printf(`-----> %s`, jsonbuf.Bytes())
+	if pdebug.Enabled {
+		pdebug.Printf(`-----> %s`, jsonbuf.Bytes())
+	}
 	if err := json.Unmarshal(jsonbuf.Bytes(), &payload); err != nil {
 		httpError(w, `Invalid JSON input`, http.StatusInternalServerError, err)
 		return
@@ -812,17 +875,20 @@ func httpUpdateUser(w http.ResponseWriter, r *http.Request) {
 		defer g.End()
 	}
 	if strings.ToLower(r.Method) != `post` {
-		httpError(w, `Method was `+r.Method, http.StatusNotFound, nil)
+		httpError(w, `Method was `+r.Method+`, expected post`, http.StatusNotFound, nil)
+		return
 	}
 
 	var payload model.UpdateUserRequest
 	jsonbuf := getTransportJSONBuffer()
 	defer releaseTransportJSONBuffer(jsonbuf)
-	if _, err := io.Copy(jsonbuf, http.MaxBytesReader(w, r.Body, MaxPostSize)); err != nil {
+	if _, err := io.Copy(jsonbuf, io.LimitReader(r.Body, MaxPostSize)); err != nil {
 		httpError(w, `Failed to read request body`, http.StatusInternalServerError, err)
 	}
 	defer r.Body.Close()
-	pdebug.Printf(`-----> %s`, jsonbuf.Bytes())
+	if pdebug.Enabled {
+		pdebug.Printf(`-----> %s`, jsonbuf.Bytes())
+	}
 	if err := json.Unmarshal(jsonbuf.Bytes(), &payload); err != nil {
 		httpError(w, `Invalid JSON input`, http.StatusInternalServerError, err)
 		return
@@ -841,17 +907,20 @@ func httpUpdateVenue(w http.ResponseWriter, r *http.Request) {
 		defer g.End()
 	}
 	if strings.ToLower(r.Method) != `post` {
-		httpError(w, `Method was `+r.Method, http.StatusNotFound, nil)
+		httpError(w, `Method was `+r.Method+`, expected post`, http.StatusNotFound, nil)
+		return
 	}
 
 	var payload model.UpdateVenueRequest
 	jsonbuf := getTransportJSONBuffer()
 	defer releaseTransportJSONBuffer(jsonbuf)
-	if _, err := io.Copy(jsonbuf, http.MaxBytesReader(w, r.Body, MaxPostSize)); err != nil {
+	if _, err := io.Copy(jsonbuf, io.LimitReader(r.Body, MaxPostSize)); err != nil {
 		httpError(w, `Failed to read request body`, http.StatusInternalServerError, err)
 	}
 	defer r.Body.Close()
-	pdebug.Printf(`-----> %s`, jsonbuf.Bytes())
+	if pdebug.Enabled {
+		pdebug.Printf(`-----> %s`, jsonbuf.Bytes())
+	}
 	if err := json.Unmarshal(jsonbuf.Bytes(), &payload); err != nil {
 		httpError(w, `Invalid JSON input`, http.StatusInternalServerError, err)
 		return
