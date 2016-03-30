@@ -10,4 +10,4 @@ install:
 script:
   - cd $DIR && ./travis.sh
 after_failure:
-  - test -e "$DIR/debug.out" && cat "$DIR/debug.out"
+  - test -e "/tmp/debug.out" && cat "/tmp/debug.out"

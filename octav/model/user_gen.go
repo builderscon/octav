@@ -45,21 +45,48 @@ func (v *User) Load(tx *db.Tx, id string) (err error) {
 
 func (v *User) FromRow(vdb db.User) error {
 	v.ID = vdb.EID
-	v.FirstName = vdb.FirstName
-	v.LastName = vdb.LastName
+	if vdb.AuthVia.Valid {
+		v.AuthVia = vdb.AuthVia.String
+	}
+	if vdb.AuthUserID.Valid {
+		v.AuthUserID = vdb.AuthUserID.String
+	}
+	if vdb.AvatarURL.Valid {
+		v.AvatarURL = vdb.AvatarURL.String
+	}
+	if vdb.FirstName.Valid {
+		v.FirstName = vdb.FirstName.String
+	}
+	if vdb.LastName.Valid {
+		v.LastName = vdb.LastName.String
+	}
 	v.Nickname = vdb.Nickname
-	v.Email = vdb.Email
-	v.TshirtSize = vdb.TshirtSize
+	if vdb.Email.Valid {
+		v.Email = vdb.Email.String
+	}
+	if vdb.TshirtSize.Valid {
+		v.TshirtSize = vdb.TshirtSize.String
+	}
 	return nil
 }
 
 func (v *User) ToRow(vdb *db.User) error {
 	vdb.EID = v.ID
-	vdb.FirstName = v.FirstName
-	vdb.LastName = v.LastName
+	vdb.AuthVia.Valid = true
+	vdb.AuthVia.String = v.AuthVia
+	vdb.AuthUserID.Valid = true
+	vdb.AuthUserID.String = v.AuthUserID
+	vdb.AvatarURL.Valid = true
+	vdb.AvatarURL.String = v.AvatarURL
+	vdb.FirstName.Valid = true
+	vdb.FirstName.String = v.FirstName
+	vdb.LastName.Valid = true
+	vdb.LastName.String = v.LastName
 	vdb.Nickname = v.Nickname
-	vdb.Email = v.Email
-	vdb.TshirtSize = v.TshirtSize
+	vdb.Email.Valid = true
+	vdb.Email.String = v.Email
+	vdb.TshirtSize.Valid = true
+	vdb.TshirtSize.String = v.TshirtSize
 	return nil
 }
 
@@ -72,6 +99,12 @@ func (v UserL10N) GetPropValue(s string) (interface{}, error) {
 	switch s {
 	case "id":
 		return v.ID, nil
+	case "auth_via":
+		return v.AuthVia, nil
+	case "auth_user_id":
+		return v.AuthUserID, nil
+	case "avatar_url":
+		return v.AvatarURL, nil
 	case "first_name":
 		return v.FirstName, nil
 	case "last_name":

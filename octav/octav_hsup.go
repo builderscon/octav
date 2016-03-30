@@ -750,6 +750,29 @@ func httpLookupUser(w http.ResponseWriter, r *http.Request) {
 	doLookupUser(NewContext(r), w, r, payload)
 }
 
+func httpLookupUserByAuthUserID(w http.ResponseWriter, r *http.Request) {
+	if pdebug.Enabled {
+		g := pdebug.Marker("httpLookupUserByAuthUserID")
+		defer g.End()
+	}
+	if strings.ToLower(r.Method) != `get` {
+		httpError(w, `Method was `+r.Method+`, expected get`, http.StatusNotFound, nil)
+		return
+	}
+
+	var payload model.LookupUserByAuthUserIDRequest
+	if err := urlenc.Unmarshal([]byte(r.URL.RawQuery), &payload); err != nil {
+		httpError(w, `Failed to parse url query string`, http.StatusInternalServerError, err)
+		return
+	}
+
+	if err := validator.HTTPLookupUserByAuthUserIDRequest.Validate(&payload); err != nil {
+		httpError(w, `Invalid input (validation failed)`, http.StatusInternalServerError, err)
+		return
+	}
+	doLookupUserByAuthUserID(NewContext(r), w, r, payload)
+}
+
 func httpLookupVenue(w http.ResponseWriter, r *http.Request) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("httpLookupVenue")
@@ -958,6 +981,7 @@ func (s *Server) SetupRoutes() {
 	r.HandleFunc(`/v1/user/delete`, httpDeleteUser)
 	r.HandleFunc(`/v1/user/list`, httpListUser)
 	r.HandleFunc(`/v1/user/lookup`, httpLookupUser)
+	r.HandleFunc(`/v1/user/lookup_by_auth_user_id`, httpLookupUserByAuthUserID)
 	r.HandleFunc(`/v1/user/update`, httpUpdateUser)
 	r.HandleFunc(`/v1/venue/create`, httpCreateVenue)
 	r.HandleFunc(`/v1/venue/delete`, httpDeleteVenue)

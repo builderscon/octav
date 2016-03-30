@@ -1,5 +1,5 @@
 [% WRAPPER "layout/main.html.tx" %]
 
-<h4>Octav Administrator UI</h4>
+TBD
 
 [% END %]

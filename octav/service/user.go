@@ -9,34 +9,85 @@ import (
 func (v *User) populateRowForCreate(vdb *db.User, payload model.CreateUserRequest) error {
 	vdb.EID = tools.UUID()
 
-	vdb.FirstName = payload.FirstName
-	vdb.LastName = payload.LastName
 	vdb.Nickname = payload.Nickname
-	vdb.Email = payload.Email
-	vdb.TshirtSize = payload.TshirtSize
+
+	if payload.AuthVia.Valid() {
+		vdb.AuthVia.Valid = true
+		vdb.AuthVia.String = payload.AuthVia.String
+	}
+
+	if payload.AuthUserID.Valid() {
+		vdb.AuthUserID.Valid = true
+		vdb.AuthUserID.String = payload.AuthUserID.String
+	}
+
+	if payload.AvatarURL.Valid() {
+		vdb.AvatarURL.Valid = true
+		vdb.AvatarURL.String = payload.AvatarURL.String
+	}
+
+	if payload.FirstName.Valid() {
+		vdb.FirstName.Valid = true
+		vdb.FirstName.String = payload.FirstName.String
+	}
+
+	if payload.LastName.Valid() {
+		vdb.LastName.Valid = true
+		vdb.LastName.String = payload.LastName.String
+	}
+
+	if payload.Email.Valid() {
+		vdb.Email.Valid = true
+		vdb.Email.String = payload.Email.String
+	}
+
+	if payload.TshirtSize.Valid() {
+		vdb.TshirtSize.Valid = true
+		vdb.TshirtSize.String = payload.TshirtSize.String
+	}
 
 	return nil
 }
 
+
 func (v *User) populateRowForUpdate(vdb *db.User, payload model.UpdateUserRequest) error {
-	if payload.FirstName.Valid() {
-		vdb.FirstName = payload.FirstName.String
-	}
-
-	if payload.LastName.Valid() {
-		vdb.LastName = payload.LastName.String
-	}
-
 	if payload.Nickname.Valid() {
 		vdb.Nickname = payload.Nickname.String
 	}
 
+	if payload.AuthVia.Valid() {
+		vdb.AuthVia.Valid = true
+		vdb.AuthVia.String = payload.AuthVia.String
+	}
+
+	if payload.AuthUserID.Valid() {
+		vdb.AuthUserID.Valid = true
+		vdb.AuthUserID.String = payload.AuthUserID.String
+	}
+
+	if payload.AvatarURL.Valid() {
+		vdb.AvatarURL.Valid = true
+		vdb.AvatarURL.String = payload.AvatarURL.String
+	}
+
+	if payload.FirstName.Valid() {
+		vdb.FirstName.Valid = true
+		vdb.FirstName.String = payload.FirstName.String
+	}
+
+	if payload.LastName.Valid() {
+		vdb.LastName.Valid = true
+		vdb.LastName.String = payload.LastName.String
+	}
+
 	if payload.Email.Valid() {
-		vdb.Email = payload.Email.String
+		vdb.Email.Valid = true
+		vdb.Email.String = payload.Email.String
 	}
 
 	if payload.TshirtSize.Valid() {
-		vdb.TshirtSize = payload.TshirtSize.String
+		vdb.TshirtSize.Valid = true
+		vdb.TshirtSize.String = payload.TshirtSize.String
 	}
 
 	return nil

@@ -3,7 +3,7 @@ FROM debian
 ENV PATH=/local-lib/bin:/opt/perl/bin:$PATH
 ADD cpanfile /
 RUN apt-get update && \
-    apt-get install -qy --no-install-recommends wget build-essential ca-certificates && \
+    apt-get install -qy --no-install-recommends wget build-essential ca-certificates libssl-dev && \
     wget http://www.cpan.org/src/5.0/perl-5.20.3.tar.gz -O - | tar xz && \
     cd perl-5.20.3 && \
     ./Configure -de -Dprefix=/opt/perl -Dman1dir=none -Dman3dir=none -Doptimize='-O3' && \

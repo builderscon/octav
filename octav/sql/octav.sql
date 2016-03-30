@@ -1,14 +1,19 @@
 CREATE TABLE users (
     oid INTEGER UNSIGNED NOT NULL PRIMARY KEY AUTO_INCREMENT,
     eid CHAR(64) CHARACTER SET latin1 NOT NULL,
-    first_name TEXT NOT NULL,
-    last_name TEXT NOT NULL,
-    nickname TEXT NOT NULL,
+    first_name TEXT,
+    last_name TEXT,
+    nickname  CHAR(128) NOT NULL,
     email TEXT,
-    tshirt_size CHAR(4) CHARACTER SET latin1 NOT NULL DEFAULT 'M',
+    auth_via CHAR(16) NOT NULL, /* github, facebook, twitter */
+    auth_user_id TEXT NOT NULL, /* ID in the auth provider */
+    avatar_url TEXT,
+    tshirt_size CHAR(4) CHARACTER SET latin1,
     created_on DATETIME NOT NULL,
     modified_on TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    UNIQUE KEY(eid)
+    UNIQUE KEY(eid),
+    UNIQUE KEY(nickname),
+    UNIQUE KEY(auth_via, auth_user_id(191))
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 CREATE TABLE venues (
@@ -70,8 +75,8 @@ CREATE TABLE conference_administrators (
 CREATE TABLE sessions (
     oid INTEGER UNSIGNED NOT NULL PRIMARY KEY AUTO_INCREMENT,
     eid CHAR(64) CHARACTER SET latin1 NOT NULL,
-    conference_id CHAR(64) NOT NULL,
-    room_id CHAR(64),
+    conference_id CHAR(64) CHARACTER SET latin1 NOT NULL,
+    room_id CHAR(64) CHARACTER SET latin1,
     speaker_id CHAR(64) NOT NULL,
     title TEXT NOT NULL,
     abstract TEXT,

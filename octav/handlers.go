@@ -8,6 +8,7 @@ import (
 	"github.com/builderscon/octav/octav/db"
 	"github.com/builderscon/octav/octav/model"
 	"github.com/builderscon/octav/octav/service"
+	"github.com/lestrrat/go-jsval"
 	"github.com/lestrrat/go-pdebug"
 	"golang.org/x/net/context"
 )
@@ -34,8 +35,9 @@ func httpJSONWithStatus(w http.ResponseWriter, v interface{}, st int) {
 
 type jsonerr struct {
 	Message string `json:"message"`
-	Error string `json:"error,omitempty"`
+	Error   string `json:"error,omitempty"`
 }
+
 func httpErrorAsJSON(w http.ResponseWriter, message string, st int, err error) {
 	v := jsonerr{
 		Message: message,
@@ -591,6 +593,33 @@ func doListUser(ctx context.Context, w http.ResponseWriter, r *http.Request, pay
 	httpJSON(w, l)
 }
 
+func doLookupUserByAuthUserID(ctx context.Context, w http.ResponseWriter, r *http.Request, payload model.LookupUserByAuthUserIDRequest) {
+	if pdebug.Enabled {
+		g := pdebug.Marker("doLookupUserByAuthUserID")
+		defer g.End()
+	}
+	tx, err := db.Begin()
+	if err != nil {
+		httpError(w, `LookupUserByAuthUserID`, http.StatusInternalServerError, err)
+		return
+	}
+	defer tx.AutoRollback()
+
+	vdb := db.User{}
+	if err := vdb.LoadByAuthUserID(tx, payload.AuthVia, payload.AuthUserID); err != nil {
+		httpError(w, `LookupUserByAuthUserID`, http.StatusInternalServerError, err)
+		return
+	}
+
+	v := model.User{}
+	if err := v.FromRow(vdb); err != nil {
+		httpError(w, `LookupUserByAuthUserID`, http.StatusInternalServerError, err)
+		return
+	}
+
+	doLookupUserCommon(ctx, w, r, tx, v, payload.Lang)
+}
+
 func doLookupUser(ctx context.Context, w http.ResponseWriter, r *http.Request, payload model.LookupUserRequest) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("doLookupUser")
@@ -609,7 +638,11 @@ func doLookupUser(ctx context.Context, w http.ResponseWriter, r *http.Request, p
 		return
 	}
 
-	if !payload.Lang.Valid() {
+	doLookupUserCommon(ctx, w, r, tx, v, payload.Lang)
+}
+
+func doLookupUserCommon(ctx context.Context, w http.ResponseWriter, r *http.Request, tx *db.Tx, v model.User, lang jsval.MaybeString) {
+	if !lang.Valid() {
 		httpJSON(w, v)
 		return
 	}
@@ -617,7 +650,7 @@ func doLookupUser(ctx context.Context, w http.ResponseWriter, r *http.Request, p
 	s := service.User{}
 	// Special case, only used for administrators. Load all of the
 	// l10n strings associated with this
-	switch payload.Lang.String {
+	switch lang.String {
 	case "all":
 		vl10n := model.UserL10N{User: v}
 		if err := vl10n.LoadLocalizedFields(tx); err != nil {
@@ -626,7 +659,7 @@ func doLookupUser(ctx context.Context, w http.ResponseWriter, r *http.Request, p
 		}
 		httpJSON(w, vl10n)
 	default:
-		if err := s.ReplaceL10NStrings(tx, &v, payload.Lang.String); err != nil {
+		if err := s.ReplaceL10NStrings(tx, &v, lang.String); err != nil {
 			httpError(w, `LookupUser`, http.StatusInternalServerError, err)
 			return
 		}

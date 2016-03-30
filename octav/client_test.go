@@ -3,6 +3,8 @@ package octav_test
 import (
 	"fmt"
 	"net/http/httptest"
+	"strconv"
+	"sync"
 	"testing"
 
 	"github.com/builderscon/octav/octav"
@@ -407,18 +409,29 @@ func TestSessionCRUD(t *testing.T) {
 	}
 }
 
+var ghidL = sync.Mutex{}
+var ghid = 0
+
 func johndoe() *model.CreateUserRequest {
+	ghidL.Lock()
+	defer ghidL.Unlock()
+
+	ghid++
 	lf := tools.LocalizedFields{}
 	lf.Set("ja", "first_name", "ジョン")
 	lf.Set("ja", "last_name", "ドー")
-	return &model.CreateUserRequest{
-		FirstName:  "John",
-		LastName:   "Doe",
-		Nickname:   "enigma621",
-		Email:      "john.doe@example.com",
-		TshirtSize: "XL",
-		L10N:       lf,
+
+	r := model.CreateUserRequest{
+		Nickname: tools.UUID(),
 	}
+	r.AuthVia.Set("github")
+	r.AuthUserID.Set(strconv.Itoa(ghid))
+	r.FirstName.Set("John")
+	r.LastName.Set("Doe")
+	r.Email.Set("john.doe@example.com")
+	r.TshirtSize.Set("XL")
+	r.L10N = lf
+	return &r
 }
 
 func TestCreateUser(t *testing.T) {
@@ -537,9 +550,9 @@ func TestDeleteConferenceDates(t *testing.T) {
 		ConferenceID: conf.ID,
 		Dates: []model.ConferenceDate{
 			model.ConferenceDate{
-				Date: model.NewDate(2016,3,22),
-				Open: model.NewWallClock(10,0),
-				Close: model.NewWallClock(19,0),
+				Date:  model.NewDate(2016, 3, 22),
+				Open:  model.NewWallClock(10, 0),
+				Close: model.NewWallClock(19, 0),
 			},
 		},
 	})
@@ -549,7 +562,7 @@ func TestDeleteConferenceDates(t *testing.T) {
 
 	err = cl.DeleteConferenceDates(&model.DeleteConferenceDatesRequest{
 		ConferenceID: conf.ID,
-		Dates: []model.Date{ model.NewDate(2016, 3, 22) },
+		Dates:        []model.Date{model.NewDate(2016, 3, 22)},
 	})
 	if !assert.NoError(t, err, "DeleteConferenceDates works") {
 		return
@@ -594,7 +607,7 @@ func TestConferenceAdmins(t *testing.T) {
 
 		err = cl.AddConferenceAdmin(&model.AddConferenceAdminRequest{
 			ConferenceID: conf.ID,
-			UserID: extraAdmin.ID,
+			UserID:       extraAdmin.ID,
 		})
 		if !assert.NoError(t, err, "AddConferenceAdmin should succeed") {
 			return
@@ -613,7 +626,7 @@ func TestConferenceAdmins(t *testing.T) {
 	for _, admin := range conf2.Administrators {
 		err = cl.DeleteConferenceAdmin(&model.DeleteConferenceAdminRequest{
 			ConferenceID: conf.ID,
-			UserID: admin.ID,
+			UserID:       admin.ID,
 		})
 		if !assert.NoError(t, err, "DeleteConferenceAdmin should succeed") {
 			return
@@ -655,9 +668,9 @@ func TestListConference(t *testing.T) {
 			ConferenceID: conf.ID,
 			Dates: []model.ConferenceDate{
 				model.ConferenceDate{
-					Date: model.NewDate(2016,3,22),
-					Open: model.NewWallClock(10,0),
-					Close: model.NewWallClock(19,0),
+					Date:  model.NewDate(2016, 3, 22),
+					Open:  model.NewWallClock(10, 0),
+					Close: model.NewWallClock(19, 0),
 				},
 			},
 		})

@@ -1,0 +1,8 @@
+[% WRAPPER "layout/main.html.tx" %]
+
+<div class="collection">
+  <a href="/auth/github" class="collection-item">Signin via Github</a>
+</div>
+
+[% END %]
+

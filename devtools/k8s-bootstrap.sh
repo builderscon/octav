@@ -28,7 +28,7 @@ fi
 
 SECRETS="cloudsql logging"
 SERVICES=apiserver
-REPLICATION_CONTROLLERS=apiserver
+REPLICATION_CONTROLLERS=apiserver adminweb
 
 # gcloud needs to know which configuration set we're dealing with
 echo "* Activating $MY_CONFIG_NAME configuration..."

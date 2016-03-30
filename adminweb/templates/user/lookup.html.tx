@@ -1,0 +1,79 @@
+[% WRAPPER "layout/main.html.tx" %]
+
+<h4>User "[% user.nickname %]"</h4>
+
+<div class="row">
+<form action="/user/update" method="POST" class="col s12">
+<div class="row">
+  <div class="input-field col s12">
+    <label for="id">ID</label>
+    <input type="text" readonly value="[% user.id %]">
+    <input type="hidden" name="id" value="[% user.id %]">
+  </div>
+</div>
+
+<div class="row">
+  <div class="input-field col s12">
+    <label for="auth_via">Authenticated Via</label>
+    <input type="text" readonly value="[% user.auth_via %]">
+    <input type="hidden" name="auth_via" value="[% user.auth_via %]">
+  </div>
+</div>
+
+<div class="row">
+  <div class="input-field col s12">
+    <label for="auth_user_id">ID From Authentication Provider</label>
+    <input type="text" readonly value="[% user.auth_user_id %]">
+    <input type="hidden" name="auth_user_id" value="[% user.auth_user_id %]">
+  </div>
+</div>
+
+<div class="row">
+  <div class="input-field col s6">
+    <label for="title">Nickname</label>
+    <input placeholder="(Required) User's nickname/login" id="nickname" name="nickname" type="text" class="validate[% IF user.nickname %] active[% END %]"[% IF user.nickname %] value="[% user.nickname %]"[% END %]>
+  </div>
+</div>
+<div>
+  <div class="input-field col s6">
+    <label for="first_name">First Name</label>
+    <input placeholder="(Optional)" id="first_name" name="first_name" type="text" class="validate[% IF user.first_name %] active[% END %]"[% IF user.first_name %] value="[% user.first_name %]"[% END %]>
+  </div>
+  <div class="input-field col s6">
+    <label for="first_name#ja">First Name (日本語）</label>
+    <input placeholder="(任意）日本語で表示する際の名前" id="first_name#ja" name="first_name#ja" type="text" class="validate[% IF user.item("first_name#ja") %] active[% END %]"[% IF user.item("first_name#ja") %] value="[% user.item("first_name#ja") %]"[% END %]>
+  </div>
+</div>
+<div>
+  <div class="input-field col s6">
+    <label for="last_name">Last Name</label>
+    <input placeholder="(Optional)" id="last_name" name="last_name" type="text" class="validate[% IF user.last_name %] active[% END %]"[% IF user.last_name %] value="[% user.last_name %]"[% END %]>
+  </div>
+  <div class="input-field col s6">
+    <label for="last_name#ja">Last Name (日本語）</label>
+    <input placeholder="(任意）日本語で表示する際の名前" id="last_name#ja" name="last_name#ja" type="text" class="validate[% IF user.item("last_name#ja") %] active[% END %]"[% IF user.item("last_name#ja") %] value="[% user.item("last_name#ja") %]"[% END %]>
+  </div>
+</div>
+
+<div class="row">
+  <div class="input-field col s12">
+    <label for="avatar_url">Avatar URL</label>
+    <input placeholder="URL" id="avatar_url" name="avatar_url" type="text" class="validate[% IF user.avatar_url %] active[% END %]"[% IF user.avatar_url %] value="[% user.avatar_url %]"[% END %]>
+  </div>
+</div>
+<div class="row">
+  <div class="input-field col s12">
+    <label for="email">Email</label>
+    <input placeholder="email address" id="email" name="email" type="text" class="validate[% IF user.email %] active[% END %]"[% IF user.email %] value="[% user.email %]"[% END %]>
+  </div>
+</div>
+
+<div class="row">
+  <button class="btn waves-effect waves-light" type="submit" name="action">Submit
+    <i class="material-icons right">send</i>
+  </button>
+</div>
+</form>
+</div>
+
+[% END %]

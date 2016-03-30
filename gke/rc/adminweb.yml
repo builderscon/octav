@@ -13,9 +13,25 @@ spec:
         name: adminweb
         group: octav
     spec:
+      volumes:
+        - name: github
+          secret:
+            secretName: github-dev
       containers:
-        - image: asia.gcr.io/builderscon-1248/adminweb:20160329.140602
+        - image: asia.gcr.io/builderscon-1248/adminweb:20160330.150529
           name: adminweb
           ports:
             - containerPort: 5000
               protocol: TCP
+          env:
+            - name: OCTAV_REDIS
+              value: 10.96.0.53:6379
+            - name: OCTAV_GITHUB_CLIENT_ID
+              value: /github/id
+            - name: OCTAV_GITHUB_CLIENT_SECRET
+              value: /github/secret
+          volumeMounts:
+            - name: github
+              readOnly: true
+              mountPath: /github
+

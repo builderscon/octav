@@ -74,6 +74,10 @@
         { "type": "object", "description": "implementation specific object representing time" }
       ]
     },
+    "idprovider_name": {
+      "type": "string",
+      "enum": ["github", "facebook", "twitter"]
+    },
     "time": {
       "type": "string",
       "pattern": "^\\d\\d:\\d\\d$"
@@ -316,6 +320,9 @@
       "schema": {
         "type": "object",
         "properties": {
+          "auth_via": { "$ref": "#/definitions/idprovider_name" },
+          "auth_user_id": { "type": "string" },
+          "avatar_url": { "$ref": "#/definitions/url" },
           "first_name": { "$ref": "#/definitions/string_en_not_empty" },
           "last_name": { "$ref": "#/definitions/string_en_not_empty" },
           "nickname": { "$ref": "#/definitions/string_en_not_empty" },
@@ -326,7 +333,7 @@
           "first_name#[a-z]+": { "$ref": "#/definitions/string_i18n" },
           "last_name#[a-z]+": { "$ref": "#/definitions/string_i18n" }
         },
-        "required": [ "first_name", "last_name", "nickname", "email", "tshirt_size" ]
+        "required": [ "nickname", "auth_via", "auth_user_id" ]
       },
       "targetSchema": { "$ref": "#/definitions/user" }
     },
@@ -340,6 +347,21 @@
         "required": ["id"],
         "properties": {
           "id": { "$ref": "#/definitions/uuid" }
+        }
+      },
+      "targetSchema": { "$ref": "#/definitions/user" }
+    },
+    {
+      "title": "Lookup user by auth user ID",
+      "rel": "lookup",
+      "href": "/user/lookup_by_auth_user_id",
+      "method": "GET",
+      "schema": {
+        "type": "object",
+        "required": ["auth_via", "auth_user_id"],
+        "properties": {
+          "auth_via": { "$ref": "#/definitions/idprovider_name" },
+          "auth_user_id": { "type": "string" }
         }
       },
       "targetSchema": { "$ref": "#/definitions/user" }

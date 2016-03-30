@@ -4,10 +4,16 @@ on 'test' => sub {
     requires 'Test::More', '0.98';
 };
 
+requires 'IO::Socket::SSL' => ">= 1.94";
 requires 'JSON';
+requires 'JSON::Types';
 requires 'Mojolicious';
 requires 'Mojolicious::Plugin::XslateRenderer';
 requires 'Plack';
-requires 'Text::Xslate::Bridge::TT2Like';
-requires 'Starlet';
+requires 'Plack::Middleware::Session::Simple';
+requires 'Redis::Jet';
+requires 'Sereal';
 requires 'Server::Starter';
+requires 'Starlet';
+requires 'Text::Xslate::Bridge::TT2Like';
+requires 'UUID::Tiny';
