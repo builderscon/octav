@@ -15,8 +15,9 @@ if [ "$TRAVIS" == "true" ]; then
     make installdeps
 fi
 
+CURDIR=$(cd $(dirname $0); pwd -P)
 export OCTAV_TEST_DSN="root:@/$OCTAV_DB_NAME?parseTime=true"
 export OCTAV_TRACE_DB=1
-export OCTAV_DEBUG_FILE=debug.out
+export OCTAV_DEBUG_FILE=$CURDIR/debug.out
 
 exec make test
