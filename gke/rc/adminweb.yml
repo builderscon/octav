@@ -17,8 +17,11 @@ spec:
         - name: github
           secret:
             secretName: github-dev
+        - name: googlemaps
+          secret:
+            secretName: googlemaps-dev
       containers:
-        - image: asia.gcr.io/builderscon-1248/adminweb:20160330.150529
+        - image: asia.gcr.io/builderscon-1248/adminweb:20160330.203130
           name: adminweb
           ports:
             - containerPort: 5000
@@ -30,8 +33,13 @@ spec:
               value: /github/id
             - name: OCTAV_GITHUB_CLIENT_SECRET
               value: /github/secret
+            - name: OCTAV_GOOGLE_MAPS_API_KEY
+              value: /googlemaps/apikey
           volumeMounts:
             - name: github
               readOnly: true
               mountPath: /github
+            - name: googlemaps
+              readOnly: true
+              mountPath: /googlemaps
 
