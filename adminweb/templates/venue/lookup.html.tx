@@ -1,0 +1,81 @@
+[% WRAPPER "layout/main.html.tx" %]
+
+<h4>Venue "[% venue.name %]"</h4>
+
+<div class="row">
+<form action="/venue/update" method="POST" class="col s12">
+<div class="row">
+  <div class="input-field col s12">
+    <label for="id">ID</label>
+    <input type="text" readonly value="[% venue.id %]">
+    <input type="hidden" name="id" value="[% venue.id %]">
+  </div>
+</div>
+
+<div class="row">
+  <div class="input-field col s6">
+    <label for="name">Name (English)</label>
+    <input placeholder="(Required) Main name of the venue" id="name" name="name" type="text" class="validate[% IF venue.name %] active[% END %]"[% IF venue.name %] value="[% venue.name %]"[% END %]>
+  </div>
+  <div class="input-field col s6">
+    <label for="name#ja">Name (日本語）</label>
+    <input placeholder="(任意）日本語で表示する際の施設名" id="name#ja" name="name#ja" type="text" class="validate[% IF venue.item("name#ja") %] active[% END %]"[% IF venue.item("name#ja") %] value="[% venue.item("name#ja") %]"[% END %]>
+  </div>
+</div>
+
+<div class="row">
+  <div class="input-field col s6">
+    <label for="address">Address (English)</label>
+    <input placeholder="(Required) Main address of the venue" id="address" name="address" type="text" class="validate[% IF venue.address %] active[% END %]"[% IF venue.address %] value="[% venue.address %]"[% END %]>
+  </div>
+  <div class="input-field col s6">
+    <label for="address#ja">Address (日本語）</label>
+    <input placeholder="(任意）日本語で表示する際の施設名" id="address#ja" name="address#ja" type="text" class="validate[% IF venue.item("address#ja") %] active[% END %]"[% IF venue.item("address#ja") %] value="[% venue.item("address#ja") %]"[% END %]>
+  </div>
+</div>
+
+<div class="row">
+  <div class="input-field col s6">
+    <label for="latitude">Latitude</label>
+    <input placeholder="Latitude of the venue" id="latitude" name="latitude" type="text" class="validate[% IF venue.latitude %] active[% END %]"[% IF venue.latitude %] value="[% venue.latitude %]"[% END %]>
+  </div>
+  <div class="input-field col s6">
+    <label for="longitude">Longitude</label>
+    <input placeholder="Longitude of the venue" id="longitude" name="longitude" type="text" class="validate[% IF venue.longitude %] active[% END %]"[% IF venue.longitude %] value="[% venue.longitude %]"[% END %]>
+  </div>
+</div>
+
+<div class="row">
+  <div class="col s12">
+    <div id="map" style="height: 200px"></div>
+  </div>
+</div>
+<script type="text/javascript">
+<!--
+var map;
+function initMap() {
+  var latlng = {lat: [% venue.latitude %], lng: [% venue.longitude %]}
+  map = new google.maps.Map(document.getElementById('map'), {
+    center: latlng,
+    zoom: 14
+  });
+  var marker = new google.maps.Marker({
+    position: latlng,
+    map: map,
+    title: "[% venue.name %]",
+  });
+}
+-->
+</script>
+
+<div class="row">
+  <button class="btn waves-effect waves-light" type="submit" name="action">Submit
+    <i class="material-icons right">send</i>
+  </button>
+</div>
+</form>
+</div>
+
+<script async defer src="https://maps.googleapis.com/maps/api/js?key=[% api_key %]&callback=initMap"></script>
+
+[% END %]
