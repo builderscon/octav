@@ -29,5 +29,5 @@ exec jo -p \
     kind=Secret \
     apiVersion=v1 \
     metadata=$(jo name=$GITHUB_SECRET_NAME labels=$(jo name=googlemaps group=secrets)) \
-    data[api_key]="$(base64 $GITHUB_DIR/api_key)"
+    data[apikey]="$(base64 $GITHUB_DIR/apikey)"
 
