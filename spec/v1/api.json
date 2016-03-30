@@ -670,6 +670,34 @@
       }
     },
     {
+      "title": "Add conference venue",
+      "rel": "update",
+      "method": "POST",
+      "href": "/conference/venue/add",
+      "ecnType": "application/json",
+      "schema": {
+        "properties": {
+          "conference_id": {"$ref": "#/definitions/uuid"},
+          "venue_id": {"$ref":"#/definitions/uuid"}
+        },
+        "required": ["conference_id","venue_id"]
+      }
+    },
+    {
+      "title": "Delete conference venue",
+      "rel": "delete",
+      "method": "POST",
+      "href": "/conference/venue/delete",
+      "ecnType": "application/json",
+      "schema": {
+        "properties": {
+          "conference_id": {"$ref": "#/definitions/uuid"},
+          "venue_id": {"$ref":"#/definitions/uuid"}
+        },
+        "required": ["conference_id","venue_id"]
+      }
+    },
+    {
       "title": "Lookup conference",
       "href": "/conference/lookup",
       "rel": "lookup",

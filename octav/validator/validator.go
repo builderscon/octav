@@ -7,6 +7,7 @@ import (
 
 var HTTPAddConferenceAdminRequest *jsval.JSVal
 var HTTPAddConferenceDatesRequest *jsval.JSVal
+var HTTPAddConferenceVenueRequest *jsval.JSVal
 var HTTPCreateConferenceRequest *jsval.JSVal
 var HTTPCreateConferenceResponse *jsval.JSVal
 var HTTPCreateRoomRequest *jsval.JSVal
@@ -20,6 +21,7 @@ var HTTPCreateVenueResponse *jsval.JSVal
 var HTTPDeleteConferenceAdminRequest *jsval.JSVal
 var HTTPDeleteConferenceDatesRequest *jsval.JSVal
 var HTTPDeleteConferenceRequest *jsval.JSVal
+var HTTPDeleteConferenceVenueRequest *jsval.JSVal
 var HTTPDeleteRoomRequest *jsval.JSVal
 var HTTPDeleteSessionRequest *jsval.JSVal
 var HTTPDeleteUserRequest *jsval.JSVal
@@ -535,6 +537,24 @@ func init() {
 				AddProp(
 					"dates",
 					jsval.Reference(M).RefersTo("#/definitions/conference_date_array"),
+				),
+		)
+
+	HTTPAddConferenceVenueRequest = jsval.New().
+		SetConstraintMap(M).
+		SetRoot(
+			jsval.Object().
+				Required("conference_id", "venue_id").
+				AdditionalProperties(
+					jsval.EmptyConstraint,
+				).
+				AddProp(
+					"conference_id",
+					jsval.Reference(M).RefersTo("#/definitions/uuid"),
+				).
+				AddProp(
+					"venue_id",
+					jsval.Reference(M).RefersTo("#/definitions/uuid"),
 				),
 		)
 
@@ -1079,6 +1099,24 @@ func init() {
 				).
 				AddProp(
 					"id",
+					jsval.Reference(M).RefersTo("#/definitions/uuid"),
+				),
+		)
+
+	HTTPDeleteConferenceVenueRequest = jsval.New().
+		SetConstraintMap(M).
+		SetRoot(
+			jsval.Object().
+				Required("conference_id", "venue_id").
+				AdditionalProperties(
+					jsval.EmptyConstraint,
+				).
+				AddProp(
+					"conference_id",
+					jsval.Reference(M).RefersTo("#/definitions/uuid"),
+				).
+				AddProp(
+					"venue_id",
 					jsval.Reference(M).RefersTo("#/definitions/uuid"),
 				),
 		)

@@ -120,6 +120,11 @@ func doLookupConference(ctx context.Context, w http.ResponseWriter, r *http.Requ
 		return
 	}
 
+	if err := s.LoadVenues(tx, &c.Venues, c.ID); err != nil {
+		httpError(w, `LookupConference`, http.StatusInternalServerError, err)
+		return
+	}
+
 	if !payload.Lang.Valid() {
 		httpJSON(w, c)
 		return
@@ -285,6 +290,48 @@ func doAddConferenceAdmin(ctx context.Context, w http.ResponseWriter, r *http.Re
 	httpJSON(w, map[string]string{"status": "success"})
 }
 
+func doDeleteConferenceVenue(ctx context.Context, w http.ResponseWriter, r *http.Request, payload model.DeleteConferenceVenueRequest) {
+	tx, err := db.Begin()
+	if err != nil {
+		httpError(w, `DeleteConferenceVenue`, http.StatusInternalServerError, err)
+		return
+	}
+	defer tx.AutoRollback()
+
+	s := service.Conference{}
+	if err := s.DeleteVenue(tx, payload.ConferenceID, payload.VenueID); err != nil {
+		httpError(w, `DeleteConferenceVenue`, http.StatusInternalServerError, err)
+		return
+	}
+
+	if err := tx.Commit(); err != nil {
+		httpError(w, `DeleteConferenceVenue`, http.StatusInternalServerError, err)
+		return
+	}
+	httpJSON(w, map[string]string{"status": "success"})
+}
+
+func doAddConferenceVenue(ctx context.Context, w http.ResponseWriter, r *http.Request, payload model.AddConferenceVenueRequest) {
+	tx, err := db.Begin()
+	if err != nil {
+		httpError(w, `AddConferenceVenue`, http.StatusInternalServerError, err)
+		return
+	}
+	defer tx.AutoRollback()
+
+	s := service.Conference{}
+	if err := s.AddVenue(tx, payload.ConferenceID, payload.VenueID); err != nil {
+		httpError(w, `AddConferenceVenue`, http.StatusInternalServerError, err)
+		return
+	}
+
+	if err := tx.Commit(); err != nil {
+		httpError(w, `AddConferenceVenue`, http.StatusInternalServerError, err)
+		return
+	}
+	httpJSON(w, map[string]string{"status": "success"})
+}
+
 func doListConference(ctx context.Context, w http.ResponseWriter, r *http.Request, payload model.ListConferenceRequest) {
 	tx, err := db.Begin()
 	if err != nil {
@@ -303,8 +350,23 @@ func doListConference(ctx context.Context, w http.ResponseWriter, r *http.Reques
 	if !payload.Lang.Valid() {
 		l := make(model.ConferenceList, len(vdbl))
 		for i, vdb := range vdbl {
-			if err := l[i].FromRow(vdb); err != nil {
+			c := &l[i]
+			if err := c.FromRow(vdb); err != nil {
 				httpError(w, `ListConference`, http.StatusInternalServerError, err)
+				return
+			}
+			if err := s.LoadDates(tx, &c.Dates, c.ID); err != nil {
+				httpError(w, `LookupConference`, http.StatusInternalServerError, err)
+				return
+			}
+
+			if err := s.LoadAdmins(tx, &c.Administrators, c.ID); err != nil {
+				httpError(w, `LookupConference`, http.StatusInternalServerError, err)
+				return
+			}
+
+			if err := s.LoadVenues(tx, &c.Venues, c.ID); err != nil {
+				httpError(w, `LookupConference`, http.StatusInternalServerError, err)
 				return
 			}
 		}
@@ -314,12 +376,26 @@ func doListConference(ctx context.Context, w http.ResponseWriter, r *http.Reques
 
 	l := make(model.ConferenceL10NList, len(vdbl))
 	for i, vdb := range vdbl {
-		v := model.Conference{}
-		if err := v.FromRow(vdb); err != nil {
+		c := model.Conference{}
+		if err := c.FromRow(vdb); err != nil {
 			httpError(w, `ListConference`, http.StatusInternalServerError, err)
 			return
 		}
-		l[i].Conference = v
+		if err := s.LoadDates(tx, &c.Dates, c.ID); err != nil {
+			httpError(w, `LookupConference`, http.StatusInternalServerError, err)
+			return
+		}
+
+		if err := s.LoadAdmins(tx, &c.Administrators, c.ID); err != nil {
+			httpError(w, `LookupConference`, http.StatusInternalServerError, err)
+			return
+		}
+
+		if err := s.LoadVenues(tx, &c.Venues, c.ID); err != nil {
+			httpError(w, `LookupConference`, http.StatusInternalServerError, err)
+			return
+		}
+		l[i].Conference = c
 		switch payload.Lang.String {
 		case "all":
 			if err := l[i].LoadLocalizedFields(tx); err != nil {

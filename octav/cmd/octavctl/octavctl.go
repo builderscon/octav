@@ -593,6 +593,95 @@ func doConferenceAdminSubcmd(args cmdargs) int {
 	return 0
 }
 
+func doConferenceVenueAdd(args cmdargs) int {
+	fs := flag.NewFlagSet("octavctl conference venue add", flag.ContinueOnError)
+	var id string
+	fs.StringVar(&id, "id", "", "")
+	var venue_id string
+	fs.StringVar(&venue_id, "venue_id", "", "")
+	prepGlobalFlags(fs)
+	if err := fs.Parse([]string(args)); err != nil {
+		return errOut(err)
+	}
+
+	m := make(map[string]interface{})
+	if id != "" {
+		m["conference_id"] = id
+	}
+	if venue_id != "" {
+		m["venue_id"] = venue_id
+	}
+	r := model.AddConferenceVenueRequest{}
+	if err := r.Populate(m); err != nil {
+		return errOut(err)
+	}
+
+	if err := validator.HTTPAddConferenceVenueRequest.Validate(&r); err != nil {
+		return errOut(err)
+	}
+
+	cl, err := newClient()
+	if err != nil {
+		return errOut(err)
+	}
+	if err := cl.AddConferenceVenue(&r); err != nil {
+		return errOut(err)
+	}
+
+	return 0
+}
+
+func doConferenceVenueDelete(args cmdargs) int {
+	fs := flag.NewFlagSet("octavctl conference venue delete", flag.ContinueOnError)
+	var id string
+	fs.StringVar(&id, "id", "", "")
+	var venue_id string
+	fs.StringVar(&venue_id, "venue_id", "", "")
+	prepGlobalFlags(fs)
+	if err := fs.Parse([]string(args)); err != nil {
+		return errOut(err)
+	}
+
+	m := make(map[string]interface{})
+	if id != "" {
+		m["conference_id"] = id
+	}
+	if venue_id != "" {
+		m["venue_id"] = venue_id
+	}
+	r := model.DeleteConferenceVenueRequest{}
+	if err := r.Populate(m); err != nil {
+		return errOut(err)
+	}
+
+	if err := validator.HTTPDeleteConferenceVenueRequest.Validate(&r); err != nil {
+		return errOut(err)
+	}
+
+	cl, err := newClient()
+	if err != nil {
+		return errOut(err)
+	}
+	if err := cl.DeleteConferenceVenue(&r); err != nil {
+		return errOut(err)
+	}
+
+	return 0
+}
+
+func doConferenceVenueSubcmd(args cmdargs) int {
+	switch v := args.Get(0); v {
+	case "add":
+		return doConferenceVenueAdd(args.WithFrontPopped())
+	case "delete":
+		return doConferenceVenueDelete(args.WithFrontPopped())
+	default:
+		log.Printf("unimplemented (conference): %s", v)
+		return 1
+	}
+	return 0
+}
+
 func doConferenceSubcmd(args cmdargs) int {
 	switch v := args.Get(0); v {
 	case "create":
@@ -609,6 +698,8 @@ func doConferenceSubcmd(args cmdargs) int {
 		return doConferenceDatesSubcmd(args.WithFrontPopped())
 	case "admin":
 		return doConferenceAdminSubcmd(args.WithFrontPopped())
+	case "venue":
+		return doConferenceVenueSubcmd(args.WithFrontPopped())
 	default:
 		log.Printf("unimplemented (conference): %s", v)
 		return 1

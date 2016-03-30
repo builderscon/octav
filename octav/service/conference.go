@@ -172,3 +172,38 @@ func (v *Conference) LoadAdmins(tx *db.Tx, cdl *model.UserList, cid string) erro
 	*cdl = res
 	return nil
 }
+
+func (v *Conference) AddVenue(tx *db.Tx, cid, vid string) error {
+	cd := db.ConferenceVenue{
+		ConferenceID: cid,
+		VenueID: vid,
+	}
+	if err := cd.Create(tx, db.WithInsertIgnore(true)); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (v *Conference) DeleteVenue(tx *db.Tx, cid, uid string) error {
+	return db.DeleteConferenceVenue(tx, cid, uid)
+}
+
+func (v *Conference) LoadVenues(tx *db.Tx, cdl *model.VenueList, cid string) error {
+	var vdbl db.VenueList
+	if err := db.LoadConferenceVenues(tx, &vdbl, cid); err != nil {
+		return err
+	}
+
+	res := make(model.VenueList, len(vdbl))
+	for i, vdb := range vdbl {
+		var u model.Venue
+		if err := u.FromRow(vdb); err != nil {
+			return err
+		}
+		res[i] = u
+	}
+	*cdl = res
+	return nil
+}
+
