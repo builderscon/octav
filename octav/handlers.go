@@ -35,8 +35,9 @@ func httpJSONWithStatus(w http.ResponseWriter, v interface{}, st int) {
 
 type jsonerr struct {
 	Message string `json:"message"`
-	Error string `json:"error,omitempty"`
+	Error   string `json:"error,omitempty"`
 }
+
 func httpErrorAsJSON(w http.ResponseWriter, message string, st int, err error) {
 	v := jsonerr{
 		Message: message,
