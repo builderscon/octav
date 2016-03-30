@@ -963,6 +963,53 @@ func (c *Client) LookupUser(in *model.LookupUserRequest) (ret *model.User, err e
 	return &payload, nil
 }
 
+func (c *Client) LookupUserByAuthUserID(in *model.LookupUserByAuthUserIDRequest) (ret *model.User, err error) {
+	if pdebug.Enabled {
+		g := pdebug.Marker("client.LookupUserByAuthUserID").BindError(&err)
+		defer g.End()
+	}
+	u, err := url.Parse(c.Endpoint + "/v1/user/lookup_by_auth_user_id")
+	if err != nil {
+		return nil, err
+	}
+	buf, err := urlenc.Marshal(in)
+	if err != nil {
+		return nil, err
+	}
+	u.RawQuery = string(buf)
+	if pdebug.Enabled {
+		pdebug.Printf("GET to %s", u.String())
+	}
+	res, err := c.Client.Get(u.String())
+	if err != nil {
+		return nil, err
+	}
+	if res.StatusCode != http.StatusOK {
+		return nil, fmt.Errorf(`Invalid response: '%s'`, res.Status)
+	}
+	jsonbuf := getTransportJSONBuffer()
+	defer releaseTransportJSONBuffer(jsonbuf)
+	_, err = io.Copy(jsonbuf, io.LimitReader(res.Body, MaxResponseSize))
+	defer res.Body.Close()
+	if pdebug.Enabled {
+		if err != nil {
+			pdebug.Printf("failed to read respons buffer: %s", err)
+		} else {
+			pdebug.Printf("response buffer: %s", jsonbuf)
+		}
+	}
+	if err != nil {
+		return nil, err
+	}
+
+	var payload model.User
+	err = json.Unmarshal(jsonbuf.Bytes(), &payload)
+	if err != nil {
+		return nil, err
+	}
+	return &payload, nil
+}
+
 func (c *Client) LookupVenue(in *model.LookupVenueRequest) (ret *model.Venue, err error) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("client.LookupVenue").BindError(&err)

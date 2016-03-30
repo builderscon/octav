@@ -10,7 +10,7 @@ import (
 	"time"
 )
 
-const UserStdSelectColumns = "users.oid, users.eid, users.first_name, users.last_name, users.nickname, users.email, users.tshirt_size, users.created_on, users.modified_on"
+const UserStdSelectColumns = "users.oid, users.eid, users.auth_via, users.auth_user_id, users.avatar_url, users.first_name, users.last_name, users.nickname, users.email, users.tshirt_size, users.created_on, users.modified_on"
 const UserTable = "users"
 
 type UserList []User
@@ -18,7 +18,7 @@ type UserList []User
 func (u *User) Scan(scanner interface {
 	Scan(...interface{}) error
 }) error {
-	return scanner.Scan(&u.OID, &u.EID, &u.FirstName, &u.LastName, &u.Nickname, &u.Email, &u.TshirtSize, &u.CreatedOn, &u.ModifiedOn)
+	return scanner.Scan(&u.OID, &u.EID, &u.AuthVia, &u.AuthUserID, &u.AvatarURL, &u.FirstName, &u.LastName, &u.Nickname, &u.Email, &u.TshirtSize, &u.CreatedOn, &u.ModifiedOn)
 }
 
 func (u *User) LoadByEID(tx *Tx, eid string) error {
@@ -50,8 +50,8 @@ func (u *User) Create(tx *Tx, opts ...InsertOption) error {
 	}
 	stmt.WriteString("INTO ")
 	stmt.WriteString(UserTable)
-	stmt.WriteString(` (eid, first_name, last_name, nickname, email, tshirt_size, created_on, modified_on) VALUES (?, ?, ?, ?, ?, ?, ?, ?)`)
-	result, err := tx.Exec(stmt.String(), u.EID, u.FirstName, u.LastName, u.Nickname, u.Email, u.TshirtSize, u.CreatedOn, u.ModifiedOn)
+	stmt.WriteString(` (eid, auth_via, auth_user_id, avatar_url, first_name, last_name, nickname, email, tshirt_size, created_on, modified_on) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`)
+	result, err := tx.Exec(stmt.String(), u.EID, u.AuthVia, u.AuthUserID, u.AvatarURL, u.FirstName, u.LastName, u.Nickname, u.Email, u.TshirtSize, u.CreatedOn, u.ModifiedOn)
 	if err != nil {
 		return err
 	}
@@ -67,11 +67,11 @@ func (u *User) Create(tx *Tx, opts ...InsertOption) error {
 
 func (u User) Update(tx *Tx) error {
 	if u.OID != 0 {
-		_, err := tx.Exec(`UPDATE `+UserTable+` SET eid = ?, first_name = ?, last_name = ?, nickname = ?, email = ?, tshirt_size = ? WHERE oid = ?`, u.EID, u.FirstName, u.LastName, u.Nickname, u.Email, u.TshirtSize, u.OID)
+		_, err := tx.Exec(`UPDATE `+UserTable+` SET eid = ?, auth_via = ?, auth_user_id = ?, avatar_url = ?, first_name = ?, last_name = ?, nickname = ?, email = ?, tshirt_size = ? WHERE oid = ?`, u.EID, u.AuthVia, u.AuthUserID, u.AvatarURL, u.FirstName, u.LastName, u.Nickname, u.Email, u.TshirtSize, u.OID)
 		return err
 	}
 	if u.EID != "" {
-		_, err := tx.Exec(`UPDATE `+UserTable+` SET first_name = ?, last_name = ?, nickname = ?, email = ?, tshirt_size = ? WHERE eid = ?`, u.FirstName, u.LastName, u.Nickname, u.Email, u.TshirtSize, u.EID)
+		_, err := tx.Exec(`UPDATE `+UserTable+` SET auth_via = ?, auth_user_id = ?, avatar_url = ?, first_name = ?, last_name = ?, nickname = ?, email = ?, tshirt_size = ? WHERE eid = ?`, u.AuthVia, u.AuthUserID, u.AvatarURL, u.FirstName, u.LastName, u.Nickname, u.Email, u.TshirtSize, u.EID)
 		return err
 	}
 	return errors.New("either OID/EID must be filled")

@@ -411,14 +411,18 @@ func johndoe() *model.CreateUserRequest {
 	lf := tools.LocalizedFields{}
 	lf.Set("ja", "first_name", "ジョン")
 	lf.Set("ja", "last_name", "ドー")
-	return &model.CreateUserRequest{
-		FirstName:  "John",
-		LastName:   "Doe",
-		Nickname:   "enigma621",
-		Email:      "john.doe@example.com",
-		TshirtSize: "XL",
-		L10N:       lf,
+
+	r := model.CreateUserRequest{
+		Nickname: tools.UUID(),
 	}
+	r.AuthVia.Set("github")
+	r.AuthUserID.Set("123")
+	r.FirstName.Set("John")
+	r.LastName.Set("Doe")
+	r.Email.Set("john.doe@example.com")
+	r.TshirtSize.Set("XL")
+	r.L10N = lf
+	return &r
 }
 
 func TestCreateUser(t *testing.T) {

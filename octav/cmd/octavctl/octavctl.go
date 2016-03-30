@@ -985,6 +985,12 @@ func doRoomSubcmd(args cmdargs) int {
 
 func doUserCreate(args cmdargs) int {
 	fs := flag.NewFlagSet("octavctl user create", flag.ContinueOnError)
+	var auth_user_id string
+	fs.StringVar(&auth_user_id, "auth_user_id", "", "")
+	var auth_via string
+	fs.StringVar(&auth_via, "auth_via", "", "")
+	var avatar_url string
+	fs.StringVar(&avatar_url, "avatar_url", "", "")
 	var email string
 	fs.StringVar(&email, "email", "", "")
 	var first_name string
@@ -1001,6 +1007,15 @@ func doUserCreate(args cmdargs) int {
 	}
 
 	m := make(map[string]interface{})
+	if auth_user_id != "" {
+		m["auth_user_id"] = auth_user_id
+	}
+	if auth_via != "" {
+		m["auth_via"] = auth_via
+	}
+	if avatar_url != "" {
+		m["avatar_url"] = avatar_url
+	}
 	if email != "" {
 		m["email"] = email
 	}

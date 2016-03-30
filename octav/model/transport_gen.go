@@ -1578,11 +1578,28 @@ func (r *DeleteSessionRequest) Populate(m map[string]interface{}) error {
 
 func (r CreateUserRequest) collectMarshalData() map[string]interface{} {
 	m := make(map[string]interface{})
-	m["first_name"] = r.FirstName
-	m["last_name"] = r.LastName
+	if r.FirstName.Valid() {
+		m["first_name"] = r.FirstName.Value()
+	}
+	if r.LastName.Valid() {
+		m["last_name"] = r.LastName.Value()
+	}
 	m["nickname"] = r.Nickname
-	m["email"] = r.Email
-	m["tshirt_size"] = r.TshirtSize
+	if r.Email.Valid() {
+		m["email"] = r.Email.Value()
+	}
+	if r.AuthVia.Valid() {
+		m["auth_via"] = r.AuthVia.Value()
+	}
+	if r.AuthUserID.Valid() {
+		m["auth_user_id"] = r.AuthUserID.Value()
+	}
+	if r.AvatarURL.Valid() {
+		m["avatar_url"] = r.AvatarURL.Value()
+	}
+	if r.TshirtSize.Valid() {
+		m["tshirt_size"] = r.TshirtSize.Value()
+	}
 	return m
 }
 
@@ -1614,22 +1631,16 @@ func (r *CreateUserRequest) UnmarshalJSON(data []byte) error {
 
 func (r *CreateUserRequest) Populate(m map[string]interface{}) error {
 	if jv, ok := m["first_name"]; ok {
-		switch jv.(type) {
-		case string:
-			r.FirstName = jv.(string)
-			delete(m, "first_name")
-		default:
-			return ErrInvalidJSONFieldType{Field: "first_name"}
+		if err := r.FirstName.Set(jv); err != nil {
+			return errors.New("set field FirstName failed: " + err.Error())
 		}
+		delete(m, "first_name")
 	}
 	if jv, ok := m["last_name"]; ok {
-		switch jv.(type) {
-		case string:
-			r.LastName = jv.(string)
-			delete(m, "last_name")
-		default:
-			return ErrInvalidJSONFieldType{Field: "last_name"}
+		if err := r.LastName.Set(jv); err != nil {
+			return errors.New("set field LastName failed: " + err.Error())
 		}
+		delete(m, "last_name")
 	}
 	if jv, ok := m["nickname"]; ok {
 		switch jv.(type) {
@@ -1641,24 +1652,36 @@ func (r *CreateUserRequest) Populate(m map[string]interface{}) error {
 		}
 	}
 	if jv, ok := m["email"]; ok {
-		switch jv.(type) {
-		case string:
-			r.Email = jv.(string)
-			delete(m, "email")
-		default:
-			return ErrInvalidJSONFieldType{Field: "email"}
+		if err := r.Email.Set(jv); err != nil {
+			return errors.New("set field Email failed: " + err.Error())
 		}
+		delete(m, "email")
+	}
+	if jv, ok := m["auth_via"]; ok {
+		if err := r.AuthVia.Set(jv); err != nil {
+			return errors.New("set field AuthVia failed: " + err.Error())
+		}
+		delete(m, "auth_via")
+	}
+	if jv, ok := m["auth_user_id"]; ok {
+		if err := r.AuthUserID.Set(jv); err != nil {
+			return errors.New("set field AuthUserID failed: " + err.Error())
+		}
+		delete(m, "auth_user_id")
+	}
+	if jv, ok := m["avatar_url"]; ok {
+		if err := r.AvatarURL.Set(jv); err != nil {
+			return errors.New("set field AvatarURL failed: " + err.Error())
+		}
+		delete(m, "avatar_url")
 	}
 	if jv, ok := m["tshirt_size"]; ok {
-		switch jv.(type) {
-		case string:
-			r.TshirtSize = jv.(string)
-			delete(m, "tshirt_size")
-		default:
-			return ErrInvalidJSONFieldType{Field: "tshirt_size"}
+		if err := r.TshirtSize.Set(jv); err != nil {
+			return errors.New("set field TshirtSize failed: " + err.Error())
 		}
+		delete(m, "tshirt_size")
 	}
-	if err := tools.ExtractL10NFields(m, &r.L10N, []string{"first_name", "last_name", "nickname", "email", "tshirt_size"}); err != nil {
+	if err := tools.ExtractL10NFields(m, &r.L10N, []string{"first_name", "last_name", "nickname", "email", "auth_via", "auth_user_id", "avatar_url", "tshirt_size"}); err != nil {
 		return err
 	}
 	return nil
@@ -1666,36 +1689,30 @@ func (r *CreateUserRequest) Populate(m map[string]interface{}) error {
 
 func (r *CreateUserRequest) GetPropNames() ([]string, error) {
 	l, _ := r.L10N.GetPropNames()
-	return append(l, "first_name", "last_name", "nickname", "email", "tshirt_size"), nil
+	return append(l, "first_name", "last_name", "nickname", "email", "auth_via", "auth_user_id", "avatar_url", "tshirt_size"), nil
 }
 
 func (r *CreateUserRequest) SetPropValue(s string, v interface{}) error {
 	switch s {
 	case "first_name":
-		if jv, ok := v.(string); ok {
-			r.FirstName = jv
-			return nil
-		}
+		return r.FirstName.Set(v)
 	case "last_name":
-		if jv, ok := v.(string); ok {
-			r.LastName = jv
-			return nil
-		}
+		return r.LastName.Set(v)
 	case "nickname":
 		if jv, ok := v.(string); ok {
 			r.Nickname = jv
 			return nil
 		}
 	case "email":
-		if jv, ok := v.(string); ok {
-			r.Email = jv
-			return nil
-		}
+		return r.Email.Set(v)
+	case "auth_via":
+		return r.AuthVia.Set(v)
+	case "auth_user_id":
+		return r.AuthUserID.Set(v)
+	case "avatar_url":
+		return r.AvatarURL.Set(v)
 	case "tshirt_size":
-		if jv, ok := v.(string); ok {
-			r.TshirtSize = jv
-			return nil
-		}
+		return r.TshirtSize.Set(v)
 	default:
 		return errors.New("unknown column '" + s + "'")
 	}
@@ -1716,6 +1733,15 @@ func (r UpdateUserRequest) collectMarshalData() map[string]interface{} {
 	}
 	if r.Email.Valid() {
 		m["email"] = r.Email.Value()
+	}
+	if r.AuthVia.Valid() {
+		m["auth_via"] = r.AuthVia.Value()
+	}
+	if r.AuthUserID.Valid() {
+		m["auth_user_id"] = r.AuthUserID.Value()
+	}
+	if r.AvatarURL.Valid() {
+		m["avatar_url"] = r.AvatarURL.Value()
 	}
 	if r.TshirtSize.Valid() {
 		m["tshirt_size"] = r.TshirtSize.Value()
@@ -1783,13 +1809,31 @@ func (r *UpdateUserRequest) Populate(m map[string]interface{}) error {
 		}
 		delete(m, "email")
 	}
+	if jv, ok := m["auth_via"]; ok {
+		if err := r.AuthVia.Set(jv); err != nil {
+			return errors.New("set field AuthVia failed: " + err.Error())
+		}
+		delete(m, "auth_via")
+	}
+	if jv, ok := m["auth_user_id"]; ok {
+		if err := r.AuthUserID.Set(jv); err != nil {
+			return errors.New("set field AuthUserID failed: " + err.Error())
+		}
+		delete(m, "auth_user_id")
+	}
+	if jv, ok := m["avatar_url"]; ok {
+		if err := r.AvatarURL.Set(jv); err != nil {
+			return errors.New("set field AvatarURL failed: " + err.Error())
+		}
+		delete(m, "avatar_url")
+	}
 	if jv, ok := m["tshirt_size"]; ok {
 		if err := r.TshirtSize.Set(jv); err != nil {
 			return errors.New("set field TshirtSize failed: " + err.Error())
 		}
 		delete(m, "tshirt_size")
 	}
-	if err := tools.ExtractL10NFields(m, &r.L10N, []string{"id", "first_name", "last_name", "nickname", "email", "tshirt_size"}); err != nil {
+	if err := tools.ExtractL10NFields(m, &r.L10N, []string{"id", "first_name", "last_name", "nickname", "email", "auth_via", "auth_user_id", "avatar_url", "tshirt_size"}); err != nil {
 		return err
 	}
 	return nil
@@ -1797,7 +1841,7 @@ func (r *UpdateUserRequest) Populate(m map[string]interface{}) error {
 
 func (r *UpdateUserRequest) GetPropNames() ([]string, error) {
 	l, _ := r.L10N.GetPropNames()
-	return append(l, "id", "first_name", "last_name", "nickname", "email", "tshirt_size"), nil
+	return append(l, "id", "first_name", "last_name", "nickname", "email", "auth_via", "auth_user_id", "avatar_url", "tshirt_size"), nil
 }
 
 func (r *UpdateUserRequest) SetPropValue(s string, v interface{}) error {
@@ -1815,6 +1859,12 @@ func (r *UpdateUserRequest) SetPropValue(s string, v interface{}) error {
 		return r.Nickname.Set(v)
 	case "email":
 		return r.Email.Set(v)
+	case "auth_via":
+		return r.AuthVia.Set(v)
+	case "auth_user_id":
+		return r.AuthUserID.Set(v)
+	case "avatar_url":
+		return r.AvatarURL.Set(v)
 	case "tshirt_size":
 		return r.TshirtSize.Set(v)
 	default:

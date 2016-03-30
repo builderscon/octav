@@ -87,11 +87,14 @@ type Session struct {
 type User struct {
 	OID        int64
 	EID        string
-	FirstName  string
-	LastName   string
+	AuthVia    sql.NullString
+	AuthUserID sql.NullString
+	AvatarURL  sql.NullString
+	FirstName  sql.NullString
+	LastName   sql.NullString
 	Nickname   string
-	Email      string
-	TshirtSize string
+	Email      sql.NullString
+	TshirtSize sql.NullString
 	CreatedOn  time.Time
 	ModifiedOn NullTime
 }

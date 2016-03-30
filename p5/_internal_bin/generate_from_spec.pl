@@ -99,5 +99,5 @@ print $fh $buf;
 sub camelize_title {
     my $s = shift;
     $s =~ s/[\W+]([\w])/_$1/g;
-    return lcfirst($s);
+    return lc($s);
 }

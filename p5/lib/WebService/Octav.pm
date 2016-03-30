@@ -26,7 +26,7 @@ sub last_error {
 
 sub create_user {
     my ($self, $payload) = @_;
-    for my $required (qw(first_name last_name nickname email tshirt_size)) {
+    for my $required (qw(nickname auth_via auth_user_id)) {
         if (!$payload->{$required}) {
             die qq|property "$required" must be provided|;
         }
@@ -49,6 +49,23 @@ sub lookup_user {
         }
     }
     my $uri = URI->new($self->{endpoint} . qq|/v1/user/lookup|);
+    $uri->query_form($payload);
+    my $res = $self->{user_agent}->get($uri);
+    if (!$res->is_success) {
+        $self->{last_error} = $res->status_line;
+        return;
+    }
+    return JSON::decode_json($res->content);
+}
+
+sub lookup_user_by_auth_user_id {
+    my ($self, $payload) = @_;
+    for my $required (qw(auth_via auth_user_id)) {
+        if (!$payload->{$required}) {
+            die qq|property "$required" must be provided|;
+        }
+    }
+    my $uri = URI->new($self->{endpoint} . qq|/v1/user/lookup_by_auth_user_id|);
     $uri->query_form($payload);
     my $res = $self->{user_agent}->get($uri);
     if (!$res->is_success) {

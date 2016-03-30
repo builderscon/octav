@@ -75,11 +75,14 @@ type TagString string
 // +model
 type User struct {
 	ID         string `json:"id"`
-	FirstName  string `json:"first_name" l10n:"true"`
-	LastName   string `json:"last_name" l10n:"true"`
+	AuthVia    string `json:"auth_via,omitempty"`
+	AuthUserID string `json:"auth_user_id,omitempty"`
+	AvatarURL  string `json:"avatar_url,omitempty"`
+	FirstName  string `json:"first_name,omitempty" l10n:"true"`
+	LastName   string `json:"last_name,omitempty" l10n:"true"`
 	Nickname   string `json:"nickname"`
-	Email      string `json:"email"`
-	TshirtSize string `json:"tshirt_size"`
+	Email      string `json:"email,omitempty"`
+	TshirtSize string `json:"tshirt_size,omitempty"`
 }
 type UserList []User
 
@@ -278,11 +281,14 @@ type DeleteSessionRequest struct {
 
 // +transport
 type CreateUserRequest struct {
-	FirstName  string                `json:"first_name" l18n:"true"`
-	LastName   string                `json:"last_name" l18n:"true"`
+	FirstName  jsval.MaybeString     `json:"first_name,omitempty" l18n:"true"`
+	LastName   jsval.MaybeString     `json:"last_name,omitempty" l18n:"true"`
 	Nickname   string                `json:"nickname"`
-	Email      string                `json:"email"`
-	TshirtSize string                `json:"tshirt_size"`
+	Email      jsval.MaybeString     `json:"email,omitempty"`
+	AuthVia    jsval.MaybeString     `json:"auth_via,omitempty"`
+	AuthUserID jsval.MaybeString     `json:"auth_user_id,omitempty"`
+	AvatarURL  jsval.MaybeString     `json:"avatar_url,omitempty"`
+	TshirtSize jsval.MaybeString     `json:"tshirt_size,omitempty"`
 	L10N       tools.LocalizedFields `json:"-"`
 }
 
@@ -293,6 +299,9 @@ type UpdateUserRequest struct {
 	LastName   jsval.MaybeString     `json:"last_name,omitempty"`
 	Nickname   jsval.MaybeString     `json:"nickname,omitempty"`
 	Email      jsval.MaybeString     `json:"email,omitempty"`
+	AuthVia    jsval.MaybeString     `json:"auth_via,omitempty"`
+	AuthUserID jsval.MaybeString     `json:"auth_user_id,omitempty"`
+	AvatarURL  jsval.MaybeString     `json:"avatar_url,omitempty"`
 	TshirtSize jsval.MaybeString     `json:"tshirt_size,omitempty"`
 	L10N       tools.LocalizedFields `json:"-"`
 }
@@ -301,6 +310,13 @@ type UpdateUserRequest struct {
 type LookupUserRequest struct {
 	ID   string            `json:"id" urlenc:"id"`
 	Lang jsval.MaybeString `json:"lang,omitempty" urlenc:"lang,omitempty,string"`
+}
+
+// +transport
+type LookupUserByAuthUserIDRequest struct {
+	AuthVia    string            `json:"auth_via" urlenc:"auth_via"`
+	AuthUserID string            `json:"auth_user_id" urlenc:"auth_user_id"`
+	Lang       jsval.MaybeString `json:"lang,omitempty" urlenc:"lang,omitempty,string"`
 }
 
 // +transport
