@@ -159,6 +159,38 @@ func httpAddConferenceDates(w http.ResponseWriter, r *http.Request) {
 	doAddConferenceDates(NewContext(r), w, r, payload)
 }
 
+func httpAddConferenceVenue(w http.ResponseWriter, r *http.Request) {
+	if pdebug.Enabled {
+		g := pdebug.Marker("httpAddConferenceVenue")
+		defer g.End()
+	}
+	if strings.ToLower(r.Method) != `post` {
+		httpError(w, `Method was `+r.Method+`, expected post`, http.StatusNotFound, nil)
+		return
+	}
+
+	var payload model.AddConferenceVenueRequest
+	jsonbuf := getTransportJSONBuffer()
+	defer releaseTransportJSONBuffer(jsonbuf)
+	if _, err := io.Copy(jsonbuf, io.LimitReader(r.Body, MaxPostSize)); err != nil {
+		httpError(w, `Failed to read request body`, http.StatusInternalServerError, err)
+	}
+	defer r.Body.Close()
+	if pdebug.Enabled {
+		pdebug.Printf(`-----> %s`, jsonbuf.Bytes())
+	}
+	if err := json.Unmarshal(jsonbuf.Bytes(), &payload); err != nil {
+		httpError(w, `Invalid JSON input`, http.StatusInternalServerError, err)
+		return
+	}
+
+	if err := validator.HTTPAddConferenceVenueRequest.Validate(&payload); err != nil {
+		httpError(w, `Invalid input (validation failed)`, http.StatusInternalServerError, err)
+		return
+	}
+	doAddConferenceVenue(NewContext(r), w, r, payload)
+}
+
 func httpCreateConference(w http.ResponseWriter, r *http.Request) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("httpCreateConference")
@@ -413,6 +445,38 @@ func httpDeleteConferenceDates(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	doDeleteConferenceDates(NewContext(r), w, r, payload)
+}
+
+func httpDeleteConferenceVenue(w http.ResponseWriter, r *http.Request) {
+	if pdebug.Enabled {
+		g := pdebug.Marker("httpDeleteConferenceVenue")
+		defer g.End()
+	}
+	if strings.ToLower(r.Method) != `post` {
+		httpError(w, `Method was `+r.Method+`, expected post`, http.StatusNotFound, nil)
+		return
+	}
+
+	var payload model.DeleteConferenceVenueRequest
+	jsonbuf := getTransportJSONBuffer()
+	defer releaseTransportJSONBuffer(jsonbuf)
+	if _, err := io.Copy(jsonbuf, io.LimitReader(r.Body, MaxPostSize)); err != nil {
+		httpError(w, `Failed to read request body`, http.StatusInternalServerError, err)
+	}
+	defer r.Body.Close()
+	if pdebug.Enabled {
+		pdebug.Printf(`-----> %s`, jsonbuf.Bytes())
+	}
+	if err := json.Unmarshal(jsonbuf.Bytes(), &payload); err != nil {
+		httpError(w, `Invalid JSON input`, http.StatusInternalServerError, err)
+		return
+	}
+
+	if err := validator.HTTPDeleteConferenceVenueRequest.Validate(&payload); err != nil {
+		httpError(w, `Invalid input (validation failed)`, http.StatusInternalServerError, err)
+		return
+	}
+	doDeleteConferenceVenue(NewContext(r), w, r, payload)
 }
 
 func httpDeleteRoom(w http.ResponseWriter, r *http.Request) {
@@ -967,6 +1031,8 @@ func (s *Server) SetupRoutes() {
 	r.HandleFunc(`/v1/conference/list`, httpListConference)
 	r.HandleFunc(`/v1/conference/lookup`, httpLookupConference)
 	r.HandleFunc(`/v1/conference/update`, httpUpdateConference)
+	r.HandleFunc(`/v1/conference/venue/add`, httpAddConferenceVenue)
+	r.HandleFunc(`/v1/conference/venue/delete`, httpDeleteConferenceVenue)
 	r.HandleFunc(`/v1/room/create`, httpCreateRoom)
 	r.HandleFunc(`/v1/room/delete`, httpDeleteRoom)
 	r.HandleFunc(`/v1/room/list`, httpListRoom)

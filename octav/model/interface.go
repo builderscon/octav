@@ -27,6 +27,7 @@ type Conference struct {
 	Slug           string             `json:"slug"`
 	Dates          ConferenceDateList `json:"dates,omitempty"`
 	Administrators UserList           `json:"administrators,omitempty"`
+	Venues         VenueList          `json:"venues,omitempty"`
 }
 type ConferenceList []Conference
 
@@ -157,6 +158,12 @@ type AddConferenceAdminRequest struct {
 }
 
 // +transport
+type AddConferenceVenueRequest struct {
+	ConferenceID string `json:"conference_id"`
+	VenueID       string `json:"venue_id"`
+}
+
+// +transport
 type DeleteConferenceDatesRequest struct {
 	ConferenceID string   `json:"conference_id"`
 	Dates        DateList `json:"dates" extract:"true"`
@@ -166,6 +173,12 @@ type DeleteConferenceDatesRequest struct {
 type DeleteConferenceAdminRequest struct {
 	ConferenceID string `json:"conference_id"`
 	UserID       string `json:"user_id"`
+}
+
+// +transport
+type DeleteConferenceVenueRequest struct {
+	ConferenceID string `json:"conference_id"`
+	VenueID       string `json:"venue_id"`
 }
 
 // +transport

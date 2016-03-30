@@ -69,7 +69,19 @@ CREATE TABLE conference_administrators (
     created_on DATETIME NOT NULL,
     modified_on TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     FOREIGN KEY (conference_id) REFERENCES conferences(eid) ON DELETE CASCADE,
+    FOREIGN KEY (user_id) REFERENCES users(eid) ON DELETE CASCADE,
     UNIQUE KEY(conference_id, user_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE conference_venues (
+    oid INTEGER UNSIGNED NOT NULL PRIMARY KEY AUTO_INCREMENT,
+    conference_id CHAR(64) CHARACTER SET latin1 NOT NULL,
+    venue_id CHAR(64) CHARACTER SET latin1 NOT NULL,
+    created_on DATETIME NOT NULL,
+    modified_on TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (conference_id) REFERENCES conferences(eid) ON DELETE CASCADE,
+    FOREIGN KEY (venue_id) REFERENCES venues(eid) ON DELETE CASCADE,
+    UNIQUE KEY(conference_id, venue_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 CREATE TABLE sessions (

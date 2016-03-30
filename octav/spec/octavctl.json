@@ -25,6 +25,10 @@
         {
           "name": "admin",
           "actions": ["add", "delete"]
+        },
+        {
+          "name": "venue",
+          "actions": ["add", "delete"]
         }
       ]
     },

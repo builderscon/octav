@@ -378,6 +378,61 @@ func (r *AddConferenceAdminRequest) Populate(m map[string]interface{}) error {
 	return nil
 }
 
+func (r AddConferenceVenueRequest) collectMarshalData() map[string]interface{} {
+	m := make(map[string]interface{})
+	m["conference_id"] = r.ConferenceID
+	m["venue_id"] = r.VenueID
+	return m
+}
+
+func (r AddConferenceVenueRequest) MarshalJSON() ([]byte, error) {
+	m := r.collectMarshalData()
+	buf, err := json.Marshal(m)
+	if err != nil {
+		return nil, err
+	}
+	return buf, nil
+}
+
+func (r AddConferenceVenueRequest) MarshalURL() ([]byte, error) {
+	m := r.collectMarshalData()
+	buf, err := urlenc.Marshal(m)
+	if err != nil {
+		return nil, err
+	}
+	return buf, nil
+}
+
+func (r *AddConferenceVenueRequest) UnmarshalJSON(data []byte) error {
+	m := make(map[string]interface{})
+	if err := json.Unmarshal(data, &m); err != nil {
+		return err
+	}
+	return r.Populate(m)
+}
+
+func (r *AddConferenceVenueRequest) Populate(m map[string]interface{}) error {
+	if jv, ok := m["conference_id"]; ok {
+		switch jv.(type) {
+		case string:
+			r.ConferenceID = jv.(string)
+			delete(m, "conference_id")
+		default:
+			return ErrInvalidJSONFieldType{Field: "conference_id"}
+		}
+	}
+	if jv, ok := m["venue_id"]; ok {
+		switch jv.(type) {
+		case string:
+			r.VenueID = jv.(string)
+			delete(m, "venue_id")
+		default:
+			return ErrInvalidJSONFieldType{Field: "venue_id"}
+		}
+	}
+	return nil
+}
+
 func (r DeleteConferenceDatesRequest) collectMarshalData() map[string]interface{} {
 	m := make(map[string]interface{})
 	m["conference_id"] = r.ConferenceID
@@ -480,6 +535,61 @@ func (r *DeleteConferenceAdminRequest) Populate(m map[string]interface{}) error 
 			delete(m, "user_id")
 		default:
 			return ErrInvalidJSONFieldType{Field: "user_id"}
+		}
+	}
+	return nil
+}
+
+func (r DeleteConferenceVenueRequest) collectMarshalData() map[string]interface{} {
+	m := make(map[string]interface{})
+	m["conference_id"] = r.ConferenceID
+	m["venue_id"] = r.VenueID
+	return m
+}
+
+func (r DeleteConferenceVenueRequest) MarshalJSON() ([]byte, error) {
+	m := r.collectMarshalData()
+	buf, err := json.Marshal(m)
+	if err != nil {
+		return nil, err
+	}
+	return buf, nil
+}
+
+func (r DeleteConferenceVenueRequest) MarshalURL() ([]byte, error) {
+	m := r.collectMarshalData()
+	buf, err := urlenc.Marshal(m)
+	if err != nil {
+		return nil, err
+	}
+	return buf, nil
+}
+
+func (r *DeleteConferenceVenueRequest) UnmarshalJSON(data []byte) error {
+	m := make(map[string]interface{})
+	if err := json.Unmarshal(data, &m); err != nil {
+		return err
+	}
+	return r.Populate(m)
+}
+
+func (r *DeleteConferenceVenueRequest) Populate(m map[string]interface{}) error {
+	if jv, ok := m["conference_id"]; ok {
+		switch jv.(type) {
+		case string:
+			r.ConferenceID = jv.(string)
+			delete(m, "conference_id")
+		default:
+			return ErrInvalidJSONFieldType{Field: "conference_id"}
+		}
+	}
+	if jv, ok := m["venue_id"]; ok {
+		switch jv.(type) {
+		case string:
+			r.VenueID = jv.(string)
+			delete(m, "venue_id")
+		default:
+			return ErrInvalidJSONFieldType{Field: "venue_id"}
 		}
 	}
 	return nil
@@ -1916,6 +2026,70 @@ func (r *LookupUserRequest) Populate(m map[string]interface{}) error {
 			delete(m, "id")
 		default:
 			return ErrInvalidJSONFieldType{Field: "id"}
+		}
+	}
+	if jv, ok := m["lang"]; ok {
+		if err := r.Lang.Set(jv); err != nil {
+			return errors.New("set field Lang failed: " + err.Error())
+		}
+		delete(m, "lang")
+	}
+	return nil
+}
+
+func (r LookupUserByAuthUserIDRequest) collectMarshalData() map[string]interface{} {
+	m := make(map[string]interface{})
+	m["auth_via"] = r.AuthVia
+	m["auth_user_id"] = r.AuthUserID
+	if r.Lang.Valid() {
+		m["lang"] = r.Lang.Value()
+	}
+	return m
+}
+
+func (r LookupUserByAuthUserIDRequest) MarshalJSON() ([]byte, error) {
+	m := r.collectMarshalData()
+	buf, err := json.Marshal(m)
+	if err != nil {
+		return nil, err
+	}
+	return buf, nil
+}
+
+func (r LookupUserByAuthUserIDRequest) MarshalURL() ([]byte, error) {
+	m := r.collectMarshalData()
+	buf, err := urlenc.Marshal(m)
+	if err != nil {
+		return nil, err
+	}
+	return buf, nil
+}
+
+func (r *LookupUserByAuthUserIDRequest) UnmarshalJSON(data []byte) error {
+	m := make(map[string]interface{})
+	if err := json.Unmarshal(data, &m); err != nil {
+		return err
+	}
+	return r.Populate(m)
+}
+
+func (r *LookupUserByAuthUserIDRequest) Populate(m map[string]interface{}) error {
+	if jv, ok := m["auth_via"]; ok {
+		switch jv.(type) {
+		case string:
+			r.AuthVia = jv.(string)
+			delete(m, "auth_via")
+		default:
+			return ErrInvalidJSONFieldType{Field: "auth_via"}
+		}
+	}
+	if jv, ok := m["auth_user_id"]; ok {
+		switch jv.(type) {
+		case string:
+			r.AuthUserID = jv.(string)
+			delete(m, "auth_user_id")
+		default:
+			return ErrInvalidJSONFieldType{Field: "auth_user_id"}
 		}
 	}
 	if jv, ok := m["lang"]; ok {

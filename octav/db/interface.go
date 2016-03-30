@@ -42,6 +42,15 @@ type ConferenceAdministrator struct {
 	ModifiedOn   NullTime
 }
 
+// +DB tablename:"conference_venues"
+type ConferenceVenue struct {
+	OID          int64 // OID is the internal id, used for sorting and what not
+	ConferenceID string
+	VenueID      string
+	CreatedOn    time.Time
+	ModifiedOn   NullTime
+}
+
 // +DB tablename:"rooms"
 type Room struct {
 	OID        int64  // intenral id, used for sorting and what not

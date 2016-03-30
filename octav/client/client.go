@@ -104,6 +104,34 @@ func (c *Client) AddConferenceDates(in *model.AddConferenceDatesRequest) (err er
 	return nil
 }
 
+func (c *Client) AddConferenceVenue(in *model.AddConferenceVenueRequest) (err error) {
+	if pdebug.Enabled {
+		g := pdebug.Marker("client.AddConferenceVenue").BindError(&err)
+		defer g.End()
+	}
+	u, err := url.Parse(c.Endpoint + "/v1/conference/venue/add")
+	if err != nil {
+		return err
+	}
+	buf := bytes.Buffer{}
+	err = json.NewEncoder(&buf).Encode(in)
+	if err != nil {
+		return err
+	}
+	if pdebug.Enabled {
+		pdebug.Printf("POST to %s", u.String())
+		pdebug.Printf("%s", buf.String())
+	}
+	res, err := c.Client.Post(u.String(), "application/json", &buf)
+	if err != nil {
+		return err
+	}
+	if res.StatusCode != http.StatusOK {
+		return fmt.Errorf(`Invalid response: '%s'`, res.Status)
+	}
+	return nil
+}
+
 func (c *Client) CreateConference(in *model.CreateConferenceRequest) (ret *model.Conference, err error) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("client.CreateConference").BindError(&err)
@@ -406,6 +434,34 @@ func (c *Client) DeleteConferenceDates(in *model.DeleteConferenceDatesRequest) (
 		defer g.End()
 	}
 	u, err := url.Parse(c.Endpoint + "/v1/conference/dates/delete")
+	if err != nil {
+		return err
+	}
+	buf := bytes.Buffer{}
+	err = json.NewEncoder(&buf).Encode(in)
+	if err != nil {
+		return err
+	}
+	if pdebug.Enabled {
+		pdebug.Printf("POST to %s", u.String())
+		pdebug.Printf("%s", buf.String())
+	}
+	res, err := c.Client.Post(u.String(), "application/json", &buf)
+	if err != nil {
+		return err
+	}
+	if res.StatusCode != http.StatusOK {
+		return fmt.Errorf(`Invalid response: '%s'`, res.Status)
+	}
+	return nil
+}
+
+func (c *Client) DeleteConferenceVenue(in *model.DeleteConferenceVenueRequest) (err error) {
+	if pdebug.Enabled {
+		g := pdebug.Marker("client.DeleteConferenceVenue").BindError(&err)
+		defer g.End()
+	}
+	u, err := url.Parse(c.Endpoint + "/v1/conference/venue/delete")
 	if err != nil {
 		return err
 	}
