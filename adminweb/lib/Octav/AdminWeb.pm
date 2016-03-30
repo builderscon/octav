@@ -53,6 +53,9 @@ sub startup {
                 "client_id" => load_from_file($ENV{OCTAV_GITHUB_CLIENT_ID}),
                 "client_secret" => load_from_file($ENV{OCTAV_GITHUB_CLIENT_SECRET}),
             },
+            "googlemaps" => {
+                "api_key" => load_from_file($ENV{OCTAV_GOOGLE_MAPS_API_KEY}),
+            },
         };
         return $config;
     });
