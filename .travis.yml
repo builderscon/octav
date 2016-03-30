@@ -4,10 +4,12 @@ go:
 services:
   - mysql
 env:
-  - DIR=octav
+  -
+  - DIR=$TRAVIS_BUILD_DIR/octav
 install:
   - echo "skipping install step"
 script:
   - cd $DIR && ./travis.sh
 after_failure:
-  - echo "Checking out $DIR/debug.out" && test -e "$DIR/debug.out" && cat "$DIR/debug.out"
+  - echo "Checking out $DIR/debug.out"
+  - test -e "$DIR/debug.out" && cat "$DIR/debug.out"
