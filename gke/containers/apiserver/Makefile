@@ -20,7 +20,7 @@ $(CURDIR)/octav: $(SRC_FILES)
 $(CURDIR)/octav-debug: $(SRC_FILES)
 	@echo "Building octav-debug"
 	cd $(OCTAV_DIR) ; make GOOS=linux GOARCH=amd64 octav-debug; cd $(CURDIR)
-	@cp $(OCTAV_DIR)/_bin/linux/amd64/octav-debug .
+	@mv $(OCTAV_DIR)/_bin/linux/amd64/octav-debug .
 
 build-octav: $(CURDIR)/octav
 build-octav-debug: $(CURDIR)/octav-debug

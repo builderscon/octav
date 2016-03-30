@@ -12,7 +12,7 @@ $(CURDIR)/cpanfile:
 	cp $(ADMINWEB_DIR)/cpanfile $(CURDIR)/cpanfile
 
 $(CURDIR)/adminweb.tar.gz: $(wildcard $(ADMINWEB_DIR)/**/*)
-	tar -C $(ADMINWEB_DIR)/.. --exclude adminweb/local -cvzf $(CURDIR)/adminweb.tar.gz adminweb
+	tar -C $(ADMINWEB_DIR)/.. --exclude adminweb/local --exclude adminweb/tmp -cvzf $(CURDIR)/adminweb.tar.gz adminweb
 
 $(CURDIR)/Octav.pm: $(TOPDIR)/p5/lib/WebService/Octav.pm
 	cp  $^ .
@@ -35,3 +35,6 @@ clean-docker-images:
 	$(MAKE) -C $(TOPDIR) clean-docker-images
 
 clean: clean-docker-images
+
+run:
+	@docker run --rm -p 5000:5000 octav/$(APPNAME) 

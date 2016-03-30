@@ -1,0 +1,14 @@
+[% WRAPPER "layout/main.html.tx" %]
+
+<div class="row">
+  <div class="input-field s12">
+    <ul class="collection with-header">
+      <li class="collection-header"><h4>Users</h4></li>
+[% FOREACH user IN users %]
+      <li class="collection-item"><a href="/user/lookup?id=[% user.id %]">[% user.nickname %]</a></li>
+[% END %]
+    </ul>
+  </div>
+</div>
+
+[% END %]
