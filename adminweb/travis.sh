@@ -5,7 +5,11 @@ set -e
 echo "====> perl version"
 perl --version
 
-cpanm --self-upgrade
+export PATH=local/bin:$PATH
+mkdir -p local/bin
+curl -L http://cpanmin.us > local/bin/cpanm
+chmod +x local/bin/cpanm
+
 echo "====> cpanm version"
 cpanm --version
 echo "====> Installing dependencies..."
