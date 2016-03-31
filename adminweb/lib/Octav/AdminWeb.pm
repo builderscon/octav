@@ -96,11 +96,13 @@ sub startup {
         if ($endpoint !~ m{^/auth(?:/|$)}) {
             my $session = $c->plack_session;
             if (! $session) {
+                warn "Access to protected resource '$endpoint' detected, but no session found";
                 $c->redirect_to($c->url_for("/auth"));
                 return
             }
 
             if (! $session->{user}) {
+                warn "Access to protected resource '$endpoint' detected, but no user information found in session";
                 $c->redirect_to($c->url_for("/auth"));
                 return
             }

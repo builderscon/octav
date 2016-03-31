@@ -2,7 +2,6 @@
 
 <h4>Conference "[% conference.title %]"</h4>
 
-<div class="row">
 <form action="/conference/update" method="POST" class="col s12">
 <div class="row">
   <div class="input-field col s12">
@@ -49,6 +48,25 @@
   </button>
 </div>
 </form>
+
+<h5>Administrators</h5>
+
+<div class="row">
+  <div class="collection col s12">
+[% FOREACH user IN conference.administrators %]
+    <a class="collection-item" href="/user/lookup?id=[% user.id %]">[% user.nickname %]</a>
+[% END %]
+  </div>
+</div>
+
+<h5>Venues</h5>
+
+<div class="row">
+  <div class="collection col s12">
+[% FOREACH venue IN conference.venues %]
+    <a class="collection-item" href="/venue/lookup?id=[% venue.id %]">[% venue.name %]</a>
+[% END %]
+  </div>
 </div>
 
 [% END %]

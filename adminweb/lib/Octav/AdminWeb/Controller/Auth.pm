@@ -14,13 +14,16 @@ sub index {
 sub github {
     my $self = shift;
 
+    my $log = $self->app->log;
     my $github_config = $self->config->{github};
     my $uri = URI->new($github_config->{auth_endpoint});
     my $redirect_uri = "http://admin.builderscon.io:5000/auth/github_cb";
-    my $state = create_uuid(UUID_RANDOM);
+    my $state = unpack("H*", create_uuid(UUID_RANDOM));
     my $session = $self->plack_session;
     $session->{"github_state"} = $state;
     $session->{"github_state_expires"} = time() + 120;
+
+    $log->debug("Saving github_state = $state");
     $uri->query_form(
         client_id    => $github_config->{client_id},
         redirect_uri => $redirect_uri,
@@ -32,12 +35,19 @@ sub github {
 
 sub github_cb {
     my $self = shift;
+
+    my $log = $self->app->log;
+
+    $log->debug("in github_cb");
+
     my $code = $self->param("code");
     my $state = $self->param("state");
     my $github_config = $self->config->{github};
 
     my $session = $self->plack_session;
-    if (delete $session->{github_state} ne $state) {
+    my $github_state = delete $session->{github_state};
+    if (!$github_state || $github_state ne $state) {
+        $log->debug("No github_state key in session");
         $self->redirect_to($self->url_for("/auth"));
         return;
     }
@@ -112,6 +122,7 @@ sub github_cb {
         $registered = $client->create_user(\%data);
     }
 
+    $log->debug("Setting session->{user}");
     $session->{user} = $registered;
 
     $self->redirect_to($self->url_for("/user/dashboard"));
