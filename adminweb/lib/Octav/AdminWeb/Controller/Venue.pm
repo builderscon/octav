@@ -2,10 +2,6 @@ package Octav::AdminWeb::Controller::Venue;
 use Mojo::Base qw(Mojolicious::Controller);
 use JSON::Types ();
 
-sub dashboard {
-    my $self = shift;
-}
-
 sub list {
     my $self = shift;
 
