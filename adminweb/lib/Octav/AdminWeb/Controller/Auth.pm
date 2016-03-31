@@ -11,6 +11,12 @@ sub index {
     $self->render(tx => "auth/index");
 }
 
+sub logout {
+    my $self = shift;
+    delete $self->plack_session->{user};
+    $self->redirect_to("/");
+}
+
 sub github {
     my $self = shift;
 

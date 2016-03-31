@@ -16,13 +16,21 @@
     <a href="/" class="brand-logo center">builderscon admin web</a>
     <a href="#" data-activates="nav-mobile" class="button-collapse"><i class="material-icons">menu</i></a>
     <ul class="right hide-on-med-and-down">
+[% IF ui_user %]
+      <li><a href="/auth/logout">Sign Out</a></li>
+[% ELSE %]
       <li><a href="/auth">Sign In</a></li>
+[% END %]
       <li><a href="/conference/list">Conferences</a></li>
       <li><a href="/user/list">Users</a></li>
       <li><a href="/venue/list">Venues</a></li>
     </ul>
     <ul class="side-nav" id="nav-mobile">
+[% IF ui_user %]
+      <li><a href="/auth/logout">Sign Out</a></li>
+[% ELSE %]
       <li><a href="/auth">Sign In</a></li>
+[% END %]
       <li><a href="/user/list">Users</a></li>
       <li><a href="/conference/list">Conferences</a></li>
       <li><a href="/venue/list">Venues</a></li>
