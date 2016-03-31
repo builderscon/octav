@@ -13,7 +13,7 @@ chmod +x local/bin/cpanm
 echo "====> cpanm version"
 cpanm --version
 echo "====> Installing dependencies..."
-cpanm -v --installdeps --notest -Llocal .
+cpanm --quiet --installdeps --notest -Llocal .
 echo "====> Running tests..."
 export PERL5OPT=-Mlib=local/lib/perl5
 perl Build.PL && ./Build && ./Build test
