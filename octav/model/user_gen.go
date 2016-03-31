@@ -67,6 +67,7 @@ func (v *User) FromRow(vdb db.User) error {
 	if vdb.TshirtSize.Valid {
 		v.TshirtSize = vdb.TshirtSize.String
 	}
+	v.IsAdmin = vdb.IsAdmin
 	return nil
 }
 
@@ -87,6 +88,7 @@ func (v *User) ToRow(vdb *db.User) error {
 	vdb.Email.String = v.Email
 	vdb.TshirtSize.Valid = true
 	vdb.TshirtSize.String = v.TshirtSize
+	vdb.IsAdmin = v.IsAdmin
 	return nil
 }
 
@@ -115,6 +117,8 @@ func (v UserL10N) GetPropValue(s string) (interface{}, error) {
 		return v.Email, nil
 	case "tshirt_size":
 		return v.TshirtSize, nil
+	case "is_admin":
+		return v.IsAdmin, nil
 	default:
 		return v.L10N.GetPropValue(s)
 	}

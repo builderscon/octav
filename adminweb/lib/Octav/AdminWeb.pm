@@ -70,6 +70,7 @@ sub startup {
     my $r = $self->routes;
     $r->get("/")->to("Root#index");
 
+    $r->get("/auth/logout")->to("auth#logout");
     $r->get("/auth")->to("auth#index");
     for my $resource (qw(github)) {
         my $r_resource = $r->under("/auth");
@@ -105,6 +106,18 @@ sub startup {
                 warn "Access to protected resource '$endpoint' detected, but no user information found in session";
                 $c->redirect_to($c->url_for("/auth"));
                 return
+            }
+            $c->stash(ui_user => $session->{user});
+
+            if (! $session->{user}->{is_admin}) {
+                warn "User is not an administrator";
+                # Instead of just erroring out here, redirect to
+                # dashboard so we can see the error in a user
+                # friendly format
+                if ($endpoint !~ m{^/user/dashboard$}) {
+                    $c->redirect_to($c->url_for("/user/dashboard"));
+                    return
+                }
             }
         }
 

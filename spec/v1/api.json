@@ -300,7 +300,8 @@
         "last_name": { "$ref": "#/definitions/string_en" },
         "nickname": { "$ref": "#/definitions/string_en" },
         "email": { "$ref": "#/definitions/email" },
-        "tshirt_size": { "$ref": "#/definitions/tshirt_size" }
+        "tshirt_size": { "$ref": "#/definitions/tshirt_size" },
+        "is_admin": { "$ref": "#/definitions/boolean_default_false" }
       },
       "patternProperties": {
         "first_name#[a-z]+": { "$ref": "#/definitions/string_i18n" },

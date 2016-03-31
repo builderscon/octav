@@ -104,6 +104,7 @@ type User struct {
 	Nickname   string
 	Email      sql.NullString
 	TshirtSize sql.NullString
+	IsAdmin    bool
 	CreatedOn  time.Time
 	ModifiedOn NullTime
 }
