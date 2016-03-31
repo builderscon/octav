@@ -49,6 +49,16 @@
 </div>
 </form>
 
+<h5>Dates</h5>
+
+<div class="row">
+  <div class="collection col s12">
+[% FOREACH date IN conference.dates %]
+    <a class="collection-item" href="#!">[% date %]</a>
+[% END %]
+  </div>
+</div>
+
 <h5>Administrators</h5>
 
 <div class="row">
