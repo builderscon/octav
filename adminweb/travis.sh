@@ -15,6 +15,6 @@ cpanm --version
 echo "====> Installing dependencies..."
 cpanm --quiet --installdeps --notest -Llocal .
 echo "====> Running tests..."
-export PERL5OPT=-Mlib=local/lib/perl5
+export PERL5OPT="-Mlib=local/lib/perl5 -Mlib=../p5/lib"
 perl Build.PL && ./Build && ./Build test
 
