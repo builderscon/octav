@@ -371,6 +371,40 @@ sub delete_conference_admin {
     return 1
 }
 
+sub add_conference_venue {
+    my ($self, $payload) = @_;
+    for my $required (qw(conference_id venue_id)) {
+        if (!$payload->{$required}) {
+            die qq|property "$required" must be provided|;
+        }
+    }
+    my $uri = URI->new($self->{endpoint} . qq|/v1/conference/venue/add|);
+    my $json_payload = JSON::encode_json($payload);
+    my $res = $self->{user_agent}->post($uri, Content => $json_payload);
+    if (!$res->is_success) {
+        $self->{last_error} = $res->status_line;
+        return;
+    }
+    return 1
+}
+
+sub delete_conference_venue {
+    my ($self, $payload) = @_;
+    for my $required (qw(conference_id venue_id)) {
+        if (!$payload->{$required}) {
+            die qq|property "$required" must be provided|;
+        }
+    }
+    my $uri = URI->new($self->{endpoint} . qq|/v1/conference/venue/delete|);
+    my $json_payload = JSON::encode_json($payload);
+    my $res = $self->{user_agent}->post($uri, Content => $json_payload);
+    if (!$res->is_success) {
+        $self->{last_error} = $res->status_line;
+        return;
+    }
+    return 1
+}
+
 sub lookup_conference {
     my ($self, $payload) = @_;
     for my $required (qw(id)) {
