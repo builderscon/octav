@@ -1,0 +1,13 @@
+requires 'perl', '5.008001';
+
+on 'build' => sub {
+    requires 'Module::Build::Tiny', '0.035';
+};
+
+on 'test' => sub {
+    requires 'Test::More', '0.98';
+};
+
+requires 'JSON';
+requires 'LWP::UserAgent';
+requires 'URI';
