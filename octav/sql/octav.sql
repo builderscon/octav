@@ -8,6 +8,7 @@ CREATE TABLE users (
     auth_via CHAR(16) NOT NULL, /* github, facebook, twitter */
     auth_user_id TEXT NOT NULL, /* ID in the auth provider */
     avatar_url TEXT,
+    is_admin TINYINT(1) NOT NULL DEFAULT 0,
     tshirt_size CHAR(4) CHARACTER SET latin1,
     created_on DATETIME NOT NULL,
     modified_on TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
@@ -82,17 +83,6 @@ CREATE TABLE conference_venues (
     FOREIGN KEY (conference_id) REFERENCES conferences(eid) ON DELETE CASCADE,
     FOREIGN KEY (venue_id) REFERENCES venues(eid) ON DELETE CASCADE,
     UNIQUE KEY(conference_id, venue_id)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-
-CREATE TABLE venue_rooms (
-    oid INTEGER UNSIGNED NOT NULL PRIMARY KEY AUTO_INCREMENT,
-    venue_id CHAR(64) CHARACTER SET latin1 NOT NULL,
-    room_id CHAR(64) CHARACTER SET latin1 NOT NULL,
-    created_on DATETIME NOT NULL,
-    modified_on TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    FOREIGN KEY (venue_id) REFERENCES venues(eid) ON DELETE CASCADE,
-    FOREIGN KEY (room_id) REFERENCES rooms(eid) ON DELETE CASCADE,
-    UNIQUE KEY(venue_id, room_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 CREATE TABLE sessions (

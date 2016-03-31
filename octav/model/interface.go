@@ -84,6 +84,7 @@ type User struct {
 	Nickname   string `json:"nickname"`
 	Email      string `json:"email,omitempty"`
 	TshirtSize string `json:"tshirt_size,omitempty"`
+	IsAdmin    bool   `json:"is_admin"`
 }
 type UserList []User
 

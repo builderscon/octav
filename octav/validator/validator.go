@@ -431,6 +431,10 @@ func init() {
 			jsval.Reference(M).RefersTo("#/definitions/uuid"),
 		).
 		AddProp(
+			"is_admin",
+			jsval.Reference(M).RefersTo("#/definitions/boolean_default_false"),
+		).
+		AddProp(
 			"last_name",
 			jsval.Reference(M).RefersTo("#/definitions/string_en"),
 		).
@@ -978,6 +982,10 @@ func init() {
 				AddProp(
 					"id",
 					jsval.Reference(M).RefersTo("#/definitions/uuid"),
+				).
+				AddProp(
+					"is_admin",
+					jsval.Reference(M).RefersTo("#/definitions/boolean_default_false"),
 				).
 				AddProp(
 					"last_name",
@@ -1652,6 +1660,10 @@ func init() {
 					jsval.Reference(M).RefersTo("#/definitions/uuid"),
 				).
 				AddProp(
+					"is_admin",
+					jsval.Reference(M).RefersTo("#/definitions/boolean_default_false"),
+				).
+				AddProp(
 					"last_name",
 					jsval.Reference(M).RefersTo("#/definitions/string_en"),
 				).
@@ -1705,6 +1717,10 @@ func init() {
 				AddProp(
 					"id",
 					jsval.Reference(M).RefersTo("#/definitions/uuid"),
+				).
+				AddProp(
+					"is_admin",
+					jsval.Reference(M).RefersTo("#/definitions/boolean_default_false"),
 				).
 				AddProp(
 					"last_name",
