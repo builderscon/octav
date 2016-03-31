@@ -76,6 +76,17 @@ function initMap() {
 </form>
 </div>
 
+<h5>Rooms</h5>
+
+<div class="row">
+  <div class="collection col s12">
+[% FOREACH room IN venue.rooms %]
+    <a class="collection-item" href="/room/lookup?id=[% room.id %]">[% room.name %]</a>
+[% END %]
+  </div>
+</div>
+
+
 <script async defer src="https://maps.googleapis.com/maps/api/js?key=[% api_key %]&callback=initMap"></script>
 
 [% END %]
