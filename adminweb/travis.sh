@@ -4,6 +4,8 @@ set -e
 
 echo "====> perl version"
 perl --version
+
+cpanm --self-upgrade
 echo "====> cpanm version"
 cpanm --version
 echo "====> Installing dependencies..."
