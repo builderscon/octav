@@ -177,7 +177,7 @@
       "properties": {
         "id": { "$ref": "#/definitions/uuid" },
         "name": { "type": "string" },
-        "rooms": { "$ref": "#/definitions/room" }
+        "rooms": { "$ref": "#/definitions/room_array" }
       }
     },
     "room_array": {
