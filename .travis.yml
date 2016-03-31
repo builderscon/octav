@@ -6,6 +6,11 @@ services:
 env:
   - TEST_DIR=octav
   - TEST_DIR=adminweb
+addons:
+  apt:
+    packages:
+      - cpanminus
+      - perl
 install:
   - echo "skipping install step"
 script:
