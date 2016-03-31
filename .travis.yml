@@ -4,10 +4,11 @@ go:
 services:
   - mysql
 env:
-  - DIR=octav
+  - TEST_DIR=octav
+  - TEST_DIR=adminweb
 install:
   - echo "skipping install step"
 script:
-  - cd $DIR && ./travis.sh
+  - cd $TEST_DIR && ./travis.sh
 after_failure:
   - test -e "/tmp/debug.out" && cat "/tmp/debug.out"
