@@ -640,6 +640,116 @@ func (r *DeleteConferenceRequest) Populate(m map[string]interface{}) error {
 	return nil
 }
 
+func (r AddVenueRoomRequest) collectMarshalData() map[string]interface{} {
+	m := make(map[string]interface{})
+	m["venue_id"] = r.VenueID
+	m["room_id"] = r.RoomID
+	return m
+}
+
+func (r AddVenueRoomRequest) MarshalJSON() ([]byte, error) {
+	m := r.collectMarshalData()
+	buf, err := json.Marshal(m)
+	if err != nil {
+		return nil, err
+	}
+	return buf, nil
+}
+
+func (r AddVenueRoomRequest) MarshalURL() ([]byte, error) {
+	m := r.collectMarshalData()
+	buf, err := urlenc.Marshal(m)
+	if err != nil {
+		return nil, err
+	}
+	return buf, nil
+}
+
+func (r *AddVenueRoomRequest) UnmarshalJSON(data []byte) error {
+	m := make(map[string]interface{})
+	if err := json.Unmarshal(data, &m); err != nil {
+		return err
+	}
+	return r.Populate(m)
+}
+
+func (r *AddVenueRoomRequest) Populate(m map[string]interface{}) error {
+	if jv, ok := m["venue_id"]; ok {
+		switch jv.(type) {
+		case string:
+			r.VenueID = jv.(string)
+			delete(m, "venue_id")
+		default:
+			return ErrInvalidJSONFieldType{Field: "venue_id"}
+		}
+	}
+	if jv, ok := m["room_id"]; ok {
+		switch jv.(type) {
+		case string:
+			r.RoomID = jv.(string)
+			delete(m, "room_id")
+		default:
+			return ErrInvalidJSONFieldType{Field: "room_id"}
+		}
+	}
+	return nil
+}
+
+func (r DeleteVenueRoomRequest) collectMarshalData() map[string]interface{} {
+	m := make(map[string]interface{})
+	m["venue_id"] = r.VenueID
+	m["room_id"] = r.RoomID
+	return m
+}
+
+func (r DeleteVenueRoomRequest) MarshalJSON() ([]byte, error) {
+	m := r.collectMarshalData()
+	buf, err := json.Marshal(m)
+	if err != nil {
+		return nil, err
+	}
+	return buf, nil
+}
+
+func (r DeleteVenueRoomRequest) MarshalURL() ([]byte, error) {
+	m := r.collectMarshalData()
+	buf, err := urlenc.Marshal(m)
+	if err != nil {
+		return nil, err
+	}
+	return buf, nil
+}
+
+func (r *DeleteVenueRoomRequest) UnmarshalJSON(data []byte) error {
+	m := make(map[string]interface{})
+	if err := json.Unmarshal(data, &m); err != nil {
+		return err
+	}
+	return r.Populate(m)
+}
+
+func (r *DeleteVenueRoomRequest) Populate(m map[string]interface{}) error {
+	if jv, ok := m["venue_id"]; ok {
+		switch jv.(type) {
+		case string:
+			r.VenueID = jv.(string)
+			delete(m, "venue_id")
+		default:
+			return ErrInvalidJSONFieldType{Field: "venue_id"}
+		}
+	}
+	if jv, ok := m["room_id"]; ok {
+		switch jv.(type) {
+		case string:
+			r.RoomID = jv.(string)
+			delete(m, "room_id")
+		default:
+			return ErrInvalidJSONFieldType{Field: "room_id"}
+		}
+	}
+	return nil
+}
+
 func (r ListConferenceRequest) collectMarshalData() map[string]interface{} {
 	m := make(map[string]interface{})
 	if r.RangeEnd.Valid() {

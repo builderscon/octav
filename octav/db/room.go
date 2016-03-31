@@ -1,6 +1,9 @@
 package db
 
-import "strconv"
+import (
+	"bytes"
+	"strconv"
+)
 
 func (v *RoomList) LoadForVenueSinceEID(tx *Tx, venueID string, since string, limit int) error {
 	var s int64
@@ -16,7 +19,24 @@ func (v *RoomList) LoadForVenueSinceEID(tx *Tx, venueID string, since string, li
 }
 
 func (v *RoomList) LoadForVenueSince(tx *Tx, venueID string, since int64, limit int) error {
-	rows, err := tx.Query(`SELECT oid, eid, venue_id, name, capacity, created_on, modified_on FROM `+RoomTable+` WHERE oid > ? AND venue_id = ? ORDER BY oid ASC LIMIT `+strconv.Itoa(limit), since, venueID)
+	buf := bytes.Buffer{}
+	buf.WriteString("SELECT ")
+	buf.WriteString(RoomStdSelectColumns)
+	buf.WriteString(" FROM ")
+	buf.WriteString(RoomTable)
+	buf.WriteString(" WHERE ")
+	buf.WriteString(RoomTable)
+	buf.WriteString(".oid > ? AND ")
+	buf.WriteString(RoomTable)
+	buf.WriteString(".venue_id = ? ORDER BY ")
+	buf.WriteString(RoomTable)
+	buf.WriteString(".oid ASC")
+	if limit > 0 {
+		buf.WriteString(" LIMIT ")
+		buf.WriteString(strconv.Itoa(limit))
+	}
+
+	rows, err := tx.Query(buf.String(), since, venueID)
 	if err != nil {
 		return err
 	}
@@ -29,5 +49,34 @@ func (v *RoomList) LoadForVenueSince(tx *Tx, venueID string, since int64, limit 
 		res = append(res, vdb)
 	}
 	*v = res
+	return nil
+}
+
+func LoadVenueRooms(tx *Tx, rooms *RoomList, vid string) error {
+	stmt := bytes.Buffer{}
+	stmt.WriteString(`SELECT `)
+	stmt.WriteString(RoomStdSelectColumns)
+	stmt.WriteString(` FROM `)
+	stmt.WriteString(RoomTable)
+	stmt.WriteString(` WHERE `)
+	stmt.WriteString(RoomTable)
+	stmt.WriteString(`.venue_id = ?`)
+
+	rows, err := tx.Query(stmt.String(), vid)
+	if err != nil {
+		return err
+	}
+
+	var res RoomList
+	for rows.Next() {
+		var u Room
+		if err := u.Scan(rows); err != nil {
+			return err
+		}
+
+		res = append(res, u)
+	}
+
+	*rooms = res
 	return nil
 }

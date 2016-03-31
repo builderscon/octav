@@ -89,11 +89,12 @@ type UserList []User
 
 // +model
 type Venue struct {
-	ID        string  `json:"id,omitempty"`
-	Name      string  `json:"name" l10n:"true"`
-	Address   string  `json:"address" l10n:"true"`
-	Longitude float64 `json:"longitude,omitempty"`
-	Latitude  float64 `json:"latitude,omitempty"`
+	ID        string   `json:"id,omitempty"`
+	Name      string   `json:"name" l10n:"true"`
+	Address   string   `json:"address" l10n:"true"`
+	Longitude float64  `json:"longitude,omitempty"`
+	Latitude  float64  `json:"latitude,omitempty"`
+	Rooms     RoomList `json:"rooms,omitempty"`
 }
 type VenueList []Venue
 
@@ -160,7 +161,7 @@ type AddConferenceAdminRequest struct {
 // +transport
 type AddConferenceVenueRequest struct {
 	ConferenceID string `json:"conference_id"`
-	VenueID       string `json:"venue_id"`
+	VenueID      string `json:"venue_id"`
 }
 
 // +transport
@@ -178,12 +179,24 @@ type DeleteConferenceAdminRequest struct {
 // +transport
 type DeleteConferenceVenueRequest struct {
 	ConferenceID string `json:"conference_id"`
-	VenueID       string `json:"venue_id"`
+	VenueID      string `json:"venue_id"`
 }
 
 // +transport
 type DeleteConferenceRequest struct {
 	ID string `json:"id" urlenc:"id"`
+}
+
+// +transport
+type AddVenueRoomRequest struct {
+	VenueID string `json:"venue_id"`
+	RoomID  string `json:"room_id"`
+}
+
+// +transport
+type DeleteVenueRoomRequest struct {
+	VenueID string `json:"venue_id"`
+	RoomID  string `json:"room_id"`
 }
 
 // +transport

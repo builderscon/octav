@@ -78,6 +78,8 @@ func (v VenueL10N) GetPropValue(s string) (interface{}, error) {
 		return v.Longitude, nil
 	case "latitude":
 		return v.Latitude, nil
+	case "rooms":
+		return v.Rooms, nil
 	default:
 		return v.L10N.GetPropValue(s)
 	}

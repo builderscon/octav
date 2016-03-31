@@ -207,3 +207,18 @@ func (v *Conference) LoadVenues(tx *db.Tx, cdl *model.VenueList, cid string) err
 	return nil
 }
 
+func (v *Conference) Decorate(tx *db.Tx, c *model.Conference) error {
+	if err := v.LoadDates(tx, &c.Dates, c.ID); err != nil {
+		return err
+	}
+
+	if err := v.LoadAdmins(tx, &c.Administrators, c.ID); err != nil {
+		return err
+	}
+
+	if err := v.LoadVenues(tx, &c.Venues, c.ID); err != nil {
+		return err
+	}
+	return nil
+}
+

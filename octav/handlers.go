@@ -91,22 +91,6 @@ func doCreateConference(ctx context.Context, w http.ResponseWriter, r *http.Requ
 	httpJSON(w, c)
 }
 
-func decorateConference(tx *db.Tx, c *model.Conference) error {
-	s := service.Conference{}
-	if err := s.LoadDates(tx, &c.Dates, c.ID); err != nil {
-		return err
-	}
-
-	if err := s.LoadAdmins(tx, &c.Administrators, c.ID); err != nil {
-		return err
-	}
-
-	if err := s.LoadVenues(tx, &c.Venues, c.ID); err != nil {
-		return err
-	}
-	return nil
-}
-
 func doLookupConference(ctx context.Context, w http.ResponseWriter, r *http.Request, payload model.LookupConferenceRequest) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("doLookupConference")
@@ -125,7 +109,8 @@ func doLookupConference(ctx context.Context, w http.ResponseWriter, r *http.Requ
 		return
 	}
 
-	if err := decorateConference(tx, &c); err != nil {
+	s := service.Conference{}
+	if err := s.Decorate(tx, &c); err != nil {
 		httpError(w, `LookupConference`, http.StatusInternalServerError, err)
 		return
 	}
@@ -361,7 +346,7 @@ func doListConference(ctx context.Context, w http.ResponseWriter, r *http.Reques
 				httpError(w, `ListConference`, http.StatusInternalServerError, err)
 				return
 			}
-			if err := decorateConference(tx, c); err != nil {
+			if err := s.Decorate(tx, c); err != nil {
 				httpError(w, `ListConference`, http.StatusInternalServerError, err)
 				return
 			}
@@ -377,7 +362,7 @@ func doListConference(ctx context.Context, w http.ResponseWriter, r *http.Reques
 			httpError(w, `ListConference`, http.StatusInternalServerError, err)
 			return
 		}
-		if err := decorateConference(tx, &c); err != nil {
+		if err := s.Decorate(tx, &c); err != nil {
 			httpError(w, `ListConference`, http.StatusInternalServerError, err)
 			return
 		}
@@ -922,6 +907,11 @@ func doLookupVenue(ctx context.Context, w http.ResponseWriter, r *http.Request, 
 		httpError(w, `LookupVenue`, http.StatusInternalServerError, err)
 		return
 	}
+	s := service.Venue{}
+	if err := s.Decorate(tx, &v); err != nil {
+		httpError(w, `LookupVenue`, http.StatusInternalServerError, err)
+		return
+	}
 
 	if !payload.Lang.Valid() {
 		httpJSON(w, v)
@@ -1019,6 +1009,12 @@ func doListVenue(ctx context.Context, w http.ResponseWriter, r *http.Request, pa
 			httpError(w, `ListVenue`, http.StatusInternalServerError, err)
 			return
 		}
+
+		if err := s.Decorate(tx, &v); err != nil {
+			httpError(w, `ListVenue`, http.StatusInternalServerError, err)
+			return
+		}
+
 		l[i].Venue = v
 		switch payload.Lang.String {
 		case "all":
