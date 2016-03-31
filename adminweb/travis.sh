@@ -2,8 +2,12 @@
 
 set -e
 
+echo "====> perl version"
 perl --version
+echo "====> cpanm version"
 cpanm --version
-cpanm --quiet --installdeps --notest .
+echo "====> Installing dependencies..."
+cpanm -v --installdeps --notest .
+echo "====> Running tests..."
 perl Build.PL && ./Build && ./Build test
 
