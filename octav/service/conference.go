@@ -8,6 +8,7 @@ import (
 	"github.com/builderscon/octav/octav/db"
 	"github.com/builderscon/octav/octav/model"
 	"github.com/builderscon/octav/octav/tools"
+	"github.com/lestrrat/go-pdebug"
 )
 
 func (v *Conference) populateRowForCreate(vdb *db.Conference, payload model.CreateConferenceRequest) error {
@@ -142,7 +143,7 @@ func (v *Conference) LoadDates(tx *db.Tx, cdl *model.ConferenceDateList, cid str
 func (v *Conference) AddAdmin(tx *db.Tx, cid, uid string) error {
 	cd := db.ConferenceAdministrator{
 		ConferenceID: cid,
-		UserID: uid,
+		UserID:       uid,
 	}
 	if err := cd.Create(tx, db.WithInsertIgnore(true)); err != nil {
 		return err
@@ -155,10 +156,19 @@ func (v *Conference) DeleteAdmin(tx *db.Tx, cid, uid string) error {
 	return db.DeleteConferenceAdministrator(tx, cid, uid)
 }
 
-func (v *Conference) LoadAdmins(tx *db.Tx, cdl *model.UserList, cid string) error {
+func (v *Conference) LoadAdmins(tx *db.Tx, cdl *model.UserList, cid string) (err error) {
+	if pdebug.Enabled {
+		g := pdebug.Marker("service.Conference.LoadAdmins").BindError(&err)
+		defer g.End()
+	}
+
 	var vdbl db.UserList
 	if err := db.LoadConferenceAdministrators(tx, &vdbl, cid); err != nil {
 		return err
+	}
+
+	if pdebug.Enabled {
+		pdebug.Printf("Loaded %d admins", len(vdbl))
 	}
 
 	res := make(model.UserList, len(vdbl))
@@ -176,7 +186,7 @@ func (v *Conference) LoadAdmins(tx *db.Tx, cdl *model.UserList, cid string) erro
 func (v *Conference) AddVenue(tx *db.Tx, cid, vid string) error {
 	cd := db.ConferenceVenue{
 		ConferenceID: cid,
-		VenueID: vid,
+		VenueID:      vid,
 	}
 	if err := cd.Create(tx, db.WithInsertIgnore(true)); err != nil {
 		return err
@@ -221,4 +231,3 @@ func (v *Conference) Decorate(tx *db.Tx, c *model.Conference) error {
 	}
 	return nil
 }
-

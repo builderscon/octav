@@ -1,82 +1,63 @@
 [% WRAPPER "layout/main.html.tx" %]
 
-<h4>Conference "[% conference.title %]"</h4>
-
-<form action="/conference/update" method="POST" class="col s12">
 <div class="row">
-  <div class="input-field col s12">
-    <label for="id">ID</label>
-    <input type="text" readonly value="[% conference.id %]">
-    <input type="hidden" name="id" value="[% conference.id %]">
+  <div class="col s12">
+    <h4>Conference "[% conference.title %]" <a href="/conference/edit?id=[% conference.id %]" class="btn-floating btn-small red"><i class="large material-icons">mode_edit</i></a></h4>
+[% IF conference.dates %][% FOREACH date IN conference.dates %]
+    <div class="chip">[% date.date %][% IF date.open || date.close %] ([% IF date.open %][% date.open %][% END %]〜[% IF date.close %][% date.close %][% END %])[% END %]</div>
+[% END %][% END %]
   </div>
 </div>
 
 <div class="row">
-  <div class="input-field col s6">
-    <label for="title">Title (English)</label>
-    <input placeholder="(Required) Main title of the conference" id="title" name="title" type="text" class="validate[% IF conference.title %] active[% END %]"[% IF conference.title %] value="[% conference.title %]"[% END %]>
-  </div>
-  <div class="input-field col s6">
-    <label for="title#ja">Title (日本語）</label>
-    <input placeholder="(任意）日本語で表示する際のカンファレンス名" id="title#ja" name="title#ja" type="text" class="validate[% IF conference.item("title#ja") %] active[% END %]"[% IF conference.item("title#ja") %] value="[% conference.item("title#ja") %]"[% END %]>
-  </div>
-</div>
-<div>
-  <div class="input-field col s6">
-    <label for="sub_title">Sub Title</label>
-    <input placeholder="(Optional)" id="sub_title" name="sub_title" type="text" class="validate[% IF conference.sub_title %] active[% END %]"[% IF conference.sub_title %] value="[% conference.sub_title %]"[% END %]>
-  </div>
-  <div class="input-field col s6">
-    <label for="sub_title#ja">Sub Title (日本語）</label>
-    <input placeholder="(任意）日本語で表示する際のカンファレンスサブタイトル" id="sub_title#ja" name="sub_title#ja" type="text" class="validate[% IF conference.item("sub_title#ja") %] active[% END %]"[% IF conference.item("sub_title#ja") %] value="[% conference.item("sub_title#ja") %]"[% END %]>
-  </div>
-</div>
-<div class="row">
-  <div class="input-field col s6">
-    <label for="title">Slug</label>
-    <input placeholder="(Required) String used as part of url" id="slug" name="slug" type="text" class="validate[% IF conference.slug %] active[% END %]"[% IF conference.slug %] value="[% conference.slug %]"[% END %]>
-  </div>
-  <div class="input-field col s6">
-    <label for="created_by_name">Created By</label>
-    <input id="created_by_name" type="text" readonly="readonly" class="validate" placeholder="FooBar"/>
-  </div>
-</div>
-
-<div class="row">
-  <button class="btn waves-effect waves-light" type="submit" name="action">Submit
-    <i class="material-icons right">send</i>
-  </button>
-</div>
-</form>
-
-<h5>Dates</h5>
-
-<div class="row">
-  <div class="collection col s12">
-[% FOREACH date IN conference.dates %]
-    <a class="collection-item" href="#!">[% date %]</a>
-[% END %]
-  </div>
-</div>
-
-<h5>Administrators</h5>
-
-<div class="row">
-  <div class="collection col s12">
+  <div class="col s12">
+    <h5>Organizers</h5>
 [% FOREACH user IN conference.administrators %]
-    <a class="collection-item" href="/user/lookup?id=[% user.id %]">[% user.nickname %]</a>
+    <div class="chip">[% IF user.avatar_url %]<img src="[% user.avatar_url %]">[% END %]<a href="/user/lookup?id=[% user.id %]">[% user.nickname %]</a></div>
 [% END %]
   </div>
 </div>
 
-<h5>Venues</h5>
-
+[% IF conference.venues %]
 <div class="row">
-  <div class="collection col s12">
-[% FOREACH venue IN conference.venues %]
-    <a class="collection-item" href="/venue/lookup?id=[% venue.id %]">[% venue.name %]</a>
-[% END %]
+  <div class="col s12">
+    <h5>Venue</h5>
   </div>
 </div>
+[% FOREACH venue IN conference.venues %]
+<div class="row">
+  <div class="col s3">
+    <h6>[% venue.name %]</h6>
+    [% venue.address %]
+  </div>
+  <div class="col s9">
+    <div id="map-[% loop.index %]" style="height: 200px"></div>
+  </div>
+</div>
+[% END %]
+<script type="text/javascript">
+<!--
+var map;
+function initMap() {
+[% FOREACH venue IN conference.venues %]
+  (function() {
+    var latlng = {lat: [% venue.latitude %], lng: [% venue.longitude %]}
+    map = new google.maps.Map(document.getElementById('map-[% loop.index %]'), {
+      center: latlng,
+      zoom: 14
+    });
+    var marker = new google.maps.Marker({
+      position: latlng,
+      map: map,
+      title: "[% venue.name %]",
+    });
+  })()
+[% END %]
+}
+-->
+</script>
+
+<script async defer src="https://maps.googleapis.com/maps/api/js?key=[% api_key %]&callback=initMap"></script>
+[% END # IF conference.venues %]
 
 [% END %]

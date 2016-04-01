@@ -10,18 +10,40 @@ sub list {
     $self->render(tx => "conference/list");
 }
 
-sub lookup {
+sub _lookup {
     my $self = shift;
 
     my $id = $self->param('id');
     if (!$id) {
-        return $self->render(text => "not found", status => 404);
+        $self->render(text => "not found", status => 404);
+        return;
     }
 
     my $client = $self->client;
     my $conference = $client->lookup_conference({id => $id, lang => "all"});
+    if (!$conference) {
+        $self->render(text => "not found", status => 404);
+        return;
+    }
+    $self->stash(api_key => $self->config->{googlemaps}->{api_key});
     $self->stash(conference => $conference);
+    return 1
+}
+
+sub lookup {
+    my $self = shift;
+    if (!$self->_lookup()) {
+        return
+    }
     $self->render(tx => "conference/lookup");
+}
+
+sub edit {
+    my $self = shift;
+    if (!$self->_lookup()) {
+        return
+    }
+    $self->render(tx => "conference/edit");
 }
 
 sub update {
