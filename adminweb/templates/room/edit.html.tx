@@ -1,0 +1,45 @@
+[% WRAPPER "layout/main.html.tx" %]
+
+<h4>Room "[% room.name %]"</h4>
+
+<div class="row">
+<form action="/room/update" method="POST" class="col s12">
+<div class="row">
+  <div class="input-field col s12">
+    <label for="id">ID</label>
+    <input type="text" readonly value="[% room.id %]">
+    <input type="hidden" name="id" value="[% room.id %]">
+  </div>
+</div>
+
+<div class="row">
+  <div class="input-field col s6">
+    <label for="name">Name (English)</label>
+    <input placeholder="(Required) Main name of the room" id="name" name="name" type="text" class="validate[% IF room.name %] active[% END %]"[% IF room.name %] value="[% room.name %]"[% END %]>
+  </div>
+  <div class="input-field col s6">
+    <label for="name#ja">Name (日本語）</label>
+    <input placeholder="(任意）日本語で表示する際の施設名" id="name#ja" name="name#ja" type="text" class="validate[% IF room.item("name#ja") %] active[% END %]"[% IF room.item("name#ja") %] value="[% room.item("name#ja") %]"[% END %]>
+  </div>
+</div>
+
+<div class="row">
+  <div class="input-field col s6">
+    <label for="capacity">Capacity</label>
+    <input placeholder="" id="capacity" name="capacity" type="text" class="validate[% IF room.capacity %] active[% END %]"[% IF room.capacity %] value="[% room.capacity %]"[% END %]>
+  </div>
+  <div class="input-field col s6">
+    <label for="venue_id">Venue ID</label>
+    <input placeholder="Venue that this room belongs to" id="venue_id" name="venue_id" type="text" class="validate[% IF room.venue_id %] active[% END %]"[% IF room.venue_id %] value="[% room.venue_id %]"[% END %]>
+  </div>
+</div>
+
+<div class="row">
+  <button class="btn waves-effect waves-light" type="submit" name="action">Submit
+    <i class="material-icons right">send</i>
+  </button>
+</div>
+</form>
+</div>
+
+[% END %]

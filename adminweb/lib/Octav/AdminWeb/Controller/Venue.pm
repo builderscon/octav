@@ -16,13 +16,21 @@ sub _lookup {
 
     my $id = $self->param('id');
     if (!$id) {
-        return $self->render(text => "not found", status => 404);
+        $log->debug("No 'id' available in query");
+        $self->render(text => "not found", status => 404);
+        return
     }
 
     my $client = $self->client;
     my $venue = $client->lookup_venue({id => $id, lang => "all"});
+    if (! $venue) {
+        $log->debug("No such venue '$id'");
+        $self->render(text => "not found", status => 404);
+        return
+    }
     $self->stash(venue => $venue);
     $self->stash(api_key => $self->config->{googlemaps}->{api_key});
+    return 1
 }
 
 sub lookup {
