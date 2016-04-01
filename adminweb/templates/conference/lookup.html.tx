@@ -27,7 +27,7 @@
 [% FOREACH venue IN conference.venues %]
 <div class="row">
   <div class="col s3">
-    <h6>[% venue.name %]</h6>
+    <h6><a href="/venue/lookup?id=[% venue.id %]">[% venue.name %]</a></h6>
     [% venue.address %]
   </div>
   <div class="col s9">

@@ -11,7 +11,7 @@ sub list {
     $self->render(tx => "venue/list");
 }
 
-sub lookup {
+sub _lookup {
     my $self = shift;
 
     my $id = $self->param('id');
@@ -23,7 +23,22 @@ sub lookup {
     my $venue = $client->lookup_venue({id => $id, lang => "all"});
     $self->stash(venue => $venue);
     $self->stash(api_key => $self->config->{googlemaps}->{api_key});
+}
+
+sub lookup {
+    my $self = shift;
+    if (! $self->_lookup()) {
+        return
+    }
     $self->render(tx => "venue/lookup");
+}
+
+sub edit {
+    my $self = shift;
+    if (! $self->_lookup()) {
+        return
+    }
+    $self->render(tx => "venue/edit");
 }
 
 sub update {
