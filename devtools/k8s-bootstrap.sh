@@ -26,9 +26,9 @@ if [ -z "$CLUSTER_MACHINE_TYPE" ]; then
     CLUSTER_MACHINE_TYPE=g1-small
 fi
 
-SECRETS="cloudsql logging"
-SERVICES=apiserver
-REPLICATION_CONTROLLERS=apiserver adminweb
+SECRETS="cloudsql github googlemaps"
+SERVICES="apiserver adminweb"
+REPLICATION_CONTROLLERS="apiserver adminweb redis"
 
 # gcloud needs to know which configuration set we're dealing with
 echo "* Activating $MY_CONFIG_NAME configuration..."
@@ -60,6 +60,17 @@ cat <<EOM
   Tag:   $INSTANCE_TAG
 EOM
 
+# Make secretes
+echo "Creating secrets..."
+for name in $SECRETS; do
+    echo "Creating secret '$name'..."
+    set +e
+    ./devtools/make_${name}_secret.sh | kubectl create -f -
+    set -e
+    if [[ "$?" != "0" ]]; then
+        ./devtools/make_${name}_secret.sh | kubectl replace -f -
+    fi
+done
 
 echo "* Creating replication controller(s)..."
 for name in $REPLICATION_CONTROLLERS; do

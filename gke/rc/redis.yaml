@@ -1,0 +1,33 @@
+kind: ReplicationController
+apiVersion: v1
+metadata:
+  name: redis-master
+spec:
+  replicas: 1
+  selector:
+    name: redis
+    group: octav
+  template:
+    metadata:
+      labels:
+        name: redis
+        group: octav
+        role: master
+    spec:
+      containers:
+        - name: master
+          image: kubernetes/redis:v1
+          env:
+            - name: MASTER
+              value: "true"
+          ports:
+            - containerPort: 6379
+          resources:
+            limits:
+              cpu: "0.1"
+          volumeMounts:
+            - mountPath: /redis-master-data
+              name: data
+      volumes:
+        - name: data
+          emptyDir: {}
