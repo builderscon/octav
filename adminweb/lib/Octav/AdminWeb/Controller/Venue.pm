@@ -14,6 +14,7 @@ sub list {
 sub _lookup {
     my $self = shift;
 
+    my $log = $self->app->log;
     my $id = $self->param('id');
     if (!$id) {
         $log->debug("No 'id' available in query");
