@@ -1,55 +1,53 @@
 [% WRAPPER "layout/main.html.tx" %]
 
-<h4>Venue "[% venue.name %]"</h4>
+<h4>Venue "[% venue.name %]"  <a href="/venue/edit?id=[% venue.id %]" class="btn-floating btn-small red"><i class="large material-icons">mode_edit</i></a></h4>
 
 <div class="row">
-<form action="/venue/update" method="POST" class="col s12">
-<div class="row">
-  <div class="input-field col s12">
-    <label for="id">ID</label>
-    <input type="text" readonly value="[% venue.id %]">
-    <input type="hidden" name="id" value="[% venue.id %]">
+  <div class="col s6">
+    <table class="highlight">
+      <thead>
+        <tr>
+          <th data-field="name"></th>
+          <th data-field="value"></th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>ID</td>
+          <td>[% venue.id %]</td>
+        </tr>
+        <tr>
+          <td>Name</td>
+          <td>[% venue.name %]</td>
+        </tr>
+        <tr>
+          <td>Name (日本語)</td>
+          <td>[% venue.item("name#ja") %]</td>
+        </tr>
+        <tr>
+          <td>Address</td>
+          <td>[% venue.address %]</td>
+        </tr>
+        <tr>
+          <td>Address （日本語）</td>
+          <td>[% venue.item("address#ja") %]</td>
+        </tr>
+        <tr>
+          <td>Latitude</td>
+          <td>[% venue.latitude %]</td>
+        </tr>
+        <tr>
+          <td>Longitude</td>
+          <td>[% venue.longitude %]</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="col s6">
+    <div id="map" style="height: 300px"></div>
   </div>
 </div>
 
-<div class="row">
-  <div class="input-field col s6">
-    <label for="name">Name (English)</label>
-    <input placeholder="(Required) Main name of the venue" id="name" name="name" type="text" class="validate[% IF venue.name %] active[% END %]"[% IF venue.name %] value="[% venue.name %]"[% END %]>
-  </div>
-  <div class="input-field col s6">
-    <label for="name#ja">Name (日本語）</label>
-    <input placeholder="(任意）日本語で表示する際の施設名" id="name#ja" name="name#ja" type="text" class="validate[% IF venue.item("name#ja") %] active[% END %]"[% IF venue.item("name#ja") %] value="[% venue.item("name#ja") %]"[% END %]>
-  </div>
-</div>
-
-<div class="row">
-  <div class="input-field col s6">
-    <label for="address">Address (English)</label>
-    <input placeholder="(Required) Main address of the venue" id="address" name="address" type="text" class="validate[% IF venue.address %] active[% END %]"[% IF venue.address %] value="[% venue.address %]"[% END %]>
-  </div>
-  <div class="input-field col s6">
-    <label for="address#ja">Address (日本語）</label>
-    <input placeholder="(任意）日本語で表示する際の施設名" id="address#ja" name="address#ja" type="text" class="validate[% IF venue.item("address#ja") %] active[% END %]"[% IF venue.item("address#ja") %] value="[% venue.item("address#ja") %]"[% END %]>
-  </div>
-</div>
-
-<div class="row">
-  <div class="input-field col s6">
-    <label for="latitude">Latitude</label>
-    <input placeholder="Latitude of the venue" id="latitude" name="latitude" type="text" class="validate[% IF venue.latitude %] active[% END %]"[% IF venue.latitude %] value="[% venue.latitude %]"[% END %]>
-  </div>
-  <div class="input-field col s6">
-    <label for="longitude">Longitude</label>
-    <input placeholder="Longitude of the venue" id="longitude" name="longitude" type="text" class="validate[% IF venue.longitude %] active[% END %]"[% IF venue.longitude %] value="[% venue.longitude %]"[% END %]>
-  </div>
-</div>
-
-<div class="row">
-  <div class="col s12">
-    <div id="map" style="height: 200px"></div>
-  </div>
-</div>
 <script type="text/javascript">
 <!--
 var map;

@@ -74,7 +74,13 @@ func TestConferenceDateJSON(t *testing.T) {
 			return
 		}
 
-		if !assert.Equal(t, string(buf), pat, "result of marshal produces the same result") {
+		var dt2 model.ConferenceDate
+		if !assert.NoError(t, json.Unmarshal(buf, &dt2), "Unmarshaling newly marshaled data should succeed") {
+			t.Logf("Failed to unmarshal '%s'", buf)
+			return
+		}
+
+		if !assert.Equal(t, dt2, dt, "Roundtrip should create same object") {
 			return
 		}
 	}

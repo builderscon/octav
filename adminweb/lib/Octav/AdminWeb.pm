@@ -80,7 +80,7 @@ sub startup {
 
     for my $resource (qw(conference user venue room)) {
         my $r_resource = $r->under("/$resource");
-        for my $action (qw(lookup list)) {
+        for my $action (qw(edit lookup list)) {
             $r_resource->get("/$action")->to("$resource#$action");
         }
 

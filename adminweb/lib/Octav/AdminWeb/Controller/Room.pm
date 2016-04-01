@@ -18,25 +18,43 @@ sub list {
     $self->render(tx => "room/list");
 }
 
-sub lookup {
+sub _lookup {
     my $self = shift;
 
     my $log = $self->app->log;
     my $id = $self->param('id');
     if (!$id) {
         $log->debug("No 'id' available in query");
-        return $self->render(text => "not found", status => 404);
+        $self->render(text => "not found", status => 404);
+        return
     }
 
     my $client = $self->client;
     my $room = $client->lookup_room({id => $id, lang => "all"});
     if (! $room) {
         $log->debug("No such room '$id'");
-        return $self->render(text => "not found", status => 404);
+        $self->render(text => "not found", status => 404);
+        return
     }
     $self->stash(room => $room);
     $self->stash(api_key => $self->config->{googlemaps}->{api_key});
+    return 1
+}
+
+sub lookup {
+    my $self = shift;
+    if (! $self->_lookup()) {
+        return
+    }
     $self->render(tx => "room/lookup");
+}
+
+sub edit {
+    my $self = shift;
+    if (! $self->_lookup()) {
+        return
+    }
+    $self->render(tx => "room/edit");
 }
 
 sub update {

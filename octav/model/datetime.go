@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"reflect"
 	"time"
+	"unicode"
 )
 
 func NewDate(y, m, d int) Date {
@@ -61,15 +62,25 @@ func (dl *DateList) Extract(v interface{}) error {
 		for i, s := range vl {
 			switch s.(type) {
 			case string:
+				if err := ret[i].Parse(s.(string)); err != nil {
+					return err
+				}
+			case map[string]interface{}:
+				m := s.(map[string]interface{})
+				v, ok := m["date"]
+				if !ok {
+					return errors.New("missing required field 'date'")
+				}
+				s2, ok := v.(string)
+				if !ok {
+					return errors.New("invalid type for required field 'date'")
+				}
+				if err := ret[i].Parse(s2); err != nil {
+					return err
+				}
 			default:
 				return errors.New("invalid value to parse for conference date")
 			}
-
-			var dt Date
-			if err := dt.Parse(s.(string)); err != nil {
-				return err
-			}
-			ret[i] = dt
 		}
 	default:
 		return errors.New("invaid value to parse for date")
@@ -134,10 +145,79 @@ func (cd ConferenceDate) String() string {
 }
 
 func (cd ConferenceDate) MarshalJSON() ([]byte, error) {
-	return json.Marshal(cd.String())
+	// conference dates are represented as:
+	// { date: "YYYY-MM-DD", open: "HH:MM", close: "HH:MM" }
+	m := map[string]string{
+		"encoded": cd.String(),
+		"date":  cd.Date.String(),
+	}
+	if s := cd.Open.String(); len(s) > 0 {
+		m["open"] = cd.Open.String()
+	}
+	if s := cd.Close.String(); len(s) > 0 {
+		m["close"] = cd.Close.String()
+	}
+	return json.Marshal(m)
+}
+
+func (cd *ConferenceDate) extractMap(m map[string]interface{}) error {
+	di, ok := m["date"]
+	if !ok {
+		return errors.New("missing required field 'date'")
+	}
+	ds, ok := di.(string)
+	if !ok {
+		return errors.New("invalid type for field 'date'")
+	}
+
+	if err := cd.Date.Parse(ds); err != nil {
+		return err
+	}
+
+	if v, ok := m["open"]; ok {
+		s, ok := v.(string)
+		if !ok {
+			return errors.New("invalid type for field 'open'")
+		}
+		if err := cd.Open.Parse(s); err != nil {
+			return err
+		}
+	}
+
+	if v, ok := m["close"]; ok {
+		s, ok := v.(string)
+		if !ok {
+			return errors.New("invalid type for field 'close'")
+		}
+		if err := cd.Close.Parse(s); err != nil {
+			return err
+		}
+	}
+	return nil
 }
 
 func (cd *ConferenceDate) UnmarshalJSON(data []byte) error {
+	var isHash bool
+	for i := 0; i < len(data); i++ {
+		if unicode.IsSpace(rune(data[i])) {
+			continue
+		}
+		if data[i] == '{' {
+			isHash = true
+		}
+	}
+
+	if isHash {
+		m := map[string]interface{}{}
+		if err := json.Unmarshal(data, &m); err != nil {
+			return err
+		}
+		if err := cd.extractMap(m); err != nil {
+			return err
+		}
+		return nil
+	}
+
 	var s string
 	if err := json.Unmarshal(data, &s); err != nil {
 		return err
@@ -237,15 +317,17 @@ func (cdl *ConferenceDateList) Extract(v interface{}) error {
 		for i, s := range vl {
 			switch s.(type) {
 			case string:
+				if err := ret[i].Parse(s.(string)); err != nil {
+					return err
+				}
+			case map[string]interface{}:
+				if err := ret[i].extractMap(s.(map[string]interface{})); err != nil {
+					return err
+				}
 			default:
 				return ErrInvalidConferenceDateType{Type: reflect.TypeOf(s)}
 			}
 
-			var dt ConferenceDate
-			if err := dt.Parse(s.(string)); err != nil {
-				return err
-			}
-			ret[i] = dt
 		}
 	default:
 		return ErrInvalidConferenceDateType{Type: reflect.TypeOf(v)}
