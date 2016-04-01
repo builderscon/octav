@@ -11,17 +11,19 @@ import (
 	"k8s.io/kubernetes/pkg/watch"
 )
 
+const k8sNamespace = "default" // TODO make configurable
+
+type watchctx struct {
+	known map[string]struct{}
+}
+
 func Watch() (err error) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("k8s.Watch").BindError(&err)
 		defer g.End()
 	}
 
-	k8sConfig, err := k8sc.InClusterConfig()
-	if err != nil {
-		return err
-	}
-	k8sClient, err := k8sc.New(k8sConfig)
+	k8sClient, err := k8sc.NewInCluster()
 	if err != nil {
 		return err
 	}
@@ -31,7 +33,21 @@ func Watch() (err error) {
 		return err
 	}
 
-	w, err := k8sClient.Pods("default").Watch(label, nil, "")
+	// First, get the list of all known pods, so to not to flood
+	// the notification.
+	podlist, err := k8sClient.Pods(k8sNamespace).List(api.ListOptions{})
+	if err != nil {
+		return err
+	}
+	ctx := watchctx{}
+	ctx.known = map[string]struct{}{}
+	for _, pod := range podlist.Items {
+		ctx.known[pod.Name] = struct{}{}
+	}
+
+	w, err := k8sClient.Pods(k8sNamespace).Watch(api.ListOptions{
+		LabelSelector: label,
+	})
 	if err != nil {
 		return err
 	}
@@ -45,7 +61,7 @@ func Watch() (err error) {
 			}
 			switch e.Object.(type) {
 			case *api.Pod:
-				if err := notifyPod(e, e.Object.(*api.Pod)); err != nil {
+				if err := notifyPod(&ctx, e, e.Object.(*api.Pod)); err != nil {
 					return err
 				}
 			}
@@ -54,7 +70,7 @@ func Watch() (err error) {
 	return nil
 }
 
-func notifyPod(e watch.Event, pod *api.Pod) (err error) {
+func notifyPod(ctx *watchctx, e watch.Event, pod *api.Pod) (err error) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("k8s.notifyPod").BindError(&err)
 		defer g.End()
@@ -62,6 +78,16 @@ func notifyPod(e watch.Event, pod *api.Pod) (err error) {
 
 	switch e.Type {
 	case watch.Added:
+		if _, ok := ctx.known[pod.Name]; ok {
+			if pdebug.Enabled {
+				pdebug.Printf("ignoring pod %s", pod.Name)
+			}
+			// If this is a known pod, then we probably
+			// don't want to report its creation
+			delete(ctx.known, pod.Name)
+			return nil
+		}
+
 		msgbuf := bytes.Buffer{}
 		msgbuf.WriteString("Pod started: name=")
 		msgbuf.WriteString(pod.Name)
@@ -69,7 +95,7 @@ func notifyPod(e watch.Event, pod *api.Pod) (err error) {
 		params.Username = "GKE Status"
 		params.Markdown = true
 		params.Attachments = append(params.Attachments, slack.Attachment{
-			Color: "good",
+			Color:    "good",
 			Fallback: msgbuf.String(),
 			Fields: []slack.AttachmentField{
 				slack.AttachmentField{
@@ -94,7 +120,7 @@ func notifyPod(e watch.Event, pod *api.Pod) (err error) {
 		params.Username = "GKE Status"
 		params.Markdown = true
 		params.Attachments = append(params.Attachments, slack.Attachment{
-			Color: "warning",
+			Color:    "warning",
 			Fallback: msgbuf.String(),
 			Fields: []slack.AttachmentField{
 				slack.AttachmentField{
@@ -103,8 +129,8 @@ func notifyPod(e watch.Event, pod *api.Pod) (err error) {
 					Short: true,
 				},
 			},
-			Title: "Pod Deleted",
-      ThumbURL: "https://pbs.twimg.com/media/Bt_pEfqCAAAiVyz.png",
+			Title:    "Pod Deleted",
+			ThumbURL: "https://pbs.twimg.com/media/Bt_pEfqCAAAiVyz.png",
 		})
 
 		_, _, err := slackClient.PostMessage("#gcp-status", "*GKE Status Changed*", params)
@@ -112,9 +138,11 @@ func notifyPod(e watch.Event, pod *api.Pod) (err error) {
 			return err
 		}
 	default:
-		pdebug.Printf("Unknown event")
-		pdebug.Printf("%#v", e)
-		pdebug.Printf("%#v", pod)
+		if pdebug.Enabled {
+			pdebug.Printf("Unknown event")
+			pdebug.Printf("%#v", e)
+			pdebug.Printf("%#v", pod)
+		}
 	}
 
 	return nil
