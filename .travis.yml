@@ -6,6 +6,7 @@ services:
 env:
   - TEST_DIR=octav
   - TEST_DIR=adminweb
+  - TEST_DIR=slackbot
 addons:
   apt:
     packages:
