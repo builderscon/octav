@@ -21,7 +21,7 @@ spec:
           secret:
             secretName: googlemaps-dev
       containers:
-        - image: asia.gcr.io/builderscon-1248/adminweb:20160330.203130
+        - image: asia.gcr.io/builderscon-1248/adminweb:20160331.135024
           name: adminweb
           ports:
             - containerPort: 5000

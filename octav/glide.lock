@@ -42,7 +42,7 @@ imports:
   subpackages:
   - assert
 - name: golang.org/x/net
-  version: 991d3e32f76f19ee6d9caadb3a22eae8d23315f7
+  version: 024ed629fd292398cfd43c9678a5bf004f7defdc
   subpackages:
   - context
 - name: golang.org/x/text

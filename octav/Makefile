@@ -17,7 +17,7 @@ SRC_FILES = $(wildcard *.go validator/*.go client/*.go db/*.go model/*.go)
 all: test build
 
 installdeps:
-	@PATH=$(INTERNAL_BIN_DIR):$(PATH) glide up
+	@PATH=$(INTERNAL_BIN_DIR):$(PATH) glide install
 
 $(INTERNAL_BIN_DIR)/%: internal/cmd/%/*.go
 	@mkdir -p $(INTERNAL_BIN_DIR)
