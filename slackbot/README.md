@@ -10,7 +10,7 @@ Simply talk to the bot to create and upload certificates for builderscon.io page
 
 ### `acme authz <domain>`
 
-![](../../media/images/slackbot-letsencrypt-authz.png)
+![](media/images/slackbot-letsencrypt-authz.png)
 
 Get authorization to issue certificates for given domain. We use dns-01
 challenge, so this takes approx 5 to 10 minutes due to the way CloudDNS
@@ -22,6 +22,6 @@ Fetch certificates for the given domain.
 
 ### `acme upload <domain>`
 
-![](../../media/images/slackbot-letsencrypt-upload.png)
+![](media/images/slackbot-letsencrypt-upload.png)
 
 Upload new certificates that then can be used in HTTPS Load Balancers.
