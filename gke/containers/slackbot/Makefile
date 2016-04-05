@@ -49,6 +49,7 @@ clean-docker-images:
 clean_executables:
 	@echo "Deleting generated executables"
 	@-rm slackbot
+	@-rm slackbot-debug
 
 clean: clean-docker-images clean_executables
 

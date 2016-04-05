@@ -17,7 +17,8 @@ type watchctx struct {
 	known map[string]struct{}
 }
 
-func Watch() (err error) {
+func StartWatch(done chan struct{}) (err error) {
+	defer close(done)
 	if pdebug.Enabled {
 		g := pdebug.Marker("k8s.Watch").BindError(&err)
 		defer g.End()

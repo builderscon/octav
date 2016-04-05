@@ -1,0 +1,36 @@
+kind: Pod
+apiVersion: v1
+metadata:
+  labels:
+    name: slackbot
+    group: octav
+  name: slackbot
+spec:
+  volumes:
+    - name: slack
+      secret:
+        secretName: slack-dev
+    - name: google
+      secret:
+        secretName: google-dev
+  containers:
+    - image: asia.gcr.io/builderscon-1248/slackbot:20160405.202610
+      name: slackbot
+      env:
+        - name: SLACKBOT_API_TOKEN_FILE
+          value: /slack/token
+        - name: ACME_AGENT_EMAIL
+          value: lestrrat@gmail.com
+        - name: ACME_AGENT_GCP_PROJECT_ID
+          value: builderscon-1248
+        - name: ACME_AGENT_GCP_ZONE_NAME
+          value: builderscon
+        - name: GOOGLE_APPLICATION_CREDENTIALS
+          value: /google/servicekey
+      volumeMounts:
+        - name: slack
+          readOnly: true
+          mountPath: /slack
+        - name: google
+          readOnly: true
+          mountPath: /google
