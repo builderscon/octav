@@ -148,7 +148,7 @@ imports:
   subpackages:
   - codec
 - name: golang.org/x/net
-  version: c2528b2dd8352441850638a8bb678c2ad056fd3e
+  version: 024ed629fd292398cfd43c9678a5bf004f7defdc
   subpackages:
   - context
   - websocket

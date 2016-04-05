@@ -5,7 +5,7 @@ GOARCH=$(word 2,$(subst /, ,$(word 4, $(GOVERSION))))
 BIN_DIR=$(CURDIR)/_bin/$(GOOS)/$(GOARCH)
 
 installdeps:
-	@PATH=$(INTERNAL_BIN_DIR):$(PATH) glide up
+	@PATH=$(INTERNAL_BIN_DIR):$(PATH) glide install
 
 $(INTERNAL_BIN_DIR)/hsup:
 	@mkdir -p $(INTERNAL_BIN_DIR)
