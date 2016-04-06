@@ -10,9 +10,9 @@ import (
 	"github.com/nlopes/slack"
 	"golang.org/x/net/context"
 	"golang.org/x/oauth2/google"
-	"google.golang.org/api/compute/v1"
 	"google.golang.org/api/dns/v1"
 	"google.golang.org/api/storage/v1"
+	k8sc "k8s.io/kubernetes/pkg/client/unversioned"
 )
 
 var slackClient *slack.Client
@@ -65,7 +65,6 @@ func initAcmeAgent() error {
 
 	ctx := context.Background()
 	httpcl, err := google.DefaultClient(ctx,
-		compute.CloudPlatformScope,
 		dns.NdevClouddnsReadwriteScope,
 		storage.CloudPlatformScope,
 		storage.DevstorageReadWriteScope,
@@ -84,14 +83,14 @@ func initAcmeAgent() error {
 		return err
 	}
 
-	computesvc, err := compute.New(httpcl)
+	k8sClient, err := k8sc.NewInCluster()
 	if err != nil {
 		return err
 	}
 
 	aa, err := acmeagent.New(acmeagent.AgentOptions{
 		DNSCompleter: gcp.NewDNS(dnssvc, gcpproj, gcpzone),
-		Uploader:     gcp.NewCertificateUpload(computesvc, gcpproj),
+		Uploader:     gcp.NewSecretUpload(k8sClient, "default"),
 		StateStorage: acmeStateStore,
 	})
 
