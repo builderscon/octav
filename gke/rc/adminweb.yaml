@@ -28,7 +28,7 @@ spec:
               protocol: TCP
           env:
             - name: OCTAV_REDIS
-              value: 10.96.0.53:6379
+              value: 10.96.2.9:6379
             - name: OCTAV_GITHUB_CLIENT_ID
               value: /github/id
             - name: OCTAV_GITHUB_CLIENT_SECRET
@@ -42,4 +42,4 @@ spec:
             - name: googlemaps
               readOnly: true
               mountPath: /googlemaps
-
+            
