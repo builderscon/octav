@@ -37,7 +37,9 @@ builder {
         store => $store,
         serializer => [
             sub { encode_base64($encoder->encode($_[0])) },
-            sub { $decoder->decode(decode_base64($_[0])) },
+            sub {
+                return eval { $decoder->decode(decode_base64($_[0])) };
+            },
         ],
         cookie_name => "octav_admin_session",
 
