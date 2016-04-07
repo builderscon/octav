@@ -1,5 +1,5 @@
 hash: a653765dbd55ba91f87cec10591518bd6bfc88af3114b3f0657312355ae24330
-updated: 2016-04-06T11:32:33.45617931+09:00
+updated: 2016-04-07T10:45:24.073402108+09:00
 imports:
 - name: bitbucket.org/ww/goautoneg
   version: 75cd24fc2f2c
@@ -93,7 +93,7 @@ imports:
 - name: github.com/juju/ratelimit
   version: 77ed1c8a01217656d2080ad51981f6e99adaa177
 - name: github.com/lestrrat/go-cloud-acmeagent
-  version: 5e20af40b861a467a695ce4215dc11e5dce7172f
+  version: b75f13628a73d7c436177c61696bd8d4d23162de
   subpackages:
   - gcp
   - store
@@ -189,7 +189,7 @@ imports:
 - name: gopkg.in/yaml.v2
   version: d466437aa4adc35830964cffc5b5f262c63ddcb4
 - name: k8s.io/kubernetes
-  version: 4f329516ae7312420577b10ee10005bbe17c87c8
+  version: f690220b5ce57a92dca68f07651fe76ecb72e1fd
   subpackages:
   - pkg/api
   - pkg/client/unversioned
