@@ -8,6 +8,9 @@ use UUID::Tiny qw(:std);
 
 sub index {
     my $self = shift;
+    if (my $error = $self->param('error')) {
+        $self->stash(error => $error);
+    }
     $self->render(tx => "auth/index");
 }
 
@@ -23,7 +26,7 @@ sub github {
     my $log = $self->app->log;
     my $github_config = $self->config->{github};
     my $uri = URI->new($github_config->{auth_endpoint});
-    my $redirect_uri = "http://admin.builderscon.io:5000/auth/github_cb";
+    my $redirect_uri = "https://admin.builderscon.io/auth/github_cb";
     my $state = unpack("H*", create_uuid(UUID_RANDOM));
     my $session = $self->plack_session;
     $session->{"github_state"} = $state;
@@ -45,6 +48,10 @@ sub github_cb {
     my $log = $self->app->log;
 
     $log->debug("in github_cb");
+
+    if (my $error = $self->param("error")) {
+        $self->redirect_to($self->url_for("/auth")->query(error => $error));
+    }
 
     my $code = $self->param("code");
     my $state = $self->param("state");
