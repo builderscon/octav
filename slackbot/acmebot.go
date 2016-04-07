@@ -2,11 +2,9 @@ package slackbot
 
 import (
 	"errors"
-	"os"
-	"os/signal"
 	"regexp"
 	"strings"
-	"syscall"
+	"sync"
 	"time"
 
 	"github.com/lestrrat/go-cloud-acmeagent"
@@ -17,14 +15,15 @@ import (
 type rtmctx struct {
 	RTM     *slack.RTM
 	Message *slack.MessageEvent
+	Sync    bool
 }
 
 func (ctx *rtmctx) Reply(txt string) {
 	ctx.RTM.SendMessage(ctx.RTM.NewOutgoingMessage(txt, ctx.Message.Channel))
 }
 
-func StartRTM(done chan struct{}) {
-	defer close(done)
+func StartRTM(done chan struct{}, wg *sync.WaitGroup) {
+	defer wg.Done()
 	if pdebug.Enabled {
 		g := pdebug.Marker("StartRTM")
 		defer g.End()
@@ -32,9 +31,6 @@ func StartRTM(done chan struct{}) {
 
 	rtm := slackClient.NewRTM()
 	go rtm.ManageConnection()
-
-	sigCh := make(chan os.Signal, 265)
-	signal.Notify(sigCh, syscall.SIGTERM, syscall.SIGINT, syscall.SIGQUIT)
 
 	for loop := true; loop; {
 		select {
@@ -45,8 +41,6 @@ func StartRTM(done chan struct{}) {
 				}
 				loop = false
 			}
-		case <-sigCh:
-			loop = false
 		case <-done:
 			loop = false
 		}
@@ -114,6 +108,8 @@ func handleMessage(rtm *slack.RTM, msg slack.RTMEvent) (err error) {
 
 func handleLetsEncryptCmd(ctx *rtmctx, cmd []string) {
 	switch cmd[0] {
+	case "help":
+		handleHelpCmd(ctx)
 	case "authz":
 		if len(cmd) < 2 {
 			return
@@ -124,12 +120,18 @@ func handleLetsEncryptCmd(ctx *rtmctx, cmd []string) {
 			return
 		}
 		handleCertCmd(ctx, cmd[1:])
-	case "upload":
-		if len(cmd) < 2 {
-			return
-		}
-		handleUploadCmd(ctx, cmd[1:])
 	}
+}
+
+func handleHelpCmd(ctx *rtmctx) {
+	ctx.Reply(`usage: acme [cert|authz] [subcmds...]
+
+acme cert issue <domain>
+acme cert delete <domain>
+acme cert upload <domain>
+acme authz request <domain>
+acme authz delete <domain>
+`)
 }
 
 func handleAuthzCmd(ctx *rtmctx, cmd []string) {
@@ -143,7 +145,21 @@ func handleAuthzCmd(ctx *rtmctx, cmd []string) {
 	}
 
 	domain := sl.Text
+	switch cmd[1] {
+	case "request":
+		handleAuthzRequestCmd(ctx, domain)
+	case "delete":
+		handleAuthzDeleteCmd(ctx, domain)
+	default:
+		ctx.Reply("Usage: `acme authz [request|delete] <domain>`")
+	}
+}
 
+func handleAuthzDeleteCmd(ctx *rtmctx, domain string) {
+	acmeStateStore.DeleteAuthorization(domain)
+}
+
+func handleAuthzRequestCmd(ctx *rtmctx, domain string) {
 	ctx.Reply(":white_check_mark: Authorizing *" + domain + "*")
 
 	var authz acmeagent.Authorization
@@ -159,29 +175,60 @@ func handleAuthzCmd(ctx *rtmctx, cmd []string) {
 	}
 
 	ctx.Reply(":white_check_mark: Running authorization (this may take a few minutes)")
-	// Do this in a goroutine so we don't block from doing other things
-	go func() {
+
+	cb := func() {
 		if err := acmeAgent.AuthorizeForDomain(domain); err != nil {
 			ctx.Reply(":exclamation: Authorization failed: " + err.Error())
 			return
 		}
 		ctx.Reply(":tada: Authorization for domain *" + domain + "* complete")
-	}()
+	}
+
+	if ctx.Sync {
+		cb()
+	} else {
+		go cb()
+	}
 }
 
 func handleCertCmd(ctx *rtmctx, cmd []string) {
-	if len(cmd) < 1 {
+pdebug.Printf("%#v", cmd)
+	switch len(cmd) {
+	case 0, 1:
+		ctx.Reply("Usage: `acme cert [issue|delete|upload] <domain>`")
 		return
+	default:
 	}
 
-	sl, err := parseSlackLink(cmd[0])
+	sl, err := parseSlackLink(cmd[1])
 	if err != nil {
 		return
 	}
-
 	domain := sl.Text
-	ctx.Reply(":white_check_mark: Issueing certificates for *" + domain + "*")
 
+	switch cmd[0] {
+	case "issue":
+		handleCertIssueCmd(ctx, domain)
+	case "delete":
+		handleCertDeleteCmd(ctx, domain)
+	case "upload":
+		handleCertUploadCmd(ctx, domain)
+	default:
+		ctx.Reply("Usage: `acme cert [issue|delete|upload] <domain>`")
+	}
+}
+
+func handleCertDeleteCmd(ctx *rtmctx, domain string) {
+	ctx.Reply(":white_check_mark: Deleting certificates for *" + domain + "*")
+	if err := acmeStateStore.DeleteCert(domain); err != nil {
+		ctx.Reply(":exclamation: Failed to delete certificates: " + err.Error())
+	} else {
+		ctx.Reply(":tada: Deleted certificates")
+	}
+}
+
+func handleCertIssueCmd(ctx *rtmctx, domain string) {
+	ctx.Reply(":white_check_mark: Issueing certificates for *" + domain + "*")
 	cert, err := acmeStateStore.LoadCert(domain)
 	if err != nil {
 		ctx.Reply(":white_check_mark: Certificates for domain not found in storage.")
@@ -195,7 +242,10 @@ func handleCertCmd(ctx *rtmctx, cmd []string) {
 	}
 
 	// run handleAuthzCmd to make sure that the authorization is there
-	handleAuthzCmd(ctx, cmd)
+	osync := ctx.Sync
+	ctx.Sync = true
+	handleAuthzRequestCmd(ctx, domain)
+	ctx.Sync = osync
 
 	ctx.Reply(":white_check_mark: Fetching certificates")
 	// Do this in a goroutine so we don't block from doing other things
@@ -204,21 +254,11 @@ func handleCertCmd(ctx *rtmctx, cmd []string) {
 			ctx.Reply(":exclamation: Failed to fetch certificates: " + err.Error())
 			return
 		}
-		ctx.Reply(":tada: Authorization for domain *" + domain + "* complete")
+		ctx.Reply(":tada: Issueing certificates for domain *" + domain + "* complete")
 	}()
 }
 
-func handleUploadCmd(ctx *rtmctx, cmd []string) {
-	if len(cmd) < 1 {
-		return
-	}
-
-	sl, err := parseSlackLink(cmd[0])
-	if err != nil {
-		return
-	}
-
-	domain := sl.Text
+func handleCertUploadCmd(ctx *rtmctx, domain string) {
 	ctx.Reply(":white_check_mark: Uploading certificates for *" + domain + "*")
 
 	name, err := acmeAgent.UploadCertificate(domain)
@@ -227,5 +267,5 @@ func handleUploadCmd(ctx *rtmctx, cmd []string) {
 		return
 	}
 
-	ctx.Reply(":tada: Certificates uploaded as *" +name+"*")
+	ctx.Reply(":tada: Certificates uploaded as *" + name + "*")
 }

@@ -3,6 +3,9 @@ package slackbot
 import (
 	"errors"
 	"os"
+	"os/signal"
+	"sync"
+	"syscall"
 
 	"github.com/lestrrat/go-cloud-acmeagent"
 	"github.com/lestrrat/go-cloud-acmeagent/gcp"
@@ -101,9 +104,31 @@ func initAcmeAgent() error {
 // Dummy for now
 func Run(_ string) error {
 	done := make(chan struct{})
-	go StartRTM(done)
-	go StartWatch(done)
+	wg := sync.WaitGroup{}
+	wg.Add(2)
 
-	<-done
+	go StartRTM(done, &wg)
+	go StartWatch(done, &wg)
+
+	sigCh := make(chan os.Signal, 265)
+	signal.Notify(sigCh, syscall.SIGTERM, syscall.SIGINT, syscall.SIGQUIT)
+	for {
+		select {
+		case <-sigCh:
+			if pdebug.Enabled {
+				pdebug.Printf("Received signal, bailing out")
+			}
+			close(done)
+		}
+	}
+
+	if pdebug.Enabled {
+		pdebug.Printf("Waiting for goroutines to exit...")
+	}
+	wg.Wait()
+
+	if pdebug.Enabled {
+		pdebug.Printf("All goroutines have exited, bailing out")
+	}
 	return nil
 }

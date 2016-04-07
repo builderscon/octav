@@ -2,6 +2,7 @@ package slackbot
 
 import (
 	"bytes"
+	"sync"
 
 	"github.com/lestrrat/go-pdebug"
 	"github.com/nlopes/slack"
@@ -17,8 +18,9 @@ type watchctx struct {
 	known map[string]struct{}
 }
 
-func StartWatch(done chan struct{}) (err error) {
-	defer close(done)
+func StartWatch(done chan struct{}, wg *sync.WaitGroup) (err error) {
+	defer wg.Done()
+
 	if pdebug.Enabled {
 		g := pdebug.Marker("k8s.Watch").BindError(&err)
 		defer g.End()
@@ -56,6 +58,8 @@ func StartWatch(done chan struct{}) (err error) {
 	c := w.ResultChan()
 	for {
 		select {
+		case <-done:
+			return nil
 		case e, ok := <-c:
 			if !ok {
 				break
