@@ -42,7 +42,11 @@ sub startup {
 
     $self->helper(client => sub {
         # FIXME endpoint should not be hardcoded
-        state $client = WebService::Octav->new(endpoint => "http://130.211.245.78:8080");
+        my $host = $ENV{APISERVER_SERVICE_HOST};
+        my $port = $ENV{APISERVER_SERVICE_PORT};
+        my $endpoint = "http://$host:$port";
+        warn "ENDPOINT = $endpoint";
+        state $client = WebService::Octav->new(endpoint => $endpoint);
         return $client;
     });
 
