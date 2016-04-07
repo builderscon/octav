@@ -9,12 +9,10 @@ import (
 	"github.com/lestrrat/go-pdebug"
 )
 
-var errNoEnv = errors.New("no env")
-
 func readEnvConfigFile(name, ename string, dst *string) error {
 	f := os.Getenv(ename)
 	if f == "" {
-		return errNoEnv
+		return errors.New("environment " + ename + " not found")
 	}
 
 	if pdebug.Enabled {
