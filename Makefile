@@ -102,5 +102,5 @@ gke-publish:
 
 gke-deploy:
 	@echo "Deploying $(IMAGE_NAME) via rolling update"
-	kubectl rolling-update --update-period=5s --image=$(IMAGE_NAME) $(APPNAME)
+	kubectl rolling-update --update-period=1s --image=$(IMAGE_NAME) $(APPNAME)
 
