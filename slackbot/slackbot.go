@@ -98,6 +98,12 @@ func initAcmeAgent() error {
 	})
 
 	acmeAgent = aa
+	var acct acmeagent.Account
+	if err := acmeStateStore.LoadAccount(&acct); err != nil {
+		if err := acmeAgent.Register(email); err != nil {
+			return err
+		}
+	}
 	return nil
 }
 
