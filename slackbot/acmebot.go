@@ -1,6 +1,7 @@
 package slackbot
 
 import (
+	"encoding/json"
 	"errors"
 	"regexp"
 	"strings"
@@ -116,7 +117,7 @@ func handleLetsEncryptCmd(ctx *rtmctx, cmd []string) {
 		}
 		handleAuthzCmd(ctx, cmd[1:])
 	case "cert":
-		if len(cmd) < 2 {
+		if len(cmd) < 3 {
 			return
 		}
 		handleCertCmd(ctx, cmd[1:])
@@ -135,28 +136,33 @@ acme authz delete <domain>
 }
 
 func handleAuthzCmd(ctx *rtmctx, cmd []string) {
-	if len(cmd) < 1 {
+	if len(cmd) < 2 {
 		return
 	}
 
-	sl, err := parseSlackLink(cmd[0])
+	sl, err := parseSlackLink(cmd[1])
 	if err != nil {
 		return
 	}
-
 	domain := sl.Text
-	switch cmd[1] {
+	switch cmd[0] {
 	case "request":
 		handleAuthzRequestCmd(ctx, domain)
 	case "delete":
 		handleAuthzDeleteCmd(ctx, domain)
+	case "show":
+		handleAuthzShowCmd(ctx, domain)
 	default:
-		ctx.Reply("Usage: `acme authz [request|delete] <domain>`")
+		ctx.Reply("Usage: `acme authz [request|delete|show] <domain>`")
 	}
 }
 
 func handleAuthzDeleteCmd(ctx *rtmctx, domain string) {
-	acmeStateStore.DeleteAuthorization(domain)
+	if err := acmeStateStore.DeleteAuthorization(domain); err != nil {
+		ctx.Reply(":exclamation: Deleting authorization failed: " + err.Error())
+		return
+	}
+	ctx.Reply(":tada: Deleted authorization")
 }
 
 func handleAuthzRequestCmd(ctx *rtmctx, domain string) {
@@ -191,8 +197,18 @@ func handleAuthzRequestCmd(ctx *rtmctx, domain string) {
 	}
 }
 
+func handleAuthzShowCmd(ctx *rtmctx, domain string) {
+	var authz acmeagent.Authorization
+	if err := acmeStateStore.LoadAuthorization(domain, &authz); err != nil {
+		ctx.Reply(":white_check_mark: Authorization for domain not found in storage.")
+		return
+	}
+
+	buf, _ := json.MarshalIndent(authz, "", "  ")
+	ctx.Reply("```\n" + string(buf) + "\n```")
+}
+
 func handleCertCmd(ctx *rtmctx, cmd []string) {
-pdebug.Printf("%#v", cmd)
 	switch len(cmd) {
 	case 0, 1:
 		ctx.Reply("Usage: `acme cert [issue|delete|upload] <domain>`")
