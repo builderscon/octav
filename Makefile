@@ -1,6 +1,9 @@
 ifndef OCTAV_DB_NAME
 	OCTAV_DB_NAME = octav
 endif
+ifdef CONTAINER
+	CONTAINER_OPTS=--container=$(CONTAINER)
+endif
 GCLOUD_CONFIG_DIR = .gcloud
 CONTAINER_DIR=$(CURDIR)/gke/containers
 CLOUDSQL_DIR=$(GCLOUD_CONFIG_DIR)/sql
@@ -106,5 +109,5 @@ gke-publish:
 
 gke-deploy:
 	@echo "Deploying $(IMAGE_NAME) via rolling update"
-	kubectl rolling-update --update-period=1s --image=$(IMAGE_NAME) $(APPNAME)
+	kubectl rolling-update --update-period=1s --image=$(IMAGE_NAME) $(CONTAINER_OPTS) $(APPNAME)
 

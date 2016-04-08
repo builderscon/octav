@@ -1,6 +1,7 @@
 TOPDIR=$(CURDIR)/../../..
 REPOSITORY_HOST=asia.gcr.io
 PROJECT_ID=$(shell gcloud config list 2>&1 | grep 'project = ' | sed -e 's/project = //')
+CONTAINER=app
 APPNAME=adminweb
 ADMINWEB_DIR=$(TOPDIR)/adminweb
 TAG:=$(shell date +"%Y%m%d.%H%M%S")
@@ -27,7 +28,7 @@ publish:
 	$(MAKE) -C $(TOPDIR) gke-publish IMAGE_NAME=$(IMAGE_NAME) APPNAME=$(APPNAME)
 
 deploy:
-	$(MAKE) -C $(TOPDIR) gke-deploy IMAGE_NAME=$(IMAGE_NAME) APPNAME=$(APPNAME)
+	$(MAKE) -C $(TOPDIR) gke-deploy IMAGE_NAME=$(IMAGE_NAME) APPNAME=$(APPNAME) CONTAINER=$(CONTAINER)
 
 publish-deploy: publish deploy
 
