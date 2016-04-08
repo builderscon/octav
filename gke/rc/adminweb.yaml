@@ -20,6 +20,7 @@ spec:
         - name: googlemaps
           secret:
             secretName: googlemaps-dev
+        # This secret must be created using gke/etc/adminweb-h2o-dev.conf
         - name: h2o
           secret:
             secretName: adminweb-h2o-dev
