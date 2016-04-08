@@ -26,10 +26,7 @@ build-octav: $(CURDIR)/octav
 build-octav-debug: $(CURDIR)/octav-debug
 
 dm-running:
-ifneq (,$(strip $(shell docker-machine env default 2>&1 | grep -o 'not running')))
-	@echo "Starting docker-machine (default)"
-	@docker-machine start default
-endif
+	$(MAKE) -C $(TOPDIR) dm-running
 
 docker-debug: dm-running build-octav-debug
 	$(MAKE) -C $(TOPDIR) docker-env-ready
