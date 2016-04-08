@@ -80,6 +80,10 @@ initdb:
 docker-env-ready:
 	$(DOCKER_MACHINE_ENV)
 
+ifneq (,$(strip $(shell docker-machine env default 2>&1 | grep -o 'not running')))
+	@echo "Starting docker-machine (default)"
+	@docker-machine start default
+endif
 clean-docker-images:
 	@echo "Deleting old images"
 	@-docker images -q --filter dangling=true | xargs docker rmi

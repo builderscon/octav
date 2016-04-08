@@ -1,0 +1,32 @@
+# http://qiita.com/sawanoboly/items/fbd3598d7446ed3fde73
+
+FROM buildpack-deps
+RUN echo "deb-src http://ftp.jp.debian.org/debian/ jessie main" >> /etc/apt/sources.list
+RUN echo "deb-src http://security.debian.org/ jessie/updates main" >> /etc/apt/sources.list
+RUN mkdir -p /glibc
+WORKDIR /glibc
+RUN apt-get update && apt-get install -y \
+cmake dpkg-dev \
+&& apt-get build-dep -y glibc --fix-missing \
+&& apt-get source -y glibc \
+&& rm -rf /var/lib/apt/lists/*
+
+# CONFARGS += --enable-static-nss
+WORKDIR /glibc/glibc-2.19
+ENV DEB_BUILD_OPTIONS="nocheck parallel=4"
+RUN sed -i '/--without-selinux/i\--enable-static-nss\ \\' debian/rules.d/build.mk
+RUN dpkg-buildpackage -us -uc -rfakeroot
+
+WORKDIR /glibc
+RUN dpkg -i *.deb
+
+WORKDIR /
+RUN git clone -b v1.6.0 https://github.com/h2o/h2o --depth 1
+WORKDIR /h2o
+RUN git submodule update --init --recursive
+RUN echo 'SET(CMAKE_FIND_LIBRARY_SUFFIXES ".a")' >> CMakeLists.txt
+RUN echo 'SET(BUILD_SHARED_LIBRARIES OFF)' >> CMakeLists.txt
+RUN echo 'SET(CMAKE_EXE_LINKER_FLAGS "-static -static-libstdc++ -static-libgcc")' >> CMakeLists.txt
+RUN cmake -DWITH_BUNDLED_SSL=on -DBUILD_SHARED_LIBS=no .\
+&& make h2o
+CMD ["/bin/bash"]

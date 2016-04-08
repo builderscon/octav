@@ -1,13 +1,31 @@
+kind: List
 apiVersion: v1
-kind: Service
-metadata:
-    name: adminweb
-    labels:
+items:
+  - apiVersion: v1
+    kind: Service
+    metadata:
+      name: adminweb
+      labels:
         name: adminweb
-spec:
-    type: LoadBalancer
-    selector:
+    spec:
+      type: LoadBalancer
+      selector:
         name: adminweb
-    ports:
+      ports:
         - name: adminweb
+          port: 443
+          targetPort: 443
+  - apiVersion: v1
+    kind: Service
+    metadata:
+      name: adminweb-internal
+      labels:
+        name: adminweb-internal
+    spec:
+      type: ClusterIP
+      selector:
+        name: adminweb
+      ports:
+        - name: adminweb-internal
           port: 5000
+          targetPort: 5000
