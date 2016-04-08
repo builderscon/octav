@@ -14,6 +14,11 @@ spec:
         group: octav
     spec:
       volumes:
+        # This emptyDir volume is used to populate data from the app container
+        # so that the proxy can serve it without asking the app for it
+        - name: static-files
+          emptyDir:
+            medium: Memory
         - name: github
           secret:
             secretName: github-dev
@@ -28,7 +33,7 @@ spec:
           secret:
             secretName: admin-builderscon-io-20160407-121650
       containers:
-        - image: asia.gcr.io/builderscon-1248/h2o
+        - image: asia.gcr.io/builderscon-1248/h2o:20160408.180741
           name: proxy
           ports:
             - name: h2o-proxy-http
@@ -38,6 +43,9 @@ spec:
               containerPort: 443
               protocol: TCP
           volumeMounts:
+            - name: static-files
+              readOnly: true
+              mountPath: /static-files
             - name: h2o
               readOnly: true
               mountPath: /etc/h2o
@@ -52,6 +60,11 @@ spec:
           ports:
             - containerPort: 5000
               protocol: TCP
+          lifecycle:
+            postStart:
+              exec:
+                # This command copies the static files to a shared dir so proxy can read it
+                command: [ "cp", "-R", "/adminweb/public/static/", "/static-files/" ]
           livenessProbe:
             httpGet:
               path: /auth/
@@ -68,6 +81,8 @@ spec:
             - name: OCTAV_GOOGLE_MAPS_API_KEY
               value: /googlemaps/apikey
           volumeMounts:
+            - name: static-files
+              mountPath: /static-files
             - name: github
               readOnly: true
               mountPath: /github
