@@ -1,5 +1,9 @@
 APPNAME=h2o
 BUILDER_IMAGE=octav/h2o-static-builder
+TOPDIR=$(CURDIR)/../../..
+REPOSITORY_HOST=asia.gcr.io
+PROJECT_ID=$(shell gcloud config list 2>&1 | grep 'project = ' | sed -e 's/project = //')
+
 TAG:=$(shell date +"%Y%m%d.%H%M%S")
 IMAGE_NAME:=$(REPOSITORY_HOST)/$(PROJECT_ID)/$(APPNAME):$(TAG)
 
