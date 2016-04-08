@@ -20,12 +20,43 @@ spec:
         - name: googlemaps
           secret:
             secretName: googlemaps-dev
+        - name: h2o
+          secret:
+            secretName: adminweb-h2o-dev
+        - name: ssl
+          secret:
+            secretName: admin-builderscon-io-20160407-121650
       containers:
-        - image: asia.gcr.io/builderscon-1248/adminweb:20160331.135024
-          name: adminweb
+        - image: asia.gcr.io/builderscon-1248/h2o
+          name: proxy
+          ports:
+            - name: h2o-proxy-http
+              containerPort: 80
+              protocol: TCP
+            - name: h2o-proxy-https
+              containerPort: 443
+              protocol: TCP
+          volumeMounts:
+            - name: h2o
+              readOnly: true
+              mountPath: /etc/h2o
+            - name: ssl
+              readOnly: true
+              mountPath: /etc/ssl/certs
+          args:
+            - -c
+            - /etc/h2o/h2o.conf
+        - image: asia.gcr.io/builderscon-1248/adminweb:20160407.110952
+          name: app
           ports:
             - containerPort: 5000
               protocol: TCP
+          livenessProbe:
+            httpGet:
+              path: /auth/
+              port: 5000
+            initialDelaySeconds: 30
+            timeoutSeconds: 5
           env:
             - name: OCTAV_REDIS
               value: 10.96.2.9:6379
@@ -42,4 +73,4 @@ spec:
             - name: googlemaps
               readOnly: true
               mountPath: /googlemaps
-            
+
