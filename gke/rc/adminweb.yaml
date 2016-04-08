@@ -28,7 +28,7 @@ spec:
           secret:
             secretName: admin-builderscon-io-20160407-121650
       containers:
-        - image: asia.gcr.io/builderscon-1248/h2o
+        - image: asia.gcr.io/builderscon-1248/h2o:20160408.180741
           name: proxy
           ports:
             - name: h2o-proxy-http
