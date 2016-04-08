@@ -21,7 +21,7 @@ WORKDIR /glibc
 RUN dpkg -i *.deb
 
 WORKDIR /
-RUN git clone -b v1.6.0 https://github.com/h2o/h2o --depth 1
+RUN git clone -b v1.7.1 https://github.com/h2o/h2o --depth 1
 WORKDIR /h2o
 RUN git submodule update --init --recursive
 RUN echo 'SET(CMAKE_FIND_LIBRARY_SUFFIXES ".a")' >> CMakeLists.txt
