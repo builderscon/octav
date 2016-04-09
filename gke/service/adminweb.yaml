@@ -12,7 +12,10 @@ items:
       selector:
         name: adminweb
       ports:
-        - name: adminweb
+        - name: adminweb-http
+          port: 80
+          targetPort: 80
+        - name: adminweb-https
           port: 443
           targetPort: 443
   - apiVersion: v1
