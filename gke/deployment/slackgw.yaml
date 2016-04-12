@@ -1,0 +1,38 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: octav-slackgw-deployment
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        name: slackgw
+        group: octav
+    spec:
+      volumes:
+        - name: slack
+          secret:
+            secretName: slack-dev
+      containers:
+        - image: asia.gcr.io/builderscon-1248/slackgw:20160412.224857
+          name: slackgw
+          ports:
+            - name: http
+              containerPort: 4979
+              protocol: TCP
+          args:
+            - -listen
+            - 0.0.0.0:4979
+            - -rtm
+            - gpubsub-forward
+            - -event
+            - MessageEvent
+            - -topic
+            - projects/builderscon-1248/topics/slackgw-forward
+            - -tokenfile
+            - /slack/token
+          volumeMounts:
+            - name: slack
+              readOnly: true
+              mountPath: /slack
