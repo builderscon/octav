@@ -97,6 +97,15 @@ sub startup {
 
     $self->hook(around_action => sub {
         my ($next, $c, $action, $last) = @_;
+
+        # Not a great idea, but for now, we just want to avoid the silly
+        # health checkers
+        my $ua = $c->req->headers->user_agent();
+        if ($ua =~ m{^GoogleHC/}) {
+            $c->render(text => "Yes, I'm healthy");
+            return
+        }
+
         my $endpoint = $c->match->endpoint->to_string;
         if ($endpoint !~ m{^/auth(?:/|$)}) {
             my $session = $c->plack_session;
