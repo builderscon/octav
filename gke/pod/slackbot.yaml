@@ -14,7 +14,7 @@ spec:
       secret:
         secretName: google-dev
   containers:
-    - image: asia.gcr.io/builderscon-1248/slackbot:20160407.085302
+    - image: asia.gcr.io/builderscon-1248/slackbot:20160407.210825
       name: slackbot
       env:
         - name: SLACKBOT_API_TOKEN_FILE

@@ -13,13 +13,12 @@ RUN apt-get update && \
     wget -O cpanm http://cpanmin.us && \
     chmod +x cpanm && \
     ./cpanm -L local-lib -n --installdeps . && \
-    apt-get autoremove -qy wget ca-certificates build-essential
+    tar -cvzf /perl.tar.gz /opt/perl
 
 ADD adminweb.tar.gz /
 ADD Octav.pm /adminweb/lib/WebService/Octav.pm
 ENV PERL5OPT="-Mlib=/local-lib/lib/perl5 -Mlib=/adminweb/lib"
-RUN apt-get install -qy --no-install-recommends build-essential && \
-    cd /adminweb && /cpanm -L /local-lib -n --installdeps . && \
-    apt-get autoremove -qy build-essential
+RUN cd /adminweb && /cpanm -L /local-lib -n --installdeps . && \
+    tar -cvzf /adminweb-local-lib.tar.gz /local-lib
 
-CMD start_server --port 5000 --signal-on-hup=USR1 /adminweb/script/run-plackup.sh
+CMD ["/bin/bash"]

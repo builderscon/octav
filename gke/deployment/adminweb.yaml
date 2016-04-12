@@ -1,16 +1,14 @@
-kind: ReplicationController
-apiVersion: v1
+apiVersion: extensions/v1beta1
+kind: Deployment
 metadata:
-  name: adminweb
+  name: octav-adminweb-deployment
 spec:
-  replicas: 3
-  selector:
-    app: octav
+  replicas: 4
   template:
     metadata:
       labels:
         name: adminweb
-        app: octav
+        group: octav
     spec:
       volumes:
         # This emptyDir volume is used to populate data from the app container
@@ -28,18 +26,12 @@ spec:
         - name: nginx
           secret:
             secretName: adminweb-nginx-dev
-        - name: ssl
-          secret:
-            secretName: admin-builderscon-io-20160407-121650
       containers:
         - image: asia.gcr.io/builderscon-1248/nginx:20160411.105018
           name: proxy
           ports:
             - name: ngx-proxy-http
               containerPort: 80
-              protocol: TCP
-            - name: ngx-proxy-https
-              containerPort: 443
               protocol: TCP
           volumeMounts:
             - name: static-files
@@ -48,10 +40,7 @@ spec:
             - name: nginx
               readOnly: true
               mountPath: /etc/nginx
-            - name: ssl
-              readOnly: true
-              mountPath: /etc/ssl/certs
-        - image: asia.gcr.io/builderscon-1248/adminweb:20160407.110952
+        - image: asia.gcr.io/builderscon-1248/adminweb:20160411.152929
           name: app
           ports:
             - containerPort: 5000
@@ -61,15 +50,9 @@ spec:
               exec:
                 # This command copies the static files to a shared dir so proxy can read it
                 command: [ "cp", "-R", "/adminweb/public/static/", "/static-files/" ]
-          livenessProbe:
-            httpGet:
-              path: /auth/
-              port: 5000
-            initialDelaySeconds: 30
-            timeoutSeconds: 5
           env:
             - name: OCTAV_REDIS
-              value: 10.96.2.9:6379
+              value: redis:6379
             - name: OCTAV_GITHUB_CLIENT_ID
               value: /github/id
             - name: OCTAV_GITHUB_CLIENT_SECRET

@@ -4,28 +4,28 @@ items:
   - apiVersion: v1
     kind: Service
     metadata:
-      name: adminweb
+      name: adminweb-proxy
       labels:
-        name: adminweb
+        name: adminweb-proxy
     spec:
-      type: LoadBalancer
+      type: NodePort
       selector:
         name: adminweb
       ports:
-        - name: adminweb
-          port: 443
-          targetPort: 443
+        - name: proxy
+          port: 5001
+          targetPort: 5001
   - apiVersion: v1
     kind: Service
     metadata:
-      name: adminweb-internal
+      name: adminweb-app
       labels:
-        name: adminweb-internal
+        name: adminweb-app
     spec:
       type: ClusterIP
       selector:
         name: adminweb
       ports:
-        - name: adminweb-internal
+        - name: app
           port: 5000
           targetPort: 5000
