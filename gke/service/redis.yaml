@@ -1,0 +1,16 @@
+kind: List
+apiVersion: v1
+items:
+  - apiVersion: v1
+    kind: Service
+    metadata:
+      name: redis
+      labels:
+        name: redis
+    spec:
+      selector:
+        name: redis
+      ports:
+        - name: redis
+          port: 6379
+          targetPort: 6379
