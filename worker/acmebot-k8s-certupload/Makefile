@@ -1,3 +1,4 @@
+INTERNAL_BIN_DIR=$(CURDIR)/_internal_bin
 GOVERSION=$(shell go version)
 GOOS=$(word 1,$(subst /, ,$(word 4, $(GOVERSION))))
 GOARCH=$(word 2,$(subst /, ,$(word 4, $(GOVERSION))))
