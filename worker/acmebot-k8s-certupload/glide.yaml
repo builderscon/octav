@@ -4,3 +4,4 @@ import:
   subpackages:
   - pkg/api
   - pkg/client/unversioned
+- package: github.com/lestrrat/go-pdebug
