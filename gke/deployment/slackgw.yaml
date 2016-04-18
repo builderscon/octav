@@ -14,8 +14,15 @@ spec:
         - name: slack
           secret:
             secretName: slack-dev
+        - name: google
+          secret:
+            secretName: google-dev
+        - name: k8s-certupload
+          emptyDir:
+            medium: Memory
       containers:
-        - image: asia.gcr.io/builderscon-1248/slackgw:20160412.224857
+        # Talks to slack, accepts requests to post to slack
+        - image: asia.gcr.io/builderscon-1248/slackgw:20160418.134603
           name: slackgw
           ports:
             - name: http
@@ -26,13 +33,60 @@ spec:
             - 0.0.0.0:4979
             - -rtm
             - gpubsub-forward
-            - -event
+            - -gpubsub-forward.project_id
+            - builderscon-1248
+            - -gpubsub-forward.event
             - MessageEvent
-            - -topic
-            - projects/builderscon-1248/topics/slackgw-forward
+            - -gpubsub-forward.topic
+            - slackgw-forward
             - -tokenfile
             - /slack/token
+          env:
+            - name: GOOGLE_APPLICATION_CREDENTIALS
+              value: /google/servicekey
           volumeMounts:
+            - name: google
+              readOnly: true
+              mountPath: /google
             - name: slack
               readOnly: true
               mountPath: /slack
+        # Listens to google pubsub, does the acme stuff
+        - image: asia.gcr.io/builderscon-1248/acmebot:20160418.164337
+          name: acmebot
+          args:
+            - -email
+            - lestrrat@gmail.com
+            - -fifopath
+            - /k8s-certupload/fifo
+            - -project_id
+            - builderscon-1248
+            - -slackgw
+            - http://slackgw:4979
+            - -topic
+            - slacgw-subscribe
+            - -zone
+            - builderscon
+          env:
+            - name: GOOGLE_APPLICATION_CREDENTIALS
+              value: /google/servicekey
+          volumeMounts:
+            - name: google
+              readOnly: true
+              mountPath: /google
+            - name: k8s-certupload
+              readOnly: false
+              mountPath: /k8s-certupload
+        # Auxilary tool to listen to fifo and push secrets to k8s
+        - image: asia.gcr.io/builderscon-1248/acmebot-k8s-certupload:20160418.164051
+          name: acmebot-k8s-certupload
+          args:
+            - -slackgw
+            - http://slackgw:4979
+            - -fifopath
+            - /k8s-certupload/fifo
+          volumeMounts:
+            - name: k8s-certupload
+              readOnly: false
+              mountPath: /k8s-certupload
+

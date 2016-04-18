@@ -1,0 +1,6 @@
+package: github.com/builderscon/octav/worker/acmebot-k8s-certupload
+import:
+- package: k8s.io/kubernetes
+  subpackages:
+  - pkg/api
+  - pkg/client/unversioned

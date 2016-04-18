@@ -11,8 +11,8 @@ $(CURDIR)/slackgw-debug:
 		$(shell go list -f '{{ .Dir }}' github.com/lestrrat/go-slackgw)/cmd/slackgw/slackgw.go
 
 $(CURDIR)/slackgw:
-	SLACKGW=$(shell go list -f '{{ .Dir }}' github.com/lestrrat/go-slackgw)
-	go build -o slackgw $(SLACKGW)/cmd/slackgw/slackgw.go
+	GOOS=linux GOARCH=amd64 go build -o slackgw-debug \
+		$(shell go list -f '{{ .Dir }}' github.com/lestrrat/go-slackgw)/cmd/slackgw/slackgw.go
 
 slackgw-debug: $(CURDIR)/slackgw-debug
 slackgw: $(CURDIR)/slackgw

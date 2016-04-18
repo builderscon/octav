@@ -1,0 +1,14 @@
+package: github.com/builderscon/octav/worker
+import:
+- package: github.com/lestrrat/go-cloud-acmeagent
+- package: github.com/lestrrat/go-jwx
+  subpackages:
+  - jwk
+- package: github.com/lestrrat/go-pdebug
+- package: github.com/nlopes/slack
+- package: golang.org/x/net
+  subpackages:
+  - context
+- package: google.golang.org/cloud
+  subpackages:
+  - pubsub
