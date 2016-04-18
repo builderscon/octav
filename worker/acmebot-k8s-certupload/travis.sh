@@ -10,7 +10,6 @@ if [ "$TRAVIS" == "true" ]; then
     make installdeps
 fi
 
-export OCTAV_TRACE_DB=1
 export OCTAV_DEBUG_FILE=/tmp/debug.out
 
 exec make test

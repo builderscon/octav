@@ -1,8 +1,9 @@
-INTERNAL_BIN_DIR = $(CURDIR)/_internal_bin
+INTERNAL_BIN_DIR=$(CURDIR)/_internal_bin
 GOVERSION=$(shell go version)
 GOOS=$(word 1,$(subst /, ,$(word 4, $(GOVERSION))))
 GOARCH=$(word 2,$(subst /, ,$(word 4, $(GOVERSION))))
 BIN_DIR=$(CURDIR)/_bin/$(GOOS)/$(GOARCH)
+SRC_FILE=$(CURDIR)/*.go
 
 installdeps:
 	@PATH=$(INTERNAL_BIN_DIR):$(PATH) glide install
@@ -13,11 +14,7 @@ $(INTERNAL_BIN_DIR)/hsup:
 	@go get -d github.com/lestrrat/go-hsup
 	@go build -o $@ github.com/lestrrat/go-hsup/cmd/hsup
 
-buildspec: $(INTERNAL_BIN_DIR)/hsup ../spec/v1/slackbot.json
-	@echo "Regenerating files based on ../spec/v1/slackbot.json"
-	@PATH=$(CURDIR)/_internal_bin:$(PATH) hsup -s ../spec/v1/slackbot.json -d . -O
-
-$(BIN_DIR)/slackbot-debug: cmd/slackbot/slackbot.go $(SRC_FILES)
+$(BIN_DIR)/acmebot-debug: $(SRC_FILES)
 	@echo "Building $(@F) for $(GOOS)/$(GOARCH)..."
 	go build -tags debug0 -o $@ $<
 
@@ -33,7 +30,7 @@ $(INTERNAL_BIN_DIR)/glide-$(GOOS)-$(GOARCH):
 	@rm -rf $(GOOS)-$(GOARCH)
 	@ln -sf glide-$(GOOS)-$(GOARCH) $(INTERNAL_BIN_DIR)/glide 
 
-slackbot-debug: $(BIN_DIR)/slackbot-debug
+acmebot-debug: $(BIN_DIR)/acmebot-debug
 
 test:
 	@go test -v $(GO_TAGS_OPT) $(shell PATH=$(INTERNAL_BIN_DIR):$(PATH) glide novendor)

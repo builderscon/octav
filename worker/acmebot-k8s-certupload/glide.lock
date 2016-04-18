@@ -1,5 +1,5 @@
-hash: a653765dbd55ba91f87cec10591518bd6bfc88af3114b3f0657312355ae24330
-updated: 2016-04-07T21:53:57.912591963+09:00
+hash: 86cb8f9e0d41f195bebb2ea3607a6e672d6d1d345c32b82e7685e1e69d5e710c
+updated: 2016-04-18T17:05:37.187742157+09:00
 imports:
 - name: bitbucket.org/ww/goautoneg
   version: 75cd24fc2f2c
@@ -27,7 +27,7 @@ imports:
 - name: github.com/docker/go-units
   version: 0bbddae09c5a5419a8c6dcdd7ff90da3d450393b
 - name: github.com/emicklei/go-restful
-  version: 777bb3f19bcafe2575ffb2a3e46af92509ae9594
+  version: 496d495156da218b9912f03dfa7df7f80fbd8cc3
   subpackages:
   - swagger
   - log
@@ -88,32 +88,14 @@ imports:
   - version
 - name: github.com/google/gofuzz
   version: bbcb9da2d746f8bdbd6a936686a0a6067ada0ec5
-- name: github.com/jessevdk/go-flags
-  version: 6b9493b3cb60367edd942144879646604089e3f7
 - name: github.com/juju/ratelimit
   version: 77ed1c8a01217656d2080ad51981f6e99adaa177
-- name: github.com/lestrrat/go-cloud-acmeagent
-  version: dfda6f281f60d685303bed1f536c10685489aa64
-  subpackages:
-  - gcp
-  - store
-- name: github.com/lestrrat/go-jwx
-  version: 76ff5fd46c773bcf15f019da4b5247780efec796
-  subpackages:
-  - jwa
-  - jwk
-  - jws
-  - buffer
-  - internal/emap
-  - internal/debug
 - name: github.com/lestrrat/go-pdebug
   version: a45b04725d5819f9f30fb68085be53b90a1d55f1
 - name: github.com/matttproud/golang_protobuf_extensions
   version: fc2b8d3a73c4867e51861bbdd5ae3c1f0869dd6a
   subpackages:
   - pbutil
-- name: github.com/nlopes/slack
-  version: 14b5c06da227e7d8fe3e411b58ace3977df0d00d
 - name: github.com/opencontainers/runc
   version: 7ca2aa4873aea7cb4265b1726acb24b90d8726c6
   subpackages:
@@ -141,8 +123,6 @@ imports:
   version: 490cc6eb5fa45bf8a8b7b73c8bc82a8160e8531d
 - name: github.com/spf13/pflag
   version: 08b1a584251b5b62f458943640fc8ebd4d50aaa5
-- name: github.com/tent/http-link-go
-  version: ac974c61c2f990f4115b119354b5e0b47550e888
 - name: github.com/ugorji/go
   version: f4485b318aadd133842532f841dc205a8e339d74
   subpackages:
@@ -151,56 +131,26 @@ imports:
   version: c2528b2dd8352441850638a8bb678c2ad056fd3e
   subpackages:
   - context
+  - html
+  - http2
+  - internal/timeseries
+  - proxy
+  - trace
   - websocket
-  - context/ctxhttp
-- name: golang.org/x/oauth2
-  version: b5adcc2dcdf009d0391547edc6ecbaff889f5bb9
-  subpackages:
-  - google
-  - internal
-  - jwt
-  - jws
-- name: google.golang.org/api
-  version: 77e7d383beb96054547729f49c372b3d01e196ff
-  subpackages:
-  - dns/v1
-  - storage/v1
-  - compute/v1
-  - gensupport
-  - googleapi
-  - googleapi/internal/uritemplates
-- name: google.golang.org/appengine
-  version: b67c870a16a2d58b3afa024461dcc51805f52e9d
-  subpackages:
-  - urlfetch
-  - internal
-  - internal/app_identity
-  - internal/modules
-  - internal/urlfetch
-  - internal/base
-  - internal/datastore
-  - internal/log
-  - internal/remote_api
-- name: google.golang.org/cloud
-  version: eb47ba841d53d93506cfbfbc03927daf9cc48f88
-  subpackages:
-  - compute/metadata
-  - internal
 - name: gopkg.in/yaml.v2
-  version: d466437aa4adc35830964cffc5b5f262c63ddcb4
+  version: a83829b6f1293c91addabc89d0571c246397bbf4
 - name: k8s.io/kubernetes
-  version: 235f8f13c0e6c6369cf49585cfb4ea30869efcc1
+  version: 26c99fee0095eb15b4a843b657f43ec7323a04f7
   subpackages:
   - pkg/api
   - pkg/client/unversioned
-  - pkg/labels
-  - pkg/watch
   - pkg/api/meta
   - pkg/api/resource
   - pkg/api/unversioned
   - pkg/auth/user
   - pkg/conversion
   - pkg/fields
+  - pkg/labels
   - pkg/runtime
   - pkg/runtime/serializer
   - pkg/types
@@ -225,17 +175,17 @@ imports:
   - pkg/util/net
   - pkg/util/wait
   - pkg/version
-  - pkg/util/validation
-  - pkg/util/runtime
+  - pkg/watch
   - pkg/util/errors
   - third_party/forked/reflect
+  - pkg/util/validation
   - pkg/conversion/queryparams
+  - pkg/util/json
   - pkg/runtime/serializer/json
   - pkg/runtime/serializer/protobuf
   - pkg/runtime/serializer/recognizer
   - pkg/runtime/serializer/streaming
   - pkg/runtime/serializer/versioning
-  - pkg/util/integer
   - pkg/util/validation/field
   - pkg/api/v1
   - pkg/apimachinery
@@ -254,8 +204,11 @@ imports:
   - pkg/util/crypto
   - pkg/util/flowcontrol
   - pkg/watch/json
+  - pkg/util/runtime
+  - pkg/util/framer
   - pkg/util/yaml
   - pkg/util/parsers
+  - pkg/watch/versioned
   - pkg/kubelet/qos
   - pkg/master/ports
   - pkg/api/endpoints
@@ -263,6 +216,7 @@ imports:
   - pkg/api/service
   - pkg/api/util
   - pkg/capabilities
+  - pkg/util/integer
   - pkg/util/hash
   - pkg/util/net/sets
 - name: speter.net/go/exp/math/dec/inf

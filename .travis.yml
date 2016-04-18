@@ -6,7 +6,8 @@ services:
 env:
   - TEST_DIR=octav
   - TEST_DIR=adminweb
-  - TEST_DIR=slackbot
+  - TEST_DIR=worker/acmebot
+  - TEST_DIR=worker/acmebot-k8s-certupload
 addons:
   apt:
     packages:
