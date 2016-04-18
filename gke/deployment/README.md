@@ -1,3 +1,13 @@
+# adminweb
+
+## SYNOPSIS
+
+`adminweb` is the UI for builderscon adminstrators. 
+
+## ARCHITECTURE
+
+![adminweb architecture](media/adminweb-architecture.jpeg)
+
 # slackgw
 
 ## SYNOPSIS
