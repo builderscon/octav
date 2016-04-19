@@ -24,6 +24,13 @@ spec:
         # Talks to slack, accepts requests to post to slack
         - image: asia.gcr.io/builderscon-1248/slackgw:20160418.134603
           name: slackgw
+          resources:
+            requests:
+              memory: "32Mi"
+              cpu: "50m"
+            limits:
+              memory: "64Mi"
+              cpu: "100m"
           ports:
             - name: http
               containerPort: 4979
@@ -51,9 +58,41 @@ spec:
             - name: slack
               readOnly: true
               mountPath: /slack
+        # Listens to google pubsub, routes the messages to the
+        # appropriate worker
+        - image: asia.gcr.io/builderscon-1248/slackrouter:20160419.120729
+          name: slackrouter
+          resources:
+            requests:
+              memory: "32Mi"
+              cpu: "50m"
+            limits:
+              memory: "64Mi"
+              cpu: "100m"
+          args:
+            - -project_id
+            - builderscon-1248
+            - -slackgw
+            - http://slackgw:4979
+            - -topic
+            - slacgw-subscribe
+          env:
+            - name: GOOGLE_APPLICATION_CREDENTIALS
+              value: /google/servicekey
+          volumeMounts:
+            - name: google
+              readOnly: true
+              mountPath: /google
         # Listens to google pubsub, does the acme stuff
         - image: asia.gcr.io/builderscon-1248/acmebot:20160418.164337
           name: acmebot
+          resources:
+            requests:
+              memory: "32Mi"
+              cpu: "50m"
+            limits:
+              memory: "64Mi"
+              cpu: "100m"
           args:
             - -email
             - lestrrat@gmail.com
@@ -64,7 +103,7 @@ spec:
             - -slackgw
             - http://slackgw:4979
             - -topic
-            - slacgw-subscribe
+            - acmebot-subscribe
             - -zone
             - builderscon
           env:
@@ -80,6 +119,13 @@ spec:
         # Auxilary tool to listen to fifo and push secrets to k8s
         - image: asia.gcr.io/builderscon-1248/acmebot-k8s-certupload:20160418.164051
           name: acmebot-k8s-certupload
+          resources:
+            requests:
+              memory: "32Mi"
+              cpu: "50m"
+            limits:
+              memory: "64Mi"
+              cpu: "100m"
           args:
             - -slackgw
             - http://slackgw:4979

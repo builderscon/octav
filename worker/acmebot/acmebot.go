@@ -9,14 +9,12 @@ import (
 	"net/http"
 	"net/url"
 	"os"
-	"os/signal"
 	"regexp"
 	"strings"
 	"syscall"
 	"time"
 
-	"golang.org/x/net/context"
-
+	"github.com/builderscon/octav/worker/acmebot/slacksub"
 	"github.com/lestrrat/go-cloud-acmeagent"
 	"github.com/lestrrat/go-jwx/jwk"
 	"github.com/lestrrat/go-pdebug"
@@ -25,14 +23,10 @@ import (
 )
 
 type Bot struct {
-	acmeagent  *acmeagent.AcmeAgent
-	acmestore  acmeagent.StateStorage
-	client     *pubsub.Client
-	done       chan struct{}
-	fifopath   string
-	msgch      chan *pubsub.Message
-	slackgwURL string
-	topic      string
+	*slacksub.Subscriber
+	acmeagent *acmeagent.AcmeAgent
+	acmestore acmeagent.StateStorage
+	fifopath  string
 }
 
 type acmectx struct {
@@ -40,16 +34,14 @@ type acmectx struct {
 }
 
 func New(cl *pubsub.Client, agent *acmeagent.AcmeAgent, store acmeagent.StateStorage, topic, slackgwURL, fifopath string) *Bot {
-	return &Bot{
+	bot := &Bot{
+		Subscriber: slacksub.New(cl, topic, slackgwURL),
 		acmeagent:  agent,
 		acmestore:  store,
-		client:     cl,
-		done:       make(chan struct{}),
 		fifopath:   fifopath,
-		msgch:      make(chan *pubsub.Message),
-		slackgwURL: slackgwURL,
-		topic:      topic,
 	}
+	bot.Subscriber.MessageCallback = bot.processMessageEvent
+	return bot
 }
 
 func (b *Bot) Fifo() (f *os.File, err error) {
@@ -75,127 +67,6 @@ func (b *Bot) Fifo() (f *os.File, err error) {
 	}
 
 	return fh, nil
-}
-
-func (b *Bot) Close() {
-	close(b.done)
-}
-
-func (b *Bot) Run() {
-	done := b.done
-	sigCh := make(chan os.Signal, 16)
-	signal.Notify(sigCh, syscall.SIGTERM, syscall.SIGINT, syscall.SIGQUIT)
-
-	go b.keepFetching()
-	go b.keepProcessing()
-
-	for {
-		select {
-		case <-done:
-		case <-sigCh:
-			return
-		}
-	}
-}
-
-func (b *Bot) keepFetching() {
-	if pdebug.Enabled {
-		g := pdebug.Marker("b.keepFetching")
-		defer g.End()
-	}
-
-	cl := b.client
-	ch := b.msgch
-	sub := cl.Subscription(b.topic)
-	backoff := 1000
-	for loop := true; loop; {
-		select {
-		case <-b.done:
-			loop = false
-			continue
-		default:
-		}
-
-		iter, err := sub.Pull(context.Background())
-		if err != nil {
-			if pdebug.Enabled {
-				pdebug.Printf("pull failed: %s", err)
-				pdebug.Printf("backing off for %d milliseconds", backoff)
-			}
-			// we need to backoff
-			time.Sleep(time.Duration(backoff) * time.Millisecond)
-			if backoff < 5*60*1000 {
-				backoff = int(float64(backoff) * 1.2)
-			}
-			continue
-		}
-
-		backoff = 1000
-
-		for {
-			msg, err := iter.Next()
-			if err != nil {
-				if pdebug.Enabled {
-					pdebug.Printf("iter.Next failed: %s", err)
-				}
-				break
-			}
-			if pdebug.Enabled {
-				pdebug.Printf("New message arrived")
-			}
-			ch <- msg
-		}
-	}
-}
-
-func (b *Bot) keepProcessing() {
-	if pdebug.Enabled {
-		g := pdebug.Marker("b.keepProcessing")
-		defer g.End()
-	}
-
-	done := b.done
-	msgch := b.msgch
-	for loop := true; loop; {
-		var msg *pubsub.Message
-		select {
-		case <-done:
-			loop = false
-			continue
-		case msg = <-msgch:
-			if pdebug.Enabled {
-				pdebug.Printf("Got new message")
-			}
-			if err := b.processMessage(msg); err != nil {
-				if pdebug.Enabled {
-					pdebug.Printf("b.processMessage failed: %s", err)
-				}
-			}
-		}
-	}
-}
-
-type msgev struct {
-	Type string `json:"Type"`
-	Data *slack.Msg `json:"Data"`
-}
-func (b *Bot) processMessage(msg *pubsub.Message) error {
-	defer msg.Done(true)
-	if pdebug.Enabled {
-		g := pdebug.Marker("b.processMessage")
-		defer g.End()
-	}
-
-	var ev slack.MessageEvent
-	in := msgev{Data: &ev.Msg}
-	if err := json.Unmarshal(msg.Data, &in); err != nil {
-		if pdebug.Enabled {
-			pdebug.Printf("unmarshal failed: %s", err)
-		}
-		return err
-	}
-
-	return b.processMessageEvent(&ev)
 }
 
 type SlackLink struct {
@@ -241,7 +112,6 @@ func (b *Bot) processMessageEvent(ev *slack.MessageEvent) error {
 		return nil
 	}
 
-
 	if cmd[1] != "acme" {
 		return nil
 	}
@@ -275,7 +145,7 @@ func (b *Bot) reply(ctx *acmectx, message string) error {
 
 func (b *Bot) postMessage(ctx *acmectx, channel, message string) error {
 	_, err := http.PostForm(
-		b.slackgwURL + "/post",
+		b.SlackgwURL+"/post",
 		url.Values{
 			"channel": []string{channel},
 			"message": []string{message},
