@@ -191,7 +191,7 @@ spec:
               readOnly: false
               mountPath: /k8s-fifo
         # Auxilary tool to listen to fifo and push secrets to k8s
-        - image: asia.gcr.io/builderscon-1248/deploybot-k8s:20160421.105715
+        - image: asia.gcr.io/builderscon-1248/deploybot-k8s:20160421.131810
           name: deploybot-k8s
           resources:
             requests:
