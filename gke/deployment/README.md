@@ -41,11 +41,14 @@ You may post to the `slackgw` service (port 4979) to post messages to our Slack 
 
 ### Commands
 
-| Command                       | Description |
-|-------------------------------|-------------|
-| acme authz request **domain** | Authorize a domain using dns-01 |
-| acme authz delete <domain>    | Delete previous authorization from storage |
-| acme cert issue <domain>      | Issue new certificates |
-| acme cert delete <domain>     | Delete previous certificates |
-| acme cert upload <domain>     | Upload certificates to Kubernetes as a secret |
+| Command                         | Description |
+|---------------------------------|-------------|
+| acme authz request **domain**   | Authorize a domain using dns-01 |
+| acme authz delete **domain**    | Delete previous authorization from storage |
+| acme cert issue **domain**      | Issue new certificates |
+| acme cert delete **domain**     | Delete previous certificates |
+| acme cert upload **domain**     | Upload certificates to Kubernetes as a secret |
+| ingress create **domain**       | Create new ingress and add new DNS entry |
+| ingress delete **ingress-name** | Deletes ingress and corresponding DNS entry, if any |
+| ingress list                    | Lists available ingress names |
 
