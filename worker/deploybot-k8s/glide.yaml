@@ -1,0 +1,14 @@
+package: github.com/builderscon/octav/worker/deploybot-k8s
+import:
+- package: github.com/lestrrat/go-pdebug
+- package: google.golang.org/api
+  subpackages:
+  - dns/v1
+- package: k8s.io/kubernetes
+  subpackages:
+  - pkg/api
+  - pkg/apis/extensions
+  - pkg/client/unversioned
+  - pkg/labels
+  - pkg/util/yaml
+- package: golang.org/x/oauth2

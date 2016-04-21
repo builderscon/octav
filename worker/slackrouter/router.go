@@ -42,7 +42,7 @@ func (r *Router) processMessageEvent(ev *slack.MessageEvent) error {
 	switch cmd[1] {
 	case "acme":
 		r.acmefwd <- ev
-	case "deploy":
+	case "deploy", "ingress":
 		r.deployfwd <- ev
 	default:
 		if pdebug.Enabled {

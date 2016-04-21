@@ -106,8 +106,6 @@ func (b *Bot) processMessageEvent(ev *slack.MessageEvent) error {
 	}
 
 	cmd := spacesRx.Split(strings.TrimSpace(ev.Text), -1)
-	pdebug.Printf("cmd = %#v", cmd)
-	pdebug.Printf("ev = %#v", ev)
 	if len(cmd) < 3 {
 		return nil
 	}
