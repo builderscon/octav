@@ -11,3 +11,4 @@ import:
   - pkg/client/unversioned
   - pkg/labels
   - pkg/util/yaml
+- package: golang.org/x/oauth2
