@@ -14,7 +14,7 @@ $(INTERNAL_BIN_DIR)/hsup:
 	@go get -d github.com/lestrrat/go-hsup
 	@go build -o $@ github.com/lestrrat/go-hsup/cmd/hsup
 
-$(BIN_DIR)/deploybot-debug: $(SRC_FILES)
+$(BIN_DIR)/deploybot-k8s-debug: $(SRC_FILES)
 	@echo "Building $(@F) for $(GOOS)/$(GOARCH)..."
 	go build -tags debug0 -o $@ $<
 
@@ -30,7 +30,7 @@ $(INTERNAL_BIN_DIR)/glide-$(GOOS)-$(GOARCH):
 	@rm -rf $(GOOS)-$(GOARCH)
 	@ln -sf glide-$(GOOS)-$(GOARCH) $(INTERNAL_BIN_DIR)/glide 
 
-deploybot-debug: $(BIN_DIR)/deploybot-debug
+deploybot-k8s-debug: $(BIN_DIR)/deploybot-k8s-debug
 
 test:
 	@go test -v $(GO_TAGS_OPT) $(shell PATH=$(INTERNAL_BIN_DIR):$(PATH) glide novendor)
