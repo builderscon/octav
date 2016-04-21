@@ -11,18 +11,25 @@ spec:
         group: octav
     spec:
       volumes:
+        - name: certificates
+          secret:
+            secretName: ca-certificates
         - name: slack
           secret:
             secretName: slack-dev
         - name: google
           secret:
             secretName: google-dev
-        - name: k8s-certupload
+        - name: k8s-fifo
           emptyDir:
             medium: Memory
+        - name: octav-clone
+          gitRepo:
+            repository: git://github.com/builderscon/octav.git
+            revision: 24b6e08
       containers:
         # Talks to slack, accepts requests to post to slack
-        - image: asia.gcr.io/builderscon-1248/slackgw:20160418.134603
+        - image: asia.gcr.io/builderscon-1248/slackgw:20160420.200951
           name: slackgw
           resources:
             requests:
@@ -52,6 +59,9 @@ spec:
             - name: GOOGLE_APPLICATION_CREDENTIALS
               value: /google/servicekey
           volumeMounts:
+            - name: certificates
+              readOnly: true
+              mountPath: /etc/ssl/certs
             - name: google
               readOnly: true
               mountPath: /google
@@ -60,7 +70,7 @@ spec:
               mountPath: /slack
         # Listens to google pubsub, routes the messages to the
         # appropriate worker
-        - image: asia.gcr.io/builderscon-1248/slackrouter:20160419.120729
+        - image: asia.gcr.io/builderscon-1248/slackrouter
           name: slackrouter
           resources:
             requests:
@@ -80,11 +90,14 @@ spec:
             - name: GOOGLE_APPLICATION_CREDENTIALS
               value: /google/servicekey
           volumeMounts:
+            - name: certificates
+              readOnly: true
+              mountPath: /etc/ssl/certs
             - name: google
               readOnly: true
               mountPath: /google
         # Listens to google pubsub, does the acme stuff
-        - image: asia.gcr.io/builderscon-1248/acmebot:20160418.164337
+        - image: asia.gcr.io/builderscon-1248/acmebot
           name: acmebot
           resources:
             requests:
@@ -97,7 +110,7 @@ spec:
             - -email
             - lestrrat@gmail.com
             - -fifopath
-            - /k8s-certupload/fifo
+            - /k8s-fifo/acmebot.fifo
             - -project_id
             - builderscon-1248
             - -slackgw
@@ -110,15 +123,18 @@ spec:
             - name: GOOGLE_APPLICATION_CREDENTIALS
               value: /google/servicekey
           volumeMounts:
+            - name: certificates
+              readOnly: true
+              mountPath: /etc/ssl/certs
             - name: google
               readOnly: true
               mountPath: /google
-            - name: k8s-certupload
+            - name: k8s-fifo
               readOnly: false
-              mountPath: /k8s-certupload
+              mountPath: /k8s-fifo
         # Auxilary tool to listen to fifo and push secrets to k8s
-        - image: asia.gcr.io/builderscon-1248/acmebot-k8s-certupload:20160418.164051
-          name: acmebot-k8s-certupload
+        - image: asia.gcr.io/builderscon-1248/acmebot-k8s
+          name: acmebot-k8s
           resources:
             requests:
               memory: "32Mi"
@@ -130,9 +146,84 @@ spec:
             - -slackgw
             - http://slackgw:4979
             - -fifopath
-            - /k8s-certupload/fifo
+            - /k8s-fifo/acmebot.fifo
           volumeMounts:
-            - name: k8s-certupload
+            - name: certificates
+              readOnly: true
+              mountPath: /etc/ssl/certs
+            - name: k8s-fifo
               readOnly: false
-              mountPath: /k8s-certupload
+              mountPath: /k8s-fifo
+        # Listens to google pubsub, does deployment
+        - image: asia.gcr.io/builderscon-1248/deploybot:20160420.152545
+          name: deploybot
+          resources:
+            requests:
+              memory: "32Mi"
+              cpu: "50m"
+            limits:
+              memory: "64Mi"
+              cpu: "100m"
+          args:
+            - -email
+            - lestrrat@gmail.com
+            - -fifopath
+            - /k8s-fifo/deploybot.fifo
+            - -project_id
+            - builderscon-1248
+            - -slackgw
+            - http://slackgw:4979
+            - -topic
+            - deploybot-subscribe
+            - -zone
+            - builderscon
+          env:
+            - name: GOOGLE_APPLICATION_CREDENTIALS
+              value: /google/servicekey
+          volumeMounts:
+            - name: certificates
+              readOnly: true
+              mountPath: /etc/ssl/certs
+            - name: google
+              readOnly: true
+              mountPath: /google
+            - name: k8s-fifo
+              readOnly: false
+              mountPath: /k8s-fifo
+        # Auxilary tool to listen to fifo and push secrets to k8s
+        - image: asia.gcr.io/builderscon-1248/deploybot-k8s:20160421.105715
+          name: deploybot-k8s
+          resources:
+            requests:
+              memory: "32Mi"
+              cpu: "50m"
+            limits:
+              memory: "64Mi"
+              cpu: "100m"
+          args:
+            - -slackgw
+            - http://slackgw:4979
+            - -fifopath
+            - /k8s-fifo/deploybot.fifo
+            - -root
+            - /git/octav/gke
+            - -project_id
+            - builderscon-1248
+            - -zone
+            - builderscon
+          env:
+            - name: GOOGLE_APPLICATION_CREDENTIALS
+              value: /google/servicekey
+          volumeMounts:
+            - name: certificates
+              readOnly: true
+              mountPath: /etc/ssl/certs
+            - name: google
+              readOnly: true
+              mountPath: /google
+            - name: k8s-fifo
+              readOnly: false
+              mountPath: /k8s-fifo
+            - name: octav-clone
+              mountPath: /git
 

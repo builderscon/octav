@@ -2,6 +2,8 @@ package slacksub
 
 import (
 	"encoding/json"
+	"net/http"
+	"net/url"
 	"os"
 	"os/signal"
 	"syscall"
@@ -53,6 +55,14 @@ func (sub *Subscriber) Run() {
 			return
 		}
 	}
+}
+
+func (sub *Subscriber) Reply(ch, s string) error {
+	_, err := http.PostForm(sub.SlackgwURL+"/post", url.Values{
+		"channel": []string{ch},
+		"message": []string{s},
+	})
+	return err
 }
 
 func (sub *Subscriber) keepFetching() {
@@ -125,10 +135,6 @@ func (sub *Subscriber) keepProcessing() {
 			loop = false
 			continue
 		case msg = <-msgch:
-			if pdebug.Enabled {
-				pdebug.Printf("Got new message")
-			}
-
 			// this needs to be in its own method because we want to call
 			// defer msg.Done(true)
 			if err := sub.processMessage(msg); err != nil {
@@ -154,6 +160,10 @@ func (sub *Subscriber) processMessage(msg *pubsub.Message) error {
 			pdebug.Printf("unmarshal failed: %s", err)
 		}
 		return err
+	}
+
+	if pdebug.Enabled {
+		pdebug.Printf("incoming message '%s'", ev.Text)
 	}
 
 	cb := sub.MessageCallback

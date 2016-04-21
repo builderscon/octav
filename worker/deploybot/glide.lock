@@ -1,0 +1,76 @@
+hash: d6c329549487c4aaa6e3dbf3022ce377d7388639f5748cefb37ce9160c593853
+updated: 2016-04-20T12:20:52.076060388+09:00
+imports:
+- name: github.com/builderscon/octav
+  version: c41f018088a37cb9e0c42f6b1d883ddd4c42ac1e
+  subpackages:
+  - worker/deploybot/slacksub
+- name: github.com/davecgh/go-spew
+  version: 5215b55f46b2b919f50a1df0eaa5886afe4e3b3d
+  subpackages:
+  - spew
+- name: github.com/golang/protobuf
+  version: 2ebff28ac76fb19e2d25e5ddd4885708dfdd5611
+  subpackages:
+  - proto
+- name: github.com/lestrrat/go-pdebug
+  version: a45b04725d5819f9f30fb68085be53b90a1d55f1
+- name: github.com/nlopes/slack
+  version: 7530ef00e32bc4b6fe93b49551b0bf457427c289
+- name: golang.org/x/net
+  version: fb93926129b8ec0056f2f458b1f519654814edf0
+  subpackages:
+  - websocket
+  - context
+  - context/ctxhttp
+  - http2
+  - trace
+  - http2/hpack
+  - internal/timeseries
+- name: golang.org/x/oauth2
+  version: 7e9cd5d59563851383f8f81a7fbb01213709387c
+  subpackages:
+  - google
+  - internal
+  - jws
+  - jwt
+- name: google.golang.org/api
+  version: 9737cc9e103c00d06a8f3993361dec083df3d252
+  subpackages:
+  - googleapi
+  - pubsub/v1
+  - googleapi/internal/uritemplates
+  - gensupport
+- name: google.golang.org/appengine
+  version: e234e71924d4aa52444bc76f2f831f13fa1eca60
+  subpackages:
+  - urlfetch
+  - internal
+  - internal/urlfetch
+  - internal/app_identity
+  - internal/modules
+  - internal/base
+  - internal/datastore
+  - internal/log
+  - internal/remote_api
+- name: google.golang.org/cloud
+  version: 995e193d1cc813d7d891c0da7bc83a99c71f5ebc
+  subpackages:
+  - pubsub
+  - internal
+  - internal/transport
+  - internal/opts
+  - compute/metadata
+- name: google.golang.org/grpc
+  version: 1a5928317d2d6526b75552438d5593e005f36477
+  subpackages:
+  - credentials
+  - credentials/oauth
+  - codes
+  - grpclog
+  - internal
+  - metadata
+  - naming
+  - transport
+  - peer
+devImports: []
