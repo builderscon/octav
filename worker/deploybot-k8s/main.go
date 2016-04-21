@@ -175,6 +175,7 @@ func (in *Incoming) reply(s string) (err error) {
 }
 
 func (b *Bot) IngressDelete(in Incoming) (err error) {
+	// Name is NOT a domain: it's the actual kubernetes ingress' name
 	if pdebug.Enabled {
 		g := pdebug.Marker("b.IngressDelete %s", in.Name).BindError(&err)
 		defer g.End()
@@ -186,12 +187,81 @@ func (b *Bot) IngressDelete(in Incoming) (err error) {
 		return err
 	}
 
-	// Find the previous Ingress instance that was running for
-	// this resource, so we can tell the user to shut it down later
+	// Find the previous Ingress instance that was running for this resource
+	ingress, err := cl.Ingress(b.namespace).Get(in.Name)
+	if err != nil {
+		in.reply(":exclamation: failed to lookup ingress '" + in.Name + "'")
+		return err
+	}
+
+	hostname := ingress.Labels["hostname"]
+	if hostname != "" {
+		// Does this ingress have an IP address?
+		switch len(ingress.Status.LoadBalancer.Ingress) {
+		case 0:
+			in.reply(":exclamation: no ip address associated with this ingress...")
+		case 1:
+			addr := ingress.Status.LoadBalancer.Ingress[0].IP
+			in.reply(":white_check_mark: ingress has an IP address '" + addr + "'")
+
+			rrslist, err := b.dns.ResourceRecordSets.List(b.projectID, b.zone).Name(hostname + ".").Type("A").Do()
+			if err != nil {
+				in.reply(":exclamation: failed to list changes for '" + in.Name + ".': " + err.Error())
+				return err
+			}
+
+			// Theres should be just one
+
+			oldips := make([]string, 0, len(rrslist.Rrsets[0].Rrdatas))
+			newips := make([]string, 0, len(rrslist.Rrsets[0].Rrdatas))
+			for _, rrd := range rrslist.Rrsets[0].Rrdatas {
+				oldips = append(oldips, rrd)
+				if rrd != addr {
+					newips = append(newips, rrd)
+				}
+			}
+
+			in.reply(":white_check_mark: removing '" + addr + "' from DNS entries for '" + hostname + "'")
+			ch := dns.Change{
+				Deletions: []*dns.ResourceRecordSet{
+					&dns.ResourceRecordSet{
+						Kind:    "dns#resourceRecordSet",
+						Name:    hostname + ".", // need to terminate with a "."
+						Rrdatas: oldips,
+						Ttl:     60,
+						Type:    "A",
+					},
+				},
+				Additions: []*dns.ResourceRecordSet{
+					&dns.ResourceRecordSet{
+						Kind:    "dns#resourceRecordSet",
+						Name:    hostname + ".", // need to terminate with a "."
+						Rrdatas: newips,
+						Ttl:     60,
+						Type:    "A",
+					},
+				},
+			}
+
+			if _, err := b.dns.Changes.Create(b.projectID, b.zone, &ch).Do(); err != nil {
+				in.reply(":exclamation: failed to delete DNS entries for '" + hostname + "' (" + addr + ")")
+				return err
+			}
+		default:
+			in.reply(":exclamation: ingress '" + in.Name + "' has more than one IP address. Don't know what to do:")
+			for _, ingaddr := range ingress.Status.LoadBalancer.Ingress {
+				in.reply(":point_right: " + ingaddr.IP)
+			}
+			in.reply(":exclamation: make sure to fix DNS records")
+		}
+	}
+
+	in.reply(":white_check_mark: deleting ingress '" + in.Name + "'")
 	if err := cl.Ingress(b.namespace).Delete(in.Name, nil); err != nil {
 		in.reply(":exclamation: failed to delete ingress '" + in.Name + "'")
 		return err
 	}
+	in.reply(":tada: successfully deleted ingress and related DNS entries")
 	return nil
 }
 
@@ -409,8 +479,7 @@ func (b *Bot) IngressCreate(in Incoming) (err error) {
 		return err
 	}
 
-	// Should be one 
-
+	// Should be one
 	oldips := make([]string, len(rrslist.Rrsets[0].Rrdatas))
 	newips := make([]string, len(rrslist.Rrsets[0].Rrdatas)+1)
 	for i, rrd := range rrslist.Rrsets[0].Rrdatas {
@@ -440,8 +509,6 @@ func (b *Bot) IngressCreate(in Incoming) (err error) {
 		},
 	}
 
-	// Two separate calls, to get rid of the old set, then immediately
-	// write over with the new set
 	if _, err := b.dns.Changes.Create(b.projectID, b.zone, &ch).Do(); err != nil {
 		in.reply(":exclamation: failed to change DNS entries for '" + in.Name + "'")
 		return err
