@@ -1,12 +1,9 @@
-kind: ReplicationController
-apiVersion: v1
+apiVersion: extensions/v1beta1
+kind: Deployment
 metadata:
-  name: apiserver
+  name: octav-apiserver-deployment
 spec:
   replicas: 3
-  selector:
-    name: apiserver
-    group: octav
   template:
     metadata:
       labels:
@@ -18,7 +15,7 @@ spec:
           secret:
             secretName: cloudsql-dev
       containers:
-        - image: asia.gcr.io/builderscon-1248/apiserver:20160331.205529
+        - image: asia.gcr.io/builderscon-1248/apiserver:20160406.140011
           name: apiserver
           env:
             - name: OCTAV_MYSQL_DBNAME
