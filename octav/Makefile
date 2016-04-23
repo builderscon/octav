@@ -5,6 +5,7 @@ INTERNAL_CMDS    = gendb genmodel gentransport genoctavctl
 GOVERSION=$(shell go version)
 GOOS=$(word 1,$(subst /, ,$(word 4, $(GOVERSION))))
 GOARCH=$(word 2,$(subst /, ,$(word 4, $(GOVERSION))))
+HSUP_DIR=$(shell go list -f '{{ .Dir }}' github.com/lestrrat/go-hsup)
 BIN_DIR=$(CURDIR)/_bin/$(GOOS)/$(GOARCH)
 ifndef OCTAV_DB_NAME
 	OCTAV_DB_NAME = octav
@@ -27,9 +28,9 @@ $(INTERNAL_BIN_DIR)/%: $(INTERNAL_BIN_DIR) internal/cmd/%/*.go
 	go build -o $@ $^
 
 $(INTERNAL_BIN_DIR)/hsup: $(INTERNAL_BIN_DIR)
-	echo "Building hsup..."
-	go get -d github.com/lestrrat/go-hsup
-	@cd $(shell go list -f '{{ .Dir }}' github.com/lestrrat/go-hsup) && PATH=$(INTERNAL_BIN_DIR):$(PATH) glide install && go build -o $@ cmd/hsup/*.go
+	@echo "Building hsup..."
+	@go get -x -d github.com/lestrrat/go-hsup
+	@cd $(HSUP_DIR) && PATH=$(INTERNAL_BIN_DIR):$(PATH) glide install && go build -o $@ cmd/hsup/*.go
 
 glide: $(INTERNAL_BIN_DIR)/glide
 
