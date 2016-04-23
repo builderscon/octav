@@ -28,7 +28,7 @@ $(INTERNAL_BIN_DIR)/hsup:
 	@mkdir -p $(INTERNAL_BIN_DIR)
 	@echo "Building hsup..."
 	@go get -d github.com/lestrrat/go-hsup
-	@cd $(GOPATH)/src/github.com/lestrrat/go-hsup && glide install && go build -o $@ cmd/hsup/*.go
+	@cd $(GOPATH)/src/github.com/lestrrat/go-hsup && PATH=$(INTERNAL_BIN_DIR) glide install && go build -o $@ cmd/hsup/*.go
 
 glide: $(INTERNAL_BIN_DIR)/glide
 
