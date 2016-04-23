@@ -12,23 +12,28 @@ endif
 
 SRC_FILES = $(wildcard *.go validator/*.go client/*.go db/*.go model/*.go)
 
-.PHONY: installdeps build_internal_cmd generate build run all clean test initdb gke-apiserver $(INTERNAL_BIN_DIR)/glide
+.PHONY: installdeps build_internal_cmd generate build run all clean test initdb gke-apiserver $(INTERNAL_BIN_DIR)/glide hsupsrc
 
 all: test build
 
 installdeps:
 	@PATH=$(INTERNAL_BIN_DIR):$(PATH) glide install
 
-$(INTERNAL_BIN_DIR)/%: internal/cmd/%/*.go
+hsupsrc:
+	@go get -d github.com/lestrrat/go-hsup
+
+$(INTERNAL_BIN_DIR):
 	@mkdir -p $(INTERNAL_BIN_DIR)
+
+$(INTERNAL_BIN_DIR)/%: internal/cmd/%/*.go
+	@$(MAKE) $(INTERNAL_BIN_DIR)
 	@echo "Building $(@F)..."
 	go build -o $@ $^
 
 $(INTERNAL_BIN_DIR)/hsup:
-	@mkdir -p $(INTERNAL_BIN_DIR)
+	@$(MAKE) $(INTERNAL_BIN_DIR)
 	@echo "Building hsup..."
-	@go get -d github.com/lestrrat/go-hsup
-	@go build -o $@ github.com/lestrrat/go-hsup/cmd/hsup
+	@cd $(shell go list -f '{{ .Dir }}' github.com/lestrrat/go-hsup) && PATH=$(INTERNAL_BIN_DIR):$(PATH) glide install && go build -o $@ cmd/hsup/*.go
 
 glide: $(INTERNAL_BIN_DIR)/glide
 

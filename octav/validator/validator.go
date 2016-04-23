@@ -413,7 +413,7 @@ func init() {
 		)
 	R32 = jsval.String().RegexpString("^\\d\\d:\\d\\d$")
 	R33 = jsval.String().Enum("XXXL", "XXL", "XL", "L", "M", "S", "XS")
-	R34 = jsval.String().Format("url")
+	R34 = jsval.String().Format("uri")
 	R35 = jsval.Object().
 		AdditionalProperties(
 			jsval.EmptyConstraint,
