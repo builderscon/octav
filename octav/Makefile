@@ -25,7 +25,7 @@ hsupsrc:
 $(INTERNAL_BIN_DIR):
 	@mkdir -p $(INTERNAL_BIN_DIR)
 
-$(INTERNAL_BIN_DIR)/%: $(INTERNAL_BIN_DIR) internal/cmd/%/*.go
+$(INTERNAL_BIN_DIR)/%: internal/cmd/%/*.go $(INTERNAL_BIN_DIR) 
 	@echo "Building $(@F)..."
 	go build -o $@ $^
 
