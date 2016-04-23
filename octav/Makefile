@@ -19,13 +19,14 @@ all: test build
 installdeps:
 	@PATH=$(INTERNAL_BIN_DIR):$(PATH) glide install
 
-$(INTERNAL_BIN_DIR)/%: internal/cmd/%/*.go
+$(INTERNAL_BIN_DIR):
 	@mkdir -p $(INTERNAL_BIN_DIR)
+
+$(INTERNAL_BIN_DIR)/%: $(INTERNAL_BIN_DIR) internal/cmd/%/*.go
 	@echo "Building $(@F)..."
 	go build -o $@ $^
 
-$(INTERNAL_BIN_DIR)/hsup:
-	@mkdir -p $(INTERNAL_BIN_DIR)
+$(INTERNAL_BIN_DIR)/hsup: $(INTERNAL_BIN_DIR)
 	@echo "Building hsup..."
 	@go get -d github.com/lestrrat/go-hsup
 	@cd $(shell go list -f '{{ .Dir }}' github.com/lestrrat/go-hsup) && PATH=$(INTERNAL_BIN_DIR):$(PATH) glide install && go build -o $@ cmd/hsup/*.go
