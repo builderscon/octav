@@ -11,6 +11,7 @@ export GO_TAGS_OPT="-tags debug0"
 if [ "$TRAVIS" == "true" ]; then
     echo " + Detected running under Travis CI"
     make glide
+    make hsupsrc
     make initdb
     make installdeps
 
