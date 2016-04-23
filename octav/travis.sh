@@ -13,6 +13,16 @@ if [ "$TRAVIS" == "true" ]; then
     make glide
     make initdb
     make installdeps
+
+    make buildspec
+    make generate
+
+    DIFF=$(git diff)
+    if [[ ! -z "$DIFF" ]]; then
+        echo "git diff found modified source after code generation"
+        echo $DIFF
+        exit 1
+    fi
 fi
 
 export OCTAV_TEST_DSN="root:@/$OCTAV_DB_NAME?parseTime=true"
