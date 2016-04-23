@@ -20,7 +20,7 @@ installdeps:
 	@PATH=$(INTERNAL_BIN_DIR):$(PATH) glide install
 
 hsupsrc:
-	@go get -x -d github.com/lestrrat/go-hsup
+	@go get -d github.com/lestrrat/go-hsup
 
 $(INTERNAL_BIN_DIR):
 	@mkdir -p $(INTERNAL_BIN_DIR)
