@@ -33,9 +33,9 @@ type acmectx struct {
 	msg *slack.MessageEvent
 }
 
-func New(cl *pubsub.Client, agent *acmeagent.AcmeAgent, store acmeagent.StateStorage, topic, slackgwURL, fifopath string) *Bot {
+func New(cl *pubsub.Client, agent *acmeagent.AcmeAgent, store acmeagent.StateStorage, topic, slackgwURL, authtoken, fifopath string) *Bot {
 	bot := &Bot{
-		Subscriber: slacksub.New(cl, topic, slackgwURL),
+		Subscriber: slacksub.New(cl, topic, slackgwURL, authtoken),
 		acmeagent:  agent,
 		acmestore:  store,
 		fifopath:   fifopath,

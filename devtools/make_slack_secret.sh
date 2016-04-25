@@ -29,4 +29,5 @@ exec jo -p \
     kind=Secret \
     apiVersion=v1 \
     metadata=$(jo name=$SLACK_SECRET_NAME labels=$(jo name=slack group=secrets)) \
-    data[token]="$(base64 $SLACK_DIR/token)"
+    data[token]="$(base64 $SLACK_DIR/token)" \
+    data[gwtoken]="$(base64 $SLACK_DIR/gwtoken)"

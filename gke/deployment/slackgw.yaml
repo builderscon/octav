@@ -29,7 +29,7 @@ spec:
             revision: 24b6e08
       containers:
         # Talks to slack, accepts requests to post to slack
-        - image: asia.gcr.io/builderscon-1248/slackgw:20160420.200951
+        - image: asia.gcr.io/builderscon-1248/slackgw:20160425.153208
           name: slackgw
           resources:
             requests:
@@ -43,16 +43,18 @@ spec:
               containerPort: 4979
               protocol: TCP
           args:
-            - -listen
-            - 0.0.0.0:4979
-            - -rtm
-            - gpubsub-forward
+            - -authtokenfile
+            - /slack/gwtoken
             - -gpubsub-forward.project_id
             - builderscon-1248
             - -gpubsub-forward.event
             - MessageEvent
             - -gpubsub-forward.topic
             - slackgw-forward
+            - -listen
+            - 0.0.0.0:4979
+            - -rtm
+            - gpubsub-forward
             - -tokenfile
             - /slack/token
           env:
@@ -70,7 +72,7 @@ spec:
               mountPath: /slack
         # Listens to google pubsub, routes the messages to the
         # appropriate worker
-        - image: asia.gcr.io/builderscon-1248/slackrouter
+        - image: asia.gcr.io/builderscon-1248/slackrouter:20160425.134742
           name: slackrouter
           resources:
             requests:
@@ -80,6 +82,8 @@ spec:
               memory: "64Mi"
               cpu: "100m"
           args:
+            - -authtokenfile
+            - /slack/gwtoken
             - -project_id
             - builderscon-1248
             - -slackgw
@@ -96,8 +100,11 @@ spec:
             - name: google
               readOnly: true
               mountPath: /google
+            - name: slack
+              readOnly: true
+              mountPath: /slack
         # Listens to google pubsub, does the acme stuff
-        - image: asia.gcr.io/builderscon-1248/acmebot
+        - image: asia.gcr.io/builderscon-1248/acmebot:20160425.151602
           name: acmebot
           resources:
             requests:
@@ -107,6 +114,8 @@ spec:
               memory: "64Mi"
               cpu: "100m"
           args:
+            - -authtokenfile
+            - /slack/gwtoken
             - -email
             - lestrrat@gmail.com
             - -fifopath
@@ -132,8 +141,11 @@ spec:
             - name: k8s-fifo
               readOnly: false
               mountPath: /k8s-fifo
+            - name: slack
+              readOnly: true
+              mountPath: /slack
         # Auxilary tool to listen to fifo and push secrets to k8s
-        - image: asia.gcr.io/builderscon-1248/acmebot-k8s
+        - image: asia.gcr.io/builderscon-1248/acmebot-k8s:20160425.202217
           name: acmebot-k8s
           resources:
             requests:
@@ -155,7 +167,7 @@ spec:
               readOnly: false
               mountPath: /k8s-fifo
         # Listens to google pubsub, does deployment
-        - image: asia.gcr.io/builderscon-1248/deploybot:20160420.152545
+        - image: asia.gcr.io/builderscon-1248/deploybot:20160425.135511
           name: deploybot
           resources:
             requests:
@@ -165,6 +177,8 @@ spec:
               memory: "64Mi"
               cpu: "100m"
           args:
+            - -authtokenfile
+            - /slack/gwtoken
             - -email
             - lestrrat@gmail.com
             - -fifopath
@@ -190,8 +204,11 @@ spec:
             - name: k8s-fifo
               readOnly: false
               mountPath: /k8s-fifo
+            - name: slack
+              readOnly: true
+              mountPath: /slack
         # Auxilary tool to listen to fifo and push secrets to k8s
-        - image: asia.gcr.io/builderscon-1248/deploybot-k8s:20160421.131810
+        - image: asia.gcr.io/builderscon-1248/deploybot-k8s:20160425.201934
           name: deploybot-k8s
           resources:
             requests:
@@ -201,14 +218,16 @@ spec:
               memory: "64Mi"
               cpu: "100m"
           args:
-            - -slackgw
-            - http://slackgw:4979
+            - -authtokenfile
+            - /slack/gwtoken
             - -fifopath
             - /k8s-fifo/deploybot.fifo
-            - -root
-            - /git/octav/gke
             - -project_id
             - builderscon-1248
+            - -root
+            - /git/octav/gke
+            - -slackgw
+            - http://slackgw:4979
             - -zone
             - builderscon
           env:
@@ -226,4 +245,7 @@ spec:
               mountPath: /k8s-fifo
             - name: octav-clone
               mountPath: /git
+            - name: slack
+              readOnly: true
+              mountPath: /slack
 

@@ -20,9 +20,9 @@ type Router struct {
 	deployfwd chan *slack.MessageEvent
 }
 
-func New(cl *pubsub.Client, topic, slackgwURL string) *Router {
+func New(cl *pubsub.Client, topic, slackgwURL, token string) *Router {
 	router := &Router{
-		Subscriber: slacksub.New(cl, topic, slackgwURL),
+		Subscriber: slacksub.New(cl, topic, slackgwURL, token),
 		acmefwd:    make(chan *slack.MessageEvent, 128),
 		deployfwd:  make(chan *slack.MessageEvent, 128),
 	}

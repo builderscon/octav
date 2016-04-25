@@ -43,6 +43,7 @@ type Incoming struct {
 	Channel string            `json:"channel"`
 	Args    map[string]string `json:"args"`
 	slackgw string            // used internally
+	token   string            // used internally
 }
 
 type Bot struct {
@@ -54,12 +55,14 @@ type Bot struct {
 }
 
 func _main() int {
+	var authtokenf string
 	var fifopath string
 	var ns string
 	var projectID string
 	var slackgw string
 	var zone string
 	var root string
+	flag.StringVar(&authtokenf, "authtokenfile", "", "File containing token used to authentication when posting")
 	flag.StringVar(&fifopath, "fifopath", "", "path to fifo where jobs are pushed into")
 	flag.StringVar(&projectID, "project_id", "", "GCE project ID")
 	flag.StringVar(&zone, "zone", "", "DNS zone")
@@ -67,6 +70,16 @@ func _main() int {
 	flag.StringVar(&slackgw, "slackgw", "http://slackgw:4979", "slack gateway url")
 	flag.StringVar(&root, "root", "/tmpl", "location of templates")
 	flag.Parse()
+
+	var authtoken string
+	if authtokenf != "" {
+		buf, err := ioutil.ReadFile(authtokenf)
+		if err != nil {
+			fmt.Printf("Failed to open file '%s': %s", authtokenf, err)
+			return 1
+		}
+		authtoken = string(buf)
+	}
 
 	if _, err := os.Stat(fifopath); err != nil { // doesn't exist
 		if err := syscall.Mknod(fifopath, syscall.S_IFIFO|0666, 0); err != nil {
@@ -131,6 +144,7 @@ func _main() int {
 			continue
 		}
 		in.slackgw = slackgw
+		in.token = authtoken
 
 		switch in.Target {
 		case "ingress":
@@ -159,10 +173,26 @@ func (in *Incoming) reply(s string) (err error) {
 		pdebug.Printf("Posting to '%s'", in.slackgw+"/post")
 	}
 
-	res, err := http.PostForm(in.slackgw+"/post", url.Values{
+	values := url.Values{
 		"channel": []string{in.Channel},
 		"message": []string{s},
-	})
+	}
+	buf := bytes.Buffer{}
+	buf.WriteString(values.Encode())
+
+	req, err := http.NewRequest("POST", in.slackgw+"/post", &buf)
+	if err != nil {
+		return err
+	}
+
+	if token := in.token; token != "" {
+		req.Header.Set("X-Slackgw-Auth", token)
+	}
+	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+	res, err := http.DefaultClient.Do(req)
+	if err != nil {
+		return err
+	}
 
 	if res.StatusCode != http.StatusOK {
 		if pdebug.Enabled {
