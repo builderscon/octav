@@ -2,9 +2,11 @@ package main
 
 import (
 	"bufio"
+	"bytes"
 	"encoding/json"
 	"flag"
 	"fmt"
+	"io/ioutil"
 	"net/http"
 	"net/url"
 	"os"
@@ -29,13 +31,25 @@ type Incoming struct {
 }
 
 func _main() int {
+	var authtokenf string
 	var fifopath string
 	var ns string
 	var slackgw string
+	flag.StringVar(&authtokenf, "authtokenfile", "", "File containing token used to authentication when posting")
 	flag.StringVar(&fifopath, "fifopath", "", "path to fifo where jobs are pushed into")
 	flag.StringVar(&ns, "namespace", "default", "k8s application namespace")
 	flag.StringVar(&slackgw, "slackgw", "http://slackgw:4979", "slack gateway url")
 	flag.Parse()
+
+	var authtoken string
+	if authtokenf != "" {
+		buf, err := ioutil.ReadFile(authtokenf)
+		if err != nil {
+			fmt.Printf("Failed to open file '%s': %s", authtokenf, err)
+			return 1
+		}
+		authtoken = string(buf)
+	}
 
 	if _, err := os.Stat(fifopath); err != nil { // doesn't exist
 		if err := syscall.Mknod(fifopath, syscall.S_IFIFO|0666, 0); err != nil {
@@ -78,13 +92,13 @@ func _main() int {
 			}
 			continue
 		}
-		go upload(slackgw, ns, in)
+		go upload(slackgw, authtoken, ns, in)
 	}
 
 	return 0
 }
 
-func upload(slackgw, ns string, in Incoming) (err error) {
+func upload(slackgw, authtoken, ns string, in Incoming) (err error) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("upload %s", in.Name).BindError(&err)
 		defer g.End()
@@ -117,10 +131,22 @@ func upload(slackgw, ns string, in Incoming) (err error) {
 		return err
 	}
 
-	_, err = http.PostForm(slackgw + "/post", url.Values{
+	values := url.Values{
 		"channel": []string{in.Channel},
 		"message": []string{":tada: Successfully created secret " + in.Name},
-	})
+	}
+	buf := bytes.Buffer{}
+	buf.WriteString(values.Encode())
+
+	req, err := http.NewRequest("POST", slackgw+"/post", &buf)
+	if err != nil {
+		return err
+	}
+	if authtoken != "" {
+		req.Header.Set("X-Slackgw-Auth", authtoken)
+	}
+	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+	_, err = http.DefaultClient.Do(req)
 	if err != nil {
 		return err
 	}

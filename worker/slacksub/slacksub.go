@@ -1,6 +1,7 @@
 package slacksub
 
 import (
+	"bytes"
 	"encoding/json"
 	"net/http"
 	"net/url"
@@ -20,18 +21,22 @@ import (
 type Subscriber struct {
 	Client          *pubsub.Client
 	Done            chan struct{}
+	HTTPClient      *http.Client
 	MessageCallback func(*slack.MessageEvent) error
 	Msgch           chan *pubsub.Message
 	SlackgwURL      string
+	AuthToken       string
 	Topic           string
 }
 
-func New(cl *pubsub.Client, topic, slackgwURL string) *Subscriber {
+func New(cl *pubsub.Client, topic, slackgwURL, authtoken string) *Subscriber {
 	return &Subscriber{
 		Client:     cl,
 		Done:       make(chan struct{}),
+		HTTPClient: &http.Client{},
 		Msgch:      make(chan *pubsub.Message),
 		SlackgwURL: slackgwURL,
+		AuthToken:  authtoken,
 		Topic:      topic,
 	}
 }
@@ -58,10 +63,23 @@ func (sub *Subscriber) Run() {
 }
 
 func (sub *Subscriber) Reply(ch, s string) error {
-	_, err := http.PostForm(sub.SlackgwURL+"/post", url.Values{
+	values := url.Values{
 		"channel": []string{ch},
 		"message": []string{s},
-	})
+	}
+	buf := bytes.Buffer{}
+	buf.WriteString(values.Encode())
+
+	req, err := http.NewRequest("POST", sub.SlackgwURL+"/post", &buf)
+	if err != nil {
+		return err
+	}
+
+	if authtoken := sub.AuthToken; authtoken != "" {
+		req.Header.Set("X-Slackgw-Auth", authtoken)
+	}
+	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+	_, err = sub.HTTPClient.Do(req)
 	return err
 }
 

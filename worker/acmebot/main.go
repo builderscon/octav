@@ -3,6 +3,7 @@ package main
 import (
 	"flag"
 	"fmt"
+	"io/ioutil"
 	"os"
 
 	"github.com/lestrrat/go-cloud-acmeagent"
@@ -20,6 +21,7 @@ func main() {
 }
 
 func _main() int {
+	var authtokenf string
 	var bucket string
 	var email string
 	var fifopath string
@@ -27,6 +29,7 @@ func _main() int {
 	var slackgw string
 	var topic string
 	var zone string
+	flag.StringVar(&authtokenf, "authtokenfile", "", "File containing token used to authentication when posting")
 	flag.StringVar(&bucket, "bucket", "", "bucket name (default is 'acme-' + projectID)")
 	flag.StringVar(&email, "email", "", "email ID to use for acme protocol")
 	flag.StringVar(&fifopath, "fifopath", "", "path to where tls requests willbe pushed to")
@@ -48,6 +51,16 @@ func _main() int {
 
 	if bucket == "" {
 		bucket = "acme-" + projectID
+	}
+
+	var authtoken string
+	if authtokenf != "" {
+		buf, err := ioutil.ReadFile(authtokenf)
+		if err != nil {
+			fmt.Printf("failed to read file '%s': %s", authtokenf, err)
+			return 1
+		}
+		authtoken = string(buf)
 	}
 
 	pcl, err := pubsub.NewClient(context.Background(), projectID)
@@ -82,7 +95,7 @@ func _main() int {
 		StateStorage: store,
 	})
 
-	bot := New(pcl, aa, store, topic, slackgw, fifopath)
+	bot := New(pcl, aa, store, topic, slackgw, authtoken, fifopath)
 	bot.Run()
 
 	return 0

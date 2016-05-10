@@ -5,6 +5,7 @@ import (
 	"errors"
 	"flag"
 	"fmt"
+	"io/ioutil"
 	"os"
 	"regexp"
 	"strings"
@@ -22,12 +23,14 @@ func main() {
 }
 
 func _main() int {
+	var authtokenf string
 	var email string
 	var fifopath string
 	var projectID string
 	var slackgw string
 	var topic string
 	var zone string
+	flag.StringVar(&authtokenf, "authtokenfile", "", "File containing token used to authentication when posting")
 	flag.StringVar(&email, "email", "", "email ID to use for acme protocol")
 	flag.StringVar(&fifopath, "fifopath", "", "path to where tls requests willbe pushed to")
 	flag.StringVar(&projectID, "project_id", "", "project ID to use")
@@ -35,6 +38,16 @@ func _main() int {
 	flag.StringVar(&topic, "topic", "slackgw-url", "topic name to subscribe to")
 	flag.StringVar(&zone, "zone", "", "DNS zone to update")
 	flag.Parse()
+
+	var authtoken string
+	if authtokenf != "" {
+		buf, err := ioutil.ReadFile(authtokenf)
+		if err != nil {
+			fmt.Printf("Failed to open file '%s': %s", authtokenf, err)
+			return 1
+		}
+		authtoken = string(buf)
+	}
 
 	if fifopath == "" {
 		fmt.Printf("fifopath is required")
@@ -52,7 +65,7 @@ func _main() int {
 		return 1
 	}
 
-	bot := New(pcl, topic, slackgw, fifopath)
+	bot := New(pcl, topic, slackgw, authtoken, fifopath)
 	bot.Run()
 
 	return 0
@@ -73,9 +86,9 @@ type ingressctx struct {
 	msg *slack.MessageEvent
 }
 
-func New(cl *pubsub.Client, topic, slackgwURL, fifopath string) *Bot {
+func New(cl *pubsub.Client, topic, slackgwURL, token, fifopath string) *Bot {
 	bot := &Bot{
-		Subscriber: slacksub.New(cl, topic, slackgwURL),
+		Subscriber: slacksub.New(cl, topic, slackgwURL, token),
 		fifopath:   fifopath,
 	}
 	bot.Subscriber.MessageCallback = bot.processMessageEvent
@@ -191,7 +204,7 @@ func (b *Bot) handleIngressCmd(ctx *ingressctx, cmd []string) error {
 	}
 
 	args := deployargs{
-		Target: "ingress",
+		Target:  "ingress",
 		Channel: ctx.msg.Channel,
 	}
 	if cmd[0] != "list" {
