@@ -307,6 +307,21 @@
         "first_name#[a-z]+": { "$ref": "#/definitions/string_i18n" },
         "last_name#[a-z]+": { "$ref": "#/definitions/string_i18n" }
       }
+    },
+    "question": {
+      "type": "object",
+      "hsup.type": "model.Question",
+      "properties": {
+        "id": {"$ref": "#/definitions/uuid"},
+        "session_id": {"$ref": "#/definitions/uuid"},
+        "user_id": {"$ref": "#/definitions/uuid"},
+        "body": {"type": "string"}
+      }
+    },
+    "question_array": {
+      "type": "array",
+      "items": {"$ref": "#/definitions/question"},
+      "hsup.type": "[]model.Question"
     }
   },
   "pathStart": "/v1",
@@ -884,6 +899,48 @@
         }
       },
       "targetSchema": { "$ref": "#/definitions/session_array" }
+    },
+    {
+      "title": "Create question",
+      "href": "/question/create",
+      "rel": "create",
+      "schema": {
+        "type": "object",
+        "required": ["session_id", "user_id", "body"],
+        "properties": {
+          "session_id": {"$ref": "#/definitions/uuid"},
+          "user_id": {"$ref": "#/definitions/uuid"},
+          "body": {"type":"string"}
+        }
+      },
+      "targetSchema": { "$ref": "#/definitions/question" }
+    },
+    {
+      "title": "Delete question",
+      "href": "/question/delete",
+      "rel": "delete",
+      "schema": {
+        "type": "object",
+        "required": ["id"],
+        "properties": {
+          "id": {"$ref": "#/definitions/uuid"}
+        }
+      }
+    },
+    {
+      "title": "List question",
+      "href": "/question/list",
+      "rel": "list",
+      "schema": {
+        "type": "object",
+        "required": ["session_id"],
+        "properties": {
+          "limit": {"$ref": "#/definitions/positiveInteger"},
+          "session_id": {"$ref": "#/definitions/uuid"},
+          "since": {"$ref": "#/definitions/uuid"}
+        }
+      },
+      "targetSchema": { "$ref": "#/definitions/question_array" }
     }
   ]
 }
