@@ -125,3 +125,12 @@ CREATE TABLE localized_strings (
     localized TEXT NOT NULL,
     KEY (parent_id, parent_type, name, language)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE questions (
+    oid INTEGER UNSIGNED NOT NULL PRIMARY KEY AUTO_INCREMENT,
+    eid CHAR(64) CHARACTER SET latin1 NOT NULL,
+    session_id CHAR(64) CHARACTER SET latin1 NOT NULL,
+    user_id CHAR(64) CHARACTER SET latin1 NOT NULL,
+    body TEXT NOT NULL,
+    KEY (eid, session_id, user_id)
+)

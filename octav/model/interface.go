@@ -401,3 +401,37 @@ type ListSessionByConferenceRequest struct {
 	Date         jsval.MaybeString `json:"date" urlenc:"date,omitempty,string"`
 	Lang         jsval.MaybeString `json:"lang,omitempty" urlenc:"lang,omitempty,string"`
 }
+
+// +model
+type Question struct {
+	ID				string
+	SessionID string
+	UserID    string
+	Body      string
+}
+
+// +transport
+type CreateQuestionRequest struct {
+	SessionID string `json:"session_id" urlenc:"session_id"`
+	UserID    string `json:"user_id" urlenc:"user_id"`
+	Body      string `json:"body" urlenc:"body"`
+}
+
+// +transport
+type UpdateQuestionRequest struct {
+	ID        string `json:"id" urlenc:"id"`
+	SessionID jsval.MaybeString `json:"session_id" urlenc:"session_id"`
+	UserID    jsval.MaybeString `json:"user_id" urlenc:"user_id"`
+	Body      jsval.MaybeString `json:"body" urlenc:"body"`
+}
+// +transport
+type DeleteQuestionRequest struct {
+	ID string `json:"id" urlenc:"id"`
+}
+
+// +transport
+type ListQuestionRequest struct {
+	Since jsval.MaybeString `json:"since" urlenc:"since,omitempty,string"`
+	Lang  jsval.MaybeString `json:"lang" urlenc:"lang,omitempty,string"`
+	Limit jsval.MaybeInt    `json:"limit" urlenc:"limit,omitempty,int64"`
+}

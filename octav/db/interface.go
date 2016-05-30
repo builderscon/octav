@@ -130,3 +130,14 @@ type LocalizedString struct {
 	Language   string
 	Localized  string
 }
+
+// +DB tablename:"questions"
+type Question struct {
+	OID        int64
+	EID        string
+	SessionID  string
+	UserID     string
+	Body       string
+	CreatedOn  time.Time
+	ModifiedOn NullTime
+}

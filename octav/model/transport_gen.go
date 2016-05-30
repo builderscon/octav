@@ -2746,3 +2746,247 @@ func (r *ListSessionByConferenceRequest) Populate(m map[string]interface{}) erro
 	}
 	return nil
 }
+
+func (r CreateQuestionRequest) collectMarshalData() map[string]interface{} {
+	m := make(map[string]interface{})
+	m["session_id"] = r.SessionID
+	m["user_id"] = r.UserID
+	m["body"] = r.Body
+	return m
+}
+
+func (r CreateQuestionRequest) MarshalJSON() ([]byte, error) {
+	m := r.collectMarshalData()
+	buf, err := json.Marshal(m)
+	if err != nil {
+		return nil, err
+	}
+	return buf, nil
+}
+
+func (r CreateQuestionRequest) MarshalURL() ([]byte, error) {
+	m := r.collectMarshalData()
+	buf, err := urlenc.Marshal(m)
+	if err != nil {
+		return nil, err
+	}
+	return buf, nil
+}
+
+func (r *CreateQuestionRequest) UnmarshalJSON(data []byte) error {
+	m := make(map[string]interface{})
+	if err := json.Unmarshal(data, &m); err != nil {
+		return err
+	}
+	return r.Populate(m)
+}
+
+func (r *CreateQuestionRequest) Populate(m map[string]interface{}) error {
+	if jv, ok := m["session_id"]; ok {
+		switch jv.(type) {
+		case string:
+			r.SessionID = jv.(string)
+			delete(m, "session_id")
+		default:
+			return ErrInvalidJSONFieldType{Field: "session_id"}
+		}
+	}
+	if jv, ok := m["user_id"]; ok {
+		switch jv.(type) {
+		case string:
+			r.UserID = jv.(string)
+			delete(m, "user_id")
+		default:
+			return ErrInvalidJSONFieldType{Field: "user_id"}
+		}
+	}
+	if jv, ok := m["body"]; ok {
+		switch jv.(type) {
+		case string:
+			r.Body = jv.(string)
+			delete(m, "body")
+		default:
+			return ErrInvalidJSONFieldType{Field: "body"}
+		}
+	}
+	return nil
+}
+
+func (r UpdateQuestionRequest) collectMarshalData() map[string]interface{} {
+	m := make(map[string]interface{})
+	m["id"] = r.ID
+	if r.SessionID.Valid() {
+		m["session_id"] = r.SessionID.Value()
+	}
+	if r.UserID.Valid() {
+		m["user_id"] = r.UserID.Value()
+	}
+	if r.Body.Valid() {
+		m["body"] = r.Body.Value()
+	}
+	return m
+}
+
+func (r UpdateQuestionRequest) MarshalJSON() ([]byte, error) {
+	m := r.collectMarshalData()
+	buf, err := json.Marshal(m)
+	if err != nil {
+		return nil, err
+	}
+	return buf, nil
+}
+
+func (r UpdateQuestionRequest) MarshalURL() ([]byte, error) {
+	m := r.collectMarshalData()
+	buf, err := urlenc.Marshal(m)
+	if err != nil {
+		return nil, err
+	}
+	return buf, nil
+}
+
+func (r *UpdateQuestionRequest) UnmarshalJSON(data []byte) error {
+	m := make(map[string]interface{})
+	if err := json.Unmarshal(data, &m); err != nil {
+		return err
+	}
+	return r.Populate(m)
+}
+
+func (r *UpdateQuestionRequest) Populate(m map[string]interface{}) error {
+	if jv, ok := m["id"]; ok {
+		switch jv.(type) {
+		case string:
+			r.ID = jv.(string)
+			delete(m, "id")
+		default:
+			return ErrInvalidJSONFieldType{Field: "id"}
+		}
+	}
+	if jv, ok := m["session_id"]; ok {
+		if err := r.SessionID.Set(jv); err != nil {
+			return errors.New("set field SessionID failed: " + err.Error())
+		}
+		delete(m, "session_id")
+	}
+	if jv, ok := m["user_id"]; ok {
+		if err := r.UserID.Set(jv); err != nil {
+			return errors.New("set field UserID failed: " + err.Error())
+		}
+		delete(m, "user_id")
+	}
+	if jv, ok := m["body"]; ok {
+		if err := r.Body.Set(jv); err != nil {
+			return errors.New("set field Body failed: " + err.Error())
+		}
+		delete(m, "body")
+	}
+	return nil
+}
+
+func (r DeleteQuestionRequest) collectMarshalData() map[string]interface{} {
+	m := make(map[string]interface{})
+	m["id"] = r.ID
+	return m
+}
+
+func (r DeleteQuestionRequest) MarshalJSON() ([]byte, error) {
+	m := r.collectMarshalData()
+	buf, err := json.Marshal(m)
+	if err != nil {
+		return nil, err
+	}
+	return buf, nil
+}
+
+func (r DeleteQuestionRequest) MarshalURL() ([]byte, error) {
+	m := r.collectMarshalData()
+	buf, err := urlenc.Marshal(m)
+	if err != nil {
+		return nil, err
+	}
+	return buf, nil
+}
+
+func (r *DeleteQuestionRequest) UnmarshalJSON(data []byte) error {
+	m := make(map[string]interface{})
+	if err := json.Unmarshal(data, &m); err != nil {
+		return err
+	}
+	return r.Populate(m)
+}
+
+func (r *DeleteQuestionRequest) Populate(m map[string]interface{}) error {
+	if jv, ok := m["id"]; ok {
+		switch jv.(type) {
+		case string:
+			r.ID = jv.(string)
+			delete(m, "id")
+		default:
+			return ErrInvalidJSONFieldType{Field: "id"}
+		}
+	}
+	return nil
+}
+
+func (r ListQuestionRequest) collectMarshalData() map[string]interface{} {
+	m := make(map[string]interface{})
+	if r.Since.Valid() {
+		m["since"] = r.Since.Value()
+	}
+	if r.Lang.Valid() {
+		m["lang"] = r.Lang.Value()
+	}
+	if r.Limit.Valid() {
+		m["limit"] = r.Limit.Value()
+	}
+	return m
+}
+
+func (r ListQuestionRequest) MarshalJSON() ([]byte, error) {
+	m := r.collectMarshalData()
+	buf, err := json.Marshal(m)
+	if err != nil {
+		return nil, err
+	}
+	return buf, nil
+}
+
+func (r ListQuestionRequest) MarshalURL() ([]byte, error) {
+	m := r.collectMarshalData()
+	buf, err := urlenc.Marshal(m)
+	if err != nil {
+		return nil, err
+	}
+	return buf, nil
+}
+
+func (r *ListQuestionRequest) UnmarshalJSON(data []byte) error {
+	m := make(map[string]interface{})
+	if err := json.Unmarshal(data, &m); err != nil {
+		return err
+	}
+	return r.Populate(m)
+}
+
+func (r *ListQuestionRequest) Populate(m map[string]interface{}) error {
+	if jv, ok := m["since"]; ok {
+		if err := r.Since.Set(jv); err != nil {
+			return errors.New("set field Since failed: " + err.Error())
+		}
+		delete(m, "since")
+	}
+	if jv, ok := m["lang"]; ok {
+		if err := r.Lang.Set(jv); err != nil {
+			return errors.New("set field Lang failed: " + err.Error())
+		}
+		delete(m, "lang")
+	}
+	if jv, ok := m["limit"]; ok {
+		if err := r.Limit.Set(jv); err != nil {
+			return errors.New("set field Limit failed: " + err.Error())
+		}
+		delete(m, "limit")
+	}
+	return nil
+}

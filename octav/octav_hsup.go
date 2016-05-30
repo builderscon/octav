@@ -223,6 +223,29 @@ func httpCreateConference(w http.ResponseWriter, r *http.Request) {
 	doCreateConference(NewContext(r), w, r, payload)
 }
 
+func httpCreateQuestion(w http.ResponseWriter, r *http.Request) {
+	if pdebug.Enabled {
+		g := pdebug.Marker("httpCreateQuestion")
+		defer g.End()
+	}
+	if strings.ToLower(r.Method) != `get` {
+		httpError(w, `Method was `+r.Method+`, expected get`, http.StatusNotFound, nil)
+		return
+	}
+
+	var payload model.CreateQuestionRequest
+	if err := urlenc.Unmarshal([]byte(r.URL.RawQuery), &payload); err != nil {
+		httpError(w, `Failed to parse url query string`, http.StatusInternalServerError, err)
+		return
+	}
+
+	if err := validator.HTTPCreateQuestionRequest.Validate(&payload); err != nil {
+		httpError(w, `Invalid input (validation failed)`, http.StatusInternalServerError, err)
+		return
+	}
+	doCreateQuestion(NewContext(r), w, r, payload)
+}
+
 func httpCreateRoom(w http.ResponseWriter, r *http.Request) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("httpCreateRoom")
@@ -479,6 +502,29 @@ func httpDeleteConferenceVenue(w http.ResponseWriter, r *http.Request) {
 	doDeleteConferenceVenue(NewContext(r), w, r, payload)
 }
 
+func httpDeleteQuestion(w http.ResponseWriter, r *http.Request) {
+	if pdebug.Enabled {
+		g := pdebug.Marker("httpDeleteQuestion")
+		defer g.End()
+	}
+	if strings.ToLower(r.Method) != `get` {
+		httpError(w, `Method was `+r.Method+`, expected get`, http.StatusNotFound, nil)
+		return
+	}
+
+	var payload model.DeleteQuestionRequest
+	if err := urlenc.Unmarshal([]byte(r.URL.RawQuery), &payload); err != nil {
+		httpError(w, `Failed to parse url query string`, http.StatusInternalServerError, err)
+		return
+	}
+
+	if err := validator.HTTPDeleteQuestionRequest.Validate(&payload); err != nil {
+		httpError(w, `Invalid input (validation failed)`, http.StatusInternalServerError, err)
+		return
+	}
+	doDeleteQuestion(NewContext(r), w, r, payload)
+}
+
 func httpDeleteRoom(w http.ResponseWriter, r *http.Request) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("httpDeleteRoom")
@@ -628,6 +674,29 @@ func httpListConference(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	doListConference(NewContext(r), w, r, payload)
+}
+
+func httpListQuestion(w http.ResponseWriter, r *http.Request) {
+	if pdebug.Enabled {
+		g := pdebug.Marker("httpListQuestion")
+		defer g.End()
+	}
+	if strings.ToLower(r.Method) != `get` {
+		httpError(w, `Method was `+r.Method+`, expected get`, http.StatusNotFound, nil)
+		return
+	}
+
+	var payload model.ListQuestionRequest
+	if err := urlenc.Unmarshal([]byte(r.URL.RawQuery), &payload); err != nil {
+		httpError(w, `Failed to parse url query string`, http.StatusInternalServerError, err)
+		return
+	}
+
+	if err := validator.HTTPListQuestionRequest.Validate(&payload); err != nil {
+		httpError(w, `Invalid input (validation failed)`, http.StatusInternalServerError, err)
+		return
+	}
+	doListQuestion(NewContext(r), w, r, payload)
 }
 
 func httpListRoom(w http.ResponseWriter, r *http.Request) {
@@ -1033,6 +1102,9 @@ func (s *Server) SetupRoutes() {
 	r.HandleFunc(`/v1/conference/update`, httpUpdateConference)
 	r.HandleFunc(`/v1/conference/venue/add`, httpAddConferenceVenue)
 	r.HandleFunc(`/v1/conference/venue/delete`, httpDeleteConferenceVenue)
+	r.HandleFunc(`/v1/question/create`, httpCreateQuestion)
+	r.HandleFunc(`/v1/question/delete`, httpDeleteQuestion)
+	r.HandleFunc(`/v1/question/list`, httpListQuestion)
 	r.HandleFunc(`/v1/room/create`, httpCreateRoom)
 	r.HandleFunc(`/v1/room/delete`, httpDeleteRoom)
 	r.HandleFunc(`/v1/room/list`, httpListRoom)

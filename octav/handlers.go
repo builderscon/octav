@@ -1107,3 +1107,12 @@ func doListSessionByConference(ctx context.Context, w http.ResponseWriter, r *ht
 	}
 	httpJSON(w, l)
 }
+
+func doCreateQuestion(ctx context.Context, w http.ResponseWriter, r *http.Request, payload model.CreateQuestionRequest) {
+}
+
+func doDeleteQuestion(ctx context.Context, w http.ResponseWriter, r *http.Request, payload model.DeleteQuestionRequest) {
+}
+
+func doListQuestion(ctx context.Context, w http.ResponseWriter, r *http.Request, payload model.ListQuestionRequest) {
+}
