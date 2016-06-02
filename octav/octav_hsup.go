@@ -101,6 +101,7 @@ func httpAddConferenceAdmin(w http.ResponseWriter, r *http.Request) {
 		defer g.End()
 	}
 	if strings.ToLower(r.Method) != `post` {
+		w.Header().Set("Allow", "post")
 		httpError(w, `Method was `+r.Method+`, expected post`, http.StatusNotFound, nil)
 		return
 	}
@@ -133,6 +134,7 @@ func httpAddConferenceDates(w http.ResponseWriter, r *http.Request) {
 		defer g.End()
 	}
 	if strings.ToLower(r.Method) != `post` {
+		w.Header().Set("Allow", "post")
 		httpError(w, `Method was `+r.Method+`, expected post`, http.StatusNotFound, nil)
 		return
 	}
@@ -165,6 +167,7 @@ func httpAddConferenceVenue(w http.ResponseWriter, r *http.Request) {
 		defer g.End()
 	}
 	if strings.ToLower(r.Method) != `post` {
+		w.Header().Set("Allow", "post")
 		httpError(w, `Method was `+r.Method+`, expected post`, http.StatusNotFound, nil)
 		return
 	}
@@ -197,6 +200,7 @@ func httpCreateConference(w http.ResponseWriter, r *http.Request) {
 		defer g.End()
 	}
 	if strings.ToLower(r.Method) != `post` {
+		w.Header().Set("Allow", "post")
 		httpError(w, `Method was `+r.Method+`, expected post`, http.StatusNotFound, nil)
 		return
 	}
@@ -229,6 +233,7 @@ func httpCreateQuestion(w http.ResponseWriter, r *http.Request) {
 		defer g.End()
 	}
 	if strings.ToLower(r.Method) != `get` {
+		w.Header().Set("Allow", "get")
 		httpError(w, `Method was `+r.Method+`, expected get`, http.StatusNotFound, nil)
 		return
 	}
@@ -252,6 +257,7 @@ func httpCreateRoom(w http.ResponseWriter, r *http.Request) {
 		defer g.End()
 	}
 	if strings.ToLower(r.Method) != `post` {
+		w.Header().Set("Allow", "post")
 		httpError(w, `Method was `+r.Method+`, expected post`, http.StatusNotFound, nil)
 		return
 	}
@@ -284,6 +290,7 @@ func httpCreateSession(w http.ResponseWriter, r *http.Request) {
 		defer g.End()
 	}
 	if strings.ToLower(r.Method) != `post` {
+		w.Header().Set("Allow", "post")
 		httpError(w, `Method was `+r.Method+`, expected post`, http.StatusNotFound, nil)
 		return
 	}
@@ -316,6 +323,7 @@ func httpCreateUser(w http.ResponseWriter, r *http.Request) {
 		defer g.End()
 	}
 	if strings.ToLower(r.Method) != `post` {
+		w.Header().Set("Allow", "post")
 		httpError(w, `Method was `+r.Method+`, expected post`, http.StatusNotFound, nil)
 		return
 	}
@@ -348,6 +356,7 @@ func httpCreateVenue(w http.ResponseWriter, r *http.Request) {
 		defer g.End()
 	}
 	if strings.ToLower(r.Method) != `post` {
+		w.Header().Set("Allow", "post")
 		httpError(w, `Method was `+r.Method+`, expected post`, http.StatusNotFound, nil)
 		return
 	}
@@ -380,6 +389,7 @@ func httpDeleteConference(w http.ResponseWriter, r *http.Request) {
 		defer g.End()
 	}
 	if strings.ToLower(r.Method) != `post` {
+		w.Header().Set("Allow", "post")
 		httpError(w, `Method was `+r.Method+`, expected post`, http.StatusNotFound, nil)
 		return
 	}
@@ -412,6 +422,7 @@ func httpDeleteConferenceAdmin(w http.ResponseWriter, r *http.Request) {
 		defer g.End()
 	}
 	if strings.ToLower(r.Method) != `post` {
+		w.Header().Set("Allow", "post")
 		httpError(w, `Method was `+r.Method+`, expected post`, http.StatusNotFound, nil)
 		return
 	}
@@ -444,6 +455,7 @@ func httpDeleteConferenceDates(w http.ResponseWriter, r *http.Request) {
 		defer g.End()
 	}
 	if strings.ToLower(r.Method) != `post` {
+		w.Header().Set("Allow", "post")
 		httpError(w, `Method was `+r.Method+`, expected post`, http.StatusNotFound, nil)
 		return
 	}
@@ -476,6 +488,7 @@ func httpDeleteConferenceVenue(w http.ResponseWriter, r *http.Request) {
 		defer g.End()
 	}
 	if strings.ToLower(r.Method) != `post` {
+		w.Header().Set("Allow", "post")
 		httpError(w, `Method was `+r.Method+`, expected post`, http.StatusNotFound, nil)
 		return
 	}
@@ -508,6 +521,7 @@ func httpDeleteQuestion(w http.ResponseWriter, r *http.Request) {
 		defer g.End()
 	}
 	if strings.ToLower(r.Method) != `get` {
+		w.Header().Set("Allow", "get")
 		httpError(w, `Method was `+r.Method+`, expected get`, http.StatusNotFound, nil)
 		return
 	}
@@ -531,6 +545,7 @@ func httpDeleteRoom(w http.ResponseWriter, r *http.Request) {
 		defer g.End()
 	}
 	if strings.ToLower(r.Method) != `post` {
+		w.Header().Set("Allow", "post")
 		httpError(w, `Method was `+r.Method+`, expected post`, http.StatusNotFound, nil)
 		return
 	}
@@ -563,6 +578,7 @@ func httpDeleteSession(w http.ResponseWriter, r *http.Request) {
 		defer g.End()
 	}
 	if strings.ToLower(r.Method) != `post` {
+		w.Header().Set("Allow", "post")
 		httpError(w, `Method was `+r.Method+`, expected post`, http.StatusNotFound, nil)
 		return
 	}
@@ -595,6 +611,7 @@ func httpDeleteUser(w http.ResponseWriter, r *http.Request) {
 		defer g.End()
 	}
 	if strings.ToLower(r.Method) != `post` {
+		w.Header().Set("Allow", "post")
 		httpError(w, `Method was `+r.Method+`, expected post`, http.StatusNotFound, nil)
 		return
 	}
@@ -627,6 +644,7 @@ func httpDeleteVenue(w http.ResponseWriter, r *http.Request) {
 		defer g.End()
 	}
 	if strings.ToLower(r.Method) != `post` {
+		w.Header().Set("Allow", "post")
 		httpError(w, `Method was `+r.Method+`, expected post`, http.StatusNotFound, nil)
 		return
 	}
@@ -659,6 +677,7 @@ func httpListConference(w http.ResponseWriter, r *http.Request) {
 		defer g.End()
 	}
 	if strings.ToLower(r.Method) != `get` {
+		w.Header().Set("Allow", "get")
 		httpError(w, `Method was `+r.Method+`, expected get`, http.StatusNotFound, nil)
 		return
 	}
@@ -682,6 +701,7 @@ func httpListQuestion(w http.ResponseWriter, r *http.Request) {
 		defer g.End()
 	}
 	if strings.ToLower(r.Method) != `get` {
+		w.Header().Set("Allow", "get")
 		httpError(w, `Method was `+r.Method+`, expected get`, http.StatusNotFound, nil)
 		return
 	}
@@ -705,6 +725,7 @@ func httpListRoom(w http.ResponseWriter, r *http.Request) {
 		defer g.End()
 	}
 	if strings.ToLower(r.Method) != `get` {
+		w.Header().Set("Allow", "get")
 		httpError(w, `Method was `+r.Method+`, expected get`, http.StatusNotFound, nil)
 		return
 	}
@@ -728,6 +749,7 @@ func httpListSessionByConference(w http.ResponseWriter, r *http.Request) {
 		defer g.End()
 	}
 	if strings.ToLower(r.Method) != `get` {
+		w.Header().Set("Allow", "get")
 		httpError(w, `Method was `+r.Method+`, expected get`, http.StatusNotFound, nil)
 		return
 	}
@@ -751,6 +773,7 @@ func httpListUser(w http.ResponseWriter, r *http.Request) {
 		defer g.End()
 	}
 	if strings.ToLower(r.Method) != `get` {
+		w.Header().Set("Allow", "get")
 		httpError(w, `Method was `+r.Method+`, expected get`, http.StatusNotFound, nil)
 		return
 	}
@@ -774,6 +797,7 @@ func httpListVenue(w http.ResponseWriter, r *http.Request) {
 		defer g.End()
 	}
 	if strings.ToLower(r.Method) != `get` {
+		w.Header().Set("Allow", "get")
 		httpError(w, `Method was `+r.Method+`, expected get`, http.StatusNotFound, nil)
 		return
 	}
@@ -797,6 +821,7 @@ func httpLookupConference(w http.ResponseWriter, r *http.Request) {
 		defer g.End()
 	}
 	if strings.ToLower(r.Method) != `get` {
+		w.Header().Set("Allow", "get")
 		httpError(w, `Method was `+r.Method+`, expected get`, http.StatusNotFound, nil)
 		return
 	}
@@ -820,6 +845,7 @@ func httpLookupRoom(w http.ResponseWriter, r *http.Request) {
 		defer g.End()
 	}
 	if strings.ToLower(r.Method) != `get` {
+		w.Header().Set("Allow", "get")
 		httpError(w, `Method was `+r.Method+`, expected get`, http.StatusNotFound, nil)
 		return
 	}
@@ -843,6 +869,7 @@ func httpLookupSession(w http.ResponseWriter, r *http.Request) {
 		defer g.End()
 	}
 	if strings.ToLower(r.Method) != `get` {
+		w.Header().Set("Allow", "get")
 		httpError(w, `Method was `+r.Method+`, expected get`, http.StatusNotFound, nil)
 		return
 	}
@@ -866,6 +893,7 @@ func httpLookupUser(w http.ResponseWriter, r *http.Request) {
 		defer g.End()
 	}
 	if strings.ToLower(r.Method) != `get` {
+		w.Header().Set("Allow", "get")
 		httpError(w, `Method was `+r.Method+`, expected get`, http.StatusNotFound, nil)
 		return
 	}
@@ -889,6 +917,7 @@ func httpLookupUserByAuthUserID(w http.ResponseWriter, r *http.Request) {
 		defer g.End()
 	}
 	if strings.ToLower(r.Method) != `get` {
+		w.Header().Set("Allow", "get")
 		httpError(w, `Method was `+r.Method+`, expected get`, http.StatusNotFound, nil)
 		return
 	}
@@ -912,6 +941,7 @@ func httpLookupVenue(w http.ResponseWriter, r *http.Request) {
 		defer g.End()
 	}
 	if strings.ToLower(r.Method) != `get` {
+		w.Header().Set("Allow", "get")
 		httpError(w, `Method was `+r.Method+`, expected get`, http.StatusNotFound, nil)
 		return
 	}
@@ -935,6 +965,7 @@ func httpUpdateConference(w http.ResponseWriter, r *http.Request) {
 		defer g.End()
 	}
 	if strings.ToLower(r.Method) != `post` {
+		w.Header().Set("Allow", "post")
 		httpError(w, `Method was `+r.Method+`, expected post`, http.StatusNotFound, nil)
 		return
 	}
@@ -967,6 +998,7 @@ func httpUpdateRoom(w http.ResponseWriter, r *http.Request) {
 		defer g.End()
 	}
 	if strings.ToLower(r.Method) != `post` {
+		w.Header().Set("Allow", "post")
 		httpError(w, `Method was `+r.Method+`, expected post`, http.StatusNotFound, nil)
 		return
 	}
@@ -999,6 +1031,7 @@ func httpUpdateSession(w http.ResponseWriter, r *http.Request) {
 		defer g.End()
 	}
 	if strings.ToLower(r.Method) != `post` {
+		w.Header().Set("Allow", "post")
 		httpError(w, `Method was `+r.Method+`, expected post`, http.StatusNotFound, nil)
 		return
 	}
@@ -1031,6 +1064,7 @@ func httpUpdateUser(w http.ResponseWriter, r *http.Request) {
 		defer g.End()
 	}
 	if strings.ToLower(r.Method) != `post` {
+		w.Header().Set("Allow", "post")
 		httpError(w, `Method was `+r.Method+`, expected post`, http.StatusNotFound, nil)
 		return
 	}
@@ -1063,6 +1097,7 @@ func httpUpdateVenue(w http.ResponseWriter, r *http.Request) {
 		defer g.End()
 	}
 	if strings.ToLower(r.Method) != `post` {
+		w.Header().Set("Allow", "post")
 		httpError(w, `Method was `+r.Method+`, expected post`, http.StatusNotFound, nil)
 		return
 	}
