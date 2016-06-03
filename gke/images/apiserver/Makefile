@@ -8,7 +8,9 @@ PROJECT_ID=$(shell gcloud config list 2>&1 | grep 'project = ' | sed -e 's/proje
 SRC_FILES = $(wildcard $(OCTAV_DIR)/*.go $(OCTAV_DIR)/validator/*.go $(OCTAV_DIR)/client/*.go $(OCTAV_DIR)/db/*.go $(OCTAV_DIR)/model/*.go)
 
 TAG:=$(shell date +"%Y%m%d.%H%M%S")
-IMAGE_NAME:=$(REPOSITORY_HOST)/$(PROJECT_ID)/$(APPNAME):$(TAG)
+IMAGE_NAME_BASE:=$(REPOSITORY_HOST)/$(PROJECT_ID)/$(APPNAME)
+IMAGE_NAME_LATEST:=$(IMAGE_NAME_BASE):latest
+IMAGE_NAME:=$(IMAGE_NAME_BASE):$(TAG)
 
 .PHONY: all octav always-rebuild
 
@@ -25,20 +27,17 @@ $(CURDIR)/octav-debug: $(SRC_FILES)
 build-octav: $(CURDIR)/octav
 build-octav-debug: $(CURDIR)/octav-debug
 
-dm-running:
-	$(MAKE) -C $(TOPDIR) dm-running
-
-docker-debug: dm-running build-octav-debug
+docker-debug: build-octav-debug
 	$(MAKE) -C $(TOPDIR) docker-env-ready
 	cp octav-debug octav
 	@docker build -t octav/$(APPNAME) .
 
-docker: dm-running build-octav
+docker: build-octav
 	$(MAKE) -C $(TOPDIR) docker-env-ready
 	@docker build -t octav/$(APPNAME) .
 
 publish:
-	$(MAKE) -C $(TOPDIR) gke-publish IMAGE_NAME=$(IMAGE_NAME) APPNAME=$(APPNAME)
+	$(MAKE) -C $(TOPDIR) gke-publish IMAGE_NAME=$(IMAGE_NAME) APPNAME=$(APPNAME) IMAGE_NAME_LATEST=$(IMAGE_NAME_LATEST)
 
 clean-docker-images:
 	$(MAKE) -C $(TOPDIR) clean-docker-images

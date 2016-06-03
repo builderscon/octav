@@ -3101,3 +3101,123 @@ func (r *CreateSessionSurveyResponseRequest) Populate(m map[string]interface{}) 
 	}
 	return nil
 }
+
+func (r CreateClientRequest) collectMarshalData() map[string]interface{} {
+	m := make(map[string]interface{})
+	m["id"] = r.ID
+	m["name"] = r.Name
+	return m
+}
+
+func (r CreateClientRequest) MarshalJSON() ([]byte, error) {
+	m := r.collectMarshalData()
+	buf, err := json.Marshal(m)
+	if err != nil {
+		return nil, err
+	}
+	return buf, nil
+}
+
+func (r CreateClientRequest) MarshalURL() ([]byte, error) {
+	m := r.collectMarshalData()
+	buf, err := urlenc.Marshal(m)
+	if err != nil {
+		return nil, err
+	}
+	return buf, nil
+}
+
+func (r *CreateClientRequest) UnmarshalJSON(data []byte) error {
+	m := make(map[string]interface{})
+	if err := json.Unmarshal(data, &m); err != nil {
+		return err
+	}
+	return r.Populate(m)
+}
+
+func (r *CreateClientRequest) Populate(m map[string]interface{}) error {
+	if jv, ok := m["id"]; ok {
+		switch jv.(type) {
+		case string:
+			r.ID = jv.(string)
+			delete(m, "id")
+		default:
+			return ErrInvalidJSONFieldType{Field: "id"}
+		}
+	}
+	if jv, ok := m["name"]; ok {
+		switch jv.(type) {
+		case string:
+			r.Name = jv.(string)
+			delete(m, "name")
+		default:
+			return ErrInvalidJSONFieldType{Field: "name"}
+		}
+	}
+	return nil
+}
+
+func (r UpdateClientRequest) collectMarshalData() map[string]interface{} {
+	m := make(map[string]interface{})
+	m["id"] = r.ID
+	m["secret"] = r.Secret
+	m["name"] = r.Name
+	return m
+}
+
+func (r UpdateClientRequest) MarshalJSON() ([]byte, error) {
+	m := r.collectMarshalData()
+	buf, err := json.Marshal(m)
+	if err != nil {
+		return nil, err
+	}
+	return buf, nil
+}
+
+func (r UpdateClientRequest) MarshalURL() ([]byte, error) {
+	m := r.collectMarshalData()
+	buf, err := urlenc.Marshal(m)
+	if err != nil {
+		return nil, err
+	}
+	return buf, nil
+}
+
+func (r *UpdateClientRequest) UnmarshalJSON(data []byte) error {
+	m := make(map[string]interface{})
+	if err := json.Unmarshal(data, &m); err != nil {
+		return err
+	}
+	return r.Populate(m)
+}
+
+func (r *UpdateClientRequest) Populate(m map[string]interface{}) error {
+	if jv, ok := m["id"]; ok {
+		switch jv.(type) {
+		case string:
+			r.ID = jv.(string)
+			delete(m, "id")
+		default:
+			return ErrInvalidJSONFieldType{Field: "id"}
+		}
+	}
+	if jv, ok := m["secret"]; ok {
+		switch jv.(type) {
+		case string:
+			r.Secret = jv.(string)
+			delete(m, "secret")
+		default:
+			return ErrInvalidJSONFieldType{Field: "secret"}
+		}
+	}
+	if jv, ok := m["name"]; ok {
+		switch jv.(type) {
+		case string:
+			r.Name = jv.(string)
+			delete(m, "name")
+		default:
+			return ErrInvalidJSONFieldType{Field: "name"}
+		}
+	}
+	return nil
+}

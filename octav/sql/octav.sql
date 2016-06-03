@@ -133,7 +133,7 @@ CREATE TABLE questions (
     user_id CHAR(64) CHARACTER SET latin1 NOT NULL,
     body TEXT NOT NULL,
     KEY (eid, session_id, user_id)
-)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- session survey responses.
 CREATE TABLE session_survey_responses (
@@ -152,5 +152,15 @@ CREATE TABLE session_survey_responses (
     modified_on TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     UNIQUE KEY (eid),
     KEY(eid, session_id, user_id)
-)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
+-- client stores data about clients that use our API
+CREATE TABLE clients (
+    oid INTEGER UNSIGNED NOT NULL PRIMARY KEY AUTO_INCREMENT,
+    eid CHAR(64) CHARACTER SET latin1 NOT NULL, -- client ID
+    secret CHAR(64) BINARY CHARACTER SET latin1 NOT NULL,
+    name TEXT NOT NULL, -- name of the client
+    created_on DATETIME NOT NULL,
+    modified_on TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    UNIQUE KEY (eid)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;

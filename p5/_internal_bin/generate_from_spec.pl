@@ -41,6 +41,13 @@ sub last_error {
     my $self = shift;
     return $self->{last_error};
 }
+
+sub credentials {
+    my $self = shift;
+    my $uri = URI->new($self->{endpoint});
+    $self->{user_agent}->credentials($uri->host_port, "octav", @_[0], @_[1])
+}
+
 EOM
 
 for my $link (@{$schema->{links}}) {

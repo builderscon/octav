@@ -8,6 +8,7 @@ type ErrInvalidFieldType struct {
 	Field string
 }
 
+type Client struct {}
 type Conference struct{}
 type Question struct{}
 type Room struct{}

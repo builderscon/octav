@@ -141,3 +141,13 @@ type Question struct {
 	CreatedOn  time.Time
 	ModifiedOn NullTime
 }
+
+// +DB tablename:"clients"
+type Client struct {
+	OID        int64
+	EID        string
+	Secret     string
+	Name       string
+	CreatedOn  time.Time
+	ModifiedOn NullTime
+}

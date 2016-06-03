@@ -23,6 +23,13 @@ sub last_error {
     return $self->{last_error};
 }
 
+sub credentials {
+    my $self = shift;
+    my $uri = URI->new($self->{endpoint});
+    $self->{user_agent}->credentials($uri->host_port, "octav", @_[0], @_[1])
+}
+
+
 
 sub create_user {
     my ($self, $payload) = @_;
@@ -551,6 +558,74 @@ sub list_session_by_conference {
         return;
     }
     return JSON::decode_json($res->content);
+}
+
+sub create_question {
+    my ($self, $payload) = @_;
+    for my $required (qw(session_id user_id body)) {
+        if (!$payload->{$required}) {
+            die qq|property "$required" must be provided|;
+        }
+    }
+    my $uri = URI->new($self->{endpoint} . qq|/v1/question/create|);
+    $uri->query_form($payload);
+    my $res = $self->{user_agent}->get($uri);
+    if (!$res->is_success) {
+        $self->{last_error} = $res->status_line;
+        return;
+    }
+    return JSON::decode_json($res->content);
+}
+
+sub delete_question {
+    my ($self, $payload) = @_;
+    for my $required (qw(id)) {
+        if (!$payload->{$required}) {
+            die qq|property "$required" must be provided|;
+        }
+    }
+    my $uri = URI->new($self->{endpoint} . qq|/v1/question/delete|);
+    $uri->query_form($payload);
+    my $res = $self->{user_agent}->get($uri);
+    if (!$res->is_success) {
+        $self->{last_error} = $res->status_line;
+        return;
+    }
+    return 1
+}
+
+sub list_question {
+    my ($self, $payload) = @_;
+    for my $required (qw(session_id)) {
+        if (!$payload->{$required}) {
+            die qq|property "$required" must be provided|;
+        }
+    }
+    my $uri = URI->new($self->{endpoint} . qq|/v1/question/list|);
+    $uri->query_form($payload);
+    my $res = $self->{user_agent}->get($uri);
+    if (!$res->is_success) {
+        $self->{last_error} = $res->status_line;
+        return;
+    }
+    return JSON::decode_json($res->content);
+}
+
+sub create_session_survey_response {
+    my ($self, $payload) = @_;
+    for my $required (qw(session_id user_id user_prior_knowledge speaker_knowledge speaker_presentation material_quality overall_rating)) {
+        if (!$payload->{$required}) {
+            die qq|property "$required" must be provided|;
+        }
+    }
+    my $uri = URI->new($self->{endpoint} . qq|/v1/survey_session_response/create|);
+    $uri->query_form($payload);
+    my $res = $self->{user_agent}->get($uri);
+    if (!$res->is_success) {
+        $self->{last_error} = $res->status_line;
+        return;
+    }
+    return 1
 }
 
 1;
