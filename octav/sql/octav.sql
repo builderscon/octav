@@ -155,7 +155,7 @@ CREATE TABLE session_survey_responses (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- client stores data about clients that use our API
-CREATE TABLE client (
+CREATE TABLE clients (
     oid INTEGER UNSIGNED NOT NULL PRIMARY KEY AUTO_INCREMENT,
     eid CHAR(64) CHARACTER SET latin1 NOT NULL, -- client ID
     secret CHAR(64) BINARY CHARACTER SET latin1 NOT NULL,
