@@ -334,6 +334,7 @@
     {
       "title": "Create user",
       "description": "A user can be a staff/organizer, speaker, or a regular attendee. Information should be obtained from facebook/twitter/github",
+      "hsup.wrapper": "httpWithBasicAuth",
       "rel": "create",
       "href": "/user/create",
       "method": "POST",
@@ -374,6 +375,7 @@
     },
     {
       "title": "Lookup user by auth user ID",
+      "hsup.wrapper": "httpWithBasicAuth",
       "rel": "lookup",
       "href": "/user/lookup_by_auth_user_id",
       "method": "GET",
@@ -389,6 +391,7 @@
     },
     {
       "title": "Update user",
+      "hsup.wrapper": "httpWithBasicAuth",
       "description": "A user can be a staff/organizer, speaker, or a regular attendee. Information should be obtained from facebook/twitter/github",
       "rel": "create",
       "href": "/user/update",
@@ -413,6 +416,7 @@
     },
     {
       "title": "Delete user",
+      "hsup.wrapper": "httpWithBasicAuth",
       "rel": "delete",
       "href": "/user/delete",
       "method": "POST",
@@ -445,6 +449,7 @@
     {
       "title": "Create venue",
       "description": "venue describes the establishment in which the conference takes place. a venue contains multiple rooms",
+      "hsup.wrapper": "httpWithBasicAuth",
       "rel": "create",
       "href": "/venue/create",
       "method": "POST",
@@ -498,6 +503,7 @@
     {
       "title": "Update venue",
       "rel": "update",
+      "hsup.wrapper": "httpWithBasicAuth",
       "href": "/venue/update",
       "method": "POST",
       "encType": "application/json",
@@ -512,6 +518,7 @@
     {
       "title": "Delete venue",
       "rel": "delete",
+      "hsup.wrapper": "httpWithBasicAuth",
       "href": "/venue/delete",
       "method": "POST",
       "encType": "application/x-www-form-urlencoded",
@@ -526,6 +533,7 @@
     {
       "title": "Create room",
       "rel": "create",
+      "hsup.wrapper": "httpWithBasicAuth",
       "href": "/room/create",
       "method": "POST",
       "encType": "application/x-www-form-urlencoded",
@@ -546,6 +554,7 @@
     {
       "title": "Update room",
       "rel": "update",
+      "hsup.wrapper": "httpWithBasicAuth",
       "href": "/room/update",
       "method": "POST",
       "encType": "application/x-www-form-urlencoded",
@@ -580,6 +589,7 @@
     {
       "title": "Delete room",
       "rel": "delete",
+      "hsup.wrapper": "httpWithBasicAuth",
       "href": "/room/delete",
       "method": "POST",
       "encType": "application/x-www-form-urlencoded",
@@ -610,7 +620,7 @@
     {
       "title": "Create conference",
       "rel": "create",
-      "hsup.wrapper": "httpWithAccessToken",
+      "hsup.wrapper": "httpWithBasicAuth",
       "method": "POST",
       "href": "/conference/create",
       "encType": "application/x-www-form-urlencoded",
@@ -632,6 +642,7 @@
     },
     {
       "title": "Add conference dates",
+      "hsup.wrapper": "httpWithBasicAuth",
       "rel": "update",
       "method": "POST",
       "href": "/conference/dates/add",
@@ -666,6 +677,7 @@
     {
       "title": "Add conference admin",
       "rel": "update",
+      "hsup.wrapper": "httpWithBasicAuth",
       "method": "POST",
       "href": "/conference/admin/add",
       "ecnType": "application/json",
@@ -680,6 +692,7 @@
     {
       "title": "Delete conference admin",
       "rel": "delete",
+      "hsup.wrapper": "httpWithBasicAuth",
       "method": "POST",
       "href": "/conference/admin/delete",
       "ecnType": "application/json",
@@ -694,6 +707,7 @@
     {
       "title": "Add conference venue",
       "rel": "update",
+      "hsup.wrapper": "httpWithBasicAuth",
       "method": "POST",
       "href": "/conference/venue/add",
       "ecnType": "application/json",
@@ -708,6 +722,7 @@
     {
       "title": "Delete conference venue",
       "rel": "delete",
+      "hsup.wrapper": "httpWithBasicAuth",
       "method": "POST",
       "href": "/conference/venue/delete",
       "ecnType": "application/json",
@@ -759,6 +774,7 @@
     {
       "title": "Update conference",
       "rel": "update",
+      "hsup.wrapper": "httpWithBasicAuth",
       "method": "POST",
       "href": "/conference/update",
       "encType": "application/x-www-form-urlencoded",
@@ -781,6 +797,7 @@
     {
       "title": "Delete conference",
       "rel": "delete",
+      "hsup.wrapper": "httpWithBasicAuth",
       "href": "/conference/delete",
       "method": "POST",
       "encType": "application/x-www-form-urlencoded",
@@ -795,6 +812,7 @@
     {
       "title": "Create session",
       "rel": "create",
+      "hsup.wrapper": "httpWithBasicAuth",
       "method": "POST",
       "href": "/session/create",
       "schema": {
@@ -840,6 +858,7 @@
     {
       "title": "Delete session",
       "href": "/session/delete",
+      "hsup.wrapper": "httpWithBasicAuth",
       "method": "POST",
       "rel": "lookup",
       "encType": "application/x-www-form-urlencoded",
@@ -853,6 +872,7 @@
     {
       "title": "Update session",
       "rel": "update",
+      "hsup.wrapper": "httpWithBasicAuth",
       "method": "POST",
       "href": "/session/update",
       "schema": {
@@ -908,6 +928,7 @@
     },
     {
       "title": "Create question",
+      "hsup.wrapper": "httpWithBasicAuth",
       "href": "/question/create",
       "rel": "create",
       "schema": {
@@ -923,6 +944,7 @@
     },
     {
       "title": "Delete question",
+      "hsup.wrapper": "httpWithBasicAuth",
       "href": "/question/delete",
       "rel": "delete",
       "schema": {
@@ -950,6 +972,7 @@
     },
     {
       "title": "Create session survey response",
+      "hsup.wrapper": "httpWithBasicAuth",
       "href": "/survey_session_response/create",
       "rel": "create",
       "schema": {

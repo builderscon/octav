@@ -17,7 +17,7 @@ func init() {
 	httpError = httpErrorAsJSON
 }
 
-func httpWithAccessToken(h HandlerWithContext) HandlerWithContext {
+func httpWithBasicAuth(h HandlerWithContext) HandlerWithContext {
 	return HandlerWithContext(func(ctx context.Context, w http.ResponseWriter, r *http.Request) {
 		// Verify access token in the Basic-Auth
 		clientID, clientSecret, ok := r.BasicAuth()
