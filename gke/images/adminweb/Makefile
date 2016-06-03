@@ -6,7 +6,9 @@ CONTAINER=app
 APPNAME=adminweb
 ADMINWEB_DIR=$(TOPDIR)/adminweb
 TAG:=$(shell date +"%Y%m%d.%H%M%S")
-IMAGE_NAME:=$(REPOSITORY_HOST)/$(PROJECT_ID)/$(APPNAME):$(TAG)
+IMAGE_NAME_BASE:=$(REPOSITORY_HOST)/$(PROJECT_ID)/$(APPNAME)
+IMAGE_NAME_LATEST:=$(IMAGE_NAME_BASE):latest
+IMAGE_NAME:=$(IMAGE_NAME_BASE):$(TAG)
 
 .PHONY: docker-build
 
@@ -39,7 +41,7 @@ docker-build:
 docker: $(CURDIR)/cpanfile $(CURDIR)/adminweb.tar.gz $(CURDIR)/adminweb-local-lib.tar.gz $(CURDIR)/perl.tar.gz $(CURDIR)/Octav.pm docker-build
 
 publish:
-	$(MAKE) -C $(TOPDIR) gke-publish IMAGE_NAME=$(IMAGE_NAME) APPNAME=$(APPNAME)
+	$(MAKE) -C $(TOPDIR) gke-publish IMAGE_NAME=$(IMAGE_NAME) APPNAME=$(APPNAME) IMAGE_NAME_LATEST=$(IMAGE_NAME_LATEST) \
 
 deploy:
 	$(MAKE) -C $(TOPDIR) gke-deploy IMAGE_NAME=$(IMAGE_NAME) APPNAME=$(APPNAME) CONTAINER=$(CONTAINER)

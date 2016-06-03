@@ -47,7 +47,7 @@ spec:
             - name: nginx
               readOnly: true
               mountPath: /etc/nginx
-        - image: asia.gcr.io/builderscon-1248/adminweb:20160411.152929
+        - image: asia.gcr.io/builderscon-1248/adminweb:20160604.074507
           name: app
           ports:
             - containerPort: 5000
@@ -73,6 +73,10 @@ spec:
               value: /github/secret
             - name: OCTAV_GOOGLE_MAPS_API_KEY
               value: /googlemaps/apikey
+            - name: OCTAV_API_CLIENT_KEY
+              value: /octav/clientkey
+            - name: OCTAV_API_CLIENT_SECRET
+              value: /octav/clientsecret
           volumeMounts:
             - name: static-files
               mountPath: /static-files
