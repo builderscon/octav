@@ -22,21 +22,22 @@ func httpWithBasicAuth(h HandlerWithContext) HandlerWithContext {
 		// Verify access token in the Basic-Auth
 		clientID, clientSecret, ok := r.BasicAuth()
 		if !ok {
-			httpError(w, http.StatusText(http.StatusForbidden), http.StatusForbidden, nil)
+			w.Header().Set("WWW-Authenticate", `Basic realm="octav"`)
+			httpError(w, http.StatusText(http.StatusUnauthorized), http.StatusUnauthorized, nil)
 			return
 		}
 
 		// TODO: implement this in service, and cache
 		tx, err := db.Begin()
 		if err != nil {
-			httpError(w, http.StatusText(http.StatusForbidden), http.StatusForbidden, err)
+			httpError(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError, err)
 			return
 		}
 		defer tx.AutoRollback()
 
 		vdb := db.Client{}
 		if err := vdb.LoadByEID(tx, clientID); err != nil {
-			httpError(w, http.StatusText(http.StatusForbidden), http.StatusForbidden, err)
+			httpError(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError, err)
 			return
 		}
 
