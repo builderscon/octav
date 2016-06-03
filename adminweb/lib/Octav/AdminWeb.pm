@@ -69,6 +69,8 @@ sub startup {
             "googlemaps" => {
                 "api_key" => load_from_file($ENV{OCTAV_GOOGLE_MAPS_API_KEY}),
             },
+            "client_key" => load_from_file($ENV{OCTAV_API_CLIENT_KEY}),
+            "client_secret" => load_from_file($ENV{OCTAV_API_CLIENT_SECRET}),
         };
         return $config;
     });
