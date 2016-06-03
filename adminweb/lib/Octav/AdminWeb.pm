@@ -41,12 +41,21 @@ sub startup {
     $self->helper(redis => \&redis);
 
     $self->helper(client => sub {
+        my $c = shift;
         # FIXME endpoint should not be hardcoded
         my $host = $ENV{APISERVER_SERVICE_HOST};
         my $port = $ENV{APISERVER_SERVICE_PORT};
         my $endpoint = "http://$host:$port";
         warn "ENDPOINT = $endpoint";
-        state $client = WebService::Octav->new(endpoint => $endpoint);
+        state $client;
+        if (! $client) {
+            $client = WebService::Octav->new(endpoint => $endpoint);
+            my $client_key = $c->config->{client_key};
+            my $client_secret = $c->config->{client_secret};
+            if ($client_key && $client_secret) {
+                $client->credentials($client_key, $client_secret);
+            }
+        }
         return $client;
     });
 
