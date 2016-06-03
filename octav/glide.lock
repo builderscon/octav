@@ -1,30 +1,30 @@
-hash: 473eae6d87b5849b4577dab733d25c04769d36a0a07a78bcdcb4d98663ad8fff
-updated: 2016-03-25T20:12:09.91552957+09:00
+hash: fcfba46aaf0d04c7929117cf86713fb89e329da9ffa3b5c898e617481e7ee72f
+updated: 2016-06-03T19:27:17.797666037+09:00
 imports:
 - name: github.com/davecgh/go-spew
   version: 5215b55f46b2b919f50a1df0eaa5886afe4e3b3d
   subpackages:
   - spew
 - name: github.com/go-sql-driver/mysql
-  version: 66312f7fe2678aa0f5ec770f96702f4c4ec5aa8e
+  version: 3654d25ec346ee8ce71a68431025458d52a38ac0
 - name: github.com/gorilla/context
-  version: 1ea25387ff6f684839d82767c1733ff4d4d15d0a
+  version: aed02d124ae4a0e94fea4541c8effd05bf0c8296
 - name: github.com/gorilla/mux
-  version: 0eeaf8392f5b04950925b8a69fe70f110fa7cbfc
+  version: bd09be08ed4377796d312df0a45314e11b8f5dc1
 - name: github.com/jessevdk/go-flags
-  version: 6b9493b3cb60367edd942144879646604089e3f7
+  version: b9b882a3990882b05e02765f5df2cd3ad02874ee
 - name: github.com/lestrrat/go-jshschema
   version: 4514acd168a63041862eb3d223a09a789cae6b3b
 - name: github.com/lestrrat/go-jspointer
   version: f4881e611bdbe9fb413a7780721ef8400a1f2341
 - name: github.com/lestrrat/go-jsref
-  version: abc2d3e204518e66d391722814667f2707de3447
+  version: e452c7b5801d1c6494c9e7e0cbc7498c0f88dfd1
   subpackages:
   - provider
 - name: github.com/lestrrat/go-jsschema
   version: 29ed749b2386595fd62b5d919e8cff759c38185a
 - name: github.com/lestrrat/go-jsval
-  version: 8f072535da03ced2bba6832045278c6538015b20
+  version: 66ec1fc6194ea4d8c9144ba056f0b266bde140c2
 - name: github.com/lestrrat/go-pdebug
   version: a45b04725d5819f9f30fb68085be53b90a1d55f1
 - name: github.com/lestrrat/go-simple-guard
@@ -34,19 +34,17 @@ imports:
 - name: github.com/lestrrat/go-tx-guard
   version: 40dc337a64f229bb420dc224b6f2981115d686fa
 - name: github.com/lestrrat/go-urlenc
-  version: 3fbec6e98ec8c1db27dbb9d9aa2c945574b597bc
+  version: c952b9a8b42e2b36637e0c5acee8a0f0898b8d80
+- name: github.com/pkg/errors
+  version: 431554f80b8ecf5058547f6c65b87fad81d90b03
 - name: github.com/shogo82148/go-sql-proxy
-  version: 6e789550f4594aa9990507295b5e969cd250bacf
-- name: github.com/stretchr/testify
-  version: 6fe211e493929a8aac0469b93f28b1d0688a9a3a
-  subpackages:
-  - assert
+  version: 0ff9659b5642274097d62b43b2d754b001ed4f4d
 - name: golang.org/x/net
-  version: 024ed629fd292398cfd43c9678a5bf004f7defdc
+  version: c4c3ea71919de159c9e246d7be66deb7f0a39a58
   subpackages:
   - context
 - name: golang.org/x/text
-  version: 1b466db55e0ba5d56ef5315c728216b42f796491
+  version: aba140c91c51dbbc9c03141af597208ecb0f000a
   subpackages:
   - language
   - internal/tag

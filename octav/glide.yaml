@@ -16,6 +16,3 @@ import:
 - package: golang.org/x/text
   subpackages:
   - language
-- package: github.com/stretchr/testify
-  subpackages:
-  - assert
