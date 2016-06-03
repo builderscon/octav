@@ -323,6 +323,33 @@ func (c *Client) CreateSession(in *model.CreateSessionRequest) (ret *model.Sessi
 	return &payload, nil
 }
 
+func (c *Client) CreateSessionSurveyResponse(in *model.CreateSessionSurveyResponseRequest) (err error) {
+	if pdebug.Enabled {
+		g := pdebug.Marker("client.CreateSessionSurveyResponse").BindError(&err)
+		defer g.End()
+	}
+	u, err := url.Parse(c.Endpoint + "/v1/survey_session_response/create")
+	if err != nil {
+		return err
+	}
+	buf, err := urlenc.Marshal(in)
+	if err != nil {
+		return err
+	}
+	u.RawQuery = string(buf)
+	if pdebug.Enabled {
+		pdebug.Printf("GET to %s", u.String())
+	}
+	res, err := c.Client.Get(u.String())
+	if err != nil {
+		return err
+	}
+	if res.StatusCode != http.StatusOK {
+		return fmt.Errorf(`Invalid response: '%s'`, res.Status)
+	}
+	return nil
+}
+
 func (c *Client) CreateUser(in *model.CreateUserRequest) (ret *model.User, err error) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("client.CreateUser").BindError(&err)

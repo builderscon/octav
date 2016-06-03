@@ -78,6 +78,11 @@
       "type": "string",
       "enum": ["github", "facebook", "twitter"]
     },
+    "int_rating": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 10
+    },
     "time": {
       "type": "string",
       "pattern": "^\\d\\d:\\d\\d$"
@@ -941,6 +946,26 @@
         }
       },
       "targetSchema": { "$ref": "#/definitions/question_array" }
+    },
+    {
+      "title": "Create session survey response",
+      "href": "/survey_session_response/create",
+      "rel": "create",
+      "schema": {
+        "type": "object",
+        "required": ["session_id","user_id","user_prior_knowledge","speaker_knowledge","speaker_presentation","material_quality","overall_rating"],
+        "properties": {
+          "user_id": {"$ref": "#/definitions/uuid"},
+          "session_id": {"$ref": "#/definitions/uuid"},
+          "user_prior_knowledge": {"$ref": "#/definitions/int_rating"},
+          "speaker_knowledge": {"$ref": "#/definitions/int_rating"},
+          "speaker_presentation": {"$ref": "#/definitions/int_rating"},
+          "material_quality": {"$ref": "#/definitions/int_rating"},
+          "overall_rating": {"$ref": "#/definitions/int_rating"},
+          "comment_good": {"type": "string"},
+          "comment_improvement": {"type": "string"}
+        }
+      }
     }
   ]
 }

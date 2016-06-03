@@ -1116,3 +1116,7 @@ func doDeleteQuestion(ctx context.Context, w http.ResponseWriter, r *http.Reques
 
 func doListQuestion(ctx context.Context, w http.ResponseWriter, r *http.Request, payload model.ListQuestionRequest) {
 }
+
+func doCreateSessionSurveyResponse(ctx context.Context, w http.ResponseWriter, r *http.Request, payload model.CreateSessionSurveyResponseRequest) {
+
+}

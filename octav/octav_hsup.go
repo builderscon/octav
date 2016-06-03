@@ -317,6 +317,30 @@ func httpCreateSession(w http.ResponseWriter, r *http.Request) {
 	doCreateSession(NewContext(r), w, r, payload)
 }
 
+func httpCreateSessionSurveyResponse(w http.ResponseWriter, r *http.Request) {
+	if pdebug.Enabled {
+		g := pdebug.Marker("httpCreateSessionSurveyResponse")
+		defer g.End()
+	}
+	if strings.ToLower(r.Method) != `get` {
+		w.Header().Set("Allow", "get")
+		httpError(w, `Method was `+r.Method+`, expected get`, http.StatusNotFound, nil)
+		return
+	}
+
+	var payload model.CreateSessionSurveyResponseRequest
+	if err := urlenc.Unmarshal([]byte(r.URL.RawQuery), &payload); err != nil {
+		httpError(w, `Failed to parse url query string`, http.StatusInternalServerError, err)
+		return
+	}
+
+	if err := validator.HTTPCreateSessionSurveyResponseRequest.Validate(&payload); err != nil {
+		httpError(w, `Invalid input (validation failed)`, http.StatusInternalServerError, err)
+		return
+	}
+	doCreateSessionSurveyResponse(NewContext(r), w, r, payload)
+}
+
 func httpCreateUser(w http.ResponseWriter, r *http.Request) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("httpCreateUser")
@@ -1150,6 +1174,7 @@ func (s *Server) SetupRoutes() {
 	r.HandleFunc(`/v1/session/delete`, httpDeleteSession)
 	r.HandleFunc(`/v1/session/lookup`, httpLookupSession)
 	r.HandleFunc(`/v1/session/update`, httpUpdateSession)
+	r.HandleFunc(`/v1/survey_session_response/create`, httpCreateSessionSurveyResponse)
 	r.HandleFunc(`/v1/user/create`, httpCreateUser)
 	r.HandleFunc(`/v1/user/delete`, httpDeleteUser)
 	r.HandleFunc(`/v1/user/list`, httpListUser)

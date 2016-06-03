@@ -435,3 +435,15 @@ type ListQuestionRequest struct {
 	Lang  jsval.MaybeString `json:"lang" urlenc:"lang,omitempty,string"`
 	Limit jsval.MaybeInt    `json:"limit" urlenc:"limit,omitempty,int64"`
 }
+
+// +transport
+type CreateSessionSurveyResponseRequest struct {
+	UserID    jsval.MaybeString `json:"user_id"`
+	SessionID jsval.MaybeString `json:"session_id"`
+	UserPriorKnowledge int `json:"user_prior_knowledge"`
+	SpeakerKnowledge int `json:"speaker_knowledge"`
+	MaterialQuality int `json:"material_quality"`
+	OverallRating int `json:"overall_rating"`
+	CommentGood jsval.MaybeString `json:"comment_good" urlenc:"comment_good,omitempty,string"`
+	CommentImprovement jsval.MaybeString `json:"comment_improvement" urlenc:"comment_improvement,omitempty,string"`
+}

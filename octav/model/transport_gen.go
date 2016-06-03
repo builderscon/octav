@@ -2990,3 +2990,114 @@ func (r *ListQuestionRequest) Populate(m map[string]interface{}) error {
 	}
 	return nil
 }
+
+func (r CreateSessionSurveyResponseRequest) collectMarshalData() map[string]interface{} {
+	m := make(map[string]interface{})
+	if r.UserID.Valid() {
+		m["user_id"] = r.UserID.Value()
+	}
+	if r.SessionID.Valid() {
+		m["session_id"] = r.SessionID.Value()
+	}
+	m["user_prior_knowledge"] = r.UserPriorKnowledge
+	m["speaker_knowledge"] = r.SpeakerKnowledge
+	m["material_quality"] = r.MaterialQuality
+	m["overall_rating"] = r.OverallRating
+	if r.CommentGood.Valid() {
+		m["comment_good"] = r.CommentGood.Value()
+	}
+	if r.CommentImprovement.Valid() {
+		m["comment_improvement"] = r.CommentImprovement.Value()
+	}
+	return m
+}
+
+func (r CreateSessionSurveyResponseRequest) MarshalJSON() ([]byte, error) {
+	m := r.collectMarshalData()
+	buf, err := json.Marshal(m)
+	if err != nil {
+		return nil, err
+	}
+	return buf, nil
+}
+
+func (r CreateSessionSurveyResponseRequest) MarshalURL() ([]byte, error) {
+	m := r.collectMarshalData()
+	buf, err := urlenc.Marshal(m)
+	if err != nil {
+		return nil, err
+	}
+	return buf, nil
+}
+
+func (r *CreateSessionSurveyResponseRequest) UnmarshalJSON(data []byte) error {
+	m := make(map[string]interface{})
+	if err := json.Unmarshal(data, &m); err != nil {
+		return err
+	}
+	return r.Populate(m)
+}
+
+func (r *CreateSessionSurveyResponseRequest) Populate(m map[string]interface{}) error {
+	if jv, ok := m["user_id"]; ok {
+		if err := r.UserID.Set(jv); err != nil {
+			return errors.New("set field UserID failed: " + err.Error())
+		}
+		delete(m, "user_id")
+	}
+	if jv, ok := m["session_id"]; ok {
+		if err := r.SessionID.Set(jv); err != nil {
+			return errors.New("set field SessionID failed: " + err.Error())
+		}
+		delete(m, "session_id")
+	}
+	if jv, ok := m["user_prior_knowledge"]; ok {
+		switch jv.(type) {
+		case float64:
+			r.UserPriorKnowledge = int(jv.(float64))
+			delete(m, "user_prior_knowledge")
+		default:
+			return ErrInvalidJSONFieldType{Field: "user_prior_knowledge"}
+		}
+	}
+	if jv, ok := m["speaker_knowledge"]; ok {
+		switch jv.(type) {
+		case float64:
+			r.SpeakerKnowledge = int(jv.(float64))
+			delete(m, "speaker_knowledge")
+		default:
+			return ErrInvalidJSONFieldType{Field: "speaker_knowledge"}
+		}
+	}
+	if jv, ok := m["material_quality"]; ok {
+		switch jv.(type) {
+		case float64:
+			r.MaterialQuality = int(jv.(float64))
+			delete(m, "material_quality")
+		default:
+			return ErrInvalidJSONFieldType{Field: "material_quality"}
+		}
+	}
+	if jv, ok := m["overall_rating"]; ok {
+		switch jv.(type) {
+		case float64:
+			r.OverallRating = int(jv.(float64))
+			delete(m, "overall_rating")
+		default:
+			return ErrInvalidJSONFieldType{Field: "overall_rating"}
+		}
+	}
+	if jv, ok := m["comment_good"]; ok {
+		if err := r.CommentGood.Set(jv); err != nil {
+			return errors.New("set field CommentGood failed: " + err.Error())
+		}
+		delete(m, "comment_good")
+	}
+	if jv, ok := m["comment_improvement"]; ok {
+		if err := r.CommentImprovement.Set(jv); err != nil {
+			return errors.New("set field CommentImprovement failed: " + err.Error())
+		}
+		delete(m, "comment_improvement")
+	}
+	return nil
+}
