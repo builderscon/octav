@@ -404,7 +404,7 @@ type ListSessionByConferenceRequest struct {
 
 // +model
 type Question struct {
-	ID				string
+	ID        string
 	SessionID string
 	UserID    string
 	Body      string
@@ -419,11 +419,12 @@ type CreateQuestionRequest struct {
 
 // +transport
 type UpdateQuestionRequest struct {
-	ID        string `json:"id" urlenc:"id"`
+	ID        string            `json:"id" urlenc:"id"`
 	SessionID jsval.MaybeString `json:"session_id" urlenc:"session_id"`
 	UserID    jsval.MaybeString `json:"user_id" urlenc:"user_id"`
 	Body      jsval.MaybeString `json:"body" urlenc:"body"`
 }
+
 // +transport
 type DeleteQuestionRequest struct {
 	ID string `json:"id" urlenc:"id"`
@@ -438,12 +439,33 @@ type ListQuestionRequest struct {
 
 // +transport
 type CreateSessionSurveyResponseRequest struct {
-	UserID    jsval.MaybeString `json:"user_id"`
-	SessionID jsval.MaybeString `json:"session_id"`
-	UserPriorKnowledge int `json:"user_prior_knowledge"`
-	SpeakerKnowledge int `json:"speaker_knowledge"`
-	MaterialQuality int `json:"material_quality"`
-	OverallRating int `json:"overall_rating"`
-	CommentGood jsval.MaybeString `json:"comment_good" urlenc:"comment_good,omitempty,string"`
+	UserID             jsval.MaybeString `json:"user_id"`
+	SessionID          jsval.MaybeString `json:"session_id"`
+	UserPriorKnowledge int               `json:"user_prior_knowledge"`
+	SpeakerKnowledge   int               `json:"speaker_knowledge"`
+	MaterialQuality    int               `json:"material_quality"`
+	OverallRating      int               `json:"overall_rating"`
+	CommentGood        jsval.MaybeString `json:"comment_good" urlenc:"comment_good,omitempty,string"`
 	CommentImprovement jsval.MaybeString `json:"comment_improvement" urlenc:"comment_improvement,omitempty,string"`
 }
+
+// +model
+type Client struct {
+	ID     string `json:"id"`
+	Secret string `json:"secret"`
+	Name   string `json:"name"`
+}
+
+// +transport
+type CreateClientRequest struct {
+	ID     string `json:"id"`
+	Name   string `json:"name"`
+}
+
+// +transport
+type UpdateClientRequest struct {
+	ID     string `json:"id"`
+	Secret string `json:"secret"`
+	Name   string `json:"name"`
+}
+

@@ -95,7 +95,15 @@ func getInteger(v url.Values, f string) ([]int64, error) {
 	return ret, nil
 }
 
-func httpAddConferenceAdmin(w http.ResponseWriter, r *http.Request) {
+type HandlerWithContext func(context.Context, http.ResponseWriter, *http.Request)
+
+func httpWithContext(h HandlerWithContext) http.HandlerFunc {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		h(NewContext(r), w, r)
+	})
+}
+
+func httpAddConferenceAdmin(ctx context.Context, w http.ResponseWriter, r *http.Request) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("httpAddConferenceAdmin")
 		defer g.End()
@@ -125,10 +133,10 @@ func httpAddConferenceAdmin(w http.ResponseWriter, r *http.Request) {
 		httpError(w, `Invalid input (validation failed)`, http.StatusInternalServerError, err)
 		return
 	}
-	doAddConferenceAdmin(NewContext(r), w, r, payload)
+	doAddConferenceAdmin(ctx, w, r, payload)
 }
 
-func httpAddConferenceDates(w http.ResponseWriter, r *http.Request) {
+func httpAddConferenceDates(ctx context.Context, w http.ResponseWriter, r *http.Request) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("httpAddConferenceDates")
 		defer g.End()
@@ -158,10 +166,10 @@ func httpAddConferenceDates(w http.ResponseWriter, r *http.Request) {
 		httpError(w, `Invalid input (validation failed)`, http.StatusInternalServerError, err)
 		return
 	}
-	doAddConferenceDates(NewContext(r), w, r, payload)
+	doAddConferenceDates(ctx, w, r, payload)
 }
 
-func httpAddConferenceVenue(w http.ResponseWriter, r *http.Request) {
+func httpAddConferenceVenue(ctx context.Context, w http.ResponseWriter, r *http.Request) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("httpAddConferenceVenue")
 		defer g.End()
@@ -191,10 +199,10 @@ func httpAddConferenceVenue(w http.ResponseWriter, r *http.Request) {
 		httpError(w, `Invalid input (validation failed)`, http.StatusInternalServerError, err)
 		return
 	}
-	doAddConferenceVenue(NewContext(r), w, r, payload)
+	doAddConferenceVenue(ctx, w, r, payload)
 }
 
-func httpCreateConference(w http.ResponseWriter, r *http.Request) {
+func httpCreateConference(ctx context.Context, w http.ResponseWriter, r *http.Request) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("httpCreateConference")
 		defer g.End()
@@ -224,10 +232,10 @@ func httpCreateConference(w http.ResponseWriter, r *http.Request) {
 		httpError(w, `Invalid input (validation failed)`, http.StatusInternalServerError, err)
 		return
 	}
-	doCreateConference(NewContext(r), w, r, payload)
+	doCreateConference(ctx, w, r, payload)
 }
 
-func httpCreateQuestion(w http.ResponseWriter, r *http.Request) {
+func httpCreateQuestion(ctx context.Context, w http.ResponseWriter, r *http.Request) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("httpCreateQuestion")
 		defer g.End()
@@ -248,10 +256,10 @@ func httpCreateQuestion(w http.ResponseWriter, r *http.Request) {
 		httpError(w, `Invalid input (validation failed)`, http.StatusInternalServerError, err)
 		return
 	}
-	doCreateQuestion(NewContext(r), w, r, payload)
+	doCreateQuestion(ctx, w, r, payload)
 }
 
-func httpCreateRoom(w http.ResponseWriter, r *http.Request) {
+func httpCreateRoom(ctx context.Context, w http.ResponseWriter, r *http.Request) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("httpCreateRoom")
 		defer g.End()
@@ -281,10 +289,10 @@ func httpCreateRoom(w http.ResponseWriter, r *http.Request) {
 		httpError(w, `Invalid input (validation failed)`, http.StatusInternalServerError, err)
 		return
 	}
-	doCreateRoom(NewContext(r), w, r, payload)
+	doCreateRoom(ctx, w, r, payload)
 }
 
-func httpCreateSession(w http.ResponseWriter, r *http.Request) {
+func httpCreateSession(ctx context.Context, w http.ResponseWriter, r *http.Request) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("httpCreateSession")
 		defer g.End()
@@ -314,10 +322,10 @@ func httpCreateSession(w http.ResponseWriter, r *http.Request) {
 		httpError(w, `Invalid input (validation failed)`, http.StatusInternalServerError, err)
 		return
 	}
-	doCreateSession(NewContext(r), w, r, payload)
+	doCreateSession(ctx, w, r, payload)
 }
 
-func httpCreateSessionSurveyResponse(w http.ResponseWriter, r *http.Request) {
+func httpCreateSessionSurveyResponse(ctx context.Context, w http.ResponseWriter, r *http.Request) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("httpCreateSessionSurveyResponse")
 		defer g.End()
@@ -338,10 +346,10 @@ func httpCreateSessionSurveyResponse(w http.ResponseWriter, r *http.Request) {
 		httpError(w, `Invalid input (validation failed)`, http.StatusInternalServerError, err)
 		return
 	}
-	doCreateSessionSurveyResponse(NewContext(r), w, r, payload)
+	doCreateSessionSurveyResponse(ctx, w, r, payload)
 }
 
-func httpCreateUser(w http.ResponseWriter, r *http.Request) {
+func httpCreateUser(ctx context.Context, w http.ResponseWriter, r *http.Request) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("httpCreateUser")
 		defer g.End()
@@ -371,10 +379,10 @@ func httpCreateUser(w http.ResponseWriter, r *http.Request) {
 		httpError(w, `Invalid input (validation failed)`, http.StatusInternalServerError, err)
 		return
 	}
-	doCreateUser(NewContext(r), w, r, payload)
+	doCreateUser(ctx, w, r, payload)
 }
 
-func httpCreateVenue(w http.ResponseWriter, r *http.Request) {
+func httpCreateVenue(ctx context.Context, w http.ResponseWriter, r *http.Request) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("httpCreateVenue")
 		defer g.End()
@@ -404,10 +412,10 @@ func httpCreateVenue(w http.ResponseWriter, r *http.Request) {
 		httpError(w, `Invalid input (validation failed)`, http.StatusInternalServerError, err)
 		return
 	}
-	doCreateVenue(NewContext(r), w, r, payload)
+	doCreateVenue(ctx, w, r, payload)
 }
 
-func httpDeleteConference(w http.ResponseWriter, r *http.Request) {
+func httpDeleteConference(ctx context.Context, w http.ResponseWriter, r *http.Request) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("httpDeleteConference")
 		defer g.End()
@@ -437,10 +445,10 @@ func httpDeleteConference(w http.ResponseWriter, r *http.Request) {
 		httpError(w, `Invalid input (validation failed)`, http.StatusInternalServerError, err)
 		return
 	}
-	doDeleteConference(NewContext(r), w, r, payload)
+	doDeleteConference(ctx, w, r, payload)
 }
 
-func httpDeleteConferenceAdmin(w http.ResponseWriter, r *http.Request) {
+func httpDeleteConferenceAdmin(ctx context.Context, w http.ResponseWriter, r *http.Request) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("httpDeleteConferenceAdmin")
 		defer g.End()
@@ -470,10 +478,10 @@ func httpDeleteConferenceAdmin(w http.ResponseWriter, r *http.Request) {
 		httpError(w, `Invalid input (validation failed)`, http.StatusInternalServerError, err)
 		return
 	}
-	doDeleteConferenceAdmin(NewContext(r), w, r, payload)
+	doDeleteConferenceAdmin(ctx, w, r, payload)
 }
 
-func httpDeleteConferenceDates(w http.ResponseWriter, r *http.Request) {
+func httpDeleteConferenceDates(ctx context.Context, w http.ResponseWriter, r *http.Request) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("httpDeleteConferenceDates")
 		defer g.End()
@@ -503,10 +511,10 @@ func httpDeleteConferenceDates(w http.ResponseWriter, r *http.Request) {
 		httpError(w, `Invalid input (validation failed)`, http.StatusInternalServerError, err)
 		return
 	}
-	doDeleteConferenceDates(NewContext(r), w, r, payload)
+	doDeleteConferenceDates(ctx, w, r, payload)
 }
 
-func httpDeleteConferenceVenue(w http.ResponseWriter, r *http.Request) {
+func httpDeleteConferenceVenue(ctx context.Context, w http.ResponseWriter, r *http.Request) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("httpDeleteConferenceVenue")
 		defer g.End()
@@ -536,10 +544,10 @@ func httpDeleteConferenceVenue(w http.ResponseWriter, r *http.Request) {
 		httpError(w, `Invalid input (validation failed)`, http.StatusInternalServerError, err)
 		return
 	}
-	doDeleteConferenceVenue(NewContext(r), w, r, payload)
+	doDeleteConferenceVenue(ctx, w, r, payload)
 }
 
-func httpDeleteQuestion(w http.ResponseWriter, r *http.Request) {
+func httpDeleteQuestion(ctx context.Context, w http.ResponseWriter, r *http.Request) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("httpDeleteQuestion")
 		defer g.End()
@@ -560,10 +568,10 @@ func httpDeleteQuestion(w http.ResponseWriter, r *http.Request) {
 		httpError(w, `Invalid input (validation failed)`, http.StatusInternalServerError, err)
 		return
 	}
-	doDeleteQuestion(NewContext(r), w, r, payload)
+	doDeleteQuestion(ctx, w, r, payload)
 }
 
-func httpDeleteRoom(w http.ResponseWriter, r *http.Request) {
+func httpDeleteRoom(ctx context.Context, w http.ResponseWriter, r *http.Request) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("httpDeleteRoom")
 		defer g.End()
@@ -593,10 +601,10 @@ func httpDeleteRoom(w http.ResponseWriter, r *http.Request) {
 		httpError(w, `Invalid input (validation failed)`, http.StatusInternalServerError, err)
 		return
 	}
-	doDeleteRoom(NewContext(r), w, r, payload)
+	doDeleteRoom(ctx, w, r, payload)
 }
 
-func httpDeleteSession(w http.ResponseWriter, r *http.Request) {
+func httpDeleteSession(ctx context.Context, w http.ResponseWriter, r *http.Request) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("httpDeleteSession")
 		defer g.End()
@@ -626,10 +634,10 @@ func httpDeleteSession(w http.ResponseWriter, r *http.Request) {
 		httpError(w, `Invalid input (validation failed)`, http.StatusInternalServerError, err)
 		return
 	}
-	doDeleteSession(NewContext(r), w, r, payload)
+	doDeleteSession(ctx, w, r, payload)
 }
 
-func httpDeleteUser(w http.ResponseWriter, r *http.Request) {
+func httpDeleteUser(ctx context.Context, w http.ResponseWriter, r *http.Request) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("httpDeleteUser")
 		defer g.End()
@@ -659,10 +667,10 @@ func httpDeleteUser(w http.ResponseWriter, r *http.Request) {
 		httpError(w, `Invalid input (validation failed)`, http.StatusInternalServerError, err)
 		return
 	}
-	doDeleteUser(NewContext(r), w, r, payload)
+	doDeleteUser(ctx, w, r, payload)
 }
 
-func httpDeleteVenue(w http.ResponseWriter, r *http.Request) {
+func httpDeleteVenue(ctx context.Context, w http.ResponseWriter, r *http.Request) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("httpDeleteVenue")
 		defer g.End()
@@ -692,10 +700,10 @@ func httpDeleteVenue(w http.ResponseWriter, r *http.Request) {
 		httpError(w, `Invalid input (validation failed)`, http.StatusInternalServerError, err)
 		return
 	}
-	doDeleteVenue(NewContext(r), w, r, payload)
+	doDeleteVenue(ctx, w, r, payload)
 }
 
-func httpListConference(w http.ResponseWriter, r *http.Request) {
+func httpListConference(ctx context.Context, w http.ResponseWriter, r *http.Request) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("httpListConference")
 		defer g.End()
@@ -716,10 +724,10 @@ func httpListConference(w http.ResponseWriter, r *http.Request) {
 		httpError(w, `Invalid input (validation failed)`, http.StatusInternalServerError, err)
 		return
 	}
-	doListConference(NewContext(r), w, r, payload)
+	doListConference(ctx, w, r, payload)
 }
 
-func httpListQuestion(w http.ResponseWriter, r *http.Request) {
+func httpListQuestion(ctx context.Context, w http.ResponseWriter, r *http.Request) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("httpListQuestion")
 		defer g.End()
@@ -740,10 +748,10 @@ func httpListQuestion(w http.ResponseWriter, r *http.Request) {
 		httpError(w, `Invalid input (validation failed)`, http.StatusInternalServerError, err)
 		return
 	}
-	doListQuestion(NewContext(r), w, r, payload)
+	doListQuestion(ctx, w, r, payload)
 }
 
-func httpListRoom(w http.ResponseWriter, r *http.Request) {
+func httpListRoom(ctx context.Context, w http.ResponseWriter, r *http.Request) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("httpListRoom")
 		defer g.End()
@@ -764,10 +772,10 @@ func httpListRoom(w http.ResponseWriter, r *http.Request) {
 		httpError(w, `Invalid input (validation failed)`, http.StatusInternalServerError, err)
 		return
 	}
-	doListRoom(NewContext(r), w, r, payload)
+	doListRoom(ctx, w, r, payload)
 }
 
-func httpListSessionByConference(w http.ResponseWriter, r *http.Request) {
+func httpListSessionByConference(ctx context.Context, w http.ResponseWriter, r *http.Request) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("httpListSessionByConference")
 		defer g.End()
@@ -788,10 +796,10 @@ func httpListSessionByConference(w http.ResponseWriter, r *http.Request) {
 		httpError(w, `Invalid input (validation failed)`, http.StatusInternalServerError, err)
 		return
 	}
-	doListSessionByConference(NewContext(r), w, r, payload)
+	doListSessionByConference(ctx, w, r, payload)
 }
 
-func httpListUser(w http.ResponseWriter, r *http.Request) {
+func httpListUser(ctx context.Context, w http.ResponseWriter, r *http.Request) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("httpListUser")
 		defer g.End()
@@ -812,10 +820,10 @@ func httpListUser(w http.ResponseWriter, r *http.Request) {
 		httpError(w, `Invalid input (validation failed)`, http.StatusInternalServerError, err)
 		return
 	}
-	doListUser(NewContext(r), w, r, payload)
+	doListUser(ctx, w, r, payload)
 }
 
-func httpListVenue(w http.ResponseWriter, r *http.Request) {
+func httpListVenue(ctx context.Context, w http.ResponseWriter, r *http.Request) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("httpListVenue")
 		defer g.End()
@@ -836,10 +844,10 @@ func httpListVenue(w http.ResponseWriter, r *http.Request) {
 		httpError(w, `Invalid input (validation failed)`, http.StatusInternalServerError, err)
 		return
 	}
-	doListVenue(NewContext(r), w, r, payload)
+	doListVenue(ctx, w, r, payload)
 }
 
-func httpLookupConference(w http.ResponseWriter, r *http.Request) {
+func httpLookupConference(ctx context.Context, w http.ResponseWriter, r *http.Request) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("httpLookupConference")
 		defer g.End()
@@ -860,10 +868,10 @@ func httpLookupConference(w http.ResponseWriter, r *http.Request) {
 		httpError(w, `Invalid input (validation failed)`, http.StatusInternalServerError, err)
 		return
 	}
-	doLookupConference(NewContext(r), w, r, payload)
+	doLookupConference(ctx, w, r, payload)
 }
 
-func httpLookupRoom(w http.ResponseWriter, r *http.Request) {
+func httpLookupRoom(ctx context.Context, w http.ResponseWriter, r *http.Request) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("httpLookupRoom")
 		defer g.End()
@@ -884,10 +892,10 @@ func httpLookupRoom(w http.ResponseWriter, r *http.Request) {
 		httpError(w, `Invalid input (validation failed)`, http.StatusInternalServerError, err)
 		return
 	}
-	doLookupRoom(NewContext(r), w, r, payload)
+	doLookupRoom(ctx, w, r, payload)
 }
 
-func httpLookupSession(w http.ResponseWriter, r *http.Request) {
+func httpLookupSession(ctx context.Context, w http.ResponseWriter, r *http.Request) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("httpLookupSession")
 		defer g.End()
@@ -908,10 +916,10 @@ func httpLookupSession(w http.ResponseWriter, r *http.Request) {
 		httpError(w, `Invalid input (validation failed)`, http.StatusInternalServerError, err)
 		return
 	}
-	doLookupSession(NewContext(r), w, r, payload)
+	doLookupSession(ctx, w, r, payload)
 }
 
-func httpLookupUser(w http.ResponseWriter, r *http.Request) {
+func httpLookupUser(ctx context.Context, w http.ResponseWriter, r *http.Request) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("httpLookupUser")
 		defer g.End()
@@ -932,10 +940,10 @@ func httpLookupUser(w http.ResponseWriter, r *http.Request) {
 		httpError(w, `Invalid input (validation failed)`, http.StatusInternalServerError, err)
 		return
 	}
-	doLookupUser(NewContext(r), w, r, payload)
+	doLookupUser(ctx, w, r, payload)
 }
 
-func httpLookupUserByAuthUserID(w http.ResponseWriter, r *http.Request) {
+func httpLookupUserByAuthUserID(ctx context.Context, w http.ResponseWriter, r *http.Request) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("httpLookupUserByAuthUserID")
 		defer g.End()
@@ -956,10 +964,10 @@ func httpLookupUserByAuthUserID(w http.ResponseWriter, r *http.Request) {
 		httpError(w, `Invalid input (validation failed)`, http.StatusInternalServerError, err)
 		return
 	}
-	doLookupUserByAuthUserID(NewContext(r), w, r, payload)
+	doLookupUserByAuthUserID(ctx, w, r, payload)
 }
 
-func httpLookupVenue(w http.ResponseWriter, r *http.Request) {
+func httpLookupVenue(ctx context.Context, w http.ResponseWriter, r *http.Request) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("httpLookupVenue")
 		defer g.End()
@@ -980,10 +988,10 @@ func httpLookupVenue(w http.ResponseWriter, r *http.Request) {
 		httpError(w, `Invalid input (validation failed)`, http.StatusInternalServerError, err)
 		return
 	}
-	doLookupVenue(NewContext(r), w, r, payload)
+	doLookupVenue(ctx, w, r, payload)
 }
 
-func httpUpdateConference(w http.ResponseWriter, r *http.Request) {
+func httpUpdateConference(ctx context.Context, w http.ResponseWriter, r *http.Request) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("httpUpdateConference")
 		defer g.End()
@@ -1013,10 +1021,10 @@ func httpUpdateConference(w http.ResponseWriter, r *http.Request) {
 		httpError(w, `Invalid input (validation failed)`, http.StatusInternalServerError, err)
 		return
 	}
-	doUpdateConference(NewContext(r), w, r, payload)
+	doUpdateConference(ctx, w, r, payload)
 }
 
-func httpUpdateRoom(w http.ResponseWriter, r *http.Request) {
+func httpUpdateRoom(ctx context.Context, w http.ResponseWriter, r *http.Request) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("httpUpdateRoom")
 		defer g.End()
@@ -1046,10 +1054,10 @@ func httpUpdateRoom(w http.ResponseWriter, r *http.Request) {
 		httpError(w, `Invalid input (validation failed)`, http.StatusInternalServerError, err)
 		return
 	}
-	doUpdateRoom(NewContext(r), w, r, payload)
+	doUpdateRoom(ctx, w, r, payload)
 }
 
-func httpUpdateSession(w http.ResponseWriter, r *http.Request) {
+func httpUpdateSession(ctx context.Context, w http.ResponseWriter, r *http.Request) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("httpUpdateSession")
 		defer g.End()
@@ -1079,10 +1087,10 @@ func httpUpdateSession(w http.ResponseWriter, r *http.Request) {
 		httpError(w, `Invalid input (validation failed)`, http.StatusInternalServerError, err)
 		return
 	}
-	doUpdateSession(NewContext(r), w, r, payload)
+	doUpdateSession(ctx, w, r, payload)
 }
 
-func httpUpdateUser(w http.ResponseWriter, r *http.Request) {
+func httpUpdateUser(ctx context.Context, w http.ResponseWriter, r *http.Request) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("httpUpdateUser")
 		defer g.End()
@@ -1112,10 +1120,10 @@ func httpUpdateUser(w http.ResponseWriter, r *http.Request) {
 		httpError(w, `Invalid input (validation failed)`, http.StatusInternalServerError, err)
 		return
 	}
-	doUpdateUser(NewContext(r), w, r, payload)
+	doUpdateUser(ctx, w, r, payload)
 }
 
-func httpUpdateVenue(w http.ResponseWriter, r *http.Request) {
+func httpUpdateVenue(ctx context.Context, w http.ResponseWriter, r *http.Request) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("httpUpdateVenue")
 		defer g.End()
@@ -1145,45 +1153,45 @@ func httpUpdateVenue(w http.ResponseWriter, r *http.Request) {
 		httpError(w, `Invalid input (validation failed)`, http.StatusInternalServerError, err)
 		return
 	}
-	doUpdateVenue(NewContext(r), w, r, payload)
+	doUpdateVenue(ctx, w, r, payload)
 }
 
 func (s *Server) SetupRoutes() {
 	r := s.Router
-	r.HandleFunc(`/v1/conference/admin/add`, httpAddConferenceAdmin)
-	r.HandleFunc(`/v1/conference/admin/delete`, httpDeleteConferenceAdmin)
-	r.HandleFunc(`/v1/conference/create`, httpCreateConference)
-	r.HandleFunc(`/v1/conference/dates/add`, httpAddConferenceDates)
-	r.HandleFunc(`/v1/conference/dates/delete`, httpDeleteConferenceDates)
-	r.HandleFunc(`/v1/conference/delete`, httpDeleteConference)
-	r.HandleFunc(`/v1/conference/list`, httpListConference)
-	r.HandleFunc(`/v1/conference/lookup`, httpLookupConference)
-	r.HandleFunc(`/v1/conference/update`, httpUpdateConference)
-	r.HandleFunc(`/v1/conference/venue/add`, httpAddConferenceVenue)
-	r.HandleFunc(`/v1/conference/venue/delete`, httpDeleteConferenceVenue)
-	r.HandleFunc(`/v1/question/create`, httpCreateQuestion)
-	r.HandleFunc(`/v1/question/delete`, httpDeleteQuestion)
-	r.HandleFunc(`/v1/question/list`, httpListQuestion)
-	r.HandleFunc(`/v1/room/create`, httpCreateRoom)
-	r.HandleFunc(`/v1/room/delete`, httpDeleteRoom)
-	r.HandleFunc(`/v1/room/list`, httpListRoom)
-	r.HandleFunc(`/v1/room/lookup`, httpLookupRoom)
-	r.HandleFunc(`/v1/room/update`, httpUpdateRoom)
-	r.HandleFunc(`/v1/schedule/list`, httpListSessionByConference)
-	r.HandleFunc(`/v1/session/create`, httpCreateSession)
-	r.HandleFunc(`/v1/session/delete`, httpDeleteSession)
-	r.HandleFunc(`/v1/session/lookup`, httpLookupSession)
-	r.HandleFunc(`/v1/session/update`, httpUpdateSession)
-	r.HandleFunc(`/v1/survey_session_response/create`, httpCreateSessionSurveyResponse)
-	r.HandleFunc(`/v1/user/create`, httpCreateUser)
-	r.HandleFunc(`/v1/user/delete`, httpDeleteUser)
-	r.HandleFunc(`/v1/user/list`, httpListUser)
-	r.HandleFunc(`/v1/user/lookup`, httpLookupUser)
-	r.HandleFunc(`/v1/user/lookup_by_auth_user_id`, httpLookupUserByAuthUserID)
-	r.HandleFunc(`/v1/user/update`, httpUpdateUser)
-	r.HandleFunc(`/v1/venue/create`, httpCreateVenue)
-	r.HandleFunc(`/v1/venue/delete`, httpDeleteVenue)
-	r.HandleFunc(`/v1/venue/list`, httpListVenue)
-	r.HandleFunc(`/v1/venue/lookup`, httpLookupVenue)
-	r.HandleFunc(`/v1/venue/update`, httpUpdateVenue)
+	r.HandleFunc(`/v1/conference/admin/add`, httpWithContext(httpAddConferenceAdmin))
+	r.HandleFunc(`/v1/conference/admin/delete`, httpWithContext(httpDeleteConferenceAdmin))
+	r.HandleFunc(`/v1/conference/create`, httpWithContext(httpWithAccessToken(httpCreateConference)))
+	r.HandleFunc(`/v1/conference/dates/add`, httpWithContext(httpAddConferenceDates))
+	r.HandleFunc(`/v1/conference/dates/delete`, httpWithContext(httpDeleteConferenceDates))
+	r.HandleFunc(`/v1/conference/delete`, httpWithContext(httpDeleteConference))
+	r.HandleFunc(`/v1/conference/list`, httpWithContext(httpListConference))
+	r.HandleFunc(`/v1/conference/lookup`, httpWithContext(httpLookupConference))
+	r.HandleFunc(`/v1/conference/update`, httpWithContext(httpUpdateConference))
+	r.HandleFunc(`/v1/conference/venue/add`, httpWithContext(httpAddConferenceVenue))
+	r.HandleFunc(`/v1/conference/venue/delete`, httpWithContext(httpDeleteConferenceVenue))
+	r.HandleFunc(`/v1/question/create`, httpWithContext(httpCreateQuestion))
+	r.HandleFunc(`/v1/question/delete`, httpWithContext(httpDeleteQuestion))
+	r.HandleFunc(`/v1/question/list`, httpWithContext(httpListQuestion))
+	r.HandleFunc(`/v1/room/create`, httpWithContext(httpCreateRoom))
+	r.HandleFunc(`/v1/room/delete`, httpWithContext(httpDeleteRoom))
+	r.HandleFunc(`/v1/room/list`, httpWithContext(httpListRoom))
+	r.HandleFunc(`/v1/room/lookup`, httpWithContext(httpLookupRoom))
+	r.HandleFunc(`/v1/room/update`, httpWithContext(httpUpdateRoom))
+	r.HandleFunc(`/v1/schedule/list`, httpWithContext(httpListSessionByConference))
+	r.HandleFunc(`/v1/session/create`, httpWithContext(httpCreateSession))
+	r.HandleFunc(`/v1/session/delete`, httpWithContext(httpDeleteSession))
+	r.HandleFunc(`/v1/session/lookup`, httpWithContext(httpLookupSession))
+	r.HandleFunc(`/v1/session/update`, httpWithContext(httpUpdateSession))
+	r.HandleFunc(`/v1/survey_session_response/create`, httpWithContext(httpCreateSessionSurveyResponse))
+	r.HandleFunc(`/v1/user/create`, httpWithContext(httpCreateUser))
+	r.HandleFunc(`/v1/user/delete`, httpWithContext(httpDeleteUser))
+	r.HandleFunc(`/v1/user/list`, httpWithContext(httpListUser))
+	r.HandleFunc(`/v1/user/lookup`, httpWithContext(httpLookupUser))
+	r.HandleFunc(`/v1/user/lookup_by_auth_user_id`, httpWithContext(httpLookupUserByAuthUserID))
+	r.HandleFunc(`/v1/user/update`, httpWithContext(httpUpdateUser))
+	r.HandleFunc(`/v1/venue/create`, httpWithContext(httpCreateVenue))
+	r.HandleFunc(`/v1/venue/delete`, httpWithContext(httpDeleteVenue))
+	r.HandleFunc(`/v1/venue/list`, httpWithContext(httpListVenue))
+	r.HandleFunc(`/v1/venue/lookup`, httpWithContext(httpLookupVenue))
+	r.HandleFunc(`/v1/venue/update`, httpWithContext(httpUpdateVenue))
 }

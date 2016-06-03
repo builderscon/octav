@@ -610,6 +610,7 @@
     {
       "title": "Create conference",
       "rel": "create",
+      "hsup.wrapper": "httpWithAccessToken",
       "method": "POST",
       "href": "/conference/create",
       "encType": "application/x-www-form-urlencoded",

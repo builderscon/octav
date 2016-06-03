@@ -17,6 +17,38 @@ func init() {
 	httpError = httpErrorAsJSON
 }
 
+func httpWithAccessToken(h HandlerWithContext) HandlerWithContext {
+	return HandlerWithContext(func(ctx context.Context, w http.ResponseWriter, r *http.Request) {
+		// Verify access token in the Basic-Auth
+		clientID, clientSecret, ok := r.BasicAuth()
+		if !ok {
+			httpError(w, http.StatusText(http.StatusForbidden), http.StatusForbidden, nil)
+			return
+		}
+
+		// TODO: implement this in service, and cache
+		tx, err := db.Begin()
+		if err != nil {
+			httpError(w, http.StatusText(http.StatusForbidden), http.StatusForbidden, err)
+			return
+		}
+		defer tx.AutoRollback()
+
+		vdb := db.Client{}
+		if err := vdb.LoadByEID(tx, clientID); err != nil {
+			httpError(w, http.StatusText(http.StatusForbidden), http.StatusForbidden, err)
+			return
+		}
+
+		if vdb.Secret != clientSecret {
+			httpError(w, http.StatusText(http.StatusForbidden), http.StatusForbidden, nil)
+			return
+		}
+
+		h(ctx, w, r)
+	})
+}
+
 func httpJSONWithStatus(w http.ResponseWriter, v interface{}, st int) {
 	buf := bytes.Buffer{}
 	if err := json.NewEncoder(&buf).Encode(v); err != nil {

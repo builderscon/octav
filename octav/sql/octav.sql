@@ -154,3 +154,12 @@ CREATE TABLE session_survey_responses (
     KEY(eid, session_id, user_id)
 )
 
+-- client stores data about clients that use our API
+CREATE TABLE client (
+    oid INTEGER UNSIGNED NOT NULL PRIMARY KEY AUTO_INCREMENT,
+    eid CHAR(64) CHARACTER SET latin1 NOT NULL, -- client ID
+    secret CHAR(64) BINARY CHARACTER SET latin1 NOT NULL,
+    name TEXT NOT NULL, -- name of the client
+    created_on DATETIME NOT NULL,
+    modified_on TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+)
