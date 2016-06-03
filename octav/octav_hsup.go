@@ -101,6 +101,7 @@ func httpAddConferenceAdmin(w http.ResponseWriter, r *http.Request) {
 		defer g.End()
 	}
 	if strings.ToLower(r.Method) != `post` {
+		w.Header().Set("Allow", "post")
 		httpError(w, `Method was `+r.Method+`, expected post`, http.StatusNotFound, nil)
 		return
 	}
@@ -133,6 +134,7 @@ func httpAddConferenceDates(w http.ResponseWriter, r *http.Request) {
 		defer g.End()
 	}
 	if strings.ToLower(r.Method) != `post` {
+		w.Header().Set("Allow", "post")
 		httpError(w, `Method was `+r.Method+`, expected post`, http.StatusNotFound, nil)
 		return
 	}
@@ -165,6 +167,7 @@ func httpAddConferenceVenue(w http.ResponseWriter, r *http.Request) {
 		defer g.End()
 	}
 	if strings.ToLower(r.Method) != `post` {
+		w.Header().Set("Allow", "post")
 		httpError(w, `Method was `+r.Method+`, expected post`, http.StatusNotFound, nil)
 		return
 	}
@@ -197,6 +200,7 @@ func httpCreateConference(w http.ResponseWriter, r *http.Request) {
 		defer g.End()
 	}
 	if strings.ToLower(r.Method) != `post` {
+		w.Header().Set("Allow", "post")
 		httpError(w, `Method was `+r.Method+`, expected post`, http.StatusNotFound, nil)
 		return
 	}
@@ -223,12 +227,37 @@ func httpCreateConference(w http.ResponseWriter, r *http.Request) {
 	doCreateConference(NewContext(r), w, r, payload)
 }
 
+func httpCreateQuestion(w http.ResponseWriter, r *http.Request) {
+	if pdebug.Enabled {
+		g := pdebug.Marker("httpCreateQuestion")
+		defer g.End()
+	}
+	if strings.ToLower(r.Method) != `get` {
+		w.Header().Set("Allow", "get")
+		httpError(w, `Method was `+r.Method+`, expected get`, http.StatusNotFound, nil)
+		return
+	}
+
+	var payload model.CreateQuestionRequest
+	if err := urlenc.Unmarshal([]byte(r.URL.RawQuery), &payload); err != nil {
+		httpError(w, `Failed to parse url query string`, http.StatusInternalServerError, err)
+		return
+	}
+
+	if err := validator.HTTPCreateQuestionRequest.Validate(&payload); err != nil {
+		httpError(w, `Invalid input (validation failed)`, http.StatusInternalServerError, err)
+		return
+	}
+	doCreateQuestion(NewContext(r), w, r, payload)
+}
+
 func httpCreateRoom(w http.ResponseWriter, r *http.Request) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("httpCreateRoom")
 		defer g.End()
 	}
 	if strings.ToLower(r.Method) != `post` {
+		w.Header().Set("Allow", "post")
 		httpError(w, `Method was `+r.Method+`, expected post`, http.StatusNotFound, nil)
 		return
 	}
@@ -261,6 +290,7 @@ func httpCreateSession(w http.ResponseWriter, r *http.Request) {
 		defer g.End()
 	}
 	if strings.ToLower(r.Method) != `post` {
+		w.Header().Set("Allow", "post")
 		httpError(w, `Method was `+r.Method+`, expected post`, http.StatusNotFound, nil)
 		return
 	}
@@ -287,12 +317,37 @@ func httpCreateSession(w http.ResponseWriter, r *http.Request) {
 	doCreateSession(NewContext(r), w, r, payload)
 }
 
+func httpCreateSessionSurveyResponse(w http.ResponseWriter, r *http.Request) {
+	if pdebug.Enabled {
+		g := pdebug.Marker("httpCreateSessionSurveyResponse")
+		defer g.End()
+	}
+	if strings.ToLower(r.Method) != `get` {
+		w.Header().Set("Allow", "get")
+		httpError(w, `Method was `+r.Method+`, expected get`, http.StatusNotFound, nil)
+		return
+	}
+
+	var payload model.CreateSessionSurveyResponseRequest
+	if err := urlenc.Unmarshal([]byte(r.URL.RawQuery), &payload); err != nil {
+		httpError(w, `Failed to parse url query string`, http.StatusInternalServerError, err)
+		return
+	}
+
+	if err := validator.HTTPCreateSessionSurveyResponseRequest.Validate(&payload); err != nil {
+		httpError(w, `Invalid input (validation failed)`, http.StatusInternalServerError, err)
+		return
+	}
+	doCreateSessionSurveyResponse(NewContext(r), w, r, payload)
+}
+
 func httpCreateUser(w http.ResponseWriter, r *http.Request) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("httpCreateUser")
 		defer g.End()
 	}
 	if strings.ToLower(r.Method) != `post` {
+		w.Header().Set("Allow", "post")
 		httpError(w, `Method was `+r.Method+`, expected post`, http.StatusNotFound, nil)
 		return
 	}
@@ -325,6 +380,7 @@ func httpCreateVenue(w http.ResponseWriter, r *http.Request) {
 		defer g.End()
 	}
 	if strings.ToLower(r.Method) != `post` {
+		w.Header().Set("Allow", "post")
 		httpError(w, `Method was `+r.Method+`, expected post`, http.StatusNotFound, nil)
 		return
 	}
@@ -357,6 +413,7 @@ func httpDeleteConference(w http.ResponseWriter, r *http.Request) {
 		defer g.End()
 	}
 	if strings.ToLower(r.Method) != `post` {
+		w.Header().Set("Allow", "post")
 		httpError(w, `Method was `+r.Method+`, expected post`, http.StatusNotFound, nil)
 		return
 	}
@@ -389,6 +446,7 @@ func httpDeleteConferenceAdmin(w http.ResponseWriter, r *http.Request) {
 		defer g.End()
 	}
 	if strings.ToLower(r.Method) != `post` {
+		w.Header().Set("Allow", "post")
 		httpError(w, `Method was `+r.Method+`, expected post`, http.StatusNotFound, nil)
 		return
 	}
@@ -421,6 +479,7 @@ func httpDeleteConferenceDates(w http.ResponseWriter, r *http.Request) {
 		defer g.End()
 	}
 	if strings.ToLower(r.Method) != `post` {
+		w.Header().Set("Allow", "post")
 		httpError(w, `Method was `+r.Method+`, expected post`, http.StatusNotFound, nil)
 		return
 	}
@@ -453,6 +512,7 @@ func httpDeleteConferenceVenue(w http.ResponseWriter, r *http.Request) {
 		defer g.End()
 	}
 	if strings.ToLower(r.Method) != `post` {
+		w.Header().Set("Allow", "post")
 		httpError(w, `Method was `+r.Method+`, expected post`, http.StatusNotFound, nil)
 		return
 	}
@@ -479,12 +539,37 @@ func httpDeleteConferenceVenue(w http.ResponseWriter, r *http.Request) {
 	doDeleteConferenceVenue(NewContext(r), w, r, payload)
 }
 
+func httpDeleteQuestion(w http.ResponseWriter, r *http.Request) {
+	if pdebug.Enabled {
+		g := pdebug.Marker("httpDeleteQuestion")
+		defer g.End()
+	}
+	if strings.ToLower(r.Method) != `get` {
+		w.Header().Set("Allow", "get")
+		httpError(w, `Method was `+r.Method+`, expected get`, http.StatusNotFound, nil)
+		return
+	}
+
+	var payload model.DeleteQuestionRequest
+	if err := urlenc.Unmarshal([]byte(r.URL.RawQuery), &payload); err != nil {
+		httpError(w, `Failed to parse url query string`, http.StatusInternalServerError, err)
+		return
+	}
+
+	if err := validator.HTTPDeleteQuestionRequest.Validate(&payload); err != nil {
+		httpError(w, `Invalid input (validation failed)`, http.StatusInternalServerError, err)
+		return
+	}
+	doDeleteQuestion(NewContext(r), w, r, payload)
+}
+
 func httpDeleteRoom(w http.ResponseWriter, r *http.Request) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("httpDeleteRoom")
 		defer g.End()
 	}
 	if strings.ToLower(r.Method) != `post` {
+		w.Header().Set("Allow", "post")
 		httpError(w, `Method was `+r.Method+`, expected post`, http.StatusNotFound, nil)
 		return
 	}
@@ -517,6 +602,7 @@ func httpDeleteSession(w http.ResponseWriter, r *http.Request) {
 		defer g.End()
 	}
 	if strings.ToLower(r.Method) != `post` {
+		w.Header().Set("Allow", "post")
 		httpError(w, `Method was `+r.Method+`, expected post`, http.StatusNotFound, nil)
 		return
 	}
@@ -549,6 +635,7 @@ func httpDeleteUser(w http.ResponseWriter, r *http.Request) {
 		defer g.End()
 	}
 	if strings.ToLower(r.Method) != `post` {
+		w.Header().Set("Allow", "post")
 		httpError(w, `Method was `+r.Method+`, expected post`, http.StatusNotFound, nil)
 		return
 	}
@@ -581,6 +668,7 @@ func httpDeleteVenue(w http.ResponseWriter, r *http.Request) {
 		defer g.End()
 	}
 	if strings.ToLower(r.Method) != `post` {
+		w.Header().Set("Allow", "post")
 		httpError(w, `Method was `+r.Method+`, expected post`, http.StatusNotFound, nil)
 		return
 	}
@@ -613,6 +701,7 @@ func httpListConference(w http.ResponseWriter, r *http.Request) {
 		defer g.End()
 	}
 	if strings.ToLower(r.Method) != `get` {
+		w.Header().Set("Allow", "get")
 		httpError(w, `Method was `+r.Method+`, expected get`, http.StatusNotFound, nil)
 		return
 	}
@@ -630,12 +719,37 @@ func httpListConference(w http.ResponseWriter, r *http.Request) {
 	doListConference(NewContext(r), w, r, payload)
 }
 
+func httpListQuestion(w http.ResponseWriter, r *http.Request) {
+	if pdebug.Enabled {
+		g := pdebug.Marker("httpListQuestion")
+		defer g.End()
+	}
+	if strings.ToLower(r.Method) != `get` {
+		w.Header().Set("Allow", "get")
+		httpError(w, `Method was `+r.Method+`, expected get`, http.StatusNotFound, nil)
+		return
+	}
+
+	var payload model.ListQuestionRequest
+	if err := urlenc.Unmarshal([]byte(r.URL.RawQuery), &payload); err != nil {
+		httpError(w, `Failed to parse url query string`, http.StatusInternalServerError, err)
+		return
+	}
+
+	if err := validator.HTTPListQuestionRequest.Validate(&payload); err != nil {
+		httpError(w, `Invalid input (validation failed)`, http.StatusInternalServerError, err)
+		return
+	}
+	doListQuestion(NewContext(r), w, r, payload)
+}
+
 func httpListRoom(w http.ResponseWriter, r *http.Request) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("httpListRoom")
 		defer g.End()
 	}
 	if strings.ToLower(r.Method) != `get` {
+		w.Header().Set("Allow", "get")
 		httpError(w, `Method was `+r.Method+`, expected get`, http.StatusNotFound, nil)
 		return
 	}
@@ -659,6 +773,7 @@ func httpListSessionByConference(w http.ResponseWriter, r *http.Request) {
 		defer g.End()
 	}
 	if strings.ToLower(r.Method) != `get` {
+		w.Header().Set("Allow", "get")
 		httpError(w, `Method was `+r.Method+`, expected get`, http.StatusNotFound, nil)
 		return
 	}
@@ -682,6 +797,7 @@ func httpListUser(w http.ResponseWriter, r *http.Request) {
 		defer g.End()
 	}
 	if strings.ToLower(r.Method) != `get` {
+		w.Header().Set("Allow", "get")
 		httpError(w, `Method was `+r.Method+`, expected get`, http.StatusNotFound, nil)
 		return
 	}
@@ -705,6 +821,7 @@ func httpListVenue(w http.ResponseWriter, r *http.Request) {
 		defer g.End()
 	}
 	if strings.ToLower(r.Method) != `get` {
+		w.Header().Set("Allow", "get")
 		httpError(w, `Method was `+r.Method+`, expected get`, http.StatusNotFound, nil)
 		return
 	}
@@ -728,6 +845,7 @@ func httpLookupConference(w http.ResponseWriter, r *http.Request) {
 		defer g.End()
 	}
 	if strings.ToLower(r.Method) != `get` {
+		w.Header().Set("Allow", "get")
 		httpError(w, `Method was `+r.Method+`, expected get`, http.StatusNotFound, nil)
 		return
 	}
@@ -751,6 +869,7 @@ func httpLookupRoom(w http.ResponseWriter, r *http.Request) {
 		defer g.End()
 	}
 	if strings.ToLower(r.Method) != `get` {
+		w.Header().Set("Allow", "get")
 		httpError(w, `Method was `+r.Method+`, expected get`, http.StatusNotFound, nil)
 		return
 	}
@@ -774,6 +893,7 @@ func httpLookupSession(w http.ResponseWriter, r *http.Request) {
 		defer g.End()
 	}
 	if strings.ToLower(r.Method) != `get` {
+		w.Header().Set("Allow", "get")
 		httpError(w, `Method was `+r.Method+`, expected get`, http.StatusNotFound, nil)
 		return
 	}
@@ -797,6 +917,7 @@ func httpLookupUser(w http.ResponseWriter, r *http.Request) {
 		defer g.End()
 	}
 	if strings.ToLower(r.Method) != `get` {
+		w.Header().Set("Allow", "get")
 		httpError(w, `Method was `+r.Method+`, expected get`, http.StatusNotFound, nil)
 		return
 	}
@@ -820,6 +941,7 @@ func httpLookupUserByAuthUserID(w http.ResponseWriter, r *http.Request) {
 		defer g.End()
 	}
 	if strings.ToLower(r.Method) != `get` {
+		w.Header().Set("Allow", "get")
 		httpError(w, `Method was `+r.Method+`, expected get`, http.StatusNotFound, nil)
 		return
 	}
@@ -843,6 +965,7 @@ func httpLookupVenue(w http.ResponseWriter, r *http.Request) {
 		defer g.End()
 	}
 	if strings.ToLower(r.Method) != `get` {
+		w.Header().Set("Allow", "get")
 		httpError(w, `Method was `+r.Method+`, expected get`, http.StatusNotFound, nil)
 		return
 	}
@@ -866,6 +989,7 @@ func httpUpdateConference(w http.ResponseWriter, r *http.Request) {
 		defer g.End()
 	}
 	if strings.ToLower(r.Method) != `post` {
+		w.Header().Set("Allow", "post")
 		httpError(w, `Method was `+r.Method+`, expected post`, http.StatusNotFound, nil)
 		return
 	}
@@ -898,6 +1022,7 @@ func httpUpdateRoom(w http.ResponseWriter, r *http.Request) {
 		defer g.End()
 	}
 	if strings.ToLower(r.Method) != `post` {
+		w.Header().Set("Allow", "post")
 		httpError(w, `Method was `+r.Method+`, expected post`, http.StatusNotFound, nil)
 		return
 	}
@@ -930,6 +1055,7 @@ func httpUpdateSession(w http.ResponseWriter, r *http.Request) {
 		defer g.End()
 	}
 	if strings.ToLower(r.Method) != `post` {
+		w.Header().Set("Allow", "post")
 		httpError(w, `Method was `+r.Method+`, expected post`, http.StatusNotFound, nil)
 		return
 	}
@@ -962,6 +1088,7 @@ func httpUpdateUser(w http.ResponseWriter, r *http.Request) {
 		defer g.End()
 	}
 	if strings.ToLower(r.Method) != `post` {
+		w.Header().Set("Allow", "post")
 		httpError(w, `Method was `+r.Method+`, expected post`, http.StatusNotFound, nil)
 		return
 	}
@@ -994,6 +1121,7 @@ func httpUpdateVenue(w http.ResponseWriter, r *http.Request) {
 		defer g.End()
 	}
 	if strings.ToLower(r.Method) != `post` {
+		w.Header().Set("Allow", "post")
 		httpError(w, `Method was `+r.Method+`, expected post`, http.StatusNotFound, nil)
 		return
 	}
@@ -1033,6 +1161,9 @@ func (s *Server) SetupRoutes() {
 	r.HandleFunc(`/v1/conference/update`, httpUpdateConference)
 	r.HandleFunc(`/v1/conference/venue/add`, httpAddConferenceVenue)
 	r.HandleFunc(`/v1/conference/venue/delete`, httpDeleteConferenceVenue)
+	r.HandleFunc(`/v1/question/create`, httpCreateQuestion)
+	r.HandleFunc(`/v1/question/delete`, httpDeleteQuestion)
+	r.HandleFunc(`/v1/question/list`, httpListQuestion)
 	r.HandleFunc(`/v1/room/create`, httpCreateRoom)
 	r.HandleFunc(`/v1/room/delete`, httpDeleteRoom)
 	r.HandleFunc(`/v1/room/list`, httpListRoom)
@@ -1043,6 +1174,7 @@ func (s *Server) SetupRoutes() {
 	r.HandleFunc(`/v1/session/delete`, httpDeleteSession)
 	r.HandleFunc(`/v1/session/lookup`, httpLookupSession)
 	r.HandleFunc(`/v1/session/update`, httpUpdateSession)
+	r.HandleFunc(`/v1/survey_session_response/create`, httpCreateSessionSurveyResponse)
 	r.HandleFunc(`/v1/user/create`, httpCreateUser)
 	r.HandleFunc(`/v1/user/delete`, httpDeleteUser)
 	r.HandleFunc(`/v1/user/list`, httpListUser)

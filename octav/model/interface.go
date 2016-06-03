@@ -401,3 +401,49 @@ type ListSessionByConferenceRequest struct {
 	Date         jsval.MaybeString `json:"date" urlenc:"date,omitempty,string"`
 	Lang         jsval.MaybeString `json:"lang,omitempty" urlenc:"lang,omitempty,string"`
 }
+
+// +model
+type Question struct {
+	ID				string
+	SessionID string
+	UserID    string
+	Body      string
+}
+
+// +transport
+type CreateQuestionRequest struct {
+	SessionID string `json:"session_id" urlenc:"session_id"`
+	UserID    string `json:"user_id" urlenc:"user_id"`
+	Body      string `json:"body" urlenc:"body"`
+}
+
+// +transport
+type UpdateQuestionRequest struct {
+	ID        string `json:"id" urlenc:"id"`
+	SessionID jsval.MaybeString `json:"session_id" urlenc:"session_id"`
+	UserID    jsval.MaybeString `json:"user_id" urlenc:"user_id"`
+	Body      jsval.MaybeString `json:"body" urlenc:"body"`
+}
+// +transport
+type DeleteQuestionRequest struct {
+	ID string `json:"id" urlenc:"id"`
+}
+
+// +transport
+type ListQuestionRequest struct {
+	Since jsval.MaybeString `json:"since" urlenc:"since,omitempty,string"`
+	Lang  jsval.MaybeString `json:"lang" urlenc:"lang,omitempty,string"`
+	Limit jsval.MaybeInt    `json:"limit" urlenc:"limit,omitempty,int64"`
+}
+
+// +transport
+type CreateSessionSurveyResponseRequest struct {
+	UserID    jsval.MaybeString `json:"user_id"`
+	SessionID jsval.MaybeString `json:"session_id"`
+	UserPriorKnowledge int `json:"user_prior_knowledge"`
+	SpeakerKnowledge int `json:"speaker_knowledge"`
+	MaterialQuality int `json:"material_quality"`
+	OverallRating int `json:"overall_rating"`
+	CommentGood jsval.MaybeString `json:"comment_good" urlenc:"comment_good,omitempty,string"`
+	CommentImprovement jsval.MaybeString `json:"comment_improvement" urlenc:"comment_improvement,omitempty,string"`
+}

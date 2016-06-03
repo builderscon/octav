@@ -180,6 +180,53 @@ func (c *Client) CreateConference(in *model.CreateConferenceRequest) (ret *model
 	return &payload, nil
 }
 
+func (c *Client) CreateQuestion(in *model.CreateQuestionRequest) (ret *model.Question, err error) {
+	if pdebug.Enabled {
+		g := pdebug.Marker("client.CreateQuestion").BindError(&err)
+		defer g.End()
+	}
+	u, err := url.Parse(c.Endpoint + "/v1/question/create")
+	if err != nil {
+		return nil, err
+	}
+	buf, err := urlenc.Marshal(in)
+	if err != nil {
+		return nil, err
+	}
+	u.RawQuery = string(buf)
+	if pdebug.Enabled {
+		pdebug.Printf("GET to %s", u.String())
+	}
+	res, err := c.Client.Get(u.String())
+	if err != nil {
+		return nil, err
+	}
+	if res.StatusCode != http.StatusOK {
+		return nil, fmt.Errorf(`Invalid response: '%s'`, res.Status)
+	}
+	jsonbuf := getTransportJSONBuffer()
+	defer releaseTransportJSONBuffer(jsonbuf)
+	_, err = io.Copy(jsonbuf, io.LimitReader(res.Body, MaxResponseSize))
+	defer res.Body.Close()
+	if pdebug.Enabled {
+		if err != nil {
+			pdebug.Printf("failed to read respons buffer: %s", err)
+		} else {
+			pdebug.Printf("response buffer: %s", jsonbuf)
+		}
+	}
+	if err != nil {
+		return nil, err
+	}
+
+	var payload model.Question
+	err = json.Unmarshal(jsonbuf.Bytes(), &payload)
+	if err != nil {
+		return nil, err
+	}
+	return &payload, nil
+}
+
 func (c *Client) CreateRoom(in *model.CreateRoomRequest) (ret *model.Room, err error) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("client.CreateRoom").BindError(&err)
@@ -274,6 +321,33 @@ func (c *Client) CreateSession(in *model.CreateSessionRequest) (ret *model.Sessi
 		return nil, err
 	}
 	return &payload, nil
+}
+
+func (c *Client) CreateSessionSurveyResponse(in *model.CreateSessionSurveyResponseRequest) (err error) {
+	if pdebug.Enabled {
+		g := pdebug.Marker("client.CreateSessionSurveyResponse").BindError(&err)
+		defer g.End()
+	}
+	u, err := url.Parse(c.Endpoint + "/v1/survey_session_response/create")
+	if err != nil {
+		return err
+	}
+	buf, err := urlenc.Marshal(in)
+	if err != nil {
+		return err
+	}
+	u.RawQuery = string(buf)
+	if pdebug.Enabled {
+		pdebug.Printf("GET to %s", u.String())
+	}
+	res, err := c.Client.Get(u.String())
+	if err != nil {
+		return err
+	}
+	if res.StatusCode != http.StatusOK {
+		return fmt.Errorf(`Invalid response: '%s'`, res.Status)
+	}
+	return nil
 }
 
 func (c *Client) CreateUser(in *model.CreateUserRequest) (ret *model.User, err error) {
@@ -484,6 +558,33 @@ func (c *Client) DeleteConferenceVenue(in *model.DeleteConferenceVenueRequest) (
 	return nil
 }
 
+func (c *Client) DeleteQuestion(in *model.DeleteQuestionRequest) (err error) {
+	if pdebug.Enabled {
+		g := pdebug.Marker("client.DeleteQuestion").BindError(&err)
+		defer g.End()
+	}
+	u, err := url.Parse(c.Endpoint + "/v1/question/delete")
+	if err != nil {
+		return err
+	}
+	buf, err := urlenc.Marshal(in)
+	if err != nil {
+		return err
+	}
+	u.RawQuery = string(buf)
+	if pdebug.Enabled {
+		pdebug.Printf("GET to %s", u.String())
+	}
+	res, err := c.Client.Get(u.String())
+	if err != nil {
+		return err
+	}
+	if res.StatusCode != http.StatusOK {
+		return fmt.Errorf(`Invalid response: '%s'`, res.Status)
+	}
+	return nil
+}
+
 func (c *Client) DeleteRoom(in *model.DeleteRoomRequest) (err error) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("client.DeleteRoom").BindError(&err)
@@ -636,6 +737,53 @@ func (c *Client) ListConference(in *model.ListConferenceRequest) (ret []model.Co
 	}
 
 	var payload []model.Conference
+	err = json.Unmarshal(jsonbuf.Bytes(), &payload)
+	if err != nil {
+		return nil, err
+	}
+	return payload, nil
+}
+
+func (c *Client) ListQuestion(in *model.ListQuestionRequest) (ret []model.Question, err error) {
+	if pdebug.Enabled {
+		g := pdebug.Marker("client.ListQuestion").BindError(&err)
+		defer g.End()
+	}
+	u, err := url.Parse(c.Endpoint + "/v1/question/list")
+	if err != nil {
+		return nil, err
+	}
+	buf, err := urlenc.Marshal(in)
+	if err != nil {
+		return nil, err
+	}
+	u.RawQuery = string(buf)
+	if pdebug.Enabled {
+		pdebug.Printf("GET to %s", u.String())
+	}
+	res, err := c.Client.Get(u.String())
+	if err != nil {
+		return nil, err
+	}
+	if res.StatusCode != http.StatusOK {
+		return nil, fmt.Errorf(`Invalid response: '%s'`, res.Status)
+	}
+	jsonbuf := getTransportJSONBuffer()
+	defer releaseTransportJSONBuffer(jsonbuf)
+	_, err = io.Copy(jsonbuf, io.LimitReader(res.Body, MaxResponseSize))
+	defer res.Body.Close()
+	if pdebug.Enabled {
+		if err != nil {
+			pdebug.Printf("failed to read respons buffer: %s", err)
+		} else {
+			pdebug.Printf("response buffer: %s", jsonbuf)
+		}
+	}
+	if err != nil {
+		return nil, err
+	}
+
+	var payload []model.Question
 	err = json.Unmarshal(jsonbuf.Bytes(), &payload)
 	if err != nil {
 		return nil, err

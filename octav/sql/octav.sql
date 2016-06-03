@@ -125,3 +125,32 @@ CREATE TABLE localized_strings (
     localized TEXT NOT NULL,
     KEY (parent_id, parent_type, name, language)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE questions (
+    oid INTEGER UNSIGNED NOT NULL PRIMARY KEY AUTO_INCREMENT,
+    eid CHAR(64) CHARACTER SET latin1 NOT NULL,
+    session_id CHAR(64) CHARACTER SET latin1 NOT NULL,
+    user_id CHAR(64) CHARACTER SET latin1 NOT NULL,
+    body TEXT NOT NULL,
+    KEY (eid, session_id, user_id)
+)
+
+-- session survey responses.
+CREATE TABLE session_survey_responses (
+    oid INTEGER UNSIGNED NOT NULL PRIMARY KEY AUTO_INCREMENT,
+    eid CHAR(64) CHARACTER SET latin1 NOT NULL,
+    session_id CHAR(64) CHARACTER SET latin1 NOT NULL,
+    user_id CHAR(64) CHARACTER SET latin1 NOT NULL,
+    user_prior_knowledge SMALLINT UNSIGNED NOT NULL DEFAULT 0,
+    speaker_knowledge SMALLINT UNSIGNED NOT NULL DEFAULT 0,
+    speaker_presentation SMALLINT UNSIGNED NOT NULL DEFAULT 0,
+    material_quality SMALLINT UNSIGNED NOT NULL DEFAULT 0,
+    overall_rating SMALLINT UNSIGNED NOT NULL DEFAULT 0,
+    comment_good TEXT,
+    comment_improvement TEXT,
+    created_on DATETIME NOT NULL,
+    modified_on TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    UNIQUE KEY (eid),
+    KEY(eid, session_id, user_id)
+)
+

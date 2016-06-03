@@ -9,6 +9,7 @@ type ErrInvalidFieldType struct {
 }
 
 type Conference struct{}
+type Question struct{}
 type Room struct{}
 type Session struct{}
 type User struct{}
