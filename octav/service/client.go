@@ -7,8 +7,8 @@ import (
 )
 
 func (v *Client) populateRowForCreate(vdb *db.Client, payload model.CreateClientRequest) error {
-	vdb.EID = payload.ID
-	vdb.Secret = tools.UUID() // XXX Change this to generate a "password"
+	vdb.EID = tools.RandomString(64)
+	vdb.Secret = tools.RandomString(64)
 	vdb.Name = payload.Name
 	return nil
 }
