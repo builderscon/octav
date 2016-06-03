@@ -36,9 +36,15 @@ func releaseTransportJSONBuffer(buf *bytes.Buffer) {
 	transportJSONBufferPool.Put(buf)
 }
 
+type BasicAuth struct {
+	Username string
+	Password string
+}
+
 type Client struct {
-	Client   *http.Client
-	Endpoint string
+	BasicAuth BasicAuth
+	Client    *http.Client
+	Endpoint  string
 }
 
 func New(s string) *Client {
@@ -66,7 +72,15 @@ func (c *Client) AddConferenceAdmin(in *model.AddConferenceAdminRequest) (err er
 		pdebug.Printf("POST to %s", u.String())
 		pdebug.Printf("%s", buf.String())
 	}
-	res, err := c.Client.Post(u.String(), "application/json", &buf)
+	req, err := http.NewRequest("POST", u.String(), &buf)
+	if err != nil {
+		return err
+	}
+	req.Header.Set("Content-Type", "application/json")
+	if c.BasicAuth.Username != "" && c.BasicAuth.Password != "" {
+		req.SetBasicAuth(c.BasicAuth.Username, c.BasicAuth.Password)
+	}
+	res, err := c.Client.Do(req)
 	if err != nil {
 		return err
 	}
@@ -94,7 +108,15 @@ func (c *Client) AddConferenceDates(in *model.AddConferenceDatesRequest) (err er
 		pdebug.Printf("POST to %s", u.String())
 		pdebug.Printf("%s", buf.String())
 	}
-	res, err := c.Client.Post(u.String(), "application/json", &buf)
+	req, err := http.NewRequest("POST", u.String(), &buf)
+	if err != nil {
+		return err
+	}
+	req.Header.Set("Content-Type", "application/json")
+	if c.BasicAuth.Username != "" && c.BasicAuth.Password != "" {
+		req.SetBasicAuth(c.BasicAuth.Username, c.BasicAuth.Password)
+	}
+	res, err := c.Client.Do(req)
 	if err != nil {
 		return err
 	}
@@ -122,7 +144,15 @@ func (c *Client) AddConferenceVenue(in *model.AddConferenceVenueRequest) (err er
 		pdebug.Printf("POST to %s", u.String())
 		pdebug.Printf("%s", buf.String())
 	}
-	res, err := c.Client.Post(u.String(), "application/json", &buf)
+	req, err := http.NewRequest("POST", u.String(), &buf)
+	if err != nil {
+		return err
+	}
+	req.Header.Set("Content-Type", "application/json")
+	if c.BasicAuth.Username != "" && c.BasicAuth.Password != "" {
+		req.SetBasicAuth(c.BasicAuth.Username, c.BasicAuth.Password)
+	}
+	res, err := c.Client.Do(req)
 	if err != nil {
 		return err
 	}
@@ -150,7 +180,15 @@ func (c *Client) CreateConference(in *model.CreateConferenceRequest) (ret *model
 		pdebug.Printf("POST to %s", u.String())
 		pdebug.Printf("%s", buf.String())
 	}
-	res, err := c.Client.Post(u.String(), "application/json", &buf)
+	req, err := http.NewRequest("POST", u.String(), &buf)
+	if err != nil {
+		return nil, err
+	}
+	req.Header.Set("Content-Type", "application/json")
+	if c.BasicAuth.Username != "" && c.BasicAuth.Password != "" {
+		req.SetBasicAuth(c.BasicAuth.Username, c.BasicAuth.Password)
+	}
+	res, err := c.Client.Do(req)
 	if err != nil {
 		return nil, err
 	}
@@ -197,7 +235,14 @@ func (c *Client) CreateQuestion(in *model.CreateQuestionRequest) (ret *model.Que
 	if pdebug.Enabled {
 		pdebug.Printf("GET to %s", u.String())
 	}
-	res, err := c.Client.Get(u.String())
+	req, err := http.NewRequest("GET", u.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+	if c.BasicAuth.Username != "" && c.BasicAuth.Password != "" {
+		req.SetBasicAuth(c.BasicAuth.Username, c.BasicAuth.Password)
+	}
+	res, err := c.Client.Do(req)
 	if err != nil {
 		return nil, err
 	}
@@ -245,7 +290,15 @@ func (c *Client) CreateRoom(in *model.CreateRoomRequest) (ret *model.Room, err e
 		pdebug.Printf("POST to %s", u.String())
 		pdebug.Printf("%s", buf.String())
 	}
-	res, err := c.Client.Post(u.String(), "application/json", &buf)
+	req, err := http.NewRequest("POST", u.String(), &buf)
+	if err != nil {
+		return nil, err
+	}
+	req.Header.Set("Content-Type", "application/json")
+	if c.BasicAuth.Username != "" && c.BasicAuth.Password != "" {
+		req.SetBasicAuth(c.BasicAuth.Username, c.BasicAuth.Password)
+	}
+	res, err := c.Client.Do(req)
 	if err != nil {
 		return nil, err
 	}
@@ -293,7 +346,15 @@ func (c *Client) CreateSession(in *model.CreateSessionRequest) (ret *model.Sessi
 		pdebug.Printf("POST to %s", u.String())
 		pdebug.Printf("%s", buf.String())
 	}
-	res, err := c.Client.Post(u.String(), "application/json", &buf)
+	req, err := http.NewRequest("POST", u.String(), &buf)
+	if err != nil {
+		return nil, err
+	}
+	req.Header.Set("Content-Type", "application/json")
+	if c.BasicAuth.Username != "" && c.BasicAuth.Password != "" {
+		req.SetBasicAuth(c.BasicAuth.Username, c.BasicAuth.Password)
+	}
+	res, err := c.Client.Do(req)
 	if err != nil {
 		return nil, err
 	}
@@ -340,7 +401,14 @@ func (c *Client) CreateSessionSurveyResponse(in *model.CreateSessionSurveyRespon
 	if pdebug.Enabled {
 		pdebug.Printf("GET to %s", u.String())
 	}
-	res, err := c.Client.Get(u.String())
+	req, err := http.NewRequest("GET", u.String(), nil)
+	if err != nil {
+		return err
+	}
+	if c.BasicAuth.Username != "" && c.BasicAuth.Password != "" {
+		req.SetBasicAuth(c.BasicAuth.Username, c.BasicAuth.Password)
+	}
+	res, err := c.Client.Do(req)
 	if err != nil {
 		return err
 	}
@@ -368,7 +436,15 @@ func (c *Client) CreateUser(in *model.CreateUserRequest) (ret *model.User, err e
 		pdebug.Printf("POST to %s", u.String())
 		pdebug.Printf("%s", buf.String())
 	}
-	res, err := c.Client.Post(u.String(), "application/json", &buf)
+	req, err := http.NewRequest("POST", u.String(), &buf)
+	if err != nil {
+		return nil, err
+	}
+	req.Header.Set("Content-Type", "application/json")
+	if c.BasicAuth.Username != "" && c.BasicAuth.Password != "" {
+		req.SetBasicAuth(c.BasicAuth.Username, c.BasicAuth.Password)
+	}
+	res, err := c.Client.Do(req)
 	if err != nil {
 		return nil, err
 	}
@@ -416,7 +492,15 @@ func (c *Client) CreateVenue(in *model.CreateVenueRequest) (ret *model.Venue, er
 		pdebug.Printf("POST to %s", u.String())
 		pdebug.Printf("%s", buf.String())
 	}
-	res, err := c.Client.Post(u.String(), "application/json", &buf)
+	req, err := http.NewRequest("POST", u.String(), &buf)
+	if err != nil {
+		return nil, err
+	}
+	req.Header.Set("Content-Type", "application/json")
+	if c.BasicAuth.Username != "" && c.BasicAuth.Password != "" {
+		req.SetBasicAuth(c.BasicAuth.Username, c.BasicAuth.Password)
+	}
+	res, err := c.Client.Do(req)
 	if err != nil {
 		return nil, err
 	}
@@ -464,7 +548,15 @@ func (c *Client) DeleteConference(in *model.DeleteConferenceRequest) (err error)
 		pdebug.Printf("POST to %s", u.String())
 		pdebug.Printf("%s", buf.String())
 	}
-	res, err := c.Client.Post(u.String(), "application/json", &buf)
+	req, err := http.NewRequest("POST", u.String(), &buf)
+	if err != nil {
+		return err
+	}
+	req.Header.Set("Content-Type", "application/json")
+	if c.BasicAuth.Username != "" && c.BasicAuth.Password != "" {
+		req.SetBasicAuth(c.BasicAuth.Username, c.BasicAuth.Password)
+	}
+	res, err := c.Client.Do(req)
 	if err != nil {
 		return err
 	}
@@ -492,7 +584,15 @@ func (c *Client) DeleteConferenceAdmin(in *model.DeleteConferenceAdminRequest) (
 		pdebug.Printf("POST to %s", u.String())
 		pdebug.Printf("%s", buf.String())
 	}
-	res, err := c.Client.Post(u.String(), "application/json", &buf)
+	req, err := http.NewRequest("POST", u.String(), &buf)
+	if err != nil {
+		return err
+	}
+	req.Header.Set("Content-Type", "application/json")
+	if c.BasicAuth.Username != "" && c.BasicAuth.Password != "" {
+		req.SetBasicAuth(c.BasicAuth.Username, c.BasicAuth.Password)
+	}
+	res, err := c.Client.Do(req)
 	if err != nil {
 		return err
 	}
@@ -520,7 +620,15 @@ func (c *Client) DeleteConferenceDates(in *model.DeleteConferenceDatesRequest) (
 		pdebug.Printf("POST to %s", u.String())
 		pdebug.Printf("%s", buf.String())
 	}
-	res, err := c.Client.Post(u.String(), "application/json", &buf)
+	req, err := http.NewRequest("POST", u.String(), &buf)
+	if err != nil {
+		return err
+	}
+	req.Header.Set("Content-Type", "application/json")
+	if c.BasicAuth.Username != "" && c.BasicAuth.Password != "" {
+		req.SetBasicAuth(c.BasicAuth.Username, c.BasicAuth.Password)
+	}
+	res, err := c.Client.Do(req)
 	if err != nil {
 		return err
 	}
@@ -548,7 +656,15 @@ func (c *Client) DeleteConferenceVenue(in *model.DeleteConferenceVenueRequest) (
 		pdebug.Printf("POST to %s", u.String())
 		pdebug.Printf("%s", buf.String())
 	}
-	res, err := c.Client.Post(u.String(), "application/json", &buf)
+	req, err := http.NewRequest("POST", u.String(), &buf)
+	if err != nil {
+		return err
+	}
+	req.Header.Set("Content-Type", "application/json")
+	if c.BasicAuth.Username != "" && c.BasicAuth.Password != "" {
+		req.SetBasicAuth(c.BasicAuth.Username, c.BasicAuth.Password)
+	}
+	res, err := c.Client.Do(req)
 	if err != nil {
 		return err
 	}
@@ -575,7 +691,14 @@ func (c *Client) DeleteQuestion(in *model.DeleteQuestionRequest) (err error) {
 	if pdebug.Enabled {
 		pdebug.Printf("GET to %s", u.String())
 	}
-	res, err := c.Client.Get(u.String())
+	req, err := http.NewRequest("GET", u.String(), nil)
+	if err != nil {
+		return err
+	}
+	if c.BasicAuth.Username != "" && c.BasicAuth.Password != "" {
+		req.SetBasicAuth(c.BasicAuth.Username, c.BasicAuth.Password)
+	}
+	res, err := c.Client.Do(req)
 	if err != nil {
 		return err
 	}
@@ -603,7 +726,15 @@ func (c *Client) DeleteRoom(in *model.DeleteRoomRequest) (err error) {
 		pdebug.Printf("POST to %s", u.String())
 		pdebug.Printf("%s", buf.String())
 	}
-	res, err := c.Client.Post(u.String(), "application/json", &buf)
+	req, err := http.NewRequest("POST", u.String(), &buf)
+	if err != nil {
+		return err
+	}
+	req.Header.Set("Content-Type", "application/json")
+	if c.BasicAuth.Username != "" && c.BasicAuth.Password != "" {
+		req.SetBasicAuth(c.BasicAuth.Username, c.BasicAuth.Password)
+	}
+	res, err := c.Client.Do(req)
 	if err != nil {
 		return err
 	}
@@ -631,7 +762,15 @@ func (c *Client) DeleteSession(in *model.DeleteSessionRequest) (err error) {
 		pdebug.Printf("POST to %s", u.String())
 		pdebug.Printf("%s", buf.String())
 	}
-	res, err := c.Client.Post(u.String(), "application/json", &buf)
+	req, err := http.NewRequest("POST", u.String(), &buf)
+	if err != nil {
+		return err
+	}
+	req.Header.Set("Content-Type", "application/json")
+	if c.BasicAuth.Username != "" && c.BasicAuth.Password != "" {
+		req.SetBasicAuth(c.BasicAuth.Username, c.BasicAuth.Password)
+	}
+	res, err := c.Client.Do(req)
 	if err != nil {
 		return err
 	}
@@ -659,7 +798,15 @@ func (c *Client) DeleteUser(in *model.DeleteUserRequest) (err error) {
 		pdebug.Printf("POST to %s", u.String())
 		pdebug.Printf("%s", buf.String())
 	}
-	res, err := c.Client.Post(u.String(), "application/json", &buf)
+	req, err := http.NewRequest("POST", u.String(), &buf)
+	if err != nil {
+		return err
+	}
+	req.Header.Set("Content-Type", "application/json")
+	if c.BasicAuth.Username != "" && c.BasicAuth.Password != "" {
+		req.SetBasicAuth(c.BasicAuth.Username, c.BasicAuth.Password)
+	}
+	res, err := c.Client.Do(req)
 	if err != nil {
 		return err
 	}
@@ -687,7 +834,15 @@ func (c *Client) DeleteVenue(in *model.DeleteVenueRequest) (err error) {
 		pdebug.Printf("POST to %s", u.String())
 		pdebug.Printf("%s", buf.String())
 	}
-	res, err := c.Client.Post(u.String(), "application/json", &buf)
+	req, err := http.NewRequest("POST", u.String(), &buf)
+	if err != nil {
+		return err
+	}
+	req.Header.Set("Content-Type", "application/json")
+	if c.BasicAuth.Username != "" && c.BasicAuth.Password != "" {
+		req.SetBasicAuth(c.BasicAuth.Username, c.BasicAuth.Password)
+	}
+	res, err := c.Client.Do(req)
 	if err != nil {
 		return err
 	}
@@ -714,7 +869,14 @@ func (c *Client) ListConference(in *model.ListConferenceRequest) (ret []model.Co
 	if pdebug.Enabled {
 		pdebug.Printf("GET to %s", u.String())
 	}
-	res, err := c.Client.Get(u.String())
+	req, err := http.NewRequest("GET", u.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+	if c.BasicAuth.Username != "" && c.BasicAuth.Password != "" {
+		req.SetBasicAuth(c.BasicAuth.Username, c.BasicAuth.Password)
+	}
+	res, err := c.Client.Do(req)
 	if err != nil {
 		return nil, err
 	}
@@ -761,7 +923,14 @@ func (c *Client) ListQuestion(in *model.ListQuestionRequest) (ret []model.Questi
 	if pdebug.Enabled {
 		pdebug.Printf("GET to %s", u.String())
 	}
-	res, err := c.Client.Get(u.String())
+	req, err := http.NewRequest("GET", u.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+	if c.BasicAuth.Username != "" && c.BasicAuth.Password != "" {
+		req.SetBasicAuth(c.BasicAuth.Username, c.BasicAuth.Password)
+	}
+	res, err := c.Client.Do(req)
 	if err != nil {
 		return nil, err
 	}
@@ -808,7 +977,14 @@ func (c *Client) ListRoom(in *model.ListRoomRequest) (ret []model.Room, err erro
 	if pdebug.Enabled {
 		pdebug.Printf("GET to %s", u.String())
 	}
-	res, err := c.Client.Get(u.String())
+	req, err := http.NewRequest("GET", u.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+	if c.BasicAuth.Username != "" && c.BasicAuth.Password != "" {
+		req.SetBasicAuth(c.BasicAuth.Username, c.BasicAuth.Password)
+	}
+	res, err := c.Client.Do(req)
 	if err != nil {
 		return nil, err
 	}
@@ -855,7 +1031,14 @@ func (c *Client) ListSessionByConference(in *model.ListSessionByConferenceReques
 	if pdebug.Enabled {
 		pdebug.Printf("GET to %s", u.String())
 	}
-	res, err := c.Client.Get(u.String())
+	req, err := http.NewRequest("GET", u.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+	if c.BasicAuth.Username != "" && c.BasicAuth.Password != "" {
+		req.SetBasicAuth(c.BasicAuth.Username, c.BasicAuth.Password)
+	}
+	res, err := c.Client.Do(req)
 	if err != nil {
 		return nil, err
 	}
@@ -902,7 +1085,14 @@ func (c *Client) ListUser(in *model.ListUserRequest) (ret []model.User, err erro
 	if pdebug.Enabled {
 		pdebug.Printf("GET to %s", u.String())
 	}
-	res, err := c.Client.Get(u.String())
+	req, err := http.NewRequest("GET", u.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+	if c.BasicAuth.Username != "" && c.BasicAuth.Password != "" {
+		req.SetBasicAuth(c.BasicAuth.Username, c.BasicAuth.Password)
+	}
+	res, err := c.Client.Do(req)
 	if err != nil {
 		return nil, err
 	}
@@ -949,7 +1139,14 @@ func (c *Client) ListVenue(in *model.ListVenueRequest) (ret []model.Venue, err e
 	if pdebug.Enabled {
 		pdebug.Printf("GET to %s", u.String())
 	}
-	res, err := c.Client.Get(u.String())
+	req, err := http.NewRequest("GET", u.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+	if c.BasicAuth.Username != "" && c.BasicAuth.Password != "" {
+		req.SetBasicAuth(c.BasicAuth.Username, c.BasicAuth.Password)
+	}
+	res, err := c.Client.Do(req)
 	if err != nil {
 		return nil, err
 	}
@@ -996,7 +1193,14 @@ func (c *Client) LookupConference(in *model.LookupConferenceRequest) (ret *model
 	if pdebug.Enabled {
 		pdebug.Printf("GET to %s", u.String())
 	}
-	res, err := c.Client.Get(u.String())
+	req, err := http.NewRequest("GET", u.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+	if c.BasicAuth.Username != "" && c.BasicAuth.Password != "" {
+		req.SetBasicAuth(c.BasicAuth.Username, c.BasicAuth.Password)
+	}
+	res, err := c.Client.Do(req)
 	if err != nil {
 		return nil, err
 	}
@@ -1043,7 +1247,14 @@ func (c *Client) LookupRoom(in *model.LookupRoomRequest) (ret *model.Room, err e
 	if pdebug.Enabled {
 		pdebug.Printf("GET to %s", u.String())
 	}
-	res, err := c.Client.Get(u.String())
+	req, err := http.NewRequest("GET", u.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+	if c.BasicAuth.Username != "" && c.BasicAuth.Password != "" {
+		req.SetBasicAuth(c.BasicAuth.Username, c.BasicAuth.Password)
+	}
+	res, err := c.Client.Do(req)
 	if err != nil {
 		return nil, err
 	}
@@ -1090,7 +1301,14 @@ func (c *Client) LookupSession(in *model.LookupSessionRequest) (ret *model.Sessi
 	if pdebug.Enabled {
 		pdebug.Printf("GET to %s", u.String())
 	}
-	res, err := c.Client.Get(u.String())
+	req, err := http.NewRequest("GET", u.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+	if c.BasicAuth.Username != "" && c.BasicAuth.Password != "" {
+		req.SetBasicAuth(c.BasicAuth.Username, c.BasicAuth.Password)
+	}
+	res, err := c.Client.Do(req)
 	if err != nil {
 		return nil, err
 	}
@@ -1137,7 +1355,14 @@ func (c *Client) LookupUser(in *model.LookupUserRequest) (ret *model.User, err e
 	if pdebug.Enabled {
 		pdebug.Printf("GET to %s", u.String())
 	}
-	res, err := c.Client.Get(u.String())
+	req, err := http.NewRequest("GET", u.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+	if c.BasicAuth.Username != "" && c.BasicAuth.Password != "" {
+		req.SetBasicAuth(c.BasicAuth.Username, c.BasicAuth.Password)
+	}
+	res, err := c.Client.Do(req)
 	if err != nil {
 		return nil, err
 	}
@@ -1184,7 +1409,14 @@ func (c *Client) LookupUserByAuthUserID(in *model.LookupUserByAuthUserIDRequest)
 	if pdebug.Enabled {
 		pdebug.Printf("GET to %s", u.String())
 	}
-	res, err := c.Client.Get(u.String())
+	req, err := http.NewRequest("GET", u.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+	if c.BasicAuth.Username != "" && c.BasicAuth.Password != "" {
+		req.SetBasicAuth(c.BasicAuth.Username, c.BasicAuth.Password)
+	}
+	res, err := c.Client.Do(req)
 	if err != nil {
 		return nil, err
 	}
@@ -1231,7 +1463,14 @@ func (c *Client) LookupVenue(in *model.LookupVenueRequest) (ret *model.Venue, er
 	if pdebug.Enabled {
 		pdebug.Printf("GET to %s", u.String())
 	}
-	res, err := c.Client.Get(u.String())
+	req, err := http.NewRequest("GET", u.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+	if c.BasicAuth.Username != "" && c.BasicAuth.Password != "" {
+		req.SetBasicAuth(c.BasicAuth.Username, c.BasicAuth.Password)
+	}
+	res, err := c.Client.Do(req)
 	if err != nil {
 		return nil, err
 	}
@@ -1279,7 +1518,15 @@ func (c *Client) UpdateConference(in *model.UpdateConferenceRequest) (err error)
 		pdebug.Printf("POST to %s", u.String())
 		pdebug.Printf("%s", buf.String())
 	}
-	res, err := c.Client.Post(u.String(), "application/json", &buf)
+	req, err := http.NewRequest("POST", u.String(), &buf)
+	if err != nil {
+		return err
+	}
+	req.Header.Set("Content-Type", "application/json")
+	if c.BasicAuth.Username != "" && c.BasicAuth.Password != "" {
+		req.SetBasicAuth(c.BasicAuth.Username, c.BasicAuth.Password)
+	}
+	res, err := c.Client.Do(req)
 	if err != nil {
 		return err
 	}
@@ -1307,7 +1554,15 @@ func (c *Client) UpdateRoom(in *model.UpdateRoomRequest) (err error) {
 		pdebug.Printf("POST to %s", u.String())
 		pdebug.Printf("%s", buf.String())
 	}
-	res, err := c.Client.Post(u.String(), "application/json", &buf)
+	req, err := http.NewRequest("POST", u.String(), &buf)
+	if err != nil {
+		return err
+	}
+	req.Header.Set("Content-Type", "application/json")
+	if c.BasicAuth.Username != "" && c.BasicAuth.Password != "" {
+		req.SetBasicAuth(c.BasicAuth.Username, c.BasicAuth.Password)
+	}
+	res, err := c.Client.Do(req)
 	if err != nil {
 		return err
 	}
@@ -1335,7 +1590,15 @@ func (c *Client) UpdateSession(in *model.UpdateSessionRequest) (err error) {
 		pdebug.Printf("POST to %s", u.String())
 		pdebug.Printf("%s", buf.String())
 	}
-	res, err := c.Client.Post(u.String(), "application/json", &buf)
+	req, err := http.NewRequest("POST", u.String(), &buf)
+	if err != nil {
+		return err
+	}
+	req.Header.Set("Content-Type", "application/json")
+	if c.BasicAuth.Username != "" && c.BasicAuth.Password != "" {
+		req.SetBasicAuth(c.BasicAuth.Username, c.BasicAuth.Password)
+	}
+	res, err := c.Client.Do(req)
 	if err != nil {
 		return err
 	}
@@ -1363,7 +1626,15 @@ func (c *Client) UpdateUser(in *model.UpdateUserRequest) (err error) {
 		pdebug.Printf("POST to %s", u.String())
 		pdebug.Printf("%s", buf.String())
 	}
-	res, err := c.Client.Post(u.String(), "application/json", &buf)
+	req, err := http.NewRequest("POST", u.String(), &buf)
+	if err != nil {
+		return err
+	}
+	req.Header.Set("Content-Type", "application/json")
+	if c.BasicAuth.Username != "" && c.BasicAuth.Password != "" {
+		req.SetBasicAuth(c.BasicAuth.Username, c.BasicAuth.Password)
+	}
+	res, err := c.Client.Do(req)
 	if err != nil {
 		return err
 	}
@@ -1391,7 +1662,15 @@ func (c *Client) UpdateVenue(in *model.UpdateVenueRequest) (err error) {
 		pdebug.Printf("POST to %s", u.String())
 		pdebug.Printf("%s", buf.String())
 	}
-	res, err := c.Client.Post(u.String(), "application/json", &buf)
+	req, err := http.NewRequest("POST", u.String(), &buf)
+	if err != nil {
+		return err
+	}
+	req.Header.Set("Content-Type", "application/json")
+	if c.BasicAuth.Username != "" && c.BasicAuth.Password != "" {
+		req.SetBasicAuth(c.BasicAuth.Username, c.BasicAuth.Password)
+	}
+	res, err := c.Client.Do(req)
 	if err != nil {
 		return err
 	}

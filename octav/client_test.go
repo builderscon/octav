@@ -8,12 +8,54 @@ import (
 	"testing"
 
 	"github.com/builderscon/octav/octav"
+	"github.com/builderscon/octav/octav/db"
 	"github.com/builderscon/octav/octav/client"
 	"github.com/builderscon/octav/octav/model"
 	"github.com/builderscon/octav/octav/tools"
 	"github.com/builderscon/octav/octav/validator"
+	"github.com/pkg/errors"
 	"github.com/stretchr/testify/assert"
 )
+
+type TestCtx struct {
+	*testing.T
+	APIClient *db.Client
+	HTTPClient *client.Client
+}
+
+func NewTestCtx(t *testing.T) (*TestCtx, error) {
+	vdb := db.Client{
+		EID: tools.UUID(),
+		Secret: tools.UUID(), // Todo
+		Name: "Test Client",
+	}
+
+	tx, err := db.Begin()
+	if err != nil {
+		return nil, errors.Wrap(err, "failed to start DB transaction")
+	}
+	defer tx.AutoRollback()
+
+	if vdb.Create(tx); err != nil {
+		return nil, err
+	}
+	if err := tx.Commit(); err != nil {
+		return nil, errors.Wrap(err, "failed to commit changes to DB")
+	}
+
+	ctx := &TestCtx{
+		T: t,
+		APIClient: &vdb,
+	}
+
+	return ctx, nil
+}
+
+func (ctx *TestCtx) SetAPIServer(ts *httptest.Server) {
+	ctx.HTTPClient = client.New(ts.URL)
+	ctx.HTTPClient.BasicAuth.Username = ctx.APIClient.EID
+	ctx.HTTPClient.BasicAuth.Password = ctx.APIClient.Secret
+}
 
 func bigsight() *model.CreateVenueRequest {
 	lf := tools.LocalizedFields{}
@@ -43,101 +85,101 @@ func intlConferenceRoom(venueID string) *model.CreateRoomRequest {
 	return &r
 }
 
-func testCreateRoom(t *testing.T, cl *client.Client, r *model.CreateRoomRequest) (*model.Room, error) {
-	res, err := cl.CreateRoom(r)
-	if !assert.NoError(t, err, "CreateRoom should succeed") {
+func testCreateRoom(ctx *TestCtx, r *model.CreateRoomRequest) (*model.Room, error) {
+	res, err := ctx.HTTPClient.CreateRoom(r)
+	if !assert.NoError(ctx.T, err, "CreateRoom should succeed") {
 		return nil, err
 	}
 	return res, nil
 }
 
-func testCreateVenue(t *testing.T, cl *client.Client, v *model.CreateVenueRequest) (*model.Venue, error) {
-	res, err := cl.CreateVenue(v)
-	if !assert.NoError(t, err, "CreateVenue should succeed") {
+func testCreateVenue(ctx *TestCtx, v *model.CreateVenueRequest) (*model.Venue, error) {
+	res, err := ctx.HTTPClient.CreateVenue(v)
+	if !assert.NoError(ctx.T, err, "CreateVenue should succeed") {
 		return nil, err
 	}
 	return res, nil
 }
 
-func testLookupRoom(t *testing.T, cl *client.Client, id, lang string) (*model.Room, error) {
+func testLookupRoom(ctx *TestCtx, id, lang string) (*model.Room, error) {
 	r := &model.LookupRoomRequest{ID: id}
 	if lang != "" {
 		r.Lang.Set(lang)
 	}
-	venue, err := cl.LookupRoom(r)
-	if !assert.NoError(t, err, "LookupRoom succeeds") {
+	venue, err := ctx.HTTPClient.LookupRoom(r)
+	if !assert.NoError(ctx.T, err, "LookupRoom succeeds") {
 		return nil, err
 	}
 	return venue, nil
 }
 
-func testCreateUser(t *testing.T, cl *client.Client, in *model.CreateUserRequest) (*model.User, error) {
-	res, err := cl.CreateUser(in)
-	if !assert.NoError(t, err, "CreateUser should succeed") {
+func testCreateUser(ctx *TestCtx, in *model.CreateUserRequest) (*model.User, error) {
+	res, err := ctx.HTTPClient.CreateUser(in)
+	if !assert.NoError(ctx.T, err, "CreateUser should succeed") {
 		return nil, err
 	}
 	return res, nil
 }
 
-func testLookupUser(t *testing.T, cl *client.Client, id, lang string) (*model.User, error) {
+func testLookupUser(ctx *TestCtx, id, lang string) (*model.User, error) {
 	r := &model.LookupUserRequest{ID: id}
 	if lang != "" {
 		r.Lang.Set(lang)
 	}
-	user, err := cl.LookupUser(r)
-	if !assert.NoError(t, err, "LookupUser succeeds") {
+	user, err := ctx.HTTPClient.LookupUser(r)
+	if !assert.NoError(ctx.T, err, "LookupUser succeeds") {
 		return nil, err
 	}
 	return user, nil
 }
 
-func testDeleteUser(t *testing.T, cl *client.Client, id string) error {
-	err := cl.DeleteUser(&model.DeleteUserRequest{ID: id})
-	if !assert.NoError(t, err, "DeleteUser should succeed") {
+func testDeleteUser(ctx *TestCtx, id string) error {
+	err := ctx.HTTPClient.DeleteUser(&model.DeleteUserRequest{ID: id})
+	if !assert.NoError(ctx.T, err, "DeleteUser should succeed") {
 		return err
 	}
 	return nil
 }
 
-func testLookupVenue(t *testing.T, cl *client.Client, id, lang string) (*model.Venue, error) {
+func testLookupVenue(ctx *TestCtx, id, lang string) (*model.Venue, error) {
 	r := &model.LookupVenueRequest{ID: id}
 	if lang != "" {
 		r.Lang.Set(lang)
 	}
-	venue, err := cl.LookupVenue(r)
-	if !assert.NoError(t, err, "LookupVenue succeeds") {
+	venue, err := ctx.HTTPClient.LookupVenue(r)
+	if !assert.NoError(ctx.T, err, "LookupVenue succeeds") {
 		return nil, err
 	}
 	return venue, nil
 }
 
-func testUpdateRoom(t *testing.T, cl *client.Client, in *model.UpdateRoomRequest) error {
-	err := cl.UpdateRoom(in)
-	if !assert.NoError(t, err, "UpdateRoom succeeds") {
+func testUpdateRoom(ctx *TestCtx, in *model.UpdateRoomRequest) error {
+	err := ctx.HTTPClient.UpdateRoom(in)
+	if !assert.NoError(ctx.T, err, "UpdateRoom succeeds") {
 		return err
 	}
 	return nil
 }
 
-func testDeleteRoom(t *testing.T, cl *client.Client, id string) error {
-	err := cl.DeleteRoom(&model.DeleteRoomRequest{ID: id})
-	if !assert.NoError(t, err, "DeleteRoom should be successful") {
+func testDeleteRoom(ctx *TestCtx, id string) error {
+	err := ctx.HTTPClient.DeleteRoom(&model.DeleteRoomRequest{ID: id})
+	if !assert.NoError(ctx.T, err, "DeleteRoom should be successful") {
 		return err
 	}
 	return err
 }
 
-func testUpdateVenue(t *testing.T, cl *client.Client, in *model.UpdateVenueRequest) error {
-	err := cl.UpdateVenue(in)
-	if !assert.NoError(t, err, "UpdateVenue succeeds") {
+func testUpdateVenue(ctx *TestCtx, in *model.UpdateVenueRequest) error {
+	err := ctx.HTTPClient.UpdateVenue(in)
+	if !assert.NoError(ctx.T, err, "UpdateVenue succeeds") {
 		return err
 	}
 	return nil
 }
 
-func testDeleteVenue(t *testing.T, cl *client.Client, id string) error {
-	err := cl.DeleteVenue(&model.DeleteVenueRequest{ID: id})
-	if !assert.NoError(t, err, "DeleteVenue should be successful") {
+func testDeleteVenue(ctx *TestCtx, id string) error {
+	err := ctx.HTTPClient.DeleteVenue(&model.DeleteVenueRequest{ID: id})
+	if !assert.NoError(ctx.T, err, "DeleteVenue should be successful") {
 		return err
 	}
 	return err
@@ -151,65 +193,70 @@ func yapcasia(userID string) *model.CreateConferenceRequest {
 	}
 }
 
-func testCreateConference(t *testing.T, cl *client.Client, in *model.CreateConferenceRequest) (*model.Conference, error) {
-	res, err := cl.CreateConference(in)
-	if !assert.NoError(t, err, "CreateConference should succeed") {
+func testCreateConference(ctx *TestCtx, in *model.CreateConferenceRequest) (*model.Conference, error) {
+	res, err := ctx.HTTPClient.CreateConference(in)
+	if !assert.NoError(ctx.T, err, "CreateConference should succeed") {
 		return nil, err
 	}
 	return res, nil
 }
 
-func testLookupConference(t *testing.T, cl *client.Client, id, lang string) (*model.Conference, error) {
+func testLookupConference(ctx *TestCtx, id, lang string) (*model.Conference, error) {
 	r := &model.LookupConferenceRequest{ID: id}
 	if lang != "" {
 		r.Lang.Set(lang)
 	}
-	conference, err := cl.LookupConference(r)
-	if !assert.NoError(t, err, "LookupConference succeeds") {
+	conference, err := ctx.HTTPClient.LookupConference(r)
+	if !assert.NoError(ctx.T, err, "LookupConference succeeds") {
 		return nil, err
 	}
 	return conference, nil
 }
 
-func testUpdateConference(t *testing.T, cl *client.Client, in *model.UpdateConferenceRequest) error {
-	err := cl.UpdateConference(in)
-	if !assert.NoError(t, err, "UpdateConference succeeds") {
+func testUpdateConference(ctx *TestCtx, in *model.UpdateConferenceRequest) error {
+	err := ctx.HTTPClient.UpdateConference(in)
+	if !assert.NoError(ctx.T, err, "UpdateConference succeeds") {
 		return err
 	}
 	return nil
 }
 
-func testDeleteConference(t *testing.T, cl *client.Client, id string) error {
-	err := cl.DeleteConference(&model.DeleteConferenceRequest{ID: id})
-	if !assert.NoError(t, err, "DeleteConference should be successful") {
+func testDeleteConference(ctx *TestCtx, id string) error {
+	err := ctx.HTTPClient.DeleteConference(&model.DeleteConferenceRequest{ID: id})
+	if !assert.NoError(ctx.T, err, "DeleteConference should be successful") {
 		return err
 	}
 	return err
 }
 
 func TestConferenceCRUD(t *testing.T) {
+	ctx, err := NewTestCtx(t)
+	if !assert.NoError(ctx, err, "failed to create test ctx") {
+		return
+	}
+
 	ts := httptest.NewServer(octav.New())
 	defer ts.Close()
 
-	cl := client.New(ts.URL)
+	ctx.SetAPIServer(ts)
 
-	user, err := testCreateUser(t, cl, johndoe())
+	user, err := testCreateUser(ctx, johndoe())
 	if err != nil {
 		return
 	}
-	defer testDeleteUser(t, cl, user.ID)
+	defer testDeleteUser(ctx, user.ID)
 
-	res, err := testCreateConference(t, cl, yapcasia(user.ID))
+	res, err := testCreateConference(ctx, yapcasia(user.ID))
 	if err != nil {
 		return
 	}
-	defer testDeleteConference(t, cl, res.ID)
+	defer testDeleteConference(ctx, res.ID)
 
-	if !assert.NoError(t, validator.HTTPCreateConferenceResponse.Validate(res), "Validation should succeed") {
+	if !assert.NoError(ctx.T, validator.HTTPCreateConferenceResponse.Validate(res), "Validation should succeed") {
 		return
 	}
 
-	res2, err := testLookupConference(t, cl, res.ID, "")
+	res2, err := testLookupConference(ctx, res.ID, "")
 	if err != nil {
 		return
 	}
@@ -218,123 +265,128 @@ func TestConferenceCRUD(t *testing.T) {
 	// Remove that (and make sure it's populated), then do the comparison
 	admins := res2.Administrators
 	res2.Administrators = model.UserList(nil)
-	if !assert.Equal(t, res2, res, "LookupConference is the same as the conference created") {
+	if !assert.Equal(ctx.T, res2, res, "LookupConference is the same as the conference created") {
 		return
 	}
 
-	if !assert.Len(t, admins, 1, "There should be 1 administrator") {
+	if !assert.Len(ctx.T, admins, 1, "There should be 1 administrator") {
 		return
 	}
 
 	in := model.UpdateConferenceRequest{ID: res.ID}
 	in.SubTitle.Set("Big Bang!")
 	in.L10N.Set("ja", "title", "ヤップシー エイジア")
-	if err := testUpdateConference(t, cl, &in); err != nil {
+	if err := testUpdateConference(ctx, &in); err != nil {
 		return
 	}
 
-	res3, err := testLookupConference(t, cl, res.ID, "ja")
+	res3, err := testLookupConference(ctx, res.ID, "ja")
 	if err != nil {
 		return
 	}
 
-	if !assert.Equal(t, res3.SubTitle, "Big Bang!", "Conference.SubTitle is the same as the conference updated") {
+	if !assert.Equal(ctx.T, res3.SubTitle, "Big Bang!", "Conference.SubTitle is the same as the conference updated") {
 		return
 	}
 
-	if !assert.Equal(t, "ヤップシー エイジア", res3.Title, "Conference.title#ja is the same as the conference updated") {
+	if !assert.Equal(ctx.T, "ヤップシー エイジア", res3.Title, "Conference.title#ja is the same as the conference updated") {
 		return
 	}
 }
 
 func TestRoomCRUD(t *testing.T) {
+	ctx, err := NewTestCtx(t)
+	if !assert.NoError(ctx, err, "failed to create test ctx") {
+		return
+	}
+
 	ts := httptest.NewServer(octav.New())
 	defer ts.Close()
 
-	cl := client.New(ts.URL)
+	ctx.SetAPIServer(ts)
 
-	venue, err := testCreateVenue(t, cl, bigsight())
+	venue, err := testCreateVenue(ctx, bigsight())
 	if err != nil {
 		return
 	}
 
-	res, err := testCreateRoom(t, cl, intlConferenceRoom(venue.ID))
+	res, err := testCreateRoom(ctx, intlConferenceRoom(venue.ID))
 	if err != nil {
 		return
 	}
 
-	if !assert.NotEmpty(t, res.ID, "Returned structure has ID") {
+	if !assert.NotEmpty(ctx.T, res.ID, "Returned structure has ID") {
 		return
 	}
 
-	if !assert.NoError(t, validator.HTTPCreateRoomResponse.Validate(res), "Validation should succeed") {
+	if !assert.NoError(ctx.T, validator.HTTPCreateRoomResponse.Validate(res), "Validation should succeed") {
 		return
 	}
 
-	res2, err := testLookupRoom(t, cl, res.ID, "")
+	res2, err := testLookupRoom(ctx, res.ID, "")
 	if err != nil {
 		return
 	}
 
-	if !assert.Equal(t, res2, res, "LookupRoom is the same as the room created") {
+	if !assert.Equal(ctx.T, res2, res, "LookupRoom is the same as the room created") {
 		return
 	}
 
 	in := model.UpdateRoomRequest{ID: res.ID}
 	in.L10N.Set("ja", "name", "国際会議場")
-	if err := testUpdateRoom(t, cl, &in); err != nil {
+	if err := testUpdateRoom(ctx, &in); err != nil {
 		return
 	}
 
-	res3, err := testLookupRoom(t, cl, res.ID, "ja")
+	res3, err := testLookupRoom(ctx, res.ID, "ja")
 	if err != nil {
 		return
 	}
 
-	if !assert.Equal(t, "国際会議場", res3.Name, "Room.name#ja is the same as the conference updated") {
+	if !assert.Equal(ctx.T, "国際会議場", res3.Name, "Room.name#ja is the same as the conference updated") {
 		return
 	}
 
-	if err := testDeleteRoom(t, cl, res.ID); err != nil {
+	if err := testDeleteRoom(ctx, res.ID); err != nil {
 		return
 	}
 
-	if err := testDeleteVenue(t, cl, venue.ID); err != nil {
+	if err := testDeleteVenue(ctx, venue.ID); err != nil {
 		return
 	}
 }
 
-func testCreateSession(t *testing.T, cl *client.Client, in *model.CreateSessionRequest) (*model.Session, error) {
-	res, err := cl.CreateSession(in)
-	if !assert.NoError(t, err, "CreateSession should succeed") {
+func testCreateSession(ctx *TestCtx, in *model.CreateSessionRequest) (*model.Session, error) {
+	res, err := ctx.HTTPClient.CreateSession(in)
+	if !assert.NoError(ctx.T, err, "CreateSession should succeed") {
 		return nil, err
 	}
 	return res, nil
 }
 
-func testLookupSession(t *testing.T, cl *client.Client, id, lang string) (*model.Session, error) {
+func testLookupSession(ctx *TestCtx, id, lang string) (*model.Session, error) {
 	r := &model.LookupSessionRequest{ID: id}
 	if lang != "" {
 		r.Lang.Set(lang)
 	}
-	v, err := cl.LookupSession(r)
-	if !assert.NoError(t, err, "LookupSession succeeds") {
+	v, err := ctx.HTTPClient.LookupSession(r)
+	if !assert.NoError(ctx.T, err, "LookupSession succeeds") {
 		return nil, err
 	}
 	return v, nil
 }
 
-func testUpdateSession(t *testing.T, cl *client.Client, in *model.UpdateSessionRequest) error {
-	err := cl.UpdateSession(in)
-	if !assert.NoError(t, err, "UpdateSession succeeds") {
+func testUpdateSession(ctx *TestCtx, in *model.UpdateSessionRequest) error {
+	err := ctx.HTTPClient.UpdateSession(in)
+	if !assert.NoError(ctx.T, err, "UpdateSession succeeds") {
 		return err
 	}
 	return nil
 }
 
-func testDeleteSession(t *testing.T, cl *client.Client, id string) error {
-	err := cl.DeleteSession(&model.DeleteSessionRequest{ID: id})
-	if !assert.NoError(t, err, "DeleteSession should be successful") {
+func testDeleteSession(ctx *TestCtx, id string) error {
+	err := ctx.HTTPClient.DeleteSession(&model.DeleteSessionRequest{ID: id})
+	if !assert.NoError(ctx.T, err, "DeleteSession should be successful") {
 		return err
 	}
 	return err
@@ -351,60 +403,65 @@ func bconsession(cid, uid string) *model.CreateSessionRequest {
 }
 
 func TestSessionCRUD(t *testing.T) {
+	ctx, err := NewTestCtx(t)
+	if !assert.NoError(ctx, err, "failed to create test ctx") {
+		return
+	}
+
 	ts := httptest.NewServer(octav.New())
 	defer ts.Close()
 
-	cl := client.New(ts.URL)
+	ctx.SetAPIServer(ts)
 
-	user, err := testCreateUser(t, cl, johndoe())
+	user, err := testCreateUser(ctx, johndoe())
 	if err != nil {
 		return
 	}
-	defer testDeleteUser(t, cl, user.ID)
+	defer testDeleteUser(ctx, user.ID)
 
-	conference, err := testCreateConference(t, cl, yapcasia(user.ID))
-	if err != nil {
-		return
-	}
-
-	res, err := testCreateSession(t, cl, bconsession(conference.ID, user.ID))
+	conference, err := testCreateConference(ctx, yapcasia(user.ID))
 	if err != nil {
 		return
 	}
 
-	if !assert.NoError(t, validator.HTTPCreateSessionResponse.Validate(res), "Validation should succeed") {
-		return
-	}
-
-	res2, err := testLookupSession(t, cl, res.ID, "")
+	res, err := testCreateSession(ctx, bconsession(conference.ID, user.ID))
 	if err != nil {
 		return
 	}
 
-	if !assert.Equal(t, res2, res, "LookupSession is the same as the room created") {
+	if !assert.NoError(ctx.T, validator.HTTPCreateSessionResponse.Validate(res), "Validation should succeed") {
+		return
+	}
+
+	res2, err := testLookupSession(ctx, res.ID, "")
+	if err != nil {
+		return
+	}
+
+	if !assert.Equal(ctx.T, res2, res, "LookupSession is the same as the room created") {
 		return
 	}
 
 	in := model.UpdateSessionRequest{ID: res.ID}
 	in.L10N.Set("ja", "title", "カンファレンス用ソフトウェアの作り方")
-	if err := testUpdateSession(t, cl, &in); err != nil {
+	if err := testUpdateSession(ctx, &in); err != nil {
 		return
 	}
 
-	res3, err := testLookupSession(t, cl, res.ID, "ja")
+	res3, err := testLookupSession(ctx, res.ID, "ja")
 	if err != nil {
 		return
 	}
 
-	if !assert.Equal(t, "カンファレンス用ソフトウェアの作り方", res3.Title, "Session.title#ja is the same as the conference updated") {
+	if !assert.Equal(ctx.T, "カンファレンス用ソフトウェアの作り方", res3.Title, "Session.title#ja is the same as the conference updated") {
 		return
 	}
 
-	if err := testDeleteSession(t, cl, res.ID); err != nil {
+	if err := testDeleteSession(ctx, res.ID); err != nil {
 		return
 	}
 
-	if err := testDeleteConference(t, cl, conference.ID); err != nil {
+	if err := testDeleteConference(ctx, conference.ID); err != nil {
 		return
 	}
 }
@@ -435,118 +492,135 @@ func johndoe() *model.CreateUserRequest {
 }
 
 func TestCreateUser(t *testing.T) {
+	ctx, err := NewTestCtx(t)
+	if !assert.NoError(ctx, err, "failed to create test ctx") {
+		return
+	}
+
 	ts := httptest.NewServer(octav.New())
 	defer ts.Close()
 
-	cl := client.New(ts.URL)
-	res, err := testCreateUser(t, cl, johndoe())
+	ctx.SetAPIServer(ts)
+
+	res, err := testCreateUser(ctx, johndoe())
 	if err != nil {
 		return
 	}
 
-	if !assert.NotEmpty(t, res.ID, "Returned structure has ID") {
+	if !assert.NotEmpty(ctx.T, res.ID, "Returned structure has ID") {
 		return
 	}
 
-	if !assert.NoError(t, validator.HTTPCreateUserResponse.Validate(res), "Validation should succeed") {
+	if !assert.NoError(ctx.T, validator.HTTPCreateUserResponse.Validate(res), "Validation should succeed") {
 		return
 	}
 
-	res2, err := testLookupUser(t, cl, res.ID, "")
+	res2, err := testLookupUser(ctx, res.ID, "")
 	if err != nil {
 		return
 	}
 
-	if !assert.Equal(t, res2, res, "LookupUser is the same as the user created") {
+	if !assert.Equal(ctx.T, res2, res, "LookupUser is the same as the user created") {
 		return
 	}
 
-	res3, err := testLookupUser(t, cl, res.ID, "ja")
+	res3, err := testLookupUser(ctx, res.ID, "ja")
 	if err != nil {
 		return
 	}
 
-	if !assert.Equal(t, "ジョン", res3.FirstName, "User.first_name#ja is localized") {
+	if !assert.Equal(ctx.T, "ジョン", res3.FirstName, "User.first_name#ja is localized") {
 		return
 	}
 
-	if !assert.Equal(t, "ドー", res3.LastName, "User.last_name#ja is localized") {
+	if !assert.Equal(ctx.T, "ドー", res3.LastName, "User.last_name#ja is localized") {
 		return
 	}
 
-	if err := testDeleteUser(t, cl, res.ID); err != nil {
+	if err := testDeleteUser(ctx, res.ID); err != nil {
 		return
 	}
 }
 
 func TestVenueCRUD(t *testing.T) {
+	ctx, err := NewTestCtx(t)
+	if !assert.NoError(ctx, err, "failed to create test ctx") {
+		return
+	}
+
 	ts := httptest.NewServer(octav.New())
 	defer ts.Close()
 
-	cl := client.New(ts.URL)
-	res, err := testCreateVenue(t, cl, bigsight())
+	ctx.SetAPIServer(ts)
+
+	res, err := testCreateVenue(ctx, bigsight())
 	if err != nil {
 		return
 	}
 
-	if !assert.NotEmpty(t, res.ID, "Returned structure has ID") {
+	if !assert.NotEmpty(ctx.T, res.ID, "Returned structure has ID") {
 		return
 	}
 
-	if !assert.NoError(t, validator.HTTPCreateVenueResponse.Validate(res), "Validation should succeed") {
+	if !assert.NoError(ctx.T, validator.HTTPCreateVenueResponse.Validate(res), "Validation should succeed") {
 		return
 	}
 
-	res2, err := testLookupVenue(t, cl, res.ID, "")
+	res2, err := testLookupVenue(ctx, res.ID, "")
 	if err != nil {
 		return
 	}
 
-	if !assert.Equal(t, res2, res, "LookupVenue is the same as the venue created") {
+	if !assert.Equal(ctx.T, res2, res, "LookupVenue is the same as the venue created") {
 		return
 	}
 
 	in := model.UpdateVenueRequest{ID: res.ID}
 	in.L10N.Set("ja", "name", "東京ビッグサイト")
-	if err := testUpdateVenue(t, cl, &in); err != nil {
+	if err := testUpdateVenue(ctx, &in); err != nil {
 		return
 	}
 
-	res3, err := testLookupVenue(t, cl, res.ID, "ja")
+	res3, err := testLookupVenue(ctx, res.ID, "ja")
 	if err != nil {
 		return
 	}
 
-	if !assert.Equal(t, "東京ビッグサイト", res3.Name, "Venue.name#ja is the same as the object updated") {
+	if !assert.Equal(ctx.T, "東京ビッグサイト", res3.Name, "Venue.name#ja is the same as the object updated") {
 		return
 	}
 
-	if err := testDeleteVenue(t, cl, res.ID); err != nil {
+	if err := testDeleteVenue(ctx, res.ID); err != nil {
 		return
 	}
 }
 
 func TestDeleteConferenceDates(t *testing.T) {
+	ctx, err := NewTestCtx(t)
+	if !assert.NoError(ctx, err, "failed to create test ctx") {
+		return
+	}
+
 	ts := httptest.NewServer(octav.New())
 	defer ts.Close()
 
-	cl := client.New(ts.URL)
+	ctx.SetAPIServer(ts)
 
-	user, err := testCreateUser(t, cl, johndoe())
+	user, err := testCreateUser(ctx, johndoe())
 	if err != nil {
 		return
 	}
-	defer testDeleteUser(t, cl, user.ID)
+	defer testDeleteUser(ctx, user.ID)
 
-	conf, err := testCreateConference(t, cl, &model.CreateConferenceRequest{
+	conf, err := testCreateConference(ctx, &model.CreateConferenceRequest{
 		UserID: user.ID,
 	})
 	if err != nil {
 		return
 	}
-	defer testDeleteConference(t, cl, conf.ID)
+	defer testDeleteConference(ctx, conf.ID)
 
-	err = cl.AddConferenceDates(&model.AddConferenceDatesRequest{
+	err = ctx.HTTPClient.AddConferenceDates(&model.AddConferenceDatesRequest{
 		ConferenceID: conf.ID,
 		Dates: []model.ConferenceDate{
 			model.ConferenceDate{
@@ -556,115 +630,125 @@ func TestDeleteConferenceDates(t *testing.T) {
 			},
 		},
 	})
-	if !assert.NoError(t, err, "AddConferenceDates works") {
+	if !assert.NoError(ctx.T, err, "AddConferenceDates works") {
 		return
 	}
 
-	err = cl.DeleteConferenceDates(&model.DeleteConferenceDatesRequest{
+	err = ctx.HTTPClient.DeleteConferenceDates(&model.DeleteConferenceDatesRequest{
 		ConferenceID: conf.ID,
 		Dates:        []model.Date{model.NewDate(2016, 3, 22)},
 	})
-	if !assert.NoError(t, err, "DeleteConferenceDates works") {
+	if !assert.NoError(ctx.T, err, "DeleteConferenceDates works") {
 		return
 	}
 
-	conf2, err := testLookupConference(t, cl, conf.ID, "")
+	conf2, err := testLookupConference(ctx, conf.ID, "")
 	if err != nil {
 		return
 	}
 
-	if !assert.Len(t, conf2.Dates, 0, "There should be no dates set") {
+	if !assert.Len(ctx.T, conf2.Dates, 0, "There should be no dates set") {
 		return
 	}
 }
 
 func TestConferenceAdmins(t *testing.T) {
+	ctx, err := NewTestCtx(t)
+	if !assert.NoError(ctx, err, "failed to create test ctx") {
+		return
+	}
+
 	ts := httptest.NewServer(octav.New())
 	defer ts.Close()
 
-	cl := client.New(ts.URL)
+	ctx.SetAPIServer(ts)
 
-	user, err := testCreateUser(t, cl, johndoe())
+	user, err := testCreateUser(ctx, johndoe())
 	if err != nil {
 		return
 	}
-	defer testDeleteUser(t, cl, user.ID)
+	defer testDeleteUser(ctx, user.ID)
 
-	conf, err := testCreateConference(t, cl, &model.CreateConferenceRequest{
+	conf, err := testCreateConference(ctx, &model.CreateConferenceRequest{
 		UserID: user.ID,
 	})
 	if err != nil {
 		return
 	}
-	defer testDeleteConference(t, cl, conf.ID)
+	defer testDeleteConference(ctx, conf.ID)
 
 	for i := 0; i < 9; i++ {
-		extraAdmin, err := testCreateUser(t, cl, johndoe())
+		extraAdmin, err := testCreateUser(ctx, johndoe())
 		if err != nil {
 			return
 		}
-		defer testDeleteUser(t, cl, extraAdmin.ID)
+		defer testDeleteUser(ctx, extraAdmin.ID)
 
-		err = cl.AddConferenceAdmin(&model.AddConferenceAdminRequest{
+		err = ctx.HTTPClient.AddConferenceAdmin(&model.AddConferenceAdminRequest{
 			ConferenceID: conf.ID,
 			UserID:       extraAdmin.ID,
 		})
-		if !assert.NoError(t, err, "AddConferenceAdmin should succeed") {
+		if !assert.NoError(ctx.T, err, "AddConferenceAdmin should succeed") {
 			return
 		}
 	}
 
-	conf2, err := testLookupConference(t, cl, conf.ID, "")
+	conf2, err := testLookupConference(ctx, conf.ID, "")
 	if err != nil {
 		return
 	}
 
-	if !assert.Len(t, conf2.Administrators, 10, "There should be 10 admins") {
+	if !assert.Len(ctx.T, conf2.Administrators, 10, "There should be 10 admins") {
 		return
 	}
 
 	for _, admin := range conf2.Administrators {
-		err = cl.DeleteConferenceAdmin(&model.DeleteConferenceAdminRequest{
+		err = ctx.HTTPClient.DeleteConferenceAdmin(&model.DeleteConferenceAdminRequest{
 			ConferenceID: conf.ID,
 			UserID:       admin.ID,
 		})
-		if !assert.NoError(t, err, "DeleteConferenceAdmin should succeed") {
+		if !assert.NoError(ctx.T, err, "DeleteConferenceAdmin should succeed") {
 			return
 		}
 	}
 
-	conf3, err := testLookupConference(t, cl, conf.ID, "")
+	conf3, err := testLookupConference(ctx, conf.ID, "")
 	if err != nil {
 		return
 	}
 
-	if !assert.Len(t, conf3.Administrators, 0, "There should be 0 admins") {
+	if !assert.Len(ctx.T, conf3.Administrators, 0, "There should be 0 admins") {
 		return
 	}
 
 }
 
 func TestListConference(t *testing.T) {
+	ctx, err := NewTestCtx(t)
+	if !assert.NoError(ctx, err, "failed to create test ctx") {
+		return
+	}
+
 	ts := httptest.NewServer(octav.New())
 	defer ts.Close()
 
-	cl := client.New(ts.URL)
+	ctx.SetAPIServer(ts)
 
-	user, err := testCreateUser(t, cl, johndoe())
+	user, err := testCreateUser(ctx, johndoe())
 	if err != nil {
 		return
 	}
-	defer testDeleteUser(t, cl, user.ID)
+	defer testDeleteUser(ctx, user.ID)
 
 	for i := 0; i < 10; i++ {
-		conf, err := testCreateConference(t, cl, &model.CreateConferenceRequest{
+		conf, err := testCreateConference(ctx, &model.CreateConferenceRequest{
 			UserID: user.ID,
 		})
 		if err != nil {
 			return
 		}
 
-		err = cl.AddConferenceDates(&model.AddConferenceDatesRequest{
+		err = ctx.HTTPClient.AddConferenceDates(&model.AddConferenceDatesRequest{
 			ConferenceID: conf.ID,
 			Dates: []model.ConferenceDate{
 				model.ConferenceDate{
@@ -674,41 +758,47 @@ func TestListConference(t *testing.T) {
 				},
 			},
 		})
-		if !assert.NoError(t, err, "AddConferenceDates works") {
+		if !assert.NoError(ctx.T, err, "AddConferenceDates works") {
 			return
 		}
 
-		defer testDeleteConference(t, cl, conf.ID)
+		defer testDeleteConference(ctx, conf.ID)
 	}
 
 	in := model.ListConferenceRequest{}
 	in.RangeStart.Set("2016-03-21")
 	in.RangeEnd.Set("2016-03-23")
-	res, err := cl.ListConference(&in)
-	if !assert.NoError(t, err, "ListConference should succeed") {
+	res, err := ctx.HTTPClient.ListConference(&in)
+	if !assert.NoError(ctx.T, err, "ListConference should succeed") {
 		return
 	}
 
-	if !assert.NoError(t, validator.HTTPListConferenceResponse.Validate(res), "Validation should succeed") {
+	if !assert.NoError(ctx.T, validator.HTTPListConferenceResponse.Validate(res), "Validation should succeed") {
 		return
 	}
 
-	if !assert.Len(t, res, 10, "ListConference returns 10 rooms") {
+	if !assert.Len(ctx.T, res, 10, "ListConference returns 10 rooms") {
 		return
 	}
 }
 
 func TestListRoom(t *testing.T) {
+	ctx, err := NewTestCtx(t)
+	if !assert.NoError(ctx, err, "failed to create test ctx") {
+		return
+	}
+
 	ts := httptest.NewServer(octav.New())
 	defer ts.Close()
 
-	cl := client.New(ts.URL)
-	venue, err := testCreateVenue(t, cl, bigsight())
+	ctx.SetAPIServer(ts)
+
+	venue, err := testCreateVenue(ctx, bigsight())
 	if err != nil {
 		return
 	}
 
-	_, err = testCreateRoom(t, cl, intlConferenceRoom(venue.ID))
+	_, err = testCreateRoom(ctx, intlConferenceRoom(venue.ID))
 	if err != nil {
 		return
 	}
@@ -716,32 +806,37 @@ func TestListRoom(t *testing.T) {
 	in := model.ListRoomRequest{
 		VenueID: venue.ID,
 	}
-	res, err := cl.ListRoom(&in)
-	if !assert.NoError(t, err, "ListRoom should succeed") {
+	res, err := ctx.HTTPClient.ListRoom(&in)
+	if !assert.NoError(ctx.T, err, "ListRoom should succeed") {
 		return
 	}
 
-	if !assert.NoError(t, validator.HTTPListRoomResponse.Validate(res), "Validation should succeed") {
+	if !assert.NoError(ctx.T, validator.HTTPListRoomResponse.Validate(res), "Validation should succeed") {
 		return
 	}
 
-	if !assert.Len(t, res, 1, "ListRoom returns 1 rooms") {
+	if !assert.Len(ctx.T, res, 1, "ListRoom returns 1 rooms") {
 		return
 	}
 }
 
 func TestListSessionByConference(t *testing.T) {
+	ctx, err := NewTestCtx(t)
+	if !assert.NoError(ctx, err, "failed to create test ctx") {
+		return
+	}
+
 	ts := httptest.NewServer(octav.New())
 	defer ts.Close()
 
-	cl := client.New(ts.URL)
+	ctx.SetAPIServer(ts)
 
-	user, err := testCreateUser(t, cl, johndoe())
+	user, err := testCreateUser(ctx, johndoe())
 	if err != nil {
 		return
 	}
-	defer testDeleteUser(t, cl, user.ID)
-	conference, err := testCreateConference(t, cl, yapcasia(user.ID))
+	defer testDeleteUser(ctx, user.ID)
+	conference, err := testCreateConference(ctx, yapcasia(user.ID))
 	if err != nil {
 		return
 	}
@@ -753,7 +848,7 @@ func TestListSessionByConference(t *testing.T) {
 		sin.Title.Set(fmt.Sprintf("Title %d", i))
 		sin.Duration.Set(60)
 		sin.Abstract.Set("Use lots of reflection and generate lots of code")
-		_, err := testCreateSession(t, cl, &sin)
+		_, err := testCreateSession(ctx, &sin)
 		if err != nil {
 			return
 		}
@@ -762,30 +857,36 @@ func TestListSessionByConference(t *testing.T) {
 	in := model.ListSessionByConferenceRequest{
 		ConferenceID: conference.ID,
 	}
-	res, err := cl.ListSessionByConference(&in)
-	if !assert.NoError(t, err, "ListSessionByConference should succeed") {
+	res, err := ctx.HTTPClient.ListSessionByConference(&in)
+	if !assert.NoError(ctx.T, err, "ListSessionByConference should succeed") {
 		return
 	}
-	if !assert.NoError(t, validator.HTTPListSessionByConferenceResponse.Validate(res), "Validation should succeed") {
+	if !assert.NoError(ctx.T, validator.HTTPListSessionByConferenceResponse.Validate(res), "Validation should succeed") {
 		return
 	}
 
-	if !assert.Len(t, res, 10, "There should be 10 sessions") {
+	if !assert.Len(ctx.T, res, 10, "There should be 10 sessions") {
 		return
 	}
 }
 
 func TestListVenue(t *testing.T) {
+	ctx, err := NewTestCtx(t)
+	if !assert.NoError(ctx, err, "failed to create test ctx") {
+		return
+	}
+
 	ts := httptest.NewServer(octav.New())
 	defer ts.Close()
 
-	cl := client.New(ts.URL)
+	ctx.SetAPIServer(ts)
+
 	in := model.ListVenueRequest{}
-	res, err := cl.ListVenue(&in)
-	if !assert.NoError(t, err, "ListVenue should succeed") {
+	res, err := ctx.HTTPClient.ListVenue(&in)
+	if !assert.NoError(ctx.T, err, "ListVenue should succeed") {
 		return
 	}
-	if !assert.NoError(t, validator.HTTPListVenueResponse.Validate(res), "Validation should succeed") {
+	if !assert.NoError(ctx.T, validator.HTTPListVenueResponse.Validate(res), "Validation should succeed") {
 		return
 	}
 }
