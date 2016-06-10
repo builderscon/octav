@@ -17,6 +17,17 @@ func init() {
 	httpError = httpErrorAsJSON
 }
 
+type httpCoder interface {
+	HTTPCode() int
+}
+
+func httpCodeFromError(err error) int {
+	if v, ok := err.(httpCoder); ok {
+		return v.HTTPCode()
+	}
+	return http.StatusInternalServerError
+}
+
 func httpWithBasicAuth(h HandlerWithContext) HandlerWithContext {
 	return HandlerWithContext(func(ctx context.Context, w http.ResponseWriter, r *http.Request) {
 		// Verify access token in the Basic-Auth
@@ -27,23 +38,10 @@ func httpWithBasicAuth(h HandlerWithContext) HandlerWithContext {
 			return
 		}
 
-		// TODO: implement this in service, and cache
-		tx, err := db.Begin()
-		if err != nil {
-			httpError(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError, err)
-			return
-		}
-		defer tx.AutoRollback()
-
-		vdb := db.Client{}
-		if err := vdb.LoadByEID(tx, clientID); err != nil {
-			httpError(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError, err)
-			return
-		}
-
-		if vdb.Secret != clientSecret {
-			httpError(w, http.StatusText(http.StatusForbidden), http.StatusForbidden, nil)
-			return
+		s := service.Client{}
+		if err := s.Authenticate(clientID, clientSecret); err != nil {
+			code := httpCodeFromError(err)
+			httpError(w, http.StatusText(code), code, err)
 		}
 
 		h(ctx, w, r)
