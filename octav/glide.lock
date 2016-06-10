@@ -1,5 +1,5 @@
 hash: 473eae6d87b5849b4577dab733d25c04769d36a0a07a78bcdcb4d98663ad8fff
-updated: 2016-06-03T19:33:00.184279506+09:00
+updated: 2016-06-10T13:48:59.136480711+09:00
 imports:
 - name: github.com/davecgh/go-spew
   version: 5215b55f46b2b919f50a1df0eaa5886afe4e3b3d
@@ -10,7 +10,7 @@ imports:
 - name: github.com/gorilla/context
   version: aed02d124ae4a0e94fea4541c8effd05bf0c8296
 - name: github.com/gorilla/mux
-  version: bd09be08ed4377796d312df0a45314e11b8f5dc1
+  version: 9fa818a44c2bf1396a17f9d5a3c0f6dd39d2ff8e
 - name: github.com/jessevdk/go-flags
   version: b9b882a3990882b05e02765f5df2cd3ad02874ee
 - name: github.com/lestrrat/go-jshschema
@@ -36,7 +36,7 @@ imports:
 - name: github.com/lestrrat/go-urlenc
   version: c952b9a8b42e2b36637e0c5acee8a0f0898b8d80
 - name: github.com/pkg/errors
-  version: 431554f80b8ecf5058547f6c65b87fad81d90b03
+  version: a5b220e0c6228dbf18da147b648aa0d3387bc5d4
 - name: github.com/shogo82148/go-sql-proxy
   version: 0ff9659b5642274097d62b43b2d754b001ed4f4d
 - name: github.com/stretchr/testify
@@ -44,11 +44,11 @@ imports:
   subpackages:
   - assert
 - name: golang.org/x/net
-  version: c4c3ea71919de159c9e246d7be66deb7f0a39a58
+  version: 3f122ce3dbbe488b7e6a8bdb26f41edec852a40b
   subpackages:
   - context
 - name: golang.org/x/text
-  version: aba140c91c51dbbc9c03141af597208ecb0f000a
+  version: 71486973ba2ca51289cfa8b539336d1c9fe59876
   subpackages:
   - language
   - internal/tag
