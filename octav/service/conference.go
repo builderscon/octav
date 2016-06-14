@@ -2,6 +2,7 @@ package service
 
 import (
 	"database/sql"
+	"regexp"
 	"strings"
 	"time"
 
@@ -9,12 +10,18 @@ import (
 	"github.com/builderscon/octav/octav/model"
 	"github.com/builderscon/octav/octav/tools"
 	"github.com/lestrrat/go-pdebug"
+	"github.com/pkg/errors"
 )
 
 func (v *Conference) populateRowForCreate(vdb *db.Conference, payload model.CreateConferenceRequest) error {
 	vdb.EID = tools.UUID()
 	vdb.Slug = payload.Slug
 	vdb.Title = payload.Title
+
+	if payload.SeriesID.Valid() {
+		vdb.SeriesID.Valid = true
+		vdb.SeriesID.String = payload.SeriesID.String
+	}
 
 	if payload.SubTitle.Valid() {
 		vdb.SubTitle.Valid = true
@@ -24,6 +31,11 @@ func (v *Conference) populateRowForCreate(vdb *db.Conference, payload model.Crea
 }
 
 func (v *Conference) populateRowForUpdate(vdb *db.Conference, payload model.UpdateConferenceRequest) error {
+	if payload.SeriesID.Valid() {
+		vdb.SeriesID.Valid = true
+		vdb.SeriesID.String = payload.SeriesID.String
+	}
+
 	if payload.Slug.Valid() {
 		vdb.Slug = payload.Slug.String
 	}
@@ -37,6 +49,33 @@ func (v *Conference) populateRowForUpdate(vdb *db.Conference, payload model.Upda
 		vdb.SubTitle.String = payload.SubTitle.String
 	}
 	return nil
+}
+
+var slugSplitRx = regexp.MustCompile(`^/([^/]+)/(.+)$`)
+
+func (v *Conference) LoadBySlug(tx *db.Tx, c *model.Conference, slug string) error {
+	matches := slugSplitRx.FindStringSubmatch(slug)
+	if matches == nil {
+		return errors.New("invalid slug pattern")
+	}
+	seriesSlug := matches[1]
+	confSlug := matches[2]
+
+	// XXX cache this later!!!
+	// This is in two steps so we can leverage existing vdb.LoadByEID()
+	row := tx.QueryRow(`SELECT `+db.ConferenceTable+`.eid FROM `+db.ConferenceTable+` JOIN `+db.ConferenceSeriesTable+` ON `+db.ConferenceSeriesTable+`.eid = `+db.ConferenceTable+`.series_id WHERE `+db.ConferenceSeriesTable+`.slug = ? AND `+db.ConferenceTable+`.slug = ?`, seriesSlug, confSlug)
+
+	var eid string
+	if err := row.Scan(&eid); err != nil {
+		return errors.Wrap(err, "failed to select conference id from slug")
+	}
+
+	vdb := db.Conference{}
+	if err := vdb.LoadByEID(tx, eid); err != nil {
+		return errors.Wrapf(err, "failed to load conference '%s'", eid)
+	}
+
+	return errors.Wrap(c.FromRow(vdb), "failed to convert to model")
 }
 
 func (v *Conference) AddAdministrator(tx *db.Tx, cid, uid string) error {
@@ -218,16 +257,29 @@ func (v *Conference) LoadVenues(tx *db.Tx, cdl *model.VenueList, cid string) err
 }
 
 func (v *Conference) Decorate(tx *db.Tx, c *model.Conference) error {
+	if seriesID := c.SeriesID; seriesID != "" {
+		sdb := db.ConferenceSeries{}
+		if err := sdb.LoadByEID(tx, seriesID); err != nil {
+			return errors.Wrapf(err, "failed to load conferences series '%s'", seriesID)
+		}
+
+		s := model.ConferenceSeries{}
+		if err := s.FromRow(sdb); err != nil {
+			return errors.Wrapf(err, "failed to load conferences series '%s'", seriesID)
+		}
+		c.Series = &s
+	}
+
 	if err := v.LoadDates(tx, &c.Dates, c.ID); err != nil {
-		return err
+		return errors.Wrapf(err, "failed to load conference date for '%s'", c.ID)
 	}
 
 	if err := v.LoadAdmins(tx, &c.Administrators, c.ID); err != nil {
-		return err
+		return errors.Wrapf(err, "failed to load administrators for '%s'", c.ID)
 	}
 
 	if err := v.LoadVenues(tx, &c.Venues, c.ID); err != nil {
-		return err
+		return errors.Wrapf(err, "failed to load venues for '%s'", c.ID) 
 	}
 	return nil
 }

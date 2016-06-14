@@ -12,10 +12,20 @@ type Config struct {
 type InsertOption interface{}
 type insertIgnoreOption bool
 
+// +DB tablename:"conference_series"
+type ConferenceSeries struct {
+	OID        int64  // intenral id, used for sorting and what not
+	EID        string // ID that is visible to the outside
+	Slug       string
+	CreatedOn  time.Time
+	ModifiedOn NullTime
+}
+
 // +DB tablename:"conferences"
 type Conference struct {
 	OID        int64  // intenral id, used for sorting and what not
 	EID        string // ID that is visible to the outside
+	SeriesID   sql.NullString // ConferenceSeries ID. May be nil if not part of a series
 	Slug       string
 	Title      string
 	SubTitle   sql.NullString

@@ -42,6 +42,8 @@ var HTTPListUserRequest *jsval.JSVal
 var HTTPListUserResponse *jsval.JSVal
 var HTTPListVenueRequest *jsval.JSVal
 var HTTPListVenueResponse *jsval.JSVal
+var HTTPLookupConferenceBySlugRequest *jsval.JSVal
+var HTTPLookupConferenceBySlugResponse *jsval.JSVal
 var HTTPLookupConferenceRequest *jsval.JSVal
 var HTTPLookupConferenceResponse *jsval.JSVal
 var HTTPLookupRoomRequest *jsval.JSVal
@@ -1552,6 +1554,65 @@ func init() {
 				).
 				AdditionalItems(
 					jsval.EmptyConstraint,
+				),
+		)
+
+	HTTPLookupConferenceBySlugRequest = jsval.New().
+		SetConstraintMap(M).
+		SetRoot(
+			jsval.Object().
+				Required("slug").
+				AdditionalProperties(
+					jsval.EmptyConstraint,
+				).
+				AddProp(
+					"slug",
+					jsval.String(),
+				),
+		)
+
+	HTTPLookupConferenceBySlugResponse = jsval.New().
+		SetConstraintMap(M).
+		SetRoot(
+			jsval.Object().
+				AdditionalProperties(
+					jsval.EmptyConstraint,
+				).
+				AddProp(
+					"administrators",
+					jsval.Reference(M).RefersTo("#/definitions/user_array"),
+				).
+				AddProp(
+					"dates",
+					jsval.Reference(M).RefersTo("#/definitions/conference_date_array"),
+				).
+				AddProp(
+					"description",
+					jsval.Reference(M).RefersTo("#/definitions/string_en"),
+				).
+				AddProp(
+					"id",
+					jsval.Reference(M).RefersTo("#/definitions/uuid"),
+				).
+				AddProp(
+					"name",
+					jsval.Reference(M).RefersTo("#/definitions/string_en"),
+				).
+				AddProp(
+					"slug",
+					jsval.Reference(M).RefersTo("#/definitions/string_en"),
+				).
+				AddProp(
+					"venue",
+					jsval.Reference(M).RefersTo("#/definitions/venue"),
+				).
+				PatternPropertiesString(
+					"description#[a-z]+",
+					jsval.Reference(M).RefersTo("#/definitions/string_i18n"),
+				).
+				PatternPropertiesString(
+					"title#[a-z]+",
+					jsval.Reference(M).RefersTo("#/definitions/string_i18n"),
 				),
 		)
 

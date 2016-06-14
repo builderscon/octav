@@ -429,6 +429,23 @@ sub lookup_conference {
     return JSON::decode_json($res->content);
 }
 
+sub lookup_conference_by_slug {
+    my ($self, $payload) = @_;
+    for my $required (qw(slug)) {
+        if (!$payload->{$required}) {
+            die qq|property "$required" must be provided|;
+        }
+    }
+    my $uri = URI->new($self->{endpoint} . qq|/v1/conference/lookup_by_slug|);
+    $uri->query_form($payload);
+    my $res = $self->{user_agent}->get($uri);
+    if (!$res->is_success) {
+        $self->{last_error} = $res->status_line;
+        return;
+    }
+    return JSON::decode_json($res->content);
+}
+
 sub list_conference {
     my ($self, $payload) = @_;
     my $uri = URI->new($self->{endpoint} . qq|/v1/conference/list|);

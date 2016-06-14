@@ -1230,6 +1230,60 @@ func (c *Client) LookupConference(in *model.LookupConferenceRequest) (ret *model
 	return &payload, nil
 }
 
+func (c *Client) LookupConferenceBySlug(in *model.LookupConferenceBySlugRequest) (ret *model.Conference, err error) {
+	if pdebug.Enabled {
+		g := pdebug.Marker("client.LookupConferenceBySlug").BindError(&err)
+		defer g.End()
+	}
+	u, err := url.Parse(c.Endpoint + "/v1/conference/lookup_by_slug")
+	if err != nil {
+		return nil, err
+	}
+	buf, err := urlenc.Marshal(in)
+	if err != nil {
+		return nil, err
+	}
+	u.RawQuery = string(buf)
+	if pdebug.Enabled {
+		pdebug.Printf("GET to %s", u.String())
+	}
+	req, err := http.NewRequest("GET", u.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+	if c.BasicAuth.Username != "" && c.BasicAuth.Password != "" {
+		req.SetBasicAuth(c.BasicAuth.Username, c.BasicAuth.Password)
+	}
+	res, err := c.Client.Do(req)
+	if err != nil {
+		return nil, err
+	}
+	if res.StatusCode != http.StatusOK {
+		return nil, fmt.Errorf(`Invalid response: '%s'`, res.Status)
+	}
+	jsonbuf := getTransportJSONBuffer()
+	defer releaseTransportJSONBuffer(jsonbuf)
+	_, err = io.Copy(jsonbuf, io.LimitReader(res.Body, MaxResponseSize))
+	defer res.Body.Close()
+	if pdebug.Enabled {
+		if err != nil {
+			pdebug.Printf("failed to read respons buffer: %s", err)
+		} else {
+			pdebug.Printf("response buffer: %s", jsonbuf)
+		}
+	}
+	if err != nil {
+		return nil, err
+	}
+
+	var payload model.Conference
+	err = json.Unmarshal(jsonbuf.Bytes(), &payload)
+	if err != nil {
+		return nil, err
+	}
+	return &payload, nil
+}
+
 func (c *Client) LookupRoom(in *model.LookupRoomRequest) (ret *model.Room, err error) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("client.LookupRoom").BindError(&err)
