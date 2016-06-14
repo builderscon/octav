@@ -56,6 +56,60 @@ func (r *CreateConferenceSeriesRequest) Populate(m map[string]interface{}) error
 	return nil
 }
 
+func (r UpdateConferenceSeriesRequest) collectMarshalData() map[string]interface{} {
+	m := make(map[string]interface{})
+	m["id"] = r.ID
+	if r.Slug.Valid() {
+		m["slug"] = r.Slug.Value()
+	}
+	return m
+}
+
+func (r UpdateConferenceSeriesRequest) MarshalJSON() ([]byte, error) {
+	m := r.collectMarshalData()
+	buf, err := json.Marshal(m)
+	if err != nil {
+		return nil, err
+	}
+	return buf, nil
+}
+
+func (r UpdateConferenceSeriesRequest) MarshalURL() ([]byte, error) {
+	m := r.collectMarshalData()
+	buf, err := urlenc.Marshal(m)
+	if err != nil {
+		return nil, err
+	}
+	return buf, nil
+}
+
+func (r *UpdateConferenceSeriesRequest) UnmarshalJSON(data []byte) error {
+	m := make(map[string]interface{})
+	if err := json.Unmarshal(data, &m); err != nil {
+		return err
+	}
+	return r.Populate(m)
+}
+
+func (r *UpdateConferenceSeriesRequest) Populate(m map[string]interface{}) error {
+	if jv, ok := m["id"]; ok {
+		switch jv.(type) {
+		case string:
+			r.ID = jv.(string)
+			delete(m, "id")
+		default:
+			return ErrInvalidJSONFieldType{Field: "id"}
+		}
+	}
+	if jv, ok := m["slug"]; ok {
+		if err := r.Slug.Set(jv); err != nil {
+			return errors.New("set field Slug failed: " + err.Error())
+		}
+		delete(m, "slug")
+	}
+	return nil
+}
+
 func (r CreateConferenceRequest) collectMarshalData() map[string]interface{} {
 	m := make(map[string]interface{})
 	m["title"] = r.Title
