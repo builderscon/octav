@@ -15,7 +15,7 @@ spec:
           secret:
             secretName: cloudsql-dev
       containers:
-        - image: asia.gcr.io/builderscon-1248/apiserver:20160614.151345
+        - image: asia.gcr.io/builderscon-1248/apiserver:20160614.152126
           name: apiserver
           env:
             - name: OCTAV_MYSQL_DBNAME
