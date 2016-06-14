@@ -246,9 +246,6 @@ func (v *Conference) LoadVenues(tx *db.Tx, cdl *model.VenueList, cid string) err
 	return nil
 }
 
-func (v *Conference) LoadSeries(tx *db.Tx, series *model.ConferenceSeries, id string) eerror {
-	c
-
 func (v *Conference) Decorate(tx *db.Tx, c *model.Conference) error {
 	if seriesID := c.SeriesID; seriesID != "" {
 		sdb := db.ConferenceSeries{}
