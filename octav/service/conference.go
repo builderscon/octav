@@ -53,7 +53,7 @@ func (v *Conference) LoadBySlug(tx *db.Tx, c *model.Conference, slug string) err
 
 	// XXX cache this later!!!
 	// This is in two steps so we can leverage existing vdb.LoadByEID()
-	row := tx.QueryRow(`SELECT `+db.ConferenceSeriesTable+`.eid FROM `+db.ConferenceTable+` JOIN `+db.ConferenceSeriesTable+` ON `+db.ConferenceSeriesTable+`.eid = `+db.ConferenceTable+`.series_id WHERE `+db.ConferenceSeriesTable+`.slug = ? AND `+db.ConferenceTable+`.slug = ?`, seriesSlug, confSlug)
+	row := tx.QueryRow(`SELECT `+db.ConferenceTable+`.eid FROM `+db.ConferenceTable+` JOIN `+db.ConferenceSeriesTable+` ON `+db.ConferenceSeriesTable+`.eid = `+db.ConferenceTable+`.series_id WHERE `+db.ConferenceSeriesTable+`.slug = ? AND `+db.ConferenceTable+`.slug = ?`, seriesSlug, confSlug)
 
 	var eid string
 	if err := row.Scan(&eid); err != nil {
