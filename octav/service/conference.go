@@ -246,17 +246,33 @@ func (v *Conference) LoadVenues(tx *db.Tx, cdl *model.VenueList, cid string) err
 	return nil
 }
 
+func (v *Conference) LoadSeries(tx *db.Tx, series *model.ConferenceSeries, id string) eerror {
+	c
+
 func (v *Conference) Decorate(tx *db.Tx, c *model.Conference) error {
+	if seriesID := c.SeriesID; seriesID != "" {
+		sdb := db.ConferenceSeries{}
+		if err := sdb.LoadByEID(tx, seriesID); err != nil {
+			return errors.Wrapf(err, "failed to load conferences series '%s'", seriesID)
+		}
+
+		s := model.ConferenceSeries{}
+		if err := s.FromRow(sdb); err != nil {
+			return errors.Wrapf(err, "failed to load conferences series '%s'", seriesID)
+		}
+		c.Series = &s
+	}
+
 	if err := v.LoadDates(tx, &c.Dates, c.ID); err != nil {
-		return err
+		return errors.Wrapf(err, "failed to load conference date for '%s'", c.ID)
 	}
 
 	if err := v.LoadAdmins(tx, &c.Administrators, c.ID); err != nil {
-		return err
+		return errors.Wrapf(err, "failed to load administrators for '%s'", c.ID)
 	}
 
 	if err := v.LoadVenues(tx, &c.Venues, c.ID); err != nil {
-		return err
+		return errors.Wrapf(err, "failed to load venues for '%s'", c.ID) 
 	}
 	return nil
 }

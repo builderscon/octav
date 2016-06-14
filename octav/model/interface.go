@@ -23,6 +23,8 @@ type ErrInvalidFieldType struct {
 type Conference struct {
 	ID             string             `json:"id"`
 	Title          string             `json:"title" l10n:"true"`
+	SeriesID       string             `json:"series_id,omitempty"`
+	Series         *ConferenceSeries  `json:"series,omitempty"`
 	SubTitle       string             `json:"sub_title" l10n:"true"`
 	Slug           string             `json:"slug"`
 	Dates          ConferenceDateList `json:"dates,omitempty"`
