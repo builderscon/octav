@@ -747,6 +747,18 @@
       "targetSchema": { "$ref": "#/definitions/conference" }
     },
     {
+      "title": "Lookup conference by slug",
+      "href": "/conference/lookup_by_slug",
+      "rel": "lookup",
+      "schema": {
+        "required": ["slug"],
+        "properties": {
+          "slug": { "type": "string" }
+        }
+      },
+      "targetSchema": { "$ref": "#/definitions/conference" }
+    },
+    {
       "title": "List conference",
       "href": "/conference/list",
       "rel": "list",

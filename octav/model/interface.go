@@ -32,6 +32,12 @@ type Conference struct {
 type ConferenceList []Conference
 
 // +model
+type ConferenceSeries struct {
+	ID   string `json:"id"`
+	Slug string `json:"slug"`
+}
+
+// +model
 type Room struct {
 	ID       string `json:"id"`
 	VenueID  string `json:"venue_id"`
@@ -100,6 +106,17 @@ type Venue struct {
 type VenueList []Venue
 
 // +transport
+type CreateConferenceSeriesRequest struct {
+	Slug string `json:"slug"`
+}
+
+// +transport
+type UpdateConferenceSeriesRequest struct {
+	ID   string            `json:"id"`
+	Slug jsval.MaybeString `json:"slug"`
+}
+
+// +transport
 type CreateConferenceRequest struct {
 	Title    string                `json:"title" l10n:"true"`
 	SubTitle jsval.MaybeString     `json:"sub_title" l10n:"true"`
@@ -111,6 +128,12 @@ type CreateConferenceRequest struct {
 // +transport
 type LookupConferenceRequest struct {
 	ID   string            `json:"id" urlenc:"id"`
+	Lang jsval.MaybeString `json:"lang,omitempty" urlenc:"lang,omitempty,string"`
+}
+
+// +transport
+type LookupConferenceBySlugRequest struct {
+	Slug string            `json:"slug"`
 	Lang jsval.MaybeString `json:"lang,omitempty" urlenc:"lang,omitempty,string"`
 }
 
@@ -458,8 +481,8 @@ type Client struct {
 
 // +transport
 type CreateClientRequest struct {
-	ID     string `json:"id"`
-	Name   string `json:"name"`
+	ID   string `json:"id"`
+	Name string `json:"name"`
 }
 
 // +transport
@@ -468,4 +491,3 @@ type UpdateClientRequest struct {
 	Secret string `json:"secret"`
 	Name   string `json:"name"`
 }
-

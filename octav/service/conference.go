@@ -2,6 +2,7 @@ package service
 
 import (
 	"database/sql"
+	"regexp"
 	"strings"
 	"time"
 
@@ -9,6 +10,7 @@ import (
 	"github.com/builderscon/octav/octav/model"
 	"github.com/builderscon/octav/octav/tools"
 	"github.com/lestrrat/go-pdebug"
+	"github.com/pkg/errors"
 )
 
 func (v *Conference) populateRowForCreate(vdb *db.Conference, payload model.CreateConferenceRequest) error {
@@ -37,6 +39,33 @@ func (v *Conference) populateRowForUpdate(vdb *db.Conference, payload model.Upda
 		vdb.SubTitle.String = payload.SubTitle.String
 	}
 	return nil
+}
+
+var slugSplitRx = regexp.MustCompile(`^/([^/]+)/(.+)$`)
+
+func (v *Conference) LoadBySlug(tx *db.Tx, c *model.Conference, slug string) error {
+	matches := slugSplitRx.FindStringSubmatch(slug)
+	if matches == nil {
+		return errors.New("invalid slug pattern")
+	}
+	seriesSlug := matches[1]
+	confSlug := matches[2]
+
+	// XXX cache this later!!!
+	// This is in two steps so we can leverage existing vdb.LoadByEID()
+	row := tx.QueryRow(`SELECT `+db.ConferenceSeriesTable+`.eid FROM `+db.ConferenceTable+` JOIN `+db.ConferenceSeriesTable+` ON `+db.ConferenceSeriesTable+`.eid = `+db.ConferenceTable+`.series_id WHERE `+db.ConferenceSeriesTable+`.slug = ? AND `+db.ConferenceTable+`.slug = ?`, seriesSlug, confSlug)
+
+	var eid string
+	if err := row.Scan(&eid); err != nil {
+		return errors.Wrap(err, "failed to select conference id from slug")
+	}
+
+	vdb := db.Conference{}
+	if err := vdb.LoadByEID(tx, eid); err != nil {
+		return errors.Wrapf(err, "failed to load conference '%s'", eid)
+	}
+
+	return errors.Wrap(c.FromRow(vdb), "failed to convert to model")
 }
 
 func (v *Conference) AddAdministrator(tx *db.Tx, cid, uid string) error {

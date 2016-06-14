@@ -871,6 +871,30 @@ func httpLookupConference(ctx context.Context, w http.ResponseWriter, r *http.Re
 	doLookupConference(ctx, w, r, payload)
 }
 
+func httpLookupConferenceBySlug(ctx context.Context, w http.ResponseWriter, r *http.Request) {
+	if pdebug.Enabled {
+		g := pdebug.Marker("httpLookupConferenceBySlug")
+		defer g.End()
+	}
+	if strings.ToLower(r.Method) != `get` {
+		w.Header().Set("Allow", "get")
+		httpError(w, `Method was `+r.Method+`, expected get`, http.StatusNotFound, nil)
+		return
+	}
+
+	var payload model.LookupConferenceBySlugRequest
+	if err := urlenc.Unmarshal([]byte(r.URL.RawQuery), &payload); err != nil {
+		httpError(w, `Failed to parse url query string`, http.StatusInternalServerError, err)
+		return
+	}
+
+	if err := validator.HTTPLookupConferenceBySlugRequest.Validate(&payload); err != nil {
+		httpError(w, `Invalid input (validation failed)`, http.StatusInternalServerError, err)
+		return
+	}
+	doLookupConferenceBySlug(ctx, w, r, payload)
+}
+
 func httpLookupRoom(ctx context.Context, w http.ResponseWriter, r *http.Request) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("httpLookupRoom")
@@ -1166,6 +1190,7 @@ func (s *Server) SetupRoutes() {
 	r.HandleFunc(`/v1/conference/delete`, httpWithContext(httpWithBasicAuth(httpDeleteConference)))
 	r.HandleFunc(`/v1/conference/list`, httpWithContext(httpListConference))
 	r.HandleFunc(`/v1/conference/lookup`, httpWithContext(httpLookupConference))
+	r.HandleFunc(`/v1/conference/lookup_by_slug`, httpWithContext(httpLookupConferenceBySlug))
 	r.HandleFunc(`/v1/conference/update`, httpWithContext(httpWithBasicAuth(httpUpdateConference)))
 	r.HandleFunc(`/v1/conference/venue/add`, httpWithContext(httpWithBasicAuth(httpAddConferenceVenue)))
 	r.HandleFunc(`/v1/conference/venue/delete`, httpWithContext(httpWithBasicAuth(httpDeleteConferenceVenue)))

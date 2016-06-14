@@ -11,6 +11,51 @@ import (
 	"github.com/lestrrat/go-urlenc"
 )
 
+func (r CreateConferenceSeriesRequest) collectMarshalData() map[string]interface{} {
+	m := make(map[string]interface{})
+	m["slug"] = r.Slug
+	return m
+}
+
+func (r CreateConferenceSeriesRequest) MarshalJSON() ([]byte, error) {
+	m := r.collectMarshalData()
+	buf, err := json.Marshal(m)
+	if err != nil {
+		return nil, err
+	}
+	return buf, nil
+}
+
+func (r CreateConferenceSeriesRequest) MarshalURL() ([]byte, error) {
+	m := r.collectMarshalData()
+	buf, err := urlenc.Marshal(m)
+	if err != nil {
+		return nil, err
+	}
+	return buf, nil
+}
+
+func (r *CreateConferenceSeriesRequest) UnmarshalJSON(data []byte) error {
+	m := make(map[string]interface{})
+	if err := json.Unmarshal(data, &m); err != nil {
+		return err
+	}
+	return r.Populate(m)
+}
+
+func (r *CreateConferenceSeriesRequest) Populate(m map[string]interface{}) error {
+	if jv, ok := m["slug"]; ok {
+		switch jv.(type) {
+		case string:
+			r.Slug = jv.(string)
+			delete(m, "slug")
+		default:
+			return ErrInvalidJSONFieldType{Field: "slug"}
+		}
+	}
+	return nil
+}
+
 func (r CreateConferenceRequest) collectMarshalData() map[string]interface{} {
 	m := make(map[string]interface{})
 	m["title"] = r.Title
@@ -161,6 +206,60 @@ func (r *LookupConferenceRequest) Populate(m map[string]interface{}) error {
 			delete(m, "id")
 		default:
 			return ErrInvalidJSONFieldType{Field: "id"}
+		}
+	}
+	if jv, ok := m["lang"]; ok {
+		if err := r.Lang.Set(jv); err != nil {
+			return errors.New("set field Lang failed: " + err.Error())
+		}
+		delete(m, "lang")
+	}
+	return nil
+}
+
+func (r LookupConferenceBySlugRequest) collectMarshalData() map[string]interface{} {
+	m := make(map[string]interface{})
+	m["slug"] = r.Slug
+	if r.Lang.Valid() {
+		m["lang"] = r.Lang.Value()
+	}
+	return m
+}
+
+func (r LookupConferenceBySlugRequest) MarshalJSON() ([]byte, error) {
+	m := r.collectMarshalData()
+	buf, err := json.Marshal(m)
+	if err != nil {
+		return nil, err
+	}
+	return buf, nil
+}
+
+func (r LookupConferenceBySlugRequest) MarshalURL() ([]byte, error) {
+	m := r.collectMarshalData()
+	buf, err := urlenc.Marshal(m)
+	if err != nil {
+		return nil, err
+	}
+	return buf, nil
+}
+
+func (r *LookupConferenceBySlugRequest) UnmarshalJSON(data []byte) error {
+	m := make(map[string]interface{})
+	if err := json.Unmarshal(data, &m); err != nil {
+		return err
+	}
+	return r.Populate(m)
+}
+
+func (r *LookupConferenceBySlugRequest) Populate(m map[string]interface{}) error {
+	if jv, ok := m["slug"]; ok {
+		switch jv.(type) {
+		case string:
+			r.Slug = jv.(string)
+			delete(m, "slug")
+		default:
+			return ErrInvalidJSONFieldType{Field: "slug"}
 		}
 	}
 	if jv, ok := m["lang"]; ok {
