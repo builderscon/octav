@@ -121,6 +121,7 @@ type UpdateConferenceSeriesRequest struct {
 // +transport
 type CreateConferenceRequest struct {
 	Title    string                `json:"title" l10n:"true"`
+	SeriesID jsval.MaybeString     `json:"series_id,omitempty"`
 	SubTitle jsval.MaybeString     `json:"sub_title" l10n:"true"`
 	Slug     string                `json:"slug"`
 	UserID   string                `json:"user_id"`
@@ -143,6 +144,7 @@ type LookupConferenceBySlugRequest struct {
 type UpdateConferenceRequest struct {
 	ID       string            `json:"id"`
 	Title    jsval.MaybeString `json:"title,omitempty" l10n:"true"`
+	SeriesID jsval.MaybeString `json:"series_id,omitempty"`
 	SubTitle jsval.MaybeString `json:"sub_title,omitempty" l10n:"true"`
 	Slug     jsval.MaybeString `json:"slug,omitempty"`
 	// TODO dates

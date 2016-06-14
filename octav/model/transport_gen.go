@@ -331,6 +331,9 @@ func (r UpdateConferenceRequest) collectMarshalData() map[string]interface{} {
 	if r.Title.Valid() {
 		m["title"] = r.Title.Value()
 	}
+	if r.SeriesID.Valid() {
+		m["series_id"] = r.SeriesID.Value()
+	}
 	if r.SubTitle.Valid() {
 		m["sub_title"] = r.SubTitle.Value()
 	}
@@ -382,6 +385,12 @@ func (r *UpdateConferenceRequest) Populate(m map[string]interface{}) error {
 		}
 		delete(m, "title")
 	}
+	if jv, ok := m["series_id"]; ok {
+		if err := r.SeriesID.Set(jv); err != nil {
+			return errors.New("set field SeriesID failed: " + err.Error())
+		}
+		delete(m, "series_id")
+	}
 	if jv, ok := m["sub_title"]; ok {
 		if err := r.SubTitle.Set(jv); err != nil {
 			return errors.New("set field SubTitle failed: " + err.Error())
@@ -394,7 +403,7 @@ func (r *UpdateConferenceRequest) Populate(m map[string]interface{}) error {
 		}
 		delete(m, "slug")
 	}
-	if err := tools.ExtractL10NFields(m, &r.L10N, []string{"id", "title", "sub_title", "slug"}); err != nil {
+	if err := tools.ExtractL10NFields(m, &r.L10N, []string{"id", "title", "series_id", "sub_title", "slug"}); err != nil {
 		return err
 	}
 	return nil
@@ -402,7 +411,7 @@ func (r *UpdateConferenceRequest) Populate(m map[string]interface{}) error {
 
 func (r *UpdateConferenceRequest) GetPropNames() ([]string, error) {
 	l, _ := r.L10N.GetPropNames()
-	return append(l, "id", "title", "sub_title", "slug"), nil
+	return append(l, "id", "title", "series_id", "sub_title", "slug"), nil
 }
 
 func (r *UpdateConferenceRequest) SetPropValue(s string, v interface{}) error {
@@ -414,6 +423,8 @@ func (r *UpdateConferenceRequest) SetPropValue(s string, v interface{}) error {
 		}
 	case "title":
 		return r.Title.Set(v)
+	case "series_id":
+		return r.SeriesID.Set(v)
 	case "sub_title":
 		return r.SubTitle.Set(v)
 	case "slug":

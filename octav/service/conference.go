@@ -18,6 +18,11 @@ func (v *Conference) populateRowForCreate(vdb *db.Conference, payload model.Crea
 	vdb.Slug = payload.Slug
 	vdb.Title = payload.Title
 
+	if payload.SeriesID.Valid() {
+		vdb.SeriesID.Valid = true
+		vdb.SeriesID.String = payload.SeriesID.String
+	}
+
 	if payload.SubTitle.Valid() {
 		vdb.SubTitle.Valid = true
 		vdb.SubTitle.String = payload.SubTitle.String
@@ -26,6 +31,11 @@ func (v *Conference) populateRowForCreate(vdb *db.Conference, payload model.Crea
 }
 
 func (v *Conference) populateRowForUpdate(vdb *db.Conference, payload model.UpdateConferenceRequest) error {
+	if payload.SeriesID.Valid() {
+		vdb.SeriesID.Valid = true
+		vdb.SeriesID.String = payload.SeriesID.String
+	}
+
 	if payload.Slug.Valid() {
 		vdb.Slug = payload.Slug.String
 	}
