@@ -122,21 +122,21 @@ func doCreateConference(ctx context.Context, w http.ResponseWriter, r *http.Requ
 	httpJSON(w, c)
 }
 
-func deliverConference(ctx context.Context, w http.ResponseWriter, r *http.Request, payload model.LookupConferenceBySlugRequest, c model.Conference) {
+func deliverConference(ctx context.Context, w http.ResponseWriter, r *http.Request, lang jsval.MaybeString, tx *db.Tx, c model.Conference) {
 	s := service.Conference{}
 	if err := s.Decorate(tx, &c); err != nil {
 		httpError(w, `LookupConference`, http.StatusInternalServerError, err)
 		return
 	}
 
-	if !payload.Lang.Valid() {
+	if !lang.Valid() {
 		httpJSON(w, c)
 		return
 	}
 
 	// Special case, only used for administrators. Load all of the
 	// l10n strings associated with this
-	switch payload.Lang.String {
+	switch lang.String {
 	case "all":
 		cl10n := model.ConferenceL10N{Conference: c}
 		if err := cl10n.LoadLocalizedFields(tx); err != nil {
@@ -146,7 +146,7 @@ func deliverConference(ctx context.Context, w http.ResponseWriter, r *http.Reque
 		httpJSON(w, cl10n)
 	default:
 		s := service.Conference{}
-		if err := s.ReplaceL10NStrings(tx, &c, payload.Lang.String); err != nil {
+		if err := s.ReplaceL10NStrings(tx, &c, lang.String); err != nil {
 			httpError(w, `LookupConference`, http.StatusInternalServerError, err)
 			return
 		}
@@ -174,7 +174,7 @@ func doLookupConferenceBySlug(ctx context.Context, w http.ResponseWriter, r *htt
 		return
 	}
 
-	deliverConference(ctx, w, r, payload, c)
+	deliverConference(ctx, w, r, payload.Lang, tx, c)
 }
 
 func doLookupConference(ctx context.Context, w http.ResponseWriter, r *http.Request, payload model.LookupConferenceRequest) {
@@ -195,7 +195,7 @@ func doLookupConference(ctx context.Context, w http.ResponseWriter, r *http.Requ
 		return
 	}
 
-	deliverConference(ctx, w, r, payload, c)
+	deliverConference(ctx, w, r, payload.Lang, tx, c)
 }
 
 func doUpdateConference(ctx context.Context, w http.ResponseWriter, r *http.Request, payload model.UpdateConferenceRequest) {
