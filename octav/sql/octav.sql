@@ -48,7 +48,7 @@ CREATE TABLE conference_series (
     created_on DATETIME NOT NULL,
     modified_on TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     UNIQUE KEY (eid),
-    UNIQUE KEY (slug(255))
+    UNIQUE KEY (slug(191))
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
     
 
@@ -63,7 +63,7 @@ CREATE TABLE conferences (
     created_on DATETIME NOT NULL,
     modified_on TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     UNIQUE KEY(eid),
-    UNIQUE KEY(series_id, slug(255))
+    UNIQUE KEY(series_id, slug(191))
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 CREATE TABLE conference_dates (
