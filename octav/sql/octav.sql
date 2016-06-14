@@ -51,11 +51,10 @@ CREATE TABLE conference_series (
     UNIQUE KEY (slug(191))
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
     
-
 CREATE TABLE conferences (
     oid INTEGER UNSIGNED NOT NULL PRIMARY KEY AUTO_INCREMENT,
     eid CHAR(64) CHARACTER SET latin1 NOT NULL,
-    series_id CHAR(64) CHARACER SET latin1, -- may be null
+    series_id CHAR(64) CHARACTER SET latin1, -- may be null
     slug TEXT NOT NULL,
     title TEXT NOT NULL,
     sub_title TEXT,
