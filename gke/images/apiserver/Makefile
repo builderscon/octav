@@ -44,7 +44,7 @@ clean-docker-images:
 
 clean_executables:
 	@echo "Deleting generated executables"
-	@-rm octav
+	@-rm octav octav-debug
 
 clean: clean-docker-images clean_executables
 
