@@ -1,5 +1,8 @@
 {
   "hsup.transport_ns": "model",
+  "hsup.middlewares": [
+    "mwset"
+  ],
   "hsup.client": {
     "imports": [
       "github.com/builderscon/octav/octav/model"

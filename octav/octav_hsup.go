@@ -53,7 +53,8 @@ var NewContext func(*http.Request) context.Context = func(r *http.Request) conte
 }
 
 func Run(l string) error {
-	return http.ListenAndServe(l, New())
+	s := New()
+	return http.ListenAndServe(l, s.makeHandler())
 }
 
 func New() *Server {
@@ -101,6 +102,13 @@ func httpWithContext(h HandlerWithContext) http.HandlerFunc {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		h(NewContext(r), w, r)
 	})
+}
+
+func (s *Server) makeHandler() http.Handler {
+	var h http.Handler
+	h = s
+	h = mwset.Wrap(h)
+	return h
 }
 
 func httpAddConferenceAdmin(ctx context.Context, w http.ResponseWriter, r *http.Request) {

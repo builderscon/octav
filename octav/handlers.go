@@ -8,13 +8,23 @@ import (
 	"github.com/builderscon/octav/octav/db"
 	"github.com/builderscon/octav/octav/model"
 	"github.com/builderscon/octav/octav/service"
+	"github.com/lestrrat/go-apache-logformat"
 	"github.com/lestrrat/go-jsval"
 	"github.com/lestrrat/go-pdebug"
 	"golang.org/x/net/context"
 )
 
+var mwset middlewareSet
+type middlewareSet struct{}
+
+func (m middlewareSet) Wrap(h http.Handler) http.Handler {
+	l := apachelog.CombinedLog
+	return apachelog.WrapLoggingWriter(h, l)
+}
+
 func init() {
 	httpError = httpErrorAsJSON
+	mwset = middlewareSet{}
 }
 
 type httpCoder interface {
