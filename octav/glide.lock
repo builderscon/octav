@@ -1,5 +1,5 @@
-hash: 473eae6d87b5849b4577dab733d25c04769d36a0a07a78bcdcb4d98663ad8fff
-updated: 2016-06-10T13:48:59.136480711+09:00
+hash: 9ce4181b94be31acf12850eed604f02398bb9abf64e7538a7bbe93a75bdf383c
+updated: 2016-07-09T23:08:58.28037148+09:00
 imports:
 - name: github.com/davecgh/go-spew
   version: 5215b55f46b2b919f50a1df0eaa5886afe4e3b3d
@@ -12,7 +12,9 @@ imports:
 - name: github.com/gorilla/mux
   version: 9fa818a44c2bf1396a17f9d5a3c0f6dd39d2ff8e
 - name: github.com/jessevdk/go-flags
-  version: b9b882a3990882b05e02765f5df2cd3ad02874ee
+  version: f2785f5820ec967043de79c8be97edfc464ca745
+- name: github.com/lestrrat/go-apache-logformat
+  version: e774e429884c94b2cda0d499397d36d306ba0dee
 - name: github.com/lestrrat/go-jshschema
   version: 4514acd168a63041862eb3d223a09a789cae6b3b
 - name: github.com/lestrrat/go-jspointer
@@ -24,7 +26,7 @@ imports:
 - name: github.com/lestrrat/go-jsschema
   version: 29ed749b2386595fd62b5d919e8cff759c38185a
 - name: github.com/lestrrat/go-jsval
-  version: 66ec1fc6194ea4d8c9144ba056f0b266bde140c2
+  version: bf4ee1dfca0c534c168fb4d3ce5e6f7a70b86472
 - name: github.com/lestrrat/go-pdebug
   version: a45b04725d5819f9f30fb68085be53b90a1d55f1
 - name: github.com/lestrrat/go-simple-guard
@@ -36,19 +38,19 @@ imports:
 - name: github.com/lestrrat/go-urlenc
   version: c952b9a8b42e2b36637e0c5acee8a0f0898b8d80
 - name: github.com/pkg/errors
-  version: a5b220e0c6228dbf18da147b648aa0d3387bc5d4
+  version: a2d6902c6d2a2f194eb3fb474981ab7867c81505
 - name: github.com/shogo82148/go-sql-proxy
   version: 0ff9659b5642274097d62b43b2d754b001ed4f4d
 - name: github.com/stretchr/testify
-  version: 8d64eb7173c7753d6419fd4a9caf057398611364
+  version: d77da356e56a7428ad25149ca77381849a6a5232
   subpackages:
   - assert
 - name: golang.org/x/net
-  version: 3f122ce3dbbe488b7e6a8bdb26f41edec852a40b
+  version: f841c39de738b1d0df95b5a7187744f0e03d8112
   subpackages:
   - context
 - name: golang.org/x/text
-  version: 71486973ba2ca51289cfa8b539336d1c9fe59876
+  version: ce78b075c2fbd48520f4995b173eb9fe18b56ef3
   subpackages:
   - language
   - internal/tag
