@@ -199,11 +199,12 @@ func (v *Session) Decorate(tx *db.Tx, session *model.Session) error {
 
 	// ... but not necessarily with a room
 	if session.RoomID != "" {
-	room := model.Room{}
-	if err := conf.Load(tx, session.RoomID); err != nil {
-		return errors.Wrap(err, "failed to load room")
+		room := model.Room{}
+		if err := conf.Load(tx, session.RoomID); err != nil {
+			return errors.Wrap(err, "failed to load room")
+		}
+		session.Room = &room
 	}
-	session.Room = &room
 
 	speaker := model.User{}
 	if err := speaker.Load(tx, session.SpeakerID); err != nil {
@@ -213,4 +214,3 @@ func (v *Session) Decorate(tx *db.Tx, session *model.Session) error {
 
 	return nil
 }
-
