@@ -538,7 +538,6 @@ func doCreateSession(ctx context.Context, w http.ResponseWriter, r *http.Request
 		return
 	}
 
-	s := service.Session{}
 	if err := s.Decorate(tx, &v); err != nil {
 		httpError(w, `LookupSession`, http.StatusInternalServerError, err)
 		return
