@@ -4,6 +4,7 @@ import (
 	"github.com/builderscon/octav/octav/db"
 	"github.com/builderscon/octav/octav/model"
 	"github.com/builderscon/octav/octav/tools"
+	"github.com/pkg/errors"
 )
 
 func (v *Session) populateRowForCreate(vdb *db.Session, payload model.CreateSessionRequest) error {
@@ -185,6 +186,28 @@ func (v *Session) LoadByConference(tx *db.Tx, vdbl *db.SessionList, cid string, 
 	if err := vdbl.LoadByConference(tx, cid, date); err != nil {
 		return err
 	}
+	return nil
+}
+
+func (v *Session) Decorate(tx *db.Tx, session *model.Session) error {
+	conf := model.Conference{}
+	if err := conf.Load(tx, session.ConferenceID); err != nil {
+		return errors.Wrap(err, "failed to load conference")
+	}
+	session.Conference = &conf
+
+	room := model.Room{}
+	if err := conf.Load(tx, session.RoomID); err != nil {
+		return errors.Wrap(err, "failed to load room")
+	}
+	session.Room = &room
+
+	speaker := model.User{}
+	if err := speaker.Load(tx, session.SpeakerID); err != nil {
+		return errors.Wrap(err, "failed to load speaker")
+	}
+	session.Speaker = &speaker
+
 	return nil
 }
 

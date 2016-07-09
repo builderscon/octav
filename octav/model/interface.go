@@ -73,9 +73,9 @@ type Session struct {
 	HasInterpretation bool        `json:"has_interpretation"`
 	Status            string      `json:"status"`
 	Confirmed         bool        `json:"confirmed"`
-	Conference        *Conference `json:"conference"` // only populated for JSON response
-	Room              *Room       `json:"room"`       // only populated for JSON response
-	Speaker           *User       `json:"speaker"`    // only populated for JSON response
+	Conference        *Conference `json:"conference,omitempty"` // only populated for JSON response
+	Room              *Room       `json:"room,omitempty"`       // only populated for JSON response
+	Speaker           *User       `json:"speaker,omitempty"`    // only populated for JSON response
 }
 type SessionList []Session
 

@@ -1114,12 +1114,20 @@ func doLookupSession(ctx context.Context, w http.ResponseWriter, r *http.Request
 		return
 	}
 
-	if payload.Lang.Valid() {
-		s := service.Session{}
-		if err := s.ReplaceL10NStrings(tx, &v, payload.Lang.String); err != nil {
-			httpError(w, `LookupSession`, http.StatusInternalServerError, err)
-			return
-		}
+	s := service.Session{}
+	if err := s.Decorate(tx, &v); err != nil {
+		httpError(w, `LookupSession`, http.StatusInternalServerError, err)
+		return
+	}
+
+	if !payload.Lang.Valid() {
+		httpJSON(w, v)
+		return
+	}
+
+	if err := s.ReplaceL10NStrings(tx, &v, payload.Lang.String); err != nil {
+		httpError(w, `LookupSession`, http.StatusInternalServerError, err)
+		return
 	}
 
 	httpJSON(w, v)
