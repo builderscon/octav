@@ -190,12 +190,15 @@ func (v *Session) LoadByConference(tx *db.Tx, vdbl *db.SessionList, cid string, 
 }
 
 func (v *Session) Decorate(tx *db.Tx, session *model.Session) error {
+	// session must be associated with a conference
 	conf := model.Conference{}
 	if err := conf.Load(tx, session.ConferenceID); err != nil {
 		return errors.Wrap(err, "failed to load conference")
 	}
 	session.Conference = &conf
 
+	// ... but not necessarily with a room
+	if session.RoomID != "" {
 	room := model.Room{}
 	if err := conf.Load(tx, session.RoomID); err != nil {
 		return errors.Wrap(err, "failed to load room")

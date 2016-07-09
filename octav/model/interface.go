@@ -52,7 +52,7 @@ type RoomList []Room
 type Session struct {
 	ID                string      `json:"id"`
 	ConferenceID      string      `json:"conference_id"`
-	RoomID            string      `json:"room_id"`
+	RoomID            string      `json:"room_id,omitempty"`
 	SpeakerID         string      `json:"speaker_id"`
 	Title             string      `json:"title" l10n:"true"`
 	Abstract          string      `json:"abstract" l10n:"true"`
@@ -73,7 +73,7 @@ type Session struct {
 	HasInterpretation bool        `json:"has_interpretation"`
 	Status            string      `json:"status"`
 	Confirmed         bool        `json:"confirmed"`
-	Conference        *Conference `json:"conference,omitempty"` // only populated for JSON response
+	Conference        *Conference `json:"conference,omitempy"` // only populated for JSON response
 	Room              *Room       `json:"room,omitempty"`       // only populated for JSON response
 	Speaker           *User       `json:"speaker,omitempty"`    // only populated for JSON response
 }
