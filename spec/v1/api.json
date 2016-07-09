@@ -609,6 +609,7 @@
       "rel": "list",
       "href": "/room/list",
       "method": "GET",
+      "encType": "application/x-www-form-urlencoded",
       "schema": {
         "properties": {
           "venue_id": { "$ref": "#/definitions/uuid" },
