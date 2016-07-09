@@ -6,10 +6,6 @@ services:
 env:
   - TEST_DIR=octav
   - TEST_DIR=adminweb
-  - TEST_DIR=worker/acmebot
-  - TEST_DIR=worker/acmebot-k8s
-  - TEST_DIR=worker/deploybot
-  - TEST_DIR=worker/deploybot-k8s
 addons:
   apt:
     packages:
