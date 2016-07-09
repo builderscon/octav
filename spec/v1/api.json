@@ -341,7 +341,7 @@
       "rel": "create",
       "href": "/user/create",
       "method": "POST",
-      "encType": "application/x-www-form-urlencoded",
+      "encType": "application/json",
       "schema": {
         "type": "object",
         "properties": {
@@ -399,7 +399,7 @@
       "rel": "create",
       "href": "/user/update",
       "method": "POST",
-      "encType": "application/x-www-form-urlencoded",
+      "encType": "application/json",
       "schema": {
         "type": "object",
         "properties": {
@@ -423,7 +423,7 @@
       "rel": "delete",
       "href": "/user/delete",
       "method": "POST",
-      "encType": "application/x-www-form-urlencoded",
+      "encType": "application/json",
       "schema": {
         "type": "object",
         "required": ["id"],
@@ -456,7 +456,7 @@
       "rel": "create",
       "href": "/venue/create",
       "method": "POST",
-      "encType": "application/x-www-form-urlencoded",
+      "encType": "application/json",
       "schema": {
         "properties": {
           "name": { "$ref": "#/definitions/string_en" },
@@ -524,7 +524,7 @@
       "hsup.wrapper": "httpWithBasicAuth",
       "href": "/venue/delete",
       "method": "POST",
-      "encType": "application/x-www-form-urlencoded",
+      "encType": "application/json",
       "schema": {
         "type": "object",
         "required": ["id"],
@@ -539,7 +539,7 @@
       "hsup.wrapper": "httpWithBasicAuth",
       "href": "/room/create",
       "method": "POST",
-      "encType": "application/x-www-form-urlencoded",
+      "encType": "application/json",
       "schema": {
         "type": "object",
         "properties": {
@@ -560,7 +560,7 @@
       "hsup.wrapper": "httpWithBasicAuth",
       "href": "/room/update",
       "method": "POST",
-      "encType": "application/x-www-form-urlencoded",
+      "encType": "application/json",
       "schema": {
         "type": "object",
         "properties": {
@@ -595,7 +595,7 @@
       "hsup.wrapper": "httpWithBasicAuth",
       "href": "/room/delete",
       "method": "POST",
-      "encType": "application/x-www-form-urlencoded",
+      "encType": "application/json",
       "schema": {
         "type": "object",
         "required": ["id"],
@@ -609,7 +609,6 @@
       "rel": "list",
       "href": "/room/list",
       "method": "GET",
-      "encType": "application/x-www-form-urlencoded",
       "schema": {
         "properties": {
           "venue_id": { "$ref": "#/definitions/uuid" },
@@ -626,7 +625,7 @@
       "hsup.wrapper": "httpWithBasicAuth",
       "method": "POST",
       "href": "/conference/create",
-      "encType": "application/x-www-form-urlencoded",
+      "encType": "application/json",
       "schema": {
         "properties": {
           "title": { "$ref": "#/definitions/string_en" },
@@ -792,7 +791,7 @@
       "hsup.wrapper": "httpWithBasicAuth",
       "method": "POST",
       "href": "/conference/update",
-      "encType": "application/x-www-form-urlencoded",
+      "encType": "application/json",
       "schema": {
         "properties": {
           "id": { "$ref": "#/definitions/uuid" },
@@ -815,7 +814,7 @@
       "hsup.wrapper": "httpWithBasicAuth",
       "href": "/conference/delete",
       "method": "POST",
-      "encType": "application/x-www-form-urlencoded",
+      "encType": "application/json",
       "schema": {
         "type": "object",
         "required": ["id"],
@@ -876,7 +875,7 @@
       "hsup.wrapper": "httpWithBasicAuth",
       "method": "POST",
       "rel": "lookup",
-      "encType": "application/x-www-form-urlencoded",
+      "encType": "application/json",
       "schema": {
         "required": ["id"],
         "properties": {
