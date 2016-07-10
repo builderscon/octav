@@ -534,7 +534,7 @@ func doCreateSession(ctx context.Context, w http.ResponseWriter, r *http.Request
 	}
 
 	if err := s.Decorate(tx, &v); err != nil {
-		httpError(w, `LookupSession`, http.StatusInternalServerError, err)
+		httpError(w, `CreateSession`, http.StatusInternalServerError, errors.Wrap(err)
 		return
 	}
 
@@ -1106,6 +1106,11 @@ func doListVenue(ctx context.Context, w http.ResponseWriter, r *http.Request, pa
 }
 
 func doLookupSession(ctx context.Context, w http.ResponseWriter, r *http.Request, payload model.LookupSessionRequest) {
+	if pdebug.Enabled {
+		g := pdebug.Marker("doLookupSession")
+		defer g.End()
+	}
+
 	tx, err := db.Begin()
 	if err != nil {
 		httpError(w, `LookupSession`, http.StatusInternalServerError, err)
@@ -1120,7 +1125,7 @@ func doLookupSession(ctx context.Context, w http.ResponseWriter, r *http.Request
 	}
 
 	s := service.Session{}
-	if err := s.Decorate(tx, &v); err != nil {
+	if err := errors.Wrap(s.Decorate(tx, &v), "failed to decorate session with associated data"); err != nil {
 		httpError(w, `LookupSession`, http.StatusInternalServerError, err)
 		return
 	}
