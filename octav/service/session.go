@@ -4,6 +4,7 @@ import (
 	"github.com/builderscon/octav/octav/db"
 	"github.com/builderscon/octav/octav/model"
 	"github.com/builderscon/octav/octav/tools"
+	"github.com/lestrrat/go-pdebug"
 	"github.com/pkg/errors"
 )
 
@@ -190,27 +191,35 @@ func (v *Session) LoadByConference(tx *db.Tx, vdbl *db.SessionList, cid string, 
 }
 
 func (v *Session) Decorate(tx *db.Tx, session *model.Session) error {
-	// session must be associated with a conference
-	conf := model.Conference{}
-	if err := conf.Load(tx, session.ConferenceID); err != nil {
-		return errors.Wrap(err, "failed to load conference")
+	if pdebug.Enabled {
+		g := pdebug.Marker("service.Session.Decorate")
+		defer g.End()
 	}
-	session.Conference = &conf
+	// session must be associated with a conference
+	if session.ConferenceID != "" {
+		conf := model.Conference{}
+		if err := conf.Load(tx, session.ConferenceID); err != nil {
+			return errors.Wrap(err, "failed to load conference")
+		}
+		session.Conference = &conf
+	}
 
 	// ... but not necessarily with a room
 	if session.RoomID != "" {
 		room := model.Room{}
-		if err := conf.Load(tx, session.RoomID); err != nil {
+		if err := room.Load(tx, session.RoomID); err != nil {
 			return errors.Wrap(err, "failed to load room")
 		}
 		session.Room = &room
 	}
 
-	speaker := model.User{}
-	if err := speaker.Load(tx, session.SpeakerID); err != nil {
-		return errors.Wrap(err, "failed to load speaker")
+	if session.SpeakerID != "" {
+		speaker := model.User{}
+		if err := speaker.Load(tx, session.SpeakerID); err != nil {
+			return errors.Wrapf(err, "failed to load speaker '%s'", session.SpeakerID)
+		}
+		session.Speaker = &speaker
 	}
-	session.Speaker = &speaker
 
 	return nil
 }

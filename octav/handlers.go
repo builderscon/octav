@@ -11,6 +11,7 @@ import (
 	"github.com/lestrrat/go-apache-logformat"
 	"github.com/lestrrat/go-jsval"
 	"github.com/lestrrat/go-pdebug"
+	"github.com/pkg/errors"
 	"golang.org/x/net/context"
 )
 
@@ -533,8 +534,8 @@ func doCreateSession(ctx context.Context, w http.ResponseWriter, r *http.Request
 		return
 	}
 
-	if err := s.Decorate(tx, &v); err != nil {
-		httpError(w, `LookupSession`, http.StatusInternalServerError, err)
+	if err := errors.Wrap(s.Decorate(tx, &v), "failed to decorate session with associated data"); err != nil {
+		httpError(w, `CreateSession`, http.StatusInternalServerError, err)
 		return
 	}
 
@@ -1106,6 +1107,11 @@ func doListVenue(ctx context.Context, w http.ResponseWriter, r *http.Request, pa
 }
 
 func doLookupSession(ctx context.Context, w http.ResponseWriter, r *http.Request, payload model.LookupSessionRequest) {
+	if pdebug.Enabled {
+		g := pdebug.Marker("doLookupSession")
+		defer g.End()
+	}
+
 	tx, err := db.Begin()
 	if err != nil {
 		httpError(w, `LookupSession`, http.StatusInternalServerError, err)
@@ -1120,7 +1126,7 @@ func doLookupSession(ctx context.Context, w http.ResponseWriter, r *http.Request
 	}
 
 	s := service.Session{}
-	if err := s.Decorate(tx, &v); err != nil {
+	if err := errors.Wrap(s.Decorate(tx, &v), "failed to decorate session with associated data"); err != nil {
 		httpError(w, `LookupSession`, http.StatusInternalServerError, err)
 		return
 	}

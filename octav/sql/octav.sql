@@ -100,9 +100,9 @@ CREATE TABLE conference_venues (
 CREATE TABLE sessions (
     oid INTEGER UNSIGNED NOT NULL PRIMARY KEY AUTO_INCREMENT,
     eid CHAR(64) CHARACTER SET latin1 NOT NULL,
-    conference_id CHAR(64) CHARACTER SET latin1 NOT NULL,
+    conference_id CHAR(64) CHARACTER SET latin1,
     room_id CHAR(64) CHARACTER SET latin1,
-    speaker_id CHAR(64) NOT NULL,
+    speaker_id CHAR(64) CHARACTER SET latin1,
     title TEXT NOT NULL,
     abstract TEXT,
     memo TEXT,
@@ -124,6 +124,8 @@ CREATE TABLE sessions (
     confirmed TINYINT(1) NOT NULL DEFAULT 0,
     created_on DATETIME NOT NULL,
     modified_on TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (speaker_id) REFERENCES users(eid) ON DELETE SET NULL,
+    FOREIGN KEY (conference_id) REFERENCES conferences(eid) ON DELETE SET NULL,
     UNIQUE KEY (eid),
     KEY(eid, conference_id, room_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
