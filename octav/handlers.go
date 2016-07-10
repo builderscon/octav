@@ -11,6 +11,7 @@ import (
 	"github.com/lestrrat/go-apache-logformat"
 	"github.com/lestrrat/go-jsval"
 	"github.com/lestrrat/go-pdebug"
+	"github.com/pkg/errors"
 	"golang.org/x/net/context"
 )
 
@@ -534,7 +535,7 @@ func doCreateSession(ctx context.Context, w http.ResponseWriter, r *http.Request
 	}
 
 	if err := s.Decorate(tx, &v); err != nil {
-		httpError(w, `CreateSession`, http.StatusInternalServerError, errors.Wrap(err)
+		httpError(w, `CreateSession`, http.StatusInternalServerError, errors.Wrap(err))
 		return
 	}
 
