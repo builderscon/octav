@@ -534,8 +534,8 @@ func doCreateSession(ctx context.Context, w http.ResponseWriter, r *http.Request
 		return
 	}
 
-	if err := s.Decorate(tx, &v); err != nil {
-		httpError(w, `CreateSession`, http.StatusInternalServerError, errors.Wrap(err))
+	if err := errors.Wrap(s.Decorate(tx, &v), "failed to decorate session with associated data"); err != nil {
+		httpError(w, `CreateSession`, http.StatusInternalServerError, err)
 		return
 	}
 
