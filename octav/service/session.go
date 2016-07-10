@@ -208,7 +208,7 @@ func (v *Session) Decorate(tx *db.Tx, session *model.Session) error {
 
 	speaker := model.User{}
 	if err := speaker.Load(tx, session.SpeakerID); err != nil {
-		return errors.Wrap(err, "failed to load speaker")
+		return errors.Wrapf(err, "failed to load speaker '%s'", session.SpeakerID)
 	}
 	session.Speaker = &speaker
 
