@@ -110,6 +110,104 @@ func (r *UpdateConferenceSeriesRequest) Populate(m map[string]interface{}) error
 	return nil
 }
 
+func (r DeleteConferenceSeriesRequest) collectMarshalData() map[string]interface{} {
+	m := make(map[string]interface{})
+	m["id"] = r.ID
+	return m
+}
+
+func (r DeleteConferenceSeriesRequest) MarshalJSON() ([]byte, error) {
+	m := r.collectMarshalData()
+	buf, err := json.Marshal(m)
+	if err != nil {
+		return nil, err
+	}
+	return buf, nil
+}
+
+func (r DeleteConferenceSeriesRequest) MarshalURL() ([]byte, error) {
+	m := r.collectMarshalData()
+	buf, err := urlenc.Marshal(m)
+	if err != nil {
+		return nil, err
+	}
+	return buf, nil
+}
+
+func (r *DeleteConferenceSeriesRequest) UnmarshalJSON(data []byte) error {
+	m := make(map[string]interface{})
+	if err := json.Unmarshal(data, &m); err != nil {
+		return err
+	}
+	return r.Populate(m)
+}
+
+func (r *DeleteConferenceSeriesRequest) Populate(m map[string]interface{}) error {
+	if jv, ok := m["id"]; ok {
+		switch jv.(type) {
+		case string:
+			r.ID = jv.(string)
+			delete(m, "id")
+		default:
+			return ErrInvalidJSONFieldType{Field: "id"}
+		}
+	}
+	return nil
+}
+
+func (r ListConferenceSeriesRequest) collectMarshalData() map[string]interface{} {
+	m := make(map[string]interface{})
+	if r.Since.Valid() {
+		m["since"] = r.Since.Value()
+	}
+	if r.Limit.Valid() {
+		m["limit"] = r.Limit.Value()
+	}
+	return m
+}
+
+func (r ListConferenceSeriesRequest) MarshalJSON() ([]byte, error) {
+	m := r.collectMarshalData()
+	buf, err := json.Marshal(m)
+	if err != nil {
+		return nil, err
+	}
+	return buf, nil
+}
+
+func (r ListConferenceSeriesRequest) MarshalURL() ([]byte, error) {
+	m := r.collectMarshalData()
+	buf, err := urlenc.Marshal(m)
+	if err != nil {
+		return nil, err
+	}
+	return buf, nil
+}
+
+func (r *ListConferenceSeriesRequest) UnmarshalJSON(data []byte) error {
+	m := make(map[string]interface{})
+	if err := json.Unmarshal(data, &m); err != nil {
+		return err
+	}
+	return r.Populate(m)
+}
+
+func (r *ListConferenceSeriesRequest) Populate(m map[string]interface{}) error {
+	if jv, ok := m["since"]; ok {
+		if err := r.Since.Set(jv); err != nil {
+			return errors.New("set field Since failed: " + err.Error())
+		}
+		delete(m, "since")
+	}
+	if jv, ok := m["limit"]; ok {
+		if err := r.Limit.Set(jv); err != nil {
+			return errors.New("set field Limit failed: " + err.Error())
+		}
+		delete(m, "limit")
+	}
+	return nil
+}
+
 func (r CreateConferenceRequest) collectMarshalData() map[string]interface{} {
 	m := make(map[string]interface{})
 	m["title"] = r.Title
