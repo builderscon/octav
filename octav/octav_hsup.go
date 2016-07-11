@@ -127,6 +127,7 @@ func httpAddConferenceAdmin(ctx context.Context, w http.ResponseWriter, r *http.
 	defer releaseTransportJSONBuffer(jsonbuf)
 	if _, err := io.Copy(jsonbuf, io.LimitReader(r.Body, MaxPostSize)); err != nil {
 		httpError(w, `Failed to read request body`, http.StatusInternalServerError, err)
+		return
 	}
 	defer r.Body.Close()
 	if pdebug.Enabled {
@@ -160,6 +161,7 @@ func httpAddConferenceDates(ctx context.Context, w http.ResponseWriter, r *http.
 	defer releaseTransportJSONBuffer(jsonbuf)
 	if _, err := io.Copy(jsonbuf, io.LimitReader(r.Body, MaxPostSize)); err != nil {
 		httpError(w, `Failed to read request body`, http.StatusInternalServerError, err)
+		return
 	}
 	defer r.Body.Close()
 	if pdebug.Enabled {
@@ -193,6 +195,7 @@ func httpAddConferenceVenue(ctx context.Context, w http.ResponseWriter, r *http.
 	defer releaseTransportJSONBuffer(jsonbuf)
 	if _, err := io.Copy(jsonbuf, io.LimitReader(r.Body, MaxPostSize)); err != nil {
 		httpError(w, `Failed to read request body`, http.StatusInternalServerError, err)
+		return
 	}
 	defer r.Body.Close()
 	if pdebug.Enabled {
@@ -226,6 +229,7 @@ func httpCreateConference(ctx context.Context, w http.ResponseWriter, r *http.Re
 	defer releaseTransportJSONBuffer(jsonbuf)
 	if _, err := io.Copy(jsonbuf, io.LimitReader(r.Body, MaxPostSize)); err != nil {
 		httpError(w, `Failed to read request body`, http.StatusInternalServerError, err)
+		return
 	}
 	defer r.Body.Close()
 	if pdebug.Enabled {
@@ -259,6 +263,7 @@ func httpCreateConferenceSeries(ctx context.Context, w http.ResponseWriter, r *h
 	defer releaseTransportJSONBuffer(jsonbuf)
 	if _, err := io.Copy(jsonbuf, io.LimitReader(r.Body, MaxPostSize)); err != nil {
 		httpError(w, `Failed to read request body`, http.StatusInternalServerError, err)
+		return
 	}
 	defer r.Body.Close()
 	if pdebug.Enabled {
@@ -316,6 +321,7 @@ func httpCreateRoom(ctx context.Context, w http.ResponseWriter, r *http.Request)
 	defer releaseTransportJSONBuffer(jsonbuf)
 	if _, err := io.Copy(jsonbuf, io.LimitReader(r.Body, MaxPostSize)); err != nil {
 		httpError(w, `Failed to read request body`, http.StatusInternalServerError, err)
+		return
 	}
 	defer r.Body.Close()
 	if pdebug.Enabled {
@@ -349,6 +355,7 @@ func httpCreateSession(ctx context.Context, w http.ResponseWriter, r *http.Reque
 	defer releaseTransportJSONBuffer(jsonbuf)
 	if _, err := io.Copy(jsonbuf, io.LimitReader(r.Body, MaxPostSize)); err != nil {
 		httpError(w, `Failed to read request body`, http.StatusInternalServerError, err)
+		return
 	}
 	defer r.Body.Close()
 	if pdebug.Enabled {
@@ -406,6 +413,7 @@ func httpCreateUser(ctx context.Context, w http.ResponseWriter, r *http.Request)
 	defer releaseTransportJSONBuffer(jsonbuf)
 	if _, err := io.Copy(jsonbuf, io.LimitReader(r.Body, MaxPostSize)); err != nil {
 		httpError(w, `Failed to read request body`, http.StatusInternalServerError, err)
+		return
 	}
 	defer r.Body.Close()
 	if pdebug.Enabled {
@@ -439,6 +447,7 @@ func httpCreateVenue(ctx context.Context, w http.ResponseWriter, r *http.Request
 	defer releaseTransportJSONBuffer(jsonbuf)
 	if _, err := io.Copy(jsonbuf, io.LimitReader(r.Body, MaxPostSize)); err != nil {
 		httpError(w, `Failed to read request body`, http.StatusInternalServerError, err)
+		return
 	}
 	defer r.Body.Close()
 	if pdebug.Enabled {
@@ -472,6 +481,7 @@ func httpDeleteConference(ctx context.Context, w http.ResponseWriter, r *http.Re
 	defer releaseTransportJSONBuffer(jsonbuf)
 	if _, err := io.Copy(jsonbuf, io.LimitReader(r.Body, MaxPostSize)); err != nil {
 		httpError(w, `Failed to read request body`, http.StatusInternalServerError, err)
+		return
 	}
 	defer r.Body.Close()
 	if pdebug.Enabled {
@@ -505,6 +515,7 @@ func httpDeleteConferenceAdmin(ctx context.Context, w http.ResponseWriter, r *ht
 	defer releaseTransportJSONBuffer(jsonbuf)
 	if _, err := io.Copy(jsonbuf, io.LimitReader(r.Body, MaxPostSize)); err != nil {
 		httpError(w, `Failed to read request body`, http.StatusInternalServerError, err)
+		return
 	}
 	defer r.Body.Close()
 	if pdebug.Enabled {
@@ -538,6 +549,7 @@ func httpDeleteConferenceDates(ctx context.Context, w http.ResponseWriter, r *ht
 	defer releaseTransportJSONBuffer(jsonbuf)
 	if _, err := io.Copy(jsonbuf, io.LimitReader(r.Body, MaxPostSize)); err != nil {
 		httpError(w, `Failed to read request body`, http.StatusInternalServerError, err)
+		return
 	}
 	defer r.Body.Close()
 	if pdebug.Enabled {
@@ -571,6 +583,7 @@ func httpDeleteConferenceSeries(ctx context.Context, w http.ResponseWriter, r *h
 	defer releaseTransportJSONBuffer(jsonbuf)
 	if _, err := io.Copy(jsonbuf, io.LimitReader(r.Body, MaxPostSize)); err != nil {
 		httpError(w, `Failed to read request body`, http.StatusInternalServerError, err)
+		return
 	}
 	defer r.Body.Close()
 	if pdebug.Enabled {
@@ -604,6 +617,7 @@ func httpDeleteConferenceVenue(ctx context.Context, w http.ResponseWriter, r *ht
 	defer releaseTransportJSONBuffer(jsonbuf)
 	if _, err := io.Copy(jsonbuf, io.LimitReader(r.Body, MaxPostSize)); err != nil {
 		httpError(w, `Failed to read request body`, http.StatusInternalServerError, err)
+		return
 	}
 	defer r.Body.Close()
 	if pdebug.Enabled {
@@ -661,6 +675,7 @@ func httpDeleteRoom(ctx context.Context, w http.ResponseWriter, r *http.Request)
 	defer releaseTransportJSONBuffer(jsonbuf)
 	if _, err := io.Copy(jsonbuf, io.LimitReader(r.Body, MaxPostSize)); err != nil {
 		httpError(w, `Failed to read request body`, http.StatusInternalServerError, err)
+		return
 	}
 	defer r.Body.Close()
 	if pdebug.Enabled {
@@ -694,6 +709,7 @@ func httpDeleteSession(ctx context.Context, w http.ResponseWriter, r *http.Reque
 	defer releaseTransportJSONBuffer(jsonbuf)
 	if _, err := io.Copy(jsonbuf, io.LimitReader(r.Body, MaxPostSize)); err != nil {
 		httpError(w, `Failed to read request body`, http.StatusInternalServerError, err)
+		return
 	}
 	defer r.Body.Close()
 	if pdebug.Enabled {
@@ -727,6 +743,7 @@ func httpDeleteUser(ctx context.Context, w http.ResponseWriter, r *http.Request)
 	defer releaseTransportJSONBuffer(jsonbuf)
 	if _, err := io.Copy(jsonbuf, io.LimitReader(r.Body, MaxPostSize)); err != nil {
 		httpError(w, `Failed to read request body`, http.StatusInternalServerError, err)
+		return
 	}
 	defer r.Body.Close()
 	if pdebug.Enabled {
@@ -760,6 +777,7 @@ func httpDeleteVenue(ctx context.Context, w http.ResponseWriter, r *http.Request
 	defer releaseTransportJSONBuffer(jsonbuf)
 	if _, err := io.Copy(jsonbuf, io.LimitReader(r.Body, MaxPostSize)); err != nil {
 		httpError(w, `Failed to read request body`, http.StatusInternalServerError, err)
+		return
 	}
 	defer r.Body.Close()
 	if pdebug.Enabled {
@@ -1129,6 +1147,7 @@ func httpUpdateConference(ctx context.Context, w http.ResponseWriter, r *http.Re
 	defer releaseTransportJSONBuffer(jsonbuf)
 	if _, err := io.Copy(jsonbuf, io.LimitReader(r.Body, MaxPostSize)); err != nil {
 		httpError(w, `Failed to read request body`, http.StatusInternalServerError, err)
+		return
 	}
 	defer r.Body.Close()
 	if pdebug.Enabled {
@@ -1162,6 +1181,7 @@ func httpUpdateRoom(ctx context.Context, w http.ResponseWriter, r *http.Request)
 	defer releaseTransportJSONBuffer(jsonbuf)
 	if _, err := io.Copy(jsonbuf, io.LimitReader(r.Body, MaxPostSize)); err != nil {
 		httpError(w, `Failed to read request body`, http.StatusInternalServerError, err)
+		return
 	}
 	defer r.Body.Close()
 	if pdebug.Enabled {
@@ -1195,6 +1215,7 @@ func httpUpdateSession(ctx context.Context, w http.ResponseWriter, r *http.Reque
 	defer releaseTransportJSONBuffer(jsonbuf)
 	if _, err := io.Copy(jsonbuf, io.LimitReader(r.Body, MaxPostSize)); err != nil {
 		httpError(w, `Failed to read request body`, http.StatusInternalServerError, err)
+		return
 	}
 	defer r.Body.Close()
 	if pdebug.Enabled {
@@ -1228,6 +1249,7 @@ func httpUpdateUser(ctx context.Context, w http.ResponseWriter, r *http.Request)
 	defer releaseTransportJSONBuffer(jsonbuf)
 	if _, err := io.Copy(jsonbuf, io.LimitReader(r.Body, MaxPostSize)); err != nil {
 		httpError(w, `Failed to read request body`, http.StatusInternalServerError, err)
+		return
 	}
 	defer r.Body.Close()
 	if pdebug.Enabled {
@@ -1261,6 +1283,7 @@ func httpUpdateVenue(ctx context.Context, w http.ResponseWriter, r *http.Request
 	defer releaseTransportJSONBuffer(jsonbuf)
 	if _, err := io.Copy(jsonbuf, io.LimitReader(r.Body, MaxPostSize)); err != nil {
 		httpError(w, `Failed to read request body`, http.StatusInternalServerError, err)
+		return
 	}
 	defer r.Body.Close()
 	if pdebug.Enabled {

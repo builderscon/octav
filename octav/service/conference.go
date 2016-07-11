@@ -245,7 +245,7 @@ func (v *Conference) AddVenue(tx *db.Tx, cid, vid string) error {
 		VenueID:      vid,
 	}
 	if err := cd.Create(tx, db.WithInsertIgnore(true)); err != nil {
-		return err
+		return errors.Wrap(err, "failed to insert new conference/venue relation")
 	}
 
 	return nil
