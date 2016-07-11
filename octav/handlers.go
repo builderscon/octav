@@ -94,6 +94,77 @@ func httpJSON(w http.ResponseWriter, v interface{}) {
 	httpJSONWithStatus(w, v, http.StatusOK)
 }
 
+func doCreateConferenceSeries(ctx context.Context, w http.ResponseWriter, r *http.Request, payload model.CreateConferenceSeriesRequest) {
+	if pdebug.Enabled {
+		g := pdebug.Marker("doCreateConferenceSeries")
+		defer g.End()
+	}
+
+	tx, err := db.Begin()
+	if err != nil {
+		httpError(w, `CreateConferenceSeries`, http.StatusInternalServerError, err)
+		return
+	}
+	defer tx.AutoRollback()
+
+	s := service.ConferenceSeries{}
+	c := model.ConferenceSeries{}
+	if err := s.CreateFromPayload(tx, payload, &c); err != nil {
+		httpError(w, `CreateConferenceSeries`, http.StatusInternalServerError, err)
+		return
+	}
+
+	if err := tx.Commit(); err != nil {
+		httpError(w, `CreateConferenceSeries`, http.StatusInternalServerError, err)
+		return
+	}
+
+	httpJSON(w, c)
+}
+
+func doDeleteConferenceSeries(ctx context.Context, w http.ResponseWriter, r *http.Request, payload model.DeleteConferenceSeriesRequest) {
+	if pdebug.Enabled {
+		g := pdebug.Marker("doDeleteConferenceSeries")
+		defer g.End()
+	}
+
+	tx, err := db.Begin()
+	if err != nil {
+		httpError(w, `DeleteConferenceSeries`, http.StatusInternalServerError, err)
+		return
+	}
+	defer tx.AutoRollback()
+
+	s := service.ConferenceSeries{}
+	if err := s.Delete(tx, payload.ID); err != nil {
+		httpError(w, `DeleteConferenceSeries`, http.StatusInternalServerError, err)
+		return
+	}
+	if err := tx.Commit(); err != nil {
+		httpError(w, `DeleteConferenceSeries`, http.StatusInternalServerError, err)
+		return
+	}
+	httpJSON(w, map[string]string{"status": "success"})
+}
+
+func doListConferenceSeries(ctx context.Context, w http.ResponseWriter, r *http.Request, payload model.ListConferenceSeriesRequest) {
+	tx, err := db.Begin()
+	if err != nil {
+		httpError(w, `ListConferencesSeries`, http.StatusInternalServerError, err)
+		return
+	}
+	defer tx.AutoRollback()
+
+	s := service.ConferenceSeries{}
+	l := []model.ConferenceSeries{}
+	if err := s.LoadByRange(tx, &l, payload.Since.String, int(payload.Limit.Int)); err != nil {
+		httpError(w, `ListConferenceSeries`, http.StatusInternalServerError, err)
+		return
+	}
+
+	httpJSON(w, l)
+}
+
 func doCreateConference(ctx context.Context, w http.ResponseWriter, r *http.Request, payload model.CreateConferenceRequest) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("doCreateConference")
@@ -108,24 +179,13 @@ func doCreateConference(ctx context.Context, w http.ResponseWriter, r *http.Requ
 	defer tx.AutoRollback()
 
 	s := service.Conference{}
-	vdb := db.Conference{}
-	if err := s.Create(tx, &vdb, payload); err != nil {
-		httpError(w, `CreateConference`, http.StatusInternalServerError, err)
-		return
-	}
-
-	if err := s.AddAdministrator(tx, vdb.EID, payload.UserID); err != nil {
+	c := model.Conference{}
+	if err := s.CreateFromPayload(tx, payload, &c); err != nil {
 		httpError(w, `CreateConference`, http.StatusInternalServerError, err)
 		return
 	}
 
 	if err := tx.Commit(); err != nil {
-		httpError(w, `CreateConference`, http.StatusInternalServerError, err)
-		return
-	}
-
-	c := model.Conference{}
-	if err := c.FromRow(vdb); err != nil {
 		httpError(w, `CreateConference`, http.StatusInternalServerError, err)
 		return
 	}

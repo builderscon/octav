@@ -115,6 +115,18 @@
       "description": "a string for a particular language, where language is presented as the suffix of the property in the form of <foo>#<language>.",
       "type": "string"
     },
+    "slug_top": {
+      "description": "a string containing only safe characters for use in a slug (top level. must not contain a slash)",
+      "type": "string",
+      "minLength": 3,
+      "pattern": "^[a-zA-Z0-9]+$"
+    },
+    "slug": {
+      "description": "a string containing only safe characters for use in a slug",
+      "type": "string",
+      "minLength": 3,
+      "pattern": "^[a-zA-Z0-9/]+$"
+    },
     "positiveInteger": {
       "type": "integer",
       "minimum": 0
@@ -161,6 +173,18 @@
       "type": "array",
       "items": {"$ref": "#/definitions/conference" },
       "hsup.type": "[]model.Conference"
+    },
+    "conference_series_array": {
+      "type": "array",
+      "items": {"$ref": "#/definitions/conference_series" },
+      "hsup.type": "[]model.ConferenceSeries"
+    },
+    "conference_series": {
+      "type": "object",
+      "hsup.type": "model.ConferenceSeries",
+      "properties": {
+        "slug": { "$ref": "#/definitions/slug_top" }
+      }
     },
     "conference": {
       "type": "object",
@@ -621,6 +645,35 @@
       "targetSchema": { "$ref": "#/definitions/room_array" }
     },
     {
+      "title": "Create conference series",
+      "rel": "create",
+      "hsup.wrapper": "httpWithBasicAuth",
+      "method": "POST",
+      "href": "/conference_series/create",
+      "encType": "application/json",
+      "schema": {
+        "properties": {
+          "slug": { "$ref": "#/definitions/slug_top" }
+        },
+        "required": ["slug"]
+      },
+      "targetSchema": { "$ref": "#/definitions/conference_series" }
+    },
+    {
+      "title": "List conference series",
+      "rel": "list",
+      "href": "/conference_series/list",
+      "method": "GET",
+      "encType": "application/x-www-form-urlencoded",
+      "schema": {
+        "properties": {
+          "limit": { "$ref": "#/definitions/positiveIntegerDefault10" },
+          "since": { "$ref": "#/definitions/uuid" }
+        }
+      },
+      "targetSchema": { "$ref": "#/definitions/conference_series_array" }
+    },
+    {
       "title": "Create conference",
       "rel": "create",
       "hsup.wrapper": "httpWithBasicAuth",
@@ -629,17 +682,14 @@
       "encType": "application/json",
       "schema": {
         "properties": {
+          "series_id": { "$ref": "#/definitions/uuid" },
           "title": { "$ref": "#/definitions/string_en" },
           "sub_title": { "$ref": "#/definitions/string_en" },
-          "slug": { "$ref": "#/definitions/string_en" },
+          "slug": { "$ref": "#/definitions/slug" },
           "description": { "$ref": "#/definitions/string_en" },
           "user_id": { "$ref": "#/definitions/uuid"}
         },
-        "patternProperties": {
-          "title#[a-z]+": { "$ref": "#/definitions/string_i18n" },
-          "description#[a-z]+": { "$ref": "#/definitions/string_i18n" }
-        },
-        "required": ["title", "slug", "user_id"]
+        "required": ["series_id", "title", "slug", "user_id"]
       },
       "targetSchema": { "$ref": "#/definitions/conference" }
     },
@@ -807,6 +857,21 @@
           "description#[a-z]+": { "$ref": "#/definitions/string_i18n" }
         },
         "required": ["id"]
+      }
+    },
+    {
+      "title": "Delete conference series",
+      "rel": "delete",
+      "hsup.wrapper": "httpWithBasicAuth",
+      "href": "/conference_series/delete",
+      "method": "POST",
+      "encType": "application/json",
+      "schema": {
+        "type": "object",
+        "required": ["id"],
+        "properties": {
+          "id": { "$ref": "#/definitions/uuid" }
+        }
       }
     },
     {

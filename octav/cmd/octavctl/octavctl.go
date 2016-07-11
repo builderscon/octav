@@ -177,6 +177,8 @@ func doConferenceCreate(args cmdargs) int {
 	fs := flag.NewFlagSet("octavctl conference create", flag.ContinueOnError)
 	var description string
 	fs.StringVar(&description, "description", "", "")
+	var series_id string
+	fs.StringVar(&series_id, "series_id", "", "")
 	var slug string
 	fs.StringVar(&slug, "slug", "", "")
 	var sub_title string
@@ -193,6 +195,9 @@ func doConferenceCreate(args cmdargs) int {
 	m := make(map[string]interface{})
 	if description != "" {
 		m["description"] = description
+	}
+	if series_id != "" {
+		m["series_id"] = series_id
 	}
 	if slug != "" {
 		m["slug"] = slug

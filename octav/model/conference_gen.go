@@ -46,9 +46,7 @@ func (v *Conference) Load(tx *db.Tx, id string) (err error) {
 func (v *Conference) FromRow(vdb db.Conference) error {
 	v.ID = vdb.EID
 	v.Title = vdb.Title
-	if vdb.SeriesID.Valid {
-		v.SeriesID = vdb.SeriesID.String
-	}
+	v.SeriesID = vdb.SeriesID
 	if vdb.SubTitle.Valid {
 		v.SubTitle = vdb.SubTitle.String
 	}
@@ -59,8 +57,7 @@ func (v *Conference) FromRow(vdb db.Conference) error {
 func (v *Conference) ToRow(vdb *db.Conference) error {
 	vdb.EID = v.ID
 	vdb.Title = v.Title
-	vdb.SeriesID.Valid = true
-	vdb.SeriesID.String = v.SeriesID
+	vdb.SeriesID = v.SeriesID
 	vdb.SubTitle.Valid = true
 	vdb.SubTitle.String = v.SubTitle
 	vdb.Slug = v.Slug

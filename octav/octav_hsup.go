@@ -243,6 +243,39 @@ func httpCreateConference(ctx context.Context, w http.ResponseWriter, r *http.Re
 	doCreateConference(ctx, w, r, payload)
 }
 
+func httpCreateConferenceSeries(ctx context.Context, w http.ResponseWriter, r *http.Request) {
+	if pdebug.Enabled {
+		g := pdebug.Marker("httpCreateConferenceSeries")
+		defer g.End()
+	}
+	if strings.ToLower(r.Method) != `post` {
+		w.Header().Set("Allow", "post")
+		httpError(w, `Method was `+r.Method+`, expected post`, http.StatusNotFound, nil)
+		return
+	}
+
+	var payload model.CreateConferenceSeriesRequest
+	jsonbuf := getTransportJSONBuffer()
+	defer releaseTransportJSONBuffer(jsonbuf)
+	if _, err := io.Copy(jsonbuf, io.LimitReader(r.Body, MaxPostSize)); err != nil {
+		httpError(w, `Failed to read request body`, http.StatusInternalServerError, err)
+	}
+	defer r.Body.Close()
+	if pdebug.Enabled {
+		pdebug.Printf(`-----> %s`, jsonbuf.Bytes())
+	}
+	if err := json.Unmarshal(jsonbuf.Bytes(), &payload); err != nil {
+		httpError(w, `Invalid JSON input`, http.StatusInternalServerError, err)
+		return
+	}
+
+	if err := validator.HTTPCreateConferenceSeriesRequest.Validate(&payload); err != nil {
+		httpError(w, `Invalid input (validation failed)`, http.StatusInternalServerError, err)
+		return
+	}
+	doCreateConferenceSeries(ctx, w, r, payload)
+}
+
 func httpCreateQuestion(ctx context.Context, w http.ResponseWriter, r *http.Request) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("httpCreateQuestion")
@@ -522,6 +555,39 @@ func httpDeleteConferenceDates(ctx context.Context, w http.ResponseWriter, r *ht
 	doDeleteConferenceDates(ctx, w, r, payload)
 }
 
+func httpDeleteConferenceSeries(ctx context.Context, w http.ResponseWriter, r *http.Request) {
+	if pdebug.Enabled {
+		g := pdebug.Marker("httpDeleteConferenceSeries")
+		defer g.End()
+	}
+	if strings.ToLower(r.Method) != `post` {
+		w.Header().Set("Allow", "post")
+		httpError(w, `Method was `+r.Method+`, expected post`, http.StatusNotFound, nil)
+		return
+	}
+
+	var payload model.DeleteConferenceSeriesRequest
+	jsonbuf := getTransportJSONBuffer()
+	defer releaseTransportJSONBuffer(jsonbuf)
+	if _, err := io.Copy(jsonbuf, io.LimitReader(r.Body, MaxPostSize)); err != nil {
+		httpError(w, `Failed to read request body`, http.StatusInternalServerError, err)
+	}
+	defer r.Body.Close()
+	if pdebug.Enabled {
+		pdebug.Printf(`-----> %s`, jsonbuf.Bytes())
+	}
+	if err := json.Unmarshal(jsonbuf.Bytes(), &payload); err != nil {
+		httpError(w, `Invalid JSON input`, http.StatusInternalServerError, err)
+		return
+	}
+
+	if err := validator.HTTPDeleteConferenceSeriesRequest.Validate(&payload); err != nil {
+		httpError(w, `Invalid input (validation failed)`, http.StatusInternalServerError, err)
+		return
+	}
+	doDeleteConferenceSeries(ctx, w, r, payload)
+}
+
 func httpDeleteConferenceVenue(ctx context.Context, w http.ResponseWriter, r *http.Request) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("httpDeleteConferenceVenue")
@@ -733,6 +799,30 @@ func httpListConference(ctx context.Context, w http.ResponseWriter, r *http.Requ
 		return
 	}
 	doListConference(ctx, w, r, payload)
+}
+
+func httpListConferenceSeries(ctx context.Context, w http.ResponseWriter, r *http.Request) {
+	if pdebug.Enabled {
+		g := pdebug.Marker("httpListConferenceSeries")
+		defer g.End()
+	}
+	if strings.ToLower(r.Method) != `get` {
+		w.Header().Set("Allow", "get")
+		httpError(w, `Method was `+r.Method+`, expected get`, http.StatusNotFound, nil)
+		return
+	}
+
+	var payload model.ListConferenceSeriesRequest
+	if err := urlenc.Unmarshal([]byte(r.URL.RawQuery), &payload); err != nil {
+		httpError(w, `Failed to parse url query string`, http.StatusInternalServerError, err)
+		return
+	}
+
+	if err := validator.HTTPListConferenceSeriesRequest.Validate(&payload); err != nil {
+		httpError(w, `Invalid input (validation failed)`, http.StatusInternalServerError, err)
+		return
+	}
+	doListConferenceSeries(ctx, w, r, payload)
 }
 
 func httpListQuestion(ctx context.Context, w http.ResponseWriter, r *http.Request) {
@@ -1202,6 +1292,9 @@ func (s *Server) SetupRoutes() {
 	r.HandleFunc(`/v1/conference/update`, httpWithContext(httpWithBasicAuth(httpUpdateConference)))
 	r.HandleFunc(`/v1/conference/venue/add`, httpWithContext(httpWithBasicAuth(httpAddConferenceVenue)))
 	r.HandleFunc(`/v1/conference/venue/delete`, httpWithContext(httpWithBasicAuth(httpDeleteConferenceVenue)))
+	r.HandleFunc(`/v1/conference_series/create`, httpWithContext(httpWithBasicAuth(httpCreateConferenceSeries)))
+	r.HandleFunc(`/v1/conference_series/delete`, httpWithContext(httpWithBasicAuth(httpDeleteConferenceSeries)))
+	r.HandleFunc(`/v1/conference_series/list`, httpWithContext(httpListConferenceSeries))
 	r.HandleFunc(`/v1/question/create`, httpWithContext(httpWithBasicAuth(httpCreateQuestion)))
 	r.HandleFunc(`/v1/question/delete`, httpWithContext(httpWithBasicAuth(httpDeleteQuestion)))
 	r.HandleFunc(`/v1/question/list`, httpWithContext(httpListQuestion))

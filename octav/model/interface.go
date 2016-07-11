@@ -38,6 +38,7 @@ type ConferenceSeries struct {
 	ID   string `json:"id"`
 	Slug string `json:"slug"`
 }
+type ConferenceSeriesList []ConferenceSeries
 
 // +model
 type Room struct {
@@ -74,8 +75,8 @@ type Session struct {
 	Status            string      `json:"status"`
 	Confirmed         bool        `json:"confirmed"`
 	Conference        *Conference `json:"conference,omitempy"` // only populated for JSON response
-	Room              *Room       `json:"room,omitempty"`       // only populated for JSON response
-	Speaker           *User       `json:"speaker,omitempty"`    // only populated for JSON response
+	Room              *Room       `json:"room,omitempty"`      // only populated for JSON response
+	Speaker           *User       `json:"speaker,omitempty"`   // only populated for JSON response
 }
 type SessionList []Session
 
@@ -119,9 +120,23 @@ type UpdateConferenceSeriesRequest struct {
 }
 
 // +transport
+type DeleteConferenceSeriesRequest struct {
+	ID string `json:"id"`
+}
+
+// +transport
+type ListConferenceSeriesRequest struct {
+	Since      jsval.MaybeString `json:"since,omitempty" urlenc:"since,omitempty,string"`
+	Limit      jsval.MaybeInt    `json:"limit,omitempty" urlenc:"limit,omitempty,int64"`
+}
+
+// +transport
+type ListConferenceSeriesReponse []ConferenceSeries
+
+// +transport
 type CreateConferenceRequest struct {
 	Title    string                `json:"title" l10n:"true"`
-	SeriesID jsval.MaybeString     `json:"series_id,omitempty"`
+	SeriesID string                `json:"series_id"`
 	SubTitle jsval.MaybeString     `json:"sub_title" l10n:"true"`
 	Slug     string                `json:"slug"`
 	UserID   string                `json:"user_id"`
