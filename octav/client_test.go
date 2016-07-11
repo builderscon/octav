@@ -8,8 +8,8 @@ import (
 	"testing"
 
 	"github.com/builderscon/octav/octav"
-	"github.com/builderscon/octav/octav/db"
 	"github.com/builderscon/octav/octav/client"
+	"github.com/builderscon/octav/octav/db"
 	"github.com/builderscon/octav/octav/model"
 	"github.com/builderscon/octav/octav/tools"
 	"github.com/builderscon/octav/octav/validator"
@@ -19,15 +19,15 @@ import (
 
 type TestCtx struct {
 	*testing.T
-	APIClient *db.Client
+	APIClient  *db.Client
 	HTTPClient *client.Client
 }
 
 func NewTestCtx(t *testing.T) (*TestCtx, error) {
 	vdb := db.Client{
-		EID: tools.UUID(),
+		EID:    tools.UUID(),
 		Secret: tools.UUID(), // Todo
-		Name: "Test Client",
+		Name:   "Test Client",
 	}
 
 	tx, err := db.Begin()
@@ -44,7 +44,7 @@ func NewTestCtx(t *testing.T) (*TestCtx, error) {
 	}
 
 	ctx := &TestCtx{
-		T: t,
+		T:         t,
 		APIClient: &vdb,
 	}
 
@@ -185,12 +185,35 @@ func testDeleteVenue(ctx *TestCtx, id string) error {
 	return err
 }
 
-func yapcasia(userID string) *model.CreateConferenceRequest {
-	return &model.CreateConferenceRequest{
-		Title:  "YAPC::Asia Tokyo",
-		Slug:   "yapcasia",
-		UserID: userID,
+func yapcasia() *model.CreateConferenceSeriesRequest {
+	return &model.CreateConferenceSeriesRequest{
+		Slug: "yapcasia",
 	}
+}
+
+func yapcasiaTokyo(series *model.ConferenceSeries, userID string) *model.CreateConferenceRequest {
+	return &model.CreateConferenceRequest{
+		Title:    "YAPC::Asia Tokyo",
+		SeriesID: series.ID,
+		Slug:     "2015",
+		UserID:   userID,
+	}
+}
+
+func testCreateConferenceSeries(ctx *TestCtx, in *model.CreateConferenceSeriesRequest) (*model.ConferenceSeries, error) {
+	res, err := ctx.HTTPClient.CreateConferenceSeries(in)
+	if !assert.NoError(ctx.T, err, "CreateConferenceSeries should succeed") {
+		return nil, err
+	}
+	return res, nil
+}
+
+func testDeleteConferenceSeries(ctx *TestCtx, id string) error {
+	err := ctx.HTTPClient.DeleteConferenceSeries(&model.DeleteConferenceSeriesRequest{ID: id})
+	if !assert.NoError(ctx.T, err, "DeleteConferenceSeries should be successful") {
+		return err
+	}
+	return err
 }
 
 func testCreateConference(ctx *TestCtx, in *model.CreateConferenceRequest) (*model.Conference, error) {
@@ -246,7 +269,13 @@ func TestConferenceCRUD(t *testing.T) {
 	}
 	defer testDeleteUser(ctx, user.ID)
 
-	res, err := testCreateConference(ctx, yapcasia(user.ID))
+	series, err := testCreateConferenceSeries(ctx, yapcasia())
+	if err != nil {
+		return
+	}
+	defer testDeleteConferenceSeries(ctx, series.ID)
+
+	res, err := testCreateConference(ctx, yapcasiaTokyo(series, user.ID))
 	if err != nil {
 		return
 	}
@@ -263,13 +292,13 @@ func TestConferenceCRUD(t *testing.T) {
 
 	// The result from LookupConference contains the administrator field
 	// Remove that (and make sure it's populated), then do the comparison
-	admins := res2.Administrators
-	res2.Administrators = model.UserList(nil)
+//	admins := res2.Administrators
+//	res2.Administrators = model.UserList(nil)
 	if !assert.Equal(ctx.T, res2, res, "LookupConference is the same as the conference created") {
 		return
 	}
 
-	if !assert.Len(ctx.T, admins, 1, "There should be 1 administrator") {
+	if !assert.Len(ctx.T, res2.Administrators, 1, "There should be 1 administrator") {
 		return
 	}
 
@@ -419,15 +448,23 @@ func TestSessionCRUD(t *testing.T) {
 	}
 	defer testDeleteUser(ctx, user.ID)
 
-	conference, err := testCreateConference(ctx, yapcasia(user.ID))
+	series, err := testCreateConferenceSeries(ctx, yapcasia())
 	if err != nil {
 		return
 	}
+	defer testDeleteConferenceSeries(ctx, series.ID)
+
+	conference, err := testCreateConference(ctx, yapcasiaTokyo(series, user.ID))
+	if err != nil {
+		return
+	}
+	defer testDeleteConference(ctx, conference.ID)
 
 	res, err := testCreateSession(ctx, bconsession(conference.ID, user.ID))
 	if err != nil {
 		return
 	}
+	defer testDeleteSession(ctx, res.ID)
 
 	if !assert.NoError(ctx.T, validator.HTTPCreateSessionResponse.Validate(res), "Validation should succeed") {
 		return
@@ -454,14 +491,6 @@ func TestSessionCRUD(t *testing.T) {
 	}
 
 	if !assert.Equal(ctx.T, "カンファレンス用ソフトウェアの作り方", res3.Title, "Session.title#ja is the same as the conference updated") {
-		return
-	}
-
-	if err := testDeleteSession(ctx, res.ID); err != nil {
-		return
-	}
-
-	if err := testDeleteConference(ctx, conference.ID); err != nil {
 		return
 	}
 }
@@ -612,8 +641,18 @@ func TestDeleteConferenceDates(t *testing.T) {
 	}
 	defer testDeleteUser(ctx, user.ID)
 
+	series, err := testCreateConferenceSeries(ctx, &model.CreateConferenceSeriesRequest{
+		Slug: tools.RandomString(8),
+	})
+	if err != nil {
+		return
+	}
+	defer testDeleteConferenceSeries(ctx, series.ID)
+
 	conf, err := testCreateConference(ctx, &model.CreateConferenceRequest{
-		UserID: user.ID,
+		UserID:   user.ID,
+		SeriesID: series.ID,
+		Slug:     tools.RandomString(8),
 	})
 	if err != nil {
 		return
@@ -669,8 +708,18 @@ func TestConferenceAdmins(t *testing.T) {
 	}
 	defer testDeleteUser(ctx, user.ID)
 
+	series, err := testCreateConferenceSeries(ctx, &model.CreateConferenceSeriesRequest{
+		Slug: tools.RandomString(8),
+	})
+	if err != nil {
+		return
+	}
+	defer testDeleteConferenceSeries(ctx, series.ID)
+
 	conf, err := testCreateConference(ctx, &model.CreateConferenceRequest{
-		UserID: user.ID,
+		UserID:   user.ID,
+		SeriesID: series.ID,
+		Slug:     tools.RandomString(8),
 	})
 	if err != nil {
 		return
@@ -740,9 +789,19 @@ func TestListConference(t *testing.T) {
 	}
 	defer testDeleteUser(ctx, user.ID)
 
+	series, err := testCreateConferenceSeries(ctx, &model.CreateConferenceSeriesRequest{
+		Slug: tools.RandomString(8),
+	})
+	if err != nil {
+		return
+	}
+	defer testDeleteConferenceSeries(ctx, series.ID)
+
 	for i := 0; i < 10; i++ {
 		conf, err := testCreateConference(ctx, &model.CreateConferenceRequest{
-			UserID: user.ID,
+			UserID:   user.ID,
+			SeriesID: series.ID,
+			Slug:     tools.RandomString(8),
 		})
 		if err != nil {
 			return
@@ -836,10 +895,18 @@ func TestListSessionByConference(t *testing.T) {
 		return
 	}
 	defer testDeleteUser(ctx, user.ID)
-	conference, err := testCreateConference(ctx, yapcasia(user.ID))
+
+	series, err := testCreateConferenceSeries(ctx, yapcasia())
 	if err != nil {
 		return
 	}
+	defer testDeleteConferenceSeries(ctx, series.ID)
+
+	conference, err := testCreateConference(ctx, yapcasiaTokyo(series, user.ID))
+	if err != nil {
+		return
+	}
+	defer testDeleteConference(ctx, conference.ID)
 
 	for i := 0; i < 10; i++ {
 		sin := model.CreateSessionRequest{}

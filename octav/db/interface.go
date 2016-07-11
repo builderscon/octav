@@ -25,7 +25,7 @@ type ConferenceSeries struct {
 type Conference struct {
 	OID        int64  // intenral id, used for sorting and what not
 	EID        string // ID that is visible to the outside
-	SeriesID   sql.NullString // ConferenceSeries ID. May be nil if not part of a series
+	SeriesID   string // ConferenceSeries ID
 	Slug       string
 	Title      string
 	SubTitle   sql.NullString

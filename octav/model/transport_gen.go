@@ -113,9 +113,7 @@ func (r *UpdateConferenceSeriesRequest) Populate(m map[string]interface{}) error
 func (r CreateConferenceRequest) collectMarshalData() map[string]interface{} {
 	m := make(map[string]interface{})
 	m["title"] = r.Title
-	if r.SeriesID.Valid() {
-		m["series_id"] = r.SeriesID.Value()
-	}
+	m["series_id"] = r.SeriesID
 	if r.SubTitle.Valid() {
 		m["sub_title"] = r.SubTitle.Value()
 	}
@@ -161,10 +159,13 @@ func (r *CreateConferenceRequest) Populate(m map[string]interface{}) error {
 		}
 	}
 	if jv, ok := m["series_id"]; ok {
-		if err := r.SeriesID.Set(jv); err != nil {
-			return errors.New("set field SeriesID failed: " + err.Error())
+		switch jv.(type) {
+		case string:
+			r.SeriesID = jv.(string)
+			delete(m, "series_id")
+		default:
+			return ErrInvalidJSONFieldType{Field: "series_id"}
 		}
-		delete(m, "series_id")
 	}
 	if jv, ok := m["sub_title"]; ok {
 		if err := r.SubTitle.Set(jv); err != nil {
@@ -209,7 +210,10 @@ func (r *CreateConferenceRequest) SetPropValue(s string, v interface{}) error {
 			return nil
 		}
 	case "series_id":
-		return r.SeriesID.Set(v)
+		if jv, ok := v.(string); ok {
+			r.SeriesID = jv
+			return nil
+		}
 	case "sub_title":
 		return r.SubTitle.Set(v)
 	case "slug":

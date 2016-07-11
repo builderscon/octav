@@ -17,11 +17,7 @@ func (v *Conference) populateRowForCreate(vdb *db.Conference, payload model.Crea
 	vdb.EID = tools.UUID()
 	vdb.Slug = payload.Slug
 	vdb.Title = payload.Title
-
-	if payload.SeriesID.Valid() {
-		vdb.SeriesID.Valid = true
-		vdb.SeriesID.String = payload.SeriesID.String
-	}
+	vdb.SeriesID = payload.SeriesID
 
 	if payload.SubTitle.Valid() {
 		vdb.SubTitle.Valid = true
@@ -32,8 +28,7 @@ func (v *Conference) populateRowForCreate(vdb *db.Conference, payload model.Crea
 
 func (v *Conference) populateRowForUpdate(vdb *db.Conference, payload model.UpdateConferenceRequest) error {
 	if payload.SeriesID.Valid() {
-		vdb.SeriesID.Valid = true
-		vdb.SeriesID.String = payload.SeriesID.String
+		vdb.SeriesID = payload.SeriesID.String
 	}
 
 	if payload.Slug.Valid() {
@@ -48,6 +43,28 @@ func (v *Conference) populateRowForUpdate(vdb *db.Conference, payload model.Upda
 		vdb.SubTitle.Valid = true
 		vdb.SubTitle.String = payload.SubTitle.String
 	}
+	return nil
+}
+
+func (v *Conference) CreateFromPayload(tx *db.Tx, payload model.CreateConferenceRequest, result *model.Conference) error {
+	vdb := db.Conference{}
+	if err := v.Create(tx, &vdb, payload); err != nil {
+		return errors.Wrap(err, "failed to create store conference in database")
+	}
+
+	if err := v.AddAdministrator(tx, vdb.EID, payload.UserID); err != nil {
+		return errors.Wrap(err, "failed to associate administrators to conference")
+	}
+
+	c := model.Conference{}
+	if err := c.FromRow(vdb); err != nil {
+		return errors.Wrap(err, "failed to populate model from database")
+	}
+
+	if err := v.Decorate(tx, &c); err != nil {
+		return errors.Wrap(err, "failed to decorate conference model")
+	}
+	*result = c
 	return nil
 }
 

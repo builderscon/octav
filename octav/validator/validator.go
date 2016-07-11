@@ -10,6 +10,8 @@ var HTTPAddConferenceDatesRequest *jsval.JSVal
 var HTTPAddConferenceVenueRequest *jsval.JSVal
 var HTTPCreateConferenceRequest *jsval.JSVal
 var HTTPCreateConferenceResponse *jsval.JSVal
+var HTTPCreateConferenceSeriesRequest *jsval.JSVal
+var HTTPCreateConferenceSeriesResponse *jsval.JSVal
 var HTTPCreateQuestionRequest *jsval.JSVal
 var HTTPCreateQuestionResponse *jsval.JSVal
 var HTTPCreateRoomRequest *jsval.JSVal
@@ -24,6 +26,7 @@ var HTTPCreateVenueResponse *jsval.JSVal
 var HTTPDeleteConferenceAdminRequest *jsval.JSVal
 var HTTPDeleteConferenceDatesRequest *jsval.JSVal
 var HTTPDeleteConferenceRequest *jsval.JSVal
+var HTTPDeleteConferenceSeriesRequest *jsval.JSVal
 var HTTPDeleteConferenceVenueRequest *jsval.JSVal
 var HTTPDeleteQuestionRequest *jsval.JSVal
 var HTTPDeleteRoomRequest *jsval.JSVal
@@ -32,6 +35,8 @@ var HTTPDeleteUserRequest *jsval.JSVal
 var HTTPDeleteVenueRequest *jsval.JSVal
 var HTTPListConferenceRequest *jsval.JSVal
 var HTTPListConferenceResponse *jsval.JSVal
+var HTTPListConferenceSeriesRequest *jsval.JSVal
+var HTTPListConferenceSeriesResponse *jsval.JSVal
 var HTTPListQuestionRequest *jsval.JSVal
 var HTTPListQuestionResponse *jsval.JSVal
 var HTTPListRoomRequest *jsval.JSVal
@@ -103,6 +108,9 @@ var R37 jsval.Constraint
 var R38 jsval.Constraint
 var R39 jsval.Constraint
 var R40 jsval.Constraint
+var R41 jsval.Constraint
+var R42 jsval.Constraint
+var R43 jsval.Constraint
 
 func init() {
 	M = &jsval.ConstraintMap{}
@@ -179,6 +187,14 @@ func init() {
 			jsval.EmptyConstraint,
 		)
 	R6 = jsval.Object().
+		AdditionalProperties(
+			jsval.EmptyConstraint,
+		).
+		AddProp(
+			"slug",
+			jsval.Reference(M).RefersTo("#/definitions/slug_top"),
+		)
+	R7 = jsval.Object().
 		Required("day", "month", "year").
 		AddProp(
 			"day",
@@ -192,22 +208,22 @@ func init() {
 			"year",
 			jsval.Reference(M).RefersTo("#/definitions/positiveInteger"),
 		)
-	R7 = jsval.Array().
+	R8 = jsval.Array().
 		Items(
 			jsval.Reference(M).RefersTo("#/definitions/date"),
 		).
 		AdditionalItems(
 			jsval.EmptyConstraint,
 		)
-	R8 = jsval.String().RegexpString("\\d{4}-\\d{2}-\\d{2}")
-	R9 = jsval.Array().
+	R9 = jsval.String().RegexpString("\\d{4}-\\d{2}-\\d{2}")
+	R10 = jsval.Array().
 		Items(
 			jsval.Reference(M).RefersTo("#/definitions/datestr"),
 		).
 		AdditionalItems(
 			jsval.EmptyConstraint,
 		)
-	R10 = jsval.OneOf().
+	R11 = jsval.OneOf().
 		Add(
 			jsval.String().Format("date-time"),
 		).
@@ -217,19 +233,19 @@ func init() {
 					jsval.EmptyConstraint,
 				),
 		)
-	R11 = jsval.Integer()
-	R12 = jsval.String().Format("email")
-	R13 = jsval.String().Enum("github", "facebook", "twitter")
-	R14 = jsval.Integer().Minimum(0).Maximum(10)
-	R15 = jsval.String().Default("en")
-	R16 = jsval.Number()
+	R12 = jsval.Integer()
+	R13 = jsval.String().Format("email")
+	R14 = jsval.String().Enum("github", "facebook", "twitter")
+	R15 = jsval.Integer().Minimum(0).Maximum(10)
+	R16 = jsval.String().Default("en")
 	R17 = jsval.Number()
-	R18 = jsval.String()
+	R18 = jsval.Number()
 	R19 = jsval.String()
-	R20 = jsval.String().Enum("beginner", "intermediate", "advanced").Default("beginner")
-	R21 = jsval.Integer().Minimum(0)
-	R22 = jsval.Integer().Minimum(0).Default(10)
-	R23 = jsval.Object().
+	R20 = jsval.String()
+	R21 = jsval.String().Enum("beginner", "intermediate", "advanced").Default("beginner")
+	R22 = jsval.Integer().Minimum(0)
+	R23 = jsval.Integer().Minimum(0).Default(10)
+	R24 = jsval.Object().
 		AdditionalProperties(
 			jsval.EmptyConstraint,
 		).
@@ -249,7 +265,7 @@ func init() {
 			"user_id",
 			jsval.Reference(M).RefersTo("#/definitions/uuid"),
 		)
-	R24 = jsval.Object().
+	R25 = jsval.Object().
 		AdditionalProperties(
 			jsval.EmptyConstraint,
 		).
@@ -273,14 +289,14 @@ func init() {
 			"name#[a-z]+",
 			jsval.Reference(M).RefersTo("#/definitions/string_i18n"),
 		)
-	R25 = jsval.Array().
+	R26 = jsval.Array().
 		Items(
 			jsval.Reference(M).RefersTo("#/definitions/room"),
 		).
 		AdditionalItems(
 			jsval.EmptyConstraint,
 		)
-	R26 = jsval.Object().
+	R27 = jsval.Object().
 		AdditionalProperties(
 			jsval.EmptyConstraint,
 		).
@@ -398,7 +414,9 @@ func init() {
 			"video_url",
 			jsval.Reference(M).RefersTo("#/definitions/url"),
 		)
-	R27 = jsval.Object().
+	R28 = jsval.String().MinLength(3).RegexpString("^[a-zA-Z0-9/]+$")
+	R29 = jsval.String().MinLength(3).RegexpString("^[a-zA-Z0-9]+$")
+	R30 = jsval.Object().
 		AdditionalProperties(
 			jsval.Object().
 				AdditionalProperties(
@@ -424,28 +442,28 @@ func init() {
 			"name",
 			jsval.String(),
 		)
-	R28 = jsval.Array().
+	R31 = jsval.Array().
 		Items(
 			jsval.Reference(M).RefersTo("#/definitions/speaker"),
 		).
 		AdditionalItems(
 			jsval.EmptyConstraint,
 		)
-	R29 = jsval.String()
-	R30 = jsval.String().MinLength(1)
-	R31 = jsval.String()
 	R32 = jsval.String()
-	R33 = jsval.Array().
+	R33 = jsval.String().MinLength(1)
+	R34 = jsval.String()
+	R35 = jsval.String()
+	R36 = jsval.Array().
 		Items(
 			jsval.Reference(M).RefersTo("#/definitions/tag"),
 		).
 		AdditionalItems(
 			jsval.EmptyConstraint,
 		)
-	R34 = jsval.String().RegexpString("^\\d\\d:\\d\\d$")
-	R35 = jsval.String().Enum("XXXL", "XXL", "XL", "L", "M", "S", "XS")
-	R36 = jsval.String().Format("uri")
-	R37 = jsval.Object().
+	R37 = jsval.String().RegexpString("^\\d\\d:\\d\\d$")
+	R38 = jsval.String().Enum("XXXL", "XXL", "XL", "L", "M", "S", "XS")
+	R39 = jsval.String().Format("uri")
+	R40 = jsval.Object().
 		AdditionalProperties(
 			jsval.EmptyConstraint,
 		).
@@ -485,15 +503,15 @@ func init() {
 			"last_name#[a-z]+",
 			jsval.Reference(M).RefersTo("#/definitions/string_i18n"),
 		)
-	R38 = jsval.Array().
+	R41 = jsval.Array().
 		Items(
 			jsval.Reference(M).RefersTo("#/definitions/user"),
 		).
 		AdditionalItems(
 			jsval.EmptyConstraint,
 		)
-	R39 = jsval.String().RegexpString("^[a-fA-F0-9-]+$")
-	R40 = jsval.Object().
+	R42 = jsval.String().RegexpString("^[a-fA-F0-9-]+$")
+	R43 = jsval.Object().
 		AdditionalProperties(
 			jsval.EmptyConstraint,
 		).
@@ -515,41 +533,44 @@ func init() {
 	M.SetReference("#/definitions/conference", R3)
 	M.SetReference("#/definitions/conference_date", R4)
 	M.SetReference("#/definitions/conference_date_array", R5)
-	M.SetReference("#/definitions/date", R6)
-	M.SetReference("#/definitions/date_array", R7)
-	M.SetReference("#/definitions/datestr", R8)
-	M.SetReference("#/definitions/datestr_array", R9)
-	M.SetReference("#/definitions/datetime", R10)
-	M.SetReference("#/definitions/duration", R11)
-	M.SetReference("#/definitions/email", R12)
-	M.SetReference("#/definitions/idprovider_name", R13)
-	M.SetReference("#/definitions/int_rating", R14)
-	M.SetReference("#/definitions/language", R15)
-	M.SetReference("#/definitions/latitude", R16)
-	M.SetReference("#/definitions/longitude", R17)
-	M.SetReference("#/definitions/markdown_en", R18)
-	M.SetReference("#/definitions/markdown_i18n", R19)
-	M.SetReference("#/definitions/material_level", R20)
-	M.SetReference("#/definitions/positiveInteger", R21)
-	M.SetReference("#/definitions/positiveIntegerDefault10", R22)
-	M.SetReference("#/definitions/question", R23)
-	M.SetReference("#/definitions/room", R24)
-	M.SetReference("#/definitions/room_array", R25)
-	M.SetReference("#/definitions/session", R26)
-	M.SetReference("#/definitions/speaker", R27)
-	M.SetReference("#/definitions/speaker_array", R28)
-	M.SetReference("#/definitions/string_en", R29)
-	M.SetReference("#/definitions/string_en_not_empty", R30)
-	M.SetReference("#/definitions/string_i18n", R31)
-	M.SetReference("#/definitions/tag", R32)
-	M.SetReference("#/definitions/tag_array", R33)
-	M.SetReference("#/definitions/time", R34)
-	M.SetReference("#/definitions/tshirt_size", R35)
-	M.SetReference("#/definitions/url", R36)
-	M.SetReference("#/definitions/user", R37)
-	M.SetReference("#/definitions/user_array", R38)
-	M.SetReference("#/definitions/uuid", R39)
-	M.SetReference("#/definitions/venue", R40)
+	M.SetReference("#/definitions/conference_series", R6)
+	M.SetReference("#/definitions/date", R7)
+	M.SetReference("#/definitions/date_array", R8)
+	M.SetReference("#/definitions/datestr", R9)
+	M.SetReference("#/definitions/datestr_array", R10)
+	M.SetReference("#/definitions/datetime", R11)
+	M.SetReference("#/definitions/duration", R12)
+	M.SetReference("#/definitions/email", R13)
+	M.SetReference("#/definitions/idprovider_name", R14)
+	M.SetReference("#/definitions/int_rating", R15)
+	M.SetReference("#/definitions/language", R16)
+	M.SetReference("#/definitions/latitude", R17)
+	M.SetReference("#/definitions/longitude", R18)
+	M.SetReference("#/definitions/markdown_en", R19)
+	M.SetReference("#/definitions/markdown_i18n", R20)
+	M.SetReference("#/definitions/material_level", R21)
+	M.SetReference("#/definitions/positiveInteger", R22)
+	M.SetReference("#/definitions/positiveIntegerDefault10", R23)
+	M.SetReference("#/definitions/question", R24)
+	M.SetReference("#/definitions/room", R25)
+	M.SetReference("#/definitions/room_array", R26)
+	M.SetReference("#/definitions/session", R27)
+	M.SetReference("#/definitions/slug", R28)
+	M.SetReference("#/definitions/slug_top", R29)
+	M.SetReference("#/definitions/speaker", R30)
+	M.SetReference("#/definitions/speaker_array", R31)
+	M.SetReference("#/definitions/string_en", R32)
+	M.SetReference("#/definitions/string_en_not_empty", R33)
+	M.SetReference("#/definitions/string_i18n", R34)
+	M.SetReference("#/definitions/tag", R35)
+	M.SetReference("#/definitions/tag_array", R36)
+	M.SetReference("#/definitions/time", R37)
+	M.SetReference("#/definitions/tshirt_size", R38)
+	M.SetReference("#/definitions/url", R39)
+	M.SetReference("#/definitions/user", R40)
+	M.SetReference("#/definitions/user_array", R41)
+	M.SetReference("#/definitions/uuid", R42)
+	M.SetReference("#/definitions/venue", R43)
 	HTTPAddConferenceAdminRequest = jsval.New().
 		SetConstraintMap(M).
 		SetRoot(
@@ -608,7 +629,7 @@ func init() {
 		SetConstraintMap(M).
 		SetRoot(
 			jsval.Object().
-				Required("slug", "title", "user_id").
+				Required("series_id", "slug", "title", "user_id").
 				AdditionalProperties(
 					jsval.EmptyConstraint,
 				).
@@ -617,8 +638,12 @@ func init() {
 					jsval.Reference(M).RefersTo("#/definitions/string_en"),
 				).
 				AddProp(
+					"series_id",
+					jsval.Reference(M).RefersTo("#/definitions/uuid"),
+				).
+				AddProp(
 					"slug",
-					jsval.Reference(M).RefersTo("#/definitions/string_en"),
+					jsval.Reference(M).RefersTo("#/definitions/slug"),
 				).
 				AddProp(
 					"sub_title",
@@ -631,14 +656,6 @@ func init() {
 				AddProp(
 					"user_id",
 					jsval.Reference(M).RefersTo("#/definitions/uuid"),
-				).
-				PatternPropertiesString(
-					"description#[a-z]+",
-					jsval.Reference(M).RefersTo("#/definitions/string_i18n"),
-				).
-				PatternPropertiesString(
-					"title#[a-z]+",
-					jsval.Reference(M).RefersTo("#/definitions/string_i18n"),
 				),
 		)
 
@@ -684,6 +701,33 @@ func init() {
 				PatternPropertiesString(
 					"title#[a-z]+",
 					jsval.Reference(M).RefersTo("#/definitions/string_i18n"),
+				),
+		)
+
+	HTTPCreateConferenceSeriesRequest = jsval.New().
+		SetConstraintMap(M).
+		SetRoot(
+			jsval.Object().
+				Required("slug").
+				AdditionalProperties(
+					jsval.EmptyConstraint,
+				).
+				AddProp(
+					"slug",
+					jsval.Reference(M).RefersTo("#/definitions/slug_top"),
+				),
+		)
+
+	HTTPCreateConferenceSeriesResponse = jsval.New().
+		SetConstraintMap(M).
+		SetRoot(
+			jsval.Object().
+				AdditionalProperties(
+					jsval.EmptyConstraint,
+				).
+				AddProp(
+					"slug",
+					jsval.Reference(M).RefersTo("#/definitions/slug_top"),
 				),
 		)
 
@@ -1246,6 +1290,20 @@ func init() {
 				),
 		)
 
+	HTTPDeleteConferenceSeriesRequest = jsval.New().
+		SetConstraintMap(M).
+		SetRoot(
+			jsval.Object().
+				Required("id").
+				AdditionalProperties(
+					jsval.EmptyConstraint,
+				).
+				AddProp(
+					"id",
+					jsval.Reference(M).RefersTo("#/definitions/uuid"),
+				),
+		)
+
 	HTTPDeleteConferenceVenueRequest = jsval.New().
 		SetConstraintMap(M).
 		SetRoot(
@@ -1381,6 +1439,35 @@ func init() {
 			jsval.Array().
 				Items(
 					jsval.Reference(M).RefersTo("#/definitions/conference"),
+				).
+				AdditionalItems(
+					jsval.EmptyConstraint,
+				),
+		)
+
+	HTTPListConferenceSeriesRequest = jsval.New().
+		SetConstraintMap(M).
+		SetRoot(
+			jsval.Object().
+				AdditionalProperties(
+					jsval.EmptyConstraint,
+				).
+				AddProp(
+					"limit",
+					jsval.Reference(M).RefersTo("#/definitions/positiveIntegerDefault10"),
+				).
+				AddProp(
+					"since",
+					jsval.Reference(M).RefersTo("#/definitions/uuid"),
+				),
+		)
+
+	HTTPListConferenceSeriesResponse = jsval.New().
+		SetConstraintMap(M).
+		SetRoot(
+			jsval.Array().
+				Items(
+					jsval.Reference(M).RefersTo("#/definitions/conference_series"),
 				).
 				AdditionalItems(
 					jsval.EmptyConstraint,
