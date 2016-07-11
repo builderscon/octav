@@ -54,13 +54,14 @@ CREATE TABLE conference_series (
 CREATE TABLE conferences (
     oid INTEGER UNSIGNED NOT NULL PRIMARY KEY AUTO_INCREMENT,
     eid CHAR(64) CHARACTER SET latin1 NOT NULL,
-    series_id CHAR(64) CHARACTER SET latin1, -- may be null
+    series_id CHAR(64) CHARACTER SET latin1 NOT NULL,
     slug TEXT NOT NULL,
     title TEXT NOT NULL,
     sub_title TEXT,
     created_by CHAR(64) CHARACTER SET latin1 NOT NULL,
     created_on DATETIME NOT NULL,
     modified_on TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (series_id) REFERENCES conference_series(eid),
     UNIQUE KEY(eid),
     UNIQUE KEY(series_id, slug(191))
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
