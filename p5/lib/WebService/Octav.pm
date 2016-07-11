@@ -293,9 +293,38 @@ sub list_room {
     return JSON::decode_json($res->content);
 }
 
+sub create_conference_series {
+    my ($self, $payload) = @_;
+    for my $required (qw(slug)) {
+        if (!$payload->{$required}) {
+            die qq|property "$required" must be provided|;
+        }
+    }
+    my $uri = URI->new($self->{endpoint} . qq|/v1/conference_series/create|);
+    my $json_payload = JSON::encode_json($payload);
+    my $res = $self->{user_agent}->post($uri, Content => $json_payload);
+    if (!$res->is_success) {
+        $self->{last_error} = $res->status_line;
+        return;
+    }
+    return JSON::decode_json($res->content);
+}
+
+sub list_conference_series {
+    my ($self, $payload) = @_;
+    my $uri = URI->new($self->{endpoint} . qq|/v1/conference_series/list|);
+    $uri->query_form($payload);
+    my $res = $self->{user_agent}->get($uri);
+    if (!$res->is_success) {
+        $self->{last_error} = $res->status_line;
+        return;
+    }
+    return JSON::decode_json($res->content);
+}
+
 sub create_conference {
     my ($self, $payload) = @_;
-    for my $required (qw(title slug user_id)) {
+    for my $required (qw(series_id title slug user_id)) {
         if (!$payload->{$required}) {
             die qq|property "$required" must be provided|;
         }
@@ -466,6 +495,23 @@ sub update_conference {
         }
     }
     my $uri = URI->new($self->{endpoint} . qq|/v1/conference/update|);
+    my $json_payload = JSON::encode_json($payload);
+    my $res = $self->{user_agent}->post($uri, Content => $json_payload);
+    if (!$res->is_success) {
+        $self->{last_error} = $res->status_line;
+        return;
+    }
+    return 1
+}
+
+sub delete_conference_series {
+    my ($self, $payload) = @_;
+    for my $required (qw(id)) {
+        if (!$payload->{$required}) {
+            die qq|property "$required" must be provided|;
+        }
+    }
+    my $uri = URI->new($self->{endpoint} . qq|/v1/conference_series/delete|);
     my $json_payload = JSON::encode_json($payload);
     my $res = $self->{user_agent}->post($uri, Content => $json_payload);
     if (!$res->is_success) {
