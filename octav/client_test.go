@@ -20,14 +20,23 @@ import (
 type TestCtx struct {
 	*testing.T
 	APIClient  *db.Client
+	Superuser  *db.User
 	HTTPClient *client.Client
 }
 
 func NewTestCtx(t *testing.T) (*TestCtx, error) {
-	vdb := db.Client{
+	client := db.Client{
 		EID:    tools.UUID(),
 		Secret: tools.UUID(), // Todo
 		Name:   "Test Client",
+	}
+	u := newuser()
+	superuser := db.User{
+		AuthUserID: u.AuthUserID,
+		AuthVia:    u.AuthVia,
+		EID:        tools.UUID(),
+		IsAdmin:    true,
+		Nickname:   "root",
 	}
 
 	tx, err := db.Begin()
@@ -36,19 +45,56 @@ func NewTestCtx(t *testing.T) (*TestCtx, error) {
 	}
 	defer tx.AutoRollback()
 
-	if vdb.Create(tx); err != nil {
+	if err = client.Create(tx); err != nil {
 		return nil, err
 	}
+
+	if err = superuser.Create(tx); err != nil {
+		return nil, err
+	}
+
+{
+	u := db.User{}
+	u.LoadByEID(tx, superuser.EID)
+	t.Logf("%#v", u)
+}
+
 	if err := tx.Commit(); err != nil {
 		return nil, errors.Wrap(err, "failed to commit changes to DB")
 	}
 
 	ctx := &TestCtx{
 		T:         t,
-		APIClient: &vdb,
+		APIClient: &client,
+		Superuser: &superuser,
 	}
 
 	return ctx, nil
+}
+
+func (ctx *TestCtx) Close() error {
+	tx, err := db.Begin()
+	if err != nil {
+		return errors.Wrap(err, "failed to start DB transaction")
+	}
+	defer tx.AutoRollback()
+
+	if cl := ctx.APIClient; cl != nil {
+		if err := cl.Delete(tx); err != nil {
+			return errors.Wrap(err, "failed to delete client")
+		}
+	}
+
+	if u := ctx.Superuser; u != nil {
+		if err := u.Delete(tx); err != nil {
+			return errors.Wrap(err, "failed to delete superuser")
+		}
+	}
+
+	if err := tx.Commit(); err != nil {
+		return errors.Wrap(err, "failed to commit changes to DB")
+	}
+	return nil
 }
 
 func (ctx *TestCtx) SetAPIServer(ts *httptest.Server) {
@@ -114,6 +160,7 @@ func testLookupRoom(ctx *TestCtx, id, lang string) (*model.Room, error) {
 }
 
 func testCreateUser(ctx *TestCtx, in *model.CreateUserRequest) (*model.User, error) {
+	in.UserID = ctx.Superuser.EID
 	res, err := ctx.HTTPClient.CreateUser(in)
 	if !assert.NoError(ctx.T, err, "CreateUser should succeed") {
 		return nil, err
@@ -185,9 +232,10 @@ func testDeleteVenue(ctx *TestCtx, id string) error {
 	return err
 }
 
-func yapcasia() *model.CreateConferenceSeriesRequest {
+func yapcasia(uid string) *model.CreateConferenceSeriesRequest {
 	return &model.CreateConferenceSeriesRequest{
-		Slug: "yapcasia",
+		UserID: uid,
+		Slug:   "yapcasia",
 	}
 }
 
@@ -208,8 +256,8 @@ func testCreateConferenceSeries(ctx *TestCtx, in *model.CreateConferenceSeriesRe
 	return res, nil
 }
 
-func testDeleteConferenceSeries(ctx *TestCtx, id string) error {
-	err := ctx.HTTPClient.DeleteConferenceSeries(&model.DeleteConferenceSeriesRequest{ID: id})
+func testDeleteConferenceSeries(ctx *TestCtx, id, userID string) error {
+	err := ctx.HTTPClient.DeleteConferenceSeries(&model.DeleteConferenceSeriesRequest{ID: id, UserID: userID})
 	if !assert.NoError(ctx.T, err, "DeleteConferenceSeries should be successful") {
 		return err
 	}
@@ -254,9 +302,10 @@ func testDeleteConference(ctx *TestCtx, id string) error {
 
 func TestConferenceCRUD(t *testing.T) {
 	ctx, err := NewTestCtx(t)
-	if !assert.NoError(ctx, err, "failed to create test ctx") {
+	if !assert.NoError(t, err, "failed to create test ctx") {
 		return
 	}
+	defer ctx.Close()
 
 	ts := httptest.NewServer(octav.New())
 	defer ts.Close()
@@ -269,11 +318,11 @@ func TestConferenceCRUD(t *testing.T) {
 	}
 	defer testDeleteUser(ctx, user.ID)
 
-	series, err := testCreateConferenceSeries(ctx, yapcasia())
+	series, err := testCreateConferenceSeries(ctx, yapcasia(ctx.Superuser.EID))
 	if err != nil {
 		return
 	}
-	defer testDeleteConferenceSeries(ctx, series.ID)
+	defer testDeleteConferenceSeries(ctx, series.ID, ctx.Superuser.EID)
 
 	res, err := testCreateConference(ctx, yapcasiaTokyo(series, user.ID))
 	if err != nil {
@@ -292,8 +341,8 @@ func TestConferenceCRUD(t *testing.T) {
 
 	// The result from LookupConference contains the administrator field
 	// Remove that (and make sure it's populated), then do the comparison
-//	admins := res2.Administrators
-//	res2.Administrators = model.UserList(nil)
+	//	admins := res2.Administrators
+	//	res2.Administrators = model.UserList(nil)
 	if !assert.Equal(ctx.T, res2, res, "LookupConference is the same as the conference created") {
 		return
 	}
@@ -328,6 +377,7 @@ func TestRoomCRUD(t *testing.T) {
 	if !assert.NoError(ctx, err, "failed to create test ctx") {
 		return
 	}
+	defer ctx.Close()
 
 	ts := httptest.NewServer(octav.New())
 	defer ts.Close()
@@ -436,6 +486,7 @@ func TestSessionCRUD(t *testing.T) {
 	if !assert.NoError(ctx, err, "failed to create test ctx") {
 		return
 	}
+	defer ctx.Close()
 
 	ts := httptest.NewServer(octav.New())
 	defer ts.Close()
@@ -448,11 +499,11 @@ func TestSessionCRUD(t *testing.T) {
 	}
 	defer testDeleteUser(ctx, user.ID)
 
-	series, err := testCreateConferenceSeries(ctx, yapcasia())
+	series, err := testCreateConferenceSeries(ctx, yapcasia(ctx.Superuser.EID))
 	if err != nil {
 		return
 	}
-	defer testDeleteConferenceSeries(ctx, series.ID)
+	defer testDeleteConferenceSeries(ctx, series.ID, ctx.Superuser.EID)
 
 	conference, err := testCreateConference(ctx, yapcasiaTokyo(series, user.ID))
 	if err != nil {
@@ -498,26 +549,33 @@ func TestSessionCRUD(t *testing.T) {
 var ghidL = sync.Mutex{}
 var ghid = 0
 
-func johndoe() *model.CreateUserRequest {
+func newuser() *model.CreateUserRequest {
 	ghidL.Lock()
 	defer ghidL.Unlock()
 
 	ghid++
+	r := model.CreateUserRequest{}
+
+	r.AuthVia = "github"
+	r.AuthUserID = strconv.Itoa(ghid)
+	return &r
+}
+
+func johndoe() *model.CreateUserRequest {
+	r := newuser()
+
 	lf := tools.LocalizedFields{}
 	lf.Set("ja", "first_name", "ジョン")
 	lf.Set("ja", "last_name", "ドー")
 
-	r := model.CreateUserRequest{
-		Nickname: tools.UUID(),
-	}
-	r.AuthVia.Set("github")
-	r.AuthUserID.Set(strconv.Itoa(ghid))
+	r.Nickname = tools.UUID()
+	r.AuthVia = "github"
 	r.FirstName.Set("John")
 	r.LastName.Set("Doe")
 	r.Email.Set("john.doe@example.com")
 	r.TshirtSize.Set("XL")
 	r.L10N = lf
-	return &r
+	return r
 }
 
 func TestCreateUser(t *testing.T) {
@@ -525,6 +583,7 @@ func TestCreateUser(t *testing.T) {
 	if !assert.NoError(ctx, err, "failed to create test ctx") {
 		return
 	}
+	defer ctx.Close()
 
 	ts := httptest.NewServer(octav.New())
 	defer ts.Close()
@@ -576,6 +635,7 @@ func TestVenueCRUD(t *testing.T) {
 	if !assert.NoError(ctx, err, "failed to create test ctx") {
 		return
 	}
+	defer ctx.Close()
 
 	ts := httptest.NewServer(octav.New())
 	defer ts.Close()
@@ -629,6 +689,7 @@ func TestDeleteConferenceDates(t *testing.T) {
 	if !assert.NoError(ctx, err, "failed to create test ctx") {
 		return
 	}
+	defer ctx.Close()
 
 	ts := httptest.NewServer(octav.New())
 	defer ts.Close()
@@ -642,12 +703,13 @@ func TestDeleteConferenceDates(t *testing.T) {
 	defer testDeleteUser(ctx, user.ID)
 
 	series, err := testCreateConferenceSeries(ctx, &model.CreateConferenceSeriesRequest{
+		UserID: ctx.Superuser.EID,
 		Slug: tools.RandomString(8),
 	})
 	if err != nil {
 		return
 	}
-	defer testDeleteConferenceSeries(ctx, series.ID)
+	defer testDeleteConferenceSeries(ctx, series.ID, ctx.Superuser.EID)
 
 	conf, err := testCreateConference(ctx, &model.CreateConferenceRequest{
 		UserID:   user.ID,
@@ -696,6 +758,7 @@ func TestConferenceAdmins(t *testing.T) {
 	if !assert.NoError(ctx, err, "failed to create test ctx") {
 		return
 	}
+	defer ctx.Close()
 
 	ts := httptest.NewServer(octav.New())
 	defer ts.Close()
@@ -709,12 +772,13 @@ func TestConferenceAdmins(t *testing.T) {
 	defer testDeleteUser(ctx, user.ID)
 
 	series, err := testCreateConferenceSeries(ctx, &model.CreateConferenceSeriesRequest{
+		UserID: ctx.Superuser.EID,
 		Slug: tools.RandomString(8),
 	})
 	if err != nil {
 		return
 	}
-	defer testDeleteConferenceSeries(ctx, series.ID)
+	defer testDeleteConferenceSeries(ctx, series.ID, ctx.Superuser.EID)
 
 	conf, err := testCreateConference(ctx, &model.CreateConferenceRequest{
 		UserID:   user.ID,
@@ -777,6 +841,7 @@ func TestListConference(t *testing.T) {
 	if !assert.NoError(ctx, err, "failed to create test ctx") {
 		return
 	}
+	defer ctx.Close()
 
 	ts := httptest.NewServer(octav.New())
 	defer ts.Close()
@@ -790,12 +855,13 @@ func TestListConference(t *testing.T) {
 	defer testDeleteUser(ctx, user.ID)
 
 	series, err := testCreateConferenceSeries(ctx, &model.CreateConferenceSeriesRequest{
+		UserID: ctx.Superuser.EID,
 		Slug: tools.RandomString(8),
 	})
 	if err != nil {
 		return
 	}
-	defer testDeleteConferenceSeries(ctx, series.ID)
+	defer testDeleteConferenceSeries(ctx, series.ID, ctx.Superuser.EID)
 
 	for i := 0; i < 10; i++ {
 		conf, err := testCreateConference(ctx, &model.CreateConferenceRequest{
@@ -846,6 +912,7 @@ func TestListRoom(t *testing.T) {
 	if !assert.NoError(ctx, err, "failed to create test ctx") {
 		return
 	}
+	defer ctx.Close()
 
 	ts := httptest.NewServer(octav.New())
 	defer ts.Close()
@@ -884,6 +951,7 @@ func TestListSessionByConference(t *testing.T) {
 	if !assert.NoError(ctx, err, "failed to create test ctx") {
 		return
 	}
+	defer ctx.Close()
 
 	ts := httptest.NewServer(octav.New())
 	defer ts.Close()
@@ -896,11 +964,11 @@ func TestListSessionByConference(t *testing.T) {
 	}
 	defer testDeleteUser(ctx, user.ID)
 
-	series, err := testCreateConferenceSeries(ctx, yapcasia())
+	series, err := testCreateConferenceSeries(ctx, yapcasia(ctx.Superuser.EID))
 	if err != nil {
 		return
 	}
-	defer testDeleteConferenceSeries(ctx, series.ID)
+	defer testDeleteConferenceSeries(ctx, series.ID, ctx.Superuser.EID)
 
 	conference, err := testCreateConference(ctx, yapcasiaTokyo(series, user.ID))
 	if err != nil {
@@ -942,6 +1010,7 @@ func TestListVenue(t *testing.T) {
 	if !assert.NoError(ctx, err, "failed to create test ctx") {
 		return
 	}
+	defer ctx.Close()
 
 	ts := httptest.NewServer(octav.New())
 	defer ts.Close()

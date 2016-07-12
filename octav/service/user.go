@@ -10,16 +10,8 @@ func (v *User) populateRowForCreate(vdb *db.User, payload model.CreateUserReques
 	vdb.EID = tools.UUID()
 
 	vdb.Nickname = payload.Nickname
-
-	if payload.AuthVia.Valid() {
-		vdb.AuthVia.Valid = true
-		vdb.AuthVia.String = payload.AuthVia.String
-	}
-
-	if payload.AuthUserID.Valid() {
-		vdb.AuthUserID.Valid = true
-		vdb.AuthUserID.String = payload.AuthUserID.String
-	}
+	vdb.AuthVia = payload.AuthVia
+	vdb.AuthUserID = payload.AuthUserID
 
 	if payload.AvatarURL.Valid() {
 		vdb.AvatarURL.Valid = true
@@ -56,13 +48,11 @@ func (v *User) populateRowForUpdate(vdb *db.User, payload model.UpdateUserReques
 	}
 
 	if payload.AuthVia.Valid() {
-		vdb.AuthVia.Valid = true
-		vdb.AuthVia.String = payload.AuthVia.String
+		vdb.AuthVia = payload.AuthVia.String
 	}
 
 	if payload.AuthUserID.Valid() {
-		vdb.AuthUserID.Valid = true
-		vdb.AuthUserID.String = payload.AuthUserID.String
+		vdb.AuthUserID = payload.AuthUserID.String
 	}
 
 	if payload.AvatarURL.Valid() {

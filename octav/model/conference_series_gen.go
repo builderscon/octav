@@ -13,7 +13,7 @@ var _ = time.Time{}
 
 func (v *ConferenceSeries) Load(tx *db.Tx, id string) (err error) {
 	if pdebug.Enabled {
-		g := pdebug.Marker("ConferenceSeries.Load").BindError(&err)
+		g := pdebug.Marker("model.ConferenceSeries.Load %s", id).BindError(&err)
 		defer g.End()
 	}
 	vdb := db.ConferenceSeries{}

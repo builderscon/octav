@@ -13,7 +13,7 @@ var _ = time.Time{}
 
 func (v *Question) Load(tx *db.Tx, id string) (err error) {
 	if pdebug.Enabled {
-		g := pdebug.Marker("Question.Load").BindError(&err)
+		g := pdebug.Marker("model.Question.Load %s", id).BindError(&err)
 		defer g.End()
 	}
 	vdb := db.Question{}

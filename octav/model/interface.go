@@ -85,8 +85,8 @@ type TagString string
 // +model
 type User struct {
 	ID         string `json:"id"`
-	AuthVia    string `json:"auth_via,omitempty"`
-	AuthUserID string `json:"auth_user_id,omitempty"`
+	AuthVia    string `json:"auth_via"`
+	AuthUserID string `json:"auth_user_id"`
 	AvatarURL  string `json:"avatar_url,omitempty"`
 	FirstName  string `json:"first_name,omitempty" l10n:"true"`
 	LastName   string `json:"last_name,omitempty" l10n:"true"`
@@ -109,8 +109,14 @@ type Venue struct {
 type VenueList []Venue
 
 // +transport
+type LookupConferenceSeriesRequest struct {
+	ID string `json:"id"`
+}
+
+// +transport
 type CreateConferenceSeriesRequest struct {
-	Slug string `json:"slug"`
+	UserID string `json:"user_id"`
+	Slug   string `json:"slug"`
 }
 
 // +transport
@@ -121,13 +127,14 @@ type UpdateConferenceSeriesRequest struct {
 
 // +transport
 type DeleteConferenceSeriesRequest struct {
-	ID string `json:"id"`
+	ID     string `json:"id"`
+	UserID string `json:"user_id"`
 }
 
 // +transport
 type ListConferenceSeriesRequest struct {
-	Since      jsval.MaybeString `json:"since,omitempty" urlenc:"since,omitempty,string"`
-	Limit      jsval.MaybeInt    `json:"limit,omitempty" urlenc:"limit,omitempty,int64"`
+	Since jsval.MaybeString `json:"since,omitempty" urlenc:"since,omitempty,string"`
+	Limit jsval.MaybeInt    `json:"limit,omitempty" urlenc:"limit,omitempty,int64"`
 }
 
 // +transport
@@ -350,12 +357,13 @@ type DeleteSessionRequest struct {
 
 // +transport
 type CreateUserRequest struct {
+	UserID     string                `json:"user_id"` // This is the user ID of the person performing this request
 	FirstName  jsval.MaybeString     `json:"first_name,omitempty" l18n:"true"`
 	LastName   jsval.MaybeString     `json:"last_name,omitempty" l18n:"true"`
 	Nickname   string                `json:"nickname"`
 	Email      jsval.MaybeString     `json:"email,omitempty"`
-	AuthVia    jsval.MaybeString     `json:"auth_via,omitempty"`
-	AuthUserID jsval.MaybeString     `json:"auth_user_id,omitempty"`
+	AuthVia    string                `json:"auth_via"`
+	AuthUserID string                `json:"auth_user_id"`
 	AvatarURL  jsval.MaybeString     `json:"avatar_url,omitempty"`
 	TshirtSize jsval.MaybeString     `json:"tshirt_size,omitempty"`
 	L10N       tools.LocalizedFields `json:"-"`
@@ -453,6 +461,11 @@ type Question struct {
 }
 
 // +transport
+type LookupQuestionRequest struct {
+	ID string `json:"id"`
+}
+
+// +transport
 type CreateQuestionRequest struct {
 	SessionID string `json:"session_id" urlenc:"session_id"`
 	UserID    string `json:"user_id" urlenc:"user_id"`
@@ -502,6 +515,11 @@ type Client struct {
 type CreateClientRequest struct {
 	ID   string `json:"id"`
 	Name string `json:"name"`
+}
+
+// +transport
+type LookupClientRequest struct {
+	ID string `json:"id"`
 }
 
 // +transport

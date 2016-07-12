@@ -5,9 +5,11 @@ package db
 import (
 	"bytes"
 	"database/sql"
-	"errors"
 	"strconv"
 	"time"
+
+	"github.com/lestrrat/go-pdebug"
+	"github.com/pkg/errors"
 )
 
 const SessionStdSelectColumns = "sessions.oid, sessions.eid, sessions.conference_id, sessions.room_id, sessions.speaker_id, sessions.title, sessions.abstract, sessions.memo, sessions.starts_on, sessions.duration, sessions.material_level, sessions.tags, sessions.category, sessions.spoken_language, sessions.slide_language, sessions.slide_subtitles, sessions.slide_url, sessions.video_url, sessions.photo_permission, sessions.video_permission, sessions.has_interpretation, sessions.status, sessions.sort_order, sessions.confirmed, sessions.created_on, sessions.modified_on"
@@ -29,7 +31,12 @@ func (s *Session) LoadByEID(tx *Tx, eid string) error {
 	return nil
 }
 
-func (s *Session) Create(tx *Tx, opts ...InsertOption) error {
+func (s *Session) Create(tx *Tx, opts ...InsertOption) (err error) {
+	if pdebug.Enabled {
+		g := pdebug.Marker("db.Session.Create").BindError(&err)
+		defer g.End()
+		pdebug.Printf("%#v", s)
+	}
 	if s.EID == "" {
 		return errors.New("create: non-empty EID required")
 	}

@@ -11,8 +11,54 @@ import (
 	"github.com/lestrrat/go-urlenc"
 )
 
+func (r LookupConferenceSeriesRequest) collectMarshalData() map[string]interface{} {
+	m := make(map[string]interface{})
+	m["id"] = r.ID
+	return m
+}
+
+func (r LookupConferenceSeriesRequest) MarshalJSON() ([]byte, error) {
+	m := r.collectMarshalData()
+	buf, err := json.Marshal(m)
+	if err != nil {
+		return nil, err
+	}
+	return buf, nil
+}
+
+func (r LookupConferenceSeriesRequest) MarshalURL() ([]byte, error) {
+	m := r.collectMarshalData()
+	buf, err := urlenc.Marshal(m)
+	if err != nil {
+		return nil, err
+	}
+	return buf, nil
+}
+
+func (r *LookupConferenceSeriesRequest) UnmarshalJSON(data []byte) error {
+	m := make(map[string]interface{})
+	if err := json.Unmarshal(data, &m); err != nil {
+		return err
+	}
+	return r.Populate(m)
+}
+
+func (r *LookupConferenceSeriesRequest) Populate(m map[string]interface{}) error {
+	if jv, ok := m["id"]; ok {
+		switch jv.(type) {
+		case string:
+			r.ID = jv.(string)
+			delete(m, "id")
+		default:
+			return ErrInvalidJSONFieldType{Field: "id"}
+		}
+	}
+	return nil
+}
+
 func (r CreateConferenceSeriesRequest) collectMarshalData() map[string]interface{} {
 	m := make(map[string]interface{})
+	m["user_id"] = r.UserID
 	m["slug"] = r.Slug
 	return m
 }
@@ -44,6 +90,15 @@ func (r *CreateConferenceSeriesRequest) UnmarshalJSON(data []byte) error {
 }
 
 func (r *CreateConferenceSeriesRequest) Populate(m map[string]interface{}) error {
+	if jv, ok := m["user_id"]; ok {
+		switch jv.(type) {
+		case string:
+			r.UserID = jv.(string)
+			delete(m, "user_id")
+		default:
+			return ErrInvalidJSONFieldType{Field: "user_id"}
+		}
+	}
 	if jv, ok := m["slug"]; ok {
 		switch jv.(type) {
 		case string:
@@ -113,6 +168,7 @@ func (r *UpdateConferenceSeriesRequest) Populate(m map[string]interface{}) error
 func (r DeleteConferenceSeriesRequest) collectMarshalData() map[string]interface{} {
 	m := make(map[string]interface{})
 	m["id"] = r.ID
+	m["user_id"] = r.UserID
 	return m
 }
 
@@ -150,6 +206,15 @@ func (r *DeleteConferenceSeriesRequest) Populate(m map[string]interface{}) error
 			delete(m, "id")
 		default:
 			return ErrInvalidJSONFieldType{Field: "id"}
+		}
+	}
+	if jv, ok := m["user_id"]; ok {
+		switch jv.(type) {
+		case string:
+			r.UserID = jv.(string)
+			delete(m, "user_id")
+		default:
+			return ErrInvalidJSONFieldType{Field: "user_id"}
 		}
 	}
 	return nil
@@ -2075,6 +2140,7 @@ func (r *DeleteSessionRequest) Populate(m map[string]interface{}) error {
 
 func (r CreateUserRequest) collectMarshalData() map[string]interface{} {
 	m := make(map[string]interface{})
+	m["user_id"] = r.UserID
 	if r.FirstName.Valid() {
 		m["first_name"] = r.FirstName.Value()
 	}
@@ -2085,12 +2151,8 @@ func (r CreateUserRequest) collectMarshalData() map[string]interface{} {
 	if r.Email.Valid() {
 		m["email"] = r.Email.Value()
 	}
-	if r.AuthVia.Valid() {
-		m["auth_via"] = r.AuthVia.Value()
-	}
-	if r.AuthUserID.Valid() {
-		m["auth_user_id"] = r.AuthUserID.Value()
-	}
+	m["auth_via"] = r.AuthVia
+	m["auth_user_id"] = r.AuthUserID
 	if r.AvatarURL.Valid() {
 		m["avatar_url"] = r.AvatarURL.Value()
 	}
@@ -2127,6 +2189,15 @@ func (r *CreateUserRequest) UnmarshalJSON(data []byte) error {
 }
 
 func (r *CreateUserRequest) Populate(m map[string]interface{}) error {
+	if jv, ok := m["user_id"]; ok {
+		switch jv.(type) {
+		case string:
+			r.UserID = jv.(string)
+			delete(m, "user_id")
+		default:
+			return ErrInvalidJSONFieldType{Field: "user_id"}
+		}
+	}
 	if jv, ok := m["first_name"]; ok {
 		if err := r.FirstName.Set(jv); err != nil {
 			return errors.New("set field FirstName failed: " + err.Error())
@@ -2155,16 +2226,22 @@ func (r *CreateUserRequest) Populate(m map[string]interface{}) error {
 		delete(m, "email")
 	}
 	if jv, ok := m["auth_via"]; ok {
-		if err := r.AuthVia.Set(jv); err != nil {
-			return errors.New("set field AuthVia failed: " + err.Error())
+		switch jv.(type) {
+		case string:
+			r.AuthVia = jv.(string)
+			delete(m, "auth_via")
+		default:
+			return ErrInvalidJSONFieldType{Field: "auth_via"}
 		}
-		delete(m, "auth_via")
 	}
 	if jv, ok := m["auth_user_id"]; ok {
-		if err := r.AuthUserID.Set(jv); err != nil {
-			return errors.New("set field AuthUserID failed: " + err.Error())
+		switch jv.(type) {
+		case string:
+			r.AuthUserID = jv.(string)
+			delete(m, "auth_user_id")
+		default:
+			return ErrInvalidJSONFieldType{Field: "auth_user_id"}
 		}
-		delete(m, "auth_user_id")
 	}
 	if jv, ok := m["avatar_url"]; ok {
 		if err := r.AvatarURL.Set(jv); err != nil {
@@ -2178,7 +2255,7 @@ func (r *CreateUserRequest) Populate(m map[string]interface{}) error {
 		}
 		delete(m, "tshirt_size")
 	}
-	if err := tools.ExtractL10NFields(m, &r.L10N, []string{"first_name", "last_name", "nickname", "email", "auth_via", "auth_user_id", "avatar_url", "tshirt_size"}); err != nil {
+	if err := tools.ExtractL10NFields(m, &r.L10N, []string{"user_id", "first_name", "last_name", "nickname", "email", "auth_via", "auth_user_id", "avatar_url", "tshirt_size"}); err != nil {
 		return err
 	}
 	return nil
@@ -2186,11 +2263,16 @@ func (r *CreateUserRequest) Populate(m map[string]interface{}) error {
 
 func (r *CreateUserRequest) GetPropNames() ([]string, error) {
 	l, _ := r.L10N.GetPropNames()
-	return append(l, "first_name", "last_name", "nickname", "email", "auth_via", "auth_user_id", "avatar_url", "tshirt_size"), nil
+	return append(l, "user_id", "first_name", "last_name", "nickname", "email", "auth_via", "auth_user_id", "avatar_url", "tshirt_size"), nil
 }
 
 func (r *CreateUserRequest) SetPropValue(s string, v interface{}) error {
 	switch s {
+	case "user_id":
+		if jv, ok := v.(string); ok {
+			r.UserID = jv
+			return nil
+		}
 	case "first_name":
 		return r.FirstName.Set(v)
 	case "last_name":
@@ -2203,9 +2285,15 @@ func (r *CreateUserRequest) SetPropValue(s string, v interface{}) error {
 	case "email":
 		return r.Email.Set(v)
 	case "auth_via":
-		return r.AuthVia.Set(v)
+		if jv, ok := v.(string); ok {
+			r.AuthVia = jv
+			return nil
+		}
 	case "auth_user_id":
-		return r.AuthUserID.Set(v)
+		if jv, ok := v.(string); ok {
+			r.AuthUserID = jv
+			return nil
+		}
 	case "avatar_url":
 		return r.AvatarURL.Set(v)
 	case "tshirt_size":
@@ -3024,6 +3112,51 @@ func (r *ListSessionByConferenceRequest) Populate(m map[string]interface{}) erro
 	return nil
 }
 
+func (r LookupQuestionRequest) collectMarshalData() map[string]interface{} {
+	m := make(map[string]interface{})
+	m["id"] = r.ID
+	return m
+}
+
+func (r LookupQuestionRequest) MarshalJSON() ([]byte, error) {
+	m := r.collectMarshalData()
+	buf, err := json.Marshal(m)
+	if err != nil {
+		return nil, err
+	}
+	return buf, nil
+}
+
+func (r LookupQuestionRequest) MarshalURL() ([]byte, error) {
+	m := r.collectMarshalData()
+	buf, err := urlenc.Marshal(m)
+	if err != nil {
+		return nil, err
+	}
+	return buf, nil
+}
+
+func (r *LookupQuestionRequest) UnmarshalJSON(data []byte) error {
+	m := make(map[string]interface{})
+	if err := json.Unmarshal(data, &m); err != nil {
+		return err
+	}
+	return r.Populate(m)
+}
+
+func (r *LookupQuestionRequest) Populate(m map[string]interface{}) error {
+	if jv, ok := m["id"]; ok {
+		switch jv.(type) {
+		case string:
+			r.ID = jv.(string)
+			delete(m, "id")
+		default:
+			return ErrInvalidJSONFieldType{Field: "id"}
+		}
+	}
+	return nil
+}
+
 func (r CreateQuestionRequest) collectMarshalData() map[string]interface{} {
 	m := make(map[string]interface{})
 	m["session_id"] = r.SessionID
@@ -3429,6 +3562,51 @@ func (r *CreateClientRequest) Populate(m map[string]interface{}) error {
 			delete(m, "name")
 		default:
 			return ErrInvalidJSONFieldType{Field: "name"}
+		}
+	}
+	return nil
+}
+
+func (r LookupClientRequest) collectMarshalData() map[string]interface{} {
+	m := make(map[string]interface{})
+	m["id"] = r.ID
+	return m
+}
+
+func (r LookupClientRequest) MarshalJSON() ([]byte, error) {
+	m := r.collectMarshalData()
+	buf, err := json.Marshal(m)
+	if err != nil {
+		return nil, err
+	}
+	return buf, nil
+}
+
+func (r LookupClientRequest) MarshalURL() ([]byte, error) {
+	m := r.collectMarshalData()
+	buf, err := urlenc.Marshal(m)
+	if err != nil {
+		return nil, err
+	}
+	return buf, nil
+}
+
+func (r *LookupClientRequest) UnmarshalJSON(data []byte) error {
+	m := make(map[string]interface{})
+	if err := json.Unmarshal(data, &m); err != nil {
+		return err
+	}
+	return r.Populate(m)
+}
+
+func (r *LookupClientRequest) Populate(m map[string]interface{}) error {
+	if jv, ok := m["id"]; ok {
+		switch jv.(type) {
+		case string:
+			r.ID = jv.(string)
+			delete(m, "id")
+		default:
+			return ErrInvalidJSONFieldType{Field: "id"}
 		}
 	}
 	return nil

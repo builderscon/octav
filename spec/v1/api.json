@@ -653,9 +653,10 @@
       "encType": "application/json",
       "schema": {
         "properties": {
+          "user_id": { "$ref": "#/definitions/uuid" },
           "slug": { "$ref": "#/definitions/slug_top" }
         },
-        "required": ["slug"]
+        "required": ["user_id","slug"]
       },
       "targetSchema": { "$ref": "#/definitions/conference_series" }
     },
@@ -868,9 +869,10 @@
       "encType": "application/json",
       "schema": {
         "type": "object",
-        "required": ["id"],
+        "required": ["id", "user_id"],
         "properties": {
-          "id": { "$ref": "#/definitions/uuid" }
+          "id": { "$ref": "#/definitions/uuid" },
+          "user_id": { "$ref": "#/definitions/uuid" }
         }
       }
     },

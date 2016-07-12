@@ -5,8 +5,10 @@ package db
 import (
 	"bytes"
 	"database/sql"
-	"errors"
 	"time"
+
+	"github.com/lestrrat/go-pdebug"
+	"github.com/pkg/errors"
 )
 
 const ConferenceAdministratorStdSelectColumns = "conference_administrators.oid, conference_administrators.conference_id, conference_administrators.user_id, conference_administrators.created_on, conference_administrators.modified_on"
@@ -20,7 +22,12 @@ func (c *ConferenceAdministrator) Scan(scanner interface {
 	return scanner.Scan(&c.OID, &c.ConferenceID, &c.UserID, &c.CreatedOn, &c.ModifiedOn)
 }
 
-func (c *ConferenceAdministrator) Create(tx *Tx, opts ...InsertOption) error {
+func (c *ConferenceAdministrator) Create(tx *Tx, opts ...InsertOption) (err error) {
+	if pdebug.Enabled {
+		g := pdebug.Marker("db.ConferenceAdministrator.Create").BindError(&err)
+		defer g.End()
+		pdebug.Printf("%#v", c)
+	}
 	c.CreatedOn = time.Now()
 	doIgnore := false
 	for _, opt := range opts {

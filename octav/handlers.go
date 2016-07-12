@@ -136,7 +136,7 @@ func doDeleteConferenceSeries(ctx context.Context, w http.ResponseWriter, r *htt
 	defer tx.AutoRollback()
 
 	s := service.ConferenceSeries{}
-	if err := s.Delete(tx, payload.ID); err != nil {
+	if err := s.DeleteFromPayload(tx, payload); err != nil {
 		httpError(w, `DeleteConferenceSeries`, http.StatusInternalServerError, err)
 		return
 	}
