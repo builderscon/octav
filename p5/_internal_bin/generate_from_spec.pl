@@ -84,7 +84,7 @@ for my $link (@{$schema->{links}}) {
     say $tmpout '        return;';
     say $tmpout '    }';
     if ($link->{targetSchema}) {
-        say $tmpout '    return JSON::decode_json($res->content);';
+        say $tmpout '    return JSON::decode_json($res->decoded_content);';
     } else {
         say $tmpout '    return 1';
     }
