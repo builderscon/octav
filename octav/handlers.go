@@ -67,7 +67,7 @@ func httpJSONWithStatus(w http.ResponseWriter, v interface{}, st int) {
 	}
 
 	if pdebug.Enabled {
-		pdebug.Printf("error: %s", buf.String())
+		pdebug.Printf("response buffer: %s", buf.String())
 	}
 
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
@@ -862,19 +862,13 @@ func doCreateVenue(ctx context.Context, w http.ResponseWriter, r *http.Request, 
 	defer tx.AutoRollback()
 
 	s := service.Venue{}
-	vdb := db.Venue{}
-	if err := s.Create(tx, &vdb, payload); err != nil {
+	v := model.Venue{}
+	if err := s.CreateFromPayload(tx, &v, payload); err != nil {
 		httpError(w, `CreateVenue`, http.StatusInternalServerError, err)
 		return
 	}
 
 	if err := tx.Commit(); err != nil {
-		httpError(w, `CreateVenue`, http.StatusInternalServerError, err)
-		return
-	}
-
-	v := model.Venue{}
-	if err := v.FromRow(vdb); err != nil {
 		httpError(w, `CreateVenue`, http.StatusInternalServerError, err)
 		return
 	}
@@ -1081,27 +1075,13 @@ func doUpdateVenue(ctx context.Context, w http.ResponseWriter, r *http.Request, 
 	defer tx.AutoRollback()
 
 	s := service.Venue{}
-	vdb := db.Venue{}
-	if err := vdb.LoadByEID(tx, payload.ID); err != nil {
-		httpError(w, `UpdateConference`, http.StatusNotFound, err)
-		return
-	}
-
-	// TODO: We must protect the API server from changing important
-	// fields like conference_id, speaker_id, room_id, etc from regular
-	// users, but allow administrators to do anything they want
-	if err := s.Update(tx, &vdb, payload); err != nil {
+	v := model.Venue{}
+	if err := s.UpdateFromPayload(tx, &v, payload); err != nil {
 		httpError(w, `UpdateVenue`, http.StatusInternalServerError, err)
 		return
 	}
 
 	if err := tx.Commit(); err != nil {
-		httpError(w, `UpdateVenue`, http.StatusInternalServerError, err)
-		return
-	}
-
-	v := model.Venue{}
-	if err := v.FromRow(vdb); err != nil {
 		httpError(w, `UpdateVenue`, http.StatusInternalServerError, err)
 		return
 	}

@@ -49,7 +49,7 @@ func (v *Conference) populateRowForUpdate(vdb *db.Conference, payload model.Upda
 func (v *Conference) CreateFromPayload(tx *db.Tx, payload model.CreateConferenceRequest, result *model.Conference) error {
 	vdb := db.Conference{}
 	if err := v.Create(tx, &vdb, payload); err != nil {
-		return errors.Wrap(err, "failed to create store conference in database")
+		return errors.Wrap(err, "failed to store in database")
 	}
 
 	if err := v.AddAdministrator(tx, vdb.EID, payload.UserID); err != nil {
@@ -251,8 +251,8 @@ func (v *Conference) AddVenue(tx *db.Tx, cid, vid string) error {
 	return nil
 }
 
-func (v *Conference) DeleteVenue(tx *db.Tx, cid, uid string) error {
-	return db.DeleteConferenceVenue(tx, cid, uid)
+func (v *Conference) DeleteVenue(tx *db.Tx, confID, venueID string) error {
+	return db.DeleteConferenceVenue(tx, confID, venueID)
 }
 
 func (v *Conference) LoadVenues(tx *db.Tx, cdl *model.VenueList, cid string) error {
