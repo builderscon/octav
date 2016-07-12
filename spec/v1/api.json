@@ -432,13 +432,14 @@
           "last_name": { "$ref": "#/definitions/string_en" },
           "nickname": { "$ref": "#/definitions/string_en" },
           "email": { "$ref": "#/definitions/email" },
-          "tshirt_size": { "$ref": "#/definitions/tshirt_size" }
+          "tshirt_size": { "$ref": "#/definitions/tshirt_size" },
+          "user_id": { "$ref": "#/definitions/uuid" }
         },
         "patternProperties": {
           "first_name#[a-z]+": { "$ref": "#/definitions/string_i18n" },
           "last_name#[a-z]+": { "$ref": "#/definitions/string_i18n" }
         },
-        "required": [ "id" ]
+        "required": [ "id","user_id" ]
       }
     },
     {
@@ -450,9 +451,10 @@
       "encType": "application/json",
       "schema": {
         "type": "object",
-        "required": ["id"],
+        "required": ["id","user_id"],
         "properties": {
-          "id": { "$ref": "#/definitions/uuid" }
+          "id": { "$ref": "#/definitions/uuid" },
+          "user_id": { "$ref": "#/definitions/uuid" }
         }
       }
     },
@@ -486,9 +488,10 @@
           "name": { "$ref": "#/definitions/string_en" },
           "address": { "$ref": "#/definitions/string_en" },
           "latitude": { "$ref": "#/definitions/latitude" },
-          "longitude": { "$ref": "#/definitions/longitude" }
+          "longitude": { "$ref": "#/definitions/longitude" },
+          "user_id": { "$ref": "#/definitions/uuid" }
         },
-        "required": ["name", "address"],
+        "required": ["name","address","user_id"],
         "patternProperties": {
           "name#[a-z]+": { "$ref": "#/definitions/string_i18n" },
           "address#[a-z]+": { "$ref": "#/definitions/string_i18n" }

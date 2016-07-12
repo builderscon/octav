@@ -208,7 +208,7 @@ type ConferenceDateList []ConferenceDate
 type AddConferenceDatesRequest struct {
 	ConferenceID string             `json:"conference_id"`
 	Dates        ConferenceDateList `json:"dates" extract:"true"`
-	UserID       string `json:"user_id"`
+	UserID       string             `json:"user_id"`
 }
 
 // +transport
@@ -372,7 +372,6 @@ type DeleteSessionRequest struct {
 
 // +transport
 type CreateUserRequest struct {
-	UserID     string                `json:"user_id"` // This is the user ID of the person performing this request
 	FirstName  jsval.MaybeString     `json:"first_name,omitempty" l18n:"true"`
 	LastName   jsval.MaybeString     `json:"last_name,omitempty" l18n:"true"`
 	Nickname   string                `json:"nickname"`
@@ -395,6 +394,7 @@ type UpdateUserRequest struct {
 	AuthUserID jsval.MaybeString     `json:"auth_user_id,omitempty"`
 	AvatarURL  jsval.MaybeString     `json:"avatar_url,omitempty"`
 	TshirtSize jsval.MaybeString     `json:"tshirt_size,omitempty"`
+	UserID     string                `json:"user_id"`
 	L10N       tools.LocalizedFields `json:"-"`
 }
 
@@ -413,7 +413,8 @@ type LookupUserByAuthUserIDRequest struct {
 
 // +transport
 type DeleteUserRequest struct {
-	ID string `json:"id"`
+	ID     string `json:"id"`
+	UserID string `json:"user_id"`
 }
 
 // +transport
@@ -430,6 +431,7 @@ type CreateVenueRequest struct {
 	Longitude jsval.MaybeFloat      `json:"longitude,omitempty"`
 	Latitude  jsval.MaybeFloat      `json:"latitude,omitempty"`
 	L10N      tools.LocalizedFields `json:"-"`
+	UserID    string                `json:"user_id"`
 }
 
 // +transport
@@ -440,11 +442,13 @@ type UpdateVenueRequest struct {
 	Longitude jsval.MaybeFloat      `json:"longitude,omitempty"`
 	Latitude  jsval.MaybeFloat      `json:"latitude,omitempty"`
 	L10N      tools.LocalizedFields `json:"-"`
+	UserID    string                `json:"user_id"`
 }
 
 // +transport
 type DeleteVenueRequest struct {
-	ID string `json:"id" urlenc:"id"`
+	ID     string `json:"id" urlenc:"id"`
+	UserID string `json:"user_id"`
 }
 
 // +transport

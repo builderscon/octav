@@ -757,6 +757,8 @@ func doVenueCreate(args cmdargs) int {
 	fs.Float64Var(&longitude, "longitude", 0, "")
 	var name string
 	fs.StringVar(&name, "name", "", "")
+	var user_id string
+	fs.StringVar(&user_id, "user_id", "", "")
 	prepGlobalFlags(fs)
 	if err := fs.Parse([]string(args)); err != nil {
 		return errOut(err)
@@ -774,6 +776,9 @@ func doVenueCreate(args cmdargs) int {
 	}
 	if name != "" {
 		m["name"] = name
+	}
+	if user_id != "" {
+		m["user_id"] = user_id
 	}
 	r := model.CreateVenueRequest{}
 	if err := r.Populate(m); err != nil {
@@ -1274,6 +1279,8 @@ func doUserDelete(args cmdargs) int {
 	fs := flag.NewFlagSet("octavctl user delete", flag.ContinueOnError)
 	var id string
 	fs.StringVar(&id, "id", "", "")
+	var id string
+	fs.StringVar(&id, "id", "", "")
 	prepGlobalFlags(fs)
 	if err := fs.Parse([]string(args)); err != nil {
 		return errOut(err)
@@ -1282,6 +1289,9 @@ func doUserDelete(args cmdargs) int {
 	m := make(map[string]interface{})
 	if id != "" {
 		m["id"] = id
+	}
+	if id != "" {
+		m["user_id"] = id
 	}
 	r := model.DeleteUserRequest{}
 	if err := r.Populate(m); err != nil {

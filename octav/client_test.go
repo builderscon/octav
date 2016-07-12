@@ -103,7 +103,7 @@ func (ctx *TestCtx) SetAPIServer(ts *httptest.Server) {
 	ctx.HTTPClient.BasicAuth.Password = ctx.APIClient.Secret
 }
 
-func bigsight() *model.CreateVenueRequest {
+func bigsight(userID string) *model.CreateVenueRequest {
 	lf := tools.LocalizedFields{}
 	lf.Set("ja", "name", `東京ビッグサイト`)
 	lf.Set("ja", "address", `〒135-0063 東京都江東区有明３丁目１０−１`)
@@ -114,6 +114,7 @@ func bigsight() *model.CreateVenueRequest {
 	r.Address.Set("Ariake 3-10-1, Koto-ku, Tokyo")
 	r.Longitude.Set(35.6320326)
 	r.Latitude.Set(139.7976891)
+	r.UserID = userID
 
 	return &r
 }
@@ -210,7 +211,6 @@ func testLookupRoom(ctx *TestCtx, id, lang string) (*model.Room, error) {
 }
 
 func testCreateUser(ctx *TestCtx, in *model.CreateUserRequest) (*model.User, error) {
-	in.UserID = ctx.Superuser.EID
 	res, err := ctx.HTTPClient.CreateUser(in)
 	if !assert.NoError(ctx.T, err, "CreateUser should succeed") {
 		return nil, err
@@ -230,8 +230,8 @@ func testLookupUser(ctx *TestCtx, id, lang string) (*model.User, error) {
 	return user, nil
 }
 
-func testDeleteUser(ctx *TestCtx, id string) error {
-	err := ctx.HTTPClient.DeleteUser(&model.DeleteUserRequest{ID: id})
+func testDeleteUser(ctx *TestCtx, targetID, userID string) error {
+	err := ctx.HTTPClient.DeleteUser(&model.DeleteUserRequest{ID: targetID, UserID: userID})
 	if !assert.NoError(ctx.T, err, "DeleteUser should succeed") {
 		return err
 	}
@@ -374,7 +374,7 @@ func TestConferenceCRUD(t *testing.T) {
 	if err != nil {
 		return
 	}
-	defer testDeleteUser(ctx, user.ID)
+	defer testDeleteUser(ctx, user.ID, ctx.Superuser.EID)
 
 	series, err := testCreateConferenceSeries(ctx, yapcasia(ctx.Superuser.EID))
 	if err != nil {
@@ -433,7 +433,7 @@ func TestConferenceCRUD(t *testing.T) {
 		return
 	}
 
-	venue, err := testCreateVenue(ctx, bigsight())
+	venue, err := testCreateVenue(ctx, bigsight(user.ID))
 	if err != nil {
 		return
 	}
@@ -456,7 +456,7 @@ func TestRoomCRUD(t *testing.T) {
 
 	ctx.SetAPIServer(ts)
 
-	venue, err := testCreateVenue(ctx, bigsight())
+	venue, err := testCreateVenue(ctx, bigsight(ctx.Superuser.EID))
 	if err != nil {
 		return
 	}
@@ -569,7 +569,7 @@ func TestSessionCRUD(t *testing.T) {
 	if err != nil {
 		return
 	}
-	defer testDeleteUser(ctx, user.ID)
+	defer testDeleteUser(ctx, user.ID, ctx.Superuser.EID)
 
 	series, err := testCreateConferenceSeries(ctx, yapcasia(ctx.Superuser.EID))
 	if err != nil {
@@ -701,7 +701,7 @@ func TestCreateUser(t *testing.T) {
 		return
 	}
 
-	if err := testDeleteUser(ctx, res.ID); err != nil {
+	if err := testDeleteUser(ctx, res.ID, ctx.Superuser.EID); err != nil {
 		return
 	}
 }
@@ -718,7 +718,7 @@ func TestVenueCRUD(t *testing.T) {
 
 	ctx.SetAPIServer(ts)
 
-	res, err := testCreateVenue(ctx, bigsight())
+	res, err := testCreateVenue(ctx, bigsight(ctx.Superuser.EID))
 	if err != nil {
 		return
 	}
@@ -776,7 +776,7 @@ func TestDeleteConferenceDates(t *testing.T) {
 	if err != nil {
 		return
 	}
-	defer testDeleteUser(ctx, user.ID)
+	defer testDeleteUser(ctx, user.ID, ctx.Superuser.EID)
 
 	series, err := testCreateConferenceSeries(ctx, &model.CreateConferenceSeriesRequest{
 		UserID: ctx.Superuser.EID,
@@ -851,7 +851,7 @@ func TestConferenceAdmins(t *testing.T) {
 	if err != nil {
 		return
 	}
-	defer testDeleteUser(ctx, user.ID)
+	defer testDeleteUser(ctx, user.ID, ctx.Superuser.EID)
 
 	series, err := testCreateConferenceSeries(ctx, &model.CreateConferenceSeriesRequest{
 		UserID: ctx.Superuser.EID,
@@ -881,7 +881,7 @@ func TestConferenceAdmins(t *testing.T) {
 		if err != nil {
 			return
 		}
-		defer testDeleteUser(ctx, extraAdmin.ID)
+		defer testDeleteUser(ctx, extraAdmin.ID, ctx.Superuser.EID)
 
 		if err := testAddConferenceAdmin(ctx, conf.ID, extraAdmin.ID, user.ID); err != nil {
 			return
@@ -911,7 +911,6 @@ func TestConferenceAdmins(t *testing.T) {
 	if !assert.Len(ctx.T, conf3.Administrators, 0, "There should be 0 admins") {
 		return
 	}
-
 }
 
 func TestListConference(t *testing.T) {
@@ -930,7 +929,7 @@ func TestListConference(t *testing.T) {
 	if err != nil {
 		return
 	}
-	defer testDeleteUser(ctx, user.ID)
+	defer testDeleteUser(ctx, user.ID, ctx.Superuser.EID)
 
 	series, err := testCreateConferenceSeries(ctx, &model.CreateConferenceSeriesRequest{
 		UserID: ctx.Superuser.EID,
@@ -1002,7 +1001,7 @@ func TestListRoom(t *testing.T) {
 
 	ctx.SetAPIServer(ts)
 
-	venue, err := testCreateVenue(ctx, bigsight())
+	venue, err := testCreateVenue(ctx, bigsight(ctx.Superuser.EID))
 	if err != nil {
 		return
 	}
@@ -1045,7 +1044,7 @@ func TestListSessionByConference(t *testing.T) {
 	if err != nil {
 		return
 	}
-	defer testDeleteUser(ctx, user.ID)
+	defer testDeleteUser(ctx, user.ID, ctx.Superuser.EID)
 
 	series, err := testCreateConferenceSeries(ctx, yapcasia(ctx.Superuser.EID))
 	if err != nil {

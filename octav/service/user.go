@@ -125,3 +125,48 @@ func (v *User) IsConferenceAdministrator(tx *db.Tx, confID, userID string) error
 	return errors.Errorf("user %s lacks conference administrator privileges for %s", userID, confID)
 }
 
+func (v *User) IsOwnerUser(tx *db.Tx, targetID, userID string) error {
+	if targetID == userID {
+		return nil
+	}
+
+	return v.IsSystemAdmin(tx, userID)
+}
+
+func (v *User) CreateFromPayload(tx *db.Tx, payload model.CreateUserRequest, result *model.User) error {
+	// Normally we would like to limit who can create users, but this
+	// is done via OAuth login, so anybody must be able to do it.
+	vdb := db.User{}
+	if err := v.Create(tx, &vdb, payload); err != nil {
+		return errors.Wrap(err, "failed to create new user in database")
+	}
+
+	var m model.User
+	if err := m.FromRow(vdb); err != nil {
+		return errors.Wrap(err, "failed to populate model from database")
+	}
+
+	*result = m
+	return nil
+}
+
+func (v *User) DeleteFromPayload(tx *db.Tx, payload model.DeleteUserRequest) error {
+	if err := v.IsOwnerUser(tx, payload.ID, payload.UserID); err != nil {
+		return errors.Wrap(err, "deleting a user requires to be the user themselves, or a system administrator")
+	}
+
+	return errors.Wrap(v.Delete(tx, payload.ID), "failed to delete user")
+}
+
+func (v *User) UpdateFromPayload(tx *db.Tx, payload model.UpdateUserRequest) error {
+	if err := v.IsOwnerUser(tx, payload.ID, payload.UserID); err != nil {
+		return errors.Wrap(err, "updating a user requires to be the user themselves, or a system administrator")
+	}
+
+	vdb := db.User{}
+	if err := vdb.LoadByEID(tx, payload.ID); err != nil {
+		return errors.Wrap(err, "failed to load from database")
+	}
+
+	return errors.Wrap(v.Update(tx, &vdb, payload), "failed to update database")
+}

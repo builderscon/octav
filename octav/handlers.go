@@ -693,19 +693,13 @@ func doCreateUser(ctx context.Context, w http.ResponseWriter, r *http.Request, p
 	defer tx.AutoRollback()
 
 	s := service.User{}
-	vdb := db.User{}
-	if err := s.Create(tx, &vdb, payload); err != nil {
+	v := model.User{}
+	if err := s.CreateFromPayload(tx, payload, &v); err != nil {
 		httpError(w, `CreateUser`, http.StatusInternalServerError, err)
 		return
 	}
 
 	if err := tx.Commit(); err != nil {
-		httpError(w, `CreateUser`, http.StatusInternalServerError, err)
-		return
-	}
-
-	v := model.User{}
-	if err := v.FromRow(vdb); err != nil {
 		httpError(w, `CreateUser`, http.StatusInternalServerError, err)
 		return
 	}
@@ -727,7 +721,7 @@ func doDeleteUser(ctx context.Context, w http.ResponseWriter, r *http.Request, p
 	defer tx.AutoRollback()
 
 	s := service.User{}
-	if err := s.Delete(tx, payload.ID); err != nil {
+	if err := s.DeleteFromPayload(tx, payload); err != nil {
 		httpError(w, `DeleteUser`, http.StatusInternalServerError, err)
 		return
 	}
@@ -904,14 +898,8 @@ func doUpdateUser(ctx context.Context, w http.ResponseWriter, r *http.Request, p
 	}
 	defer tx.AutoRollback()
 
-	vdb := db.User{}
-	if err := vdb.LoadByEID(tx, payload.ID); err != nil {
-		httpError(w, `UpdateUser`, http.StatusNotFound, err)
-		return
-	}
-
 	s := service.User{}
-	if err := s.Update(tx, &vdb, payload); err != nil {
+	if err := s.UpdateFromPayload(tx, payload); err != nil {
 		httpError(w, `UpdateUser`, http.StatusInternalServerError, err)
 		return
 	}

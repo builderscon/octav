@@ -1222,7 +1222,7 @@ func init() {
 		SetConstraintMap(M).
 		SetRoot(
 			jsval.Object().
-				Required("address", "name").
+				Required("address", "name", "user_id").
 				AdditionalProperties(
 					jsval.EmptyConstraint,
 				).
@@ -1241,6 +1241,10 @@ func init() {
 				AddProp(
 					"name",
 					jsval.Reference(M).RefersTo("#/definitions/string_en"),
+				).
+				AddProp(
+					"user_id",
+					jsval.Reference(M).RefersTo("#/definitions/uuid"),
 				).
 				PatternPropertiesString(
 					"address#[a-z]+",
@@ -1423,12 +1427,16 @@ func init() {
 		SetConstraintMap(M).
 		SetRoot(
 			jsval.Object().
-				Required("id").
+				Required("id", "user_id").
 				AdditionalProperties(
 					jsval.EmptyConstraint,
 				).
 				AddProp(
 					"id",
+					jsval.Reference(M).RefersTo("#/definitions/uuid"),
+				).
+				AddProp(
+					"user_id",
 					jsval.Reference(M).RefersTo("#/definitions/uuid"),
 				),
 		)
@@ -2336,7 +2344,7 @@ func init() {
 		SetConstraintMap(M).
 		SetRoot(
 			jsval.Object().
-				Required("id").
+				Required("id", "user_id").
 				AdditionalProperties(
 					jsval.EmptyConstraint,
 				).
@@ -2363,6 +2371,10 @@ func init() {
 				AddProp(
 					"tshirt_size",
 					jsval.Reference(M).RefersTo("#/definitions/tshirt_size"),
+				).
+				AddProp(
+					"user_id",
+					jsval.Reference(M).RefersTo("#/definitions/uuid"),
 				).
 				PatternPropertiesString(
 					"first_name#[a-z]+",
