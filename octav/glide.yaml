@@ -20,3 +20,4 @@ import:
   subpackages:
   - assert
 - package: github.com/lestrrat/go-apache-logformat
+- package: github.com/pkg/errors
