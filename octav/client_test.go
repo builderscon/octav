@@ -53,11 +53,11 @@ func NewTestCtx(t *testing.T) (*TestCtx, error) {
 		return nil, err
 	}
 
-{
-	u := db.User{}
-	u.LoadByEID(tx, superuser.EID)
-	t.Logf("%#v", u)
-}
+	{
+		u := db.User{}
+		u.LoadByEID(tx, superuser.EID)
+		t.Logf("%#v", u)
+	}
 
 	if err := tx.Commit(); err != nil {
 		return nil, errors.Wrap(err, "failed to commit changes to DB")
@@ -145,6 +145,56 @@ func testCreateVenue(ctx *TestCtx, v *model.CreateVenueRequest) (*model.Venue, e
 		return nil, err
 	}
 	return res, nil
+}
+
+func testAddConferenceAdmin(ctx *TestCtx, confID, adminID, userID string) error {
+	err := ctx.HTTPClient.AddConferenceAdmin(&model.AddConferenceAdminRequest{
+		ConferenceID: confID,
+		AdminID:      adminID,
+		UserID:       userID,
+	})
+	if !assert.NoError(ctx.T, err, "AddConferenceAdmin should succeed") {
+		return err
+	}
+	return nil
+}
+
+func testDeleteConferenceAdmin(ctx *TestCtx, confID, adminID, userID string) error {
+	err := ctx.HTTPClient.DeleteConferenceAdmin(&model.DeleteConferenceAdminRequest{
+		ConferenceID: confID,
+		AdminID:      adminID,
+		UserID:       userID,
+	})
+	if !assert.NoError(ctx.T, err, "DeleteConferenceAdmin should succeed") {
+		return err
+	}
+	return nil
+}
+
+func testAddConferenceVenue(ctx *TestCtx, confID, venueID, userID string) error {
+	req := model.AddConferenceVenueRequest{
+		ConferenceID: confID,
+		VenueID:      venueID,
+		UserID:       userID,
+	}
+	err := ctx.HTTPClient.AddConferenceVenue(&req)
+	if !assert.NoError(ctx.T, err, "AddConferenceVenue should succeed") {
+		return err
+	}
+	return nil
+}
+
+func testDeleteConferenceVenue(ctx *TestCtx, confID, venueID, userID string) error {
+	req := model.DeleteConferenceVenueRequest{
+		ConferenceID: confID,
+		VenueID:      venueID,
+		UserID:       userID,
+	}
+	err := ctx.HTTPClient.DeleteConferenceVenue(&req)
+	if !assert.NoError(ctx.T, err, "DeleteConferenceVenue should succeed") {
+		return err
+	}
+	return nil
 }
 
 func testLookupRoom(ctx *TestCtx, id, lang string) (*model.Room, error) {
@@ -264,6 +314,14 @@ func testDeleteConferenceSeries(ctx *TestCtx, id, userID string) error {
 	return err
 }
 
+func testAddConferenceSeriesAdmin(ctx *TestCtx, id, adminID, userID string) error {
+	err := ctx.HTTPClient.AddConferenceSeriesAdmin(&model.AddConferenceSeriesAdminRequest{SeriesID: id, AdminID: adminID, UserID: userID})
+	if !assert.NoError(ctx.T, err, "AddConferenceSeriesAdmin should be successful") {
+		return err
+	}
+	return err
+}
+
 func testCreateConference(ctx *TestCtx, in *model.CreateConferenceRequest) (*model.Conference, error) {
 	res, err := ctx.HTTPClient.CreateConference(in)
 	if !assert.NoError(ctx.T, err, "CreateConference should succeed") {
@@ -324,6 +382,10 @@ func TestConferenceCRUD(t *testing.T) {
 	}
 	defer testDeleteConferenceSeries(ctx, series.ID, ctx.Superuser.EID)
 
+	if err := testAddConferenceSeriesAdmin(ctx, series.ID, user.ID, ctx.Superuser.EID); err != nil {
+		return
+	}
+
 	res, err := testCreateConference(ctx, yapcasiaTokyo(series, user.ID))
 	if err != nil {
 		return
@@ -351,7 +413,7 @@ func TestConferenceCRUD(t *testing.T) {
 		return
 	}
 
-	in := model.UpdateConferenceRequest{ID: res.ID}
+	in := model.UpdateConferenceRequest{ID: res.ID, UserID: user.ID}
 	in.SubTitle.Set("Big Bang!")
 	in.L10N.Set("ja", "title", "ヤップシー エイジア")
 	if err := testUpdateConference(ctx, &in); err != nil {
@@ -370,6 +432,16 @@ func TestConferenceCRUD(t *testing.T) {
 	if !assert.Equal(ctx.T, "ヤップシー エイジア", res3.Title, "Conference.title#ja is the same as the conference updated") {
 		return
 	}
+
+	venue, err := testCreateVenue(ctx, bigsight())
+	if err != nil {
+		return
+	}
+
+	if err := testAddConferenceVenue(ctx, res.ID, venue.ID, user.ID); err != nil {
+		return
+	}
+	defer testDeleteConferenceVenue(ctx, res.ID, venue.ID, user.ID)
 }
 
 func TestRoomCRUD(t *testing.T) {
@@ -504,6 +576,10 @@ func TestSessionCRUD(t *testing.T) {
 		return
 	}
 	defer testDeleteConferenceSeries(ctx, series.ID, ctx.Superuser.EID)
+
+	if err := testAddConferenceSeriesAdmin(ctx, series.ID, user.ID, ctx.Superuser.EID); err != nil {
+		return
+	}
 
 	conference, err := testCreateConference(ctx, yapcasiaTokyo(series, user.ID))
 	if err != nil {
@@ -704,12 +780,16 @@ func TestDeleteConferenceDates(t *testing.T) {
 
 	series, err := testCreateConferenceSeries(ctx, &model.CreateConferenceSeriesRequest{
 		UserID: ctx.Superuser.EID,
-		Slug: tools.RandomString(8),
+		Slug:   tools.RandomString(8),
 	})
 	if err != nil {
 		return
 	}
 	defer testDeleteConferenceSeries(ctx, series.ID, ctx.Superuser.EID)
+
+	if err := testAddConferenceSeriesAdmin(ctx, series.ID, user.ID, ctx.Superuser.EID); err != nil {
+		return
+	}
 
 	conf, err := testCreateConference(ctx, &model.CreateConferenceRequest{
 		UserID:   user.ID,
@@ -723,6 +803,7 @@ func TestDeleteConferenceDates(t *testing.T) {
 
 	err = ctx.HTTPClient.AddConferenceDates(&model.AddConferenceDatesRequest{
 		ConferenceID: conf.ID,
+		UserID:       user.ID,
 		Dates: []model.ConferenceDate{
 			model.ConferenceDate{
 				Date:  model.NewDate(2016, 3, 22),
@@ -738,6 +819,7 @@ func TestDeleteConferenceDates(t *testing.T) {
 	err = ctx.HTTPClient.DeleteConferenceDates(&model.DeleteConferenceDatesRequest{
 		ConferenceID: conf.ID,
 		Dates:        []model.Date{model.NewDate(2016, 3, 22)},
+		UserID:       user.ID,
 	})
 	if !assert.NoError(ctx.T, err, "DeleteConferenceDates works") {
 		return
@@ -773,12 +855,16 @@ func TestConferenceAdmins(t *testing.T) {
 
 	series, err := testCreateConferenceSeries(ctx, &model.CreateConferenceSeriesRequest{
 		UserID: ctx.Superuser.EID,
-		Slug: tools.RandomString(8),
+		Slug:   tools.RandomString(8),
 	})
 	if err != nil {
 		return
 	}
 	defer testDeleteConferenceSeries(ctx, series.ID, ctx.Superuser.EID)
+
+	if err := testAddConferenceSeriesAdmin(ctx, series.ID, user.ID, ctx.Superuser.EID); err != nil {
+		return
+	}
 
 	conf, err := testCreateConference(ctx, &model.CreateConferenceRequest{
 		UserID:   user.ID,
@@ -797,11 +883,7 @@ func TestConferenceAdmins(t *testing.T) {
 		}
 		defer testDeleteUser(ctx, extraAdmin.ID)
 
-		err = ctx.HTTPClient.AddConferenceAdmin(&model.AddConferenceAdminRequest{
-			ConferenceID: conf.ID,
-			UserID:       extraAdmin.ID,
-		})
-		if !assert.NoError(ctx.T, err, "AddConferenceAdmin should succeed") {
+		if err := testAddConferenceAdmin(ctx, conf.ID, extraAdmin.ID, user.ID); err != nil {
 			return
 		}
 	}
@@ -816,11 +898,7 @@ func TestConferenceAdmins(t *testing.T) {
 	}
 
 	for _, admin := range conf2.Administrators {
-		err = ctx.HTTPClient.DeleteConferenceAdmin(&model.DeleteConferenceAdminRequest{
-			ConferenceID: conf.ID,
-			UserID:       admin.ID,
-		})
-		if !assert.NoError(ctx.T, err, "DeleteConferenceAdmin should succeed") {
+		if err := testDeleteConferenceAdmin(ctx, conf.ID, admin.ID, user.ID); err != nil {
 			return
 		}
 	}
@@ -856,12 +934,16 @@ func TestListConference(t *testing.T) {
 
 	series, err := testCreateConferenceSeries(ctx, &model.CreateConferenceSeriesRequest{
 		UserID: ctx.Superuser.EID,
-		Slug: tools.RandomString(8),
+		Slug:   tools.RandomString(8),
 	})
 	if err != nil {
 		return
 	}
 	defer testDeleteConferenceSeries(ctx, series.ID, ctx.Superuser.EID)
+
+	if err := testAddConferenceSeriesAdmin(ctx, series.ID, user.ID, ctx.Superuser.EID); err != nil {
+		return
+	}
 
 	for i := 0; i < 10; i++ {
 		conf, err := testCreateConference(ctx, &model.CreateConferenceRequest{
@@ -875,6 +957,7 @@ func TestListConference(t *testing.T) {
 
 		err = ctx.HTTPClient.AddConferenceDates(&model.AddConferenceDatesRequest{
 			ConferenceID: conf.ID,
+			UserID: user.ID,
 			Dates: []model.ConferenceDate{
 				model.ConferenceDate{
 					Date:  model.NewDate(2016, 3, 22),
@@ -969,6 +1052,10 @@ func TestListSessionByConference(t *testing.T) {
 		return
 	}
 	defer testDeleteConferenceSeries(ctx, series.ID, ctx.Superuser.EID)
+
+	if err := testAddConferenceSeriesAdmin(ctx, series.ID, user.ID, ctx.Superuser.EID); err != nil {
+		return
+	}
 
 	conference, err := testCreateConference(ctx, yapcasiaTokyo(series, user.ID))
 	if err != nil {

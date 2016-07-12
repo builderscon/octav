@@ -165,6 +165,27 @@ func doListConferenceSeries(ctx context.Context, w http.ResponseWriter, r *http.
 	httpJSON(w, l)
 }
 
+func doAddConferenceSeriesAdmin(ctx context.Context, w http.ResponseWriter, r *http.Request, payload model.AddConferenceSeriesAdminRequest) {
+	tx, err := db.Begin()
+	if err != nil {
+		httpError(w, `AddConferenceSeriesAdmin`, http.StatusInternalServerError, err)
+		return
+	}
+	defer tx.AutoRollback()
+
+	s := service.ConferenceSeries{}
+	if err := s.AddAdministratorFromPayload(tx, payload); err != nil {
+		httpError(w, `AddConferenceSeriesAdmin`, http.StatusInternalServerError, err)
+		return
+	}
+
+	if err := tx.Commit(); err != nil {
+		httpError(w, `AddConferenceSeriesAdmin`, http.StatusInternalServerError, err)
+		return
+	}
+	httpJSON(w, map[string]string{"status": "success"})
+}
+
 func doCreateConference(ctx context.Context, w http.ResponseWriter, r *http.Request, payload model.CreateConferenceRequest) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("doCreateConference")
@@ -282,14 +303,8 @@ func doUpdateConference(ctx context.Context, w http.ResponseWriter, r *http.Requ
 	}
 	defer tx.AutoRollback()
 
-	vdb := db.Conference{}
-	if err := vdb.LoadByEID(tx, payload.ID); err != nil {
-		httpError(w, `UpdateConference`, http.StatusNotFound, err)
-		return
-	}
-
 	s := service.Conference{}
-	if err := s.Update(tx, &vdb, payload); err != nil {
+	if err := s.UpdateFromPayload(tx, payload); err != nil {
 		httpError(w, `UpdateConference`, http.StatusInternalServerError, err)
 		return
 	}
@@ -335,7 +350,7 @@ func doDeleteConferenceDates(ctx context.Context, w http.ResponseWriter, r *http
 	defer tx.AutoRollback()
 
 	s := service.Conference{}
-	if err := s.DeleteDates(tx, payload.ConferenceID, payload.Dates...); err != nil {
+	if err := s.DeleteDatesFromPayload(tx, payload); err != nil {
 		httpError(w, `DeleteConferenceDates`, http.StatusInternalServerError, err)
 		return
 	}
@@ -356,7 +371,7 @@ func doAddConferenceDates(ctx context.Context, w http.ResponseWriter, r *http.Re
 	defer tx.AutoRollback()
 
 	s := service.Conference{}
-	if err := s.AddDates(tx, payload.ConferenceID, payload.Dates...); err != nil {
+	if err := s.AddDatesFromPayload(tx, payload); err != nil {
 		httpError(w, `AddConferenceDates`, http.StatusInternalServerError, err)
 		return
 	}
@@ -377,7 +392,7 @@ func doDeleteConferenceAdmin(ctx context.Context, w http.ResponseWriter, r *http
 	defer tx.AutoRollback()
 
 	s := service.Conference{}
-	if err := s.DeleteAdmin(tx, payload.ConferenceID, payload.UserID); err != nil {
+	if err := s.DeleteAdministratorFromPayload(tx, payload); err != nil {
 		httpError(w, `DeleteConferenceAdmin`, http.StatusInternalServerError, err)
 		return
 	}
@@ -398,7 +413,7 @@ func doAddConferenceAdmin(ctx context.Context, w http.ResponseWriter, r *http.Re
 	defer tx.AutoRollback()
 
 	s := service.Conference{}
-	if err := s.AddAdmin(tx, payload.ConferenceID, payload.UserID); err != nil {
+	if err := s.AddAdministratorFromPayload(tx, payload); err != nil {
 		httpError(w, `AddConferenceAdmin`, http.StatusInternalServerError, err)
 		return
 	}
@@ -419,7 +434,7 @@ func doDeleteConferenceVenue(ctx context.Context, w http.ResponseWriter, r *http
 	defer tx.AutoRollback()
 
 	s := service.Conference{}
-	if err := s.DeleteVenue(tx, payload.ConferenceID, payload.VenueID); err != nil {
+	if err := s.DeleteVenueFromPayload(tx, payload); err != nil {
 		httpError(w, `DeleteConferenceVenue`, http.StatusInternalServerError, err)
 		return
 	}
@@ -440,7 +455,7 @@ func doAddConferenceVenue(ctx context.Context, w http.ResponseWriter, r *http.Re
 	defer tx.AutoRollback()
 
 	s := service.Conference{}
-	if err := s.AddVenue(tx, payload.ConferenceID, payload.VenueID); err != nil {
+	if err := s.AddVenueFromPayload(tx, payload); err != nil {
 		httpError(w, `AddConferenceVenue`, http.StatusInternalServerError, err)
 		return
 	}

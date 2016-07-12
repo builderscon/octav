@@ -273,6 +273,71 @@ func (r *ListConferenceSeriesRequest) Populate(m map[string]interface{}) error {
 	return nil
 }
 
+func (r AddConferenceSeriesAdminRequest) collectMarshalData() map[string]interface{} {
+	m := make(map[string]interface{})
+	m["series_id"] = r.SeriesID
+	m["admin_id"] = r.AdminID
+	m["user_id"] = r.UserID
+	return m
+}
+
+func (r AddConferenceSeriesAdminRequest) MarshalJSON() ([]byte, error) {
+	m := r.collectMarshalData()
+	buf, err := json.Marshal(m)
+	if err != nil {
+		return nil, err
+	}
+	return buf, nil
+}
+
+func (r AddConferenceSeriesAdminRequest) MarshalURL() ([]byte, error) {
+	m := r.collectMarshalData()
+	buf, err := urlenc.Marshal(m)
+	if err != nil {
+		return nil, err
+	}
+	return buf, nil
+}
+
+func (r *AddConferenceSeriesAdminRequest) UnmarshalJSON(data []byte) error {
+	m := make(map[string]interface{})
+	if err := json.Unmarshal(data, &m); err != nil {
+		return err
+	}
+	return r.Populate(m)
+}
+
+func (r *AddConferenceSeriesAdminRequest) Populate(m map[string]interface{}) error {
+	if jv, ok := m["series_id"]; ok {
+		switch jv.(type) {
+		case string:
+			r.SeriesID = jv.(string)
+			delete(m, "series_id")
+		default:
+			return ErrInvalidJSONFieldType{Field: "series_id"}
+		}
+	}
+	if jv, ok := m["admin_id"]; ok {
+		switch jv.(type) {
+		case string:
+			r.AdminID = jv.(string)
+			delete(m, "admin_id")
+		default:
+			return ErrInvalidJSONFieldType{Field: "admin_id"}
+		}
+	}
+	if jv, ok := m["user_id"]; ok {
+		switch jv.(type) {
+		case string:
+			r.UserID = jv.(string)
+			delete(m, "user_id")
+		default:
+			return ErrInvalidJSONFieldType{Field: "user_id"}
+		}
+	}
+	return nil
+}
+
 func (r CreateConferenceRequest) collectMarshalData() map[string]interface{} {
 	m := make(map[string]interface{})
 	m["title"] = r.Title
@@ -518,6 +583,7 @@ func (r UpdateConferenceRequest) collectMarshalData() map[string]interface{} {
 	if r.Slug.Valid() {
 		m["slug"] = r.Slug.Value()
 	}
+	m["user_id"] = r.UserID
 	return m
 }
 
@@ -581,7 +647,16 @@ func (r *UpdateConferenceRequest) Populate(m map[string]interface{}) error {
 		}
 		delete(m, "slug")
 	}
-	if err := tools.ExtractL10NFields(m, &r.L10N, []string{"id", "title", "series_id", "sub_title", "slug"}); err != nil {
+	if jv, ok := m["user_id"]; ok {
+		switch jv.(type) {
+		case string:
+			r.UserID = jv.(string)
+			delete(m, "user_id")
+		default:
+			return ErrInvalidJSONFieldType{Field: "user_id"}
+		}
+	}
+	if err := tools.ExtractL10NFields(m, &r.L10N, []string{"id", "title", "series_id", "sub_title", "slug", "user_id"}); err != nil {
 		return err
 	}
 	return nil
@@ -589,7 +664,7 @@ func (r *UpdateConferenceRequest) Populate(m map[string]interface{}) error {
 
 func (r *UpdateConferenceRequest) GetPropNames() ([]string, error) {
 	l, _ := r.L10N.GetPropNames()
-	return append(l, "id", "title", "series_id", "sub_title", "slug"), nil
+	return append(l, "id", "title", "series_id", "sub_title", "slug", "user_id"), nil
 }
 
 func (r *UpdateConferenceRequest) SetPropValue(s string, v interface{}) error {
@@ -607,6 +682,11 @@ func (r *UpdateConferenceRequest) SetPropValue(s string, v interface{}) error {
 		return r.SubTitle.Set(v)
 	case "slug":
 		return r.Slug.Set(v)
+	case "user_id":
+		if jv, ok := v.(string); ok {
+			r.UserID = jv
+			return nil
+		}
 	default:
 		return errors.New("unknown column '" + s + "'")
 	}
@@ -617,6 +697,7 @@ func (r AddConferenceDatesRequest) collectMarshalData() map[string]interface{} {
 	m := make(map[string]interface{})
 	m["conference_id"] = r.ConferenceID
 	m["dates"] = r.Dates
+	m["user_id"] = r.UserID
 	return m
 }
 
@@ -662,12 +743,22 @@ func (r *AddConferenceDatesRequest) Populate(m map[string]interface{}) error {
 		}
 		delete(m, "dates")
 	}
+	if jv, ok := m["user_id"]; ok {
+		switch jv.(type) {
+		case string:
+			r.UserID = jv.(string)
+			delete(m, "user_id")
+		default:
+			return ErrInvalidJSONFieldType{Field: "user_id"}
+		}
+	}
 	return nil
 }
 
 func (r AddConferenceAdminRequest) collectMarshalData() map[string]interface{} {
 	m := make(map[string]interface{})
 	m["conference_id"] = r.ConferenceID
+	m["admin_id"] = r.AdminID
 	m["user_id"] = r.UserID
 	return m
 }
@@ -708,6 +799,15 @@ func (r *AddConferenceAdminRequest) Populate(m map[string]interface{}) error {
 			return ErrInvalidJSONFieldType{Field: "conference_id"}
 		}
 	}
+	if jv, ok := m["admin_id"]; ok {
+		switch jv.(type) {
+		case string:
+			r.AdminID = jv.(string)
+			delete(m, "admin_id")
+		default:
+			return ErrInvalidJSONFieldType{Field: "admin_id"}
+		}
+	}
 	if jv, ok := m["user_id"]; ok {
 		switch jv.(type) {
 		case string:
@@ -724,6 +824,7 @@ func (r AddConferenceVenueRequest) collectMarshalData() map[string]interface{} {
 	m := make(map[string]interface{})
 	m["conference_id"] = r.ConferenceID
 	m["venue_id"] = r.VenueID
+	m["user_id"] = r.UserID
 	return m
 }
 
@@ -772,6 +873,15 @@ func (r *AddConferenceVenueRequest) Populate(m map[string]interface{}) error {
 			return ErrInvalidJSONFieldType{Field: "venue_id"}
 		}
 	}
+	if jv, ok := m["user_id"]; ok {
+		switch jv.(type) {
+		case string:
+			r.UserID = jv.(string)
+			delete(m, "user_id")
+		default:
+			return ErrInvalidJSONFieldType{Field: "user_id"}
+		}
+	}
 	return nil
 }
 
@@ -779,6 +889,7 @@ func (r DeleteConferenceDatesRequest) collectMarshalData() map[string]interface{
 	m := make(map[string]interface{})
 	m["conference_id"] = r.ConferenceID
 	m["dates"] = r.Dates
+	m["user_id"] = r.UserID
 	return m
 }
 
@@ -824,12 +935,22 @@ func (r *DeleteConferenceDatesRequest) Populate(m map[string]interface{}) error 
 		}
 		delete(m, "dates")
 	}
+	if jv, ok := m["user_id"]; ok {
+		switch jv.(type) {
+		case string:
+			r.UserID = jv.(string)
+			delete(m, "user_id")
+		default:
+			return ErrInvalidJSONFieldType{Field: "user_id"}
+		}
+	}
 	return nil
 }
 
 func (r DeleteConferenceAdminRequest) collectMarshalData() map[string]interface{} {
 	m := make(map[string]interface{})
 	m["conference_id"] = r.ConferenceID
+	m["admin_id"] = r.AdminID
 	m["user_id"] = r.UserID
 	return m
 }
@@ -870,6 +991,15 @@ func (r *DeleteConferenceAdminRequest) Populate(m map[string]interface{}) error 
 			return ErrInvalidJSONFieldType{Field: "conference_id"}
 		}
 	}
+	if jv, ok := m["admin_id"]; ok {
+		switch jv.(type) {
+		case string:
+			r.AdminID = jv.(string)
+			delete(m, "admin_id")
+		default:
+			return ErrInvalidJSONFieldType{Field: "admin_id"}
+		}
+	}
 	if jv, ok := m["user_id"]; ok {
 		switch jv.(type) {
 		case string:
@@ -886,6 +1016,7 @@ func (r DeleteConferenceVenueRequest) collectMarshalData() map[string]interface{
 	m := make(map[string]interface{})
 	m["conference_id"] = r.ConferenceID
 	m["venue_id"] = r.VenueID
+	m["user_id"] = r.UserID
 	return m
 }
 
@@ -934,12 +1065,22 @@ func (r *DeleteConferenceVenueRequest) Populate(m map[string]interface{}) error 
 			return ErrInvalidJSONFieldType{Field: "venue_id"}
 		}
 	}
+	if jv, ok := m["user_id"]; ok {
+		switch jv.(type) {
+		case string:
+			r.UserID = jv.(string)
+			delete(m, "user_id")
+		default:
+			return ErrInvalidJSONFieldType{Field: "user_id"}
+		}
+	}
 	return nil
 }
 
 func (r DeleteConferenceRequest) collectMarshalData() map[string]interface{} {
 	m := make(map[string]interface{})
 	m["id"] = r.ID
+	m["user_id"] = r.UserID
 	return m
 }
 
@@ -977,6 +1118,15 @@ func (r *DeleteConferenceRequest) Populate(m map[string]interface{}) error {
 			delete(m, "id")
 		default:
 			return ErrInvalidJSONFieldType{Field: "id"}
+		}
+	}
+	if jv, ok := m["user_id"]; ok {
+		switch jv.(type) {
+		case string:
+			r.UserID = jv.(string)
+			delete(m, "user_id")
+		default:
+			return ErrInvalidJSONFieldType{Field: "user_id"}
 		}
 	}
 	return nil

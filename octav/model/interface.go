@@ -138,6 +138,13 @@ type ListConferenceSeriesRequest struct {
 }
 
 // +transport
+type AddConferenceSeriesAdminRequest struct {
+	SeriesID string `json:"series_id"`
+	AdminID  string `json:"admin_id"` // new ID to add
+	UserID   string `json:"user_id"`  // ID of the operator
+}
+
+// +transport
 type ListConferenceSeriesReponse []ConferenceSeries
 
 // +transport
@@ -169,6 +176,7 @@ type UpdateConferenceRequest struct {
 	SeriesID jsval.MaybeString `json:"series_id,omitempty"`
 	SubTitle jsval.MaybeString `json:"sub_title,omitempty" l10n:"true"`
 	Slug     jsval.MaybeString `json:"slug,omitempty"`
+	UserID   string            `json:"user_id"`
 	// TODO dates
 	L10N tools.LocalizedFields `json:"-"`
 }
@@ -200,11 +208,13 @@ type ConferenceDateList []ConferenceDate
 type AddConferenceDatesRequest struct {
 	ConferenceID string             `json:"conference_id"`
 	Dates        ConferenceDateList `json:"dates" extract:"true"`
+	UserID       string `json:"user_id"`
 }
 
 // +transport
 type AddConferenceAdminRequest struct {
 	ConferenceID string `json:"conference_id"`
+	AdminID      string `json:"admin_id"`
 	UserID       string `json:"user_id"`
 }
 
@@ -212,17 +222,20 @@ type AddConferenceAdminRequest struct {
 type AddConferenceVenueRequest struct {
 	ConferenceID string `json:"conference_id"`
 	VenueID      string `json:"venue_id"`
+	UserID       string `json:"user_id"`
 }
 
 // +transport
 type DeleteConferenceDatesRequest struct {
 	ConferenceID string   `json:"conference_id"`
 	Dates        DateList `json:"dates" extract:"true"`
+	UserID       string   `json:"user_id"`
 }
 
 // +transport
 type DeleteConferenceAdminRequest struct {
 	ConferenceID string `json:"conference_id"`
+	AdminID      string `json:"admin_id"`
 	UserID       string `json:"user_id"`
 }
 
@@ -230,11 +243,13 @@ type DeleteConferenceAdminRequest struct {
 type DeleteConferenceVenueRequest struct {
 	ConferenceID string `json:"conference_id"`
 	VenueID      string `json:"venue_id"`
+	UserID       string `json:"user_id"`
 }
 
 // +transport
 type DeleteConferenceRequest struct {
-	ID string `json:"id" urlenc:"id"`
+	ID     string `json:"id"`
+	UserID string `json:"user_id"`
 }
 
 // +transport

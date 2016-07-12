@@ -376,6 +376,8 @@ func doConferenceUpdate(args cmdargs) int {
 	fs.StringVar(&sub_title, "sub_title", "", "")
 	var title string
 	fs.StringVar(&title, "title", "", "")
+	var user_id string
+	fs.StringVar(&user_id, "user_id", "", "")
 	prepGlobalFlags(fs)
 	if err := fs.Parse([]string(args)); err != nil {
 		return errOut(err)
@@ -399,6 +401,9 @@ func doConferenceUpdate(args cmdargs) int {
 	}
 	if title != "" {
 		m["title"] = title
+	}
+	if user_id != "" {
+		m["user_id"] = user_id
 	}
 	r := model.UpdateConferenceRequest{}
 	if err := r.Populate(m); err != nil {
@@ -426,6 +431,8 @@ func doConferenceDatesAdd(args cmdargs) int {
 	fs.StringVar(&id, "id", "", "")
 	var dates stringList
 	fs.Var(&dates, "dates", "")
+	var user_id string
+	fs.StringVar(&user_id, "user_id", "", "")
 	prepGlobalFlags(fs)
 	if err := fs.Parse([]string(args)); err != nil {
 		return errOut(err)
@@ -437,6 +444,9 @@ func doConferenceDatesAdd(args cmdargs) int {
 	}
 	if dates.Valid() {
 		m["dates"] = dates.Get()
+	}
+	if user_id != "" {
+		m["user_id"] = user_id
 	}
 	r := model.AddConferenceDatesRequest{}
 	if err := r.Populate(m); err != nil {
@@ -464,6 +474,8 @@ func doConferenceDatesDelete(args cmdargs) int {
 	fs.StringVar(&id, "id", "", "")
 	var dates stringList
 	fs.Var(&dates, "dates", "")
+	var user_id string
+	fs.StringVar(&user_id, "user_id", "", "")
 	prepGlobalFlags(fs)
 	if err := fs.Parse([]string(args)); err != nil {
 		return errOut(err)
@@ -475,6 +487,9 @@ func doConferenceDatesDelete(args cmdargs) int {
 	}
 	if dates.Valid() {
 		m["dates"] = dates.Get()
+	}
+	if user_id != "" {
+		m["user_id"] = user_id
 	}
 	r := model.DeleteConferenceDatesRequest{}
 	if err := r.Populate(m); err != nil {
@@ -511,6 +526,8 @@ func doConferenceDatesSubcmd(args cmdargs) int {
 
 func doConferenceAdminAdd(args cmdargs) int {
 	fs := flag.NewFlagSet("octavctl conference admin add", flag.ContinueOnError)
+	var admin_id string
+	fs.StringVar(&admin_id, "admin_id", "", "")
 	var id string
 	fs.StringVar(&id, "id", "", "")
 	var user_id string
@@ -521,6 +538,9 @@ func doConferenceAdminAdd(args cmdargs) int {
 	}
 
 	m := make(map[string]interface{})
+	if admin_id != "" {
+		m["admin_id"] = admin_id
+	}
 	if id != "" {
 		m["conference_id"] = id
 	}
@@ -549,6 +569,8 @@ func doConferenceAdminAdd(args cmdargs) int {
 
 func doConferenceAdminDelete(args cmdargs) int {
 	fs := flag.NewFlagSet("octavctl conference admin delete", flag.ContinueOnError)
+	var admin_id string
+	fs.StringVar(&admin_id, "admin_id", "", "")
 	var id string
 	fs.StringVar(&id, "id", "", "")
 	var user_id string
@@ -559,6 +581,9 @@ func doConferenceAdminDelete(args cmdargs) int {
 	}
 
 	m := make(map[string]interface{})
+	if admin_id != "" {
+		m["admin_id"] = admin_id
+	}
 	if id != "" {
 		m["conference_id"] = id
 	}
@@ -602,6 +627,8 @@ func doConferenceVenueAdd(args cmdargs) int {
 	fs := flag.NewFlagSet("octavctl conference venue add", flag.ContinueOnError)
 	var id string
 	fs.StringVar(&id, "id", "", "")
+	var user_id string
+	fs.StringVar(&user_id, "user_id", "", "")
 	var venue_id string
 	fs.StringVar(&venue_id, "venue_id", "", "")
 	prepGlobalFlags(fs)
@@ -612,6 +639,9 @@ func doConferenceVenueAdd(args cmdargs) int {
 	m := make(map[string]interface{})
 	if id != "" {
 		m["conference_id"] = id
+	}
+	if user_id != "" {
+		m["user_id"] = user_id
 	}
 	if venue_id != "" {
 		m["venue_id"] = venue_id
@@ -640,6 +670,8 @@ func doConferenceVenueDelete(args cmdargs) int {
 	fs := flag.NewFlagSet("octavctl conference venue delete", flag.ContinueOnError)
 	var id string
 	fs.StringVar(&id, "id", "", "")
+	var user_id string
+	fs.StringVar(&user_id, "user_id", "", "")
 	var venue_id string
 	fs.StringVar(&venue_id, "venue_id", "", "")
 	prepGlobalFlags(fs)
@@ -650,6 +682,9 @@ func doConferenceVenueDelete(args cmdargs) int {
 	m := make(map[string]interface{})
 	if id != "" {
 		m["conference_id"] = id
+	}
+	if user_id != "" {
+		m["user_id"] = user_id
 	}
 	if venue_id != "" {
 		m["venue_id"] = venue_id

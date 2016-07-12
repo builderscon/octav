@@ -179,6 +179,40 @@ func httpAddConferenceDates(ctx context.Context, w http.ResponseWriter, r *http.
 	doAddConferenceDates(ctx, w, r, payload)
 }
 
+func httpAddConferenceSeriesAdmin(ctx context.Context, w http.ResponseWriter, r *http.Request) {
+	if pdebug.Enabled {
+		g := pdebug.Marker("httpAddConferenceSeriesAdmin")
+		defer g.End()
+	}
+	if strings.ToLower(r.Method) != `post` {
+		w.Header().Set("Allow", "post")
+		httpError(w, `Method was `+r.Method+`, expected post`, http.StatusNotFound, nil)
+		return
+	}
+
+	var payload model.AddConferenceSeriesAdminRequest
+	jsonbuf := getTransportJSONBuffer()
+	defer releaseTransportJSONBuffer(jsonbuf)
+	if _, err := io.Copy(jsonbuf, io.LimitReader(r.Body, MaxPostSize)); err != nil {
+		httpError(w, `Failed to read request body`, http.StatusInternalServerError, err)
+		return
+	}
+	defer r.Body.Close()
+	if pdebug.Enabled {
+		pdebug.Printf(`-----> %s`, jsonbuf.Bytes())
+	}
+	if err := json.Unmarshal(jsonbuf.Bytes(), &payload); err != nil {
+		httpError(w, `Invalid JSON input`, http.StatusInternalServerError, err)
+		return
+	}
+
+	if err := validator.HTTPAddConferenceSeriesAdminRequest.Validate(&payload); err != nil {
+		httpError(w, `Invalid input (validation failed)`, http.StatusInternalServerError, err)
+		return
+	}
+	doAddConferenceSeriesAdmin(ctx, w, r, payload)
+}
+
 func httpAddConferenceVenue(ctx context.Context, w http.ResponseWriter, r *http.Request) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("httpAddConferenceVenue")
@@ -1315,6 +1349,7 @@ func (s *Server) SetupRoutes() {
 	r.HandleFunc(`/v1/conference/update`, httpWithContext(httpWithBasicAuth(httpUpdateConference)))
 	r.HandleFunc(`/v1/conference/venue/add`, httpWithContext(httpWithBasicAuth(httpAddConferenceVenue)))
 	r.HandleFunc(`/v1/conference/venue/delete`, httpWithContext(httpWithBasicAuth(httpDeleteConferenceVenue)))
+	r.HandleFunc(`/v1/conference_series/admin/add`, httpWithContext(httpWithBasicAuth(httpAddConferenceSeriesAdmin)))
 	r.HandleFunc(`/v1/conference_series/create`, httpWithContext(httpWithBasicAuth(httpCreateConferenceSeries)))
 	r.HandleFunc(`/v1/conference_series/delete`, httpWithContext(httpWithBasicAuth(httpDeleteConferenceSeries)))
 	r.HandleFunc(`/v1/conference_series/list`, httpWithContext(httpListConferenceSeries))
