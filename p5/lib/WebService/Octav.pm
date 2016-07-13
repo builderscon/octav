@@ -45,7 +45,7 @@ sub create_user {
         $self->{last_error} = $res->status_line;
         return;
     }
-    return JSON::decode_json($res->content);
+    return JSON::decode_json($res->decoded_content);
 }
 
 sub lookup_user {
@@ -62,7 +62,7 @@ sub lookup_user {
         $self->{last_error} = $res->status_line;
         return;
     }
-    return JSON::decode_json($res->content);
+    return JSON::decode_json($res->decoded_content);
 }
 
 sub lookup_user_by_auth_user_id {
@@ -79,12 +79,12 @@ sub lookup_user_by_auth_user_id {
         $self->{last_error} = $res->status_line;
         return;
     }
-    return JSON::decode_json($res->content);
+    return JSON::decode_json($res->decoded_content);
 }
 
 sub update_user {
     my ($self, $payload) = @_;
-    for my $required (qw(id)) {
+    for my $required (qw(id user_id)) {
         if (!$payload->{$required}) {
             die qq|property "$required" must be provided|;
         }
@@ -101,7 +101,7 @@ sub update_user {
 
 sub delete_user {
     my ($self, $payload) = @_;
-    for my $required (qw(id)) {
+    for my $required (qw(id user_id)) {
         if (!$payload->{$required}) {
             die qq|property "$required" must be provided|;
         }
@@ -125,12 +125,12 @@ sub list_user {
         $self->{last_error} = $res->status_line;
         return;
     }
-    return JSON::decode_json($res->content);
+    return JSON::decode_json($res->decoded_content);
 }
 
 sub create_venue {
     my ($self, $payload) = @_;
-    for my $required (qw(name address)) {
+    for my $required (qw(name address user_id)) {
         if (!$payload->{$required}) {
             die qq|property "$required" must be provided|;
         }
@@ -142,7 +142,7 @@ sub create_venue {
         $self->{last_error} = $res->status_line;
         return;
     }
-    return JSON::decode_json($res->content);
+    return JSON::decode_json($res->decoded_content);
 }
 
 sub list_venue {
@@ -154,7 +154,7 @@ sub list_venue {
         $self->{last_error} = $res->status_line;
         return;
     }
-    return JSON::decode_json($res->content);
+    return JSON::decode_json($res->decoded_content);
 }
 
 sub lookup_venue {
@@ -171,12 +171,12 @@ sub lookup_venue {
         $self->{last_error} = $res->status_line;
         return;
     }
-    return JSON::decode_json($res->content);
+    return JSON::decode_json($res->decoded_content);
 }
 
 sub update_venue {
     my ($self, $payload) = @_;
-    for my $required (qw(id)) {
+    for my $required (qw(id user_id)) {
         if (!$payload->{$required}) {
             die qq|property "$required" must be provided|;
         }
@@ -193,7 +193,7 @@ sub update_venue {
 
 sub delete_venue {
     my ($self, $payload) = @_;
-    for my $required (qw(id)) {
+    for my $required (qw(id user_id)) {
         if (!$payload->{$required}) {
             die qq|property "$required" must be provided|;
         }
@@ -210,7 +210,7 @@ sub delete_venue {
 
 sub create_room {
     my ($self, $payload) = @_;
-    for my $required (qw(venue_id name)) {
+    for my $required (qw(venue_id name user_id)) {
         if (!$payload->{$required}) {
             die qq|property "$required" must be provided|;
         }
@@ -222,12 +222,12 @@ sub create_room {
         $self->{last_error} = $res->status_line;
         return;
     }
-    return JSON::decode_json($res->content);
+    return JSON::decode_json($res->decoded_content);
 }
 
 sub update_room {
     my ($self, $payload) = @_;
-    for my $required (qw(id)) {
+    for my $required (qw(id user_id)) {
         if (!$payload->{$required}) {
             die qq|property "$required" must be provided|;
         }
@@ -256,12 +256,12 @@ sub lookup_room {
         $self->{last_error} = $res->status_line;
         return;
     }
-    return JSON::decode_json($res->content);
+    return JSON::decode_json($res->decoded_content);
 }
 
 sub delete_room {
     my ($self, $payload) = @_;
-    for my $required (qw(id)) {
+    for my $required (qw(id user_id)) {
         if (!$payload->{$required}) {
             die qq|property "$required" must be provided|;
         }
@@ -290,12 +290,58 @@ sub list_room {
         $self->{last_error} = $res->status_line;
         return;
     }
-    return JSON::decode_json($res->content);
+    return JSON::decode_json($res->decoded_content);
+}
+
+sub create_conference_series {
+    my ($self, $payload) = @_;
+    for my $required (qw(user_id slug)) {
+        if (!$payload->{$required}) {
+            die qq|property "$required" must be provided|;
+        }
+    }
+    my $uri = URI->new($self->{endpoint} . qq|/v1/conference_series/create|);
+    my $json_payload = JSON::encode_json($payload);
+    my $res = $self->{user_agent}->post($uri, Content => $json_payload);
+    if (!$res->is_success) {
+        $self->{last_error} = $res->status_line;
+        return;
+    }
+    return JSON::decode_json($res->decoded_content);
+}
+
+sub list_conference_series {
+    my ($self, $payload) = @_;
+    my $uri = URI->new($self->{endpoint} . qq|/v1/conference_series/list|);
+    $uri->query_form($payload);
+    my $res = $self->{user_agent}->get($uri);
+    if (!$res->is_success) {
+        $self->{last_error} = $res->status_line;
+        return;
+    }
+    return JSON::decode_json($res->decoded_content);
+}
+
+sub add_conference_series_admin {
+    my ($self, $payload) = @_;
+    for my $required (qw(series_id admin_id user_id)) {
+        if (!$payload->{$required}) {
+            die qq|property "$required" must be provided|;
+        }
+    }
+    my $uri = URI->new($self->{endpoint} . qq|/v1/conference_series/admin/add|);
+    my $json_payload = JSON::encode_json($payload);
+    my $res = $self->{user_agent}->post($uri, Content => $json_payload);
+    if (!$res->is_success) {
+        $self->{last_error} = $res->status_line;
+        return;
+    }
+    return 1
 }
 
 sub create_conference {
     my ($self, $payload) = @_;
-    for my $required (qw(title slug user_id)) {
+    for my $required (qw(series_id title slug user_id)) {
         if (!$payload->{$required}) {
             die qq|property "$required" must be provided|;
         }
@@ -307,12 +353,12 @@ sub create_conference {
         $self->{last_error} = $res->status_line;
         return;
     }
-    return JSON::decode_json($res->content);
+    return JSON::decode_json($res->decoded_content);
 }
 
 sub add_conference_dates {
     my ($self, $payload) = @_;
-    for my $required (qw(conference_id dates)) {
+    for my $required (qw(conference_id dates user_id)) {
         if (!$payload->{$required}) {
             die qq|property "$required" must be provided|;
         }
@@ -329,7 +375,7 @@ sub add_conference_dates {
 
 sub delete_conference_dates {
     my ($self, $payload) = @_;
-    for my $required (qw(conference_id dates)) {
+    for my $required (qw(conference_id dates user_id)) {
         if (!$payload->{$required}) {
             die qq|property "$required" must be provided|;
         }
@@ -346,7 +392,7 @@ sub delete_conference_dates {
 
 sub add_conference_admin {
     my ($self, $payload) = @_;
-    for my $required (qw(conference_id user_id)) {
+    for my $required (qw(conference_id admin_id user_id)) {
         if (!$payload->{$required}) {
             die qq|property "$required" must be provided|;
         }
@@ -363,7 +409,7 @@ sub add_conference_admin {
 
 sub delete_conference_admin {
     my ($self, $payload) = @_;
-    for my $required (qw(conference_id user_id)) {
+    for my $required (qw(conference_id admin_id user_id)) {
         if (!$payload->{$required}) {
             die qq|property "$required" must be provided|;
         }
@@ -380,7 +426,7 @@ sub delete_conference_admin {
 
 sub add_conference_venue {
     my ($self, $payload) = @_;
-    for my $required (qw(conference_id venue_id)) {
+    for my $required (qw(conference_id venue_id user_id)) {
         if (!$payload->{$required}) {
             die qq|property "$required" must be provided|;
         }
@@ -397,7 +443,7 @@ sub add_conference_venue {
 
 sub delete_conference_venue {
     my ($self, $payload) = @_;
-    for my $required (qw(conference_id venue_id)) {
+    for my $required (qw(conference_id venue_id user_id)) {
         if (!$payload->{$required}) {
             die qq|property "$required" must be provided|;
         }
@@ -426,7 +472,7 @@ sub lookup_conference {
         $self->{last_error} = $res->status_line;
         return;
     }
-    return JSON::decode_json($res->content);
+    return JSON::decode_json($res->decoded_content);
 }
 
 sub lookup_conference_by_slug {
@@ -443,7 +489,7 @@ sub lookup_conference_by_slug {
         $self->{last_error} = $res->status_line;
         return;
     }
-    return JSON::decode_json($res->content);
+    return JSON::decode_json($res->decoded_content);
 }
 
 sub list_conference {
@@ -455,17 +501,34 @@ sub list_conference {
         $self->{last_error} = $res->status_line;
         return;
     }
-    return JSON::decode_json($res->content);
+    return JSON::decode_json($res->decoded_content);
 }
 
 sub update_conference {
     my ($self, $payload) = @_;
-    for my $required (qw(id)) {
+    for my $required (qw(id user_id)) {
         if (!$payload->{$required}) {
             die qq|property "$required" must be provided|;
         }
     }
     my $uri = URI->new($self->{endpoint} . qq|/v1/conference/update|);
+    my $json_payload = JSON::encode_json($payload);
+    my $res = $self->{user_agent}->post($uri, Content => $json_payload);
+    if (!$res->is_success) {
+        $self->{last_error} = $res->status_line;
+        return;
+    }
+    return 1
+}
+
+sub delete_conference_series {
+    my ($self, $payload) = @_;
+    for my $required (qw(id user_id)) {
+        if (!$payload->{$required}) {
+            die qq|property "$required" must be provided|;
+        }
+    }
+    my $uri = URI->new($self->{endpoint} . qq|/v1/conference_series/delete|);
     my $json_payload = JSON::encode_json($payload);
     my $res = $self->{user_agent}->post($uri, Content => $json_payload);
     if (!$res->is_success) {
@@ -494,7 +557,7 @@ sub delete_conference {
 
 sub create_session {
     my ($self, $payload) = @_;
-    for my $required (qw(conference_id speaker_id title abstract duration)) {
+    for my $required (qw(conference_id speaker_id title abstract duration user_id)) {
         if (!$payload->{$required}) {
             die qq|property "$required" must be provided|;
         }
@@ -506,7 +569,7 @@ sub create_session {
         $self->{last_error} = $res->status_line;
         return;
     }
-    return JSON::decode_json($res->content);
+    return JSON::decode_json($res->decoded_content);
 }
 
 sub lookup_session {
@@ -523,12 +586,12 @@ sub lookup_session {
         $self->{last_error} = $res->status_line;
         return;
     }
-    return JSON::decode_json($res->content);
+    return JSON::decode_json($res->decoded_content);
 }
 
 sub delete_session {
     my ($self, $payload) = @_;
-    for my $required (qw(id)) {
+    for my $required (qw(id user_id)) {
         if (!$payload->{$required}) {
             die qq|property "$required" must be provided|;
         }
@@ -545,7 +608,7 @@ sub delete_session {
 
 sub update_session {
     my ($self, $payload) = @_;
-    for my $required (qw(id)) {
+    for my $required (qw(id user_id)) {
         if (!$payload->{$required}) {
             die qq|property "$required" must be provided|;
         }
@@ -574,7 +637,7 @@ sub list_session_by_conference {
         $self->{last_error} = $res->status_line;
         return;
     }
-    return JSON::decode_json($res->content);
+    return JSON::decode_json($res->decoded_content);
 }
 
 sub create_question {
@@ -591,7 +654,7 @@ sub create_question {
         $self->{last_error} = $res->status_line;
         return;
     }
-    return JSON::decode_json($res->content);
+    return JSON::decode_json($res->decoded_content);
 }
 
 sub delete_question {
@@ -625,7 +688,7 @@ sub list_question {
         $self->{last_error} = $res->status_line;
         return;
     }
-    return JSON::decode_json($res->content);
+    return JSON::decode_json($res->decoded_content);
 }
 
 sub create_session_survey_response {

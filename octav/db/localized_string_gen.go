@@ -5,7 +5,9 @@ package db
 import (
 	"bytes"
 	"database/sql"
-	"errors"
+
+	"github.com/lestrrat/go-pdebug"
+	"github.com/pkg/errors"
 )
 
 const LocalizedStringStdSelectColumns = "localized_strings.oid, localized_strings.parent_id, localized_strings.parent_type, localized_strings.name, localized_strings.language, localized_strings.localized"
@@ -19,7 +21,12 @@ func (l *LocalizedString) Scan(scanner interface {
 	return scanner.Scan(&l.OID, &l.ParentID, &l.ParentType, &l.Name, &l.Language, &l.Localized)
 }
 
-func (l *LocalizedString) Create(tx *Tx, opts ...InsertOption) error {
+func (l *LocalizedString) Create(tx *Tx, opts ...InsertOption) (err error) {
+	if pdebug.Enabled {
+		g := pdebug.Marker("db.LocalizedString.Create").BindError(&err)
+		defer g.End()
+		pdebug.Printf("%#v", l)
+	}
 	doIgnore := false
 	for _, opt := range opts {
 		switch opt.(type) {

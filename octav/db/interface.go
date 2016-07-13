@@ -43,6 +43,15 @@ type ConferenceDate struct {
 	Close        sql.NullString
 }
 
+// +DB tablename:"conference_series_administrators"
+type ConferenceSeriesAdministrator struct {
+	OID        int64 // OID is the internal id, used for sorting and what not
+	SeriesID   string
+	UserID     string
+	CreatedOn  time.Time
+	ModifiedOn NullTime
+}
+
 // +DB tablename:"conference_administrators"
 type ConferenceAdministrator struct {
 	OID          int64 // OID is the internal id, used for sorting and what not
@@ -106,8 +115,8 @@ type Session struct {
 type User struct {
 	OID        int64
 	EID        string
-	AuthVia    sql.NullString
-	AuthUserID sql.NullString
+	AuthVia    string
+	AuthUserID string
 	AvatarURL  sql.NullString
 	FirstName  sql.NullString
 	LastName   sql.NullString

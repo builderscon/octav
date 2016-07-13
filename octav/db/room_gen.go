@@ -5,9 +5,11 @@ package db
 import (
 	"bytes"
 	"database/sql"
-	"errors"
 	"strconv"
 	"time"
+
+	"github.com/lestrrat/go-pdebug"
+	"github.com/pkg/errors"
 )
 
 const RoomStdSelectColumns = "rooms.oid, rooms.eid, rooms.venue_id, rooms.name, rooms.capacity, rooms.created_on, rooms.modified_on"
@@ -29,7 +31,12 @@ func (r *Room) LoadByEID(tx *Tx, eid string) error {
 	return nil
 }
 
-func (r *Room) Create(tx *Tx, opts ...InsertOption) error {
+func (r *Room) Create(tx *Tx, opts ...InsertOption) (err error) {
+	if pdebug.Enabled {
+		g := pdebug.Marker("db.Room.Create").BindError(&err)
+		defer g.End()
+		pdebug.Printf("%#v", r)
+	}
 	if r.EID == "" {
 		return errors.New("create: non-empty EID required")
 	}

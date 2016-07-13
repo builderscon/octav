@@ -32,10 +32,16 @@ encoded as JSON text.
 
 # Data structure
 
+## Conference Series
+
+"builderscon" is a series. "builderscon tokyo 2016" is a conference instance in that series.
+
+Only system administrators can create conference series.
+
 ## Conferences
 
-Conferences have title, sub title, and slug. The slug is used to create
-URL (TBD, but e.g. http://*slug*.conf.builderscon.io or http://conf.builderscon.io/*slug*)
+Conferences have title, sub title, series_id and slug. The slug is used to create
+URL (http://conf.builderscon.io/*slug*)
 
 Conferences can have multiple dates. Most conferences will be 1 day only,
 but sometimes they span multiple days. Use `AddConferenceDates` to
@@ -45,6 +51,8 @@ Conferences must have at least 1 administrator associated, but can have
 multiple administrators. The account that created the conference is
 automatically registered as administrator. To add more administrators,
 use `AddAdminisrator`
+
+Conferences may only be created by conference series administrators, but may be edited by conference administrators.
 
 ## ConferenceDates
 
@@ -72,13 +80,19 @@ them using `DeleteConferenceAdmin`
 
 Venues can contain multiple rooms.
 
+Venues can be created by anybody who is an administrator of any conference.
+
 ## Rooms
 
-TODO
+Rooms belong to a venue.
+
+Rooms can be created by anybody who is an administrator of any conference.
 
 ## Sessions
 
 Sessions can be regeistered to be presented at a room.
+
+Sessions for a particular conference can only be created by administrators of that conference.
 
 # Code generation directions
 
@@ -140,14 +154,13 @@ The schema is still changing wildly. You probably want to flush it from
 time to time
 
 ```
-mysqladmin -uroot drop octav
+make initdb
 ```
 
 ## 1. Create a database
 
 ```
-mysqladmin -uroot create octav
-mysql -uroot octav < octav/sql/octav.sql
+make initdb
 ```
 
 ## 2. Run

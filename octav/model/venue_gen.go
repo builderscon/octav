@@ -29,7 +29,7 @@ func (v VenueL10N) MarshalJSON() ([]byte, error) {
 
 func (v *Venue) Load(tx *db.Tx, id string) (err error) {
 	if pdebug.Enabled {
-		g := pdebug.Marker("Venue.Load").BindError(&err)
+		g := pdebug.Marker("model.Venue.Load %s", id).BindError(&err)
 		defer g.End()
 	}
 	vdb := db.Venue{}

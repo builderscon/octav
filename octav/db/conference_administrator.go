@@ -1,9 +1,30 @@
 package db
 
-import "bytes"
+import (
+	"github.com/pkg/errors"
+)
+
+func IsConferenceAdministrator(tx *Tx, cid, uid string) error {
+	stmt := getStmtBuf()
+	defer releaseStmtBuf(stmt)
+	stmt.WriteString(`SELECT 1 FROM `)
+	stmt.WriteString(ConferenceAdministratorTable)
+	stmt.WriteString(` WHERE conference_id = ? AND user_id = ?`)
+
+	var v int
+	row := tx.QueryRow(stmt.String(), cid, uid)
+	if err := row.Scan(&v); err != nil {
+		return errors.Wrap(err, "failed to scan row")
+	}
+	if v != 1 {
+		return errors.New("no matching administrator found")
+	}
+	return nil
+}
 
 func DeleteConferenceAdministrator(tx *Tx, cid, uid string) error {
-	stmt := bytes.Buffer{}
+	stmt := getStmtBuf()
+	defer releaseStmtBuf(stmt)
 	stmt.WriteString(`DELETE FROM `)
 	stmt.WriteString(ConferenceAdministratorTable)
 	stmt.WriteString(` WHERE conference_id = ? AND user_id = ?`)
@@ -13,7 +34,8 @@ func DeleteConferenceAdministrator(tx *Tx, cid, uid string) error {
 }
 
 func LoadConferenceAdministrators(tx *Tx, admins *UserList, cid string) error {
-	stmt := bytes.Buffer{}
+	stmt := getStmtBuf()
+	defer releaseStmtBuf(stmt)
 	stmt.WriteString(`SELECT `)
 	stmt.WriteString(UserStdSelectColumns)
 	stmt.WriteString(` FROM `)

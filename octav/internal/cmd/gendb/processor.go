@@ -169,13 +169,14 @@ func (p *Processor) ProcessStruct(s Struct) error {
 	buf.WriteString("\n\nimport (")
 	buf.WriteString("\n" + `"bytes"`)
 	buf.WriteString("\n" + `"database/sql"`)
-	buf.WriteString("\n" + `"errors"`)
 	if hasEID && hasOID {
 		buf.WriteString("\n" + `"strconv"`)
 	}
 	if hasCreatedOn {
 		buf.WriteString("\n" + `"time"`)
 	}
+	buf.WriteString("\n\n" + `"github.com/lestrrat/go-pdebug"`)
+	buf.WriteString("\n" + `"github.com/pkg/errors"`)
 	buf.WriteString("\n)")
 
 	for i, f := range updateFields {
@@ -244,7 +245,12 @@ func (p *Processor) ProcessStruct(s Struct) error {
 		buf.WriteString("\n}")
 	}
 
-	fmt.Fprintf(&buf, "\n\nfunc (%c *%s) Create(tx *Tx, opts ...InsertOption) error {", varname, s.Name)
+	fmt.Fprintf(&buf, "\n\nfunc (%c *%s) Create(tx *Tx, opts ...InsertOption) (err error) {", varname, s.Name)
+	buf.WriteString("\nif pdebug.Enabled {")
+	fmt.Fprintf(&buf, "\n" + `g := pdebug.Marker("db.%s.Create").BindError(&err)`, s.Name)
+	buf.WriteString("\ndefer g.End()")
+	fmt.Fprintf(&buf, "\n" + `pdebug.Printf("%%#v", %c)`, varname)
+	buf.WriteString("\n}")
 	if hasEID {
 		fmt.Fprintf(&buf, "\nif %c.EID == "+`""`+" {", varname)
 		buf.WriteString("\n" + `return errors.New("create: non-empty EID required")`)

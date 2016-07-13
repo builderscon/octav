@@ -126,6 +126,42 @@ func (c *Client) AddConferenceDates(in *model.AddConferenceDatesRequest) (err er
 	return nil
 }
 
+func (c *Client) AddConferenceSeriesAdmin(in *model.AddConferenceSeriesAdminRequest) (err error) {
+	if pdebug.Enabled {
+		g := pdebug.Marker("client.AddConferenceSeriesAdmin").BindError(&err)
+		defer g.End()
+	}
+	u, err := url.Parse(c.Endpoint + "/v1/conference_series/admin/add")
+	if err != nil {
+		return err
+	}
+	buf := bytes.Buffer{}
+	err = json.NewEncoder(&buf).Encode(in)
+	if err != nil {
+		return err
+	}
+	if pdebug.Enabled {
+		pdebug.Printf("POST to %s", u.String())
+		pdebug.Printf("%s", buf.String())
+	}
+	req, err := http.NewRequest("POST", u.String(), &buf)
+	if err != nil {
+		return err
+	}
+	req.Header.Set("Content-Type", "application/json")
+	if c.BasicAuth.Username != "" && c.BasicAuth.Password != "" {
+		req.SetBasicAuth(c.BasicAuth.Username, c.BasicAuth.Password)
+	}
+	res, err := c.Client.Do(req)
+	if err != nil {
+		return err
+	}
+	if res.StatusCode != http.StatusOK {
+		return fmt.Errorf(`Invalid response: '%s'`, res.Status)
+	}
+	return nil
+}
+
 func (c *Client) AddConferenceVenue(in *model.AddConferenceVenueRequest) (err error) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("client.AddConferenceVenue").BindError(&err)

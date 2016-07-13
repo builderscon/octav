@@ -85,8 +85,8 @@ type TagString string
 // +model
 type User struct {
 	ID         string `json:"id"`
-	AuthVia    string `json:"auth_via,omitempty"`
-	AuthUserID string `json:"auth_user_id,omitempty"`
+	AuthVia    string `json:"auth_via"`
+	AuthUserID string `json:"auth_user_id"`
 	AvatarURL  string `json:"avatar_url,omitempty"`
 	FirstName  string `json:"first_name,omitempty" l10n:"true"`
 	LastName   string `json:"last_name,omitempty" l10n:"true"`
@@ -109,8 +109,14 @@ type Venue struct {
 type VenueList []Venue
 
 // +transport
+type LookupConferenceSeriesRequest struct {
+	ID string `json:"id"`
+}
+
+// +transport
 type CreateConferenceSeriesRequest struct {
-	Slug string `json:"slug"`
+	UserID string `json:"user_id"`
+	Slug   string `json:"slug"`
 }
 
 // +transport
@@ -121,13 +127,21 @@ type UpdateConferenceSeriesRequest struct {
 
 // +transport
 type DeleteConferenceSeriesRequest struct {
-	ID string `json:"id"`
+	ID     string `json:"id"`
+	UserID string `json:"user_id"`
 }
 
 // +transport
 type ListConferenceSeriesRequest struct {
-	Since      jsval.MaybeString `json:"since,omitempty" urlenc:"since,omitempty,string"`
-	Limit      jsval.MaybeInt    `json:"limit,omitempty" urlenc:"limit,omitempty,int64"`
+	Since jsval.MaybeString `json:"since,omitempty" urlenc:"since,omitempty,string"`
+	Limit jsval.MaybeInt    `json:"limit,omitempty" urlenc:"limit,omitempty,int64"`
+}
+
+// +transport
+type AddConferenceSeriesAdminRequest struct {
+	SeriesID string `json:"series_id"`
+	AdminID  string `json:"admin_id"` // new ID to add
+	UserID   string `json:"user_id"`  // ID of the operator
 }
 
 // +transport
@@ -162,6 +176,7 @@ type UpdateConferenceRequest struct {
 	SeriesID jsval.MaybeString `json:"series_id,omitempty"`
 	SubTitle jsval.MaybeString `json:"sub_title,omitempty" l10n:"true"`
 	Slug     jsval.MaybeString `json:"slug,omitempty"`
+	UserID   string            `json:"user_id"`
 	// TODO dates
 	L10N tools.LocalizedFields `json:"-"`
 }
@@ -193,11 +208,13 @@ type ConferenceDateList []ConferenceDate
 type AddConferenceDatesRequest struct {
 	ConferenceID string             `json:"conference_id"`
 	Dates        ConferenceDateList `json:"dates" extract:"true"`
+	UserID       string             `json:"user_id"`
 }
 
 // +transport
 type AddConferenceAdminRequest struct {
 	ConferenceID string `json:"conference_id"`
+	AdminID      string `json:"admin_id"`
 	UserID       string `json:"user_id"`
 }
 
@@ -205,17 +222,20 @@ type AddConferenceAdminRequest struct {
 type AddConferenceVenueRequest struct {
 	ConferenceID string `json:"conference_id"`
 	VenueID      string `json:"venue_id"`
+	UserID       string `json:"user_id"`
 }
 
 // +transport
 type DeleteConferenceDatesRequest struct {
 	ConferenceID string   `json:"conference_id"`
 	Dates        DateList `json:"dates" extract:"true"`
+	UserID       string   `json:"user_id"`
 }
 
 // +transport
 type DeleteConferenceAdminRequest struct {
 	ConferenceID string `json:"conference_id"`
+	AdminID      string `json:"admin_id"`
 	UserID       string `json:"user_id"`
 }
 
@@ -223,11 +243,13 @@ type DeleteConferenceAdminRequest struct {
 type DeleteConferenceVenueRequest struct {
 	ConferenceID string `json:"conference_id"`
 	VenueID      string `json:"venue_id"`
+	UserID       string `json:"user_id"`
 }
 
 // +transport
 type DeleteConferenceRequest struct {
-	ID string `json:"id" urlenc:"id"`
+	ID     string `json:"id"`
+	UserID string `json:"user_id"`
 }
 
 // +transport
@@ -260,6 +282,7 @@ type CreateRoomRequest struct {
 	Name     jsval.MaybeString     `json:"name" l10n:"true"`
 	Capacity jsval.MaybeUint       `json:"capacity"`
 	L10N     tools.LocalizedFields `json:"-"`
+	UserID   string                `json:"user_id"`
 }
 
 // +transport
@@ -275,11 +298,13 @@ type UpdateRoomRequest struct {
 	Name     jsval.MaybeString     `json:"name,omitempty" l10n:"true"`
 	Capacity jsval.MaybeUint       `json:"capacity,omitempty"`
 	L10N     tools.LocalizedFields `json:"-"`
+	UserID   string                `json:"user_id"`
 }
 
 // +transport
 type DeleteRoomRequest struct {
-	ID string `json:"id" urlenc:"id"`
+	ID     string `json:"id" urlenc:"id"`
+	UserID string `json:"user_id"`
 }
 
 // +transport
@@ -309,6 +334,7 @@ type CreateSessionRequest struct {
 	PhotoPermission jsval.MaybeString     `json:"photo_permission,omitempty"`
 	VideoPermission jsval.MaybeString     `json:"video_permission,omitempty"`
 	L10N            tools.LocalizedFields `json:"-"`
+	UserID          string                `json:"user_id"`
 }
 
 // +transport
@@ -341,11 +367,13 @@ type UpdateSessionRequest struct {
 	Status            jsval.MaybeString     `json:"status,omitempty"`
 	Confirmed         jsval.MaybeBool       `json:"confirmed,omitempty"`
 	L10N              tools.LocalizedFields `json:"-"`
+	UserID            string                `json:"user_id"`
 }
 
 // +transport
 type DeleteSessionRequest struct {
-	ID string `json:"id" urlenc:"id"`
+	ID     string `json:"id" urlenc:"id"`
+	UserID string `json:"user_id"`
 }
 
 // +transport
@@ -354,8 +382,8 @@ type CreateUserRequest struct {
 	LastName   jsval.MaybeString     `json:"last_name,omitempty" l18n:"true"`
 	Nickname   string                `json:"nickname"`
 	Email      jsval.MaybeString     `json:"email,omitempty"`
-	AuthVia    jsval.MaybeString     `json:"auth_via,omitempty"`
-	AuthUserID jsval.MaybeString     `json:"auth_user_id,omitempty"`
+	AuthVia    string                `json:"auth_via"`
+	AuthUserID string                `json:"auth_user_id"`
 	AvatarURL  jsval.MaybeString     `json:"avatar_url,omitempty"`
 	TshirtSize jsval.MaybeString     `json:"tshirt_size,omitempty"`
 	L10N       tools.LocalizedFields `json:"-"`
@@ -372,6 +400,7 @@ type UpdateUserRequest struct {
 	AuthUserID jsval.MaybeString     `json:"auth_user_id,omitempty"`
 	AvatarURL  jsval.MaybeString     `json:"avatar_url,omitempty"`
 	TshirtSize jsval.MaybeString     `json:"tshirt_size,omitempty"`
+	UserID     string                `json:"user_id"`
 	L10N       tools.LocalizedFields `json:"-"`
 }
 
@@ -390,7 +419,8 @@ type LookupUserByAuthUserIDRequest struct {
 
 // +transport
 type DeleteUserRequest struct {
-	ID string `json:"id"`
+	ID     string `json:"id"`
+	UserID string `json:"user_id"`
 }
 
 // +transport
@@ -407,6 +437,7 @@ type CreateVenueRequest struct {
 	Longitude jsval.MaybeFloat      `json:"longitude,omitempty"`
 	Latitude  jsval.MaybeFloat      `json:"latitude,omitempty"`
 	L10N      tools.LocalizedFields `json:"-"`
+	UserID    string                `json:"user_id"`
 }
 
 // +transport
@@ -417,11 +448,13 @@ type UpdateVenueRequest struct {
 	Longitude jsval.MaybeFloat      `json:"longitude,omitempty"`
 	Latitude  jsval.MaybeFloat      `json:"latitude,omitempty"`
 	L10N      tools.LocalizedFields `json:"-"`
+	UserID    string                `json:"user_id"`
 }
 
 // +transport
 type DeleteVenueRequest struct {
-	ID string `json:"id" urlenc:"id"`
+	ID     string `json:"id" urlenc:"id"`
+	UserID string `json:"user_id"`
 }
 
 // +transport
@@ -450,6 +483,11 @@ type Question struct {
 	SessionID string
 	UserID    string
 	Body      string
+}
+
+// +transport
+type LookupQuestionRequest struct {
+	ID string `json:"id"`
 }
 
 // +transport
@@ -502,6 +540,11 @@ type Client struct {
 type CreateClientRequest struct {
 	ID   string `json:"id"`
 	Name string `json:"name"`
+}
+
+// +transport
+type LookupClientRequest struct {
+	ID string `json:"id"`
 }
 
 // +transport

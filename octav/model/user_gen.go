@@ -29,7 +29,7 @@ func (v UserL10N) MarshalJSON() ([]byte, error) {
 
 func (v *User) Load(tx *db.Tx, id string) (err error) {
 	if pdebug.Enabled {
-		g := pdebug.Marker("User.Load").BindError(&err)
+		g := pdebug.Marker("model.User.Load %s", id).BindError(&err)
 		defer g.End()
 	}
 	vdb := db.User{}
@@ -45,12 +45,8 @@ func (v *User) Load(tx *db.Tx, id string) (err error) {
 
 func (v *User) FromRow(vdb db.User) error {
 	v.ID = vdb.EID
-	if vdb.AuthVia.Valid {
-		v.AuthVia = vdb.AuthVia.String
-	}
-	if vdb.AuthUserID.Valid {
-		v.AuthUserID = vdb.AuthUserID.String
-	}
+	v.AuthVia = vdb.AuthVia
+	v.AuthUserID = vdb.AuthUserID
 	if vdb.AvatarURL.Valid {
 		v.AvatarURL = vdb.AvatarURL.String
 	}
@@ -73,10 +69,8 @@ func (v *User) FromRow(vdb db.User) error {
 
 func (v *User) ToRow(vdb *db.User) error {
 	vdb.EID = v.ID
-	vdb.AuthVia.Valid = true
-	vdb.AuthVia.String = v.AuthVia
-	vdb.AuthUserID.Valid = true
-	vdb.AuthUserID.String = v.AuthUserID
+	vdb.AuthVia = v.AuthVia
+	vdb.AuthUserID = v.AuthUserID
 	vdb.AvatarURL.Valid = true
 	vdb.AvatarURL.String = v.AvatarURL
 	vdb.FirstName.Valid = true

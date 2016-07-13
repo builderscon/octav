@@ -49,7 +49,12 @@ func (v *Conference) populateRowForUpdate(vdb *db.Conference, payload model.Upda
 func (v *Conference) CreateFromPayload(tx *db.Tx, payload model.CreateConferenceRequest, result *model.Conference) error {
 	vdb := db.Conference{}
 	if err := v.Create(tx, &vdb, payload); err != nil {
-		return errors.Wrap(err, "failed to create store conference in database")
+		return errors.Wrap(err, "failed to store in database")
+	}
+
+	su := User{}
+	if err := su.IsConferenceSeriesAdministrator(tx, payload.SeriesID, payload.UserID); err != nil {
+		return errors.Wrap(err, "creating a conference requires conference series administrator privilege")
 	}
 
 	if err := v.AddAdministrator(tx, vdb.EID, payload.UserID); err != nil {
@@ -100,7 +105,16 @@ func (v *Conference) AddAdministrator(tx *db.Tx, cid, uid string) error {
 		ConferenceID: cid,
 		UserID:       uid,
 	}
-	return c.Create(tx)
+	return c.Create(tx, db.WithInsertIgnore(true))
+}
+
+func (v *Conference) AddAdministratorFromPayload(tx *db.Tx, payload model.AddConferenceAdminRequest) error {
+	su := User{}
+	if err := su.IsConferenceAdministrator(tx, payload.ConferenceID, payload.UserID); err != nil {
+		return errors.Wrap(err, "adding a conference administrator requires conference administrator privilege")
+	}
+
+	return errors.Wrap(v.AddAdministrator(tx, payload.ConferenceID, payload.AdminID), "failed to add administrator")
 }
 
 const datefmt = `2006-01-02`
@@ -131,10 +145,15 @@ func (v *Conference) LoadByRange(tx *db.Tx, vdbl *db.ConferenceList, since, lang
 	return nil
 }
 
-func (v *Conference) AddDates(tx *db.Tx, cid string, dates ...model.ConferenceDate) error {
-	for _, date := range dates {
+func (v *Conference) AddDatesFromPayload(tx *db.Tx, payload model.AddConferenceDatesRequest) error {
+	su := User{}
+	if err := su.IsConferenceAdministrator(tx, payload.ConferenceID, payload.UserID); err != nil {
+		return errors.Wrap(err, "adding conference dates requires conference administrator privilege")
+	}
+
+	for _, date := range payload.Dates {
 		cd := db.ConferenceDate{
-			ConferenceID: cid,
+			ConferenceID: payload.ConferenceID,
 			Date:         date.Date.String(),
 			Open:         sql.NullString{String: date.Open.String(), Valid: true},
 			Close:        sql.NullString{String: date.Close.String(), Valid: true},
@@ -147,13 +166,18 @@ func (v *Conference) AddDates(tx *db.Tx, cid string, dates ...model.ConferenceDa
 	return nil
 }
 
-func (v *Conference) DeleteDates(tx *db.Tx, cid string, dates ...model.Date) error {
+func (v *Conference) DeleteDatesFromPayload(tx *db.Tx, payload model.DeleteConferenceDatesRequest) error {
+	su := User{}
+	if err := su.IsConferenceAdministrator(tx, payload.ConferenceID, payload.UserID); err != nil {
+		return errors.Wrap(err, "deleting conference dates requires conference administrator privilege")
+	}
+
 	vdb := db.ConferenceDate{}
-	sdatelist := make([]string, len(dates))
-	for i, dt := range dates {
+	sdatelist := make([]string, len(payload.Dates))
+	for i, dt := range payload.Dates {
 		sdatelist[i] = dt.String()
 	}
-	return vdb.DeleteDates(tx, cid, sdatelist...)
+	return vdb.DeleteDates(tx, payload.ConferenceID, sdatelist...)
 }
 
 func (v *Conference) LoadDates(tx *db.Tx, cdl *model.ConferenceDateList, cid string) error {
@@ -196,20 +220,18 @@ func (v *Conference) LoadDates(tx *db.Tx, cdl *model.ConferenceDateList, cid str
 	return nil
 }
 
-func (v *Conference) AddAdmin(tx *db.Tx, cid, uid string) error {
-	cd := db.ConferenceAdministrator{
-		ConferenceID: cid,
-		UserID:       uid,
-	}
-	if err := cd.Create(tx, db.WithInsertIgnore(true)); err != nil {
-		return err
+func (v *Conference) DeleteAdministratorFromPayload(tx *db.Tx, payload model.DeleteConferenceAdminRequest) (err error) {
+	if pdebug.Enabled {
+		g := pdebug.Marker("service.Conference.DeleteAdministratorFromPayload").BindError(&err)
+		defer g.End()
 	}
 
-	return nil
-}
+	su := User{}
+	if err := su.IsConferenceAdministrator(tx, payload.ConferenceID, payload.UserID); err != nil {
+		return errors.Wrap(err, "deleting a conference administrator requires conference administrator privilege")
+	}
 
-func (v *Conference) DeleteAdmin(tx *db.Tx, cid, uid string) error {
-	return db.DeleteConferenceAdministrator(tx, cid, uid)
+	return db.DeleteConferenceAdministrator(tx, payload.ConferenceID, payload.AdminID)
 }
 
 func (v *Conference) LoadAdmins(tx *db.Tx, cdl *model.UserList, cid string) (err error) {
@@ -239,20 +261,28 @@ func (v *Conference) LoadAdmins(tx *db.Tx, cdl *model.UserList, cid string) (err
 	return nil
 }
 
-func (v *Conference) AddVenue(tx *db.Tx, cid, vid string) error {
+func (v *Conference) AddVenueFromPayload(tx *db.Tx, payload model.AddConferenceVenueRequest) error {
+	su := User{}
+	if err := su.IsConferenceAdministrator(tx, payload.ConferenceID, payload.UserID); err != nil {
+		return errors.Wrap(err, "adding a conference venue requires conference administrator privilege")
+	}
 	cd := db.ConferenceVenue{
-		ConferenceID: cid,
-		VenueID:      vid,
+		ConferenceID: payload.ConferenceID,
+		VenueID:      payload.VenueID,
 	}
 	if err := cd.Create(tx, db.WithInsertIgnore(true)); err != nil {
-		return err
+		return errors.Wrap(err, "failed to insert new conference/venue relation")
 	}
 
 	return nil
 }
 
-func (v *Conference) DeleteVenue(tx *db.Tx, cid, uid string) error {
-	return db.DeleteConferenceVenue(tx, cid, uid)
+func (v *Conference) DeleteVenueFromPayload(tx *db.Tx, payload model.DeleteConferenceVenueRequest) error {
+	su := User{}
+	if err := su.IsConferenceAdministrator(tx, payload.ConferenceID, payload.UserID); err != nil {
+		return errors.Wrap(err, "deleting a conference venue requires conference administrator privilege")
+	}
+	return errors.Wrap(db.DeleteConferenceVenue(tx, payload.ConferenceID, payload.VenueID), "failed to delete conference venue")
 }
 
 func (v *Conference) LoadVenues(tx *db.Tx, cdl *model.VenueList, cid string) error {
@@ -296,7 +326,27 @@ func (v *Conference) Decorate(tx *db.Tx, c *model.Conference) error {
 	}
 
 	if err := v.LoadVenues(tx, &c.Venues, c.ID); err != nil {
-		return errors.Wrapf(err, "failed to load venues for '%s'", c.ID) 
+		return errors.Wrapf(err, "failed to load venues for '%s'", c.ID)
 	}
 	return nil
 }
+
+func (v *Conference) UpdateFromPayload(tx *db.Tx, payload model.UpdateConferenceRequest) (err error) {
+	if pdebug.Enabled {
+		g := pdebug.Marker("service.Conference.UpdateFromPayload").BindError(&err)
+		defer g.End()
+	}
+
+	su := User{}
+	if err := su.IsConferenceAdministrator(tx, payload.ID, payload.UserID); err != nil {
+		return errors.Wrap(err, "updating a conference requires conference administrator privilege")
+	}
+
+	vdb := db.Conference{}
+	if err := vdb.LoadByEID(tx, payload.ID); err != nil {
+		return errors.Wrap(err, "failed to load conference from database")
+	}
+
+	return errors.Wrap(v.Update(tx, &vdb, payload), "failed to load conference from database")
+}
+

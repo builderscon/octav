@@ -432,13 +432,14 @@
           "last_name": { "$ref": "#/definitions/string_en" },
           "nickname": { "$ref": "#/definitions/string_en" },
           "email": { "$ref": "#/definitions/email" },
-          "tshirt_size": { "$ref": "#/definitions/tshirt_size" }
+          "tshirt_size": { "$ref": "#/definitions/tshirt_size" },
+          "user_id": { "$ref": "#/definitions/uuid" }
         },
         "patternProperties": {
           "first_name#[a-z]+": { "$ref": "#/definitions/string_i18n" },
           "last_name#[a-z]+": { "$ref": "#/definitions/string_i18n" }
         },
-        "required": [ "id" ]
+        "required": [ "id","user_id" ]
       }
     },
     {
@@ -450,9 +451,10 @@
       "encType": "application/json",
       "schema": {
         "type": "object",
-        "required": ["id"],
+        "required": ["id","user_id"],
         "properties": {
-          "id": { "$ref": "#/definitions/uuid" }
+          "id": { "$ref": "#/definitions/uuid" },
+          "user_id": { "$ref": "#/definitions/uuid" }
         }
       }
     },
@@ -486,9 +488,10 @@
           "name": { "$ref": "#/definitions/string_en" },
           "address": { "$ref": "#/definitions/string_en" },
           "latitude": { "$ref": "#/definitions/latitude" },
-          "longitude": { "$ref": "#/definitions/longitude" }
+          "longitude": { "$ref": "#/definitions/longitude" },
+          "user_id": { "$ref": "#/definitions/uuid" }
         },
-        "required": ["name", "address"],
+        "required": ["name","address","user_id"],
         "patternProperties": {
           "name#[a-z]+": { "$ref": "#/definitions/string_i18n" },
           "address#[a-z]+": { "$ref": "#/definitions/string_i18n" }
@@ -536,9 +539,10 @@
       "encType": "application/json",
       "schema": {
         "type": "object",
-        "required": ["id"],
+        "required": ["id", "user_id"],
         "properties": {
-          "id": { "$ref": "#/definitions/uuid" }
+          "id": { "$ref": "#/definitions/uuid" },
+          "user_id": { "$ref": "#/definitions/uuid" }
         }
       }
     },
@@ -551,9 +555,10 @@
       "encType": "application/json",
       "schema": {
         "type": "object",
-        "required": ["id"],
+        "required": ["id", "user_id"],
         "properties": {
-          "id": { "$ref": "#/definitions/uuid" }
+          "id": { "$ref": "#/definitions/uuid" },
+          "user_id": { "$ref": "#/definitions/uuid" }
         }
       }
     },
@@ -569,9 +574,10 @@
         "properties": {
           "venue_id": { "$ref": "#/definitions/uuid" },
           "name": { "$ref": "#/definitions/string_en" },
-          "capacity": { "$ref": "#/definitions/positiveInteger" }
+          "capacity": { "$ref": "#/definitions/positiveInteger" },
+          "user_id": { "$ref": "#/definitions/uuid" }
         },
-        "required": ["venue_id", "name"],
+        "required": ["venue_id", "name", "user_id"],
         "patternProperties": {
           "name#[a-z]+": { "$ref": "#/definitions/string_i18n" }
         }
@@ -591,9 +597,10 @@
           "id": { "$ref": "#/definitions/uuid" },
           "venue_id": { "$ref": "#/definitions/uuid" },
           "name": { "$ref": "#/definitions/string_en" },
-          "capacity": { "$ref": "#/definitions/positiveInteger" }
+          "capacity": { "$ref": "#/definitions/positiveInteger" },
+          "user_id": { "$ref": "#/definitions/uuid" }
         },
-        "required": ["id"],
+        "required": ["id", "user_id"],
         "patternProperties": {
           "name#[a-z]+": { "$ref": "#/definitions/string_i18n" }
         }
@@ -622,9 +629,10 @@
       "encType": "application/json",
       "schema": {
         "type": "object",
-        "required": ["id"],
+        "required": ["id", "user_id"],
         "properties": {
-          "id": { "$ref": "#/definitions/uuid" }
+          "id": { "$ref": "#/definitions/uuid" },
+          "user_id": { "$ref": "#/definitions/uuid" }
         }
       }
     },
@@ -653,9 +661,10 @@
       "encType": "application/json",
       "schema": {
         "properties": {
+          "user_id": { "$ref": "#/definitions/uuid" },
           "slug": { "$ref": "#/definitions/slug_top" }
         },
-        "required": ["slug"]
+        "required": ["user_id","slug"]
       },
       "targetSchema": { "$ref": "#/definitions/conference_series" }
     },
@@ -672,6 +681,22 @@
         }
       },
       "targetSchema": { "$ref": "#/definitions/conference_series_array" }
+    },
+    {
+      "title": "Add conference series admin",
+      "rel": "update",
+      "hsup.wrapper": "httpWithBasicAuth",
+      "method": "POST",
+      "href": "/conference_series/admin/add",
+      "ecnType": "application/json",
+      "schema": {
+        "properties": {
+          "series_id": {"$ref": "#/definitions/uuid"},
+          "admin_id": {"$ref": "#/definitions/uuid"},
+          "user_id": {"$ref":"#/definitions/uuid"}
+        },
+        "required": ["series_id","admin_id","user_id"]
+      }
     },
     {
       "title": "Create conference",
@@ -703,9 +728,10 @@
       "schema": {
         "properties": {
           "conference_id": {"$ref": "#/definitions/uuid"},
-          "dates": {"$ref":"#/definitions/conference_date_array"}
+          "dates": {"$ref":"#/definitions/conference_date_array"},
+          "user_id": {"$ref": "#/definitions/uuid"}
         },
-        "required": ["conference_id","dates"]
+        "required": ["conference_id","dates","user_id"]
       }
     },
     {
@@ -722,9 +748,10 @@
               {"$ref":"#/definitions/date_array"},
               {"$ref":"#/definitions/datestr_array"}
             ]
-          }
+          },
+          "user_id": {"$ref": "#/definitions/uuid"}
         },
-        "required": ["conference_id","dates"]
+        "required": ["conference_id","dates","user_id"]
       }
     },
     {
@@ -737,9 +764,10 @@
       "schema": {
         "properties": {
           "conference_id": {"$ref": "#/definitions/uuid"},
+          "admin_id": {"$ref":"#/definitions/uuid"},
           "user_id": {"$ref":"#/definitions/uuid"}
         },
-        "required": ["conference_id","user_id"]
+        "required": ["conference_id","admin_id","user_id"]
       }
     },
     {
@@ -752,9 +780,10 @@
       "schema": {
         "properties": {
           "conference_id": {"$ref": "#/definitions/uuid"},
+          "admin_id": {"$ref":"#/definitions/uuid"},
           "user_id": {"$ref":"#/definitions/uuid"}
         },
-        "required": ["conference_id","user_id"]
+        "required": ["conference_id","admin_id","user_id"]
       }
     },
     {
@@ -767,9 +796,10 @@
       "schema": {
         "properties": {
           "conference_id": {"$ref": "#/definitions/uuid"},
-          "venue_id": {"$ref":"#/definitions/uuid"}
+          "venue_id": {"$ref":"#/definitions/uuid"},
+          "user_id": {"$ref":"#/definitions/uuid"}
         },
-        "required": ["conference_id","venue_id"]
+        "required": ["conference_id","venue_id","user_id"]
       }
     },
     {
@@ -782,9 +812,10 @@
       "schema": {
         "properties": {
           "conference_id": {"$ref": "#/definitions/uuid"},
-          "venue_id": {"$ref":"#/definitions/uuid"}
+          "venue_id": {"$ref":"#/definitions/uuid"},
+          "user_id": {"$ref":"#/definitions/uuid"}
         },
-        "required": ["conference_id","venue_id"]
+        "required": ["conference_id","venue_id","user_id"]
       }
     },
     {
@@ -846,17 +877,18 @@
       "schema": {
         "properties": {
           "id": { "$ref": "#/definitions/uuid" },
-          "title": { "$ref": "#/definitions/string_en" },
+          "description": { "$ref": "#/definitions/string_en" },
           "sub_title": { "$ref": "#/definitions/string_en" },
           "slug": { "$ref": "#/definitions/string_en" },
-          "description": { "$ref": "#/definitions/string_en" },
-          "starts_on": { "$ref": "#/definitions/datetime" }
+          "starts_on": { "$ref": "#/definitions/datetime" },
+          "title": { "$ref": "#/definitions/string_en" },
+          "user_id": { "$ref": "#/definitions/uuid" }
         },
         "patternProperties": {
           "title#[a-z]+": { "$ref": "#/definitions/string_i18n" },
           "description#[a-z]+": { "$ref": "#/definitions/string_i18n" }
         },
-        "required": ["id"]
+        "required": ["id", "user_id"]
       }
     },
     {
@@ -868,9 +900,10 @@
       "encType": "application/json",
       "schema": {
         "type": "object",
-        "required": ["id"],
+        "required": ["id", "user_id"],
         "properties": {
-          "id": { "$ref": "#/definitions/uuid" }
+          "id": { "$ref": "#/definitions/uuid" },
+          "user_id": { "$ref": "#/definitions/uuid" }
         }
       }
     },
@@ -897,7 +930,7 @@
       "href": "/session/create",
       "schema": {
         "type": "object",
-        "required": ["conference_id", "speaker_id", "title", "abstract", "duration"],
+        "required": ["conference_id", "speaker_id", "title", "abstract", "duration", "user_id"],
         "properties": {
           "conference_id": { "$ref": "#/definitions/uuid" },
           "speaker_id": { "$ref": "#/definitions/uuid" },
@@ -914,7 +947,8 @@
           "slide_url": { "$ref": "#/definitions/url" },
           "video_url": { "$ref": "#/definitions/url" },
           "photo_permission": { "$ref": "#/definitions/binary_permission_default_allow" },
-          "video_permission": { "$ref": "#/definitions/binary_permission_default_allow" }
+          "video_permission": { "$ref": "#/definitions/binary_permission_default_allow" },
+          "user_id": { "$ref": "#/definitions/uuid" }
         },
         "patternProperties": {
           "title#[a-z]+": { "$ref": "#/definitions/string_i18n" },
@@ -943,9 +977,10 @@
       "rel": "lookup",
       "encType": "application/json",
       "schema": {
-        "required": ["id"],
+        "required": ["id", "user_id"],
         "properties": {
-          "id": { "$ref": "#/definitions/uuid" }
+          "id": { "$ref": "#/definitions/uuid" },
+          "user_id": { "$ref": "#/definitions/uuid" }
         }
       }
     },
@@ -957,7 +992,7 @@
       "href": "/session/update",
       "schema": {
         "type": "object",
-        "required": ["id"],
+        "required": ["id", "user_id"],
         "properties": {
           "id": { "$ref": "#/definitions/uuid" },
           "conference_id": { "$ref": "#/definitions/uuid" },
@@ -979,7 +1014,8 @@
           "has_interpretation": { "$ref": "#/definitions/boolean_default_false" },
           "status": { "$ref": "#/definitions/acceptance_status" },
           "sort_order": { "$ref": "#/definitions/positiveInteger" },
-          "confirmed": { "$ref": "#/definitions/boolean_default_false" }
+          "confirmed": { "$ref": "#/definitions/boolean_default_false" },
+          "user_id": { "$ref": "#/definitions/uuid" }
         },
         "patternProperties": {
           "title#[a-z]+": { "$ref": "#/definitions/string_i18n" },
