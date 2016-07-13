@@ -84,7 +84,7 @@ sub lookup_user_by_auth_user_id {
 
 sub update_user {
     my ($self, $payload) = @_;
-    for my $required (qw(id)) {
+    for my $required (qw(id user_id)) {
         if (!$payload->{$required}) {
             die qq|property "$required" must be provided|;
         }
@@ -101,7 +101,7 @@ sub update_user {
 
 sub delete_user {
     my ($self, $payload) = @_;
-    for my $required (qw(id)) {
+    for my $required (qw(id user_id)) {
         if (!$payload->{$required}) {
             die qq|property "$required" must be provided|;
         }
@@ -130,7 +130,7 @@ sub list_user {
 
 sub create_venue {
     my ($self, $payload) = @_;
-    for my $required (qw(name address)) {
+    for my $required (qw(name address user_id)) {
         if (!$payload->{$required}) {
             die qq|property "$required" must be provided|;
         }
@@ -176,7 +176,7 @@ sub lookup_venue {
 
 sub update_venue {
     my ($self, $payload) = @_;
-    for my $required (qw(id)) {
+    for my $required (qw(id user_id)) {
         if (!$payload->{$required}) {
             die qq|property "$required" must be provided|;
         }
@@ -193,7 +193,7 @@ sub update_venue {
 
 sub delete_venue {
     my ($self, $payload) = @_;
-    for my $required (qw(id)) {
+    for my $required (qw(id user_id)) {
         if (!$payload->{$required}) {
             die qq|property "$required" must be provided|;
         }
@@ -210,7 +210,7 @@ sub delete_venue {
 
 sub create_room {
     my ($self, $payload) = @_;
-    for my $required (qw(venue_id name)) {
+    for my $required (qw(venue_id name user_id)) {
         if (!$payload->{$required}) {
             die qq|property "$required" must be provided|;
         }
@@ -227,7 +227,7 @@ sub create_room {
 
 sub update_room {
     my ($self, $payload) = @_;
-    for my $required (qw(id)) {
+    for my $required (qw(id user_id)) {
         if (!$payload->{$required}) {
             die qq|property "$required" must be provided|;
         }
@@ -261,7 +261,7 @@ sub lookup_room {
 
 sub delete_room {
     my ($self, $payload) = @_;
-    for my $required (qw(id)) {
+    for my $required (qw(id user_id)) {
         if (!$payload->{$required}) {
             die qq|property "$required" must be provided|;
         }
@@ -295,7 +295,7 @@ sub list_room {
 
 sub create_conference_series {
     my ($self, $payload) = @_;
-    for my $required (qw(slug)) {
+    for my $required (qw(user_id slug)) {
         if (!$payload->{$required}) {
             die qq|property "$required" must be provided|;
         }
@@ -322,6 +322,23 @@ sub list_conference_series {
     return JSON::decode_json($res->decoded_content);
 }
 
+sub add_conference_series_admin {
+    my ($self, $payload) = @_;
+    for my $required (qw(series_id admin_id user_id)) {
+        if (!$payload->{$required}) {
+            die qq|property "$required" must be provided|;
+        }
+    }
+    my $uri = URI->new($self->{endpoint} . qq|/v1/conference_series/admin/add|);
+    my $json_payload = JSON::encode_json($payload);
+    my $res = $self->{user_agent}->post($uri, Content => $json_payload);
+    if (!$res->is_success) {
+        $self->{last_error} = $res->status_line;
+        return;
+    }
+    return 1
+}
+
 sub create_conference {
     my ($self, $payload) = @_;
     for my $required (qw(series_id title slug user_id)) {
@@ -341,7 +358,7 @@ sub create_conference {
 
 sub add_conference_dates {
     my ($self, $payload) = @_;
-    for my $required (qw(conference_id dates)) {
+    for my $required (qw(conference_id dates user_id)) {
         if (!$payload->{$required}) {
             die qq|property "$required" must be provided|;
         }
@@ -358,7 +375,7 @@ sub add_conference_dates {
 
 sub delete_conference_dates {
     my ($self, $payload) = @_;
-    for my $required (qw(conference_id dates)) {
+    for my $required (qw(conference_id dates user_id)) {
         if (!$payload->{$required}) {
             die qq|property "$required" must be provided|;
         }
@@ -375,7 +392,7 @@ sub delete_conference_dates {
 
 sub add_conference_admin {
     my ($self, $payload) = @_;
-    for my $required (qw(conference_id user_id)) {
+    for my $required (qw(conference_id admin_id user_id)) {
         if (!$payload->{$required}) {
             die qq|property "$required" must be provided|;
         }
@@ -392,7 +409,7 @@ sub add_conference_admin {
 
 sub delete_conference_admin {
     my ($self, $payload) = @_;
-    for my $required (qw(conference_id user_id)) {
+    for my $required (qw(conference_id admin_id user_id)) {
         if (!$payload->{$required}) {
             die qq|property "$required" must be provided|;
         }
@@ -409,7 +426,7 @@ sub delete_conference_admin {
 
 sub add_conference_venue {
     my ($self, $payload) = @_;
-    for my $required (qw(conference_id venue_id)) {
+    for my $required (qw(conference_id venue_id user_id)) {
         if (!$payload->{$required}) {
             die qq|property "$required" must be provided|;
         }
@@ -426,7 +443,7 @@ sub add_conference_venue {
 
 sub delete_conference_venue {
     my ($self, $payload) = @_;
-    for my $required (qw(conference_id venue_id)) {
+    for my $required (qw(conference_id venue_id user_id)) {
         if (!$payload->{$required}) {
             die qq|property "$required" must be provided|;
         }
@@ -489,7 +506,7 @@ sub list_conference {
 
 sub update_conference {
     my ($self, $payload) = @_;
-    for my $required (qw(id)) {
+    for my $required (qw(id user_id)) {
         if (!$payload->{$required}) {
             die qq|property "$required" must be provided|;
         }
@@ -506,7 +523,7 @@ sub update_conference {
 
 sub delete_conference_series {
     my ($self, $payload) = @_;
-    for my $required (qw(id)) {
+    for my $required (qw(id user_id)) {
         if (!$payload->{$required}) {
             die qq|property "$required" must be provided|;
         }
@@ -540,7 +557,7 @@ sub delete_conference {
 
 sub create_session {
     my ($self, $payload) = @_;
-    for my $required (qw(conference_id speaker_id title abstract duration)) {
+    for my $required (qw(conference_id speaker_id title abstract duration user_id)) {
         if (!$payload->{$required}) {
             die qq|property "$required" must be provided|;
         }
@@ -574,7 +591,7 @@ sub lookup_session {
 
 sub delete_session {
     my ($self, $payload) = @_;
-    for my $required (qw(id)) {
+    for my $required (qw(id user_id)) {
         if (!$payload->{$required}) {
             die qq|property "$required" must be provided|;
         }
@@ -591,7 +608,7 @@ sub delete_session {
 
 sub update_session {
     my ($self, $payload) = @_;
-    for my $required (qw(id)) {
+    for my $required (qw(id user_id)) {
         if (!$payload->{$required}) {
             die qq|property "$required" must be provided|;
         }
