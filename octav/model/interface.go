@@ -282,6 +282,7 @@ type CreateRoomRequest struct {
 	Name     jsval.MaybeString     `json:"name" l10n:"true"`
 	Capacity jsval.MaybeUint       `json:"capacity"`
 	L10N     tools.LocalizedFields `json:"-"`
+	UserID   string                `json:"user_id"`
 }
 
 // +transport
@@ -297,11 +298,13 @@ type UpdateRoomRequest struct {
 	Name     jsval.MaybeString     `json:"name,omitempty" l10n:"true"`
 	Capacity jsval.MaybeUint       `json:"capacity,omitempty"`
 	L10N     tools.LocalizedFields `json:"-"`
+	UserID   string                `json:"user_id"`
 }
 
 // +transport
 type DeleteRoomRequest struct {
-	ID string `json:"id" urlenc:"id"`
+	ID     string `json:"id" urlenc:"id"`
+	UserID string `json:"user_id"`
 }
 
 // +transport

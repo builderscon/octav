@@ -84,7 +84,13 @@ func (v *User) populateRowForUpdate(vdb *db.User, payload model.UpdateUserReques
 	return nil
 }
 
+func (v *User) IsAdministrator(tx *db.Tx, id string) error {
+	// TODO: cache
+	return db.IsAdministrator(tx, id)
+}
+
 func (v *User) IsSystemAdmin(tx *db.Tx, id string) error {
+	// TODO: cache
 	u := model.User{}
 	if err := v.Lookup(tx, &u, model.LookupUserRequest{ID: id}); err != nil {
 		return errors.Wrap(err, "failed to load user from database")
@@ -97,6 +103,7 @@ func (v *User) IsSystemAdmin(tx *db.Tx, id string) error {
 }
 
 func (v *User) IsConferenceSeriesAdministrator(tx *db.Tx, seriesID, userID string) error {
+	// TODO: cache
 	if err := db.IsConferenceSeriesAdministrator(tx, seriesID, userID); err == nil {
 		return nil
 	}
@@ -108,6 +115,7 @@ func (v *User) IsConferenceSeriesAdministrator(tx *db.Tx, seriesID, userID strin
 }
 
 func (v *User) IsConferenceAdministrator(tx *db.Tx, confID, userID string) error {
+	// TODO: cache
 	if err := db.IsConferenceAdministrator(tx, confID, userID); err == nil {
 		return nil
 	}

@@ -985,7 +985,7 @@ func doDeleteRoom(ctx context.Context, w http.ResponseWriter, r *http.Request, p
 	defer tx.AutoRollback()
 
 	s := service.Room{}
-	if err := s.Delete(tx, payload.ID); err != nil {
+	if err := s.DeleteFromPayload(tx, payload); err != nil {
 		httpError(w, `DeleteRoom`, http.StatusInternalServerError, err)
 		return
 	}
@@ -1010,7 +1010,7 @@ func doDeleteVenue(ctx context.Context, w http.ResponseWriter, r *http.Request, 
 	defer tx.AutoRollback()
 
 	s := service.Venue{}
-	if err := s.Delete(tx, payload.ID); err != nil {
+	if err := s.DeleteFromPayload(tx, payload); err != nil {
 		httpError(w, `DeleteVenue`, http.StatusInternalServerError, err)
 		return
 	}

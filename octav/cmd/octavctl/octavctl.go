@@ -892,6 +892,8 @@ func doVenueDelete(args cmdargs) int {
 	fs := flag.NewFlagSet("octavctl venue delete", flag.ContinueOnError)
 	var id string
 	fs.StringVar(&id, "id", "", "")
+	var user_id string
+	fs.StringVar(&user_id, "user_id", "", "")
 	prepGlobalFlags(fs)
 	if err := fs.Parse([]string(args)); err != nil {
 		return errOut(err)
@@ -900,6 +902,9 @@ func doVenueDelete(args cmdargs) int {
 	m := make(map[string]interface{})
 	if id != "" {
 		m["id"] = id
+	}
+	if user_id != "" {
+		m["user_id"] = user_id
 	}
 	r := model.DeleteVenueRequest{}
 	if err := r.Populate(m); err != nil {
@@ -944,6 +949,8 @@ func doRoomCreate(args cmdargs) int {
 	fs.Int64Var(&capacity, "capacity", 0, "")
 	var name string
 	fs.StringVar(&name, "name", "", "")
+	var user_id string
+	fs.StringVar(&user_id, "user_id", "", "")
 	var venue_id string
 	fs.StringVar(&venue_id, "venue_id", "", "")
 	prepGlobalFlags(fs)
@@ -957,6 +964,9 @@ func doRoomCreate(args cmdargs) int {
 	}
 	if name != "" {
 		m["name"] = name
+	}
+	if user_id != "" {
+		m["user_id"] = user_id
 	}
 	if venue_id != "" {
 		m["venue_id"] = venue_id
@@ -1073,6 +1083,8 @@ func doRoomDelete(args cmdargs) int {
 	fs := flag.NewFlagSet("octavctl room delete", flag.ContinueOnError)
 	var id string
 	fs.StringVar(&id, "id", "", "")
+	var user_id string
+	fs.StringVar(&user_id, "user_id", "", "")
 	prepGlobalFlags(fs)
 	if err := fs.Parse([]string(args)); err != nil {
 		return errOut(err)
@@ -1081,6 +1093,9 @@ func doRoomDelete(args cmdargs) int {
 	m := make(map[string]interface{})
 	if id != "" {
 		m["id"] = id
+	}
+	if user_id != "" {
+		m["user_id"] = user_id
 	}
 	r := model.DeleteRoomRequest{}
 	if err := r.Populate(m); err != nil {

@@ -119,7 +119,7 @@ func bigsight(userID string) *model.CreateVenueRequest {
 	return &r
 }
 
-func intlConferenceRoom(venueID string) *model.CreateRoomRequest {
+func intlConferenceRoom(venueID, userID string) *model.CreateRoomRequest {
 	lf := tools.LocalizedFields{}
 	lf.Set("ja", "name", `国際会議場`)
 
@@ -128,6 +128,7 @@ func intlConferenceRoom(venueID string) *model.CreateRoomRequest {
 	r.Capacity.Set(1000)
 	r.Name.Set("International Conference Hall")
 	r.VenueID.Set(venueID)
+	r.UserID = userID
 
 	return &r
 }
@@ -258,8 +259,8 @@ func testUpdateRoom(ctx *TestCtx, in *model.UpdateRoomRequest) error {
 	return nil
 }
 
-func testDeleteRoom(ctx *TestCtx, id string) error {
-	err := ctx.HTTPClient.DeleteRoom(&model.DeleteRoomRequest{ID: id})
+func testDeleteRoom(ctx *TestCtx, roomID, userID string) error {
+	err := ctx.HTTPClient.DeleteRoom(&model.DeleteRoomRequest{ID: roomID, UserID: userID})
 	if !assert.NoError(ctx.T, err, "DeleteRoom should be successful") {
 		return err
 	}
@@ -274,8 +275,8 @@ func testUpdateVenue(ctx *TestCtx, in *model.UpdateVenueRequest) error {
 	return nil
 }
 
-func testDeleteVenue(ctx *TestCtx, id string) error {
-	err := ctx.HTTPClient.DeleteVenue(&model.DeleteVenueRequest{ID: id})
+func testDeleteVenue(ctx *TestCtx, venueID, userID string) error {
+	err := ctx.HTTPClient.DeleteVenue(&model.DeleteVenueRequest{ID: venueID, UserID: userID})
 	if !assert.NoError(ctx.T, err, "DeleteVenue should be successful") {
 		return err
 	}
@@ -461,7 +462,7 @@ func TestRoomCRUD(t *testing.T) {
 		return
 	}
 
-	res, err := testCreateRoom(ctx, intlConferenceRoom(venue.ID))
+	res, err := testCreateRoom(ctx, intlConferenceRoom(venue.ID, ctx.Superuser.EID))
 	if err != nil {
 		return
 	}
@@ -483,7 +484,7 @@ func TestRoomCRUD(t *testing.T) {
 		return
 	}
 
-	in := model.UpdateRoomRequest{ID: res.ID}
+	in := model.UpdateRoomRequest{ID: res.ID, UserID: ctx.Superuser.EID}
 	in.L10N.Set("ja", "name", "国際会議場")
 	if err := testUpdateRoom(ctx, &in); err != nil {
 		return
@@ -498,11 +499,11 @@ func TestRoomCRUD(t *testing.T) {
 		return
 	}
 
-	if err := testDeleteRoom(ctx, res.ID); err != nil {
+	if err := testDeleteRoom(ctx, res.ID, ctx.Superuser.EID); err != nil {
 		return
 	}
 
-	if err := testDeleteVenue(ctx, venue.ID); err != nil {
+	if err := testDeleteVenue(ctx, venue.ID, ctx.Superuser.EID); err != nil {
 		return
 	}
 }
@@ -740,7 +741,7 @@ func TestVenueCRUD(t *testing.T) {
 		return
 	}
 
-	in := model.UpdateVenueRequest{ID: res.ID}
+	in := model.UpdateVenueRequest{ID: res.ID, UserID: ctx.Superuser.EID}
 	in.L10N.Set("ja", "name", "東京ビッグサイト")
 	if err := testUpdateVenue(ctx, &in); err != nil {
 		return
@@ -755,7 +756,7 @@ func TestVenueCRUD(t *testing.T) {
 		return
 	}
 
-	if err := testDeleteVenue(ctx, res.ID); err != nil {
+	if err := testDeleteVenue(ctx, res.ID, ctx.Superuser.EID); err != nil {
 		return
 	}
 }
@@ -1006,7 +1007,7 @@ func TestListRoom(t *testing.T) {
 		return
 	}
 
-	_, err = testCreateRoom(ctx, intlConferenceRoom(venue.ID))
+	_, err = testCreateRoom(ctx, intlConferenceRoom(venue.ID, ctx.Superuser.EID))
 	if err != nil {
 		return
 	}

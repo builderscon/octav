@@ -539,9 +539,10 @@
       "encType": "application/json",
       "schema": {
         "type": "object",
-        "required": ["id"],
+        "required": ["id", "user_id"],
         "properties": {
-          "id": { "$ref": "#/definitions/uuid" }
+          "id": { "$ref": "#/definitions/uuid" },
+          "user_id": { "$ref": "#/definitions/uuid" }
         }
       }
     },
@@ -554,9 +555,10 @@
       "encType": "application/json",
       "schema": {
         "type": "object",
-        "required": ["id"],
+        "required": ["id", "user_id"],
         "properties": {
-          "id": { "$ref": "#/definitions/uuid" }
+          "id": { "$ref": "#/definitions/uuid" },
+          "user_id": { "$ref": "#/definitions/uuid" }
         }
       }
     },
@@ -572,9 +574,10 @@
         "properties": {
           "venue_id": { "$ref": "#/definitions/uuid" },
           "name": { "$ref": "#/definitions/string_en" },
-          "capacity": { "$ref": "#/definitions/positiveInteger" }
+          "capacity": { "$ref": "#/definitions/positiveInteger" },
+          "user_id": { "$ref": "#/definitions/uuid" }
         },
-        "required": ["venue_id", "name"],
+        "required": ["venue_id", "name", "user_id"],
         "patternProperties": {
           "name#[a-z]+": { "$ref": "#/definitions/string_i18n" }
         }
@@ -594,9 +597,10 @@
           "id": { "$ref": "#/definitions/uuid" },
           "venue_id": { "$ref": "#/definitions/uuid" },
           "name": { "$ref": "#/definitions/string_en" },
-          "capacity": { "$ref": "#/definitions/positiveInteger" }
+          "capacity": { "$ref": "#/definitions/positiveInteger" },
+          "user_id": { "$ref": "#/definitions/uuid" }
         },
-        "required": ["id"],
+        "required": ["id", "user_id"],
         "patternProperties": {
           "name#[a-z]+": { "$ref": "#/definitions/string_i18n" }
         }
@@ -625,9 +629,10 @@
       "encType": "application/json",
       "schema": {
         "type": "object",
-        "required": ["id"],
+        "required": ["id", "user_id"],
         "properties": {
-          "id": { "$ref": "#/definitions/uuid" }
+          "id": { "$ref": "#/definitions/uuid" },
+          "user_id": { "$ref": "#/definitions/uuid" }
         }
       }
     },

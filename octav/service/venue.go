@@ -97,3 +97,11 @@ func (v *Venue) UpdateFromPayload(tx *db.Tx, venue *model.Venue, payload model.U
 	return nil
 }
 
+func (v *Venue) DeleteFromPayload(tx *db.Tx, payload model.DeleteVenueRequest) error {
+	su := User{}
+	if err := su.IsAdministrator(tx, payload.UserID); err != nil {
+		return errors.Wrap(err, "deleting venues require administrator privileges")
+	}
+
+	return errors.Wrap(v.Delete(tx, payload.ID), "failed to delete from database")
+}
