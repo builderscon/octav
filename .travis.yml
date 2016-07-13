@@ -5,7 +5,6 @@ services:
   - mysql
 env:
   - TEST_DIR=octav
-  - TEST_DIR=adminweb
 addons:
   apt:
     packages:
