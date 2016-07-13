@@ -178,3 +178,21 @@ func (v *User) UpdateFromPayload(tx *db.Tx, payload model.UpdateUserRequest) err
 
 	return errors.Wrap(v.Update(tx, &vdb, payload), "failed to update database")
 }
+
+func (v *User) IsSessionOwner(tx *db.Tx, sessionID, userID string) error {
+	if err := db.IsSessionOwner(tx, sessionID, userID); err == nil {
+		return nil
+	}
+
+	ss := Session{}
+	var m model.Session
+	if err := ss.Lookup(tx, &m, model.LookupSessionRequest{ID: sessionID}); err != nil {
+		return errors.Wrap(err, "failed to load session")
+	}
+
+	if err := v.IsConferenceAdministrator(tx, m.ConferenceID, userID); err == nil {
+		return nil
+	}
+
+	return errors.Errorf("user %s lacks session owner privileges for %s", userID, sessionID)
+}

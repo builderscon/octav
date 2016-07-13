@@ -16,6 +16,7 @@ func (vdb *User) LoadByAuthUserID(tx *Tx, via, id string) error {
 
 func IsAdministrator(tx *Tx, userID string) error {
 	stmt := getStmtBuf()
+	defer releaseStmtBuf(stmt)
 	fmt.Fprintf(stmt, `SELECT 1 FROM %s WHERE %s.is_admin = 1 and %s.eid = ?`, UserTable, UserTable, UserTable)
 	fmt.Fprintf(stmt, ` UNION SELECT 1 FROM %s WHERE %s.user_id = ?`, ConferenceAdministratorTable, ConferenceAdministratorTable)
 	fmt.Fprintf(stmt, ` UNION SELECT 1 FROM %s WHERE %s.user_id = ?`, ConferenceSeriesAdministratorTable, ConferenceSeriesAdministratorTable)

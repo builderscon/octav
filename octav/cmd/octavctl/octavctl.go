@@ -1375,6 +1375,8 @@ func doSessionCreate(args cmdargs) int {
 	fs.StringVar(&tags, "tags", "", "")
 	var title string
 	fs.StringVar(&title, "title", "", "")
+	var user_id string
+	fs.StringVar(&user_id, "user_id", "", "")
 	var video_permission string
 	fs.StringVar(&video_permission, "video_permission", "", "")
 	var video_url string
@@ -1426,6 +1428,9 @@ func doSessionCreate(args cmdargs) int {
 	}
 	if title != "" {
 		m["title"] = title
+	}
+	if user_id != "" {
+		m["user_id"] = user_id
 	}
 	if video_permission != "" {
 		m["video_permission"] = video_permission
@@ -1498,6 +1503,8 @@ func doSessionDelete(args cmdargs) int {
 	fs := flag.NewFlagSet("octavctl session delete", flag.ContinueOnError)
 	var id string
 	fs.StringVar(&id, "id", "", "")
+	var user_id string
+	fs.StringVar(&user_id, "user_id", "", "")
 	prepGlobalFlags(fs)
 	if err := fs.Parse([]string(args)); err != nil {
 		return errOut(err)
@@ -1506,6 +1513,9 @@ func doSessionDelete(args cmdargs) int {
 	m := make(map[string]interface{})
 	if id != "" {
 		m["id"] = id
+	}
+	if user_id != "" {
+		m["user_id"] = user_id
 	}
 	r := model.DeleteSessionRequest{}
 	if err := r.Populate(m); err != nil {

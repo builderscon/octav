@@ -880,7 +880,7 @@ func init() {
 		SetConstraintMap(M).
 		SetRoot(
 			jsval.Object().
-				Required("abstract", "conference_id", "duration", "speaker_id", "title").
+				Required("abstract", "conference_id", "duration", "speaker_id", "title", "user_id").
 				AdditionalProperties(
 					jsval.EmptyConstraint,
 				).
@@ -939,6 +939,10 @@ func init() {
 				AddProp(
 					"title",
 					jsval.Reference(M).RefersTo("#/definitions/string_en"),
+				).
+				AddProp(
+					"user_id",
+					jsval.Reference(M).RefersTo("#/definitions/uuid"),
 				).
 				AddProp(
 					"video_permission",
@@ -1421,12 +1425,16 @@ func init() {
 		SetConstraintMap(M).
 		SetRoot(
 			jsval.Object().
-				Required("id").
+				Required("id", "user_id").
 				AdditionalProperties(
 					jsval.EmptyConstraint,
 				).
 				AddProp(
 					"id",
+					jsval.Reference(M).RefersTo("#/definitions/uuid"),
+				).
+				AddProp(
+					"user_id",
 					jsval.Reference(M).RefersTo("#/definitions/uuid"),
 				),
 		)
@@ -2258,7 +2266,7 @@ func init() {
 		SetConstraintMap(M).
 		SetRoot(
 			jsval.Object().
-				Required("id").
+				Required("id", "user_id").
 				AdditionalProperties(
 					jsval.EmptyConstraint,
 				).
@@ -2337,6 +2345,10 @@ func init() {
 				AddProp(
 					"title",
 					jsval.Reference(M).RefersTo("#/definitions/string_en"),
+				).
+				AddProp(
+					"user_id",
+					jsval.Reference(M).RefersTo("#/definitions/uuid"),
 				).
 				AddProp(
 					"video_permission",

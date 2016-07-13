@@ -536,21 +536,22 @@ func testUpdateSession(ctx *TestCtx, in *model.UpdateSessionRequest) error {
 	return nil
 }
 
-func testDeleteSession(ctx *TestCtx, id string) error {
-	err := ctx.HTTPClient.DeleteSession(&model.DeleteSessionRequest{ID: id})
+func testDeleteSession(ctx *TestCtx, sessionID, userID string) error {
+	err := ctx.HTTPClient.DeleteSession(&model.DeleteSessionRequest{ID: sessionID, UserID: userID})
 	if !assert.NoError(ctx.T, err, "DeleteSession should be successful") {
 		return err
 	}
 	return err
 }
 
-func bconsession(cid, uid string) *model.CreateSessionRequest {
+func bconsession(cid, speakerID, userID string) *model.CreateSessionRequest {
 	in := model.CreateSessionRequest{}
 	in.ConferenceID.Set(cid)
-	in.SpeakerID.Set(uid)
+	in.SpeakerID.Set(speakerID)
 	in.Title.Set("How To Write A Conference Backend")
 	in.Duration.Set(60)
 	in.Abstract.Set("Use lots of reflection and generate lots of code")
+	in.UserID = userID
 	return &in
 }
 
@@ -588,11 +589,11 @@ func TestSessionCRUD(t *testing.T) {
 	}
 	defer testDeleteConference(ctx, conference.ID)
 
-	res, err := testCreateSession(ctx, bconsession(conference.ID, user.ID))
+	res, err := testCreateSession(ctx, bconsession(conference.ID, user.ID, user.ID))
 	if err != nil {
 		return
 	}
-	defer testDeleteSession(ctx, res.ID)
+	defer testDeleteSession(ctx, res.ID, user.ID)
 
 	if !assert.NoError(ctx.T, validator.HTTPCreateSessionResponse.Validate(res), "Validation should succeed") {
 		return
@@ -607,7 +608,7 @@ func TestSessionCRUD(t *testing.T) {
 		return
 	}
 
-	in := model.UpdateSessionRequest{ID: res.ID}
+	in := model.UpdateSessionRequest{ID: res.ID, UserID: user.ID}
 	in.L10N.Set("ja", "title", "カンファレンス用ソフトウェアの作り方")
 	if err := testUpdateSession(ctx, &in); err != nil {
 		return
@@ -1070,6 +1071,7 @@ func TestListSessionByConference(t *testing.T) {
 		sin.Title.Set(fmt.Sprintf("Title %d", i))
 		sin.Duration.Set(60)
 		sin.Abstract.Set("Use lots of reflection and generate lots of code")
+		sin.UserID = user.ID
 		_, err := testCreateSession(ctx, &sin)
 		if err != nil {
 			return

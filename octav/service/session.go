@@ -223,3 +223,55 @@ func (v *Session) Decorate(tx *db.Tx, session *model.Session) error {
 
 	return nil
 }
+
+func (v *Session) CreateFromPayload(tx *db.Tx, payload model.CreateSessionRequest, result *model.Session) error {
+	var u model.User
+	su := User{}
+	if err := su.Lookup(tx, &u, model.LookupUserRequest{ID: payload.UserID}); err != nil {
+		return errors.Wrapf(err, "failed to load user %s", payload.UserID)
+	}
+
+	var vdb db.Session
+	if err := v.Create(tx, &vdb, payload); err != nil {
+		return errors.Wrap(err, "failed to insert into database")
+	}
+
+	var m model.Session
+	if err := m.FromRow(vdb); err != nil {
+		return errors.Wrap(err, "failed to populate model from database")
+	}
+
+	if err := v.Decorate(tx, &m); err != nil {
+		return errors.Wrap(err, "failed to decorate model")
+	}
+
+	*result = m
+	return nil
+}
+
+func (v *Session) UpdateFromPayload(tx *db.Tx, payload model.UpdateSessionRequest, result *model.Session) error {
+	su := User{}
+	if err := su.IsSessionOwner(tx, payload.ID, payload.UserID); err != nil {
+		return errors.Wrap(err, "updating sessions require session owner privileges")
+	}
+
+	vdb := db.Session{}
+	if err := vdb.LoadByEID(tx, payload.ID); err != nil {
+		return errors.Wrap(err, "failed to load from database")
+	}
+
+	// TODO: We must protect the API server from changing important
+	// fields like conference_id, speaker_id, room_id, etc from regular
+	// users, but allow administrators to do anything they want
+	if err := v.Update(tx, &vdb, payload); err != nil {
+		return errors.Wrap(err, "failed to update database")
+	}
+
+	m := model.Session{}
+	if err := m.FromRow(vdb); err != nil {
+		return errors.Wrap(err, "failed to populate model from database")
+	}
+
+	*result = m
+	return nil
+}

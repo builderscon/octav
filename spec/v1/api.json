@@ -930,7 +930,7 @@
       "href": "/session/create",
       "schema": {
         "type": "object",
-        "required": ["conference_id", "speaker_id", "title", "abstract", "duration"],
+        "required": ["conference_id", "speaker_id", "title", "abstract", "duration", "user_id"],
         "properties": {
           "conference_id": { "$ref": "#/definitions/uuid" },
           "speaker_id": { "$ref": "#/definitions/uuid" },
@@ -947,7 +947,8 @@
           "slide_url": { "$ref": "#/definitions/url" },
           "video_url": { "$ref": "#/definitions/url" },
           "photo_permission": { "$ref": "#/definitions/binary_permission_default_allow" },
-          "video_permission": { "$ref": "#/definitions/binary_permission_default_allow" }
+          "video_permission": { "$ref": "#/definitions/binary_permission_default_allow" },
+          "user_id": { "$ref": "#/definitions/uuid" }
         },
         "patternProperties": {
           "title#[a-z]+": { "$ref": "#/definitions/string_i18n" },
@@ -976,9 +977,10 @@
       "rel": "lookup",
       "encType": "application/json",
       "schema": {
-        "required": ["id"],
+        "required": ["id", "user_id"],
         "properties": {
-          "id": { "$ref": "#/definitions/uuid" }
+          "id": { "$ref": "#/definitions/uuid" },
+          "user_id": { "$ref": "#/definitions/uuid" }
         }
       }
     },
@@ -990,7 +992,7 @@
       "href": "/session/update",
       "schema": {
         "type": "object",
-        "required": ["id"],
+        "required": ["id", "user_id"],
         "properties": {
           "id": { "$ref": "#/definitions/uuid" },
           "conference_id": { "$ref": "#/definitions/uuid" },
@@ -1012,7 +1014,8 @@
           "has_interpretation": { "$ref": "#/definitions/boolean_default_false" },
           "status": { "$ref": "#/definitions/acceptance_status" },
           "sort_order": { "$ref": "#/definitions/positiveInteger" },
-          "confirmed": { "$ref": "#/definitions/boolean_default_false" }
+          "confirmed": { "$ref": "#/definitions/boolean_default_false" },
+          "user_id": { "$ref": "#/definitions/uuid" }
         },
         "patternProperties": {
           "title#[a-z]+": { "$ref": "#/definitions/string_i18n" },

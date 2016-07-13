@@ -1,6 +1,10 @@
 package db
 
-import "database/sql"
+import (
+	"database/sql"
+
+	"github.com/pkg/errors"
+)
 
 func (v *SessionList) LoadByConference(tx *Tx, cid, date string) error {
 	var rows *sql.Rows
@@ -17,6 +21,27 @@ func (v *SessionList) LoadByConference(tx *Tx, cid, date string) error {
 
 	if err := v.FromRows(rows, 0); err != nil {
 		return err
+	}
+	return nil
+}
+
+
+func IsSessionOwner(tx *Tx, sessionID, userID string) error {
+	stmt := getStmtBuf()
+	defer releaseStmtBuf(stmt)
+
+	stmt.WriteString(`SELECT 1 FROM `)
+	stmt.WriteString(SessionTable)
+	stmt.WriteString(` WHERE id = ? AND speaker_id = ?`)
+	row := tx.QueryRow(stmt.String())
+	var r int
+
+	if err := row.Scan(&r); err != nil {
+		return errors.Wrap(err, "failed to scan from database")
+	}
+
+	if r == 0 {
+		return errors.Errorf("user %s is not an owner of session %s", userID, sessionID)
 	}
 	return nil
 }

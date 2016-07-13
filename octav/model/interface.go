@@ -334,6 +334,7 @@ type CreateSessionRequest struct {
 	PhotoPermission jsval.MaybeString     `json:"photo_permission,omitempty"`
 	VideoPermission jsval.MaybeString     `json:"video_permission,omitempty"`
 	L10N            tools.LocalizedFields `json:"-"`
+	UserID          string                `json:"user_id"`
 }
 
 // +transport
@@ -366,11 +367,13 @@ type UpdateSessionRequest struct {
 	Status            jsval.MaybeString     `json:"status,omitempty"`
 	Confirmed         jsval.MaybeBool       `json:"confirmed,omitempty"`
 	L10N              tools.LocalizedFields `json:"-"`
+	UserID            string                `json:"user_id"`
 }
 
 // +transport
 type DeleteSessionRequest struct {
-	ID string `json:"id" urlenc:"id"`
+	ID     string `json:"id" urlenc:"id"`
+	UserID string `json:"user_id"`
 }
 
 // +transport

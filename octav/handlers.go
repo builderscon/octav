@@ -597,19 +597,8 @@ func doCreateSession(ctx context.Context, w http.ResponseWriter, r *http.Request
 	defer tx.AutoRollback()
 
 	s := service.Session{}
-	vdb := db.Session{}
-	if err := s.Create(tx, &vdb, payload); err != nil {
-		httpError(w, `CreateSession`, http.StatusInternalServerError, err)
-		return
-	}
-
 	v := model.Session{}
-	if err := v.FromRow(vdb); err != nil {
-		httpError(w, `CreateSession`, http.StatusInternalServerError, err)
-		return
-	}
-
-	if err := errors.Wrap(s.Decorate(tx, &v), "failed to decorate session with associated data"); err != nil {
+	if err := s.CreateFromPayload(tx, payload, &v); err != nil {
 		httpError(w, `CreateSession`, http.StatusInternalServerError, err)
 		return
 	}
@@ -631,30 +620,16 @@ func doUpdateSession(ctx context.Context, w http.ResponseWriter, r *http.Request
 	defer tx.AutoRollback()
 
 	s := service.Session{}
-	vdb := db.Session{}
-	if err := vdb.LoadByEID(tx, payload.ID); err != nil {
+	var v model.Session
+	if err := s.UpdateFromPayload(tx, payload, &v); err != nil {
 		httpError(w, `UpdateConference`, http.StatusNotFound, err)
 		return
 	}
-
-	// TODO: We must protect the API server from changing important
-	// fields like conference_id, speaker_id, room_id, etc from regular
-	// users, but allow administrators to do anything they want
-	if err := s.Update(tx, &vdb, payload); err != nil {
-		httpError(w, `UpdateSession`, http.StatusInternalServerError, err)
-		return
-	}
-
 	if err := tx.Commit(); err != nil {
 		httpError(w, `UpdateSession`, http.StatusInternalServerError, err)
 		return
 	}
 
-	v := model.Session{}
-	if err := v.FromRow(vdb); err != nil {
-		httpError(w, `UpdateSession`, http.StatusInternalServerError, err)
-		return
-	}
 
 	httpJSON(w, v)
 }

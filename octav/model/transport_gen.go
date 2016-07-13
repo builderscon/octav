@@ -1766,6 +1766,7 @@ func (r CreateSessionRequest) collectMarshalData() map[string]interface{} {
 	if r.VideoPermission.Valid() {
 		m["video_permission"] = r.VideoPermission.Value()
 	}
+	m["user_id"] = r.UserID
 	return m
 }
 
@@ -1892,7 +1893,16 @@ func (r *CreateSessionRequest) Populate(m map[string]interface{}) error {
 		}
 		delete(m, "video_permission")
 	}
-	if err := tools.ExtractL10NFields(m, &r.L10N, []string{"conference_id", "speaker_id", "title", "abstract", "memo", "duration", "material_level", "tags", "category", "spoken_language", "slide_language", "slide_subtitles", "slide_url", "video_url", "photo_permission", "video_permission"}); err != nil {
+	if jv, ok := m["user_id"]; ok {
+		switch jv.(type) {
+		case string:
+			r.UserID = jv.(string)
+			delete(m, "user_id")
+		default:
+			return ErrInvalidJSONFieldType{Field: "user_id"}
+		}
+	}
+	if err := tools.ExtractL10NFields(m, &r.L10N, []string{"conference_id", "speaker_id", "title", "abstract", "memo", "duration", "material_level", "tags", "category", "spoken_language", "slide_language", "slide_subtitles", "slide_url", "video_url", "photo_permission", "video_permission", "user_id"}); err != nil {
 		return err
 	}
 	return nil
@@ -1900,7 +1910,7 @@ func (r *CreateSessionRequest) Populate(m map[string]interface{}) error {
 
 func (r *CreateSessionRequest) GetPropNames() ([]string, error) {
 	l, _ := r.L10N.GetPropNames()
-	return append(l, "conference_id", "speaker_id", "title", "abstract", "memo", "duration", "material_level", "tags", "category", "spoken_language", "slide_language", "slide_subtitles", "slide_url", "video_url", "photo_permission", "video_permission"), nil
+	return append(l, "conference_id", "speaker_id", "title", "abstract", "memo", "duration", "material_level", "tags", "category", "spoken_language", "slide_language", "slide_subtitles", "slide_url", "video_url", "photo_permission", "video_permission", "user_id"), nil
 }
 
 func (r *CreateSessionRequest) SetPropValue(s string, v interface{}) error {
@@ -1937,6 +1947,11 @@ func (r *CreateSessionRequest) SetPropValue(s string, v interface{}) error {
 		return r.PhotoPermission.Set(v)
 	case "video_permission":
 		return r.VideoPermission.Set(v)
+	case "user_id":
+		if jv, ok := v.(string); ok {
+			r.UserID = jv
+			return nil
+		}
 	default:
 		return errors.New("unknown column '" + s + "'")
 	}
@@ -2060,6 +2075,7 @@ func (r UpdateSessionRequest) collectMarshalData() map[string]interface{} {
 	if r.Confirmed.Valid() {
 		m["confirmed"] = r.Confirmed.Value()
 	}
+	m["user_id"] = r.UserID
 	return m
 }
 
@@ -2219,7 +2235,16 @@ func (r *UpdateSessionRequest) Populate(m map[string]interface{}) error {
 		}
 		delete(m, "confirmed")
 	}
-	if err := tools.ExtractL10NFields(m, &r.L10N, []string{"id", "conference_id", "speaker_id", "title", "abstract", "memo", "duration", "material_level", "tags", "category", "spoken_language", "slide_language", "slide_subtitles", "slide_url", "video_url", "photo_permission", "video_permission", "sort_order", "has_interpretation", "status", "confirmed"}); err != nil {
+	if jv, ok := m["user_id"]; ok {
+		switch jv.(type) {
+		case string:
+			r.UserID = jv.(string)
+			delete(m, "user_id")
+		default:
+			return ErrInvalidJSONFieldType{Field: "user_id"}
+		}
+	}
+	if err := tools.ExtractL10NFields(m, &r.L10N, []string{"id", "conference_id", "speaker_id", "title", "abstract", "memo", "duration", "material_level", "tags", "category", "spoken_language", "slide_language", "slide_subtitles", "slide_url", "video_url", "photo_permission", "video_permission", "sort_order", "has_interpretation", "status", "confirmed", "user_id"}); err != nil {
 		return err
 	}
 	return nil
@@ -2227,7 +2252,7 @@ func (r *UpdateSessionRequest) Populate(m map[string]interface{}) error {
 
 func (r *UpdateSessionRequest) GetPropNames() ([]string, error) {
 	l, _ := r.L10N.GetPropNames()
-	return append(l, "id", "conference_id", "speaker_id", "title", "abstract", "memo", "duration", "material_level", "tags", "category", "spoken_language", "slide_language", "slide_subtitles", "slide_url", "video_url", "photo_permission", "video_permission", "sort_order", "has_interpretation", "status", "confirmed"), nil
+	return append(l, "id", "conference_id", "speaker_id", "title", "abstract", "memo", "duration", "material_level", "tags", "category", "spoken_language", "slide_language", "slide_subtitles", "slide_url", "video_url", "photo_permission", "video_permission", "sort_order", "has_interpretation", "status", "confirmed", "user_id"), nil
 }
 
 func (r *UpdateSessionRequest) SetPropValue(s string, v interface{}) error {
@@ -2277,6 +2302,11 @@ func (r *UpdateSessionRequest) SetPropValue(s string, v interface{}) error {
 		return r.Status.Set(v)
 	case "confirmed":
 		return r.Confirmed.Set(v)
+	case "user_id":
+		if jv, ok := v.(string); ok {
+			r.UserID = jv
+			return nil
+		}
 	default:
 		return errors.New("unknown column '" + s + "'")
 	}
@@ -2286,6 +2316,7 @@ func (r *UpdateSessionRequest) SetPropValue(s string, v interface{}) error {
 func (r DeleteSessionRequest) collectMarshalData() map[string]interface{} {
 	m := make(map[string]interface{})
 	m["id"] = r.ID
+	m["user_id"] = r.UserID
 	return m
 }
 
@@ -2323,6 +2354,15 @@ func (r *DeleteSessionRequest) Populate(m map[string]interface{}) error {
 			delete(m, "id")
 		default:
 			return ErrInvalidJSONFieldType{Field: "id"}
+		}
+	}
+	if jv, ok := m["user_id"]; ok {
+		switch jv.(type) {
+		case string:
+			r.UserID = jv.(string)
+			delete(m, "user_id")
+		default:
+			return ErrInvalidJSONFieldType{Field: "user_id"}
 		}
 	}
 	return nil
