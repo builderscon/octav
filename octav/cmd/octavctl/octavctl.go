@@ -1294,8 +1294,8 @@ func doUserDelete(args cmdargs) int {
 	fs := flag.NewFlagSet("octavctl user delete", flag.ContinueOnError)
 	var id string
 	fs.StringVar(&id, "id", "", "")
-	var id string
-	fs.StringVar(&id, "id", "", "")
+	var user_id string
+	fs.StringVar(&user_id, "user_id", "", "")
 	prepGlobalFlags(fs)
 	if err := fs.Parse([]string(args)); err != nil {
 		return errOut(err)
@@ -1305,8 +1305,8 @@ func doUserDelete(args cmdargs) int {
 	if id != "" {
 		m["id"] = id
 	}
-	if id != "" {
-		m["user_id"] = id
+	if user_id != "" {
+		m["user_id"] = user_id
 	}
 	r := model.DeleteUserRequest{}
 	if err := r.Populate(m); err != nil {

@@ -407,11 +407,14 @@ func processAction(ctx *genctx, action Action) error {
 	sort.Strings(propnames)
 
 	methodName := toMethodName(ctx.cmdchain[1:])
+
 	buf := bytes.Buffer{}
 	fmt.Fprintf(&buf, "\n\nfunc do%s(args cmdargs) int {", methodName)
 	fmt.Fprintf(&buf, "\nfs := flag.NewFlagSet(%s, flag.ContinueOnError)", strconv.Quote(cmdall))
 
 	setbuf := bytes.Buffer{}
+
+	_, hasID := link.Schema.Properties["id"]
 
 	for _, pname := range propnames {
 		pdef, ok := link.Schema.Properties[pname]
@@ -426,7 +429,12 @@ func processAction(ctx *genctx, action Action) error {
 			pdef = rs
 		}
 
-		sansprefix := strings.TrimPrefix(pname, exclprefix)
+		var sansprefix string
+		if hasID {
+			sansprefix = pname
+		} else {
+			sansprefix = strings.TrimPrefix(pname, exclprefix)
+		}
 
 		argt := "string"
 		argm := "StringVar"
