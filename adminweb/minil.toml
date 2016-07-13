@@ -1,6 +1,0 @@
-name = "web"
-# badges = ["travis"]
-authority="cpan:DMAKI"
-
-module_maker="ModuleBuildTiny"
-
