@@ -23,6 +23,9 @@ func (v *Conference) Lookup(tx *db.Tx, m *model.Conference, payload model.Lookup
 	if err = r.Load(tx, payload.ID); err != nil {
 		return errors.Wrap(err, "failed to load model.Conference from database")
 	}
+	if err := v.Decorate(tx, &r, payload.Lang.String); err != nil {
+		return errors.Wrap(err, "failed to load associated data for model.Conference from database")
+	}
 	*m = r
 	return nil
 }
@@ -97,6 +100,9 @@ func (v *Conference) ReplaceL10NStrings(tx *db.Tx, m *model.Conference, lang str
 	for rows.Next() {
 		if err := l.Scan(rows); err != nil {
 			return err
+		}
+		if len(l.Localized) == 0 {
+			continue
 		}
 
 		switch l.Name {

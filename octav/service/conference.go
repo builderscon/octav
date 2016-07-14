@@ -47,14 +47,14 @@ func (v *Conference) populateRowForUpdate(vdb *db.Conference, payload model.Upda
 }
 
 func (v *Conference) CreateFromPayload(tx *db.Tx, payload model.CreateConferenceRequest, result *model.Conference) error {
-	vdb := db.Conference{}
-	if err := v.Create(tx, &vdb, payload); err != nil {
-		return errors.Wrap(err, "failed to store in database")
-	}
-
 	su := User{}
 	if err := su.IsConferenceSeriesAdministrator(tx, payload.SeriesID, payload.UserID); err != nil {
 		return errors.Wrap(err, "creating a conference requires conference series administrator privilege")
+	}
+
+	vdb := db.Conference{}
+	if err := v.Create(tx, &vdb, payload); err != nil {
+		return errors.Wrap(err, "failed to store in database")
 	}
 
 	if err := v.AddAdministrator(tx, vdb.EID, payload.UserID); err != nil {
@@ -66,17 +66,14 @@ func (v *Conference) CreateFromPayload(tx *db.Tx, payload model.CreateConference
 		return errors.Wrap(err, "failed to populate model from database")
 	}
 
-	if err := v.Decorate(tx, &c); err != nil {
-		return errors.Wrap(err, "failed to decorate conference model")
-	}
 	*result = c
 	return nil
 }
 
 var slugSplitRx = regexp.MustCompile(`^/([^/]+)/(.+)$`)
 
-func (v *Conference) LoadBySlug(tx *db.Tx, c *model.Conference, slug string) error {
-	matches := slugSplitRx.FindStringSubmatch(slug)
+func (v *Conference) LookupBySlug(tx *db.Tx, c *model.Conference, payload model.LookupConferenceBySlugRequest) error {
+	matches := slugSplitRx.FindStringSubmatch(payload.Slug)
 	if matches == nil {
 		return errors.New("invalid slug pattern")
 	}
@@ -92,12 +89,7 @@ func (v *Conference) LoadBySlug(tx *db.Tx, c *model.Conference, slug string) err
 		return errors.Wrap(err, "failed to select conference id from slug")
 	}
 
-	vdb := db.Conference{}
-	if err := vdb.LoadByEID(tx, eid); err != nil {
-		return errors.Wrapf(err, "failed to load conference '%s'", eid)
-	}
-
-	return errors.Wrap(c.FromRow(vdb), "failed to convert to model")
+	return v.Lookup(tx, c, model.LookupConferenceRequest{ID: eid, Lang: payload.Lang})
 }
 
 func (v *Conference) AddAdministrator(tx *db.Tx, cid, uid string) error {
@@ -119,7 +111,7 @@ func (v *Conference) AddAdministratorFromPayload(tx *db.Tx, payload model.AddCon
 
 const datefmt = `2006-01-02`
 
-func (v *Conference) LoadByRange(tx *db.Tx, vdbl *db.ConferenceList, since, lang, rangeStart, rangeEnd string, limit int) error {
+func (v *Conference) LoadByRange(tx *db.Tx, vdbl *db.ConferenceList, since, rangeStart, rangeEnd string, limit int) error {
 	var rs time.Time
 	var re time.Time
 	var err error
@@ -303,7 +295,7 @@ func (v *Conference) LoadVenues(tx *db.Tx, cdl *model.VenueList, cid string) err
 	return nil
 }
 
-func (v *Conference) Decorate(tx *db.Tx, c *model.Conference) error {
+func (v *Conference) Decorate(tx *db.Tx, c *model.Conference, lang string) error {
 	if seriesID := c.SeriesID; seriesID != "" {
 		sdb := db.ConferenceSeries{}
 		if err := sdb.LoadByEID(tx, seriesID); err != nil {
@@ -328,6 +320,19 @@ func (v *Conference) Decorate(tx *db.Tx, c *model.Conference) error {
 	if err := v.LoadVenues(tx, &c.Venues, c.ID); err != nil {
 		return errors.Wrapf(err, "failed to load venues for '%s'", c.ID)
 	}
+
+	if lang != "" {
+		sv := Venue{}
+		for i := range c.Venues {
+			if err := sv.Decorate(tx, &c.Venues[i], lang); err != nil {
+				return errors.Wrap(err, "failed to decorate venue with associated data")
+			}
+		}
+		if err := v.ReplaceL10NStrings(tx, c, lang); err != nil {
+			return errors.Wrap(err, "failed to replace L10N strings")
+		}
+	}
+
 	return nil
 }
 
@@ -350,3 +355,42 @@ func (v *Conference) UpdateFromPayload(tx *db.Tx, payload model.UpdateConference
 	return errors.Wrap(v.Update(tx, &vdb, payload), "failed to load conference from database")
 }
 
+func (v *Conference) ListFromPayload(tx *db.Tx, l *model.ConferenceList, payload model.ListConferenceRequest) (err error) {
+	if pdebug.Enabled {
+		g := pdebug.Marker("service.Conference.ListFromPayload").BindError(&err)
+		defer g.End()
+	}
+
+	var rs time.Time
+	var re time.Time
+
+	if payload.RangeStart.Valid() {
+		if rs, err = time.Parse(datefmt, payload.RangeStart.String); err != nil {
+			return errors.Wrap(err, "failed to parse range start")
+		}
+	}
+
+	if payload.RangeEnd.Valid() {
+		if re, err = time.Parse(datefmt, payload.RangeEnd.String); err != nil {
+			return errors.Wrap(err, "failed to parse range end")
+		}
+	}
+
+	vdbl := db.ConferenceList{}
+	if err := vdbl.LoadByRange(tx, payload.Since.String, rs, re, int(payload.Limit.Int)); err != nil {
+		return errors.Wrap(err, "failed to load list from database")
+	}
+
+	r := make(model.ConferenceList, len(vdbl))
+	for i, vdb := range vdbl {
+		if err := (r[i]).FromRow(vdb); err != nil {
+			return errors.Wrap(err, "failed populate model from database")
+		}
+		if err := v.Decorate(tx, &r[i], payload.Lang.String); err != nil {
+			return errors.Wrap(err, "failed to decorate venue with associated data")
+		}
+	}
+
+	*l = r
+	return nil
+}

@@ -44,7 +44,7 @@ func (v *ConferenceSeries) DeleteFromPayload(tx *db.Tx, payload model.DeleteConf
 
 // CreateFromPayload adds extra logic around Create to verify data
 // and create accessory data.
-func (v *ConferenceSeries) CreateFromPayload(tx *db.Tx, payload model.CreateConferenceSeriesRequest, result *model.ConferenceSeries) (err error) {
+func (v *ConferenceSeries) CreateFromPayload(tx *db.Tx, result *model.ConferenceSeries, payload model.CreateConferenceSeriesRequest) (err error) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("service.ConferenceSeries.CreateFromPayload").BindError(&err)
 		defer g.End()

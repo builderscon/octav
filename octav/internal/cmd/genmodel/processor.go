@@ -77,6 +77,7 @@ type genctx struct {
 
 type Field struct {
 	Convert  bool
+	Decorate bool
 	JSONName string
 	L10N     bool
 	Name     string
@@ -272,6 +273,7 @@ func (ctx *genctx) extractModelStructs(n ast.Node) bool {
 
 			var jsname string
 			var l10n bool
+			var decorate bool
 			var convert bool
 			if f.Tag != nil {
 				v := f.Tag.Value
@@ -301,6 +303,11 @@ func (ctx *genctx) extractModelStructs(n ast.Node) bool {
 					l10n = true
 				}
 
+				tag = st.Get("decorate")
+				if b, err := strconv.ParseBool(tag); err == nil && b {
+					decorate = true
+				}
+
 				if tag = st.Get("assign"); tag == "convert" {
 					convert = true
 				}
@@ -314,6 +321,7 @@ func (ctx *genctx) extractModelStructs(n ast.Node) bool {
 			field := Field{
 				L10N:     l10n,
 				Convert:  convert,
+				Decorate: decorate,
 				Name:     f.Names[0].Name,
 				JSONName: jsname,
 				Type:     typ,
@@ -696,9 +704,13 @@ func generateServiceFile(ctx *genctx, m Model) error {
 	buf := bytes.Buffer{}
 
 	hasL10N := false
+	hasDecorate := false
 	for _, f := range m.Fields {
 		if f.L10N {
 			hasL10N = true
+		}
+		if f.Decorate {
+			hasDecorate = true
 		}
 	}
 
@@ -722,6 +734,11 @@ func generateServiceFile(ctx *genctx, m Model) error {
 	buf.WriteString("\nif err = r.Load(tx, payload.ID); err != nil {")
 	fmt.Fprintf(&buf, "\n" + `return errors.Wrap(err, "failed to load model.%s from database")`, m.Name)
 	buf.WriteString("\n}")
+	if hasL10N || hasDecorate {
+		buf.WriteString("\nif err := v.Decorate(tx, &r, payload.Lang.String); err != nil {")
+		fmt.Fprintf(&buf, "\n" + `return errors.Wrap(err, "failed to load associated data for model.%s from database")`, m.Name)
+		buf.WriteString("\n}")
+	}
 	buf.WriteString("\n*m = r")
 	buf.WriteString("\nreturn nil")
 	buf.WriteString("\n}")
@@ -799,6 +816,9 @@ func generateServiceFile(ctx *genctx, m Model) error {
 		buf.WriteString("\nfor rows.Next() {")
 		buf.WriteString("\nif err := l.Scan(rows); err != nil {")
 		buf.WriteString("\nreturn err")
+		buf.WriteString("\n}")
+		buf.WriteString("\nif len(l.Localized) == 0 {")
+		buf.WriteString("\ncontinue")
 		buf.WriteString("\n}")
 		buf.WriteString("\n\nswitch l.Name {")
 		for _, f := range m.Fields {

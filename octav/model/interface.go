@@ -21,15 +21,15 @@ type ErrInvalidFieldType struct {
 
 // +model
 type Conference struct {
-	ID             string             `json:"id"`
-	Title          string             `json:"title" l10n:"true"`
-	SeriesID       string             `json:"series_id,omitempty"`
-	Series         *ConferenceSeries  `json:"series,omitempty"`
-	SubTitle       string             `json:"sub_title" l10n:"true"`
-	Slug           string             `json:"slug"`
-	Dates          ConferenceDateList `json:"dates,omitempty"`
-	Administrators UserList           `json:"administrators,omitempty"`
-	Venues         VenueList          `json:"venues,omitempty"`
+	ID             string                `json:"id"`
+	Title          string                `json:"title" l10n:"true"`
+	SeriesID       string                `json:"series_id,omitempty"`
+	Series         *ConferenceSeries     `json:"series,omitempty" decorate:"true"`
+	SubTitle       string                `json:"sub_title" l10n:"true"`
+	Slug           string                `json:"slug"`
+	Dates          ConferenceDateList    `json:"dates,omitempty"`
+	Administrators UserList              `json:"administrators,omitempty" decorate:"true"`
+	Venues         VenueList             `json:"venues,omitempty" decorate:"true"`
 }
 type ConferenceList []Conference
 
@@ -44,7 +44,7 @@ type ConferenceSeriesList []ConferenceSeries
 type Room struct {
 	ID       string `json:"id"`
 	VenueID  string `json:"venue_id"`
-	Name     string `json:"name" l10n:"true"`
+	Name     string `json:"name" l10n:"true" decorate:"true"`
 	Capacity uint   `json:"capacity"`
 }
 type RoomList []Room
@@ -74,9 +74,9 @@ type Session struct {
 	HasInterpretation bool        `json:"has_interpretation"`
 	Status            string      `json:"status"`
 	Confirmed         bool        `json:"confirmed"`
-	Conference        *Conference `json:"conference,omitempy"` // only populated for JSON response
-	Room              *Room       `json:"room,omitempty"`      // only populated for JSON response
-	Speaker           *User       `json:"speaker,omitempty"`   // only populated for JSON response
+	Conference        *Conference `json:"conference,omitempy" decorate:"true"` // only populated for JSON response
+	Room              *Room       `json:"room,omitempty" decorate:"true"`      // only populated for JSON response
+	Speaker           *User       `json:"speaker,omitempty" decorate:"true"`   // only populated for JSON response
 }
 type SessionList []Session
 
@@ -100,8 +100,8 @@ type UserList []User
 // +model
 type Venue struct {
 	ID        string   `json:"id,omitempty"`
-	Name      string   `json:"name" l10n:"true"`
-	Address   string   `json:"address" l10n:"true"`
+	Name      string   `json:"name" l10n:"true" decorate:"true"`
+	Address   string   `json:"address" l10n:"true" decorate:"true"`
 	Longitude float64  `json:"longitude,omitempty"`
 	Latitude  float64  `json:"latitude,omitempty"`
 	Rooms     RoomList `json:"rooms,omitempty"`

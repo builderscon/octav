@@ -23,6 +23,9 @@ func (v *Session) Lookup(tx *db.Tx, m *model.Session, payload model.LookupSessio
 	if err = r.Load(tx, payload.ID); err != nil {
 		return errors.Wrap(err, "failed to load model.Session from database")
 	}
+	if err := v.Decorate(tx, &r, payload.Lang.String); err != nil {
+		return errors.Wrap(err, "failed to load associated data for model.Session from database")
+	}
 	*m = r
 	return nil
 }
@@ -97,6 +100,9 @@ func (v *Session) ReplaceL10NStrings(tx *db.Tx, m *model.Session, lang string) e
 	for rows.Next() {
 		if err := l.Scan(rows); err != nil {
 			return err
+		}
+		if len(l.Localized) == 0 {
+			continue
 		}
 
 		switch l.Name {
