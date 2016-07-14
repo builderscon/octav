@@ -47,14 +47,14 @@ func (v *Conference) populateRowForUpdate(vdb *db.Conference, payload model.Upda
 }
 
 func (v *Conference) CreateFromPayload(tx *db.Tx, payload model.CreateConferenceRequest, result *model.Conference) error {
-	vdb := db.Conference{}
-	if err := v.Create(tx, &vdb, payload); err != nil {
-		return errors.Wrap(err, "failed to store in database")
-	}
-
 	su := User{}
 	if err := su.IsConferenceSeriesAdministrator(tx, payload.SeriesID, payload.UserID); err != nil {
 		return errors.Wrap(err, "creating a conference requires conference series administrator privilege")
+	}
+
+	vdb := db.Conference{}
+	if err := v.Create(tx, &vdb, payload); err != nil {
+		return errors.Wrap(err, "failed to store in database")
 	}
 
 	if err := v.AddAdministrator(tx, vdb.EID, payload.UserID); err != nil {
@@ -283,7 +283,6 @@ func (v *Conference) LoadVenues(tx *db.Tx, cdl *model.VenueList, cid string) err
 		return err
 	}
 
-	sv := Venue{}
 	res := make(model.VenueList, len(vdbl))
 	for i, vdb := range vdbl {
 		var u model.Venue
@@ -291,9 +290,6 @@ func (v *Conference) LoadVenues(tx *db.Tx, cdl *model.VenueList, cid string) err
 			return err
 		}
 		res[i] = u
-		if err := sv.Decorate(tx, &u); err != nil {
-			return errors.Wrap(err, "failed to decorate venue with associated data")
-		}
 	}
 	*cdl = res
 	return nil
@@ -326,6 +322,12 @@ func (v *Conference) Decorate(tx *db.Tx, c *model.Conference, lang string) error
 	}
 
 	if lang != "" {
+		sv := Venue{}
+		for i := range c.Venues {
+			if err := sv.Decorate(tx, &c.Venues[i], lang); err != nil {
+				return errors.Wrap(err, "failed to decorate venue with associated data")
+			}
+		}
 		if err := v.ReplaceL10NStrings(tx, c, lang); err != nil {
 			return errors.Wrap(err, "failed to replace L10N strings")
 		}

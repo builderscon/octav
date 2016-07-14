@@ -41,6 +41,26 @@ func (v *Room) populateRowForUpdate(vdb *db.Room, payload model.UpdateRoomReques
 	return nil
 }
 
+func (v *Room) CreateFromPayload(tx *db.Tx, result *model.Room, payload model.CreateRoomRequest) error {
+	su := User{}
+	if err := su.IsAdministrator(tx, payload.UserID); err != nil {
+		return errors.Wrap(err, "creating a room requires conference administrator privilege")
+	}
+
+	vdb := db.Room{}
+	if err := v.Create(tx, &vdb, payload); err != nil {
+		return errors.Wrap(err, "failed to store in database")
+	}
+
+	var r model.Room
+	if err := r.FromRow(vdb); err != nil {
+		return errors.Wrap(err, "failed to populate model from database")
+	}
+
+	*result = r
+	return nil
+}
+
 func (v *Room) DeleteFromPayload(tx *db.Tx, payload model.DeleteRoomRequest) error {
 	su := User{}
 	if err := su.IsAdministrator(tx, payload.UserID); err != nil {

@@ -463,19 +463,13 @@ func doCreateRoom(ctx context.Context, w http.ResponseWriter, r *http.Request, p
 	defer tx.AutoRollback()
 
 	s := service.Room{}
-	vdb := db.Room{}
-	if err := s.Create(tx, &vdb, payload); err != nil {
+	v := model.Room{}
+	if err := s.CreateFromPayload(tx, &v, payload); err != nil {
 		httpError(w, `CreateRoom`, http.StatusInternalServerError, err)
 		return
 	}
 
 	if err := tx.Commit(); err != nil {
-		httpError(w, `CreateRoom`, http.StatusInternalServerError, err)
-		return
-	}
-
-	v := model.Room{}
-	if err := v.FromRow(vdb); err != nil {
 		httpError(w, `CreateRoom`, http.StatusInternalServerError, err)
 		return
 	}
@@ -935,40 +929,14 @@ func doLookupVenue(ctx context.Context, w http.ResponseWriter, r *http.Request, 
 	}
 	defer tx.AutoRollback()
 
-	v := model.Venue{}
-	if err := v.Load(tx, payload.ID); err != nil {
-		httpError(w, `LookupVenue`, http.StatusInternalServerError, err)
-		return
-	}
 	s := service.Venue{}
-	if err := s.Decorate(tx, &v); err != nil {
+	v := model.Venue{}
+	if err := s.Lookup(tx, &v, payload); err != nil {
 		httpError(w, `LookupVenue`, http.StatusInternalServerError, err)
 		return
 	}
 
-	if !payload.Lang.Valid() {
-		httpJSON(w, v)
-		return
-	}
-
-	// Special case, only used for administrators. Load all of the
-	// l10n strings associated with this
-	switch payload.Lang.String {
-	case "all":
-		vl10n := model.VenueL10N{Venue: v}
-		if err := vl10n.LoadLocalizedFields(tx); err != nil {
-			httpError(w, `LookupConference`, http.StatusInternalServerError, err)
-			return
-		}
-		httpJSON(w, vl10n)
-	default:
-		s := service.Venue{}
-		if err := s.ReplaceL10NStrings(tx, &v, payload.Lang.String); err != nil {
-			httpError(w, `LookupConference`, http.StatusInternalServerError, err)
-			return
-		}
-		httpJSON(w, v)
-	}
+	httpJSON(w, v)
 }
 
 func doUpdateVenue(ctx context.Context, w http.ResponseWriter, r *http.Request, payload model.UpdateVenueRequest) {
@@ -1002,52 +970,13 @@ func doListVenue(ctx context.Context, w http.ResponseWriter, r *http.Request, pa
 	}
 	defer tx.AutoRollback()
 
+	var l model.VenueList
 	s := service.Venue{}
-	vdbl := db.VenueList{}
-	if err := s.LoadList(tx, &vdbl, payload.Since.String, int(payload.Limit.Int)); err != nil {
+	if err := s.ListFromPayload(tx, &l, payload); err != nil {
 		httpError(w, `ListVenues`, http.StatusInternalServerError, err)
 		return
 	}
 
-	if !payload.Lang.Valid() {
-		l := make(model.VenueList, len(vdbl))
-		for i, vdb := range vdbl {
-			if err := l[i].FromRow(vdb); err != nil {
-				httpError(w, `ListConferences`, http.StatusInternalServerError, err)
-				return
-			}
-		}
-		httpJSON(w, l)
-		return
-	}
-
-	l := make(model.VenueL10NList, len(vdbl))
-	for i, vdb := range vdbl {
-		v := model.Venue{}
-		if err := v.FromRow(vdb); err != nil {
-			httpError(w, `ListVenue`, http.StatusInternalServerError, err)
-			return
-		}
-
-		if err := s.Decorate(tx, &v); err != nil {
-			httpError(w, `ListVenue`, http.StatusInternalServerError, err)
-			return
-		}
-
-		l[i].Venue = v
-		switch payload.Lang.String {
-		case "all":
-			if err := l[i].LoadLocalizedFields(tx); err != nil {
-				httpError(w, `ListVenue`, http.StatusInternalServerError, err)
-				return
-			}
-		default:
-			if err := s.ReplaceL10NStrings(tx, &(l[i].Venue), payload.Lang.String); err != nil {
-				httpError(w, `ListVenue`, http.StatusInternalServerError, err)
-				return
-			}
-		}
-	}
 	httpJSON(w, l)
 }
 

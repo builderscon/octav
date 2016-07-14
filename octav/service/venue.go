@@ -35,9 +35,9 @@ func (v *Venue) populateRowForUpdate(vdb *db.Venue, payload model.UpdateVenueReq
 	return nil
 }
 
-func (v *Venue) LoadRooms(tx *db.Tx, cdl *model.RoomList, vid string) error {
+func (v *Venue) LoadRooms(tx *db.Tx, cdl *model.RoomList, venueID string) error {
 	var vdbl db.RoomList
-	if err := db.LoadVenueRooms(tx, &vdbl, vid); err != nil {
+	if err := db.LoadVenueRooms(tx, &vdbl, venueID); err != nil {
 		return err
 	}
 
@@ -53,10 +53,24 @@ func (v *Venue) LoadRooms(tx *db.Tx, cdl *model.RoomList, vid string) error {
 	return nil
 }
 
-func (v *Venue) Decorate(tx *db.Tx, venue *model.Venue) error {
+func (v *Venue) Decorate(tx *db.Tx, venue *model.Venue, lang string) error {
 	if err := v.LoadRooms(tx, &venue.Rooms, venue.ID); err != nil {
 		return err
 	}
+
+	if lang != "" {
+		sr := Room{}
+		for i := range venue.Rooms {
+			if err := sr.ReplaceL10NStrings(tx, &venue.Rooms[i], lang); err != nil {
+				return errors.Wrap(err, "failed to replace L10N strings")
+			}
+		}
+
+		if err := v.ReplaceL10NStrings(tx, venue, lang); err != nil {
+			return errors.Wrap(err, "failed to replace L10N strings")
+		}
+	}
+
 	return nil
 }
 
@@ -105,3 +119,25 @@ func (v *Venue) DeleteFromPayload(tx *db.Tx, payload model.DeleteVenueRequest) e
 
 	return errors.Wrap(v.Delete(tx, payload.ID), "failed to delete from database")
 }
+
+func (v *Venue) ListFromPayload(tx *db.Tx, result *model.VenueList, payload model.ListVenueRequest) error {
+	vdbl := db.VenueList{}
+	if err := vdbl.LoadSinceEID(tx, payload.Since.String, int(payload.Limit.Int)); err != nil {
+		return errors.Wrap(err, "failed to load from database")
+	}
+
+	l := make(model.VenueList, len(vdbl))
+	for i, vdb := range vdbl {
+		if err := (l[i]).FromRow(vdb); err != nil {
+			return errors.Wrap(err, "failed to populate model from database")
+		}
+
+		if err := v.Decorate(tx, &l[i], payload.Lang.String); err != nil {
+			return errors.Wrap(err, "failed to decorate venue with associated data")
+		}
+	}
+
+	*result = l
+	return nil
+}
+
