@@ -143,6 +143,10 @@ func (lf *LocalizedFields) CreateLocalizedStrings(tx *db.Tx, parentType, parentI
 		return nil
 	}
 	err := lf.Foreach(func(lang, key, val string) error {
+		if len(val) == 0 {
+			return nil
+		}
+
 		if pdebug.Enabled {
 			pdebug.Printf("Creating l10n string for '%s' (%s)", key, lang)
 		}
