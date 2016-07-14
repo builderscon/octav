@@ -53,12 +53,6 @@ func NewTestCtx(t *testing.T) (*TestCtx, error) {
 		return nil, err
 	}
 
-	{
-		u := db.User{}
-		u.LoadByEID(tx, superuser.EID)
-		t.Logf("%#v", u)
-	}
-
 	if err := tx.Commit(); err != nil {
 		return nil, errors.Wrap(err, "failed to commit changes to DB")
 	}
@@ -402,15 +396,15 @@ func TestConferenceCRUD(t *testing.T) {
 		return
 	}
 
-	// The result from LookupConference contains the administrator field
-	// Remove that (and make sure it's populated), then do the comparison
-	//	admins := res2.Administrators
-	//	res2.Administrators = model.UserList(nil)
-	if !assert.Equal(ctx.T, res2, res, "LookupConference is the same as the conference created") {
+	if !assert.Len(ctx.T, res2.Administrators, 1, "There should be 1 administrator") {
 		return
 	}
 
-	if !assert.Len(ctx.T, res2.Administrators, 1, "There should be 1 administrator") {
+	// The result from LookupConference contains the administrator field
+	// Remove that (and make sure it's populated), then do the comparison
+	res2.Administrators = model.UserList(nil)
+	res2.Series = (*model.ConferenceSeries)(nil)
+	if !assert.Equal(ctx.T, res2, res, "LookupConference is the same as the conference created") {
 		return
 	}
 
@@ -947,10 +941,15 @@ func TestListConference(t *testing.T) {
 	}
 
 	for i := 0; i < 10; i++ {
+		lf := tools.LocalizedFields{}
+		lf.Set("ja", "title", `リストカンファレンステスト`)
+
 		conf, err := testCreateConference(ctx, &model.CreateConferenceRequest{
-			UserID:   user.ID,
+			L10N:     lf,
 			SeriesID: series.ID,
 			Slug:     tools.RandomString(8),
+			Title:    "ListConference Test",
+			UserID:   user.ID,
 		})
 		if err != nil {
 			return
@@ -975,6 +974,7 @@ func TestListConference(t *testing.T) {
 	}
 
 	in := model.ListConferenceRequest{}
+	in.Lang.Set("ja")
 	in.RangeStart.Set("2016-03-21")
 	in.RangeEnd.Set("2016-03-23")
 	res, err := ctx.HTTPClient.ListConference(&in)
@@ -988,6 +988,12 @@ func TestListConference(t *testing.T) {
 
 	if !assert.Len(ctx.T, res, 10, "ListConference returns 10 rooms") {
 		return
+	}
+
+	for _, c := range res {
+		if !assert.Equal(t, c.Title, "リストカンファレンステスト", "Title is in Japanese") {
+			return
+		}
 	}
 }
 

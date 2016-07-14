@@ -214,38 +214,6 @@ func doCreateConference(ctx context.Context, w http.ResponseWriter, r *http.Requ
 	httpJSON(w, c)
 }
 
-func deliverConference(ctx context.Context, w http.ResponseWriter, r *http.Request, lang jsval.MaybeString, tx *db.Tx, c model.Conference) {
-	s := service.Conference{}
-	if err := s.Decorate(tx, &c); err != nil {
-		httpError(w, `LookupConference`, http.StatusInternalServerError, err)
-		return
-	}
-
-	if !lang.Valid() {
-		httpJSON(w, c)
-		return
-	}
-
-	// Special case, only used for administrators. Load all of the
-	// l10n strings associated with this
-	switch lang.String {
-	case "all":
-		cl10n := model.ConferenceL10N{Conference: c}
-		if err := cl10n.LoadLocalizedFields(tx); err != nil {
-			httpError(w, `LookupConference`, http.StatusInternalServerError, err)
-			return
-		}
-		httpJSON(w, cl10n)
-	default:
-		s := service.Conference{}
-		if err := s.ReplaceL10NStrings(tx, &c, lang.String); err != nil {
-			httpError(w, `LookupConference`, http.StatusInternalServerError, err)
-			return
-		}
-		httpJSON(w, c)
-	}
-}
-
 func doLookupConferenceBySlug(ctx context.Context, w http.ResponseWriter, r *http.Request, payload model.LookupConferenceBySlugRequest) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("doLookupConferenceBySlug")
@@ -261,12 +229,12 @@ func doLookupConferenceBySlug(ctx context.Context, w http.ResponseWriter, r *htt
 
 	s := service.Conference{}
 	c := model.Conference{}
-	if err := s.LoadBySlug(tx, &c, payload.Slug); err != nil {
+	if err := s.LookupBySlug(tx, &c, payload); err != nil {
 		httpError(w, `LookupConferenceBySlug`, http.StatusInternalServerError, err)
 		return
 	}
 
-	deliverConference(ctx, w, r, payload.Lang, tx, c)
+	httpJSON(w, c)
 }
 
 func doLookupConference(ctx context.Context, w http.ResponseWriter, r *http.Request, payload model.LookupConferenceRequest) {
@@ -281,13 +249,14 @@ func doLookupConference(ctx context.Context, w http.ResponseWriter, r *http.Requ
 	}
 	defer tx.AutoRollback()
 
+	s := service.Conference{}
 	c := model.Conference{}
-	if err := c.Load(tx, payload.ID); err != nil {
+	if err := s.Lookup(tx, &c, payload); err != nil {
 		httpError(w, `LookupConference`, http.StatusInternalServerError, err)
 		return
 	}
 
-	deliverConference(ctx, w, r, payload.Lang, tx, c)
+	httpJSON(w, c)
 }
 
 func doUpdateConference(ctx context.Context, w http.ResponseWriter, r *http.Request, payload model.UpdateConferenceRequest) {
@@ -475,55 +444,13 @@ func doListConference(ctx context.Context, w http.ResponseWriter, r *http.Reques
 	}
 	defer tx.AutoRollback()
 
+	var l model.ConferenceList
 	s := service.Conference{}
-	vdbl := db.ConferenceList{}
-	if err := s.LoadByRange(tx, &vdbl, payload.Since.String, payload.Lang.String, payload.RangeStart.String, payload.RangeEnd.String, int(payload.Limit.Int)); err != nil {
+	if err := s.ListFromPayload(tx, &l, payload); err != nil {
 		httpError(w, `ListConference`, http.StatusInternalServerError, err)
 		return
 	}
 
-	if !payload.Lang.Valid() {
-		l := make(model.ConferenceList, len(vdbl))
-		for i, vdb := range vdbl {
-			c := &l[i]
-			if err := c.FromRow(vdb); err != nil {
-				httpError(w, `ListConference`, http.StatusInternalServerError, err)
-				return
-			}
-			if err := s.Decorate(tx, c); err != nil {
-				httpError(w, `ListConference`, http.StatusInternalServerError, err)
-				return
-			}
-		}
-		httpJSON(w, l)
-		return
-	}
-
-	l := make(model.ConferenceL10NList, len(vdbl))
-	for i, vdb := range vdbl {
-		c := model.Conference{}
-		if err := c.FromRow(vdb); err != nil {
-			httpError(w, `ListConference`, http.StatusInternalServerError, err)
-			return
-		}
-		if err := s.Decorate(tx, &c); err != nil {
-			httpError(w, `ListConference`, http.StatusInternalServerError, err)
-			return
-		}
-		l[i].Conference = c
-		switch payload.Lang.String {
-		case "all":
-			if err := l[i].LoadLocalizedFields(tx); err != nil {
-				httpError(w, `ListConference`, http.StatusInternalServerError, err)
-				return
-			}
-		default:
-			if err := s.ReplaceL10NStrings(tx, &(l[i].Conference), payload.Lang.String); err != nil {
-				httpError(w, `ListConference`, http.StatusInternalServerError, err)
-				return
-			}
-		}
-	}
 	httpJSON(w, l)
 }
 
