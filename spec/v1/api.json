@@ -837,6 +837,7 @@
       "schema": {
         "required": ["slug"],
         "properties": {
+          "lang": { "$ref": "#/definitions/language" },
           "slug": { "type": "string" }
         }
       },
