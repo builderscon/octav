@@ -101,6 +101,9 @@ func (v *Room) ReplaceL10NStrings(tx *db.Tx, m *model.Room, lang string) error {
 		if err := l.Scan(rows); err != nil {
 			return err
 		}
+		if len(l.Localized) == 0 {
+			continue
+		}
 
 		switch l.Name {
 		case "name":

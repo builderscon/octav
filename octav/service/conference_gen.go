@@ -101,6 +101,9 @@ func (v *Conference) ReplaceL10NStrings(tx *db.Tx, m *model.Conference, lang str
 		if err := l.Scan(rows); err != nil {
 			return err
 		}
+		if len(l.Localized) == 0 {
+			continue
+		}
 
 		switch l.Name {
 		case "title":

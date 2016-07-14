@@ -817,6 +817,9 @@ func generateServiceFile(ctx *genctx, m Model) error {
 		buf.WriteString("\nif err := l.Scan(rows); err != nil {")
 		buf.WriteString("\nreturn err")
 		buf.WriteString("\n}")
+		buf.WriteString("\nif len(l.Localized) == 0 {")
+		buf.WriteString("\ncontinue")
+		buf.WriteString("\n}")
 		buf.WriteString("\n\nswitch l.Name {")
 		for _, f := range m.Fields {
 			if !f.L10N {
