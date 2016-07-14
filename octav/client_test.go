@@ -598,6 +598,8 @@ func TestSessionCRUD(t *testing.T) {
 		return
 	}
 
+	res2.Conference = nil
+	res2.Speaker = nil
 	if !assert.Equal(ctx.T, res2, res, "LookupSession is the same as the room created") {
 		return
 	}

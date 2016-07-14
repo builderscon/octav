@@ -196,3 +196,13 @@ func (v *User) IsSessionOwner(tx *db.Tx, sessionID, userID string) error {
 
 	return errors.Errorf("user %s lacks session owner privileges for %s", userID, sessionID)
 }
+
+func (v *User) Decorate(tx *db.Tx, user *model.User, lang string) error {
+	if lang != "" {
+		if err := v.ReplaceL10NStrings(tx, user, lang); err != nil {
+			return errors.Wrap(err, "failed to replace L10N strings")
+		}
+	}
+	return nil
+}
+

@@ -11,7 +11,6 @@ import (
 	"github.com/lestrrat/go-apache-logformat"
 	"github.com/lestrrat/go-jsval"
 	"github.com/lestrrat/go-pdebug"
-	"github.com/pkg/errors"
 	"golang.org/x/net/context"
 )
 
@@ -107,9 +106,9 @@ func doCreateConferenceSeries(ctx context.Context, w http.ResponseWriter, r *htt
 	}
 	defer tx.AutoRollback()
 
-	s := service.ConferenceSeries{}
-	c := model.ConferenceSeries{}
-	if err := s.CreateFromPayload(tx, payload, &c); err != nil {
+	var s service.ConferenceSeries
+	var c model.ConferenceSeries
+	if err := s.CreateFromPayload(tx, &c, payload); err != nil {
 		httpError(w, `CreateConferenceSeries`, http.StatusInternalServerError, err)
 		return
 	}
@@ -519,7 +518,7 @@ func doCreateSession(ctx context.Context, w http.ResponseWriter, r *http.Request
 
 	s := service.Session{}
 	v := model.Session{}
-	if err := s.CreateFromPayload(tx, payload, &v); err != nil {
+	if err := s.CreateFromPayload(tx, &v, payload); err != nil {
 		httpError(w, `CreateSession`, http.StatusInternalServerError, err)
 		return
 	}
@@ -542,7 +541,7 @@ func doUpdateSession(ctx context.Context, w http.ResponseWriter, r *http.Request
 
 	s := service.Session{}
 	var v model.Session
-	if err := s.UpdateFromPayload(tx, payload, &v); err != nil {
+	if err := s.UpdateFromPayload(tx, &v, payload); err != nil {
 		httpError(w, `UpdateConference`, http.StatusNotFound, err)
 		return
 	}
@@ -973,24 +972,9 @@ func doLookupSession(ctx context.Context, w http.ResponseWriter, r *http.Request
 	}
 	defer tx.AutoRollback()
 
-	v := model.Session{}
-	if err := v.Load(tx, payload.ID); err != nil {
-		httpError(w, `LookupSession`, http.StatusInternalServerError, err)
-		return
-	}
-
-	s := service.Session{}
-	if err := errors.Wrap(s.Decorate(tx, &v), "failed to decorate session with associated data"); err != nil {
-		httpError(w, `LookupSession`, http.StatusInternalServerError, err)
-		return
-	}
-
-	if !payload.Lang.Valid() {
-		httpJSON(w, v)
-		return
-	}
-
-	if err := s.ReplaceL10NStrings(tx, &v, payload.Lang.String); err != nil {
+	var s service.Session
+	var v model.Session
+	if err := s.Lookup(tx, &v, payload); err != nil {
 		httpError(w, `LookupSession`, http.StatusInternalServerError, err)
 		return
 	}
@@ -1006,47 +990,14 @@ func doListSessionByConference(ctx context.Context, w http.ResponseWriter, r *ht
 	}
 	defer tx.AutoRollback()
 
-	s := service.Session{}
-	vdbl := db.SessionList{}
-	if err := s.LoadByConference(tx, &vdbl, payload.ConferenceID, payload.Date.String); err != nil {
+	var s service.Session
+	var v model.SessionList
+	if err := s.ListSessionFromPayload(tx, &v, payload); err != nil {
 		httpError(w, `ListSessionByConference`, http.StatusInternalServerError, err)
 		return
 	}
 
-	if !payload.Lang.Valid() {
-		l := make(model.SessionList, len(vdbl))
-		for i, vdb := range vdbl {
-			if err := l[i].FromRow(vdb); err != nil {
-				httpError(w, `ListSessionByConference`, http.StatusInternalServerError, err)
-				return
-			}
-		}
-		httpJSON(w, l)
-		return
-	}
-
-	l := make(model.SessionL10NList, len(vdbl))
-	for i, vdb := range vdbl {
-		v := model.Session{}
-		if err := v.FromRow(vdb); err != nil {
-			httpError(w, `ListSessionByConference`, http.StatusInternalServerError, err)
-			return
-		}
-		l[i].Session = v
-		switch payload.Lang.String {
-		case "all":
-			if err := l[i].LoadLocalizedFields(tx); err != nil {
-				httpError(w, `ListSessionByConference`, http.StatusInternalServerError, err)
-				return
-			}
-		default:
-			if err := s.ReplaceL10NStrings(tx, &(l[i].Session), payload.Lang.String); err != nil {
-				httpError(w, `ListSessionByConference`, http.StatusInternalServerError, err)
-				return
-			}
-		}
-	}
-	httpJSON(w, l)
+	httpJSON(w, v)
 }
 
 func doCreateQuestion(ctx context.Context, w http.ResponseWriter, r *http.Request, payload model.CreateQuestionRequest) {

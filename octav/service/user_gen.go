@@ -23,6 +23,9 @@ func (v *User) Lookup(tx *db.Tx, m *model.User, payload model.LookupUserRequest)
 	if err = r.Load(tx, payload.ID); err != nil {
 		return errors.Wrap(err, "failed to load model.User from database")
 	}
+	if err := v.Decorate(tx, &r, payload.Lang.String); err != nil {
+		return errors.Wrap(err, "failed to load associated data for model.User from database")
+	}
 	*m = r
 	return nil
 }

@@ -190,7 +190,7 @@ func (v *Session) LoadByConference(tx *db.Tx, vdbl *db.SessionList, cid string, 
 	return nil
 }
 
-func (v *Session) Decorate(tx *db.Tx, session *model.Session) error {
+func (v *Session) Decorate(tx *db.Tx, session *model.Session, lang string) error {
 	if pdebug.Enabled {
 		g := pdebug.Marker("service.Session.Decorate")
 		defer g.End()
@@ -221,10 +221,16 @@ func (v *Session) Decorate(tx *db.Tx, session *model.Session) error {
 		session.Speaker = &speaker
 	}
 
+	if lang != "" {
+		if err := v.ReplaceL10NStrings(tx, session, lang); err != nil {
+			return errors.Wrap(err, "failed to replace localized strings")
+		}
+	}
+
 	return nil
 }
 
-func (v *Session) CreateFromPayload(tx *db.Tx, payload model.CreateSessionRequest, result *model.Session) error {
+func (v *Session) CreateFromPayload(tx *db.Tx, result *model.Session, payload model.CreateSessionRequest) error {
 	var u model.User
 	su := User{}
 	if err := su.Lookup(tx, &u, model.LookupUserRequest{ID: payload.UserID}); err != nil {
@@ -241,15 +247,11 @@ func (v *Session) CreateFromPayload(tx *db.Tx, payload model.CreateSessionReques
 		return errors.Wrap(err, "failed to populate model from database")
 	}
 
-	if err := v.Decorate(tx, &m); err != nil {
-		return errors.Wrap(err, "failed to decorate model")
-	}
-
 	*result = m
 	return nil
 }
 
-func (v *Session) UpdateFromPayload(tx *db.Tx, payload model.UpdateSessionRequest, result *model.Session) error {
+func (v *Session) UpdateFromPayload(tx *db.Tx, result *model.Session, payload model.UpdateSessionRequest) error {
 	su := User{}
 	if err := su.IsSessionOwner(tx, payload.ID, payload.UserID); err != nil {
 		return errors.Wrap(err, "updating sessions require session owner privileges")
@@ -273,5 +275,26 @@ func (v *Session) UpdateFromPayload(tx *db.Tx, payload model.UpdateSessionReques
 	}
 
 	*result = m
+	return nil
+}
+
+func (v *Session) ListSessionFromPayload(tx *db.Tx, result *model.SessionList, payload model.ListSessionByConferenceRequest) error {
+	var vdbl db.SessionList
+	if err := vdbl.LoadByConference(tx, payload.ConferenceID, payload.Date.String); err != nil {
+		return errors.Wrap(err, "failed to load from database")
+	}
+
+	l := make(model.SessionList, len(vdbl))
+	for i, vdb := range vdbl {
+		if err := l[i].FromRow(vdb); err != nil {
+			return errors.Wrap(err, "failed to populate model from database")
+		}
+
+		if err := v.Decorate(tx, &l[i], payload.Lang.String); err != nil {
+			return errors.Wrap(err, "failed to decorate session with associated data")
+		}
+	}
+
+	*result = l
 	return nil
 }
