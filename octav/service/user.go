@@ -141,7 +141,28 @@ func (v *User) IsOwnerUser(tx *db.Tx, targetID, userID string) error {
 	return v.IsSystemAdmin(tx, userID)
 }
 
-func (v *User) CreateFromPayload(tx *db.Tx, payload model.CreateUserRequest, result *model.User) error {
+func (v *User) ListFromPayload(tx *db.Tx, result *model.UserList, payload model.ListUserRequest) error {
+	var vdbl db.UserList
+	if err :=  vdbl.LoadSinceEID(tx, payload.Since.String, int(payload.Limit.Int)); err != nil {
+		return errors.Wrap(err, "failed to load from database")
+	}
+
+	l := make(model.UserList, len(vdbl))
+	for i, vdb := range vdbl {
+		if err := l[i].FromRow(vdb); err != nil {
+			return errors.Wrap(err, "failed to populate model from database")
+		}
+
+		if err := v.Decorate(tx, &l[i], payload.Lang.String); err != nil {
+			return errors.Wrap(err, "failed to decorate user with associated data")
+		}
+	}
+
+	*result = l
+	return nil
+}
+
+func (v *User) CreateFromPayload(tx *db.Tx, result *model.User, payload model.CreateUserRequest) error {
 	// Normally we would like to limit who can create users, but this
 	// is done via OAuth login, so anybody must be able to do it.
 	vdb := db.User{}
@@ -203,6 +224,25 @@ func (v *User) Decorate(tx *db.Tx, user *model.User, lang string) error {
 			return errors.Wrap(err, "failed to replace L10N strings")
 		}
 	}
+	return nil
+}
+
+func (v *User) LookupUserByAuthUserIDFromPayload(tx *db.Tx, result *model.User, payload model.LookupUserByAuthUserIDRequest) error {
+	var vdb db.User
+	if err := vdb.LoadByAuthUserID(tx, payload.AuthVia, payload.AuthUserID); err != nil {
+		return errors.Wrap(err, "failed to load from database")
+	}
+
+	var r model.User
+	if err := r.FromRow(vdb); err != nil {
+		return errors.Wrap(err, "failed to populate mode from database")
+	}
+
+	if err := v.Decorate(tx, &r, payload.Lang.String); err != nil {
+		return errors.Wrap(err, "failed to decorate with assocaited data")
+	}
+
+	*result = r
 	return nil
 }
 

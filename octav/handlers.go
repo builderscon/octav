@@ -9,7 +9,6 @@ import (
 	"github.com/builderscon/octav/octav/model"
 	"github.com/builderscon/octav/octav/service"
 	"github.com/lestrrat/go-apache-logformat"
-	"github.com/lestrrat/go-jsval"
 	"github.com/lestrrat/go-pdebug"
 	"golang.org/x/net/context"
 )
@@ -134,7 +133,7 @@ func doDeleteConferenceSeries(ctx context.Context, w http.ResponseWriter, r *htt
 	}
 	defer tx.AutoRollback()
 
-	s := service.ConferenceSeries{}
+	var s service.ConferenceSeries
 	if err := s.DeleteFromPayload(tx, payload); err != nil {
 		httpError(w, `DeleteConferenceSeries`, http.StatusInternalServerError, err)
 		return
@@ -154,7 +153,7 @@ func doListConferenceSeries(ctx context.Context, w http.ResponseWriter, r *http.
 	}
 	defer tx.AutoRollback()
 
-	s := service.ConferenceSeries{}
+	var s service.ConferenceSeries
 	l := []model.ConferenceSeries{}
 	if err := s.LoadByRange(tx, &l, payload.Since.String, int(payload.Limit.Int)); err != nil {
 		httpError(w, `ListConferenceSeries`, http.StatusInternalServerError, err)
@@ -172,7 +171,7 @@ func doAddConferenceSeriesAdmin(ctx context.Context, w http.ResponseWriter, r *h
 	}
 	defer tx.AutoRollback()
 
-	s := service.ConferenceSeries{}
+	var s service.ConferenceSeries
 	if err := s.AddAdministratorFromPayload(tx, payload); err != nil {
 		httpError(w, `AddConferenceSeriesAdmin`, http.StatusInternalServerError, err)
 		return
@@ -198,8 +197,8 @@ func doCreateConference(ctx context.Context, w http.ResponseWriter, r *http.Requ
 	}
 	defer tx.AutoRollback()
 
-	s := service.Conference{}
-	c := model.Conference{}
+	var s service.Conference
+	var c model.Conference
 	if err := s.CreateFromPayload(tx, payload, &c); err != nil {
 		httpError(w, `CreateConference`, http.StatusInternalServerError, err)
 		return
@@ -226,8 +225,8 @@ func doLookupConferenceBySlug(ctx context.Context, w http.ResponseWriter, r *htt
 	}
 	defer tx.AutoRollback()
 
-	s := service.Conference{}
-	c := model.Conference{}
+	var s service.Conference
+	var c model.Conference
 	if err := s.LookupBySlug(tx, &c, payload); err != nil {
 		httpError(w, `LookupConferenceBySlug`, http.StatusInternalServerError, err)
 		return
@@ -248,8 +247,8 @@ func doLookupConference(ctx context.Context, w http.ResponseWriter, r *http.Requ
 	}
 	defer tx.AutoRollback()
 
-	s := service.Conference{}
-	c := model.Conference{}
+	var s service.Conference
+	var c model.Conference
 	if err := s.Lookup(tx, &c, payload); err != nil {
 		httpError(w, `LookupConference`, http.StatusInternalServerError, err)
 		return
@@ -271,7 +270,7 @@ func doUpdateConference(ctx context.Context, w http.ResponseWriter, r *http.Requ
 	}
 	defer tx.AutoRollback()
 
-	s := service.Conference{}
+	var s service.Conference
 	if err := s.UpdateFromPayload(tx, payload); err != nil {
 		httpError(w, `UpdateConference`, http.StatusInternalServerError, err)
 		return
@@ -297,7 +296,7 @@ func doDeleteConference(ctx context.Context, w http.ResponseWriter, r *http.Requ
 	}
 	defer tx.AutoRollback()
 
-	s := service.Conference{}
+	var s service.Conference
 	if err := s.Delete(tx, payload.ID); err != nil {
 		httpError(w, `DeleteConference`, http.StatusInternalServerError, err)
 		return
@@ -317,7 +316,7 @@ func doDeleteConferenceDates(ctx context.Context, w http.ResponseWriter, r *http
 	}
 	defer tx.AutoRollback()
 
-	s := service.Conference{}
+	var s service.Conference
 	if err := s.DeleteDatesFromPayload(tx, payload); err != nil {
 		httpError(w, `DeleteConferenceDates`, http.StatusInternalServerError, err)
 		return
@@ -338,7 +337,7 @@ func doAddConferenceDates(ctx context.Context, w http.ResponseWriter, r *http.Re
 	}
 	defer tx.AutoRollback()
 
-	s := service.Conference{}
+	var s service.Conference
 	if err := s.AddDatesFromPayload(tx, payload); err != nil {
 		httpError(w, `AddConferenceDates`, http.StatusInternalServerError, err)
 		return
@@ -359,7 +358,7 @@ func doDeleteConferenceAdmin(ctx context.Context, w http.ResponseWriter, r *http
 	}
 	defer tx.AutoRollback()
 
-	s := service.Conference{}
+	var s service.Conference
 	if err := s.DeleteAdministratorFromPayload(tx, payload); err != nil {
 		httpError(w, `DeleteConferenceAdmin`, http.StatusInternalServerError, err)
 		return
@@ -380,7 +379,7 @@ func doAddConferenceAdmin(ctx context.Context, w http.ResponseWriter, r *http.Re
 	}
 	defer tx.AutoRollback()
 
-	s := service.Conference{}
+	var s service.Conference
 	if err := s.AddAdministratorFromPayload(tx, payload); err != nil {
 		httpError(w, `AddConferenceAdmin`, http.StatusInternalServerError, err)
 		return
@@ -401,7 +400,7 @@ func doDeleteConferenceVenue(ctx context.Context, w http.ResponseWriter, r *http
 	}
 	defer tx.AutoRollback()
 
-	s := service.Conference{}
+	var s service.Conference
 	if err := s.DeleteVenueFromPayload(tx, payload); err != nil {
 		httpError(w, `DeleteConferenceVenue`, http.StatusInternalServerError, err)
 		return
@@ -422,7 +421,7 @@ func doAddConferenceVenue(ctx context.Context, w http.ResponseWriter, r *http.Re
 	}
 	defer tx.AutoRollback()
 
-	s := service.Conference{}
+	var s service.Conference
 	if err := s.AddVenueFromPayload(tx, payload); err != nil {
 		httpError(w, `AddConferenceVenue`, http.StatusInternalServerError, err)
 		return
@@ -443,14 +442,14 @@ func doListConference(ctx context.Context, w http.ResponseWriter, r *http.Reques
 	}
 	defer tx.AutoRollback()
 
-	var l model.ConferenceList
-	s := service.Conference{}
-	if err := s.ListFromPayload(tx, &l, payload); err != nil {
+	var s service.Conference
+	var v model.ConferenceList
+	if err := s.ListFromPayload(tx, &v, payload); err != nil {
 		httpError(w, `ListConference`, http.StatusInternalServerError, err)
 		return
 	}
 
-	httpJSON(w, l)
+	httpJSON(w, v)
 }
 
 func doCreateRoom(ctx context.Context, w http.ResponseWriter, r *http.Request, payload model.CreateRoomRequest) {
@@ -461,8 +460,8 @@ func doCreateRoom(ctx context.Context, w http.ResponseWriter, r *http.Request, p
 	}
 	defer tx.AutoRollback()
 
-	s := service.Room{}
-	v := model.Room{}
+	var s service.Room
+	var v model.Room
 	if err := s.CreateFromPayload(tx, &v, payload); err != nil {
 		httpError(w, `CreateRoom`, http.StatusInternalServerError, err)
 		return
@@ -489,17 +488,12 @@ func doUpdateRoom(ctx context.Context, w http.ResponseWriter, r *http.Request, p
 	}
 	defer tx.AutoRollback()
 
-	vdb := db.Room{}
-	if err := vdb.LoadByEID(tx, payload.ID); err != nil {
-		httpError(w, `UpdateRoom`, http.StatusNotFound, err)
-		return
-	}
-
-	s := service.Room{}
-	if err := s.Update(tx, &vdb, payload); err != nil {
+	var s service.Room
+	if err := s.UpdateFromPayload(tx, payload); err != nil {
 		httpError(w, `UpdateRoom`, http.StatusInternalServerError, err)
 		return
 	}
+
 	if err := tx.Commit(); err != nil {
 		httpError(w, `UpdateRoom`, http.StatusInternalServerError, err)
 		return
@@ -516,8 +510,8 @@ func doCreateSession(ctx context.Context, w http.ResponseWriter, r *http.Request
 	}
 	defer tx.AutoRollback()
 
-	s := service.Session{}
-	v := model.Session{}
+	var s service.Session
+	var v model.Session
 	if err := s.CreateFromPayload(tx, &v, payload); err != nil {
 		httpError(w, `CreateSession`, http.StatusInternalServerError, err)
 		return
@@ -539,7 +533,7 @@ func doUpdateSession(ctx context.Context, w http.ResponseWriter, r *http.Request
 	}
 	defer tx.AutoRollback()
 
-	s := service.Session{}
+	var s service.Session
 	var v model.Session
 	if err := s.UpdateFromPayload(tx, &v, payload); err != nil {
 		httpError(w, `UpdateConference`, http.StatusNotFound, err)
@@ -567,7 +561,7 @@ func doDeleteSession(ctx context.Context, w http.ResponseWriter, r *http.Request
 	}
 	defer tx.AutoRollback()
 
-	s := service.Session{}
+	var s service.Session
 	if err := s.Delete(tx, payload.ID); err != nil {
 		httpError(w, `DeleteSession`, http.StatusInternalServerError, err)
 		return
@@ -587,9 +581,9 @@ func doCreateUser(ctx context.Context, w http.ResponseWriter, r *http.Request, p
 	}
 	defer tx.AutoRollback()
 
-	s := service.User{}
-	v := model.User{}
-	if err := s.CreateFromPayload(tx, payload, &v); err != nil {
+	var s service.User
+	var v model.User
+	if err := s.CreateFromPayload(tx, &v, payload); err != nil {
 		httpError(w, `CreateUser`, http.StatusInternalServerError, err)
 		return
 	}
@@ -615,7 +609,7 @@ func doDeleteUser(ctx context.Context, w http.ResponseWriter, r *http.Request, p
 	}
 	defer tx.AutoRollback()
 
-	s := service.User{}
+	var s service.User
 	if err := s.DeleteFromPayload(tx, payload); err != nil {
 		httpError(w, `DeleteUser`, http.StatusInternalServerError, err)
 		return
@@ -635,47 +629,14 @@ func doListUser(ctx context.Context, w http.ResponseWriter, r *http.Request, pay
 	}
 	defer tx.AutoRollback()
 
-	s := service.User{}
-	vdbl := db.UserList{}
-	if err := s.LoadList(tx, &vdbl, payload.Since.String, int(payload.Limit.Int)); err != nil {
+	var s service.User
+	var v model.UserList
+	if err := s.ListFromPayload(tx, &v, payload); err != nil {
 		httpError(w, `ListUsers`, http.StatusInternalServerError, err)
 		return
 	}
 
-	if !payload.Lang.Valid() {
-		l := make(model.UserList, len(vdbl))
-		for i, vdb := range vdbl {
-			if err := l[i].FromRow(vdb); err != nil {
-				httpError(w, `ListConferences`, http.StatusInternalServerError, err)
-				return
-			}
-		}
-		httpJSON(w, l)
-		return
-	}
-
-	l := make(model.UserL10NList, len(vdbl))
-	for i, vdb := range vdbl {
-		v := model.User{}
-		if err := v.FromRow(vdb); err != nil {
-			httpError(w, `ListUser`, http.StatusInternalServerError, err)
-			return
-		}
-		l[i].User = v
-		switch payload.Lang.String {
-		case "all":
-			if err := l[i].LoadLocalizedFields(tx); err != nil {
-				httpError(w, `ListUser`, http.StatusInternalServerError, err)
-				return
-			}
-		default:
-			if err := s.ReplaceL10NStrings(tx, &(l[i].User), payload.Lang.String); err != nil {
-				httpError(w, `ListUser`, http.StatusInternalServerError, err)
-				return
-			}
-		}
-	}
-	httpJSON(w, l)
+	httpJSON(w, v)
 }
 
 func doLookupUserByAuthUserID(ctx context.Context, w http.ResponseWriter, r *http.Request, payload model.LookupUserByAuthUserIDRequest) {
@@ -690,19 +651,14 @@ func doLookupUserByAuthUserID(ctx context.Context, w http.ResponseWriter, r *htt
 	}
 	defer tx.AutoRollback()
 
-	vdb := db.User{}
-	if err := vdb.LoadByAuthUserID(tx, payload.AuthVia, payload.AuthUserID); err != nil {
+	var s service.User
+	var v model.User
+	if err := s.LookupUserByAuthUserIDFromPayload(tx, &v, payload); err != nil {
 		httpError(w, `LookupUserByAuthUserID`, http.StatusInternalServerError, err)
 		return
 	}
 
-	v := model.User{}
-	if err := v.FromRow(vdb); err != nil {
-		httpError(w, `LookupUserByAuthUserID`, http.StatusInternalServerError, err)
-		return
-	}
-
-	doLookupUserCommon(ctx, w, r, tx, v, payload.Lang)
+	httpJSON(w, v)
 }
 
 func doLookupUser(ctx context.Context, w http.ResponseWriter, r *http.Request, payload model.LookupUserRequest) {
@@ -717,39 +673,14 @@ func doLookupUser(ctx context.Context, w http.ResponseWriter, r *http.Request, p
 	}
 	defer tx.AutoRollback()
 
-	v := model.User{}
-	if err := v.Load(tx, payload.ID); err != nil {
+	var s service.User
+	var v model.User
+	if err := s.Lookup(tx, &v, payload); err != nil {
 		httpError(w, `LookupUser`, http.StatusInternalServerError, err)
 		return
 	}
 
-	doLookupUserCommon(ctx, w, r, tx, v, payload.Lang)
-}
-
-func doLookupUserCommon(ctx context.Context, w http.ResponseWriter, r *http.Request, tx *db.Tx, v model.User, lang jsval.MaybeString) {
-	if !lang.Valid() {
-		httpJSON(w, v)
-		return
-	}
-
-	s := service.User{}
-	// Special case, only used for administrators. Load all of the
-	// l10n strings associated with this
-	switch lang.String {
-	case "all":
-		vl10n := model.UserL10N{User: v}
-		if err := vl10n.LoadLocalizedFields(tx); err != nil {
-			httpError(w, `LookupUser`, http.StatusInternalServerError, err)
-			return
-		}
-		httpJSON(w, vl10n)
-	default:
-		if err := s.ReplaceL10NStrings(tx, &v, lang.String); err != nil {
-			httpError(w, `LookupUser`, http.StatusInternalServerError, err)
-			return
-		}
-		httpJSON(w, v)
-	}
+	httpJSON(w, v)
 }
 
 func doCreateVenue(ctx context.Context, w http.ResponseWriter, r *http.Request, payload model.CreateVenueRequest) {
@@ -765,8 +696,8 @@ func doCreateVenue(ctx context.Context, w http.ResponseWriter, r *http.Request, 
 	}
 	defer tx.AutoRollback()
 
-	s := service.Venue{}
-	v := model.Venue{}
+	var s service.Venue
+	var v model.Venue
 	if err := s.CreateFromPayload(tx, &v, payload); err != nil {
 		httpError(w, `CreateVenue`, http.StatusInternalServerError, err)
 		return
@@ -884,7 +815,7 @@ func doDeleteVenue(ctx context.Context, w http.ResponseWriter, r *http.Request, 
 	}
 	defer tx.AutoRollback()
 
-	s := service.Venue{}
+	var s service.Venue
 	if err := s.DeleteFromPayload(tx, payload); err != nil {
 		httpError(w, `DeleteVenue`, http.StatusInternalServerError, err)
 		return

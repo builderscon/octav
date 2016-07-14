@@ -77,6 +77,20 @@ func (v *Room) ListFromPayload(tx *db.Tx, result *model.RoomList, payload model.
 	return nil
 }
 
+func (v *Room) UpdateFromPayload(tx *db.Tx, payload model.UpdateRoomRequest) error {
+	su := User{}
+	if err := su.IsAdministrator(tx, payload.UserID); err != nil {
+		return errors.Wrap(err, "deleting rooms require administrator privileges")
+	}
+
+	var vdb db.Room
+	if err := vdb.LoadByEID(tx, payload.ID); err != nil {
+		return errors.Wrap(err, "failed to load from database")
+	}
+
+	return errors.Wrap(v.Update(tx, &vdb, payload), "failed to update database")
+}
+
 func (v *Room) DeleteFromPayload(tx *db.Tx, payload model.DeleteRoomRequest) error {
 	su := User{}
 	if err := su.IsAdministrator(tx, payload.UserID); err != nil {
