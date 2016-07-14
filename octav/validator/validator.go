@@ -1736,6 +1736,10 @@ func init() {
 					jsval.EmptyConstraint,
 				).
 				AddProp(
+					"lang",
+					jsval.Reference(M).RefersTo("#/definitions/language"),
+				).
+				AddProp(
 					"slug",
 					jsval.String(),
 				),
