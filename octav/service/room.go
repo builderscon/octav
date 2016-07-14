@@ -61,6 +61,22 @@ func (v *Room) CreateFromPayload(tx *db.Tx, result *model.Room, payload model.Cr
 	return nil
 }
 
+func (v *Room) ListFromPayload(tx *db.Tx, result *model.RoomList, payload model.ListRoomRequest) error {
+	var m model.RoomList
+	if err := m.LoadForVenue(tx, payload.VenueID, payload.Since.String, int(payload.Limit.Int)); err != nil {
+		return errors.Wrap(err, "failed to load from database")
+	}
+
+	for i := range m {
+		if err := v.Decorate(tx, &m[i], payload.Lang.String); err != nil {
+			return errors.Wrap(err, "failed to associate data to model")
+		}
+	}
+
+	*result = m
+	return nil
+}
+
 func (v *Room) DeleteFromPayload(tx *db.Tx, payload model.DeleteRoomRequest) error {
 	su := User{}
 	if err := su.IsAdministrator(tx, payload.UserID); err != nil {
@@ -68,4 +84,13 @@ func (v *Room) DeleteFromPayload(tx *db.Tx, payload model.DeleteRoomRequest) err
 	}
 
 	return errors.Wrap(v.Delete(tx, payload.ID), "failed to delete from ddatabase")
+}
+
+func (v *Room) Decorate(tx *db.Tx, room *model.Room, lang string) error {
+	if lang != "" {
+		if err := v.ReplaceL10NStrings(tx, room, lang); err != nil {
+			return errors.Wrap(err, "failed to replace L10N strings")
+		}
+	}
+	return nil
 }

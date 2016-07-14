@@ -815,13 +815,14 @@ func doListRoom(ctx context.Context, w http.ResponseWriter, r *http.Request, pay
 	}
 	defer tx.AutoRollback()
 
-	rl := model.RoomList{}
-	if err := rl.LoadForVenue(tx, payload.VenueID, payload.Since.String, int(payload.Limit.Int)); err != nil {
+	var s service.Room
+	var v model.RoomList
+	if err := s.ListFromPayload(tx, &v, payload); err != nil {
 		httpError(w, `ListRoom`, http.StatusInternalServerError, err)
 		return
 	}
 
-	httpJSON(w, rl)
+	httpJSON(w, v)
 }
 
 func doLookupRoom(ctx context.Context, w http.ResponseWriter, r *http.Request, payload model.LookupRoomRequest) {
@@ -836,35 +837,14 @@ func doLookupRoom(ctx context.Context, w http.ResponseWriter, r *http.Request, p
 	}
 	defer tx.AutoRollback()
 
-	v := model.Room{}
-	if err := v.Load(tx, payload.ID); err != nil {
+	var s service.Room
+	var v model.Room
+	if err := s.Lookup(tx, &v, payload); err != nil {
 		httpError(w, `LookupRoom`, http.StatusInternalServerError, err)
 		return
 	}
 
-	if !payload.Lang.Valid() {
-		httpJSON(w, v)
-		return
-	}
-
-	// Special case, only used for administrators. Load all of the
-	// l10n strings associated with this
-	switch payload.Lang.String {
-	case "all":
-		vl10n := model.RoomL10N{Room: v}
-		if err := vl10n.LoadLocalizedFields(tx); err != nil {
-			httpError(w, `LookupRoom`, http.StatusInternalServerError, err)
-			return
-		}
-		httpJSON(w, vl10n)
-	default:
-		s := service.Room{}
-		if err := s.ReplaceL10NStrings(tx, &v, payload.Lang.String); err != nil {
-			httpError(w, `LookupRoom`, http.StatusInternalServerError, err)
-			return
-		}
-		httpJSON(w, v)
-	}
+	httpJSON(w, v)
 }
 
 func doDeleteRoom(ctx context.Context, w http.ResponseWriter, r *http.Request, payload model.DeleteRoomRequest) {
@@ -880,7 +860,7 @@ func doDeleteRoom(ctx context.Context, w http.ResponseWriter, r *http.Request, p
 	}
 	defer tx.AutoRollback()
 
-	s := service.Room{}
+	var s service.Room
 	if err := s.DeleteFromPayload(tx, payload); err != nil {
 		httpError(w, `DeleteRoom`, http.StatusInternalServerError, err)
 		return
@@ -929,8 +909,8 @@ func doLookupVenue(ctx context.Context, w http.ResponseWriter, r *http.Request, 
 	}
 	defer tx.AutoRollback()
 
-	s := service.Venue{}
-	v := model.Venue{}
+	var s service.Venue
+	var v model.Venue
 	if err := s.Lookup(tx, &v, payload); err != nil {
 		httpError(w, `LookupVenue`, http.StatusInternalServerError, err)
 		return
@@ -947,8 +927,8 @@ func doUpdateVenue(ctx context.Context, w http.ResponseWriter, r *http.Request, 
 	}
 	defer tx.AutoRollback()
 
-	s := service.Venue{}
-	v := model.Venue{}
+	var s service.Venue
+	var v model.Venue
 	if err := s.UpdateFromPayload(tx, &v, payload); err != nil {
 		httpError(w, `UpdateVenue`, http.StatusInternalServerError, err)
 		return
@@ -970,14 +950,14 @@ func doListVenue(ctx context.Context, w http.ResponseWriter, r *http.Request, pa
 	}
 	defer tx.AutoRollback()
 
-	var l model.VenueList
-	s := service.Venue{}
-	if err := s.ListFromPayload(tx, &l, payload); err != nil {
+	var s service.Venue
+	var v model.VenueList
+	if err := s.ListFromPayload(tx, &v, payload); err != nil {
 		httpError(w, `ListVenues`, http.StatusInternalServerError, err)
 		return
 	}
 
-	httpJSON(w, l)
+	httpJSON(w, v)
 }
 
 func doLookupSession(ctx context.Context, w http.ResponseWriter, r *http.Request, payload model.LookupSessionRequest) {

@@ -23,6 +23,9 @@ func (v *Room) Lookup(tx *db.Tx, m *model.Room, payload model.LookupRoomRequest)
 	if err = r.Load(tx, payload.ID); err != nil {
 		return errors.Wrap(err, "failed to load model.Room from database")
 	}
+	if err := v.Decorate(tx, &r, payload.Lang.String); err != nil {
+		return errors.Wrap(err, "failed to load associated data for model.Room from database")
+	}
 	*m = r
 	return nil
 }

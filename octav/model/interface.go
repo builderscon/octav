@@ -44,7 +44,7 @@ type ConferenceSeriesList []ConferenceSeries
 type Room struct {
 	ID       string `json:"id"`
 	VenueID  string `json:"venue_id"`
-	Name     string `json:"name" l10n:"true"`
+	Name     string `json:"name" l10n:"true" decorate:"true"`
 	Capacity uint   `json:"capacity"`
 }
 type RoomList []Room
