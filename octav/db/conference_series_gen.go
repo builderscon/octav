@@ -12,7 +12,7 @@ import (
 	"github.com/pkg/errors"
 )
 
-const ConferenceSeriesStdSelectColumns = "conference_series.oid, conference_series.eid, conference_series.slug, conference_series.created_on, conference_series.modified_on"
+const ConferenceSeriesStdSelectColumns = "conference_series.oid, conference_series.eid, conference_series.slug, conference_series.title, conference_series.created_on, conference_series.modified_on"
 const ConferenceSeriesTable = "conference_series"
 
 type ConferenceSeriesList []ConferenceSeries
@@ -20,7 +20,7 @@ type ConferenceSeriesList []ConferenceSeries
 func (c *ConferenceSeries) Scan(scanner interface {
 	Scan(...interface{}) error
 }) error {
-	return scanner.Scan(&c.OID, &c.EID, &c.Slug, &c.CreatedOn, &c.ModifiedOn)
+	return scanner.Scan(&c.OID, &c.EID, &c.Slug, &c.Title, &c.CreatedOn, &c.ModifiedOn)
 }
 
 func (c *ConferenceSeries) LoadByEID(tx *Tx, eid string) error {
@@ -57,8 +57,8 @@ func (c *ConferenceSeries) Create(tx *Tx, opts ...InsertOption) (err error) {
 	}
 	stmt.WriteString("INTO ")
 	stmt.WriteString(ConferenceSeriesTable)
-	stmt.WriteString(` (eid, slug, created_on, modified_on) VALUES (?, ?, ?, ?)`)
-	result, err := tx.Exec(stmt.String(), c.EID, c.Slug, c.CreatedOn, c.ModifiedOn)
+	stmt.WriteString(` (eid, slug, title, created_on, modified_on) VALUES (?, ?, ?, ?, ?)`)
+	result, err := tx.Exec(stmt.String(), c.EID, c.Slug, c.Title, c.CreatedOn, c.ModifiedOn)
 	if err != nil {
 		return err
 	}
@@ -74,11 +74,11 @@ func (c *ConferenceSeries) Create(tx *Tx, opts ...InsertOption) (err error) {
 
 func (c ConferenceSeries) Update(tx *Tx) error {
 	if c.OID != 0 {
-		_, err := tx.Exec(`UPDATE `+ConferenceSeriesTable+` SET eid = ?, slug = ? WHERE oid = ?`, c.EID, c.Slug, c.OID)
+		_, err := tx.Exec(`UPDATE `+ConferenceSeriesTable+` SET eid = ?, slug = ?, title = ? WHERE oid = ?`, c.EID, c.Slug, c.Title, c.OID)
 		return err
 	}
 	if c.EID != "" {
-		_, err := tx.Exec(`UPDATE `+ConferenceSeriesTable+` SET slug = ? WHERE eid = ?`, c.Slug, c.EID)
+		_, err := tx.Exec(`UPDATE `+ConferenceSeriesTable+` SET slug = ?, title = ? WHERE eid = ?`, c.Slug, c.Title, c.EID)
 		return err
 	}
 	return errors.New("either OID/EID must be filled")

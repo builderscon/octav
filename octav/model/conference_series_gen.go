@@ -46,12 +46,14 @@ func (v *ConferenceSeries) Load(tx *db.Tx, id string) (err error) {
 func (v *ConferenceSeries) FromRow(vdb db.ConferenceSeries) error {
 	v.ID = vdb.EID
 	v.Slug = vdb.Slug
+	v.Title = vdb.Title
 	return nil
 }
 
 func (v *ConferenceSeries) ToRow(vdb *db.ConferenceSeries) error {
 	vdb.EID = v.ID
 	vdb.Slug = v.Slug
+	vdb.Title = v.Title
 	return nil
 }
 
