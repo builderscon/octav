@@ -75,7 +75,7 @@ for my $link (@{$schema->{links}}) {
                 $required{$name}++;
                 say $tmpout '    if ' . $name . ' is None:';
                 say $tmpout '            raise "property \"" + required + "\" must be provided"';
-                say $tmpout '    payload[' . $name . '] = ' . $name;
+                say $tmpout "    payload['" . $name . "'] = " . $name;
             }
         }
     }
