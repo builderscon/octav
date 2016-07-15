@@ -17,6 +17,7 @@ type ConferenceSeries struct {
 	OID        int64  // intenral id, used for sorting and what not
 	EID        string // ID that is visible to the outside
 	Slug       string
+	Title      string
 	CreatedOn  time.Time
 	ModifiedOn NullTime
 }

@@ -11,12 +11,17 @@ import (
 func (v *ConferenceSeries) populateRowForCreate(vdb *db.ConferenceSeries, payload model.CreateConferenceSeriesRequest) error {
 	vdb.EID = tools.UUID()
 	vdb.Slug = payload.Slug
+	vdb.Title = payload.Title
 	return nil
 }
 
 func (v *ConferenceSeries) populateRowForUpdate(vdb *db.ConferenceSeries, payload model.UpdateConferenceSeriesRequest) error {
 	if payload.Slug.Valid() {
 		vdb.Slug = payload.Slug.String
+	}
+
+	if payload.Title.Valid() {
+		vdb.Title = payload.Title.String
 	}
 
 	return nil
@@ -107,4 +112,14 @@ func (v *ConferenceSeries) AddAdministrator(tx *db.Tx, seriesID, userID string) 
 		UserID:   userID,
 	}
 	return c.Create(tx, db.WithInsertIgnore(true))
+}
+
+func (v *ConferenceSeries) Decorate(tx *db.Tx, c *model.ConferenceSeries, lang string) error {
+	if lang == "" {
+		return nil
+	}
+	if err := v.ReplaceL10NStrings(tx, c, lang); err != nil {
+		return errors.Wrap(err, "failed to replace L10N strings")
+	}
+	return nil
 }

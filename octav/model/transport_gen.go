@@ -14,6 +14,9 @@ import (
 func (r LookupConferenceSeriesRequest) collectMarshalData() map[string]interface{} {
 	m := make(map[string]interface{})
 	m["id"] = r.ID
+	if r.Lang.Valid() {
+		m["lang"] = r.Lang.Value()
+	}
 	return m
 }
 
@@ -53,6 +56,12 @@ func (r *LookupConferenceSeriesRequest) Populate(m map[string]interface{}) error
 			return ErrInvalidJSONFieldType{Field: "id"}
 		}
 	}
+	if jv, ok := m["lang"]; ok {
+		if err := r.Lang.Set(jv); err != nil {
+			return errors.New("set field Lang failed: " + err.Error())
+		}
+		delete(m, "lang")
+	}
 	return nil
 }
 
@@ -60,6 +69,7 @@ func (r CreateConferenceSeriesRequest) collectMarshalData() map[string]interface
 	m := make(map[string]interface{})
 	m["user_id"] = r.UserID
 	m["slug"] = r.Slug
+	m["title"] = r.Title
 	return m
 }
 
@@ -69,7 +79,7 @@ func (r CreateConferenceSeriesRequest) MarshalJSON() ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-	return buf, nil
+	return tools.MarshalJSONWithL10N(buf, r.L10N)
 }
 
 func (r CreateConferenceSeriesRequest) MarshalURL() ([]byte, error) {
@@ -78,7 +88,7 @@ func (r CreateConferenceSeriesRequest) MarshalURL() ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-	return buf, nil
+	return tools.MarshalURLWithL10N(buf, r.L10N)
 }
 
 func (r *CreateConferenceSeriesRequest) UnmarshalJSON(data []byte) error {
@@ -108,7 +118,47 @@ func (r *CreateConferenceSeriesRequest) Populate(m map[string]interface{}) error
 			return ErrInvalidJSONFieldType{Field: "slug"}
 		}
 	}
+	if jv, ok := m["title"]; ok {
+		switch jv.(type) {
+		case string:
+			r.Title = jv.(string)
+			delete(m, "title")
+		default:
+			return ErrInvalidJSONFieldType{Field: "title"}
+		}
+	}
+	if err := tools.ExtractL10NFields(m, &r.L10N, []string{"user_id", "slug", "title"}); err != nil {
+		return err
+	}
 	return nil
+}
+
+func (r *CreateConferenceSeriesRequest) GetPropNames() ([]string, error) {
+	l, _ := r.L10N.GetPropNames()
+	return append(l, "user_id", "slug", "title"), nil
+}
+
+func (r *CreateConferenceSeriesRequest) SetPropValue(s string, v interface{}) error {
+	switch s {
+	case "user_id":
+		if jv, ok := v.(string); ok {
+			r.UserID = jv
+			return nil
+		}
+	case "slug":
+		if jv, ok := v.(string); ok {
+			r.Slug = jv
+			return nil
+		}
+	case "title":
+		if jv, ok := v.(string); ok {
+			r.Title = jv
+			return nil
+		}
+	default:
+		return errors.New("unknown column '" + s + "'")
+	}
+	return ErrInvalidFieldType{Field: s}
 }
 
 func (r UpdateConferenceSeriesRequest) collectMarshalData() map[string]interface{} {
@@ -116,6 +166,9 @@ func (r UpdateConferenceSeriesRequest) collectMarshalData() map[string]interface
 	m["id"] = r.ID
 	if r.Slug.Valid() {
 		m["slug"] = r.Slug.Value()
+	}
+	if r.Title.Valid() {
+		m["title"] = r.Title.Value()
 	}
 	return m
 }
@@ -126,7 +179,7 @@ func (r UpdateConferenceSeriesRequest) MarshalJSON() ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-	return buf, nil
+	return tools.MarshalJSONWithL10N(buf, r.L10N)
 }
 
 func (r UpdateConferenceSeriesRequest) MarshalURL() ([]byte, error) {
@@ -135,7 +188,7 @@ func (r UpdateConferenceSeriesRequest) MarshalURL() ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-	return buf, nil
+	return tools.MarshalURLWithL10N(buf, r.L10N)
 }
 
 func (r *UpdateConferenceSeriesRequest) UnmarshalJSON(data []byte) error {
@@ -162,7 +215,38 @@ func (r *UpdateConferenceSeriesRequest) Populate(m map[string]interface{}) error
 		}
 		delete(m, "slug")
 	}
+	if jv, ok := m["title"]; ok {
+		if err := r.Title.Set(jv); err != nil {
+			return errors.New("set field Title failed: " + err.Error())
+		}
+		delete(m, "title")
+	}
+	if err := tools.ExtractL10NFields(m, &r.L10N, []string{"id", "slug", "title"}); err != nil {
+		return err
+	}
 	return nil
+}
+
+func (r *UpdateConferenceSeriesRequest) GetPropNames() ([]string, error) {
+	l, _ := r.L10N.GetPropNames()
+	return append(l, "id", "slug", "title"), nil
+}
+
+func (r *UpdateConferenceSeriesRequest) SetPropValue(s string, v interface{}) error {
+	switch s {
+	case "id":
+		if jv, ok := v.(string); ok {
+			r.ID = jv
+			return nil
+		}
+	case "slug":
+		return r.Slug.Set(v)
+	case "title":
+		return r.Title.Set(v)
+	default:
+		return errors.New("unknown column '" + s + "'")
+	}
+	return ErrInvalidFieldType{Field: s}
 }
 
 func (r DeleteConferenceSeriesRequest) collectMarshalData() map[string]interface{} {
@@ -228,6 +312,9 @@ func (r ListConferenceSeriesRequest) collectMarshalData() map[string]interface{}
 	if r.Limit.Valid() {
 		m["limit"] = r.Limit.Value()
 	}
+	if r.Lang.Valid() {
+		m["lang"] = r.Lang.Value()
+	}
 	return m
 }
 
@@ -269,6 +356,12 @@ func (r *ListConferenceSeriesRequest) Populate(m map[string]interface{}) error {
 			return errors.New("set field Limit failed: " + err.Error())
 		}
 		delete(m, "limit")
+	}
+	if jv, ok := m["lang"]; ok {
+		if err := r.Lang.Set(jv); err != nil {
+			return errors.New("set field Lang failed: " + err.Error())
+		}
+		delete(m, "lang")
 	}
 	return nil
 }

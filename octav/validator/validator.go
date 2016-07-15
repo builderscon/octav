@@ -192,8 +192,16 @@ func init() {
 			jsval.EmptyConstraint,
 		).
 		AddProp(
+			"id",
+			jsval.Reference(M).RefersTo("#/definitions/uuid"),
+		).
+		AddProp(
 			"slug",
 			jsval.Reference(M).RefersTo("#/definitions/slug_top"),
+		).
+		AddProp(
+			"title",
+			jsval.String(),
 		)
 	R7 = jsval.Object().
 		Required("day", "month", "year").
@@ -743,13 +751,17 @@ func init() {
 		SetConstraintMap(M).
 		SetRoot(
 			jsval.Object().
-				Required("slug", "user_id").
+				Required("slug", "title", "user_id").
 				AdditionalProperties(
 					jsval.EmptyConstraint,
 				).
 				AddProp(
 					"slug",
 					jsval.Reference(M).RefersTo("#/definitions/slug_top"),
+				).
+				AddProp(
+					"title",
+					jsval.String(),
 				).
 				AddProp(
 					"user_id",
@@ -765,8 +777,16 @@ func init() {
 					jsval.EmptyConstraint,
 				).
 				AddProp(
+					"id",
+					jsval.Reference(M).RefersTo("#/definitions/uuid"),
+				).
+				AddProp(
 					"slug",
 					jsval.Reference(M).RefersTo("#/definitions/slug_top"),
+				).
+				AddProp(
+					"title",
+					jsval.String(),
 				),
 		)
 
