@@ -127,36 +127,6 @@ func intlConferenceRoom(venueID, userID string) *model.CreateRoomRequest {
 	return &r
 }
 
-func testCreateRoom(ctx *TestCtx, r *model.CreateRoomRequest) (*model.Room, error) {
-	res, err := ctx.HTTPClient.CreateRoom(r)
-	if !assert.NoError(ctx.T, err, "CreateRoom should succeed") {
-		return nil, err
-	}
-	return res, nil
-}
-
-func testCreateVenuePass(ctx *TestCtx, v *model.CreateVenueRequest) (*model.Venue, error) {
-	return testCreateVenue(ctx, v, false)
-}
-
-func testCreateVenueFail(ctx *TestCtx, v *model.CreateVenueRequest) (*model.Venue, error) {
-	return testCreateVenue(ctx, v, true)
-}
-
-func testCreateVenue(ctx *TestCtx, v *model.CreateVenueRequest, fail bool) (*model.Venue, error) {
-	res, err := ctx.HTTPClient.CreateVenue(v)
-	if fail {
-		if !assert.Error(ctx.T, err, "CreateVenue should fail") {
-			return nil, errors.New("expected operation to fail, but succeeded")
-		}
-		return nil, nil
-	}
-	if !assert.NoError(ctx.T, err, "CreateVenue should succeed") {
-		return nil, err
-	}
-	return res, nil
-}
-
 func testAddConferenceAdmin(ctx *TestCtx, confID, adminID, userID string) error {
 	err := ctx.HTTPClient.AddConferenceAdmin(&model.AddConferenceAdminRequest{
 		ConferenceID: confID,
@@ -470,7 +440,7 @@ func TestRoomCRUD(t *testing.T) {
 		return
 	}
 
-	res, err := testCreateRoom(ctx, intlConferenceRoom(venue.ID, ctx.Superuser.EID))
+	res, err := testCreateRoomPass(ctx, intlConferenceRoom(venue.ID, ctx.Superuser.EID))
 	if err != nil {
 		return
 	}
@@ -1030,10 +1000,11 @@ func TestListRoom(t *testing.T) {
 		return
 	}
 
-	_, err = testCreateRoom(ctx, intlConferenceRoom(venue.ID, ctx.Superuser.EID))
+	room, err := testCreateRoomPass(ctx, intlConferenceRoom(venue.ID, ctx.Superuser.EID))
 	if err != nil {
 		return
 	}
+	defer testDeleteRoom(ctx, room.ID, ctx.Superuser.EID)
 
 	in := model.ListRoomRequest{
 		VenueID: venue.ID,
@@ -1138,7 +1109,7 @@ func TestListVenue(t *testing.T) {
 	}
 }
 
-func TestCreateTestRandomUser(t *testing.T) {
+func TestCreateVenueRandomUser(t *testing.T) {
 	ctx, err := NewTestCtx(t)
 	if !assert.NoError(ctx, err, "failed to create test ctx") {
 		return
@@ -1161,3 +1132,33 @@ func TestCreateTestRandomUser(t *testing.T) {
 		return
 	}
 }
+
+func TestCreateRoomRandomUser(t *testing.T) {
+	ctx, err := NewTestCtx(t)
+	if !assert.NoError(ctx, err, "failed to create test ctx") {
+		return
+	}
+	defer ctx.Close()
+
+	ts := httptest.NewServer(octav.New())
+	defer ts.Close()
+
+	ctx.SetAPIServer(ts)
+
+	user, err := testCreateUser(ctx, johndoe())
+	if err != nil {
+		return
+	}
+	defer testDeleteUser(ctx, user.ID, ctx.Superuser.EID)
+
+	venue, err := testCreateVenuePass(ctx, bigsight(ctx.Superuser.EID))
+	if err != nil {
+		return
+	}
+	defer testDeleteVenue(ctx, user.ID, ctx.Superuser.EID)
+
+	if _, err = testCreateRoomFail(ctx, intlConferenceRoom(venue.ID, user.ID)); err != nil {
+		return
+	}
+}
+
