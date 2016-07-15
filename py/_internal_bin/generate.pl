@@ -36,7 +36,7 @@ class Octav(object):
       raise "secret is required"
     self.debug = debug
     self.endpoint = endpoint
-    serlf.error = None
+    self.error = None
     self.key = key
     self.secret = secret
     self.session = requests.Session()
@@ -66,18 +66,22 @@ for my $link (@{$schema->{links}}) {
     }
     print $tmpout "):\n";
 
+    my %required;
+    say $tmpout '    payload = {}';
     if (my $link_schema = $link->{schema}) {
         my $required = $link_schema->{required};
         if ($required && scalar(@{$required}) > 0) {
-            foreach my $name (@$required) {
+            foreach my $name (sort @$required) {
+                $required{$name}++;
                 say $tmpout '    if ' . $name . ' is None:';
                 say $tmpout '            raise "property \"" + required + "\" must be provided"';
+                say $tmpout '    payload[' . $name . '] = ' . $name;
             }
         }
     }
-    say $tmpout '    payload = {}';
     if (my @keys = keys %$props) {
-        foreach my $key (@keys) {
+        foreach my $key (sort @keys) {
+            next if $required{$key};
             say $tmpout "    if not $key is None:";
             say $tmpout "        payload['" . $key . "'] = " . $key;
         }
