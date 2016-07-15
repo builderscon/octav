@@ -1,5 +1,5 @@
 """OCTAV Client Library"""
-"""DO NOT EDIT: This file was generated from ../spec/v1/api.json on Fri Jul 15 14:09:16 2016"""
+"""DO NOT EDIT: This file was generated from ../spec/v1/api.json on Fri Jul 15 19:49:51 2016"""
 
 import json
 import os
@@ -390,16 +390,21 @@ class Octav(object):
         return None
     return res.json()
 
-  def create_conference_series (self, slug, user_id):
+  def create_conference_series (self, slug, title, user_id):
     payload = {}
     if slug is None:
             raise 'property slug must be provided'
     payload['slug'] = slug
+    if title is None:
+            raise 'property title must be provided'
+    payload['title'] = title
     if user_id is None:
             raise 'property user_id must be provided'
     payload['user_id'] = user_id
     if not slug is None:
         payload['slug'] = slug
+    if not title is None:
+        payload['title'] = title
     if not user_id is None:
         payload['user_id'] = user_id
     uri = self.endpoint + "/conference_series/create"
@@ -643,13 +648,15 @@ class Octav(object):
         return None
     return True
 
-  def lookup_conference (self, id):
+  def lookup_conference (self, id, lang=None):
     payload = {}
     if id is None:
             raise 'property id must be provided'
     payload['id'] = id
     if not id is None:
         payload['id'] = id
+    if not lang is None:
+        payload['lang'] = lang
     uri = self.endpoint + "/conference/lookup"
     if self.debug:
         print("GET " + uri)
