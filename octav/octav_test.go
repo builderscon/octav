@@ -138,4 +138,26 @@ func testCreateRoom(ctx *TestCtx, r *model.CreateRoomRequest, fail bool) (*model
 	return res, nil
 }
 
+func testCreateConferencePass(ctx *TestCtx, in *model.CreateConferenceRequest) (*model.Conference, error) {
+	return testCreateConference(ctx, in, false)
+}
+
+func testCreateConferenceFail(ctx *TestCtx, in *model.CreateConferenceRequest) (*model.Conference, error) {
+	return testCreateConference(ctx, in, true)
+}
+
+func testCreateConference(ctx *TestCtx, in *model.CreateConferenceRequest, fail bool) (*model.Conference, error) {
+	res, err := ctx.HTTPClient.CreateConference(in)
+	if fail {
+		if !assert.Error(ctx.T, err, "CreateConference should fail") {
+			return nil, errors.New("expected operation to fail, but succeeded")
+		}
+		return nil, nil
+	}
+	if !assert.NoError(ctx.T, err, "CreateConference should succeed") {
+		return nil, err
+	}
+	return res, nil
+}
+
 

@@ -49,7 +49,7 @@ func (v *Conference) populateRowForUpdate(vdb *db.Conference, payload model.Upda
 func (v *Conference) CreateFromPayload(tx *db.Tx, payload model.CreateConferenceRequest, result *model.Conference) error {
 	su := User{}
 	if err := su.IsConferenceSeriesAdministrator(tx, payload.SeriesID, payload.UserID); err != nil {
-		return errors.Wrap(err, "creating a conference requires conference series administrator privilege")
+		return errors.Wrap(err, "creating a conference requires conference administrator privilege")
 	}
 
 	vdb := db.Conference{}
