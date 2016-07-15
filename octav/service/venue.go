@@ -75,6 +75,11 @@ func (v *Venue) Decorate(tx *db.Tx, venue *model.Venue, lang string) error {
 }
 
 func (v *Venue) CreateFromPayload(tx *db.Tx, venue *model.Venue, payload model.CreateVenueRequest) error {
+	su := User{}
+	if err := su.IsAdministrator(tx, payload.UserID); err != nil {
+		return errors.Wrap(err, "creating venues require administrator privileges")
+	}
+
 	vdb := db.Venue{}
 	if err := v.Create(tx, &vdb, payload); err != nil {
 		return errors.Wrap(err, "failed to store in database")

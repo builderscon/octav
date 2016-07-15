@@ -127,22 +127,6 @@ func intlConferenceRoom(venueID, userID string) *model.CreateRoomRequest {
 	return &r
 }
 
-func testCreateRoom(ctx *TestCtx, r *model.CreateRoomRequest) (*model.Room, error) {
-	res, err := ctx.HTTPClient.CreateRoom(r)
-	if !assert.NoError(ctx.T, err, "CreateRoom should succeed") {
-		return nil, err
-	}
-	return res, nil
-}
-
-func testCreateVenue(ctx *TestCtx, v *model.CreateVenueRequest) (*model.Venue, error) {
-	res, err := ctx.HTTPClient.CreateVenue(v)
-	if !assert.NoError(ctx.T, err, "CreateVenue should succeed") {
-		return nil, err
-	}
-	return res, nil
-}
-
 func testAddConferenceAdmin(ctx *TestCtx, confID, adminID, userID string) error {
 	err := ctx.HTTPClient.AddConferenceAdmin(&model.AddConferenceAdminRequest{
 		ConferenceID: confID,
@@ -317,14 +301,6 @@ func testAddConferenceSeriesAdmin(ctx *TestCtx, id, adminID, userID string) erro
 	return err
 }
 
-func testCreateConference(ctx *TestCtx, in *model.CreateConferenceRequest) (*model.Conference, error) {
-	res, err := ctx.HTTPClient.CreateConference(in)
-	if !assert.NoError(ctx.T, err, "CreateConference should succeed") {
-		return nil, err
-	}
-	return res, nil
-}
-
 func testLookupConference(ctx *TestCtx, id, lang string) (*model.Conference, error) {
 	r := &model.LookupConferenceRequest{ID: id}
 	if lang != "" {
@@ -381,7 +357,7 @@ func TestConferenceCRUD(t *testing.T) {
 		return
 	}
 
-	res, err := testCreateConference(ctx, yapcasiaTokyo(series, user.ID))
+	res, err := testCreateConferencePass(ctx, yapcasiaTokyo(series, user.ID))
 	if err != nil {
 		return
 	}
@@ -428,7 +404,7 @@ func TestConferenceCRUD(t *testing.T) {
 		return
 	}
 
-	venue, err := testCreateVenue(ctx, bigsight(user.ID))
+	venue, err := testCreateVenuePass(ctx, bigsight(user.ID))
 	if err != nil {
 		return
 	}
@@ -451,12 +427,12 @@ func TestRoomCRUD(t *testing.T) {
 
 	ctx.SetAPIServer(ts)
 
-	venue, err := testCreateVenue(ctx, bigsight(ctx.Superuser.EID))
+	venue, err := testCreateVenuePass(ctx, bigsight(ctx.Superuser.EID))
 	if err != nil {
 		return
 	}
 
-	res, err := testCreateRoom(ctx, intlConferenceRoom(venue.ID, ctx.Superuser.EID))
+	res, err := testCreateRoomPass(ctx, intlConferenceRoom(venue.ID, ctx.Superuser.EID))
 	if err != nil {
 		return
 	}
@@ -577,7 +553,7 @@ func TestSessionCRUD(t *testing.T) {
 		return
 	}
 
-	conference, err := testCreateConference(ctx, yapcasiaTokyo(series, user.ID))
+	conference, err := testCreateConferencePass(ctx, yapcasiaTokyo(series, user.ID))
 	if err != nil {
 		return
 	}
@@ -716,7 +692,7 @@ func TestVenueCRUD(t *testing.T) {
 
 	ctx.SetAPIServer(ts)
 
-	res, err := testCreateVenue(ctx, bigsight(ctx.Superuser.EID))
+	res, err := testCreateVenuePass(ctx, bigsight(ctx.Superuser.EID))
 	if err != nil {
 		return
 	}
@@ -789,7 +765,7 @@ func TestDeleteConferenceDates(t *testing.T) {
 		return
 	}
 
-	conf, err := testCreateConference(ctx, &model.CreateConferenceRequest{
+	conf, err := testCreateConferencePass(ctx, &model.CreateConferenceRequest{
 		UserID:   user.ID,
 		SeriesID: series.ID,
 		Slug:     tools.RandomString(8),
@@ -864,7 +840,7 @@ func TestConferenceAdmins(t *testing.T) {
 		return
 	}
 
-	conf, err := testCreateConference(ctx, &model.CreateConferenceRequest{
+	conf, err := testCreateConferencePass(ctx, &model.CreateConferenceRequest{
 		UserID:   user.ID,
 		SeriesID: series.ID,
 		Slug:     tools.RandomString(8),
@@ -946,7 +922,7 @@ func TestListConference(t *testing.T) {
 		lf := tools.LocalizedFields{}
 		lf.Set("ja", "title", `リストカンファレンステスト`)
 
-		conf, err := testCreateConference(ctx, &model.CreateConferenceRequest{
+		conf, err := testCreateConferencePass(ctx, &model.CreateConferenceRequest{
 			L10N:     lf,
 			SeriesID: series.ID,
 			Slug:     tools.RandomString(8),
@@ -1011,15 +987,16 @@ func TestListRoom(t *testing.T) {
 
 	ctx.SetAPIServer(ts)
 
-	venue, err := testCreateVenue(ctx, bigsight(ctx.Superuser.EID))
+	venue, err := testCreateVenuePass(ctx, bigsight(ctx.Superuser.EID))
 	if err != nil {
 		return
 	}
 
-	_, err = testCreateRoom(ctx, intlConferenceRoom(venue.ID, ctx.Superuser.EID))
+	room, err := testCreateRoomPass(ctx, intlConferenceRoom(venue.ID, ctx.Superuser.EID))
 	if err != nil {
 		return
 	}
+	defer testDeleteRoom(ctx, room.ID, ctx.Superuser.EID)
 
 	in := model.ListRoomRequest{
 		VenueID: venue.ID,
@@ -1066,7 +1043,7 @@ func TestListSessionByConference(t *testing.T) {
 		return
 	}
 
-	conference, err := testCreateConference(ctx, yapcasiaTokyo(series, user.ID))
+	conference, err := testCreateConferencePass(ctx, yapcasiaTokyo(series, user.ID))
 	if err != nil {
 		return
 	}
@@ -1123,3 +1100,4 @@ func TestListVenue(t *testing.T) {
 		return
 	}
 }
+
