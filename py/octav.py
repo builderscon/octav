@@ -1,5 +1,5 @@
 """OCTAV Client Library"""
-"""DO NOT EDIT: This file was generated from ../spec/v1/api.json on Fri Jul 15 19:49:51 2016"""
+"""DO NOT EDIT: This file was generated from ../spec/v1/api.json on Sat Jul 16 01:46:33 2016"""
 
 import json
 import os
@@ -42,21 +42,21 @@ class Octav(object):
     if nickname is None:
             raise 'property nickname must be provided'
     payload['nickname'] = nickname
-    if not auth_user_id is None:
+    if auth_user_id is not None:
         payload['auth_user_id'] = auth_user_id
-    if not auth_via is None:
+    if auth_via is not None:
         payload['auth_via'] = auth_via
-    if not avatar_url is None:
+    if avatar_url is not None:
         payload['avatar_url'] = avatar_url
-    if not email is None:
+    if email is not None:
         payload['email'] = email
-    if not first_name is None:
+    if first_name is not None:
         payload['first_name'] = first_name
-    if not last_name is None:
+    if last_name is not None:
         payload['last_name'] = last_name
-    if not nickname is None:
+    if nickname is not None:
         payload['nickname'] = nickname
-    if not tshirt_size is None:
+    if tshirt_size is not None:
         payload['tshirt_size'] = tshirt_size
     uri = self.endpoint + "/user/create"
     if self.debug:
@@ -72,7 +72,7 @@ class Octav(object):
     if id is None:
             raise 'property id must be provided'
     payload['id'] = id
-    if not id is None:
+    if id is not None:
         payload['id'] = id
     uri = self.endpoint + "/user/lookup"
     if self.debug:
@@ -91,9 +91,9 @@ class Octav(object):
     if auth_via is None:
             raise 'property auth_via must be provided'
     payload['auth_via'] = auth_via
-    if not auth_user_id is None:
+    if auth_user_id is not None:
         payload['auth_user_id'] = auth_user_id
-    if not auth_via is None:
+    if auth_via is not None:
         payload['auth_via'] = auth_via
     uri = self.endpoint + "/user/lookup_by_auth_user_id"
     if self.debug:
@@ -112,19 +112,19 @@ class Octav(object):
     if user_id is None:
             raise 'property user_id must be provided'
     payload['user_id'] = user_id
-    if not email is None:
+    if email is not None:
         payload['email'] = email
-    if not first_name is None:
+    if first_name is not None:
         payload['first_name'] = first_name
-    if not id is None:
+    if id is not None:
         payload['id'] = id
-    if not last_name is None:
+    if last_name is not None:
         payload['last_name'] = last_name
-    if not nickname is None:
+    if nickname is not None:
         payload['nickname'] = nickname
-    if not tshirt_size is None:
+    if tshirt_size is not None:
         payload['tshirt_size'] = tshirt_size
-    if not user_id is None:
+    if user_id is not None:
         payload['user_id'] = user_id
     uri = self.endpoint + "/user/update"
     if self.debug:
@@ -143,9 +143,9 @@ class Octav(object):
     if user_id is None:
             raise 'property user_id must be provided'
     payload['user_id'] = user_id
-    if not id is None:
+    if id is not None:
         payload['id'] = id
-    if not user_id is None:
+    if user_id is not None:
         payload['user_id'] = user_id
     uri = self.endpoint + "/user/delete"
     if self.debug:
@@ -158,11 +158,11 @@ class Octav(object):
 
   def list_user (self, lang=None, limit=None, since=None):
     payload = {}
-    if not lang is None:
+    if lang is not None:
         payload['lang'] = lang
-    if not limit is None:
+    if limit is not None:
         payload['limit'] = limit
-    if not since is None:
+    if since is not None:
         payload['since'] = since
     uri = self.endpoint + "/user/list"
     if self.debug:
@@ -184,15 +184,15 @@ class Octav(object):
     if user_id is None:
             raise 'property user_id must be provided'
     payload['user_id'] = user_id
-    if not address is None:
+    if address is not None:
         payload['address'] = address
-    if not latitude is None:
+    if latitude is not None:
         payload['latitude'] = latitude
-    if not longitude is None:
+    if longitude is not None:
         payload['longitude'] = longitude
-    if not name is None:
+    if name is not None:
         payload['name'] = name
-    if not user_id is None:
+    if user_id is not None:
         payload['user_id'] = user_id
     uri = self.endpoint + "/venue/create"
     if self.debug:
@@ -205,11 +205,11 @@ class Octav(object):
 
   def list_venue (self, lang=None, limit=None, since=None):
     payload = {}
-    if not lang is None:
+    if lang is not None:
         payload['lang'] = lang
-    if not limit is None:
+    if limit is not None:
         payload['limit'] = limit
-    if not since is None:
+    if since is not None:
         payload['since'] = since
     uri = self.endpoint + "/venue/list"
     if self.debug:
@@ -225,7 +225,7 @@ class Octav(object):
     if id is None:
             raise 'property id must be provided'
     payload['id'] = id
-    if not id is None:
+    if id is not None:
         payload['id'] = id
     uri = self.endpoint + "/venue/lookup"
     if self.debug:
@@ -244,9 +244,9 @@ class Octav(object):
     if user_id is None:
             raise 'property user_id must be provided'
     payload['user_id'] = user_id
-    if not id is None:
+    if id is not None:
         payload['id'] = id
-    if not user_id is None:
+    if user_id is not None:
         payload['user_id'] = user_id
     uri = self.endpoint + "/venue/update"
     if self.debug:
@@ -265,9 +265,9 @@ class Octav(object):
     if user_id is None:
             raise 'property user_id must be provided'
     payload['user_id'] = user_id
-    if not id is None:
+    if id is not None:
         payload['id'] = id
-    if not user_id is None:
+    if user_id is not None:
         payload['user_id'] = user_id
     uri = self.endpoint + "/venue/delete"
     if self.debug:
@@ -289,13 +289,13 @@ class Octav(object):
     if venue_id is None:
             raise 'property venue_id must be provided'
     payload['venue_id'] = venue_id
-    if not capacity is None:
+    if capacity is not None:
         payload['capacity'] = capacity
-    if not name is None:
+    if name is not None:
         payload['name'] = name
-    if not user_id is None:
+    if user_id is not None:
         payload['user_id'] = user_id
-    if not venue_id is None:
+    if venue_id is not None:
         payload['venue_id'] = venue_id
     uri = self.endpoint + "/room/create"
     if self.debug:
@@ -314,15 +314,15 @@ class Octav(object):
     if user_id is None:
             raise 'property user_id must be provided'
     payload['user_id'] = user_id
-    if not capacity is None:
+    if capacity is not None:
         payload['capacity'] = capacity
-    if not id is None:
+    if id is not None:
         payload['id'] = id
-    if not name is None:
+    if name is not None:
         payload['name'] = name
-    if not user_id is None:
+    if user_id is not None:
         payload['user_id'] = user_id
-    if not venue_id is None:
+    if venue_id is not None:
         payload['venue_id'] = venue_id
     uri = self.endpoint + "/room/update"
     if self.debug:
@@ -338,7 +338,7 @@ class Octav(object):
     if id is None:
             raise 'property id must be provided'
     payload['id'] = id
-    if not id is None:
+    if id is not None:
         payload['id'] = id
     uri = self.endpoint + "/room/lookup"
     if self.debug:
@@ -357,9 +357,9 @@ class Octav(object):
     if user_id is None:
             raise 'property user_id must be provided'
     payload['user_id'] = user_id
-    if not id is None:
+    if id is not None:
         payload['id'] = id
-    if not user_id is None:
+    if user_id is not None:
         payload['user_id'] = user_id
     uri = self.endpoint + "/room/delete"
     if self.debug:
@@ -375,11 +375,11 @@ class Octav(object):
     if venue_id is None:
             raise 'property venue_id must be provided'
     payload['venue_id'] = venue_id
-    if not lang is None:
+    if lang is not None:
         payload['lang'] = lang
-    if not limit is None:
+    if limit is not None:
         payload['limit'] = limit
-    if not venue_id is None:
+    if venue_id is not None:
         payload['venue_id'] = venue_id
     uri = self.endpoint + "/room/list"
     if self.debug:
@@ -401,11 +401,11 @@ class Octav(object):
     if user_id is None:
             raise 'property user_id must be provided'
     payload['user_id'] = user_id
-    if not slug is None:
+    if slug is not None:
         payload['slug'] = slug
-    if not title is None:
+    if title is not None:
         payload['title'] = title
-    if not user_id is None:
+    if user_id is not None:
         payload['user_id'] = user_id
     uri = self.endpoint + "/conference_series/create"
     if self.debug:
@@ -418,9 +418,9 @@ class Octav(object):
 
   def list_conference_series (self, limit=None, since=None):
     payload = {}
-    if not limit is None:
+    if limit is not None:
         payload['limit'] = limit
-    if not since is None:
+    if since is not None:
         payload['since'] = since
     uri = self.endpoint + "/conference_series/list"
     if self.debug:
@@ -442,11 +442,11 @@ class Octav(object):
     if user_id is None:
             raise 'property user_id must be provided'
     payload['user_id'] = user_id
-    if not admin_id is None:
+    if admin_id is not None:
         payload['admin_id'] = admin_id
-    if not series_id is None:
+    if series_id is not None:
         payload['series_id'] = series_id
-    if not user_id is None:
+    if user_id is not None:
         payload['user_id'] = user_id
     uri = self.endpoint + "/conference_series/admin/add"
     if self.debug:
@@ -471,17 +471,17 @@ class Octav(object):
     if user_id is None:
             raise 'property user_id must be provided'
     payload['user_id'] = user_id
-    if not description is None:
+    if description is not None:
         payload['description'] = description
-    if not series_id is None:
+    if series_id is not None:
         payload['series_id'] = series_id
-    if not slug is None:
+    if slug is not None:
         payload['slug'] = slug
-    if not sub_title is None:
+    if sub_title is not None:
         payload['sub_title'] = sub_title
-    if not title is None:
+    if title is not None:
         payload['title'] = title
-    if not user_id is None:
+    if user_id is not None:
         payload['user_id'] = user_id
     uri = self.endpoint + "/conference/create"
     if self.debug:
@@ -503,11 +503,11 @@ class Octav(object):
     if user_id is None:
             raise 'property user_id must be provided'
     payload['user_id'] = user_id
-    if not conference_id is None:
+    if conference_id is not None:
         payload['conference_id'] = conference_id
-    if not dates is None:
+    if dates is not None:
         payload['dates'] = dates
-    if not user_id is None:
+    if user_id is not None:
         payload['user_id'] = user_id
     uri = self.endpoint + "/conference/dates/add"
     if self.debug:
@@ -529,11 +529,11 @@ class Octav(object):
     if user_id is None:
             raise 'property user_id must be provided'
     payload['user_id'] = user_id
-    if not conference_id is None:
+    if conference_id is not None:
         payload['conference_id'] = conference_id
-    if not dates is None:
+    if dates is not None:
         payload['dates'] = dates
-    if not user_id is None:
+    if user_id is not None:
         payload['user_id'] = user_id
     uri = self.endpoint + "/conference/dates/delete"
     if self.debug:
@@ -555,11 +555,11 @@ class Octav(object):
     if user_id is None:
             raise 'property user_id must be provided'
     payload['user_id'] = user_id
-    if not admin_id is None:
+    if admin_id is not None:
         payload['admin_id'] = admin_id
-    if not conference_id is None:
+    if conference_id is not None:
         payload['conference_id'] = conference_id
-    if not user_id is None:
+    if user_id is not None:
         payload['user_id'] = user_id
     uri = self.endpoint + "/conference/admin/add"
     if self.debug:
@@ -581,11 +581,11 @@ class Octav(object):
     if user_id is None:
             raise 'property user_id must be provided'
     payload['user_id'] = user_id
-    if not admin_id is None:
+    if admin_id is not None:
         payload['admin_id'] = admin_id
-    if not conference_id is None:
+    if conference_id is not None:
         payload['conference_id'] = conference_id
-    if not user_id is None:
+    if user_id is not None:
         payload['user_id'] = user_id
     uri = self.endpoint + "/conference/admin/delete"
     if self.debug:
@@ -607,11 +607,11 @@ class Octav(object):
     if venue_id is None:
             raise 'property venue_id must be provided'
     payload['venue_id'] = venue_id
-    if not conference_id is None:
+    if conference_id is not None:
         payload['conference_id'] = conference_id
-    if not user_id is None:
+    if user_id is not None:
         payload['user_id'] = user_id
-    if not venue_id is None:
+    if venue_id is not None:
         payload['venue_id'] = venue_id
     uri = self.endpoint + "/conference/venue/add"
     if self.debug:
@@ -633,11 +633,11 @@ class Octav(object):
     if venue_id is None:
             raise 'property venue_id must be provided'
     payload['venue_id'] = venue_id
-    if not conference_id is None:
+    if conference_id is not None:
         payload['conference_id'] = conference_id
-    if not user_id is None:
+    if user_id is not None:
         payload['user_id'] = user_id
-    if not venue_id is None:
+    if venue_id is not None:
         payload['venue_id'] = venue_id
     uri = self.endpoint + "/conference/venue/delete"
     if self.debug:
@@ -653,9 +653,9 @@ class Octav(object):
     if id is None:
             raise 'property id must be provided'
     payload['id'] = id
-    if not id is None:
+    if id is not None:
         payload['id'] = id
-    if not lang is None:
+    if lang is not None:
         payload['lang'] = lang
     uri = self.endpoint + "/conference/lookup"
     if self.debug:
@@ -671,9 +671,9 @@ class Octav(object):
     if slug is None:
             raise 'property slug must be provided'
     payload['slug'] = slug
-    if not lang is None:
+    if lang is not None:
         payload['lang'] = lang
-    if not slug is None:
+    if slug is not None:
         payload['slug'] = slug
     uri = self.endpoint + "/conference/lookup_by_slug"
     if self.debug:
@@ -686,15 +686,15 @@ class Octav(object):
 
   def list_conference (self, lang=None, limit=None, range_end=None, range_start=None, since=None):
     payload = {}
-    if not lang is None:
+    if lang is not None:
         payload['lang'] = lang
-    if not limit is None:
+    if limit is not None:
         payload['limit'] = limit
-    if not range_end is None:
+    if range_end is not None:
         payload['range_end'] = range_end
-    if not range_start is None:
+    if range_start is not None:
         payload['range_start'] = range_start
-    if not since is None:
+    if since is not None:
         payload['since'] = since
     uri = self.endpoint + "/conference/list"
     if self.debug:
@@ -713,19 +713,19 @@ class Octav(object):
     if user_id is None:
             raise 'property user_id must be provided'
     payload['user_id'] = user_id
-    if not description is None:
+    if description is not None:
         payload['description'] = description
-    if not id is None:
+    if id is not None:
         payload['id'] = id
-    if not slug is None:
+    if slug is not None:
         payload['slug'] = slug
-    if not starts_on is None:
+    if starts_on is not None:
         payload['starts_on'] = starts_on
-    if not sub_title is None:
+    if sub_title is not None:
         payload['sub_title'] = sub_title
-    if not title is None:
+    if title is not None:
         payload['title'] = title
-    if not user_id is None:
+    if user_id is not None:
         payload['user_id'] = user_id
     uri = self.endpoint + "/conference/update"
     if self.debug:
@@ -744,9 +744,9 @@ class Octav(object):
     if user_id is None:
             raise 'property user_id must be provided'
     payload['user_id'] = user_id
-    if not id is None:
+    if id is not None:
         payload['id'] = id
-    if not user_id is None:
+    if user_id is not None:
         payload['user_id'] = user_id
     uri = self.endpoint + "/conference_series/delete"
     if self.debug:
@@ -762,7 +762,7 @@ class Octav(object):
     if id is None:
             raise 'property id must be provided'
     payload['id'] = id
-    if not id is None:
+    if id is not None:
         payload['id'] = id
     uri = self.endpoint + "/conference/delete"
     if self.debug:
@@ -793,39 +793,39 @@ class Octav(object):
     if user_id is None:
             raise 'property user_id must be provided'
     payload['user_id'] = user_id
-    if not abstract is None:
+    if abstract is not None:
         payload['abstract'] = abstract
-    if not category is None:
+    if category is not None:
         payload['category'] = category
-    if not conference_id is None:
+    if conference_id is not None:
         payload['conference_id'] = conference_id
-    if not duration is None:
+    if duration is not None:
         payload['duration'] = duration
-    if not material_level is None:
+    if material_level is not None:
         payload['material_level'] = material_level
-    if not memo is None:
+    if memo is not None:
         payload['memo'] = memo
-    if not photo_permission is None:
+    if photo_permission is not None:
         payload['photo_permission'] = photo_permission
-    if not slide_language is None:
+    if slide_language is not None:
         payload['slide_language'] = slide_language
-    if not slide_subtitles is None:
+    if slide_subtitles is not None:
         payload['slide_subtitles'] = slide_subtitles
-    if not slide_url is None:
+    if slide_url is not None:
         payload['slide_url'] = slide_url
-    if not speaker_id is None:
+    if speaker_id is not None:
         payload['speaker_id'] = speaker_id
-    if not spoken_language is None:
+    if spoken_language is not None:
         payload['spoken_language'] = spoken_language
-    if not tags is None:
+    if tags is not None:
         payload['tags'] = tags
-    if not title is None:
+    if title is not None:
         payload['title'] = title
-    if not user_id is None:
+    if user_id is not None:
         payload['user_id'] = user_id
-    if not video_permission is None:
+    if video_permission is not None:
         payload['video_permission'] = video_permission
-    if not video_url is None:
+    if video_url is not None:
         payload['video_url'] = video_url
     uri = self.endpoint + "/session/create"
     if self.debug:
@@ -841,7 +841,7 @@ class Octav(object):
     if id is None:
             raise 'property id must be provided'
     payload['id'] = id
-    if not id is None:
+    if id is not None:
         payload['id'] = id
     uri = self.endpoint + "/session/lookup"
     if self.debug:
@@ -860,9 +860,9 @@ class Octav(object):
     if user_id is None:
             raise 'property user_id must be provided'
     payload['user_id'] = user_id
-    if not id is None:
+    if id is not None:
         payload['id'] = id
-    if not user_id is None:
+    if user_id is not None:
         payload['user_id'] = user_id
     uri = self.endpoint + "/session/delete"
     if self.debug:
@@ -881,49 +881,49 @@ class Octav(object):
     if user_id is None:
             raise 'property user_id must be provided'
     payload['user_id'] = user_id
-    if not abstract is None:
+    if abstract is not None:
         payload['abstract'] = abstract
-    if not category is None:
+    if category is not None:
         payload['category'] = category
-    if not conference_id is None:
+    if conference_id is not None:
         payload['conference_id'] = conference_id
-    if not confirmed is None:
+    if confirmed is not None:
         payload['confirmed'] = confirmed
-    if not duration is None:
+    if duration is not None:
         payload['duration'] = duration
-    if not has_interpretation is None:
+    if has_interpretation is not None:
         payload['has_interpretation'] = has_interpretation
-    if not id is None:
+    if id is not None:
         payload['id'] = id
-    if not material_level is None:
+    if material_level is not None:
         payload['material_level'] = material_level
-    if not memo is None:
+    if memo is not None:
         payload['memo'] = memo
-    if not photo_permission is None:
+    if photo_permission is not None:
         payload['photo_permission'] = photo_permission
-    if not slide_language is None:
+    if slide_language is not None:
         payload['slide_language'] = slide_language
-    if not slide_subtitles is None:
+    if slide_subtitles is not None:
         payload['slide_subtitles'] = slide_subtitles
-    if not slide_url is None:
+    if slide_url is not None:
         payload['slide_url'] = slide_url
-    if not sort_order is None:
+    if sort_order is not None:
         payload['sort_order'] = sort_order
-    if not speaker_id is None:
+    if speaker_id is not None:
         payload['speaker_id'] = speaker_id
-    if not spoken_language is None:
+    if spoken_language is not None:
         payload['spoken_language'] = spoken_language
-    if not status is None:
+    if status is not None:
         payload['status'] = status
-    if not tags is None:
+    if tags is not None:
         payload['tags'] = tags
-    if not title is None:
+    if title is not None:
         payload['title'] = title
-    if not user_id is None:
+    if user_id is not None:
         payload['user_id'] = user_id
-    if not video_permission is None:
+    if video_permission is not None:
         payload['video_permission'] = video_permission
-    if not video_url is None:
+    if video_url is not None:
         payload['video_url'] = video_url
     uri = self.endpoint + "/session/update"
     if self.debug:
@@ -939,9 +939,9 @@ class Octav(object):
     if conference_id is None:
             raise 'property conference_id must be provided'
     payload['conference_id'] = conference_id
-    if not conference_id is None:
+    if conference_id is not None:
         payload['conference_id'] = conference_id
-    if not date is None:
+    if date is not None:
         payload['date'] = date
     uri = self.endpoint + "/schedule/list"
     if self.debug:
@@ -963,11 +963,11 @@ class Octav(object):
     if user_id is None:
             raise 'property user_id must be provided'
     payload['user_id'] = user_id
-    if not body is None:
+    if body is not None:
         payload['body'] = body
-    if not session_id is None:
+    if session_id is not None:
         payload['session_id'] = session_id
-    if not user_id is None:
+    if user_id is not None:
         payload['user_id'] = user_id
     uri = self.endpoint + "/question/create"
     if self.debug:
@@ -983,7 +983,7 @@ class Octav(object):
     if id is None:
             raise 'property id must be provided'
     payload['id'] = id
-    if not id is None:
+    if id is not None:
         payload['id'] = id
     uri = self.endpoint + "/question/delete"
     if self.debug:
@@ -999,11 +999,11 @@ class Octav(object):
     if session_id is None:
             raise 'property session_id must be provided'
     payload['session_id'] = session_id
-    if not limit is None:
+    if limit is not None:
         payload['limit'] = limit
-    if not session_id is None:
+    if session_id is not None:
         payload['session_id'] = session_id
-    if not since is None:
+    if since is not None:
         payload['since'] = since
     uri = self.endpoint + "/question/list"
     if self.debug:
@@ -1037,23 +1037,23 @@ class Octav(object):
     if user_prior_knowledge is None:
             raise 'property user_prior_knowledge must be provided'
     payload['user_prior_knowledge'] = user_prior_knowledge
-    if not comment_good is None:
+    if comment_good is not None:
         payload['comment_good'] = comment_good
-    if not comment_improvement is None:
+    if comment_improvement is not None:
         payload['comment_improvement'] = comment_improvement
-    if not material_quality is None:
+    if material_quality is not None:
         payload['material_quality'] = material_quality
-    if not overall_rating is None:
+    if overall_rating is not None:
         payload['overall_rating'] = overall_rating
-    if not session_id is None:
+    if session_id is not None:
         payload['session_id'] = session_id
-    if not speaker_knowledge is None:
+    if speaker_knowledge is not None:
         payload['speaker_knowledge'] = speaker_knowledge
-    if not speaker_presentation is None:
+    if speaker_presentation is not None:
         payload['speaker_presentation'] = speaker_presentation
-    if not user_id is None:
+    if user_id is not None:
         payload['user_id'] = user_id
-    if not user_prior_knowledge is None:
+    if user_prior_knowledge is not None:
         payload['user_prior_knowledge'] = user_prior_knowledge
     uri = self.endpoint + "/survey_session_response/create"
     if self.debug:

@@ -87,7 +87,7 @@ for my $link (@{$schema->{links}}) {
     }
 
     foreach my $key (sort @keys) {
-        say $tmpout "    if not $key is None:";
+        say $tmpout "    if $key is not None:";
         say $tmpout "        payload['" . $key . "'] = " . $key;
     }
     say $tmpout '    uri = self.endpoint + "' . $path . '"';
