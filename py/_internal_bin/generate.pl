@@ -36,6 +36,7 @@ class Octav(object):
       raise "secret is required"
     self.debug = debug
     self.endpoint = endpoint
+    serlf.error = None
     self.key = key
     self.secret = secret
     self.session = requests.Session()
