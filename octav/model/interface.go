@@ -21,22 +21,23 @@ type ErrInvalidFieldType struct {
 
 // +model
 type Conference struct {
-	ID             string                `json:"id"`
-	Title          string                `json:"title" l10n:"true"`
-	SeriesID       string                `json:"series_id,omitempty"`
-	Series         *ConferenceSeries     `json:"series,omitempty" decorate:"true"`
-	SubTitle       string                `json:"sub_title" l10n:"true"`
-	Slug           string                `json:"slug"`
-	Dates          ConferenceDateList    `json:"dates,omitempty"`
-	Administrators UserList              `json:"administrators,omitempty" decorate:"true"`
-	Venues         VenueList             `json:"venues,omitempty" decorate:"true"`
+	ID             string             `json:"id"`
+	Title          string             `json:"title" l10n:"true"`
+	SeriesID       string             `json:"series_id,omitempty"`
+	Series         *ConferenceSeries  `json:"series,omitempty" decorate:"true"`
+	SubTitle       string             `json:"sub_title" l10n:"true"`
+	Slug           string             `json:"slug"`
+	Dates          ConferenceDateList `json:"dates,omitempty"`
+	Administrators UserList           `json:"administrators,omitempty" decorate:"true"`
+	Venues         VenueList          `json:"venues,omitempty" decorate:"true"`
 }
 type ConferenceList []Conference
 
 // +model
 type ConferenceSeries struct {
-	ID   string `json:"id"`
-	Slug string `json:"slug"`
+	ID    string `json:"id"`
+	Slug  string `json:"slug"`
+	Title string `json:"title" l10n:"true"`
 }
 type ConferenceSeriesList []ConferenceSeries
 
@@ -44,7 +45,7 @@ type ConferenceSeriesList []ConferenceSeries
 type Room struct {
 	ID       string `json:"id"`
 	VenueID  string `json:"venue_id"`
-	Name     string `json:"name" l10n:"true" decorate:"true"`
+	Name     string `json:"name" l10n:"true"`
 	Capacity uint   `json:"capacity"`
 }
 type RoomList []Room
@@ -110,19 +111,24 @@ type VenueList []Venue
 
 // +transport
 type LookupConferenceSeriesRequest struct {
-	ID string `json:"id"`
+	ID   string            `json:"id"`
+	Lang jsval.MaybeString `json:"lang,omitempty" urlenc:"lang,omitempty,string"`
 }
 
 // +transport
 type CreateConferenceSeriesRequest struct {
-	UserID string `json:"user_id"`
-	Slug   string `json:"slug"`
+	UserID string                `json:"user_id"`
+	Slug   string                `json:"slug"`
+	Title  string                `json:"title"`
+	L10N   tools.LocalizedFields `json:"-"`
 }
 
 // +transport
 type UpdateConferenceSeriesRequest struct {
-	ID   string            `json:"id"`
-	Slug jsval.MaybeString `json:"slug"`
+	ID    string                `json:"id"`
+	Slug  jsval.MaybeString     `json:"slug"`
+	Title jsval.MaybeString     `json:"title"`
+	L10N  tools.LocalizedFields `json:"-"`
 }
 
 // +transport
@@ -135,6 +141,7 @@ type DeleteConferenceSeriesRequest struct {
 type ListConferenceSeriesRequest struct {
 	Since jsval.MaybeString `json:"since,omitempty" urlenc:"since,omitempty,string"`
 	Limit jsval.MaybeInt    `json:"limit,omitempty" urlenc:"limit,omitempty,int64"`
+	Lang  jsval.MaybeString `json:"lang,omitempty" urlenc:"lang,omitempty,string"`
 }
 
 // +transport

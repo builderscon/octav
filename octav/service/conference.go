@@ -137,13 +137,21 @@ func (v *Conference) LoadByRange(tx *db.Tx, vdbl *db.ConferenceList, since, rang
 	return nil
 }
 
-func (v *Conference) AddDatesFromPayload(tx *db.Tx, payload model.AddConferenceDatesRequest) error {
+func (v *Conference) AddDatesFromPayload(tx *db.Tx, payload model.AddConferenceDatesRequest) (err error) {
+	if pdebug.Enabled {
+		g := pdebug.Marker("service.Conference.AddDatesFromPayload").BindError(&err)
+		defer g.End()
+	}
+
 	su := User{}
 	if err := su.IsConferenceAdministrator(tx, payload.ConferenceID, payload.UserID); err != nil {
 		return errors.Wrap(err, "adding conference dates requires conference administrator privilege")
 	}
 
 	for _, date := range payload.Dates {
+		if pdebug.Enabled {
+			pdebug.Printf("Adding conference date %s", date)
+		}
 		cd := db.ConferenceDate{
 			ConferenceID: payload.ConferenceID,
 			Date:         date.Date.String(),

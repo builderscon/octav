@@ -183,7 +183,9 @@
       "type": "object",
       "hsup.type": "model.ConferenceSeries",
       "properties": {
-        "slug": { "$ref": "#/definitions/slug_top" }
+        "id": { "$ref": "#/definitions/uuid" },
+        "slug": { "$ref": "#/definitions/slug_top" },
+        "title": { "type": "string" }
       }
     },
     "conference": {
@@ -662,9 +664,10 @@
       "schema": {
         "properties": {
           "user_id": { "$ref": "#/definitions/uuid" },
-          "slug": { "$ref": "#/definitions/slug_top" }
+          "slug": { "$ref": "#/definitions/slug_top" },
+          "title": { "type": "string" }
         },
-        "required": ["user_id","slug"]
+        "required": ["user_id","slug","title"]
       },
       "targetSchema": { "$ref": "#/definitions/conference_series" }
     },
