@@ -828,7 +828,8 @@
       "schema": {
         "required": ["id"],
         "properties": {
-          "id": { "$ref": "#/definitions/uuid" }
+          "id": { "$ref": "#/definitions/uuid" },
+          "lang": { "$ref": "#/definitions/language" }
         }
       },
       "targetSchema": { "$ref": "#/definitions/conference" }
