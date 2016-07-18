@@ -27,7 +27,7 @@ import os
 import requests
 
 class Octav(object):
-  def __init__(self, endpoint=None, key=None, secret=None, debug=False):
+  def __init__(self, endpoint, key, secret, debug=False):
     if not endpoint:
       raise "endpoint is required"
     if not key:
@@ -58,35 +58,38 @@ for my $link (@{$schema->{links}}) {
 
     my $path = $link->{href};
     my $link_schema = $link->{schema};
-    print $tmpout "  def $name (self";
+    my $required = $link_schema && ($link_schema->{required} || []);
     my $props = $link_schema->{properties} || {};
-    if (my @keys = keys %$props) {
-        print $tmpout ", ";
-        print $tmpout join (", ", map { "$_=None" } @keys);
+    my @keys = keys %$props;
+    my @args;
+
+    # First, find out the required arguments
+    my %required;
+    foreach my $name (sort @$required) {
+        $required{$name}++;
+        push @args, $name; # required arguments are as-is
+    }
+    foreach my $key (sort @keys) {
+        next if $required{$key};
+        push @args, "$key=None";
+    }
+    print $tmpout "  def $name (self";
+    if (@args) {
+        print $tmpout ", ", join(", ", @args);
     }
     print $tmpout "):\n";
 
-    my %required;
     say $tmpout '    payload = {}';
-    if (my $link_schema = $link->{schema}) {
-        my $required = $link_schema->{required};
-        if ($required && scalar(@{$required}) > 0) {
-            foreach my $name (sort @$required) {
-                $required{$name}++;
-                say $tmpout '    if ' . $name . ' is None:';
-                say $tmpout '            raise "property \"" + required + "\" must be provided"';
-                say $tmpout "    payload['" . $name . "'] = " . $name;
-            }
-        }
-    }
-    if (my @keys = keys %$props) {
-        foreach my $key (sort @keys) {
-            next if $required{$key};
-            say $tmpout "    if not $key is None:";
-            say $tmpout "        payload['" . $key . "'] = " . $key;
-        }
+    foreach my $name (sort @$required) {
+        say $tmpout '    if ' . $name . ' is None:';
+        say $tmpout "            raise 'property $name must be provided'";
+        say $tmpout "    payload['" . $name . "'] = " . $name;
     }
 
+    foreach my $key (sort @keys) {
+        say $tmpout "    if $key is not None:";
+        say $tmpout "        payload['" . $key . "'] = " . $key;
+    }
     say $tmpout '    uri = self.endpoint + "' . $path . '"';
     if (lc($link->{method}) eq 'post') {
         say $tmpout '    if self.debug:';
