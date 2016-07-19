@@ -1,5 +1,5 @@
 """OCTAV Client Library"""
-"""DO NOT EDIT: This file was generated from ../spec/v1/api.json on Sat Jul 16 01:46:33 2016"""
+"""DO NOT EDIT: This file was generated from ../spec/v1/api.json on Tue Jul 19 21:31:48 2016"""
 
 import json
 import os
@@ -987,8 +987,8 @@ class Octav(object):
         payload['id'] = id
     uri = self.endpoint + "/question/delete"
     if self.debug:
-        print("GET " + uri)
-    res = self.session.get(uri, params=payload)
+        print("POST " + uri)
+    res = self.session.post(uri, auth=(self.key, self.secret), json=payload)
     if res.status_code != 200:
         self.extract_error(res)
         return None
@@ -1059,6 +1059,127 @@ class Octav(object):
     if self.debug:
         print("GET " + uri)
     res = self.session.get(uri, params=payload)
+    if res.status_code != 200:
+        self.extract_error(res)
+        return None
+    return True
+
+  def create_featured_speaker (self, avatar_url, conference_id, description, display_name, speaker_id=None, user_id=None):
+    payload = {}
+    if avatar_url is None:
+            raise 'property avatar_url must be provided'
+    payload['avatar_url'] = avatar_url
+    if conference_id is None:
+            raise 'property conference_id must be provided'
+    payload['conference_id'] = conference_id
+    if description is None:
+            raise 'property description must be provided'
+    payload['description'] = description
+    if display_name is None:
+            raise 'property display_name must be provided'
+    payload['display_name'] = display_name
+    if avatar_url is not None:
+        payload['avatar_url'] = avatar_url
+    if conference_id is not None:
+        payload['conference_id'] = conference_id
+    if description is not None:
+        payload['description'] = description
+    if display_name is not None:
+        payload['display_name'] = display_name
+    if speaker_id is not None:
+        payload['speaker_id'] = speaker_id
+    if user_id is not None:
+        payload['user_id'] = user_id
+    uri = self.endpoint + "/featured_speaker/create"
+    if self.debug:
+        print("POST " + uri)
+    res = self.session.post(uri, auth=(self.key, self.secret), json=payload)
+    if res.status_code != 200:
+        self.extract_error(res)
+        return None
+    return res.json()
+
+  def lookup_featured_speaker (self, id, lang=None):
+    payload = {}
+    if id is None:
+            raise 'property id must be provided'
+    payload['id'] = id
+    if id is not None:
+        payload['id'] = id
+    if lang is not None:
+        payload['lang'] = lang
+    uri = self.endpoint + "/featured_speaker/lookup"
+    if self.debug:
+        print("GET " + uri)
+    res = self.session.get(uri, params=payload)
+    if res.status_code != 200:
+        self.extract_error(res)
+        return None
+    return res.json()
+
+  def list_featured_speakers (self, conference_id=None, lang=None, limit=None, since=None):
+    payload = {}
+    if conference_id is not None:
+        payload['conference_id'] = conference_id
+    if lang is not None:
+        payload['lang'] = lang
+    if limit is not None:
+        payload['limit'] = limit
+    if since is not None:
+        payload['since'] = since
+    uri = self.endpoint + "/featured_speaker/list"
+    if self.debug:
+        print("GET " + uri)
+    res = self.session.get(uri, params=payload)
+    if res.status_code != 200:
+        self.extract_error(res)
+        return None
+    return res.json()
+
+  def update_featured_speaker (self, id, avatar_url=None, conference_id=None, description=None, display_name=None, speaker_id=None, user_id=None):
+    payload = {}
+    if id is None:
+            raise 'property id must be provided'
+    payload['id'] = id
+    if avatar_url is not None:
+        payload['avatar_url'] = avatar_url
+    if conference_id is not None:
+        payload['conference_id'] = conference_id
+    if description is not None:
+        payload['description'] = description
+    if display_name is not None:
+        payload['display_name'] = display_name
+    if id is not None:
+        payload['id'] = id
+    if speaker_id is not None:
+        payload['speaker_id'] = speaker_id
+    if user_id is not None:
+        payload['user_id'] = user_id
+    uri = self.endpoint + "/featured_speaker/update"
+    if self.debug:
+        print("POST " + uri)
+    res = self.session.post(uri, auth=(self.key, self.secret), json=payload)
+    if res.status_code != 200:
+        self.extract_error(res)
+        return None
+    return True
+
+  def delete_featured_speaker (self, id, user_id):
+    payload = {}
+    if id is None:
+            raise 'property id must be provided'
+    payload['id'] = id
+    if user_id is None:
+            raise 'property user_id must be provided'
+    payload['user_id'] = user_id
+    if id is not None:
+        payload['id'] = id
+    if user_id is not None:
+        payload['user_id'] = user_id
+    uri = self.endpoint + "/featured_speaker/delete"
+    if self.debug:
+        print("POST " + uri)
+    res = self.session.post(uri, auth=(self.key, self.secret), json=payload)
     if res.status_code != 200:
         self.extract_error(res)
         return None
