@@ -708,14 +708,14 @@ sub create_session_survey_response {
     return 1
 }
 
-sub create_featured_speaker {
+sub add_featured_speaker {
     my ($self, $payload) = @_;
-    for my $required (qw(conference_id avatar_url display_name description)) {
+    for my $required (qw(conference_id display_name description)) {
         if (!$payload->{$required}) {
             die qq|property "$required" must be provided|;
         }
     }
-    my $uri = URI->new($self->{endpoint} . qq|/v1/featured_speaker/create|);
+    my $uri = URI->new($self->{endpoint} . qq|/v1/featured_speaker/add|);
     my $json_payload = JSON::encode_json($payload);
     my $res = $self->{user_agent}->post($uri, Content => $json_payload);
     if (!$res->is_success) {
