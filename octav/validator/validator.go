@@ -121,6 +121,7 @@ var R41 jsval.Constraint
 var R42 jsval.Constraint
 var R43 jsval.Constraint
 var R44 jsval.Constraint
+var R45 jsval.Constraint
 
 func init() {
 	M = &jsval.ConstraintMap{}
@@ -142,6 +143,10 @@ func init() {
 		AddProp(
 			"description",
 			jsval.Reference(M).RefersTo("#/definitions/string_en"),
+		).
+		AddProp(
+			"featured_speakers",
+			jsval.Reference(M).RefersTo("#/definitions/featured_speaker_array"),
 		).
 		AddProp(
 			"id",
@@ -289,17 +294,24 @@ func init() {
 			"display_name#[a-z]+",
 			jsval.Reference(M).RefersTo("#/definitions/string_i18n"),
 		)
-	R15 = jsval.String().Enum("github", "facebook", "twitter")
-	R16 = jsval.Integer().Minimum(0).Maximum(10)
-	R17 = jsval.String().Default("en")
-	R18 = jsval.Number()
+	R15 = jsval.Array().
+		Items(
+			jsval.Reference(M).RefersTo("#/definitions/featured_speaker"),
+		).
+		AdditionalItems(
+			jsval.EmptyConstraint,
+		)
+	R16 = jsval.String().Enum("github", "facebook", "twitter")
+	R17 = jsval.Integer().Minimum(0).Maximum(10)
+	R18 = jsval.String().Default("en")
 	R19 = jsval.Number()
-	R20 = jsval.String()
+	R20 = jsval.Number()
 	R21 = jsval.String()
-	R22 = jsval.String().Enum("beginner", "intermediate", "advanced").Default("beginner")
-	R23 = jsval.Integer().Minimum(0)
-	R24 = jsval.Integer().Minimum(0).Default(10)
-	R25 = jsval.Object().
+	R22 = jsval.String()
+	R23 = jsval.String().Enum("beginner", "intermediate", "advanced").Default("beginner")
+	R24 = jsval.Integer().Minimum(0)
+	R25 = jsval.Integer().Minimum(0).Default(10)
+	R26 = jsval.Object().
 		AdditionalProperties(
 			jsval.EmptyConstraint,
 		).
@@ -319,7 +331,7 @@ func init() {
 			"user_id",
 			jsval.Reference(M).RefersTo("#/definitions/uuid"),
 		)
-	R26 = jsval.Object().
+	R27 = jsval.Object().
 		AdditionalProperties(
 			jsval.EmptyConstraint,
 		).
@@ -343,14 +355,14 @@ func init() {
 			"name#[a-z]+",
 			jsval.Reference(M).RefersTo("#/definitions/string_i18n"),
 		)
-	R27 = jsval.Array().
+	R28 = jsval.Array().
 		Items(
 			jsval.Reference(M).RefersTo("#/definitions/room"),
 		).
 		AdditionalItems(
 			jsval.EmptyConstraint,
 		)
-	R28 = jsval.Object().
+	R29 = jsval.Object().
 		AdditionalProperties(
 			jsval.EmptyConstraint,
 		).
@@ -468,9 +480,9 @@ func init() {
 			"video_url",
 			jsval.Reference(M).RefersTo("#/definitions/url"),
 		)
-	R29 = jsval.String().MinLength(3).RegexpString("^[a-zA-Z0-9/]+$")
-	R30 = jsval.String().MinLength(3).RegexpString("^[a-zA-Z0-9]+$")
-	R31 = jsval.Object().
+	R30 = jsval.String().MinLength(3).RegexpString("^[a-zA-Z0-9/]+$")
+	R31 = jsval.String().MinLength(3).RegexpString("^[a-zA-Z0-9]+$")
+	R32 = jsval.Object().
 		AdditionalProperties(
 			jsval.Object().
 				AdditionalProperties(
@@ -496,28 +508,28 @@ func init() {
 			"name",
 			jsval.String(),
 		)
-	R32 = jsval.Array().
+	R33 = jsval.Array().
 		Items(
 			jsval.Reference(M).RefersTo("#/definitions/speaker"),
 		).
 		AdditionalItems(
 			jsval.EmptyConstraint,
 		)
-	R33 = jsval.String()
-	R34 = jsval.String().MinLength(1)
-	R35 = jsval.String()
+	R34 = jsval.String()
+	R35 = jsval.String().MinLength(1)
 	R36 = jsval.String()
-	R37 = jsval.Array().
+	R37 = jsval.String()
+	R38 = jsval.Array().
 		Items(
 			jsval.Reference(M).RefersTo("#/definitions/tag"),
 		).
 		AdditionalItems(
 			jsval.EmptyConstraint,
 		)
-	R38 = jsval.String().RegexpString("^\\d\\d:\\d\\d$")
-	R39 = jsval.String().Enum("XXXL", "XXL", "XL", "L", "M", "S", "XS")
-	R40 = jsval.String().Format("uri")
-	R41 = jsval.Object().
+	R39 = jsval.String().RegexpString("^\\d\\d:\\d\\d$")
+	R40 = jsval.String().Enum("XXXL", "XXL", "XL", "L", "M", "S", "XS")
+	R41 = jsval.String().Format("uri")
+	R42 = jsval.Object().
 		AdditionalProperties(
 			jsval.EmptyConstraint,
 		).
@@ -557,15 +569,15 @@ func init() {
 			"last_name#[a-z]+",
 			jsval.Reference(M).RefersTo("#/definitions/string_i18n"),
 		)
-	R42 = jsval.Array().
+	R43 = jsval.Array().
 		Items(
 			jsval.Reference(M).RefersTo("#/definitions/user"),
 		).
 		AdditionalItems(
 			jsval.EmptyConstraint,
 		)
-	R43 = jsval.String().RegexpString("^[a-fA-F0-9-]+$")
-	R44 = jsval.Object().
+	R44 = jsval.String().RegexpString("^[a-fA-F0-9-]+$")
+	R45 = jsval.Object().
 		AdditionalProperties(
 			jsval.EmptyConstraint,
 		).
@@ -596,36 +608,37 @@ func init() {
 	M.SetReference("#/definitions/duration", R12)
 	M.SetReference("#/definitions/email", R13)
 	M.SetReference("#/definitions/featured_speaker", R14)
-	M.SetReference("#/definitions/idprovider_name", R15)
-	M.SetReference("#/definitions/int_rating", R16)
-	M.SetReference("#/definitions/language", R17)
-	M.SetReference("#/definitions/latitude", R18)
-	M.SetReference("#/definitions/longitude", R19)
-	M.SetReference("#/definitions/markdown_en", R20)
-	M.SetReference("#/definitions/markdown_i18n", R21)
-	M.SetReference("#/definitions/material_level", R22)
-	M.SetReference("#/definitions/positiveInteger", R23)
-	M.SetReference("#/definitions/positiveIntegerDefault10", R24)
-	M.SetReference("#/definitions/question", R25)
-	M.SetReference("#/definitions/room", R26)
-	M.SetReference("#/definitions/room_array", R27)
-	M.SetReference("#/definitions/session", R28)
-	M.SetReference("#/definitions/slug", R29)
-	M.SetReference("#/definitions/slug_top", R30)
-	M.SetReference("#/definitions/speaker", R31)
-	M.SetReference("#/definitions/speaker_array", R32)
-	M.SetReference("#/definitions/string_en", R33)
-	M.SetReference("#/definitions/string_en_not_empty", R34)
-	M.SetReference("#/definitions/string_i18n", R35)
-	M.SetReference("#/definitions/tag", R36)
-	M.SetReference("#/definitions/tag_array", R37)
-	M.SetReference("#/definitions/time", R38)
-	M.SetReference("#/definitions/tshirt_size", R39)
-	M.SetReference("#/definitions/url", R40)
-	M.SetReference("#/definitions/user", R41)
-	M.SetReference("#/definitions/user_array", R42)
-	M.SetReference("#/definitions/uuid", R43)
-	M.SetReference("#/definitions/venue", R44)
+	M.SetReference("#/definitions/featured_speaker_array", R15)
+	M.SetReference("#/definitions/idprovider_name", R16)
+	M.SetReference("#/definitions/int_rating", R17)
+	M.SetReference("#/definitions/language", R18)
+	M.SetReference("#/definitions/latitude", R19)
+	M.SetReference("#/definitions/longitude", R20)
+	M.SetReference("#/definitions/markdown_en", R21)
+	M.SetReference("#/definitions/markdown_i18n", R22)
+	M.SetReference("#/definitions/material_level", R23)
+	M.SetReference("#/definitions/positiveInteger", R24)
+	M.SetReference("#/definitions/positiveIntegerDefault10", R25)
+	M.SetReference("#/definitions/question", R26)
+	M.SetReference("#/definitions/room", R27)
+	M.SetReference("#/definitions/room_array", R28)
+	M.SetReference("#/definitions/session", R29)
+	M.SetReference("#/definitions/slug", R30)
+	M.SetReference("#/definitions/slug_top", R31)
+	M.SetReference("#/definitions/speaker", R32)
+	M.SetReference("#/definitions/speaker_array", R33)
+	M.SetReference("#/definitions/string_en", R34)
+	M.SetReference("#/definitions/string_en_not_empty", R35)
+	M.SetReference("#/definitions/string_i18n", R36)
+	M.SetReference("#/definitions/tag", R37)
+	M.SetReference("#/definitions/tag_array", R38)
+	M.SetReference("#/definitions/time", R39)
+	M.SetReference("#/definitions/tshirt_size", R40)
+	M.SetReference("#/definitions/url", R41)
+	M.SetReference("#/definitions/user", R42)
+	M.SetReference("#/definitions/user_array", R43)
+	M.SetReference("#/definitions/uuid", R44)
+	M.SetReference("#/definitions/venue", R45)
 	HTTPAddConferenceAdminRequest = jsval.New().
 		SetConstraintMap(M).
 		SetRoot(
@@ -766,6 +779,10 @@ func init() {
 				AddProp(
 					"description",
 					jsval.Reference(M).RefersTo("#/definitions/string_en"),
+				).
+				AddProp(
+					"featured_speakers",
+					jsval.Reference(M).RefersTo("#/definitions/featured_speaker_array"),
 				).
 				AddProp(
 					"id",
@@ -1969,6 +1986,10 @@ func init() {
 					jsval.Reference(M).RefersTo("#/definitions/string_en"),
 				).
 				AddProp(
+					"featured_speakers",
+					jsval.Reference(M).RefersTo("#/definitions/featured_speaker_array"),
+				).
+				AddProp(
 					"id",
 					jsval.Reference(M).RefersTo("#/definitions/uuid"),
 				).
@@ -2030,6 +2051,10 @@ func init() {
 				AddProp(
 					"description",
 					jsval.Reference(M).RefersTo("#/definitions/string_en"),
+				).
+				AddProp(
+					"featured_speakers",
+					jsval.Reference(M).RefersTo("#/definitions/featured_speaker_array"),
 				).
 				AddProp(
 					"id",

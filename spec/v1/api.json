@@ -219,7 +219,8 @@
         "description": { "$ref": "#/definitions/string_en" },
         "venue": { "$ref": "#/definitions/venue" },
         "dates": { "$ref": "#/definitions/conference_date_array" },
-        "administrators": { "$ref": "#/definitions/user_array" }
+        "administrators": { "$ref": "#/definitions/user_array" },
+        "featured_speakers": { "$ref": "#/definitions/featured_speaker_array" }
       },
       "patternProperties": {
         "title#[a-z]+": { "$ref": "#/definitions/string_i18n" },

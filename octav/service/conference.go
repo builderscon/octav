@@ -329,6 +329,10 @@ func (v *Conference) Decorate(tx *db.Tx, c *model.Conference, lang string) error
 		return errors.Wrapf(err, "failed to load venues for '%s'", c.ID)
 	}
 
+	if err := v.LoadFeaturedSpeakers(tx, &c.FeaturedSpeakers, c.ID); err != nil {
+		return errors.Wrapf(err, "failed to load featured speakers for '%s'", c.ID)
+	}
+
 	if lang != "" {
 		sv := Venue{}
 		for i := range c.Venues {
@@ -402,3 +406,23 @@ func (v *Conference) ListFromPayload(tx *db.Tx, l *model.ConferenceList, payload
 	*l = r
 	return nil
 }
+
+func (v *Conference) LoadFeaturedSpeakers(tx *db.Tx, cdl *model.FeaturedSpeakerList, cid string) error {
+	var vdbl db.FeaturedSpeakerList
+	if err := db.LoadFeaturedSpeakers(tx, &vdbl, cid); err != nil {
+		return err
+	}
+
+	res := make(model.FeaturedSpeakerList, len(vdbl))
+	for i, vdb := range vdbl {
+		var u model.FeaturedSpeaker
+		if err := u.FromRow(vdb); err != nil {
+			return err
+		}
+		res[i] = u
+	}
+	*cdl = res
+	return nil
+}
+
+

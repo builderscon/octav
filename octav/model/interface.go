@@ -21,15 +21,16 @@ type ErrInvalidFieldType struct {
 
 // +model
 type Conference struct {
-	ID             string             `json:"id"`
-	Title          string             `json:"title" l10n:"true"`
-	SeriesID       string             `json:"series_id,omitempty"`
-	Series         *ConferenceSeries  `json:"series,omitempty" decorate:"true"`
-	SubTitle       string             `json:"sub_title" l10n:"true"`
-	Slug           string             `json:"slug"`
-	Dates          ConferenceDateList `json:"dates,omitempty"`
-	Administrators UserList           `json:"administrators,omitempty" decorate:"true"`
-	Venues         VenueList          `json:"venues,omitempty" decorate:"true"`
+	ID               string              `json:"id"`
+	Title            string              `json:"title" l10n:"true"`
+	SeriesID         string              `json:"series_id,omitempty"`
+	Series           *ConferenceSeries   `json:"series,omitempty" decorate:"true"`
+	SubTitle         string              `json:"sub_title" l10n:"true"`
+	Slug             string              `json:"slug"`
+	Dates            ConferenceDateList  `json:"dates,omitempty"`
+	Administrators   UserList            `json:"administrators,omitempty" decorate:"true"`
+	Venues           VenueList           `json:"venues,omitempty" decorate:"true"`
+	FeaturedSpeakers FeaturedSpeakerList `json:"featured_speakers,omitempty" decorate:"true"`
 }
 type ConferenceList []Conference
 
