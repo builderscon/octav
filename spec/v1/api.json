@@ -1143,7 +1143,7 @@
       "rel": "create",
       "schema": {
         "type": "object",
-        "required": ["conference_id","avatar_url","display_name","description"],
+        "required": ["conference_id","display_name","description"],
         "properties": {
           "speaker_id": {"$ref": "#/definitions/uuid"},
           "conference_id": {"$ref": "#/definitions/uuid"},
