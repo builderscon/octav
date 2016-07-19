@@ -198,6 +198,62 @@ func (c *Client) AddConferenceVenue(in *model.AddConferenceVenueRequest) (err er
 	return nil
 }
 
+func (c *Client) AddFeaturedSpeaker(in *model.AddFeaturedSpeakerRequest) (ret *model.FeaturedSpeaker, err error) {
+	if pdebug.Enabled {
+		g := pdebug.Marker("client.AddFeaturedSpeaker").BindError(&err)
+		defer g.End()
+	}
+	u, err := url.Parse(c.Endpoint + "/v1/featured_speaker/add")
+	if err != nil {
+		return nil, err
+	}
+	buf := bytes.Buffer{}
+	err = json.NewEncoder(&buf).Encode(in)
+	if err != nil {
+		return nil, err
+	}
+	if pdebug.Enabled {
+		pdebug.Printf("POST to %s", u.String())
+		pdebug.Printf("%s", buf.String())
+	}
+	req, err := http.NewRequest("POST", u.String(), &buf)
+	if err != nil {
+		return nil, err
+	}
+	req.Header.Set("Content-Type", "application/json")
+	if c.BasicAuth.Username != "" && c.BasicAuth.Password != "" {
+		req.SetBasicAuth(c.BasicAuth.Username, c.BasicAuth.Password)
+	}
+	res, err := c.Client.Do(req)
+	if err != nil {
+		return nil, err
+	}
+	if res.StatusCode != http.StatusOK {
+		return nil, fmt.Errorf(`Invalid response: '%s'`, res.Status)
+	}
+	jsonbuf := getTransportJSONBuffer()
+	defer releaseTransportJSONBuffer(jsonbuf)
+	_, err = io.Copy(jsonbuf, io.LimitReader(res.Body, MaxResponseSize))
+	defer res.Body.Close()
+	if pdebug.Enabled {
+		if err != nil {
+			pdebug.Printf("failed to read respons buffer: %s", err)
+		} else {
+			pdebug.Printf("response buffer: %s", jsonbuf)
+		}
+	}
+	if err != nil {
+		return nil, err
+	}
+
+	var payload model.FeaturedSpeaker
+	err = json.Unmarshal(jsonbuf.Bytes(), &payload)
+	if err != nil {
+		return nil, err
+	}
+	return &payload, nil
+}
+
 func (c *Client) CreateConference(in *model.CreateConferenceRequest) (ret *model.Conference, err error) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("client.CreateConference").BindError(&err)
@@ -303,62 +359,6 @@ func (c *Client) CreateConferenceSeries(in *model.CreateConferenceSeriesRequest)
 	}
 
 	var payload model.ConferenceSeries
-	err = json.Unmarshal(jsonbuf.Bytes(), &payload)
-	if err != nil {
-		return nil, err
-	}
-	return &payload, nil
-}
-
-func (c *Client) CreateFeaturedSpeaker(in *model.CreateFeaturedSpeakerRequest) (ret *model.FeaturedSpeaker, err error) {
-	if pdebug.Enabled {
-		g := pdebug.Marker("client.CreateFeaturedSpeaker").BindError(&err)
-		defer g.End()
-	}
-	u, err := url.Parse(c.Endpoint + "/v1/featured_speaker/create")
-	if err != nil {
-		return nil, err
-	}
-	buf := bytes.Buffer{}
-	err = json.NewEncoder(&buf).Encode(in)
-	if err != nil {
-		return nil, err
-	}
-	if pdebug.Enabled {
-		pdebug.Printf("POST to %s", u.String())
-		pdebug.Printf("%s", buf.String())
-	}
-	req, err := http.NewRequest("POST", u.String(), &buf)
-	if err != nil {
-		return nil, err
-	}
-	req.Header.Set("Content-Type", "application/json")
-	if c.BasicAuth.Username != "" && c.BasicAuth.Password != "" {
-		req.SetBasicAuth(c.BasicAuth.Username, c.BasicAuth.Password)
-	}
-	res, err := c.Client.Do(req)
-	if err != nil {
-		return nil, err
-	}
-	if res.StatusCode != http.StatusOK {
-		return nil, fmt.Errorf(`Invalid response: '%s'`, res.Status)
-	}
-	jsonbuf := getTransportJSONBuffer()
-	defer releaseTransportJSONBuffer(jsonbuf)
-	_, err = io.Copy(jsonbuf, io.LimitReader(res.Body, MaxResponseSize))
-	defer res.Body.Close()
-	if pdebug.Enabled {
-		if err != nil {
-			pdebug.Printf("failed to read respons buffer: %s", err)
-		} else {
-			pdebug.Printf("response buffer: %s", jsonbuf)
-		}
-	}
-	if err != nil {
-		return nil, err
-	}
-
-	var payload model.FeaturedSpeaker
 	err = json.Unmarshal(jsonbuf.Bytes(), &payload)
 	if err != nil {
 		return nil, err

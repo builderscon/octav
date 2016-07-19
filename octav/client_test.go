@@ -329,8 +329,8 @@ func testDeleteConference(ctx *TestCtx, id string) error {
 	return err
 }
 
-func larrywall(confID, userID string) *model.CreateFeaturedSpeakerRequest {
-	r := &model.CreateFeaturedSpeakerRequest{
+func larrywall(confID, userID string) *model.AddFeaturedSpeakerRequest {
+	r := &model.AddFeaturedSpeakerRequest{
 		ConferenceID: confID,
 		DisplayName: `Larry Wall (TimToady)`,
 		Description: `Larry Wall is a computer programmer and author, most widely known as the creator of the Perl programming language.`,
@@ -340,8 +340,8 @@ func larrywall(confID, userID string) *model.CreateFeaturedSpeakerRequest {
 	return r
 }
 
-func testCreateFeaturedSpeaker(ctx *TestCtx, in *model.CreateFeaturedSpeakerRequest) (*model.FeaturedSpeaker, error) {
-	res, err := ctx.HTTPClient.CreateFeaturedSpeaker(in)
+func testCreateFeaturedSpeaker(ctx *TestCtx, in *model.AddFeaturedSpeakerRequest) (*model.FeaturedSpeaker, error) {
+	res, err := ctx.HTTPClient.AddFeaturedSpeaker(in)
 	if !assert.NoError(ctx.T, err, "CreateFeaturedSpeaker should succeed") {
 		return nil, err
 	}

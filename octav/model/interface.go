@@ -587,7 +587,7 @@ type ListFeaturedSpeakersRequest struct {
 }
 
 // +transport
-type CreateFeaturedSpeakerRequest struct {
+type AddFeaturedSpeakerRequest struct {
 	ConferenceID string                `json:"conference_id"`
 	SpeakerID    jsval.MaybeString     `json:"speaker_id"`
 	AvatarURL    jsval.MaybeString     `json:"avatar_url"`
@@ -595,6 +595,9 @@ type CreateFeaturedSpeakerRequest struct {
 	Description  string                `json:"description" l18n":"true"`
 	L10N         tools.LocalizedFields `json:"-"`
 	UserID       string                `json:"user_id"`
+}
+type CreateFeaturedSpeakerRequest struct {
+	AddFeaturedSpeakerRequest
 }
 
 // +transport

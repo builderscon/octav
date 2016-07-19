@@ -49,14 +49,14 @@ func (v *FeaturedSpeaker) populateRowForUpdate(vdb *db.FeaturedSpeaker, payload 
 	return nil
 }
 
-func (v *FeaturedSpeaker) CreateFromPayload(tx *db.Tx, payload model.CreateFeaturedSpeakerRequest, result *model.FeaturedSpeaker) error {
+func (v *FeaturedSpeaker) CreateFromPayload(tx *db.Tx, payload model.AddFeaturedSpeakerRequest, result *model.FeaturedSpeaker) error {
 	su := User{}
 	if err := su.IsConferenceAdministrator(tx, payload.ConferenceID, payload.UserID); err != nil {
 		return errors.Wrap(err, "creating a featured speaker requires conference administrator privilege")
 	}
 
 	vdb := db.FeaturedSpeaker{}
-	if err := v.Create(tx, &vdb, payload); err != nil {
+	if err := v.Create(tx, &vdb, model.CreateFeaturedSpeakerRequest{payload}); err != nil {
 		return errors.Wrap(err, "failed to store in database")
 	}
 

@@ -9,12 +9,12 @@ var HTTPAddConferenceAdminRequest *jsval.JSVal
 var HTTPAddConferenceDatesRequest *jsval.JSVal
 var HTTPAddConferenceSeriesAdminRequest *jsval.JSVal
 var HTTPAddConferenceVenueRequest *jsval.JSVal
+var HTTPAddFeaturedSpeakerRequest *jsval.JSVal
+var HTTPAddFeaturedSpeakerResponse *jsval.JSVal
 var HTTPCreateConferenceRequest *jsval.JSVal
 var HTTPCreateConferenceResponse *jsval.JSVal
 var HTTPCreateConferenceSeriesRequest *jsval.JSVal
 var HTTPCreateConferenceSeriesResponse *jsval.JSVal
-var HTTPCreateFeaturedSpeakerRequest *jsval.JSVal
-var HTTPCreateFeaturedSpeakerResponse *jsval.JSVal
 var HTTPCreateQuestionRequest *jsval.JSVal
 var HTTPCreateQuestionResponse *jsval.JSVal
 var HTTPCreateRoomRequest *jsval.JSVal
@@ -727,6 +727,89 @@ func init() {
 				),
 		)
 
+	HTTPAddFeaturedSpeakerRequest = jsval.New().
+		SetConstraintMap(M).
+		SetRoot(
+			jsval.Object().
+				Required("conference_id", "description", "display_name").
+				AdditionalProperties(
+					jsval.EmptyConstraint,
+				).
+				AddProp(
+					"avatar_url",
+					jsval.Reference(M).RefersTo("#/definitions/url"),
+				).
+				AddProp(
+					"conference_id",
+					jsval.Reference(M).RefersTo("#/definitions/uuid"),
+				).
+				AddProp(
+					"description",
+					jsval.Reference(M).RefersTo("#/definitions/string_en_not_empty"),
+				).
+				AddProp(
+					"display_name",
+					jsval.Reference(M).RefersTo("#/definitions/string_en_not_empty"),
+				).
+				AddProp(
+					"speaker_id",
+					jsval.Reference(M).RefersTo("#/definitions/uuid"),
+				).
+				AddProp(
+					"user_id",
+					jsval.Reference(M).RefersTo("#/definitions/uuid"),
+				).
+				PatternPropertiesString(
+					"description#[a-z]+",
+					jsval.Reference(M).RefersTo("#/definitions/string_i18n"),
+				).
+				PatternPropertiesString(
+					"display_name#[a-z]+",
+					jsval.Reference(M).RefersTo("#/definitions/string_i18n"),
+				),
+		)
+
+	HTTPAddFeaturedSpeakerResponse = jsval.New().
+		SetConstraintMap(M).
+		SetRoot(
+			jsval.Object().
+				AdditionalProperties(
+					jsval.EmptyConstraint,
+				).
+				AddProp(
+					"avatar_url",
+					jsval.Reference(M).RefersTo("#/definitions/url"),
+				).
+				AddProp(
+					"conference_id",
+					jsval.Reference(M).RefersTo("#/definitions/uuid"),
+				).
+				AddProp(
+					"description",
+					jsval.Reference(M).RefersTo("#/definitions/string_en_not_empty"),
+				).
+				AddProp(
+					"display_name",
+					jsval.Reference(M).RefersTo("#/definitions/string_en_not_empty"),
+				).
+				AddProp(
+					"id",
+					jsval.Reference(M).RefersTo("#/definitions/uuid"),
+				).
+				AddProp(
+					"user_id",
+					jsval.Reference(M).RefersTo("#/definitions/uuid"),
+				).
+				PatternPropertiesString(
+					"description#[a-z]+",
+					jsval.Reference(M).RefersTo("#/definitions/string_i18n"),
+				).
+				PatternPropertiesString(
+					"display_name#[a-z]+",
+					jsval.Reference(M).RefersTo("#/definitions/string_i18n"),
+				),
+		)
+
 	HTTPCreateConferenceRequest = jsval.New().
 		SetConstraintMap(M).
 		SetRoot(
@@ -850,89 +933,6 @@ func init() {
 				AddProp(
 					"title",
 					jsval.String(),
-				),
-		)
-
-	HTTPCreateFeaturedSpeakerRequest = jsval.New().
-		SetConstraintMap(M).
-		SetRoot(
-			jsval.Object().
-				Required("conference_id", "description", "display_name").
-				AdditionalProperties(
-					jsval.EmptyConstraint,
-				).
-				AddProp(
-					"avatar_url",
-					jsval.Reference(M).RefersTo("#/definitions/url"),
-				).
-				AddProp(
-					"conference_id",
-					jsval.Reference(M).RefersTo("#/definitions/uuid"),
-				).
-				AddProp(
-					"description",
-					jsval.Reference(M).RefersTo("#/definitions/string_en_not_empty"),
-				).
-				AddProp(
-					"display_name",
-					jsval.Reference(M).RefersTo("#/definitions/string_en_not_empty"),
-				).
-				AddProp(
-					"speaker_id",
-					jsval.Reference(M).RefersTo("#/definitions/uuid"),
-				).
-				AddProp(
-					"user_id",
-					jsval.Reference(M).RefersTo("#/definitions/uuid"),
-				).
-				PatternPropertiesString(
-					"description#[a-z]+",
-					jsval.Reference(M).RefersTo("#/definitions/string_i18n"),
-				).
-				PatternPropertiesString(
-					"display_name#[a-z]+",
-					jsval.Reference(M).RefersTo("#/definitions/string_i18n"),
-				),
-		)
-
-	HTTPCreateFeaturedSpeakerResponse = jsval.New().
-		SetConstraintMap(M).
-		SetRoot(
-			jsval.Object().
-				AdditionalProperties(
-					jsval.EmptyConstraint,
-				).
-				AddProp(
-					"avatar_url",
-					jsval.Reference(M).RefersTo("#/definitions/url"),
-				).
-				AddProp(
-					"conference_id",
-					jsval.Reference(M).RefersTo("#/definitions/uuid"),
-				).
-				AddProp(
-					"description",
-					jsval.Reference(M).RefersTo("#/definitions/string_en_not_empty"),
-				).
-				AddProp(
-					"display_name",
-					jsval.Reference(M).RefersTo("#/definitions/string_en_not_empty"),
-				).
-				AddProp(
-					"id",
-					jsval.Reference(M).RefersTo("#/definitions/uuid"),
-				).
-				AddProp(
-					"user_id",
-					jsval.Reference(M).RefersTo("#/definitions/uuid"),
-				).
-				PatternPropertiesString(
-					"description#[a-z]+",
-					jsval.Reference(M).RefersTo("#/definitions/string_i18n"),
-				).
-				PatternPropertiesString(
-					"display_name#[a-z]+",
-					jsval.Reference(M).RefersTo("#/definitions/string_i18n"),
 				),
 		)
 

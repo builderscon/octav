@@ -247,6 +247,40 @@ func httpAddConferenceVenue(ctx context.Context, w http.ResponseWriter, r *http.
 	doAddConferenceVenue(ctx, w, r, payload)
 }
 
+func httpAddFeaturedSpeaker(ctx context.Context, w http.ResponseWriter, r *http.Request) {
+	if pdebug.Enabled {
+		g := pdebug.Marker("httpAddFeaturedSpeaker")
+		defer g.End()
+	}
+	if strings.ToLower(r.Method) != `post` {
+		w.Header().Set("Allow", "post")
+		httpError(w, `Method was `+r.Method+`, expected post`, http.StatusNotFound, nil)
+		return
+	}
+
+	var payload model.AddFeaturedSpeakerRequest
+	jsonbuf := getTransportJSONBuffer()
+	defer releaseTransportJSONBuffer(jsonbuf)
+	if _, err := io.Copy(jsonbuf, io.LimitReader(r.Body, MaxPostSize)); err != nil {
+		httpError(w, `Failed to read request body`, http.StatusInternalServerError, err)
+		return
+	}
+	defer r.Body.Close()
+	if pdebug.Enabled {
+		pdebug.Printf(`-----> %s`, jsonbuf.Bytes())
+	}
+	if err := json.Unmarshal(jsonbuf.Bytes(), &payload); err != nil {
+		httpError(w, `Invalid JSON input`, http.StatusInternalServerError, err)
+		return
+	}
+
+	if err := validator.HTTPAddFeaturedSpeakerRequest.Validate(&payload); err != nil {
+		httpError(w, `Invalid input (validation failed)`, http.StatusInternalServerError, err)
+		return
+	}
+	doAddFeaturedSpeaker(ctx, w, r, payload)
+}
+
 func httpCreateConference(ctx context.Context, w http.ResponseWriter, r *http.Request) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("httpCreateConference")
@@ -313,40 +347,6 @@ func httpCreateConferenceSeries(ctx context.Context, w http.ResponseWriter, r *h
 		return
 	}
 	doCreateConferenceSeries(ctx, w, r, payload)
-}
-
-func httpCreateFeaturedSpeaker(ctx context.Context, w http.ResponseWriter, r *http.Request) {
-	if pdebug.Enabled {
-		g := pdebug.Marker("httpCreateFeaturedSpeaker")
-		defer g.End()
-	}
-	if strings.ToLower(r.Method) != `post` {
-		w.Header().Set("Allow", "post")
-		httpError(w, `Method was `+r.Method+`, expected post`, http.StatusNotFound, nil)
-		return
-	}
-
-	var payload model.CreateFeaturedSpeakerRequest
-	jsonbuf := getTransportJSONBuffer()
-	defer releaseTransportJSONBuffer(jsonbuf)
-	if _, err := io.Copy(jsonbuf, io.LimitReader(r.Body, MaxPostSize)); err != nil {
-		httpError(w, `Failed to read request body`, http.StatusInternalServerError, err)
-		return
-	}
-	defer r.Body.Close()
-	if pdebug.Enabled {
-		pdebug.Printf(`-----> %s`, jsonbuf.Bytes())
-	}
-	if err := json.Unmarshal(jsonbuf.Bytes(), &payload); err != nil {
-		httpError(w, `Invalid JSON input`, http.StatusInternalServerError, err)
-		return
-	}
-
-	if err := validator.HTTPCreateFeaturedSpeakerRequest.Validate(&payload); err != nil {
-		httpError(w, `Invalid input (validation failed)`, http.StatusInternalServerError, err)
-		return
-	}
-	doCreateFeaturedSpeaker(ctx, w, r, payload)
 }
 
 func httpCreateQuestion(ctx context.Context, w http.ResponseWriter, r *http.Request) {
@@ -1513,7 +1513,7 @@ func (s *Server) SetupRoutes() {
 	r.HandleFunc(`/v1/conference_series/create`, httpWithContext(httpWithBasicAuth(httpCreateConferenceSeries)))
 	r.HandleFunc(`/v1/conference_series/delete`, httpWithContext(httpWithBasicAuth(httpDeleteConferenceSeries)))
 	r.HandleFunc(`/v1/conference_series/list`, httpWithContext(httpListConferenceSeries))
-	r.HandleFunc(`/v1/featured_speaker/create`, httpWithContext(httpWithBasicAuth(httpCreateFeaturedSpeaker)))
+	r.HandleFunc(`/v1/featured_speaker/add`, httpWithContext(httpWithBasicAuth(httpAddFeaturedSpeaker)))
 	r.HandleFunc(`/v1/featured_speaker/delete`, httpWithContext(httpWithBasicAuth(httpDeleteFeaturedSpeaker)))
 	r.HandleFunc(`/v1/featured_speaker/list`, httpWithContext(httpWithBasicAuth(httpListFeaturedSpeakers)))
 	r.HandleFunc(`/v1/featured_speaker/lookup`, httpWithContext(httpWithBasicAuth(httpLookupFeaturedSpeaker)))

@@ -4176,7 +4176,7 @@ func (r *ListFeaturedSpeakersRequest) Populate(m map[string]interface{}) error {
 	return nil
 }
 
-func (r CreateFeaturedSpeakerRequest) collectMarshalData() map[string]interface{} {
+func (r AddFeaturedSpeakerRequest) collectMarshalData() map[string]interface{} {
 	m := make(map[string]interface{})
 	m["conference_id"] = r.ConferenceID
 	if r.SpeakerID.Valid() {
@@ -4191,7 +4191,7 @@ func (r CreateFeaturedSpeakerRequest) collectMarshalData() map[string]interface{
 	return m
 }
 
-func (r CreateFeaturedSpeakerRequest) MarshalJSON() ([]byte, error) {
+func (r AddFeaturedSpeakerRequest) MarshalJSON() ([]byte, error) {
 	m := r.collectMarshalData()
 	buf, err := json.Marshal(m)
 	if err != nil {
@@ -4200,7 +4200,7 @@ func (r CreateFeaturedSpeakerRequest) MarshalJSON() ([]byte, error) {
 	return tools.MarshalJSONWithL10N(buf, r.L10N)
 }
 
-func (r CreateFeaturedSpeakerRequest) MarshalURL() ([]byte, error) {
+func (r AddFeaturedSpeakerRequest) MarshalURL() ([]byte, error) {
 	m := r.collectMarshalData()
 	buf, err := urlenc.Marshal(m)
 	if err != nil {
@@ -4209,7 +4209,7 @@ func (r CreateFeaturedSpeakerRequest) MarshalURL() ([]byte, error) {
 	return tools.MarshalURLWithL10N(buf, r.L10N)
 }
 
-func (r *CreateFeaturedSpeakerRequest) UnmarshalJSON(data []byte) error {
+func (r *AddFeaturedSpeakerRequest) UnmarshalJSON(data []byte) error {
 	m := make(map[string]interface{})
 	if err := json.Unmarshal(data, &m); err != nil {
 		return err
@@ -4217,7 +4217,7 @@ func (r *CreateFeaturedSpeakerRequest) UnmarshalJSON(data []byte) error {
 	return r.Populate(m)
 }
 
-func (r *CreateFeaturedSpeakerRequest) Populate(m map[string]interface{}) error {
+func (r *AddFeaturedSpeakerRequest) Populate(m map[string]interface{}) error {
 	if jv, ok := m["conference_id"]; ok {
 		switch jv.(type) {
 		case string:
@@ -4272,12 +4272,12 @@ func (r *CreateFeaturedSpeakerRequest) Populate(m map[string]interface{}) error 
 	return nil
 }
 
-func (r *CreateFeaturedSpeakerRequest) GetPropNames() ([]string, error) {
+func (r *AddFeaturedSpeakerRequest) GetPropNames() ([]string, error) {
 	l, _ := r.L10N.GetPropNames()
 	return append(l, "conference_id", "speaker_id", "avatar_url", "display_name", "description", "user_id"), nil
 }
 
-func (r *CreateFeaturedSpeakerRequest) SetPropValue(s string, v interface{}) error {
+func (r *AddFeaturedSpeakerRequest) SetPropValue(s string, v interface{}) error {
 	switch s {
 	case "conference_id":
 		if jv, ok := v.(string); ok {

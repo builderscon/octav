@@ -1136,8 +1136,8 @@
       }
     },
     {
-      "title": "Create featured speaker",
-      "href": "/featured_speaker/create",
+      "title": "Add featured speaker",
+      "href": "/featured_speaker/add",
       "hsup.wrapper": "httpWithBasicAuth",
       "method": "POST",
       "rel": "create",

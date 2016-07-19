@@ -944,15 +944,15 @@ func doCreateSessionSurveyResponse(ctx context.Context, w http.ResponseWriter, r
 
 }
 
-func doCreateFeaturedSpeaker(ctx context.Context, w http.ResponseWriter, r *http.Request, payload model.CreateFeaturedSpeakerRequest) {
+func doAddFeaturedSpeaker(ctx context.Context, w http.ResponseWriter, r *http.Request, payload model.AddFeaturedSpeakerRequest) {
 	if pdebug.Enabled {
-		g := pdebug.Marker("doCreateFeaturedSpeaker")
+		g := pdebug.Marker("doAddFeaturedSpeaker")
 		defer g.End()
 	}
 
 	tx, err := db.Begin()
 	if err != nil {
-		httpError(w, `CreateFeaturedSpeaker`, http.StatusInternalServerError, err)
+		httpError(w, `AddFeaturedSpeaker`, http.StatusInternalServerError, err)
 		return
 	}
 	defer tx.AutoRollback()
@@ -960,7 +960,7 @@ func doCreateFeaturedSpeaker(ctx context.Context, w http.ResponseWriter, r *http
 	var s service.FeaturedSpeaker
 	var c model.FeaturedSpeaker
 	if err := s.CreateFromPayload(tx, payload, &c); err != nil {
-		httpError(w, `CreateFeaturedSpeaker`, http.StatusInternalServerError, err)
+		httpError(w, `AddFeaturedSpeaker`, http.StatusInternalServerError, err)
 		return
 	}
 
