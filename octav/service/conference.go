@@ -89,7 +89,7 @@ func (v *Conference) LookupBySlug(tx *db.Tx, c *model.Conference, payload model.
 		return errors.Wrap(err, "failed to select conference id from slug")
 	}
 
-	return v.Lookup(tx, c, model.LookupConferenceRequest{ID: eid, Lang: payload.Lang})
+	return v.LookupFromPayload(tx, c, model.LookupConferenceRequest{ID: eid, Lang: payload.Lang})
 }
 
 func (v *Conference) AddAdministrator(tx *db.Tx, cid, uid string) error {

@@ -315,6 +315,40 @@ func httpCreateConferenceSeries(ctx context.Context, w http.ResponseWriter, r *h
 	doCreateConferenceSeries(ctx, w, r, payload)
 }
 
+func httpCreateFeaturedSpeaker(ctx context.Context, w http.ResponseWriter, r *http.Request) {
+	if pdebug.Enabled {
+		g := pdebug.Marker("httpCreateFeaturedSpeaker")
+		defer g.End()
+	}
+	if strings.ToLower(r.Method) != `post` {
+		w.Header().Set("Allow", "post")
+		httpError(w, `Method was `+r.Method+`, expected post`, http.StatusNotFound, nil)
+		return
+	}
+
+	var payload model.CreateFeaturedSpeakerRequest
+	jsonbuf := getTransportJSONBuffer()
+	defer releaseTransportJSONBuffer(jsonbuf)
+	if _, err := io.Copy(jsonbuf, io.LimitReader(r.Body, MaxPostSize)); err != nil {
+		httpError(w, `Failed to read request body`, http.StatusInternalServerError, err)
+		return
+	}
+	defer r.Body.Close()
+	if pdebug.Enabled {
+		pdebug.Printf(`-----> %s`, jsonbuf.Bytes())
+	}
+	if err := json.Unmarshal(jsonbuf.Bytes(), &payload); err != nil {
+		httpError(w, `Invalid JSON input`, http.StatusInternalServerError, err)
+		return
+	}
+
+	if err := validator.HTTPCreateFeaturedSpeakerRequest.Validate(&payload); err != nil {
+		httpError(w, `Invalid input (validation failed)`, http.StatusInternalServerError, err)
+		return
+	}
+	doCreateFeaturedSpeaker(ctx, w, r, payload)
+}
+
 func httpCreateQuestion(ctx context.Context, w http.ResponseWriter, r *http.Request) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("httpCreateQuestion")
@@ -669,20 +703,64 @@ func httpDeleteConferenceVenue(ctx context.Context, w http.ResponseWriter, r *ht
 	doDeleteConferenceVenue(ctx, w, r, payload)
 }
 
+func httpDeleteFeaturedSpeaker(ctx context.Context, w http.ResponseWriter, r *http.Request) {
+	if pdebug.Enabled {
+		g := pdebug.Marker("httpDeleteFeaturedSpeaker")
+		defer g.End()
+	}
+	if strings.ToLower(r.Method) != `post` {
+		w.Header().Set("Allow", "post")
+		httpError(w, `Method was `+r.Method+`, expected post`, http.StatusNotFound, nil)
+		return
+	}
+
+	var payload model.DeleteFeaturedSpeakerRequest
+	jsonbuf := getTransportJSONBuffer()
+	defer releaseTransportJSONBuffer(jsonbuf)
+	if _, err := io.Copy(jsonbuf, io.LimitReader(r.Body, MaxPostSize)); err != nil {
+		httpError(w, `Failed to read request body`, http.StatusInternalServerError, err)
+		return
+	}
+	defer r.Body.Close()
+	if pdebug.Enabled {
+		pdebug.Printf(`-----> %s`, jsonbuf.Bytes())
+	}
+	if err := json.Unmarshal(jsonbuf.Bytes(), &payload); err != nil {
+		httpError(w, `Invalid JSON input`, http.StatusInternalServerError, err)
+		return
+	}
+
+	if err := validator.HTTPDeleteFeaturedSpeakerRequest.Validate(&payload); err != nil {
+		httpError(w, `Invalid input (validation failed)`, http.StatusInternalServerError, err)
+		return
+	}
+	doDeleteFeaturedSpeaker(ctx, w, r, payload)
+}
+
 func httpDeleteQuestion(ctx context.Context, w http.ResponseWriter, r *http.Request) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("httpDeleteQuestion")
 		defer g.End()
 	}
-	if strings.ToLower(r.Method) != `get` {
-		w.Header().Set("Allow", "get")
-		httpError(w, `Method was `+r.Method+`, expected get`, http.StatusNotFound, nil)
+	if strings.ToLower(r.Method) != `post` {
+		w.Header().Set("Allow", "post")
+		httpError(w, `Method was `+r.Method+`, expected post`, http.StatusNotFound, nil)
 		return
 	}
 
 	var payload model.DeleteQuestionRequest
-	if err := urlenc.Unmarshal([]byte(r.URL.RawQuery), &payload); err != nil {
-		httpError(w, `Failed to parse url query string`, http.StatusInternalServerError, err)
+	jsonbuf := getTransportJSONBuffer()
+	defer releaseTransportJSONBuffer(jsonbuf)
+	if _, err := io.Copy(jsonbuf, io.LimitReader(r.Body, MaxPostSize)); err != nil {
+		httpError(w, `Failed to read request body`, http.StatusInternalServerError, err)
+		return
+	}
+	defer r.Body.Close()
+	if pdebug.Enabled {
+		pdebug.Printf(`-----> %s`, jsonbuf.Bytes())
+	}
+	if err := json.Unmarshal(jsonbuf.Bytes(), &payload); err != nil {
+		httpError(w, `Invalid JSON input`, http.StatusInternalServerError, err)
 		return
 	}
 
@@ -877,6 +955,30 @@ func httpListConferenceSeries(ctx context.Context, w http.ResponseWriter, r *htt
 	doListConferenceSeries(ctx, w, r, payload)
 }
 
+func httpListFeaturedSpeakers(ctx context.Context, w http.ResponseWriter, r *http.Request) {
+	if pdebug.Enabled {
+		g := pdebug.Marker("httpListFeaturedSpeakers")
+		defer g.End()
+	}
+	if strings.ToLower(r.Method) != `get` {
+		w.Header().Set("Allow", "get")
+		httpError(w, `Method was `+r.Method+`, expected get`, http.StatusNotFound, nil)
+		return
+	}
+
+	var payload model.ListFeaturedSpeakersRequest
+	if err := urlenc.Unmarshal([]byte(r.URL.RawQuery), &payload); err != nil {
+		httpError(w, `Failed to parse url query string`, http.StatusInternalServerError, err)
+		return
+	}
+
+	if err := validator.HTTPListFeaturedSpeakersRequest.Validate(&payload); err != nil {
+		httpError(w, `Invalid input (validation failed)`, http.StatusInternalServerError, err)
+		return
+	}
+	doListFeaturedSpeakers(ctx, w, r, payload)
+}
+
 func httpListQuestion(ctx context.Context, w http.ResponseWriter, r *http.Request) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("httpListQuestion")
@@ -1045,6 +1147,30 @@ func httpLookupConferenceBySlug(ctx context.Context, w http.ResponseWriter, r *h
 	doLookupConferenceBySlug(ctx, w, r, payload)
 }
 
+func httpLookupFeaturedSpeaker(ctx context.Context, w http.ResponseWriter, r *http.Request) {
+	if pdebug.Enabled {
+		g := pdebug.Marker("httpLookupFeaturedSpeaker")
+		defer g.End()
+	}
+	if strings.ToLower(r.Method) != `get` {
+		w.Header().Set("Allow", "get")
+		httpError(w, `Method was `+r.Method+`, expected get`, http.StatusNotFound, nil)
+		return
+	}
+
+	var payload model.LookupFeaturedSpeakerRequest
+	if err := urlenc.Unmarshal([]byte(r.URL.RawQuery), &payload); err != nil {
+		httpError(w, `Failed to parse url query string`, http.StatusInternalServerError, err)
+		return
+	}
+
+	if err := validator.HTTPLookupFeaturedSpeakerRequest.Validate(&payload); err != nil {
+		httpError(w, `Invalid input (validation failed)`, http.StatusInternalServerError, err)
+		return
+	}
+	doLookupFeaturedSpeaker(ctx, w, r, payload)
+}
+
 func httpLookupRoom(ctx context.Context, w http.ResponseWriter, r *http.Request) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("httpLookupRoom")
@@ -1197,6 +1323,40 @@ func httpUpdateConference(ctx context.Context, w http.ResponseWriter, r *http.Re
 		return
 	}
 	doUpdateConference(ctx, w, r, payload)
+}
+
+func httpUpdateFeaturedSpeaker(ctx context.Context, w http.ResponseWriter, r *http.Request) {
+	if pdebug.Enabled {
+		g := pdebug.Marker("httpUpdateFeaturedSpeaker")
+		defer g.End()
+	}
+	if strings.ToLower(r.Method) != `post` {
+		w.Header().Set("Allow", "post")
+		httpError(w, `Method was `+r.Method+`, expected post`, http.StatusNotFound, nil)
+		return
+	}
+
+	var payload model.UpdateFeaturedSpeakerRequest
+	jsonbuf := getTransportJSONBuffer()
+	defer releaseTransportJSONBuffer(jsonbuf)
+	if _, err := io.Copy(jsonbuf, io.LimitReader(r.Body, MaxPostSize)); err != nil {
+		httpError(w, `Failed to read request body`, http.StatusInternalServerError, err)
+		return
+	}
+	defer r.Body.Close()
+	if pdebug.Enabled {
+		pdebug.Printf(`-----> %s`, jsonbuf.Bytes())
+	}
+	if err := json.Unmarshal(jsonbuf.Bytes(), &payload); err != nil {
+		httpError(w, `Invalid JSON input`, http.StatusInternalServerError, err)
+		return
+	}
+
+	if err := validator.HTTPUpdateFeaturedSpeakerRequest.Validate(&payload); err != nil {
+		httpError(w, `Invalid input (validation failed)`, http.StatusInternalServerError, err)
+		return
+	}
+	doUpdateFeaturedSpeaker(ctx, w, r, payload)
 }
 
 func httpUpdateRoom(ctx context.Context, w http.ResponseWriter, r *http.Request) {
@@ -1353,6 +1513,11 @@ func (s *Server) SetupRoutes() {
 	r.HandleFunc(`/v1/conference_series/create`, httpWithContext(httpWithBasicAuth(httpCreateConferenceSeries)))
 	r.HandleFunc(`/v1/conference_series/delete`, httpWithContext(httpWithBasicAuth(httpDeleteConferenceSeries)))
 	r.HandleFunc(`/v1/conference_series/list`, httpWithContext(httpListConferenceSeries))
+	r.HandleFunc(`/v1/featured_speaker/create`, httpWithContext(httpWithBasicAuth(httpCreateFeaturedSpeaker)))
+	r.HandleFunc(`/v1/featured_speaker/delete`, httpWithContext(httpWithBasicAuth(httpDeleteFeaturedSpeaker)))
+	r.HandleFunc(`/v1/featured_speaker/list`, httpWithContext(httpWithBasicAuth(httpListFeaturedSpeakers)))
+	r.HandleFunc(`/v1/featured_speaker/lookup`, httpWithContext(httpWithBasicAuth(httpLookupFeaturedSpeaker)))
+	r.HandleFunc(`/v1/featured_speaker/update`, httpWithContext(httpWithBasicAuth(httpUpdateFeaturedSpeaker)))
 	r.HandleFunc(`/v1/question/create`, httpWithContext(httpWithBasicAuth(httpCreateQuestion)))
 	r.HandleFunc(`/v1/question/delete`, httpWithContext(httpWithBasicAuth(httpDeleteQuestion)))
 	r.HandleFunc(`/v1/question/list`, httpWithContext(httpListQuestion))

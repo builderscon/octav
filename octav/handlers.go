@@ -249,7 +249,7 @@ func doLookupConference(ctx context.Context, w http.ResponseWriter, r *http.Requ
 
 	var s service.Conference
 	var c model.Conference
-	if err := s.Lookup(tx, &c, payload); err != nil {
+	if err := s.LookupFromPayload(tx, &c, payload); err != nil {
 		httpError(w, `LookupConference`, http.StatusInternalServerError, err)
 		return
 	}
@@ -675,7 +675,7 @@ func doLookupUser(ctx context.Context, w http.ResponseWriter, r *http.Request, p
 
 	var s service.User
 	var v model.User
-	if err := s.Lookup(tx, &v, payload); err != nil {
+	if err := s.LookupFromPayload(tx, &v, payload); err != nil {
 		httpError(w, `LookupUser`, http.StatusInternalServerError, err)
 		return
 	}
@@ -769,7 +769,7 @@ func doLookupRoom(ctx context.Context, w http.ResponseWriter, r *http.Request, p
 
 	var s service.Room
 	var v model.Room
-	if err := s.Lookup(tx, &v, payload); err != nil {
+	if err := s.LookupFromPayload(tx, &v, payload); err != nil {
 		httpError(w, `LookupRoom`, http.StatusInternalServerError, err)
 		return
 	}
@@ -841,7 +841,7 @@ func doLookupVenue(ctx context.Context, w http.ResponseWriter, r *http.Request, 
 
 	var s service.Venue
 	var v model.Venue
-	if err := s.Lookup(tx, &v, payload); err != nil {
+	if err := s.LookupFromPayload(tx, &v, payload); err != nil {
 		httpError(w, `LookupVenue`, http.StatusInternalServerError, err)
 		return
 	}
@@ -905,7 +905,7 @@ func doLookupSession(ctx context.Context, w http.ResponseWriter, r *http.Request
 
 	var s service.Session
 	var v model.Session
-	if err := s.Lookup(tx, &v, payload); err != nil {
+	if err := s.LookupFromPayload(tx, &v, payload); err != nil {
 		httpError(w, `LookupSession`, http.StatusInternalServerError, err)
 		return
 	}
@@ -943,3 +943,124 @@ func doListQuestion(ctx context.Context, w http.ResponseWriter, r *http.Request,
 func doCreateSessionSurveyResponse(ctx context.Context, w http.ResponseWriter, r *http.Request, payload model.CreateSessionSurveyResponseRequest) {
 
 }
+
+func doCreateFeaturedSpeaker(ctx context.Context, w http.ResponseWriter, r *http.Request, payload model.CreateFeaturedSpeakerRequest) {
+	if pdebug.Enabled {
+		g := pdebug.Marker("doCreateFeaturedSpeaker")
+		defer g.End()
+	}
+
+	tx, err := db.Begin()
+	if err != nil {
+		httpError(w, `CreateFeaturedSpeaker`, http.StatusInternalServerError, err)
+		return
+	}
+	defer tx.AutoRollback()
+
+	var s service.FeaturedSpeaker
+	var c model.FeaturedSpeaker
+	if err := s.CreateFromPayload(tx, payload, &c); err != nil {
+		httpError(w, `CreateFeaturedSpeaker`, http.StatusInternalServerError, err)
+		return
+	}
+
+	if err := tx.Commit(); err != nil {
+		httpError(w, `CreateConference`, http.StatusInternalServerError, err)
+		return
+	}
+
+	httpJSON(w, c)
+}
+
+func doDeleteFeaturedSpeaker(ctx context.Context, w http.ResponseWriter, r *http.Request, payload model.DeleteFeaturedSpeakerRequest) {
+	if pdebug.Enabled {
+		g := pdebug.Marker("doDeleteFeaturedSpeaker")
+		defer g.End()
+	}
+
+	tx, err := db.Begin()
+	if err != nil {
+		httpError(w, `DeleteFeaturedSpeaker`, http.StatusInternalServerError, err)
+		return
+	}
+	defer tx.AutoRollback()
+
+	var s service.FeaturedSpeaker
+	if err := s.DeleteFromPayload(tx, payload); err != nil {
+		httpError(w, `DeleteFeaturedSpeaker`, http.StatusInternalServerError, err)
+		return
+	}
+	if err := tx.Commit(); err != nil {
+		httpError(w, `DeleteFeaturedSpeaker`, http.StatusInternalServerError, err)
+		return
+	}
+	httpJSON(w, map[string]string{"status": "success"})
+}
+
+func doUpdateFeaturedSpeaker(ctx context.Context, w http.ResponseWriter, r *http.Request, payload model.UpdateFeaturedSpeakerRequest) {
+	if pdebug.Enabled {
+		g := pdebug.Marker("doUpdateFeaturedSpeaker")
+		defer g.End()
+	}
+
+	tx, err := db.Begin()
+	if err != nil {
+		httpError(w, `UpdateFeaturedSpeaker`, http.StatusInternalServerError, err)
+		return
+	}
+	defer tx.AutoRollback()
+
+	var s service.FeaturedSpeaker
+	if err := s.UpdateFromPayload(tx, payload); err != nil {
+		httpError(w, `UpdateFeaturedSpeaker`, http.StatusInternalServerError, err)
+		return
+	}
+	if err := tx.Commit(); err != nil {
+		httpError(w, `UpdateFeaturedSpeaker`, http.StatusInternalServerError, err)
+		return
+	}
+
+	httpJSON(w, map[string]string{"status": "success"})
+}
+
+func doLookupFeaturedSpeaker(ctx context.Context, w http.ResponseWriter, r *http.Request, payload model.LookupFeaturedSpeakerRequest) {
+	if pdebug.Enabled {
+		g := pdebug.Marker("doLookupFeaturedSpeaker")
+		defer g.End()
+	}
+	tx, err := db.Begin()
+	if err != nil {
+		httpError(w, `LookupFeaturedSpeaker`, http.StatusInternalServerError, err)
+		return
+	}
+	defer tx.AutoRollback()
+
+	var s service.FeaturedSpeaker
+	var c model.FeaturedSpeaker
+	if err := s.LookupFromPayload(tx, &c, payload); err != nil {
+		httpError(w, `LookupFeaturedSpeaker`, http.StatusInternalServerError, err)
+		return
+	}
+
+	httpJSON(w, c)
+}
+
+func doListFeaturedSpeakers(ctx context.Context, w http.ResponseWriter, r *http.Request, payload model.ListFeaturedSpeakersRequest) {
+	tx, err := db.Begin()
+	if err != nil {
+		httpError(w, `ListConferencesSeries`, http.StatusInternalServerError, err)
+		return
+	}
+	defer tx.AutoRollback()
+
+	var s service.FeaturedSpeaker
+	var l model.FeaturedSpeakerList
+	if err := s.ListFromPayload(tx, &l, payload); err != nil {
+		httpError(w, `ListFeaturedSpeakers`, http.StatusInternalServerError, err)
+		return
+	}
+
+	httpJSON(w, l)
+}
+
+

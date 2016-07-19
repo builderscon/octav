@@ -4049,3 +4049,442 @@ func (r *UpdateClientRequest) Populate(m map[string]interface{}) error {
 	}
 	return nil
 }
+
+func (r LookupFeaturedSpeakerRequest) collectMarshalData() map[string]interface{} {
+	m := make(map[string]interface{})
+	m["id"] = r.ID
+	if r.Lang.Valid() {
+		m["lang"] = r.Lang.Value()
+	}
+	return m
+}
+
+func (r LookupFeaturedSpeakerRequest) MarshalJSON() ([]byte, error) {
+	m := r.collectMarshalData()
+	buf, err := json.Marshal(m)
+	if err != nil {
+		return nil, err
+	}
+	return buf, nil
+}
+
+func (r LookupFeaturedSpeakerRequest) MarshalURL() ([]byte, error) {
+	m := r.collectMarshalData()
+	buf, err := urlenc.Marshal(m)
+	if err != nil {
+		return nil, err
+	}
+	return buf, nil
+}
+
+func (r *LookupFeaturedSpeakerRequest) UnmarshalJSON(data []byte) error {
+	m := make(map[string]interface{})
+	if err := json.Unmarshal(data, &m); err != nil {
+		return err
+	}
+	return r.Populate(m)
+}
+
+func (r *LookupFeaturedSpeakerRequest) Populate(m map[string]interface{}) error {
+	if jv, ok := m["id"]; ok {
+		switch jv.(type) {
+		case string:
+			r.ID = jv.(string)
+			delete(m, "id")
+		default:
+			return ErrInvalidJSONFieldType{Field: "id"}
+		}
+	}
+	if jv, ok := m["lang"]; ok {
+		if err := r.Lang.Set(jv); err != nil {
+			return errors.New("set field Lang failed: " + err.Error())
+		}
+		delete(m, "lang")
+	}
+	return nil
+}
+
+func (r ListFeaturedSpeakersRequest) collectMarshalData() map[string]interface{} {
+	m := make(map[string]interface{})
+	m["conference_id"] = r.ConferenceID
+	if r.Since.Valid() {
+		m["since"] = r.Since.Value()
+	}
+	if r.Lang.Valid() {
+		m["lang"] = r.Lang.Value()
+	}
+	if r.Limit.Valid() {
+		m["limit"] = r.Limit.Value()
+	}
+	return m
+}
+
+func (r ListFeaturedSpeakersRequest) MarshalJSON() ([]byte, error) {
+	m := r.collectMarshalData()
+	buf, err := json.Marshal(m)
+	if err != nil {
+		return nil, err
+	}
+	return buf, nil
+}
+
+func (r ListFeaturedSpeakersRequest) MarshalURL() ([]byte, error) {
+	m := r.collectMarshalData()
+	buf, err := urlenc.Marshal(m)
+	if err != nil {
+		return nil, err
+	}
+	return buf, nil
+}
+
+func (r *ListFeaturedSpeakersRequest) UnmarshalJSON(data []byte) error {
+	m := make(map[string]interface{})
+	if err := json.Unmarshal(data, &m); err != nil {
+		return err
+	}
+	return r.Populate(m)
+}
+
+func (r *ListFeaturedSpeakersRequest) Populate(m map[string]interface{}) error {
+	if jv, ok := m["conference_id"]; ok {
+		switch jv.(type) {
+		case string:
+			r.ConferenceID = jv.(string)
+			delete(m, "conference_id")
+		default:
+			return ErrInvalidJSONFieldType{Field: "conference_id"}
+		}
+	}
+	if jv, ok := m["since"]; ok {
+		if err := r.Since.Set(jv); err != nil {
+			return errors.New("set field Since failed: " + err.Error())
+		}
+		delete(m, "since")
+	}
+	if jv, ok := m["lang"]; ok {
+		if err := r.Lang.Set(jv); err != nil {
+			return errors.New("set field Lang failed: " + err.Error())
+		}
+		delete(m, "lang")
+	}
+	if jv, ok := m["limit"]; ok {
+		if err := r.Limit.Set(jv); err != nil {
+			return errors.New("set field Limit failed: " + err.Error())
+		}
+		delete(m, "limit")
+	}
+	return nil
+}
+
+func (r CreateFeaturedSpeakerRequest) collectMarshalData() map[string]interface{} {
+	m := make(map[string]interface{})
+	m["conference_id"] = r.ConferenceID
+	if r.SpeakerID.Valid() {
+		m["speaker_id"] = r.SpeakerID.Value()
+	}
+	if r.AvatarURL.Valid() {
+		m["avatar_url"] = r.AvatarURL.Value()
+	}
+	m["display_name"] = r.DisplayName
+	m["description"] = r.Description
+	m["user_id"] = r.UserID
+	return m
+}
+
+func (r CreateFeaturedSpeakerRequest) MarshalJSON() ([]byte, error) {
+	m := r.collectMarshalData()
+	buf, err := json.Marshal(m)
+	if err != nil {
+		return nil, err
+	}
+	return tools.MarshalJSONWithL10N(buf, r.L10N)
+}
+
+func (r CreateFeaturedSpeakerRequest) MarshalURL() ([]byte, error) {
+	m := r.collectMarshalData()
+	buf, err := urlenc.Marshal(m)
+	if err != nil {
+		return nil, err
+	}
+	return tools.MarshalURLWithL10N(buf, r.L10N)
+}
+
+func (r *CreateFeaturedSpeakerRequest) UnmarshalJSON(data []byte) error {
+	m := make(map[string]interface{})
+	if err := json.Unmarshal(data, &m); err != nil {
+		return err
+	}
+	return r.Populate(m)
+}
+
+func (r *CreateFeaturedSpeakerRequest) Populate(m map[string]interface{}) error {
+	if jv, ok := m["conference_id"]; ok {
+		switch jv.(type) {
+		case string:
+			r.ConferenceID = jv.(string)
+			delete(m, "conference_id")
+		default:
+			return ErrInvalidJSONFieldType{Field: "conference_id"}
+		}
+	}
+	if jv, ok := m["speaker_id"]; ok {
+		if err := r.SpeakerID.Set(jv); err != nil {
+			return errors.New("set field SpeakerID failed: " + err.Error())
+		}
+		delete(m, "speaker_id")
+	}
+	if jv, ok := m["avatar_url"]; ok {
+		if err := r.AvatarURL.Set(jv); err != nil {
+			return errors.New("set field AvatarURL failed: " + err.Error())
+		}
+		delete(m, "avatar_url")
+	}
+	if jv, ok := m["display_name"]; ok {
+		switch jv.(type) {
+		case string:
+			r.DisplayName = jv.(string)
+			delete(m, "display_name")
+		default:
+			return ErrInvalidJSONFieldType{Field: "display_name"}
+		}
+	}
+	if jv, ok := m["description"]; ok {
+		switch jv.(type) {
+		case string:
+			r.Description = jv.(string)
+			delete(m, "description")
+		default:
+			return ErrInvalidJSONFieldType{Field: "description"}
+		}
+	}
+	if jv, ok := m["user_id"]; ok {
+		switch jv.(type) {
+		case string:
+			r.UserID = jv.(string)
+			delete(m, "user_id")
+		default:
+			return ErrInvalidJSONFieldType{Field: "user_id"}
+		}
+	}
+	if err := tools.ExtractL10NFields(m, &r.L10N, []string{"conference_id", "speaker_id", "avatar_url", "display_name", "description", "user_id"}); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (r *CreateFeaturedSpeakerRequest) GetPropNames() ([]string, error) {
+	l, _ := r.L10N.GetPropNames()
+	return append(l, "conference_id", "speaker_id", "avatar_url", "display_name", "description", "user_id"), nil
+}
+
+func (r *CreateFeaturedSpeakerRequest) SetPropValue(s string, v interface{}) error {
+	switch s {
+	case "conference_id":
+		if jv, ok := v.(string); ok {
+			r.ConferenceID = jv
+			return nil
+		}
+	case "speaker_id":
+		return r.SpeakerID.Set(v)
+	case "avatar_url":
+		return r.AvatarURL.Set(v)
+	case "display_name":
+		if jv, ok := v.(string); ok {
+			r.DisplayName = jv
+			return nil
+		}
+	case "description":
+		if jv, ok := v.(string); ok {
+			r.Description = jv
+			return nil
+		}
+	case "user_id":
+		if jv, ok := v.(string); ok {
+			r.UserID = jv
+			return nil
+		}
+	default:
+		return errors.New("unknown column '" + s + "'")
+	}
+	return ErrInvalidFieldType{Field: s}
+}
+
+func (r UpdateFeaturedSpeakerRequest) collectMarshalData() map[string]interface{} {
+	m := make(map[string]interface{})
+	m["id"] = r.ID
+	if r.SpeakerID.Valid() {
+		m["speaker_id"] = r.SpeakerID.Value()
+	}
+	if r.AvatarURL.Valid() {
+		m["avatar_url"] = r.AvatarURL.Value()
+	}
+	if r.DisplayName.Valid() {
+		m["display_name"] = r.DisplayName.Value()
+	}
+	if r.Description.Valid() {
+		m["description"] = r.Description.Value()
+	}
+	m["user_id"] = r.UserID
+	return m
+}
+
+func (r UpdateFeaturedSpeakerRequest) MarshalJSON() ([]byte, error) {
+	m := r.collectMarshalData()
+	buf, err := json.Marshal(m)
+	if err != nil {
+		return nil, err
+	}
+	return tools.MarshalJSONWithL10N(buf, r.L10N)
+}
+
+func (r UpdateFeaturedSpeakerRequest) MarshalURL() ([]byte, error) {
+	m := r.collectMarshalData()
+	buf, err := urlenc.Marshal(m)
+	if err != nil {
+		return nil, err
+	}
+	return tools.MarshalURLWithL10N(buf, r.L10N)
+}
+
+func (r *UpdateFeaturedSpeakerRequest) UnmarshalJSON(data []byte) error {
+	m := make(map[string]interface{})
+	if err := json.Unmarshal(data, &m); err != nil {
+		return err
+	}
+	return r.Populate(m)
+}
+
+func (r *UpdateFeaturedSpeakerRequest) Populate(m map[string]interface{}) error {
+	if jv, ok := m["id"]; ok {
+		switch jv.(type) {
+		case string:
+			r.ID = jv.(string)
+			delete(m, "id")
+		default:
+			return ErrInvalidJSONFieldType{Field: "id"}
+		}
+	}
+	if jv, ok := m["speaker_id"]; ok {
+		if err := r.SpeakerID.Set(jv); err != nil {
+			return errors.New("set field SpeakerID failed: " + err.Error())
+		}
+		delete(m, "speaker_id")
+	}
+	if jv, ok := m["avatar_url"]; ok {
+		if err := r.AvatarURL.Set(jv); err != nil {
+			return errors.New("set field AvatarURL failed: " + err.Error())
+		}
+		delete(m, "avatar_url")
+	}
+	if jv, ok := m["display_name"]; ok {
+		if err := r.DisplayName.Set(jv); err != nil {
+			return errors.New("set field DisplayName failed: " + err.Error())
+		}
+		delete(m, "display_name")
+	}
+	if jv, ok := m["description"]; ok {
+		if err := r.Description.Set(jv); err != nil {
+			return errors.New("set field Description failed: " + err.Error())
+		}
+		delete(m, "description")
+	}
+	if jv, ok := m["user_id"]; ok {
+		switch jv.(type) {
+		case string:
+			r.UserID = jv.(string)
+			delete(m, "user_id")
+		default:
+			return ErrInvalidJSONFieldType{Field: "user_id"}
+		}
+	}
+	if err := tools.ExtractL10NFields(m, &r.L10N, []string{"id", "speaker_id", "avatar_url", "display_name", "description", "user_id"}); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (r *UpdateFeaturedSpeakerRequest) GetPropNames() ([]string, error) {
+	l, _ := r.L10N.GetPropNames()
+	return append(l, "id", "speaker_id", "avatar_url", "display_name", "description", "user_id"), nil
+}
+
+func (r *UpdateFeaturedSpeakerRequest) SetPropValue(s string, v interface{}) error {
+	switch s {
+	case "id":
+		if jv, ok := v.(string); ok {
+			r.ID = jv
+			return nil
+		}
+	case "speaker_id":
+		return r.SpeakerID.Set(v)
+	case "avatar_url":
+		return r.AvatarURL.Set(v)
+	case "display_name":
+		return r.DisplayName.Set(v)
+	case "description":
+		return r.Description.Set(v)
+	case "user_id":
+		if jv, ok := v.(string); ok {
+			r.UserID = jv
+			return nil
+		}
+	default:
+		return errors.New("unknown column '" + s + "'")
+	}
+	return ErrInvalidFieldType{Field: s}
+}
+
+func (r DeleteFeaturedSpeakerRequest) collectMarshalData() map[string]interface{} {
+	m := make(map[string]interface{})
+	m["id"] = r.ID
+	m["user_id"] = r.UserID
+	return m
+}
+
+func (r DeleteFeaturedSpeakerRequest) MarshalJSON() ([]byte, error) {
+	m := r.collectMarshalData()
+	buf, err := json.Marshal(m)
+	if err != nil {
+		return nil, err
+	}
+	return buf, nil
+}
+
+func (r DeleteFeaturedSpeakerRequest) MarshalURL() ([]byte, error) {
+	m := r.collectMarshalData()
+	buf, err := urlenc.Marshal(m)
+	if err != nil {
+		return nil, err
+	}
+	return buf, nil
+}
+
+func (r *DeleteFeaturedSpeakerRequest) UnmarshalJSON(data []byte) error {
+	m := make(map[string]interface{})
+	if err := json.Unmarshal(data, &m); err != nil {
+		return err
+	}
+	return r.Populate(m)
+}
+
+func (r *DeleteFeaturedSpeakerRequest) Populate(m map[string]interface{}) error {
+	if jv, ok := m["id"]; ok {
+		switch jv.(type) {
+		case string:
+			r.ID = jv.(string)
+			delete(m, "id")
+		default:
+			return ErrInvalidJSONFieldType{Field: "id"}
+		}
+	}
+	if jv, ok := m["user_id"]; ok {
+		switch jv.(type) {
+		case string:
+			r.UserID = jv.(string)
+			delete(m, "user_id")
+		default:
+			return ErrInvalidJSONFieldType{Field: "user_id"}
+		}
+	}
+	return nil
+}

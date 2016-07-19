@@ -725,20 +725,31 @@ func generateServiceFile(ctx *genctx, m Model) error {
 	buf.WriteString("\n)")
 	buf.WriteString("\n\nvar _ = time.Time{}")
 
-	fmt.Fprintf(&buf, "\nfunc (v *%s) Lookup(tx *db.Tx, m *model.%s, payload model.Lookup%sRequest) (err error) {", m.Name, m.Name, m.Name)
+	fmt.Fprintf(&buf, "\nfunc (v *%s) LookupFromPayload(tx *db.Tx, m *model.%s, payload model.Lookup%sRequest) (err error) {", m.Name, m.Name, m.Name)
+	buf.WriteString("\nif pdebug.Enabled {")
+	fmt.Fprintf(&buf, "\n" + `g := pdebug.Marker("service.%s.LookupFromPayload").BindError(&err)`, m.Name)
+	buf.WriteString("\ndefer g.End()")
+	buf.WriteString("\n}")
+	buf.WriteString("\nif err = v.Lookup(tx, m, payload.ID); err != nil {")
+	fmt.Fprintf(&buf, "\n" + `return errors.Wrap(err, "failed to load model.%s from database")`, m.Name)
+	buf.WriteString("\n}")
+	if hasL10N || hasDecorate {
+		buf.WriteString("\nif err := v.Decorate(tx, m, payload.Lang.String); err != nil {")
+		fmt.Fprintf(&buf, "\n" + `return errors.Wrap(err, "failed to load associated data for model.%s from database")`, m.Name)
+		buf.WriteString("\n}")
+	}
+	buf.WriteString("\nreturn nil")
+	buf.WriteString("\n}")
+
+	fmt.Fprintf(&buf, "\nfunc (v *%s) Lookup(tx *db.Tx, m *model.%s, id string) (err error) {", m.Name, m.Name)
 	buf.WriteString("\nif pdebug.Enabled {")
 	fmt.Fprintf(&buf, "\n" + `g := pdebug.Marker("service.%s.Lookup").BindError(&err)`, m.Name)
 	buf.WriteString("\ndefer g.End()")
 	buf.WriteString("\n}")
 	fmt.Fprintf(&buf, "\n\nr := model.%s{}", m.Name)
-	buf.WriteString("\nif err = r.Load(tx, payload.ID); err != nil {")
+	buf.WriteString("\nif err = r.Load(tx, id); err != nil {")
 	fmt.Fprintf(&buf, "\n" + `return errors.Wrap(err, "failed to load model.%s from database")`, m.Name)
 	buf.WriteString("\n}")
-	if hasL10N || hasDecorate {
-		buf.WriteString("\nif err := v.Decorate(tx, &r, payload.Lang.String); err != nil {")
-		fmt.Fprintf(&buf, "\n" + `return errors.Wrap(err, "failed to load associated data for model.%s from database")`, m.Name)
-		buf.WriteString("\n}")
-	}
 	buf.WriteString("\n*m = r")
 	buf.WriteString("\nreturn nil")
 	buf.WriteString("\n}")
