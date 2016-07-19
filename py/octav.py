@@ -1,5 +1,5 @@
 """OCTAV Client Library"""
-"""DO NOT EDIT: This file was generated from ../spec/v1/api.json on Tue Jul 19 21:31:48 2016"""
+"""DO NOT EDIT: This file was generated from ../spec/v1/api.json on Wed Jul 20 08:00:12 2016"""
 
 import json
 import os
@@ -1064,11 +1064,8 @@ class Octav(object):
         return None
     return True
 
-  def create_featured_speaker (self, avatar_url, conference_id, description, display_name, speaker_id=None, user_id=None):
+  def add_featured_speaker (self, conference_id, description, display_name, avatar_url=None, speaker_id=None, user_id=None):
     payload = {}
-    if avatar_url is None:
-            raise 'property avatar_url must be provided'
-    payload['avatar_url'] = avatar_url
     if conference_id is None:
             raise 'property conference_id must be provided'
     payload['conference_id'] = conference_id
@@ -1090,7 +1087,7 @@ class Octav(object):
         payload['speaker_id'] = speaker_id
     if user_id is not None:
         payload['user_id'] = user_id
-    uri = self.endpoint + "/featured_speaker/create"
+    uri = self.endpoint + "/featured_speaker/add"
     if self.debug:
         print("POST " + uri)
     res = self.session.post(uri, auth=(self.key, self.secret), json=payload)
