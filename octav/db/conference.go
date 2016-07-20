@@ -5,7 +5,6 @@ import (
 	"io"
 	"time"
 
-	pdebug "github.com/lestrrat/go-pdebug"
 	"github.com/pkg/errors"
 )
 
@@ -37,7 +36,6 @@ func compileRangeWhere(dst io.Writer, args *[]interface{}, since int64, rangeSta
 
 	toWrite := where.Len()
 	n, err := where.WriteTo(dst)
-	pdebug.Printf("Written %d bytes, expeced to write %d bytes", n, toWrite)
 	if n != int64(toWrite) {
 		if err != nil {
 			return errors.Wrap(err, "failed to write where clause to destination")
@@ -60,10 +58,26 @@ func (v *ConferenceList) LoadByStatusAndRange(tx *Tx, status string, since strin
 
 	qbuf := getStmtBuf()
 	defer releaseStmtBuf(qbuf)
+
+	var hasDate bool
+	if !rangeStart.IsZero() || !rangeEnd.IsZero() {
+		hasDate = true
+	}
+
 	qbuf.WriteString(`SELECT `)
 	qbuf.WriteString(ConferenceStdSelectColumns)
 	qbuf.WriteString(` FROM `)
 	qbuf.WriteString(ConferenceTable)
+	if hasDate {
+		qbuf.WriteString(` JOIN `)
+		qbuf.WriteString(ConferenceDateTable)
+		qbuf.WriteString(` ON `)
+		qbuf.WriteString(ConferenceTable)
+		qbuf.WriteString(`.eid = `)
+		qbuf.WriteString(ConferenceDateTable)
+		qbuf.WriteString(`.conference_id `)
+	}
+
 	qbuf.WriteString(` WHERE `)
 
 	var args []interface{}

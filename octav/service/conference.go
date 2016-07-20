@@ -388,8 +388,13 @@ func (v *Conference) ListFromPayload(tx *db.Tx, l *model.ConferenceList, payload
 		}
 	}
 
+	status := "public";
+	if payload.Status.Valid() {
+		status = payload.Status.String
+	}
+
 	vdbl := db.ConferenceList{}
-	if err := vdbl.LoadByRange(tx, payload.Since.String, rs, re, int(payload.Limit.Int)); err != nil {
+	if err := vdbl.LoadByStatusAndRange(tx, status, payload.Since.String, rs, re, int(payload.Limit.Int)); err != nil {
 		return errors.Wrap(err, "failed to load list from database")
 	}
 

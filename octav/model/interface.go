@@ -277,6 +277,7 @@ type ListConferenceRequest struct {
 	RangeEnd   jsval.MaybeString `json:"range_end,omitempty" urlenc:"range_end,omitempty,string"`
 	RangeStart jsval.MaybeString `json:"range_start,omitempty" urlenc:"range_start,omitempty,string"`
 	Since      jsval.MaybeString `json:"since,omitempty" urlenc:"since,omitempty,string"`
+	Status     jsval.MaybeString `json:"status,omitempty" urlenc:"status,omitempty,string"`
 	Lang       jsval.MaybeString `json:"lang,omitempty" urlenc:"lang,omitempty,string"`
 	Limit      jsval.MaybeInt    `json:"limit,omitempty" urlenc:"limit,omitempty,int64"`
 }
