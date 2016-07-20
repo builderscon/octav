@@ -198,6 +198,62 @@ func (c *Client) AddConferenceVenue(in *model.AddConferenceVenueRequest) (err er
 	return nil
 }
 
+func (c *Client) AddFeaturedSpeaker(in *model.AddFeaturedSpeakerRequest) (ret *model.FeaturedSpeaker, err error) {
+	if pdebug.Enabled {
+		g := pdebug.Marker("client.AddFeaturedSpeaker").BindError(&err)
+		defer g.End()
+	}
+	u, err := url.Parse(c.Endpoint + "/v1/featured_speaker/add")
+	if err != nil {
+		return nil, err
+	}
+	buf := bytes.Buffer{}
+	err = json.NewEncoder(&buf).Encode(in)
+	if err != nil {
+		return nil, err
+	}
+	if pdebug.Enabled {
+		pdebug.Printf("POST to %s", u.String())
+		pdebug.Printf("%s", buf.String())
+	}
+	req, err := http.NewRequest("POST", u.String(), &buf)
+	if err != nil {
+		return nil, err
+	}
+	req.Header.Set("Content-Type", "application/json")
+	if c.BasicAuth.Username != "" && c.BasicAuth.Password != "" {
+		req.SetBasicAuth(c.BasicAuth.Username, c.BasicAuth.Password)
+	}
+	res, err := c.Client.Do(req)
+	if err != nil {
+		return nil, err
+	}
+	if res.StatusCode != http.StatusOK {
+		return nil, fmt.Errorf(`Invalid response: '%s'`, res.Status)
+	}
+	jsonbuf := getTransportJSONBuffer()
+	defer releaseTransportJSONBuffer(jsonbuf)
+	_, err = io.Copy(jsonbuf, io.LimitReader(res.Body, MaxResponseSize))
+	defer res.Body.Close()
+	if pdebug.Enabled {
+		if err != nil {
+			pdebug.Printf("failed to read respons buffer: %s", err)
+		} else {
+			pdebug.Printf("response buffer: %s", jsonbuf)
+		}
+	}
+	if err != nil {
+		return nil, err
+	}
+
+	var payload model.FeaturedSpeaker
+	err = json.Unmarshal(jsonbuf.Bytes(), &payload)
+	if err != nil {
+		return nil, err
+	}
+	return &payload, nil
+}
+
 func (c *Client) CreateConference(in *model.CreateConferenceRequest) (ret *model.Conference, err error) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("client.CreateConference").BindError(&err)
@@ -802,6 +858,42 @@ func (c *Client) DeleteConferenceVenue(in *model.DeleteConferenceVenueRequest) (
 	return nil
 }
 
+func (c *Client) DeleteFeaturedSpeaker(in *model.DeleteFeaturedSpeakerRequest) (err error) {
+	if pdebug.Enabled {
+		g := pdebug.Marker("client.DeleteFeaturedSpeaker").BindError(&err)
+		defer g.End()
+	}
+	u, err := url.Parse(c.Endpoint + "/v1/featured_speaker/delete")
+	if err != nil {
+		return err
+	}
+	buf := bytes.Buffer{}
+	err = json.NewEncoder(&buf).Encode(in)
+	if err != nil {
+		return err
+	}
+	if pdebug.Enabled {
+		pdebug.Printf("POST to %s", u.String())
+		pdebug.Printf("%s", buf.String())
+	}
+	req, err := http.NewRequest("POST", u.String(), &buf)
+	if err != nil {
+		return err
+	}
+	req.Header.Set("Content-Type", "application/json")
+	if c.BasicAuth.Username != "" && c.BasicAuth.Password != "" {
+		req.SetBasicAuth(c.BasicAuth.Username, c.BasicAuth.Password)
+	}
+	res, err := c.Client.Do(req)
+	if err != nil {
+		return err
+	}
+	if res.StatusCode != http.StatusOK {
+		return fmt.Errorf(`Invalid response: '%s'`, res.Status)
+	}
+	return nil
+}
+
 func (c *Client) DeleteQuestion(in *model.DeleteQuestionRequest) (err error) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("client.DeleteQuestion").BindError(&err)
@@ -811,18 +903,20 @@ func (c *Client) DeleteQuestion(in *model.DeleteQuestionRequest) (err error) {
 	if err != nil {
 		return err
 	}
-	buf, err := urlenc.Marshal(in)
+	buf := bytes.Buffer{}
+	err = json.NewEncoder(&buf).Encode(in)
 	if err != nil {
 		return err
 	}
-	u.RawQuery = string(buf)
 	if pdebug.Enabled {
-		pdebug.Printf("GET to %s", u.String())
+		pdebug.Printf("POST to %s", u.String())
+		pdebug.Printf("%s", buf.String())
 	}
-	req, err := http.NewRequest("GET", u.String(), nil)
+	req, err := http.NewRequest("POST", u.String(), &buf)
 	if err != nil {
 		return err
 	}
+	req.Header.Set("Content-Type", "application/json")
 	if c.BasicAuth.Username != "" && c.BasicAuth.Password != "" {
 		req.SetBasicAuth(c.BasicAuth.Username, c.BasicAuth.Password)
 	}
@@ -1081,6 +1175,60 @@ func (c *Client) ListConferenceSeries(in *model.ListConferenceSeriesRequest) (re
 	}
 
 	var payload []model.ConferenceSeries
+	err = json.Unmarshal(jsonbuf.Bytes(), &payload)
+	if err != nil {
+		return nil, err
+	}
+	return payload, nil
+}
+
+func (c *Client) ListFeaturedSpeakers(in *model.ListFeaturedSpeakersRequest) (ret []model.FeaturedSpeaker, err error) {
+	if pdebug.Enabled {
+		g := pdebug.Marker("client.ListFeaturedSpeakers").BindError(&err)
+		defer g.End()
+	}
+	u, err := url.Parse(c.Endpoint + "/v1/featured_speaker/list")
+	if err != nil {
+		return nil, err
+	}
+	buf, err := urlenc.Marshal(in)
+	if err != nil {
+		return nil, err
+	}
+	u.RawQuery = string(buf)
+	if pdebug.Enabled {
+		pdebug.Printf("GET to %s", u.String())
+	}
+	req, err := http.NewRequest("GET", u.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+	if c.BasicAuth.Username != "" && c.BasicAuth.Password != "" {
+		req.SetBasicAuth(c.BasicAuth.Username, c.BasicAuth.Password)
+	}
+	res, err := c.Client.Do(req)
+	if err != nil {
+		return nil, err
+	}
+	if res.StatusCode != http.StatusOK {
+		return nil, fmt.Errorf(`Invalid response: '%s'`, res.Status)
+	}
+	jsonbuf := getTransportJSONBuffer()
+	defer releaseTransportJSONBuffer(jsonbuf)
+	_, err = io.Copy(jsonbuf, io.LimitReader(res.Body, MaxResponseSize))
+	defer res.Body.Close()
+	if pdebug.Enabled {
+		if err != nil {
+			pdebug.Printf("failed to read respons buffer: %s", err)
+		} else {
+			pdebug.Printf("response buffer: %s", jsonbuf)
+		}
+	}
+	if err != nil {
+		return nil, err
+	}
+
+	var payload []model.FeaturedSpeaker
 	err = json.Unmarshal(jsonbuf.Bytes(), &payload)
 	if err != nil {
 		return nil, err
@@ -1466,6 +1614,60 @@ func (c *Client) LookupConferenceBySlug(in *model.LookupConferenceBySlugRequest)
 	return &payload, nil
 }
 
+func (c *Client) LookupFeaturedSpeaker(in *model.LookupFeaturedSpeakerRequest) (ret *model.FeaturedSpeaker, err error) {
+	if pdebug.Enabled {
+		g := pdebug.Marker("client.LookupFeaturedSpeaker").BindError(&err)
+		defer g.End()
+	}
+	u, err := url.Parse(c.Endpoint + "/v1/featured_speaker/lookup")
+	if err != nil {
+		return nil, err
+	}
+	buf, err := urlenc.Marshal(in)
+	if err != nil {
+		return nil, err
+	}
+	u.RawQuery = string(buf)
+	if pdebug.Enabled {
+		pdebug.Printf("GET to %s", u.String())
+	}
+	req, err := http.NewRequest("GET", u.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+	if c.BasicAuth.Username != "" && c.BasicAuth.Password != "" {
+		req.SetBasicAuth(c.BasicAuth.Username, c.BasicAuth.Password)
+	}
+	res, err := c.Client.Do(req)
+	if err != nil {
+		return nil, err
+	}
+	if res.StatusCode != http.StatusOK {
+		return nil, fmt.Errorf(`Invalid response: '%s'`, res.Status)
+	}
+	jsonbuf := getTransportJSONBuffer()
+	defer releaseTransportJSONBuffer(jsonbuf)
+	_, err = io.Copy(jsonbuf, io.LimitReader(res.Body, MaxResponseSize))
+	defer res.Body.Close()
+	if pdebug.Enabled {
+		if err != nil {
+			pdebug.Printf("failed to read respons buffer: %s", err)
+		} else {
+			pdebug.Printf("response buffer: %s", jsonbuf)
+		}
+	}
+	if err != nil {
+		return nil, err
+	}
+
+	var payload model.FeaturedSpeaker
+	err = json.Unmarshal(jsonbuf.Bytes(), &payload)
+	if err != nil {
+		return nil, err
+	}
+	return &payload, nil
+}
+
 func (c *Client) LookupRoom(in *model.LookupRoomRequest) (ret *model.Room, err error) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("client.LookupRoom").BindError(&err)
@@ -1742,6 +1944,42 @@ func (c *Client) UpdateConference(in *model.UpdateConferenceRequest) (err error)
 		defer g.End()
 	}
 	u, err := url.Parse(c.Endpoint + "/v1/conference/update")
+	if err != nil {
+		return err
+	}
+	buf := bytes.Buffer{}
+	err = json.NewEncoder(&buf).Encode(in)
+	if err != nil {
+		return err
+	}
+	if pdebug.Enabled {
+		pdebug.Printf("POST to %s", u.String())
+		pdebug.Printf("%s", buf.String())
+	}
+	req, err := http.NewRequest("POST", u.String(), &buf)
+	if err != nil {
+		return err
+	}
+	req.Header.Set("Content-Type", "application/json")
+	if c.BasicAuth.Username != "" && c.BasicAuth.Password != "" {
+		req.SetBasicAuth(c.BasicAuth.Username, c.BasicAuth.Password)
+	}
+	res, err := c.Client.Do(req)
+	if err != nil {
+		return err
+	}
+	if res.StatusCode != http.StatusOK {
+		return fmt.Errorf(`Invalid response: '%s'`, res.Status)
+	}
+	return nil
+}
+
+func (c *Client) UpdateFeaturedSpeaker(in *model.UpdateFeaturedSpeakerRequest) (err error) {
+	if pdebug.Enabled {
+		g := pdebug.Marker("client.UpdateFeaturedSpeaker").BindError(&err)
+		defer g.End()
+	}
+	u, err := url.Parse(c.Endpoint + "/v1/featured_speaker/update")
 	if err != nil {
 		return err
 	}

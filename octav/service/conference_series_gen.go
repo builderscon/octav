@@ -13,18 +13,28 @@ import (
 
 var _ = time.Time{}
 
-func (v *ConferenceSeries) Lookup(tx *db.Tx, m *model.ConferenceSeries, payload model.LookupConferenceSeriesRequest) (err error) {
+func (v *ConferenceSeries) LookupFromPayload(tx *db.Tx, m *model.ConferenceSeries, payload model.LookupConferenceSeriesRequest) (err error) {
+	if pdebug.Enabled {
+		g := pdebug.Marker("service.ConferenceSeries.LookupFromPayload").BindError(&err)
+		defer g.End()
+	}
+	if err = v.Lookup(tx, m, payload.ID); err != nil {
+		return errors.Wrap(err, "failed to load model.ConferenceSeries from database")
+	}
+	if err := v.Decorate(tx, m, payload.Lang.String); err != nil {
+		return errors.Wrap(err, "failed to load associated data for model.ConferenceSeries from database")
+	}
+	return nil
+}
+func (v *ConferenceSeries) Lookup(tx *db.Tx, m *model.ConferenceSeries, id string) (err error) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("service.ConferenceSeries.Lookup").BindError(&err)
 		defer g.End()
 	}
 
 	r := model.ConferenceSeries{}
-	if err = r.Load(tx, payload.ID); err != nil {
+	if err = r.Load(tx, id); err != nil {
 		return errors.Wrap(err, "failed to load model.ConferenceSeries from database")
-	}
-	if err := v.Decorate(tx, &r, payload.Lang.String); err != nil {
-		return errors.Wrap(err, "failed to load associated data for model.ConferenceSeries from database")
 	}
 	*m = r
 	return nil

@@ -92,7 +92,7 @@ func (v *User) IsAdministrator(tx *db.Tx, id string) error {
 func (v *User) IsSystemAdmin(tx *db.Tx, id string) error {
 	// TODO: cache
 	u := model.User{}
-	if err := v.Lookup(tx, &u, model.LookupUserRequest{ID: id}); err != nil {
+	if err := v.Lookup(tx, &u, id); err != nil {
 		return errors.Wrap(err, "failed to load user from database")
 	}
 
@@ -122,7 +122,7 @@ func (v *User) IsConferenceAdministrator(tx *db.Tx, confID, userID string) error
 
 	c := model.Conference{}
 	sc := Conference{}
-	if err := sc.Lookup(tx, &c, model.LookupConferenceRequest{ID: confID}); err != nil {
+	if err := sc.Lookup(tx, &c, confID); err != nil {
 		return errors.Wrap(err, "failed to load conference from database")
 	}
 
@@ -207,7 +207,7 @@ func (v *User) IsSessionOwner(tx *db.Tx, sessionID, userID string) error {
 
 	ss := Session{}
 	var m model.Session
-	if err := ss.Lookup(tx, &m, model.LookupSessionRequest{ID: sessionID}); err != nil {
+	if err := ss.Lookup(tx, &m, sessionID); err != nil {
 		return errors.Wrap(err, "failed to load session")
 	}
 

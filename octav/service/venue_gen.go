@@ -13,18 +13,28 @@ import (
 
 var _ = time.Time{}
 
-func (v *Venue) Lookup(tx *db.Tx, m *model.Venue, payload model.LookupVenueRequest) (err error) {
+func (v *Venue) LookupFromPayload(tx *db.Tx, m *model.Venue, payload model.LookupVenueRequest) (err error) {
+	if pdebug.Enabled {
+		g := pdebug.Marker("service.Venue.LookupFromPayload").BindError(&err)
+		defer g.End()
+	}
+	if err = v.Lookup(tx, m, payload.ID); err != nil {
+		return errors.Wrap(err, "failed to load model.Venue from database")
+	}
+	if err := v.Decorate(tx, m, payload.Lang.String); err != nil {
+		return errors.Wrap(err, "failed to load associated data for model.Venue from database")
+	}
+	return nil
+}
+func (v *Venue) Lookup(tx *db.Tx, m *model.Venue, id string) (err error) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("service.Venue.Lookup").BindError(&err)
 		defer g.End()
 	}
 
 	r := model.Venue{}
-	if err = r.Load(tx, payload.ID); err != nil {
+	if err = r.Load(tx, id); err != nil {
 		return errors.Wrap(err, "failed to load model.Venue from database")
-	}
-	if err := v.Decorate(tx, &r, payload.Lang.String); err != nil {
-		return errors.Wrap(err, "failed to load associated data for model.Venue from database")
 	}
 	*m = r
 	return nil

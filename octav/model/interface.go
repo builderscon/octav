@@ -21,15 +21,16 @@ type ErrInvalidFieldType struct {
 
 // +model
 type Conference struct {
-	ID             string             `json:"id"`
-	Title          string             `json:"title" l10n:"true"`
-	SeriesID       string             `json:"series_id,omitempty"`
-	Series         *ConferenceSeries  `json:"series,omitempty" decorate:"true"`
-	SubTitle       string             `json:"sub_title" l10n:"true"`
-	Slug           string             `json:"slug"`
-	Dates          ConferenceDateList `json:"dates,omitempty"`
-	Administrators UserList           `json:"administrators,omitempty" decorate:"true"`
-	Venues         VenueList          `json:"venues,omitempty" decorate:"true"`
+	ID               string              `json:"id"`
+	Title            string              `json:"title" l10n:"true"`
+	SeriesID         string              `json:"series_id,omitempty"`
+	Series           *ConferenceSeries   `json:"series,omitempty" decorate:"true"`
+	SubTitle         string              `json:"sub_title" l10n:"true"`
+	Slug             string              `json:"slug"`
+	Dates            ConferenceDateList  `json:"dates,omitempty"`
+	Administrators   UserList            `json:"administrators,omitempty" decorate:"true"`
+	Venues           VenueList           `json:"venues,omitempty" decorate:"true"`
+	FeaturedSpeakers FeaturedSpeakerList `json:"featured_speakers,omitempty" decorate:"true"`
 }
 type ConferenceList []Conference
 
@@ -559,4 +560,59 @@ type UpdateClientRequest struct {
 	ID     string `json:"id"`
 	Secret string `json:"secret"`
 	Name   string `json:"name"`
+}
+
+// +model
+type FeaturedSpeaker struct {
+	ID          string `json:"id"`
+	UserID      string `json:"user_id"`
+	AvatarURL   string `json:"avatar_url"`
+	DisplayName string `json:"display_name" l10n:"true"`
+	Description string `json:"description" l10n:"true"`
+}
+type FeaturedSpeakerList []FeaturedSpeaker
+
+// +transport
+type LookupFeaturedSpeakerRequest struct {
+	ID   string            `json:"id"`
+	Lang jsval.MaybeString `json:"lang,omitempty" urlenc:"lang,omitempty,string"`
+}
+
+// +transport
+type ListFeaturedSpeakersRequest struct {
+	ConferenceID string            `json:"conference_id"`
+	Since        jsval.MaybeString `json:"since" urlenc:"since,omitempty,string"`
+	Lang         jsval.MaybeString `json:"lang" urlenc:"lang,omitempty,string"`
+	Limit        jsval.MaybeInt    `json:"limit" urlenc:"limit,omitempty,int64"`
+}
+
+// +transport
+type AddFeaturedSpeakerRequest struct {
+	ConferenceID string                `json:"conference_id"`
+	SpeakerID    jsval.MaybeString     `json:"speaker_id"`
+	AvatarURL    jsval.MaybeString     `json:"avatar_url"`
+	DisplayName  string                `json:"display_name" l18n:"true"`
+	Description  string                `json:"description" l18n":"true"`
+	L10N         tools.LocalizedFields `json:"-"`
+	UserID       string                `json:"user_id"`
+}
+type CreateFeaturedSpeakerRequest struct {
+	AddFeaturedSpeakerRequest
+}
+
+// +transport
+type UpdateFeaturedSpeakerRequest struct {
+	ID          string                `json:"id"`
+	SpeakerID   jsval.MaybeString     `json:"speaker_id,omitempty"`
+	AvatarURL   jsval.MaybeString     `json:"avatar_url,omitempty"`
+	DisplayName jsval.MaybeString     `json:"display_name,omitempty" l18n:"true"`
+	Description jsval.MaybeString     `json:"description,omitempty" l18n":"true"`
+	L10N        tools.LocalizedFields `json:"-"`
+	UserID      string                `json:"user_id"`
+}
+
+// +transport
+type DeleteFeaturedSpeakerRequest struct {
+	ID     string `json:"id"`
+	UserID string `json:"user_id"`
 }

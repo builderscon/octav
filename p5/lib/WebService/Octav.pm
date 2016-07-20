@@ -295,7 +295,7 @@ sub list_room {
 
 sub create_conference_series {
     my ($self, $payload) = @_;
-    for my $required (qw(user_id slug)) {
+    for my $required (qw(user_id slug title)) {
         if (!$payload->{$required}) {
             die qq|property "$required" must be provided|;
         }
@@ -665,8 +665,8 @@ sub delete_question {
         }
     }
     my $uri = URI->new($self->{endpoint} . qq|/v1/question/delete|);
-    $uri->query_form($payload);
-    my $res = $self->{user_agent}->get($uri);
+    my $json_payload = JSON::encode_json($payload);
+    my $res = $self->{user_agent}->post($uri, Content => $json_payload);
     if (!$res->is_success) {
         $self->{last_error} = $res->status_line;
         return;
@@ -701,6 +701,86 @@ sub create_session_survey_response {
     my $uri = URI->new($self->{endpoint} . qq|/v1/survey_session_response/create|);
     $uri->query_form($payload);
     my $res = $self->{user_agent}->get($uri);
+    if (!$res->is_success) {
+        $self->{last_error} = $res->status_line;
+        return;
+    }
+    return 1
+}
+
+sub add_featured_speaker {
+    my ($self, $payload) = @_;
+    for my $required (qw(conference_id display_name description)) {
+        if (!$payload->{$required}) {
+            die qq|property "$required" must be provided|;
+        }
+    }
+    my $uri = URI->new($self->{endpoint} . qq|/v1/featured_speaker/add|);
+    my $json_payload = JSON::encode_json($payload);
+    my $res = $self->{user_agent}->post($uri, Content => $json_payload);
+    if (!$res->is_success) {
+        $self->{last_error} = $res->status_line;
+        return;
+    }
+    return JSON::decode_json($res->decoded_content);
+}
+
+sub lookup_featured_speaker {
+    my ($self, $payload) = @_;
+    for my $required (qw(id)) {
+        if (!$payload->{$required}) {
+            die qq|property "$required" must be provided|;
+        }
+    }
+    my $uri = URI->new($self->{endpoint} . qq|/v1/featured_speaker/lookup|);
+    $uri->query_form($payload);
+    my $res = $self->{user_agent}->get($uri);
+    if (!$res->is_success) {
+        $self->{last_error} = $res->status_line;
+        return;
+    }
+    return JSON::decode_json($res->decoded_content);
+}
+
+sub list_featured_speakers {
+    my ($self, $payload) = @_;
+    my $uri = URI->new($self->{endpoint} . qq|/v1/featured_speaker/list|);
+    $uri->query_form($payload);
+    my $res = $self->{user_agent}->get($uri);
+    if (!$res->is_success) {
+        $self->{last_error} = $res->status_line;
+        return;
+    }
+    return JSON::decode_json($res->decoded_content);
+}
+
+sub update_featured_speaker {
+    my ($self, $payload) = @_;
+    for my $required (qw(id)) {
+        if (!$payload->{$required}) {
+            die qq|property "$required" must be provided|;
+        }
+    }
+    my $uri = URI->new($self->{endpoint} . qq|/v1/featured_speaker/update|);
+    my $json_payload = JSON::encode_json($payload);
+    my $res = $self->{user_agent}->post($uri, Content => $json_payload);
+    if (!$res->is_success) {
+        $self->{last_error} = $res->status_line;
+        return;
+    }
+    return 1
+}
+
+sub delete_featured_speaker {
+    my ($self, $payload) = @_;
+    for my $required (qw(id user_id)) {
+        if (!$payload->{$required}) {
+            die qq|property "$required" must be provided|;
+        }
+    }
+    my $uri = URI->new($self->{endpoint} . qq|/v1/featured_speaker/delete|);
+    my $json_payload = JSON::encode_json($payload);
+    my $res = $self->{user_agent}->post($uri, Content => $json_payload);
     if (!$res->is_success) {
         $self->{last_error} = $res->status_line;
         return;

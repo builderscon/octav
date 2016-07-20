@@ -35,7 +35,7 @@ func (v *ConferenceSeries) DeleteFromPayload(tx *db.Tx, payload model.DeleteConf
 
 	u := model.User{}
 	su := User{}
-	if err := su.Lookup(tx, &u, model.LookupUserRequest{ID: payload.UserID}); err != nil {
+	if err := su.Lookup(tx, &u, payload.UserID); err != nil {
 		return errors.Wrap(err, "failed to load user from database")
 	}
 

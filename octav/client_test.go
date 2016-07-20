@@ -329,6 +329,36 @@ func testDeleteConference(ctx *TestCtx, id string) error {
 	return err
 }
 
+func larrywall(confID, userID string) *model.AddFeaturedSpeakerRequest {
+	r := &model.AddFeaturedSpeakerRequest{
+		ConferenceID: confID,
+		DisplayName: `Larry Wall (TimToady)`,
+		Description: `Larry Wall is a computer programmer and author, most widely known as the creator of the Perl programming language.`,
+		UserID: userID,
+	}
+	r.AvatarURL.Set(`https://upload.wikimedia.org/wikipedia/commons/b/b3/Larry_Wall_YAPC_2007.jpg`)
+	return r
+}
+
+func testCreateFeaturedSpeaker(ctx *TestCtx, in *model.AddFeaturedSpeakerRequest) (*model.FeaturedSpeaker, error) {
+	res, err := ctx.HTTPClient.AddFeaturedSpeaker(in)
+	if !assert.NoError(ctx.T, err, "CreateFeaturedSpeaker should succeed") {
+		return nil, err
+	}
+	return res, nil
+}
+
+func testDeleteFeaturedSpeaker(ctx *TestCtx, id, userID string) error {
+	err := ctx.HTTPClient.DeleteFeaturedSpeaker(&model.DeleteFeaturedSpeakerRequest{
+		ID: id,
+		UserID: userID,
+	})
+	if !assert.NoError(ctx.T, err, "DeleteFeaturedSpeaker should succeed") {
+		return err
+	}
+	return nil
+}
+
 func TestConferenceCRUD(t *testing.T) {
 	ctx, err := NewTestCtx(t)
 	if !assert.NoError(t, err, "failed to create test ctx") {
@@ -413,6 +443,13 @@ func TestConferenceCRUD(t *testing.T) {
 		return
 	}
 	defer testDeleteConferenceVenue(ctx, res.ID, venue.ID, user.ID)
+
+	// add a featured speaker
+	fs, err := testCreateFeaturedSpeaker(ctx, larrywall(res.ID, user.ID))
+	if err != nil {
+		return
+	}
+	defer testDeleteFeaturedSpeaker(ctx, fs.ID, user.ID)
 }
 
 func TestRoomCRUD(t *testing.T) {

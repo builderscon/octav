@@ -191,3 +191,26 @@ CREATE TABLE clients (
     modified_on TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     UNIQUE KEY (eid)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- Featured speakers are those speakers that you want have a separate
+-- section in your page, to describe who they are and what value they
+-- bring to your conference.
+-- These entries may be associated with an actual user, but often times
+-- you want to put these stories *BEFORE* they have the actual talk
+-- materials, or even, before they can commit to dates.
+-- Therefore this table replicates some of `users` table. Consumers
+-- should use the actual user data if the `user_id` field is populated
+CREATE TABLE featured_speakers (
+    oid INTEGER UNSIGNED NOT NULL PRIMARY KEY AUTO_INCREMENT,
+    eid CHAR(64) CHARACTER SET latin1 NOT NULL,
+    conference_id CHAR(64) CHARACTER SET latin1 NOT NULL, -- featured speakers are bound to a conference.
+    speaker_id CHAR(64) CHARACTER SET latin1, -- If non-null, is linked to an actual user
+    display_name TEXT NOT NULL, -- consolidated because we just need a name to show
+    description TEXT NOT NULL, -- text to be displayed in the featured section
+    avatar_url TEXT, -- if null, we should provide a sane default
+    created_on DATETIME NOT NULL,
+    modified_on TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    UNIQUE KEY(eid),
+    KEY(conference_id),
+    FOREIGN KEY (speaker_id) REFERENCES users(eid) ON DELETE SET NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;

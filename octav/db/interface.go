@@ -171,3 +171,16 @@ type Client struct {
 	CreatedOn  time.Time
 	ModifiedOn NullTime
 }
+
+// +DB tablename:"featured_speakers"
+type FeaturedSpeaker struct {
+	OID          int64
+	EID          string
+	ConferenceID string
+	SpeakerID    sql.NullString
+	AvatarURL    sql.NullString
+	DisplayName  string
+	Description  string
+	CreatedOn    time.Time
+	ModifiedOn   NullTime
+}

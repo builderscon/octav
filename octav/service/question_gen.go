@@ -13,14 +13,24 @@ import (
 
 var _ = time.Time{}
 
-func (v *Question) Lookup(tx *db.Tx, m *model.Question, payload model.LookupQuestionRequest) (err error) {
+func (v *Question) LookupFromPayload(tx *db.Tx, m *model.Question, payload model.LookupQuestionRequest) (err error) {
+	if pdebug.Enabled {
+		g := pdebug.Marker("service.Question.LookupFromPayload").BindError(&err)
+		defer g.End()
+	}
+	if err = v.Lookup(tx, m, payload.ID); err != nil {
+		return errors.Wrap(err, "failed to load model.Question from database")
+	}
+	return nil
+}
+func (v *Question) Lookup(tx *db.Tx, m *model.Question, id string) (err error) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("service.Question.Lookup").BindError(&err)
 		defer g.End()
 	}
 
 	r := model.Question{}
-	if err = r.Load(tx, payload.ID); err != nil {
+	if err = r.Load(tx, id); err != nil {
 		return errors.Wrap(err, "failed to load model.Question from database")
 	}
 	*m = r

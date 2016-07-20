@@ -233,7 +233,7 @@ func (v *Session) Decorate(tx *db.Tx, session *model.Session, lang string) error
 func (v *Session) CreateFromPayload(tx *db.Tx, result *model.Session, payload model.CreateSessionRequest) error {
 	var u model.User
 	su := User{}
-	if err := su.Lookup(tx, &u, model.LookupUserRequest{ID: payload.UserID}); err != nil {
+	if err := su.Lookup(tx, &u, payload.UserID); err != nil {
 		return errors.Wrapf(err, "failed to load user %s", payload.UserID)
 	}
 
