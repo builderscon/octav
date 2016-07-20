@@ -18,6 +18,7 @@ func (v *Conference) populateRowForCreate(vdb *db.Conference, payload model.Crea
 	vdb.Slug = payload.Slug
 	vdb.Title = payload.Title
 	vdb.SeriesID = payload.SeriesID
+	vdb.Status = "private"
 
 	if payload.SubTitle.Valid() {
 		vdb.SubTitle.Valid = true
@@ -37,6 +38,10 @@ func (v *Conference) populateRowForUpdate(vdb *db.Conference, payload model.Upda
 
 	if payload.Title.Valid() {
 		vdb.Title = payload.Title.String
+	}
+
+	if payload.Status.Valid() {
+		vdb.Status = payload.Status.String
 	}
 
 	if payload.SubTitle.Valid() {
@@ -388,8 +393,13 @@ func (v *Conference) ListFromPayload(tx *db.Tx, l *model.ConferenceList, payload
 		}
 	}
 
+	status := "public";
+	if payload.Status.Valid() {
+		status = payload.Status.String
+	}
+
 	vdbl := db.ConferenceList{}
-	if err := vdbl.LoadByRange(tx, payload.Since.String, rs, re, int(payload.Limit.Int)); err != nil {
+	if err := vdbl.LoadByStatusAndRange(tx, status, payload.Since.String, rs, re, int(payload.Limit.Int)); err != nil {
 		return errors.Wrap(err, "failed to load list from database")
 	}
 

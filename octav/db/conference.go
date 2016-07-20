@@ -1,45 +1,70 @@
 package db
 
 import (
-	"bytes"
 	"fmt"
+	"io"
 	"time"
+
+	"github.com/lestrrat/go-pdebug"
+	"github.com/pkg/errors"
 )
 
-func (v *ConferenceList) LoadByRange(tx *Tx, since string, rangeStart, rangeEnd time.Time, limit int) error {
-	// Use JOIN later
-	var args []interface{}
-	where := bytes.Buffer{}
-	if since != "" {
-		vdb := Conference{}
-		if err := vdb.LoadByEID(tx, since); err != nil {
-			return err
-		}
-		where.WriteString(ConferenceTable)
-		where.WriteString(".conference.oid > ?")
-		args = append(args, vdb.OID)
-	}
+func compileRangeWhere(dst io.Writer, args *[]interface{}, since int64, rangeStart, rangeEnd time.Time) error {
+	where := getStmtBuf()
+	defer releaseStmtBuf(where)
 
-	hasDate := false
+	where.WriteString(ConferenceTable)
+	where.WriteString(".oid > ?")
+	*args = append(*args, since)
+
 	if !rangeStart.IsZero() {
 		if where.Len() > 0 {
 			where.WriteString(" AND ")
 		}
-		where.WriteString("conference_dates.date >= ?")
-		args = append(args, rangeStart)
-		hasDate = true
+		where.WriteString(ConferenceDateTable)
+		where.WriteString(".date >= ?")
+		*args = append(*args, rangeStart)
 	}
 
 	if !rangeEnd.IsZero() {
 		if where.Len() > 0 {
 			where.WriteString(" AND ")
 		}
-		where.WriteString("conference_dates.date <= ?")
-		args = append(args, rangeEnd)
+		where.WriteString(ConferenceDateTable)
+		where.WriteString(".date <= ?")
+		*args = append(*args, rangeEnd)
+	}
+
+	toWrite := where.Len()
+	n, err := where.WriteTo(dst)
+	if n != int64(toWrite) {
+		if err != nil {
+			return errors.Wrap(err, "failed to write where clause to destination")
+		}
+		return errors.New("failed to write entire where clause to destination")
+	}
+	return nil
+}
+
+func (v *ConferenceList) LoadByStatusAndRange(tx *Tx, status string, since string, rangeStart, rangeEnd time.Time, limit int) error {
+	// We need the oid of "since"
+	var sinceOID int64
+	if since != "" {
+		var vdb Conference
+		if err := vdb.LoadByEID(tx, since); err != nil {
+			return errors.Wrap(err, "failed to load reference row")
+		}
+		sinceOID = vdb.OID
+	}
+
+	qbuf := getStmtBuf()
+	defer releaseStmtBuf(qbuf)
+
+	var hasDate bool
+	if !rangeStart.IsZero() || !rangeEnd.IsZero() {
 		hasDate = true
 	}
 
-	qbuf := bytes.Buffer{}
 	qbuf.WriteString(`SELECT `)
 	qbuf.WriteString(ConferenceStdSelectColumns)
 	qbuf.WriteString(` FROM `)
@@ -54,9 +79,64 @@ func (v *ConferenceList) LoadByRange(tx *Tx, since string, rangeStart, rangeEnd 
 		qbuf.WriteString(`.conference_id `)
 	}
 
-	if where.Len() > 0 {
-		qbuf.WriteString(` WHERE `)
-		where.WriteTo(&qbuf)
+	qbuf.WriteString(` WHERE `)
+
+	var args []interface{}
+	if err := compileRangeWhere(qbuf, &args, sinceOID, rangeStart, rangeEnd); err != nil {
+		return errors.Wrap(err, "failed to compile range where clause")
+	}
+	qbuf.WriteString(` AND `)
+	qbuf.WriteString(ConferenceTable)
+	qbuf.WriteString(`.status = ?`)
+	args = append(args, status)
+
+	qbuf.WriteString(` ORDER BY oid DESC`)
+	fmt.Fprintf(qbuf, " LIMIT %d", limit)
+
+pdebug.Printf("%s", qbuf.String())
+pdebug.Printf("%#v", args)
+
+	return v.execSQLAndExtract(tx, qbuf.String(), limit, args...)
+}
+
+func (v *ConferenceList) LoadByRange(tx *Tx, since string, rangeStart, rangeEnd time.Time, limit int) error {
+	// We need the oid of "since"
+	var sinceOID int64
+	if since != "" {
+		var vdb Conference
+		if err := vdb.LoadByEID(tx, since); err != nil {
+			return errors.Wrap(err, "failed to load reference row")
+		}
+		sinceOID = vdb.OID
+	}
+
+	// Use JOIN later
+	var args []interface{}
+	qbuf := getStmtBuf()
+	defer releaseStmtBuf(qbuf)
+
+	var hasDate bool
+	if !rangeStart.IsZero() || !rangeEnd.IsZero() {
+		hasDate = true
+	}
+
+	qbuf.WriteString(`SELECT `)
+	qbuf.WriteString(ConferenceStdSelectColumns)
+	qbuf.WriteString(` FROM `)
+	qbuf.WriteString(ConferenceTable)
+	if hasDate {
+		qbuf.WriteString(` JOIN `)
+		qbuf.WriteString(ConferenceDateTable)
+		qbuf.WriteString(` ON `)
+		qbuf.WriteString(ConferenceTable)
+		qbuf.WriteString(`.eid = `)
+		qbuf.WriteString(ConferenceDateTable)
+		qbuf.WriteString(`.conference_id `)
+	}
+
+	qbuf.WriteString(` WHERE `)
+	if err := compileRangeWhere(qbuf, &args, sinceOID, rangeStart, rangeEnd); err != nil {
+		return errors.Wrap(err, "failed to compile range where clause")
 	}
 
 	if hasDate {
@@ -67,14 +147,17 @@ func (v *ConferenceList) LoadByRange(tx *Tx, since string, rangeStart, rangeEnd 
 		qbuf.WriteString(` ORDER BY oid DESC`)
 	}
 
-	fmt.Fprintf(&qbuf, " LIMIT %d", limit)
+	fmt.Fprintf(qbuf, " LIMIT %d", limit)
+	return v.execSQLAndExtract(tx, qbuf.String(), limit, args...)
+}
 
-	rows, err := tx.Query(qbuf.String(), args...)
+func (v *ConferenceList) execSQLAndExtract(tx *Tx, sql string, limit int, args ...interface{}) error {
+	rows, err := tx.Query(sql, args...)
 	if err != nil {
 		return err
 	}
 
-	res := make([]Conference, 0, limit)
+	res := make(ConferenceList, 0, limit)
 	for rows.Next() {
 		row := Conference{}
 		if err := row.Scan(rows); err != nil {

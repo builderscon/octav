@@ -70,12 +70,14 @@ CREATE TABLE conferences (
     slug TEXT NOT NULL,
     title TEXT NOT NULL,
     sub_title TEXT,
+    status CHAR(64) CHARACTER SET latin1 NOT NULL default "private",
     created_by CHAR(64) CHARACTER SET latin1 NOT NULL,
     created_on DATETIME NOT NULL,
     modified_on TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     FOREIGN KEY (series_id) REFERENCES conference_series(eid),
     UNIQUE KEY(eid),
-    UNIQUE KEY(series_id, slug(191))
+    UNIQUE KEY(series_id, slug(191)),
+    KEY (status)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 CREATE TABLE conference_dates (

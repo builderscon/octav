@@ -1,5 +1,5 @@
 """OCTAV Client Library"""
-"""DO NOT EDIT: This file was generated from ../spec/v1/api.json on Wed Jul 20 08:00:12 2016"""
+"""DO NOT EDIT: This file was generated from ../spec/v1/api.json on Wed Jul 20 20:51:24 2016"""
 
 import json
 import os
@@ -684,7 +684,7 @@ class Octav(object):
         return None
     return res.json()
 
-  def list_conference (self, lang=None, limit=None, range_end=None, range_start=None, since=None):
+  def list_conference (self, lang=None, limit=None, range_end=None, range_start=None, since=None, status=None):
     payload = {}
     if lang is not None:
         payload['lang'] = lang
@@ -696,6 +696,8 @@ class Octav(object):
         payload['range_start'] = range_start
     if since is not None:
         payload['since'] = since
+    if status is not None:
+        payload['status'] = status
     uri = self.endpoint + "/conference/list"
     if self.debug:
         print("GET " + uri)
@@ -705,7 +707,7 @@ class Octav(object):
         return None
     return res.json()
 
-  def update_conference (self, id, user_id, description=None, slug=None, starts_on=None, sub_title=None, title=None):
+  def update_conference (self, id, user_id, description=None, slug=None, status=None, sub_title=None, title=None):
     payload = {}
     if id is None:
             raise 'property id must be provided'
@@ -719,8 +721,8 @@ class Octav(object):
         payload['id'] = id
     if slug is not None:
         payload['slug'] = slug
-    if starts_on is not None:
-        payload['starts_on'] = starts_on
+    if status is not None:
+        payload['status'] = status
     if sub_title is not None:
         payload['sub_title'] = sub_title
     if title is not None:

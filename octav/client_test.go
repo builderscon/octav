@@ -955,6 +955,7 @@ func TestListConference(t *testing.T) {
 		return
 	}
 
+	confs := make([]*model.Conference, 10)
 	for i := 0; i < 10; i++ {
 		lf := tools.LocalizedFields{}
 		lf.Set("ja", "title", `リストカンファレンステスト`)
@@ -969,6 +970,7 @@ func TestListConference(t *testing.T) {
 		if err != nil {
 			return
 		}
+		confs[i] = conf
 
 		err = ctx.HTTPClient.AddConferenceDates(&model.AddConferenceDatesRequest{
 			ConferenceID: conf.ID,
@@ -986,6 +988,15 @@ func TestListConference(t *testing.T) {
 		}
 
 		defer testDeleteConference(ctx, conf.ID)
+
+		req := &model.UpdateConferenceRequest{
+			ID: confs[i].ID,
+			UserID: user.ID,
+		}
+		req.Status.Set("public")
+		if err := testUpdateConference(ctx, req); err != nil {
+			return
+		}
 	}
 
 	in := model.ListConferenceRequest{}
@@ -1002,6 +1013,33 @@ func TestListConference(t *testing.T) {
 	}
 
 	if !assert.Len(ctx.T, res, 10, "ListConference returns 10 rooms") {
+		return
+	}
+
+	for _, c := range res {
+		if !assert.Equal(t, c.Title, "リストカンファレンステスト", "Title is in Japanese") {
+			return
+		}
+	}
+
+	// Make some of them private
+	for i := 0; i < 5; i++ {
+		req := &model.UpdateConferenceRequest{
+			ID: confs[i*2].ID,
+			UserID: user.ID,
+		}
+		req.Status.Set("private")
+		if err := testUpdateConference(ctx, req); err != nil {
+			return
+		}
+	}
+
+  res, err = ctx.HTTPClient.ListConference(&in)
+  if !assert.NoError(ctx.T, err, "ListConference should succeed") {
+    return
+  }
+
+	if !assert.Len(ctx.T, res, 5, "ListConference returns 5 conferences") {
 		return
 	}
 

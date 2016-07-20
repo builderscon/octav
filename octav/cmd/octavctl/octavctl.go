@@ -322,6 +322,8 @@ func doConferenceList(args cmdargs) int {
 	fs.StringVar(&range_start, "range_start", "", "")
 	var since string
 	fs.StringVar(&since, "since", "", "")
+	var status string
+	fs.StringVar(&status, "status", "", "")
 	prepGlobalFlags(fs)
 	if err := fs.Parse([]string(args)); err != nil {
 		return errOut(err)
@@ -342,6 +344,9 @@ func doConferenceList(args cmdargs) int {
 	}
 	if since != "" {
 		m["since"] = since
+	}
+	if status != "" {
+		m["status"] = status
 	}
 	r := model.ListConferenceRequest{}
 	if err := r.Populate(m); err != nil {
@@ -375,8 +380,8 @@ func doConferenceUpdate(args cmdargs) int {
 	fs.StringVar(&id, "id", "", "")
 	var slug string
 	fs.StringVar(&slug, "slug", "", "")
-	var starts_on string
-	fs.StringVar(&starts_on, "starts_on", "", "")
+	var status string
+	fs.StringVar(&status, "status", "", "")
 	var sub_title string
 	fs.StringVar(&sub_title, "sub_title", "", "")
 	var title string
@@ -398,8 +403,8 @@ func doConferenceUpdate(args cmdargs) int {
 	if slug != "" {
 		m["slug"] = slug
 	}
-	if starts_on != "" {
-		m["starts_on"] = starts_on
+	if status != "" {
+		m["status"] = status
 	}
 	if sub_title != "" {
 		m["sub_title"] = sub_title
