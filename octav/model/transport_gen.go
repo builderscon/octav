@@ -670,11 +670,14 @@ func (r UpdateConferenceRequest) collectMarshalData() map[string]interface{} {
 	if r.SeriesID.Valid() {
 		m["series_id"] = r.SeriesID.Value()
 	}
+	if r.Slug.Valid() {
+		m["slug"] = r.Slug.Value()
+	}
 	if r.SubTitle.Valid() {
 		m["sub_title"] = r.SubTitle.Value()
 	}
-	if r.Slug.Valid() {
-		m["slug"] = r.Slug.Value()
+	if r.Status.Valid() {
+		m["status"] = r.Status.Value()
 	}
 	m["user_id"] = r.UserID
 	return m
@@ -728,17 +731,23 @@ func (r *UpdateConferenceRequest) Populate(m map[string]interface{}) error {
 		}
 		delete(m, "series_id")
 	}
+	if jv, ok := m["slug"]; ok {
+		if err := r.Slug.Set(jv); err != nil {
+			return errors.New("set field Slug failed: " + err.Error())
+		}
+		delete(m, "slug")
+	}
 	if jv, ok := m["sub_title"]; ok {
 		if err := r.SubTitle.Set(jv); err != nil {
 			return errors.New("set field SubTitle failed: " + err.Error())
 		}
 		delete(m, "sub_title")
 	}
-	if jv, ok := m["slug"]; ok {
-		if err := r.Slug.Set(jv); err != nil {
-			return errors.New("set field Slug failed: " + err.Error())
+	if jv, ok := m["status"]; ok {
+		if err := r.Status.Set(jv); err != nil {
+			return errors.New("set field Status failed: " + err.Error())
 		}
-		delete(m, "slug")
+		delete(m, "status")
 	}
 	if jv, ok := m["user_id"]; ok {
 		switch jv.(type) {
@@ -749,7 +758,7 @@ func (r *UpdateConferenceRequest) Populate(m map[string]interface{}) error {
 			return ErrInvalidJSONFieldType{Field: "user_id"}
 		}
 	}
-	if err := tools.ExtractL10NFields(m, &r.L10N, []string{"id", "title", "series_id", "sub_title", "slug", "user_id"}); err != nil {
+	if err := tools.ExtractL10NFields(m, &r.L10N, []string{"id", "title", "series_id", "slug", "sub_title", "status", "user_id"}); err != nil {
 		return err
 	}
 	return nil
@@ -757,7 +766,7 @@ func (r *UpdateConferenceRequest) Populate(m map[string]interface{}) error {
 
 func (r *UpdateConferenceRequest) GetPropNames() ([]string, error) {
 	l, _ := r.L10N.GetPropNames()
-	return append(l, "id", "title", "series_id", "sub_title", "slug", "user_id"), nil
+	return append(l, "id", "title", "series_id", "slug", "sub_title", "status", "user_id"), nil
 }
 
 func (r *UpdateConferenceRequest) SetPropValue(s string, v interface{}) error {
@@ -771,10 +780,12 @@ func (r *UpdateConferenceRequest) SetPropValue(s string, v interface{}) error {
 		return r.Title.Set(v)
 	case "series_id":
 		return r.SeriesID.Set(v)
-	case "sub_title":
-		return r.SubTitle.Set(v)
 	case "slug":
 		return r.Slug.Set(v)
+	case "sub_title":
+		return r.SubTitle.Set(v)
+	case "status":
+		return r.Status.Set(v)
 	case "user_id":
 		if jv, ok := v.(string); ok {
 			r.UserID = jv
@@ -1346,6 +1357,9 @@ func (r ListConferenceRequest) collectMarshalData() map[string]interface{} {
 	if r.Since.Valid() {
 		m["since"] = r.Since.Value()
 	}
+	if r.Status.Valid() {
+		m["status"] = r.Status.Value()
+	}
 	if r.Lang.Valid() {
 		m["lang"] = r.Lang.Value()
 	}
@@ -1399,6 +1413,12 @@ func (r *ListConferenceRequest) Populate(m map[string]interface{}) error {
 			return errors.New("set field Since failed: " + err.Error())
 		}
 		delete(m, "since")
+	}
+	if jv, ok := m["status"]; ok {
+		if err := r.Status.Set(jv); err != nil {
+			return errors.New("set field Status failed: " + err.Error())
+		}
+		delete(m, "status")
 	}
 	if jv, ok := m["lang"]; ok {
 		if err := r.Lang.Set(jv); err != nil {

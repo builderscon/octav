@@ -51,6 +51,7 @@ func (v *Conference) FromRow(vdb db.Conference) error {
 		v.SubTitle = vdb.SubTitle.String
 	}
 	v.Slug = vdb.Slug
+	v.Status = vdb.Status
 	return nil
 }
 
@@ -61,6 +62,7 @@ func (v *Conference) ToRow(vdb *db.Conference) error {
 	vdb.SubTitle.Valid = true
 	vdb.SubTitle.String = v.SubTitle
 	vdb.Slug = v.Slug
+	vdb.Status = v.Status
 	return nil
 }
 
@@ -83,6 +85,8 @@ func (v ConferenceL10N) GetPropValue(s string) (interface{}, error) {
 		return v.SubTitle, nil
 	case "slug":
 		return v.Slug, nil
+	case "status":
+		return v.Status, nil
 	case "dates":
 		return v.Dates, nil
 	case "administrators":

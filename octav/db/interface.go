@@ -29,6 +29,7 @@ type Conference struct {
 	SeriesID   string // ConferenceSeries ID
 	Slug       string
 	Title      string
+	Status     string
 	SubTitle   sql.NullString
 	CreatedBy  string // User ID that creates this conference
 	CreatedOn  time.Time

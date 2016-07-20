@@ -5,6 +5,7 @@ import (
 	"io"
 	"time"
 
+	"github.com/lestrrat/go-pdebug"
 	"github.com/pkg/errors"
 )
 
@@ -84,8 +85,16 @@ func (v *ConferenceList) LoadByStatusAndRange(tx *Tx, status string, since strin
 	if err := compileRangeWhere(qbuf, &args, sinceOID, rangeStart, rangeEnd); err != nil {
 		return errors.Wrap(err, "failed to compile range where clause")
 	}
+	qbuf.WriteString(` AND `)
+	qbuf.WriteString(ConferenceTable)
+	qbuf.WriteString(`.status = ?`)
+	args = append(args, status)
+
 	qbuf.WriteString(` ORDER BY oid DESC`)
 	fmt.Fprintf(qbuf, " LIMIT %d", limit)
+
+pdebug.Printf("%s", qbuf.String())
+pdebug.Printf("%#v", args)
 
 	return v.execSQLAndExtract(tx, qbuf.String(), limit, args...)
 }

@@ -27,6 +27,7 @@ type Conference struct {
 	Series           *ConferenceSeries   `json:"series,omitempty" decorate:"true"`
 	SubTitle         string              `json:"sub_title" l10n:"true"`
 	Slug             string              `json:"slug"`
+	Status           string              `json:"status"`
 	Dates            ConferenceDateList  `json:"dates,omitempty"`
 	Administrators   UserList            `json:"administrators,omitempty" decorate:"true"`
 	Venues           VenueList           `json:"venues,omitempty" decorate:"true"`
@@ -182,8 +183,9 @@ type UpdateConferenceRequest struct {
 	ID       string            `json:"id"`
 	Title    jsval.MaybeString `json:"title,omitempty" l10n:"true"`
 	SeriesID jsval.MaybeString `json:"series_id,omitempty"`
-	SubTitle jsval.MaybeString `json:"sub_title,omitempty" l10n:"true"`
 	Slug     jsval.MaybeString `json:"slug,omitempty"`
+	SubTitle jsval.MaybeString `json:"sub_title,omitempty" l10n:"true"`
+	Status   jsval.MaybeString `json:"status,omitempty"`
 	UserID   string            `json:"user_id"`
 	// TODO dates
 	L10N tools.LocalizedFields `json:"-"`
