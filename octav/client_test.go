@@ -454,7 +454,7 @@ func TestConferenceCRUD(t *testing.T) {
 
 func TestRoomCRUD(t *testing.T) {
 	ctx, err := NewTestCtx(t)
-	if !assert.NoError(ctx, err, "failed to create test ctx") {
+	if !assert.NoError(t, err, "failed to create test ctx") {
 		return
 	}
 	defer ctx.Close()
@@ -564,7 +564,7 @@ func bconsession(cid, speakerID, userID string) *model.CreateSessionRequest {
 
 func TestSessionCRUD(t *testing.T) {
 	ctx, err := NewTestCtx(t)
-	if !assert.NoError(ctx, err, "failed to create test ctx") {
+	if !assert.NoError(t, err, "failed to create test ctx") {
 		return
 	}
 	defer ctx.Close()
@@ -667,7 +667,7 @@ func johndoe() *model.CreateUserRequest {
 
 func TestCreateUser(t *testing.T) {
 	ctx, err := NewTestCtx(t)
-	if !assert.NoError(ctx, err, "failed to create test ctx") {
+	if !assert.NoError(t, err, "failed to create test ctx") {
 		return
 	}
 	defer ctx.Close()
@@ -719,7 +719,7 @@ func TestCreateUser(t *testing.T) {
 
 func TestVenueCRUD(t *testing.T) {
 	ctx, err := NewTestCtx(t)
-	if !assert.NoError(ctx, err, "failed to create test ctx") {
+	if !assert.NoError(t, err, "failed to create test ctx") {
 		return
 	}
 	defer ctx.Close()
@@ -773,7 +773,7 @@ func TestVenueCRUD(t *testing.T) {
 
 func TestDeleteConferenceDates(t *testing.T) {
 	ctx, err := NewTestCtx(t)
-	if !assert.NoError(ctx, err, "failed to create test ctx") {
+	if !assert.NoError(t, err, "failed to create test ctx") {
 		return
 	}
 	defer ctx.Close()
@@ -848,7 +848,7 @@ func TestDeleteConferenceDates(t *testing.T) {
 
 func TestConferenceAdmins(t *testing.T) {
 	ctx, err := NewTestCtx(t)
-	if !assert.NoError(ctx, err, "failed to create test ctx") {
+	if !assert.NoError(t, err, "failed to create test ctx") {
 		return
 	}
 	defer ctx.Close()
@@ -926,7 +926,7 @@ func TestConferenceAdmins(t *testing.T) {
 
 func TestListConference(t *testing.T) {
 	ctx, err := NewTestCtx(t)
-	if !assert.NoError(ctx, err, "failed to create test ctx") {
+	if !assert.NoError(t, err, "failed to create test ctx") {
 		return
 	}
 	defer ctx.Close()
@@ -1052,7 +1052,7 @@ func TestListConference(t *testing.T) {
 
 func TestListRoom(t *testing.T) {
 	ctx, err := NewTestCtx(t)
-	if !assert.NoError(ctx, err, "failed to create test ctx") {
+	if !assert.NoError(t, err, "failed to create test ctx") {
 		return
 	}
 	defer ctx.Close()
@@ -1092,7 +1092,7 @@ func TestListRoom(t *testing.T) {
 
 func TestListSessionByConference(t *testing.T) {
 	ctx, err := NewTestCtx(t)
-	if !assert.NoError(ctx, err, "failed to create test ctx") {
+	if !assert.NoError(t, err, "failed to create test ctx") {
 		return
 	}
 	defer ctx.Close()
@@ -1156,7 +1156,7 @@ func TestListSessionByConference(t *testing.T) {
 
 func TestListVenue(t *testing.T) {
 	ctx, err := NewTestCtx(t)
-	if !assert.NoError(ctx, err, "failed to create test ctx") {
+	if !assert.NoError(t, err, "failed to create test ctx") {
 		return
 	}
 	defer ctx.Close()
