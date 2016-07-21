@@ -115,6 +115,9 @@ func (v *Room) ReplaceL10NStrings(tx *db.Tx, m *model.Room, lang string) error {
 			if len(l.Localized) == 0 {
 				continue
 			}
+			if pdebug.Enabled {
+				pdebug.Printf("Adding key '%s#%s'", l.Name, l.Language)
+			}
 			m.L10N.Set(l.Language, l.Name, l.Localized)
 		}
 	} else {
