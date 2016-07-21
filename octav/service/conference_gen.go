@@ -98,34 +98,52 @@ func (v *Conference) Update(tx *db.Tx, vdb *db.Conference, payload model.UpdateC
 
 func (v *Conference) ReplaceL10NStrings(tx *db.Tx, m *model.Conference, lang string) error {
 	if pdebug.Enabled {
-		g := pdebug.Marker("service.Conference.ReplaceL10NStrings")
+		g := pdebug.Marker("service.Conference.ReplaceL10NStrings lang = %s", lang)
 		defer g.End()
 	}
-	rows, err := tx.Query(`SELECT oid, parent_id, parent_type, name, language, localized FROM localized_strings WHERE parent_type = ? AND parent_id = ? AND language = ?`, "Conference", m.ID, lang)
-	if err != nil {
-		return err
-	}
-
-	var l db.LocalizedString
-	for rows.Next() {
-		if err := l.Scan(rows); err != nil {
+	if lang == "all" {
+		rows, err := tx.Query(`SELECT oid, parent_id, parent_type, name, language, localized FROM localized_strings WHERE parent_type = ? AND parent_id = ?`, "Conference", m.ID)
+		if err != nil {
 			return err
 		}
-		if len(l.Localized) == 0 {
-			continue
+
+		var l db.LocalizedString
+		for rows.Next() {
+			if err := l.Scan(rows); err != nil {
+				return err
+			}
+			if len(l.Localized) == 0 {
+				continue
+			}
+			m.L10N.Set(l.Language, l.Name, l.Localized)
+		}
+	} else {
+		rows, err := tx.Query(`SELECT oid, parent_id, parent_type, name, language, localized FROM localized_strings WHERE parent_type = ? AND parent_id = ? AND language = ?`, "Conference", m.ID, lang)
+		if err != nil {
+			return err
 		}
 
-		switch l.Name {
-		case "title":
-			if pdebug.Enabled {
-				pdebug.Printf("Replacing for key 'title'")
+		var l db.LocalizedString
+		for rows.Next() {
+			if err := l.Scan(rows); err != nil {
+				return err
 			}
-			m.Title = l.Localized
-		case "sub_title":
-			if pdebug.Enabled {
-				pdebug.Printf("Replacing for key 'sub_title'")
+			if len(l.Localized) == 0 {
+				continue
 			}
-			m.SubTitle = l.Localized
+
+			switch l.Name {
+			case "title":
+				if pdebug.Enabled {
+					pdebug.Printf("Replacing for key 'title'")
+				}
+				m.Title = l.Localized
+			case "sub_title":
+				if pdebug.Enabled {
+					pdebug.Printf("Replacing for key 'sub_title'")
+				}
+				m.SubTitle = l.Localized
+			}
 		}
 	}
 	return nil

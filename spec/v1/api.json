@@ -82,11 +82,11 @@
       "type": "object",
       "properties": {
         "id": {"$ref": "#/definitions/uuid"},
-        "conference_id": {"$ref": "#/definitions/uuid"},
-        "user_id": {"$ref": "#/definitions/uuid"},
         "avatar_url": {"$ref": "#/definitions/url" },
+        "conference_id": {"$ref": "#/definitions/uuid"},
         "display_name": { "$ref": "#/definitions/string_en_not_empty" },
-        "description": { "$ref": "#/definitions/string_en_not_empty" }
+        "description": { "$ref": "#/definitions/string_en_not_empty" },
+        "speaker_id": {"$ref": "#/definitions/uuid"}
       },
       "patternProperties": {
         "display_name#[a-z]+": { "$ref": "#/definitions/string_i18n" },
@@ -1207,7 +1207,6 @@
         "required": ["id"],
         "properties": {
           "id": {"$ref": "#/definitions/uuid"},
-          "conference_id": {"$ref": "#/definitions/uuid"},
           "speaker_id": {"$ref": "#/definitions/uuid"},
           "avatar_url": {"$ref": "#/definitions/url" },
           "display_name": { "$ref": "#/definitions/string_en_not_empty" },

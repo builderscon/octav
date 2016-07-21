@@ -289,7 +289,7 @@ func init() {
 			jsval.Reference(M).RefersTo("#/definitions/uuid"),
 		).
 		AddProp(
-			"user_id",
+			"speaker_id",
 			jsval.Reference(M).RefersTo("#/definitions/uuid"),
 		).
 		PatternPropertiesString(
@@ -804,7 +804,7 @@ func init() {
 					jsval.Reference(M).RefersTo("#/definitions/uuid"),
 				).
 				AddProp(
-					"user_id",
+					"speaker_id",
 					jsval.Reference(M).RefersTo("#/definitions/uuid"),
 				).
 				PatternPropertiesString(
@@ -2151,7 +2151,7 @@ func init() {
 					jsval.Reference(M).RefersTo("#/definitions/uuid"),
 				).
 				AddProp(
-					"user_id",
+					"speaker_id",
 					jsval.Reference(M).RefersTo("#/definitions/uuid"),
 				).
 				PatternPropertiesString(
@@ -2558,10 +2558,6 @@ func init() {
 				AddProp(
 					"avatar_url",
 					jsval.Reference(M).RefersTo("#/definitions/url"),
-				).
-				AddProp(
-					"conference_id",
-					jsval.Reference(M).RefersTo("#/definitions/uuid"),
 				).
 				AddProp(
 					"description",
