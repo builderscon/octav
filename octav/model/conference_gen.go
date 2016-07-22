@@ -24,6 +24,7 @@ type rawConference struct {
 	Administrators   UserList            `json:"administrators,omitempty" decorate:"true"`
 	Venues           VenueList           `json:"venues,omitempty" decorate:"true"`
 	FeaturedSpeakers FeaturedSpeakerList `json:"featured_speakers,omitempty" decorate:"true"`
+	Sponsors         SponsorList         `json:"sponsors,omitempty" decorate:"true"`
 }
 
 func (v Conference) MarshalJSON() ([]byte, error) {
@@ -38,6 +39,7 @@ func (v Conference) MarshalJSON() ([]byte, error) {
 	raw.Administrators = v.Administrators
 	raw.Venues = v.Venues
 	raw.FeaturedSpeakers = v.FeaturedSpeakers
+	raw.Sponsors = v.Sponsors
 	buf, err := json.Marshal(raw)
 	if err != nil {
 		return nil, err
