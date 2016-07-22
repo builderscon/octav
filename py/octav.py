@@ -1,5 +1,5 @@
 """OCTAV Client Library"""
-"""DO NOT EDIT: This file was generated from ../spec/v1/api.json on Wed Jul 20 20:51:24 2016"""
+"""DO NOT EDIT: This file was generated from ../spec/v1/api.json on Fri Jul 22 13:49:34 2016"""
 
 import json
 import os
@@ -1135,15 +1135,16 @@ class Octav(object):
         return None
     return res.json()
 
-  def update_featured_speaker (self, id, avatar_url=None, conference_id=None, description=None, display_name=None, speaker_id=None, user_id=None):
+  def update_featured_speaker (self, id, user_id, avatar_url=None, description=None, display_name=None, speaker_id=None):
     payload = {}
     if id is None:
             raise 'property id must be provided'
     payload['id'] = id
+    if user_id is None:
+            raise 'property user_id must be provided'
+    payload['user_id'] = user_id
     if avatar_url is not None:
         payload['avatar_url'] = avatar_url
-    if conference_id is not None:
-        payload['conference_id'] = conference_id
     if description is not None:
         payload['description'] = description
     if display_name is not None:
@@ -1176,6 +1177,146 @@ class Octav(object):
     if user_id is not None:
         payload['user_id'] = user_id
     uri = self.endpoint + "/featured_speaker/delete"
+    if self.debug:
+        print("POST " + uri)
+    res = self.session.post(uri, auth=(self.key, self.secret), json=payload)
+    if res.status_code != 200:
+        self.extract_error(res)
+        return None
+    return True
+
+  def add_sponsor (self, conference_id, group_name, logo_url1, name, url, user_id, logo_url2=None, logo_url3=None, sort_order=None):
+    payload = {}
+    if conference_id is None:
+            raise 'property conference_id must be provided'
+    payload['conference_id'] = conference_id
+    if group_name is None:
+            raise 'property group_name must be provided'
+    payload['group_name'] = group_name
+    if logo_url1 is None:
+            raise 'property logo_url1 must be provided'
+    payload['logo_url1'] = logo_url1
+    if name is None:
+            raise 'property name must be provided'
+    payload['name'] = name
+    if url is None:
+            raise 'property url must be provided'
+    payload['url'] = url
+    if user_id is None:
+            raise 'property user_id must be provided'
+    payload['user_id'] = user_id
+    if conference_id is not None:
+        payload['conference_id'] = conference_id
+    if group_name is not None:
+        payload['group_name'] = group_name
+    if logo_url1 is not None:
+        payload['logo_url1'] = logo_url1
+    if logo_url2 is not None:
+        payload['logo_url2'] = logo_url2
+    if logo_url3 is not None:
+        payload['logo_url3'] = logo_url3
+    if name is not None:
+        payload['name'] = name
+    if sort_order is not None:
+        payload['sort_order'] = sort_order
+    if url is not None:
+        payload['url'] = url
+    if user_id is not None:
+        payload['user_id'] = user_id
+    uri = self.endpoint + "/sponsor/add"
+    if self.debug:
+        print("POST " + uri)
+    res = self.session.post(uri, auth=(self.key, self.secret), json=payload)
+    if res.status_code != 200:
+        self.extract_error(res)
+        return None
+    return res.json()
+
+  def lookup_sponsor (self, id, lang=None):
+    payload = {}
+    if id is None:
+            raise 'property id must be provided'
+    payload['id'] = id
+    if id is not None:
+        payload['id'] = id
+    if lang is not None:
+        payload['lang'] = lang
+    uri = self.endpoint + "/sponsor/lookup"
+    if self.debug:
+        print("GET " + uri)
+    res = self.session.get(uri, params=payload)
+    if res.status_code != 200:
+        self.extract_error(res)
+        return None
+    return res.json()
+
+  def list_sponsors (self, conference_id=None, lang=None, limit=None, since=None):
+    payload = {}
+    if conference_id is not None:
+        payload['conference_id'] = conference_id
+    if lang is not None:
+        payload['lang'] = lang
+    if limit is not None:
+        payload['limit'] = limit
+    if since is not None:
+        payload['since'] = since
+    uri = self.endpoint + "/sponsor/list"
+    if self.debug:
+        print("GET " + uri)
+    res = self.session.get(uri, params=payload)
+    if res.status_code != 200:
+        self.extract_error(res)
+        return None
+    return res.json()
+
+  def update_sponsor (self, id, user_id, group_name=None, logo_url1=None, logo_url2=None, logo_url3=None, name=None, sort_order=None, url=None):
+    payload = {}
+    if id is None:
+            raise 'property id must be provided'
+    payload['id'] = id
+    if user_id is None:
+            raise 'property user_id must be provided'
+    payload['user_id'] = user_id
+    if group_name is not None:
+        payload['group_name'] = group_name
+    if id is not None:
+        payload['id'] = id
+    if logo_url1 is not None:
+        payload['logo_url1'] = logo_url1
+    if logo_url2 is not None:
+        payload['logo_url2'] = logo_url2
+    if logo_url3 is not None:
+        payload['logo_url3'] = logo_url3
+    if name is not None:
+        payload['name'] = name
+    if sort_order is not None:
+        payload['sort_order'] = sort_order
+    if url is not None:
+        payload['url'] = url
+    if user_id is not None:
+        payload['user_id'] = user_id
+    uri = self.endpoint + "/sponsor/update"
+    if self.debug:
+        print("POST " + uri)
+    res = self.session.post(uri, auth=(self.key, self.secret), json=payload)
+    if res.status_code != 200:
+        self.extract_error(res)
+        return None
+    return True
+
+  def delete_sponsor (self, id, user_id):
+    payload = {}
+    if id is None:
+            raise 'property id must be provided'
+    payload['id'] = id
+    if user_id is None:
+            raise 'property user_id must be provided'
+    payload['user_id'] = user_id
+    if id is not None:
+        payload['id'] = id
+    if user_id is not None:
+        payload['user_id'] = user_id
+    uri = self.endpoint + "/sponsor/delete"
     if self.debug:
         print("POST " + uri)
     res = self.session.post(uri, auth=(self.key, self.secret), json=payload)
