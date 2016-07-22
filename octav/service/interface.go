@@ -15,5 +15,6 @@ type FeaturedSpeaker struct{}
 type Question struct{}
 type Room struct{}
 type Session struct{}
+type Sponsor struct{}
 type User struct{}
 type Venue struct{}

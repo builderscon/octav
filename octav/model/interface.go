@@ -21,68 +21,68 @@ type ErrInvalidFieldType struct {
 
 // +model
 type Conference struct {
-	ID               string                `json:"id"`
-	Title            string                `json:"title" l10n:"true"`
-	SeriesID         string                `json:"series_id,omitempty"`
-	Series           *ConferenceSeries     `json:"series,omitempty" decorate:"true"`
-	SubTitle         string                `json:"sub_title" l10n:"true"`
-	Slug             string                `json:"slug"`
-	Dates            ConferenceDateList    `json:"dates,omitempty"`
-	Administrators   UserList              `json:"administrators,omitempty" decorate:"true"`
-	Venues           VenueList             `json:"venues,omitempty" decorate:"true"`
-	FeaturedSpeakers FeaturedSpeakerList   `json:"featured_speakers,omitempty" decorate:"true"`
-	L10N             tools.LocalizedFields `json:"-"`
+	tools.LocalizedFields `json:"-"`
+	ID                    string              `json:"id"`
+	Title                 string              `json:"title" l10n:"true"`
+	SeriesID              string              `json:"series_id,omitempty"`
+	Series                *ConferenceSeries   `json:"series,omitempty" decorate:"true"`
+	SubTitle              string              `json:"sub_title" l10n:"true"`
+	Slug                  string              `json:"slug"`
+	Dates                 ConferenceDateList  `json:"dates,omitempty"`
+	Administrators        UserList            `json:"administrators,omitempty" decorate:"true"`
+	Venues                VenueList           `json:"venues,omitempty" decorate:"true"`
+	FeaturedSpeakers      FeaturedSpeakerList `json:"featured_speakers,omitempty" decorate:"true"`
 }
 type ConferenceList []Conference
 
 // +model
 type ConferenceSeries struct {
-	ID    string                `json:"id"`
-	Slug  string                `json:"slug"`
-	Title string                `json:"title" l10n:"true"`
-	L10N  tools.LocalizedFields `json:"-"`
+	tools.LocalizedFields `json:"-"`
+	ID                    string `json:"id"`
+	Slug                  string `json:"slug"`
+	Title                 string `json:"title" l10n:"true"`
 }
 type ConferenceSeriesList []ConferenceSeries
 
 // +model
 type Room struct {
-	ID       string                `json:"id"`
-	VenueID  string                `json:"venue_id"`
-	Name     string                `json:"name" l10n:"true"`
-	Capacity uint                  `json:"capacity"`
-	L10N     tools.LocalizedFields `json:"-"`
+	tools.LocalizedFields `json:"-"`
+	ID                    string `json:"id"`
+	VenueID               string `json:"venue_id"`
+	Name                  string `json:"name" l10n:"true"`
+	Capacity              uint   `json:"capacity"`
 }
 type RoomList []Room
 
 // +model
 type Session struct {
-	ID                string                `json:"id"`
-	ConferenceID      string                `json:"conference_id"`
-	RoomID            string                `json:"room_id,omitempty"`
-	SpeakerID         string                `json:"speaker_id"`
-	Title             string                `json:"title" l10n:"true"`
-	Abstract          string                `json:"abstract" l10n:"true"`
-	Memo              string                `json:"memo"`
-	StartsOn          time.Time             `json:"starts_on"`
-	Duration          int                   `json:"duration"`
-	MaterialLevel     string                `json:"material_level"`
-	Tags              TagString             `json:"tags,omitempty" assign:"convert"`
-	Category          string                `json:"category,omitempty"`
-	SpokenLanguage    string                `json:"spoken_language,omitempty"`
-	SlideLanguage     string                `json:"slide_language,omitempty"`
-	SlideSubtitles    string                `json:"slide_subtitles,omitempty"`
-	SlideURL          string                `json:"slide_url,omitempty"`
-	VideoURL          string                `json:"video_url,omitempty"`
-	PhotoPermission   string                `json:"photo_permission"`
-	VideoPermission   string                `json:"video_permission"`
-	SortOrder         int                   `json:"-"`
-	HasInterpretation bool                  `json:"has_interpretation"`
-	Status            string                `json:"status"`
-	Confirmed         bool                  `json:"confirmed"`
-	Conference        *Conference           `json:"conference,omitempy" decorate:"true"` // only populated for JSON response
-	Room              *Room                 `json:"room,omitempty" decorate:"true"`      // only populated for JSON response
-	Speaker           *User                 `json:"speaker,omitempty" decorate:"true"`   // only populated for JSON response
-	L10N              tools.LocalizedFields `json:"-"`
+	tools.LocalizedFields `json:"-"`
+	ID                    string      `json:"id"`
+	ConferenceID          string      `json:"conference_id"`
+	RoomID                string      `json:"room_id,omitempty"`
+	SpeakerID             string      `json:"speaker_id"`
+	Title                 string      `json:"title" l10n:"true"`
+	Abstract              string      `json:"abstract" l10n:"true"`
+	Memo                  string      `json:"memo"`
+	StartsOn              time.Time   `json:"starts_on"`
+	Duration              int         `json:"duration"`
+	MaterialLevel         string      `json:"material_level"`
+	Tags                  TagString   `json:"tags,omitempty" assign:"convert"`
+	Category              string      `json:"category,omitempty"`
+	SpokenLanguage        string      `json:"spoken_language,omitempty"`
+	SlideLanguage         string      `json:"slide_language,omitempty"`
+	SlideSubtitles        string      `json:"slide_subtitles,omitempty"`
+	SlideURL              string      `json:"slide_url,omitempty"`
+	VideoURL              string      `json:"video_url,omitempty"`
+	PhotoPermission       string      `json:"photo_permission"`
+	VideoPermission       string      `json:"video_permission"`
+	SortOrder             int         `json:"-"`
+	HasInterpretation     bool        `json:"has_interpretation"`
+	Status                string      `json:"status"`
+	Confirmed             bool        `json:"confirmed"`
+	Conference            *Conference `json:"conference,omitempy" decorate:"true"` // only populated for JSON response
+	Room                  *Room       `json:"room,omitempty" decorate:"true"`      // only populated for JSON response
+	Speaker               *User       `json:"speaker,omitempty" decorate:"true"`   // only populated for JSON response
 }
 type SessionList []Session
 
@@ -90,29 +90,29 @@ type TagString string
 
 // +model
 type User struct {
-	ID         string                `json:"id"`
-	AuthVia    string                `json:"auth_via"`
-	AuthUserID string                `json:"auth_user_id"`
-	AvatarURL  string                `json:"avatar_url,omitempty"`
-	FirstName  string                `json:"first_name,omitempty" l10n:"true"`
-	LastName   string                `json:"last_name,omitempty" l10n:"true"`
-	Nickname   string                `json:"nickname"`
-	Email      string                `json:"email,omitempty"`
-	TshirtSize string                `json:"tshirt_size,omitempty"`
-	IsAdmin    bool                  `json:"is_admin"`
-	L10N       tools.LocalizedFields `json:"-"`
+	tools.LocalizedFields `json:"-"`
+	ID                    string `json:"id"`
+	AuthVia               string `json:"auth_via"`
+	AuthUserID            string `json:"auth_user_id"`
+	AvatarURL             string `json:"avatar_url,omitempty"`
+	FirstName             string `json:"first_name,omitempty" l10n:"true"`
+	LastName              string `json:"last_name,omitempty" l10n:"true"`
+	Nickname              string `json:"nickname"`
+	Email                 string `json:"email,omitempty"`
+	TshirtSize            string `json:"tshirt_size,omitempty"`
+	IsAdmin               bool   `json:"is_admin"`
 }
 type UserList []User
 
 // +model
 type Venue struct {
-	ID        string                `json:"id,omitempty"`
-	Name      string                `json:"name" l10n:"true" decorate:"true"`
-	Address   string                `json:"address" l10n:"true" decorate:"true"`
-	Longitude float64               `json:"longitude,omitempty"`
-	Latitude  float64               `json:"latitude,omitempty"`
-	Rooms     RoomList              `json:"rooms,omitempty"`
-	L10N      tools.LocalizedFields `json:"-"`
+	tools.LocalizedFields `json:"-"`
+	ID                    string   `json:"id,omitempty"`
+	Name                  string   `json:"name" l10n:"true" decorate:"true"`
+	Address               string   `json:"address" l10n:"true" decorate:"true"`
+	Longitude             float64  `json:"longitude,omitempty"`
+	Latitude              float64  `json:"latitude,omitempty"`
+	Rooms                 RoomList `json:"rooms,omitempty"`
 }
 type VenueList []Venue
 
@@ -572,12 +572,13 @@ type UpdateClientRequest struct {
 
 // +model
 type FeaturedSpeaker struct {
-	ID          string                `json:"id"`
-	UserID      string                `json:"user_id"`
-	AvatarURL   string                `json:"avatar_url"`
-	DisplayName string                `json:"display_name" l10n:"true"`
-	Description string                `json:"description" l10n:"true"`
-	L10N        tools.LocalizedFields `json:"-"`
+	tools.LocalizedFields `json:"-"`
+	ID                    string `json:"id"`
+	ConferenceID          string `json:"conference_id"`
+	SpeakerID             string `json:"speaker_id"`
+	AvatarURL             string `json:"avatar_url"`
+	DisplayName           string `json:"display_name" l10n:"true"`
+	Description           string `json:"description" l10n:"true"`
 }
 type FeaturedSpeakerList []FeaturedSpeaker
 
@@ -622,6 +623,70 @@ type UpdateFeaturedSpeakerRequest struct {
 
 // +transport
 type DeleteFeaturedSpeakerRequest struct {
+	ID     string `json:"id"`
+	UserID string `json:"user_id"`
+}
+
+// +model
+type Sponsor struct {
+	tools.LocalizedFields `json:"-"`
+	ID                    string `json:"id"`
+	ConferenceID          string `json:"conference_id"`
+	Name                  string `json:"name" l10n:"true"`
+	LogoURL1              string `json:"logo_url1"`
+	LogoURL2              string `json:"logo_url2,omitempty"`
+	LogoURL3              string `json:"logo_url3,omitempty"`
+	URL                   string `json:"url"`
+	GroupName             string `json:"group_name"`
+}
+type SponsorList []Sponsor
+
+// +transport
+type LookupSponsorRequest struct {
+	ID   string            `json:"id"`
+	Lang jsval.MaybeString `json:"lang,omitempty" urlenc:"lang,omitempty,string"`
+}
+
+// +transport
+type ListSponsorsRequest struct {
+	ConferenceID string            `json:"conference_id"`
+	GroupName    jsval.MaybeString  `json:"group_name" urlenc:"group_name,omitempty,string"`
+	Since        jsval.MaybeString `json:"since" urlenc:"since,omitempty,string"`
+	Lang         jsval.MaybeString `json:"lang" urlenc:"lang,omitempty,string"`
+	Limit        jsval.MaybeInt    `json:"limit" urlenc:"limit,omitempty,int64"`
+}
+
+// +transport
+type AddSponsorRequest struct {
+	ConferenceID string                `json:"conference_id"`
+	Name         string                `json:"name"`
+	LogoURL1     string                `json:"logo_url1"`
+	LogoURL2     jsval.MaybeString     `json:"logo_url2,omitempty"`
+	LogoURL3     jsval.MaybeString     `json:"logo_url3,omitempty"`
+	URL          string                `json:"url"`
+	GroupName    string                `json:"group_name"`
+	L10N         tools.LocalizedFields `json:"-"`
+	UserID       string                `json:"user_id"`
+}
+type CreateSponsorRequest struct {
+	AddSponsorRequest
+}
+
+// +transport
+type UpdateSponsorRequest struct {
+	ID        string                `json:"id"`
+	Name      jsval.MaybeString     `json:"name,omitempty"`
+	LogoURL1  jsval.MaybeString     `json:"logo_url1,omitempty"`
+	LogoURL2  jsval.MaybeString     `json:"logo_url2,omitempty"`
+	LogoURL3  jsval.MaybeString     `json:"logo_url3,omitempty"`
+	URL       jsval.MaybeString     `json:"url,omitempty"`
+	GroupName jsval.MaybeString     `json:"group_name,omitempty"`
+	L10N      tools.LocalizedFields `json:"-"`
+	UserID    string                `json:"user_id"`
+}
+
+// +transport
+type DeleteSponsorRequest struct {
 	ID     string `json:"id"`
 	UserID string `json:"user_id"`
 }

@@ -1,9 +1,6 @@
 package db
 
-import (
-	"bytes"
-	"strconv"
-)
+import "strconv"
 
 func (v *FeaturedSpeakerList) LoadByConferenceSinceEID(tx *Tx, confID, since string, limit int) error {
 	var s int64
@@ -31,7 +28,9 @@ func (v *FeaturedSpeakerList) LoadByConferenceSince(tx *Tx, confID string, since
 }
 
 func LoadFeaturedSpeakers(tx *Tx, venues *FeaturedSpeakerList, cid string) error {
-	stmt := bytes.Buffer{}
+	stmt := getStmtBuf()
+	defer releaseStmtBuf(stmt)
+
 	stmt.WriteString(`SELECT `)
 	stmt.WriteString(FeaturedSpeakerStdSelectColumns)
 	stmt.WriteString(` FROM `)

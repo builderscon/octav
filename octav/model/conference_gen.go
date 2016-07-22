@@ -4,27 +4,45 @@ package model
 
 import (
 	"encoding/json"
+	"github.com/builderscon/octav/octav/tools"
 	"time"
 
 	"github.com/builderscon/octav/octav/db"
-	"github.com/builderscon/octav/octav/tools"
 	"github.com/lestrrat/go-pdebug"
 )
 
 var _ = time.Time{}
 
-type ConferenceL10N struct {
-	Conference
-	L10N tools.LocalizedFields `json:"-"`
+type rawConference struct {
+	ID               string              `json:"id"`
+	Title            string              `json:"title" l10n:"true"`
+	SeriesID         string              `json:"series_id,omitempty"`
+	Series           *ConferenceSeries   `json:"series,omitempty" decorate:"true"`
+	SubTitle         string              `json:"sub_title" l10n:"true"`
+	Slug             string              `json:"slug"`
+	Dates            ConferenceDateList  `json:"dates,omitempty"`
+	Administrators   UserList            `json:"administrators,omitempty" decorate:"true"`
+	Venues           VenueList           `json:"venues,omitempty" decorate:"true"`
+	FeaturedSpeakers FeaturedSpeakerList `json:"featured_speakers,omitempty" decorate:"true"`
 }
-type ConferenceL10NList []ConferenceL10N
 
-func (v ConferenceL10N) MarshalJSON() ([]byte, error) {
-	buf, err := json.Marshal(v.Conference)
+func (v Conference) MarshalJSON() ([]byte, error) {
+	var raw rawConference
+	raw.ID = v.ID
+	raw.Title = v.Title
+	raw.SeriesID = v.SeriesID
+	raw.Series = v.Series
+	raw.SubTitle = v.SubTitle
+	raw.Slug = v.Slug
+	raw.Dates = v.Dates
+	raw.Administrators = v.Administrators
+	raw.Venues = v.Venues
+	raw.FeaturedSpeakers = v.FeaturedSpeakers
+	buf, err := json.Marshal(raw)
 	if err != nil {
 		return nil, err
 	}
-	return tools.MarshalJSONWithL10N(buf, v.L10N)
+	return tools.MarshalJSONWithL10N(buf, v.LocalizedFields)
 }
 
 func (v *Conference) Load(tx *db.Tx, id string) (err error) {
@@ -51,7 +69,6 @@ func (v *Conference) FromRow(vdb db.Conference) error {
 		v.SubTitle = vdb.SubTitle.String
 	}
 	v.Slug = vdb.Slug
-	v.Status = vdb.Status
 	return nil
 }
 
@@ -62,74 +79,5 @@ func (v *Conference) ToRow(vdb *db.Conference) error {
 	vdb.SubTitle.Valid = true
 	vdb.SubTitle.String = v.SubTitle
 	vdb.Slug = v.Slug
-	vdb.Status = v.Status
-	return nil
-}
-
-func (v ConferenceL10N) GetPropNames() ([]string, error) {
-	l, _ := v.L10N.GetPropNames()
-	return append(l, "title", "sub_title"), nil
-}
-
-func (v ConferenceL10N) GetPropValue(s string) (interface{}, error) {
-	switch s {
-	case "id":
-		return v.ID, nil
-	case "title":
-		return v.Title, nil
-	case "series_id":
-		return v.SeriesID, nil
-	case "series":
-		return v.Series, nil
-	case "sub_title":
-		return v.SubTitle, nil
-	case "slug":
-		return v.Slug, nil
-	case "status":
-		return v.Status, nil
-	case "dates":
-		return v.Dates, nil
-	case "administrators":
-		return v.Administrators, nil
-	case "venues":
-		return v.Venues, nil
-	case "featured_speakers":
-		return v.FeaturedSpeakers, nil
-	default:
-		return v.L10N.GetPropValue(s)
-	}
-}
-
-func (v *ConferenceL10N) UnmarshalJSON(data []byte) error {
-	var s Conference
-	if err := json.Unmarshal(data, &s); err != nil {
-		return err
-	}
-
-	v.Conference = s
-	m := make(map[string]interface{})
-	if err := json.Unmarshal(data, &m); err != nil {
-		return err
-	}
-
-	if err := tools.ExtractL10NFields(m, &v.L10N, []string{"title", "sub_title"}); err != nil {
-		return err
-	}
-
-	return nil
-}
-
-func (v *ConferenceL10N) LoadLocalizedFields(tx *db.Tx) error {
-	ls, err := db.LoadLocalizedStringsForParent(tx, v.Conference.ID, "Conference")
-	if err != nil {
-		return err
-	}
-
-	if len(ls) > 0 {
-		v.L10N = tools.LocalizedFields{}
-		for _, l := range ls {
-			v.L10N.Set(l.Language, l.Name, l.Localized)
-		}
-	}
 	return nil
 }

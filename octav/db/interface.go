@@ -185,3 +185,18 @@ type FeaturedSpeaker struct {
 	CreatedOn    time.Time
 	ModifiedOn   NullTime
 }
+
+// +DB tablename:"sponsors"
+type Sponsor struct {
+	OID          int64
+	EID          string
+	ConferenceID string
+	Name         string
+	LogoURL1     string
+	LogoURL2     sql.NullString
+	LogoURL3     sql.NullString
+	URL          string
+	GroupName    string
+	CreatedOn    time.Time
+	ModifiedOn   NullTime
+}

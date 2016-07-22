@@ -118,7 +118,7 @@ func (v *Venue) ReplaceL10NStrings(tx *db.Tx, m *model.Venue, lang string) error
 			if pdebug.Enabled {
 				pdebug.Printf("Adding key '%s#%s'", l.Name, l.Language)
 			}
-			m.L10N.Set(l.Language, l.Name, l.Localized)
+			m.LocalizedFields.Set(l.Language, l.Name, l.Localized)
 		}
 	} else {
 		rows, err := tx.Query(`SELECT oid, parent_id, parent_type, name, language, localized FROM localized_strings WHERE parent_type = ? AND parent_id = ? AND language = ?`, "Venue", m.ID, lang)

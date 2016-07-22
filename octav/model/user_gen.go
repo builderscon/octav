@@ -4,27 +4,45 @@ package model
 
 import (
 	"encoding/json"
+	"github.com/builderscon/octav/octav/tools"
 	"time"
 
 	"github.com/builderscon/octav/octav/db"
-	"github.com/builderscon/octav/octav/tools"
 	"github.com/lestrrat/go-pdebug"
 )
 
 var _ = time.Time{}
 
-type UserL10N struct {
-	User
-	L10N tools.LocalizedFields `json:"-"`
+type rawUser struct {
+	ID         string `json:"id"`
+	AuthVia    string `json:"auth_via"`
+	AuthUserID string `json:"auth_user_id"`
+	AvatarURL  string `json:"avatar_url,omitempty"`
+	FirstName  string `json:"first_name,omitempty" l10n:"true"`
+	LastName   string `json:"last_name,omitempty" l10n:"true"`
+	Nickname   string `json:"nickname"`
+	Email      string `json:"email,omitempty"`
+	TshirtSize string `json:"tshirt_size,omitempty"`
+	IsAdmin    bool   `json:"is_admin"`
 }
-type UserL10NList []UserL10N
 
-func (v UserL10N) MarshalJSON() ([]byte, error) {
-	buf, err := json.Marshal(v.User)
+func (v User) MarshalJSON() ([]byte, error) {
+	var raw rawUser
+	raw.ID = v.ID
+	raw.AuthVia = v.AuthVia
+	raw.AuthUserID = v.AuthUserID
+	raw.AvatarURL = v.AvatarURL
+	raw.FirstName = v.FirstName
+	raw.LastName = v.LastName
+	raw.Nickname = v.Nickname
+	raw.Email = v.Email
+	raw.TshirtSize = v.TshirtSize
+	raw.IsAdmin = v.IsAdmin
+	buf, err := json.Marshal(raw)
 	if err != nil {
 		return nil, err
 	}
-	return tools.MarshalJSONWithL10N(buf, v.L10N)
+	return tools.MarshalJSONWithL10N(buf, v.LocalizedFields)
 }
 
 func (v *User) Load(tx *db.Tx, id string) (err error) {
@@ -83,71 +101,5 @@ func (v *User) ToRow(vdb *db.User) error {
 	vdb.TshirtSize.Valid = true
 	vdb.TshirtSize.String = v.TshirtSize
 	vdb.IsAdmin = v.IsAdmin
-	return nil
-}
-
-func (v UserL10N) GetPropNames() ([]string, error) {
-	l, _ := v.L10N.GetPropNames()
-	return append(l, "first_name", "last_name"), nil
-}
-
-func (v UserL10N) GetPropValue(s string) (interface{}, error) {
-	switch s {
-	case "id":
-		return v.ID, nil
-	case "auth_via":
-		return v.AuthVia, nil
-	case "auth_user_id":
-		return v.AuthUserID, nil
-	case "avatar_url":
-		return v.AvatarURL, nil
-	case "first_name":
-		return v.FirstName, nil
-	case "last_name":
-		return v.LastName, nil
-	case "nickname":
-		return v.Nickname, nil
-	case "email":
-		return v.Email, nil
-	case "tshirt_size":
-		return v.TshirtSize, nil
-	case "is_admin":
-		return v.IsAdmin, nil
-	default:
-		return v.L10N.GetPropValue(s)
-	}
-}
-
-func (v *UserL10N) UnmarshalJSON(data []byte) error {
-	var s User
-	if err := json.Unmarshal(data, &s); err != nil {
-		return err
-	}
-
-	v.User = s
-	m := make(map[string]interface{})
-	if err := json.Unmarshal(data, &m); err != nil {
-		return err
-	}
-
-	if err := tools.ExtractL10NFields(m, &v.L10N, []string{"first_name", "last_name"}); err != nil {
-		return err
-	}
-
-	return nil
-}
-
-func (v *UserL10N) LoadLocalizedFields(tx *db.Tx) error {
-	ls, err := db.LoadLocalizedStringsForParent(tx, v.User.ID, "User")
-	if err != nil {
-		return err
-	}
-
-	if len(ls) > 0 {
-		v.L10N = tools.LocalizedFields{}
-		for _, l := range ls {
-			v.L10N.Set(l.Language, l.Name, l.Localized)
-		}
-	}
 	return nil
 }

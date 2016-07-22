@@ -4508,3 +4508,503 @@ func (r *DeleteFeaturedSpeakerRequest) Populate(m map[string]interface{}) error 
 	}
 	return nil
 }
+
+func (r LookupSponsorRequest) collectMarshalData() map[string]interface{} {
+	m := make(map[string]interface{})
+	m["id"] = r.ID
+	if r.Lang.Valid() {
+		m["lang"] = r.Lang.Value()
+	}
+	return m
+}
+
+func (r LookupSponsorRequest) MarshalJSON() ([]byte, error) {
+	m := r.collectMarshalData()
+	buf, err := json.Marshal(m)
+	if err != nil {
+		return nil, err
+	}
+	return buf, nil
+}
+
+func (r LookupSponsorRequest) MarshalURL() ([]byte, error) {
+	m := r.collectMarshalData()
+	buf, err := urlenc.Marshal(m)
+	if err != nil {
+		return nil, err
+	}
+	return buf, nil
+}
+
+func (r *LookupSponsorRequest) UnmarshalJSON(data []byte) error {
+	m := make(map[string]interface{})
+	if err := json.Unmarshal(data, &m); err != nil {
+		return err
+	}
+	return r.Populate(m)
+}
+
+func (r *LookupSponsorRequest) Populate(m map[string]interface{}) error {
+	if jv, ok := m["id"]; ok {
+		switch jv.(type) {
+		case string:
+			r.ID = jv.(string)
+			delete(m, "id")
+		default:
+			return ErrInvalidJSONFieldType{Field: "id"}
+		}
+	}
+	if jv, ok := m["lang"]; ok {
+		if err := r.Lang.Set(jv); err != nil {
+			return errors.New("set field Lang failed: " + err.Error())
+		}
+		delete(m, "lang")
+	}
+	return nil
+}
+
+func (r ListSponsorsRequest) collectMarshalData() map[string]interface{} {
+	m := make(map[string]interface{})
+	m["conference_id"] = r.ConferenceID
+	if r.GroupName.Valid() {
+		m["group_name"] = r.GroupName.Value()
+	}
+	if r.Since.Valid() {
+		m["since"] = r.Since.Value()
+	}
+	if r.Lang.Valid() {
+		m["lang"] = r.Lang.Value()
+	}
+	if r.Limit.Valid() {
+		m["limit"] = r.Limit.Value()
+	}
+	return m
+}
+
+func (r ListSponsorsRequest) MarshalJSON() ([]byte, error) {
+	m := r.collectMarshalData()
+	buf, err := json.Marshal(m)
+	if err != nil {
+		return nil, err
+	}
+	return buf, nil
+}
+
+func (r ListSponsorsRequest) MarshalURL() ([]byte, error) {
+	m := r.collectMarshalData()
+	buf, err := urlenc.Marshal(m)
+	if err != nil {
+		return nil, err
+	}
+	return buf, nil
+}
+
+func (r *ListSponsorsRequest) UnmarshalJSON(data []byte) error {
+	m := make(map[string]interface{})
+	if err := json.Unmarshal(data, &m); err != nil {
+		return err
+	}
+	return r.Populate(m)
+}
+
+func (r *ListSponsorsRequest) Populate(m map[string]interface{}) error {
+	if jv, ok := m["conference_id"]; ok {
+		switch jv.(type) {
+		case string:
+			r.ConferenceID = jv.(string)
+			delete(m, "conference_id")
+		default:
+			return ErrInvalidJSONFieldType{Field: "conference_id"}
+		}
+	}
+	if jv, ok := m["group_name"]; ok {
+		if err := r.GroupName.Set(jv); err != nil {
+			return errors.New("set field GroupName failed: " + err.Error())
+		}
+		delete(m, "group_name")
+	}
+	if jv, ok := m["since"]; ok {
+		if err := r.Since.Set(jv); err != nil {
+			return errors.New("set field Since failed: " + err.Error())
+		}
+		delete(m, "since")
+	}
+	if jv, ok := m["lang"]; ok {
+		if err := r.Lang.Set(jv); err != nil {
+			return errors.New("set field Lang failed: " + err.Error())
+		}
+		delete(m, "lang")
+	}
+	if jv, ok := m["limit"]; ok {
+		if err := r.Limit.Set(jv); err != nil {
+			return errors.New("set field Limit failed: " + err.Error())
+		}
+		delete(m, "limit")
+	}
+	return nil
+}
+
+func (r AddSponsorRequest) collectMarshalData() map[string]interface{} {
+	m := make(map[string]interface{})
+	m["conference_id"] = r.ConferenceID
+	m["name"] = r.Name
+	m["logo_url1"] = r.LogoURL1
+	if r.LogoURL2.Valid() {
+		m["logo_url2"] = r.LogoURL2.Value()
+	}
+	if r.LogoURL3.Valid() {
+		m["logo_url3"] = r.LogoURL3.Value()
+	}
+	m["url"] = r.URL
+	m["group_name"] = r.GroupName
+	m["user_id"] = r.UserID
+	return m
+}
+
+func (r AddSponsorRequest) MarshalJSON() ([]byte, error) {
+	m := r.collectMarshalData()
+	buf, err := json.Marshal(m)
+	if err != nil {
+		return nil, err
+	}
+	return tools.MarshalJSONWithL10N(buf, r.L10N)
+}
+
+func (r AddSponsorRequest) MarshalURL() ([]byte, error) {
+	m := r.collectMarshalData()
+	buf, err := urlenc.Marshal(m)
+	if err != nil {
+		return nil, err
+	}
+	return tools.MarshalURLWithL10N(buf, r.L10N)
+}
+
+func (r *AddSponsorRequest) UnmarshalJSON(data []byte) error {
+	m := make(map[string]interface{})
+	if err := json.Unmarshal(data, &m); err != nil {
+		return err
+	}
+	return r.Populate(m)
+}
+
+func (r *AddSponsorRequest) Populate(m map[string]interface{}) error {
+	if jv, ok := m["conference_id"]; ok {
+		switch jv.(type) {
+		case string:
+			r.ConferenceID = jv.(string)
+			delete(m, "conference_id")
+		default:
+			return ErrInvalidJSONFieldType{Field: "conference_id"}
+		}
+	}
+	if jv, ok := m["name"]; ok {
+		switch jv.(type) {
+		case string:
+			r.Name = jv.(string)
+			delete(m, "name")
+		default:
+			return ErrInvalidJSONFieldType{Field: "name"}
+		}
+	}
+	if jv, ok := m["logo_url1"]; ok {
+		switch jv.(type) {
+		case string:
+			r.LogoURL1 = jv.(string)
+			delete(m, "logo_url1")
+		default:
+			return ErrInvalidJSONFieldType{Field: "logo_url1"}
+		}
+	}
+	if jv, ok := m["logo_url2"]; ok {
+		if err := r.LogoURL2.Set(jv); err != nil {
+			return errors.New("set field LogoURL2 failed: " + err.Error())
+		}
+		delete(m, "logo_url2")
+	}
+	if jv, ok := m["logo_url3"]; ok {
+		if err := r.LogoURL3.Set(jv); err != nil {
+			return errors.New("set field LogoURL3 failed: " + err.Error())
+		}
+		delete(m, "logo_url3")
+	}
+	if jv, ok := m["url"]; ok {
+		switch jv.(type) {
+		case string:
+			r.URL = jv.(string)
+			delete(m, "url")
+		default:
+			return ErrInvalidJSONFieldType{Field: "url"}
+		}
+	}
+	if jv, ok := m["group_name"]; ok {
+		switch jv.(type) {
+		case string:
+			r.GroupName = jv.(string)
+			delete(m, "group_name")
+		default:
+			return ErrInvalidJSONFieldType{Field: "group_name"}
+		}
+	}
+	if jv, ok := m["user_id"]; ok {
+		switch jv.(type) {
+		case string:
+			r.UserID = jv.(string)
+			delete(m, "user_id")
+		default:
+			return ErrInvalidJSONFieldType{Field: "user_id"}
+		}
+	}
+	if err := tools.ExtractL10NFields(m, &r.L10N, []string{"conference_id", "name", "logo_url1", "logo_url2", "logo_url3", "url", "group_name", "user_id"}); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (r *AddSponsorRequest) GetPropNames() ([]string, error) {
+	l, _ := r.L10N.GetPropNames()
+	return append(l, "conference_id", "name", "logo_url1", "logo_url2", "logo_url3", "url", "group_name", "user_id"), nil
+}
+
+func (r *AddSponsorRequest) SetPropValue(s string, v interface{}) error {
+	switch s {
+	case "conference_id":
+		if jv, ok := v.(string); ok {
+			r.ConferenceID = jv
+			return nil
+		}
+	case "name":
+		if jv, ok := v.(string); ok {
+			r.Name = jv
+			return nil
+		}
+	case "logo_url1":
+		if jv, ok := v.(string); ok {
+			r.LogoURL1 = jv
+			return nil
+		}
+	case "logo_url2":
+		return r.LogoURL2.Set(v)
+	case "logo_url3":
+		return r.LogoURL3.Set(v)
+	case "url":
+		if jv, ok := v.(string); ok {
+			r.URL = jv
+			return nil
+		}
+	case "group_name":
+		if jv, ok := v.(string); ok {
+			r.GroupName = jv
+			return nil
+		}
+	case "user_id":
+		if jv, ok := v.(string); ok {
+			r.UserID = jv
+			return nil
+		}
+	default:
+		return errors.New("unknown column '" + s + "'")
+	}
+	return ErrInvalidFieldType{Field: s}
+}
+
+func (r UpdateSponsorRequest) collectMarshalData() map[string]interface{} {
+	m := make(map[string]interface{})
+	m["id"] = r.ID
+	if r.Name.Valid() {
+		m["name"] = r.Name.Value()
+	}
+	if r.LogoURL1.Valid() {
+		m["logo_url1"] = r.LogoURL1.Value()
+	}
+	if r.LogoURL2.Valid() {
+		m["logo_url2"] = r.LogoURL2.Value()
+	}
+	if r.LogoURL3.Valid() {
+		m["logo_url3"] = r.LogoURL3.Value()
+	}
+	if r.URL.Valid() {
+		m["url"] = r.URL.Value()
+	}
+	if r.GroupName.Valid() {
+		m["group_name"] = r.GroupName.Value()
+	}
+	m["user_id"] = r.UserID
+	return m
+}
+
+func (r UpdateSponsorRequest) MarshalJSON() ([]byte, error) {
+	m := r.collectMarshalData()
+	buf, err := json.Marshal(m)
+	if err != nil {
+		return nil, err
+	}
+	return tools.MarshalJSONWithL10N(buf, r.L10N)
+}
+
+func (r UpdateSponsorRequest) MarshalURL() ([]byte, error) {
+	m := r.collectMarshalData()
+	buf, err := urlenc.Marshal(m)
+	if err != nil {
+		return nil, err
+	}
+	return tools.MarshalURLWithL10N(buf, r.L10N)
+}
+
+func (r *UpdateSponsorRequest) UnmarshalJSON(data []byte) error {
+	m := make(map[string]interface{})
+	if err := json.Unmarshal(data, &m); err != nil {
+		return err
+	}
+	return r.Populate(m)
+}
+
+func (r *UpdateSponsorRequest) Populate(m map[string]interface{}) error {
+	if jv, ok := m["id"]; ok {
+		switch jv.(type) {
+		case string:
+			r.ID = jv.(string)
+			delete(m, "id")
+		default:
+			return ErrInvalidJSONFieldType{Field: "id"}
+		}
+	}
+	if jv, ok := m["name"]; ok {
+		if err := r.Name.Set(jv); err != nil {
+			return errors.New("set field Name failed: " + err.Error())
+		}
+		delete(m, "name")
+	}
+	if jv, ok := m["logo_url1"]; ok {
+		if err := r.LogoURL1.Set(jv); err != nil {
+			return errors.New("set field LogoURL1 failed: " + err.Error())
+		}
+		delete(m, "logo_url1")
+	}
+	if jv, ok := m["logo_url2"]; ok {
+		if err := r.LogoURL2.Set(jv); err != nil {
+			return errors.New("set field LogoURL2 failed: " + err.Error())
+		}
+		delete(m, "logo_url2")
+	}
+	if jv, ok := m["logo_url3"]; ok {
+		if err := r.LogoURL3.Set(jv); err != nil {
+			return errors.New("set field LogoURL3 failed: " + err.Error())
+		}
+		delete(m, "logo_url3")
+	}
+	if jv, ok := m["url"]; ok {
+		if err := r.URL.Set(jv); err != nil {
+			return errors.New("set field URL failed: " + err.Error())
+		}
+		delete(m, "url")
+	}
+	if jv, ok := m["group_name"]; ok {
+		if err := r.GroupName.Set(jv); err != nil {
+			return errors.New("set field GroupName failed: " + err.Error())
+		}
+		delete(m, "group_name")
+	}
+	if jv, ok := m["user_id"]; ok {
+		switch jv.(type) {
+		case string:
+			r.UserID = jv.(string)
+			delete(m, "user_id")
+		default:
+			return ErrInvalidJSONFieldType{Field: "user_id"}
+		}
+	}
+	if err := tools.ExtractL10NFields(m, &r.L10N, []string{"id", "name", "logo_url1", "logo_url2", "logo_url3", "url", "group_name", "user_id"}); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (r *UpdateSponsorRequest) GetPropNames() ([]string, error) {
+	l, _ := r.L10N.GetPropNames()
+	return append(l, "id", "name", "logo_url1", "logo_url2", "logo_url3", "url", "group_name", "user_id"), nil
+}
+
+func (r *UpdateSponsorRequest) SetPropValue(s string, v interface{}) error {
+	switch s {
+	case "id":
+		if jv, ok := v.(string); ok {
+			r.ID = jv
+			return nil
+		}
+	case "name":
+		return r.Name.Set(v)
+	case "logo_url1":
+		return r.LogoURL1.Set(v)
+	case "logo_url2":
+		return r.LogoURL2.Set(v)
+	case "logo_url3":
+		return r.LogoURL3.Set(v)
+	case "url":
+		return r.URL.Set(v)
+	case "group_name":
+		return r.GroupName.Set(v)
+	case "user_id":
+		if jv, ok := v.(string); ok {
+			r.UserID = jv
+			return nil
+		}
+	default:
+		return errors.New("unknown column '" + s + "'")
+	}
+	return ErrInvalidFieldType{Field: s}
+}
+
+func (r DeleteSponsorRequest) collectMarshalData() map[string]interface{} {
+	m := make(map[string]interface{})
+	m["id"] = r.ID
+	m["user_id"] = r.UserID
+	return m
+}
+
+func (r DeleteSponsorRequest) MarshalJSON() ([]byte, error) {
+	m := r.collectMarshalData()
+	buf, err := json.Marshal(m)
+	if err != nil {
+		return nil, err
+	}
+	return buf, nil
+}
+
+func (r DeleteSponsorRequest) MarshalURL() ([]byte, error) {
+	m := r.collectMarshalData()
+	buf, err := urlenc.Marshal(m)
+	if err != nil {
+		return nil, err
+	}
+	return buf, nil
+}
+
+func (r *DeleteSponsorRequest) UnmarshalJSON(data []byte) error {
+	m := make(map[string]interface{})
+	if err := json.Unmarshal(data, &m); err != nil {
+		return err
+	}
+	return r.Populate(m)
+}
+
+func (r *DeleteSponsorRequest) Populate(m map[string]interface{}) error {
+	if jv, ok := m["id"]; ok {
+		switch jv.(type) {
+		case string:
+			r.ID = jv.(string)
+			delete(m, "id")
+		default:
+			return ErrInvalidJSONFieldType{Field: "id"}
+		}
+	}
+	if jv, ok := m["user_id"]; ok {
+		switch jv.(type) {
+		case string:
+			r.UserID = jv.(string)
+			delete(m, "user_id")
+		default:
+			return ErrInvalidJSONFieldType{Field: "user_id"}
+		}
+	}
+	return nil
+}

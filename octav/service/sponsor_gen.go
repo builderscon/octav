@@ -13,28 +13,28 @@ import (
 
 var _ = time.Time{}
 
-func (v *Conference) LookupFromPayload(tx *db.Tx, m *model.Conference, payload model.LookupConferenceRequest) (err error) {
+func (v *Sponsor) LookupFromPayload(tx *db.Tx, m *model.Sponsor, payload model.LookupSponsorRequest) (err error) {
 	if pdebug.Enabled {
-		g := pdebug.Marker("service.Conference.LookupFromPayload").BindError(&err)
+		g := pdebug.Marker("service.Sponsor.LookupFromPayload").BindError(&err)
 		defer g.End()
 	}
 	if err = v.Lookup(tx, m, payload.ID); err != nil {
-		return errors.Wrap(err, "failed to load model.Conference from database")
+		return errors.Wrap(err, "failed to load model.Sponsor from database")
 	}
 	if err := v.Decorate(tx, m, payload.Lang.String); err != nil {
-		return errors.Wrap(err, "failed to load associated data for model.Conference from database")
+		return errors.Wrap(err, "failed to load associated data for model.Sponsor from database")
 	}
 	return nil
 }
-func (v *Conference) Lookup(tx *db.Tx, m *model.Conference, id string) (err error) {
+func (v *Sponsor) Lookup(tx *db.Tx, m *model.Sponsor, id string) (err error) {
 	if pdebug.Enabled {
-		g := pdebug.Marker("service.Conference.Lookup").BindError(&err)
+		g := pdebug.Marker("service.Sponsor.Lookup").BindError(&err)
 		defer g.End()
 	}
 
-	r := model.Conference{}
+	r := model.Sponsor{}
 	if err = r.Load(tx, id); err != nil {
-		return errors.Wrap(err, "failed to load model.Conference from database")
+		return errors.Wrap(err, "failed to load model.Sponsor from database")
 	}
 	*m = r
 	return nil
@@ -43,9 +43,9 @@ func (v *Conference) Lookup(tx *db.Tx, m *model.Conference, id string) (err erro
 // Create takes in the transaction, the incoming payload, and a reference to
 // a database row. The database row is initialized/populated so that the
 // caller can use it afterwards.
-func (v *Conference) Create(tx *db.Tx, vdb *db.Conference, payload model.CreateConferenceRequest) (err error) {
+func (v *Sponsor) Create(tx *db.Tx, vdb *db.Sponsor, payload model.CreateSponsorRequest) (err error) {
 	if pdebug.Enabled {
-		g := pdebug.Marker("service.Conference.Create").BindError(&err)
+		g := pdebug.Marker("service.Sponsor.Create").BindError(&err)
 		defer g.End()
 	}
 
@@ -57,15 +57,15 @@ func (v *Conference) Create(tx *db.Tx, vdb *db.Conference, payload model.CreateC
 		return err
 	}
 
-	if err := payload.L10N.CreateLocalizedStrings(tx, "Conference", vdb.EID); err != nil {
+	if err := payload.L10N.CreateLocalizedStrings(tx, "Sponsor", vdb.EID); err != nil {
 		return err
 	}
 	return nil
 }
 
-func (v *Conference) Update(tx *db.Tx, vdb *db.Conference, payload model.UpdateConferenceRequest) (err error) {
+func (v *Sponsor) Update(tx *db.Tx, vdb *db.Sponsor, payload model.UpdateSponsorRequest) (err error) {
 	if pdebug.Enabled {
-		g := pdebug.Marker("service.Conference.Update (%s)", vdb.EID).BindError(&err)
+		g := pdebug.Marker("service.Sponsor.Update (%s)", vdb.EID).BindError(&err)
 		defer g.End()
 	}
 
@@ -86,7 +86,7 @@ func (v *Conference) Update(tx *db.Tx, vdb *db.Conference, payload model.UpdateC
 			pdebug.Printf("Updating l10n string for '%s' (%s)", k, l)
 		}
 		ls := db.LocalizedString{
-			ParentType: "Conference",
+			ParentType: "Sponsor",
 			ParentID:   vdb.EID,
 			Language:   l,
 			Name:       k,
@@ -96,13 +96,13 @@ func (v *Conference) Update(tx *db.Tx, vdb *db.Conference, payload model.UpdateC
 	})
 }
 
-func (v *Conference) ReplaceL10NStrings(tx *db.Tx, m *model.Conference, lang string) error {
+func (v *Sponsor) ReplaceL10NStrings(tx *db.Tx, m *model.Sponsor, lang string) error {
 	if pdebug.Enabled {
-		g := pdebug.Marker("service.Conference.ReplaceL10NStrings lang = %s", lang)
+		g := pdebug.Marker("service.Sponsor.ReplaceL10NStrings lang = %s", lang)
 		defer g.End()
 	}
 	if lang == "all" {
-		rows, err := tx.Query(`SELECT oid, parent_id, parent_type, name, language, localized FROM localized_strings WHERE parent_type = ? AND parent_id = ?`, "Conference", m.ID)
+		rows, err := tx.Query(`SELECT oid, parent_id, parent_type, name, language, localized FROM localized_strings WHERE parent_type = ? AND parent_id = ?`, "Sponsor", m.ID)
 		if err != nil {
 			return err
 		}
@@ -121,7 +121,7 @@ func (v *Conference) ReplaceL10NStrings(tx *db.Tx, m *model.Conference, lang str
 			m.LocalizedFields.Set(l.Language, l.Name, l.Localized)
 		}
 	} else {
-		rows, err := tx.Query(`SELECT oid, parent_id, parent_type, name, language, localized FROM localized_strings WHERE parent_type = ? AND parent_id = ? AND language = ?`, "Conference", m.ID, lang)
+		rows, err := tx.Query(`SELECT oid, parent_id, parent_type, name, language, localized FROM localized_strings WHERE parent_type = ? AND parent_id = ? AND language = ?`, "Sponsor", m.ID, lang)
 		if err != nil {
 			return err
 		}
@@ -136,38 +136,33 @@ func (v *Conference) ReplaceL10NStrings(tx *db.Tx, m *model.Conference, lang str
 			}
 
 			switch l.Name {
-			case "title":
+			case "name":
 				if pdebug.Enabled {
-					pdebug.Printf("Replacing for key 'title'")
+					pdebug.Printf("Replacing for key 'name'")
 				}
-				m.Title = l.Localized
-			case "sub_title":
-				if pdebug.Enabled {
-					pdebug.Printf("Replacing for key 'sub_title'")
-				}
-				m.SubTitle = l.Localized
+				m.Name = l.Localized
 			}
 		}
 	}
 	return nil
 }
 
-func (v *Conference) Delete(tx *db.Tx, id string) error {
+func (v *Sponsor) Delete(tx *db.Tx, id string) error {
 	if pdebug.Enabled {
-		g := pdebug.Marker("Conference.Delete (%s)", id)
+		g := pdebug.Marker("Sponsor.Delete (%s)", id)
 		defer g.End()
 	}
 
-	vdb := db.Conference{EID: id}
+	vdb := db.Sponsor{EID: id}
 	if err := vdb.Delete(tx); err != nil {
 		return err
 	}
-	if err := db.DeleteLocalizedStringsForParent(tx, id, "Conference"); err != nil {
+	if err := db.DeleteLocalizedStringsForParent(tx, id, "Sponsor"); err != nil {
 		return err
 	}
 	return nil
 }
 
-func (v *Conference) LoadList(tx *db.Tx, vdbl *db.ConferenceList, since string, limit int) error {
+func (v *Sponsor) LoadList(tx *db.Tx, vdbl *db.SponsorList, since string, limit int) error {
 	return vdbl.LoadSinceEID(tx, since, limit)
 }

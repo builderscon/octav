@@ -4,27 +4,75 @@ package model
 
 import (
 	"encoding/json"
+	"github.com/builderscon/octav/octav/tools"
 	"time"
 
 	"github.com/builderscon/octav/octav/db"
-	"github.com/builderscon/octav/octav/tools"
 	"github.com/lestrrat/go-pdebug"
 )
 
 var _ = time.Time{}
 
-type SessionL10N struct {
-	Session
-	L10N tools.LocalizedFields `json:"-"`
+type rawSession struct {
+	ID                string      `json:"id"`
+	ConferenceID      string      `json:"conference_id"`
+	RoomID            string      `json:"room_id,omitempty"`
+	SpeakerID         string      `json:"speaker_id"`
+	Title             string      `json:"title" l10n:"true"`
+	Abstract          string      `json:"abstract" l10n:"true"`
+	Memo              string      `json:"memo"`
+	StartsOn          time.Time   `json:"starts_on"`
+	Duration          int         `json:"duration"`
+	MaterialLevel     string      `json:"material_level"`
+	Tags              TagString   `json:"tags,omitempty" assign:"convert"`
+	Category          string      `json:"category,omitempty"`
+	SpokenLanguage    string      `json:"spoken_language,omitempty"`
+	SlideLanguage     string      `json:"slide_language,omitempty"`
+	SlideSubtitles    string      `json:"slide_subtitles,omitempty"`
+	SlideURL          string      `json:"slide_url,omitempty"`
+	VideoURL          string      `json:"video_url,omitempty"`
+	PhotoPermission   string      `json:"photo_permission"`
+	VideoPermission   string      `json:"video_permission"`
+	HasInterpretation bool        `json:"has_interpretation"`
+	Status            string      `json:"status"`
+	Confirmed         bool        `json:"confirmed"`
+	Conference        *Conference `json:"conference,omitempy" decorate:"true"`
+	Room              *Room       `json:"room,omitempty" decorate:"true"`
+	Speaker           *User       `json:"speaker,omitempty" decorate:"true"`
 }
-type SessionL10NList []SessionL10N
 
-func (v SessionL10N) MarshalJSON() ([]byte, error) {
-	buf, err := json.Marshal(v.Session)
+func (v Session) MarshalJSON() ([]byte, error) {
+	var raw rawSession
+	raw.ID = v.ID
+	raw.ConferenceID = v.ConferenceID
+	raw.RoomID = v.RoomID
+	raw.SpeakerID = v.SpeakerID
+	raw.Title = v.Title
+	raw.Abstract = v.Abstract
+	raw.Memo = v.Memo
+	raw.StartsOn = v.StartsOn
+	raw.Duration = v.Duration
+	raw.MaterialLevel = v.MaterialLevel
+	raw.Tags = v.Tags
+	raw.Category = v.Category
+	raw.SpokenLanguage = v.SpokenLanguage
+	raw.SlideLanguage = v.SlideLanguage
+	raw.SlideSubtitles = v.SlideSubtitles
+	raw.SlideURL = v.SlideURL
+	raw.VideoURL = v.VideoURL
+	raw.PhotoPermission = v.PhotoPermission
+	raw.VideoPermission = v.VideoPermission
+	raw.HasInterpretation = v.HasInterpretation
+	raw.Status = v.Status
+	raw.Confirmed = v.Confirmed
+	raw.Conference = v.Conference
+	raw.Room = v.Room
+	raw.Speaker = v.Speaker
+	buf, err := json.Marshal(raw)
 	if err != nil {
 		return nil, err
 	}
-	return tools.MarshalJSONWithL10N(buf, v.L10N)
+	return tools.MarshalJSONWithL10N(buf, v.LocalizedFields)
 }
 
 func (v *Session) Load(tx *db.Tx, id string) (err error) {
@@ -137,101 +185,5 @@ func (v *Session) ToRow(vdb *db.Session) error {
 	vdb.HasInterpretation = v.HasInterpretation
 	vdb.Status = v.Status
 	vdb.Confirmed = v.Confirmed
-	return nil
-}
-
-func (v SessionL10N) GetPropNames() ([]string, error) {
-	l, _ := v.L10N.GetPropNames()
-	return append(l, "title", "abstract"), nil
-}
-
-func (v SessionL10N) GetPropValue(s string) (interface{}, error) {
-	switch s {
-	case "id":
-		return v.ID, nil
-	case "conference_id":
-		return v.ConferenceID, nil
-	case "room_id":
-		return v.RoomID, nil
-	case "speaker_id":
-		return v.SpeakerID, nil
-	case "title":
-		return v.Title, nil
-	case "abstract":
-		return v.Abstract, nil
-	case "memo":
-		return v.Memo, nil
-	case "starts_on":
-		return v.StartsOn, nil
-	case "duration":
-		return v.Duration, nil
-	case "material_level":
-		return v.MaterialLevel, nil
-	case "tags":
-		return v.Tags, nil
-	case "category":
-		return v.Category, nil
-	case "spoken_language":
-		return v.SpokenLanguage, nil
-	case "slide_language":
-		return v.SlideLanguage, nil
-	case "slide_subtitles":
-		return v.SlideSubtitles, nil
-	case "slide_url":
-		return v.SlideURL, nil
-	case "video_url":
-		return v.VideoURL, nil
-	case "photo_permission":
-		return v.PhotoPermission, nil
-	case "video_permission":
-		return v.VideoPermission, nil
-	case "has_interpretation":
-		return v.HasInterpretation, nil
-	case "status":
-		return v.Status, nil
-	case "confirmed":
-		return v.Confirmed, nil
-	case "conference":
-		return v.Conference, nil
-	case "room":
-		return v.Room, nil
-	case "speaker":
-		return v.Speaker, nil
-	default:
-		return v.L10N.GetPropValue(s)
-	}
-}
-
-func (v *SessionL10N) UnmarshalJSON(data []byte) error {
-	var s Session
-	if err := json.Unmarshal(data, &s); err != nil {
-		return err
-	}
-
-	v.Session = s
-	m := make(map[string]interface{})
-	if err := json.Unmarshal(data, &m); err != nil {
-		return err
-	}
-
-	if err := tools.ExtractL10NFields(m, &v.L10N, []string{"title", "abstract"}); err != nil {
-		return err
-	}
-
-	return nil
-}
-
-func (v *SessionL10N) LoadLocalizedFields(tx *db.Tx) error {
-	ls, err := db.LoadLocalizedStringsForParent(tx, v.Session.ID, "Session")
-	if err != nil {
-		return err
-	}
-
-	if len(ls) > 0 {
-		v.L10N = tools.LocalizedFields{}
-		for _, l := range ls {
-			v.L10N.Set(l.Language, l.Name, l.Localized)
-		}
-	}
 	return nil
 }
