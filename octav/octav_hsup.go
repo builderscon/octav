@@ -281,6 +281,40 @@ func httpAddFeaturedSpeaker(ctx context.Context, w http.ResponseWriter, r *http.
 	doAddFeaturedSpeaker(ctx, w, r, payload)
 }
 
+func httpAddSponsor(ctx context.Context, w http.ResponseWriter, r *http.Request) {
+	if pdebug.Enabled {
+		g := pdebug.Marker("httpAddSponsor")
+		defer g.End()
+	}
+	if strings.ToLower(r.Method) != `post` {
+		w.Header().Set("Allow", "post")
+		httpError(w, `Method was `+r.Method+`, expected post`, http.StatusNotFound, nil)
+		return
+	}
+
+	var payload model.AddSponsorRequest
+	jsonbuf := getTransportJSONBuffer()
+	defer releaseTransportJSONBuffer(jsonbuf)
+	if _, err := io.Copy(jsonbuf, io.LimitReader(r.Body, MaxPostSize)); err != nil {
+		httpError(w, `Failed to read request body`, http.StatusInternalServerError, err)
+		return
+	}
+	defer r.Body.Close()
+	if pdebug.Enabled {
+		pdebug.Printf(`-----> %s`, jsonbuf.Bytes())
+	}
+	if err := json.Unmarshal(jsonbuf.Bytes(), &payload); err != nil {
+		httpError(w, `Invalid JSON input`, http.StatusInternalServerError, err)
+		return
+	}
+
+	if err := validator.HTTPAddSponsorRequest.Validate(&payload); err != nil {
+		httpError(w, `Invalid input (validation failed)`, http.StatusInternalServerError, err)
+		return
+	}
+	doAddSponsor(ctx, w, r, payload)
+}
+
 func httpCreateConference(ctx context.Context, w http.ResponseWriter, r *http.Request) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("httpCreateConference")
@@ -839,6 +873,40 @@ func httpDeleteSession(ctx context.Context, w http.ResponseWriter, r *http.Reque
 	doDeleteSession(ctx, w, r, payload)
 }
 
+func httpDeleteSponsor(ctx context.Context, w http.ResponseWriter, r *http.Request) {
+	if pdebug.Enabled {
+		g := pdebug.Marker("httpDeleteSponsor")
+		defer g.End()
+	}
+	if strings.ToLower(r.Method) != `post` {
+		w.Header().Set("Allow", "post")
+		httpError(w, `Method was `+r.Method+`, expected post`, http.StatusNotFound, nil)
+		return
+	}
+
+	var payload model.DeleteSponsorRequest
+	jsonbuf := getTransportJSONBuffer()
+	defer releaseTransportJSONBuffer(jsonbuf)
+	if _, err := io.Copy(jsonbuf, io.LimitReader(r.Body, MaxPostSize)); err != nil {
+		httpError(w, `Failed to read request body`, http.StatusInternalServerError, err)
+		return
+	}
+	defer r.Body.Close()
+	if pdebug.Enabled {
+		pdebug.Printf(`-----> %s`, jsonbuf.Bytes())
+	}
+	if err := json.Unmarshal(jsonbuf.Bytes(), &payload); err != nil {
+		httpError(w, `Invalid JSON input`, http.StatusInternalServerError, err)
+		return
+	}
+
+	if err := validator.HTTPDeleteSponsorRequest.Validate(&payload); err != nil {
+		httpError(w, `Invalid input (validation failed)`, http.StatusInternalServerError, err)
+		return
+	}
+	doDeleteSponsor(ctx, w, r, payload)
+}
+
 func httpDeleteUser(ctx context.Context, w http.ResponseWriter, r *http.Request) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("httpDeleteUser")
@@ -1051,6 +1119,30 @@ func httpListSessionByConference(ctx context.Context, w http.ResponseWriter, r *
 	doListSessionByConference(ctx, w, r, payload)
 }
 
+func httpListSponsors(ctx context.Context, w http.ResponseWriter, r *http.Request) {
+	if pdebug.Enabled {
+		g := pdebug.Marker("httpListSponsors")
+		defer g.End()
+	}
+	if strings.ToLower(r.Method) != `get` {
+		w.Header().Set("Allow", "get")
+		httpError(w, `Method was `+r.Method+`, expected get`, http.StatusNotFound, nil)
+		return
+	}
+
+	var payload model.ListSponsorsRequest
+	if err := urlenc.Unmarshal([]byte(r.URL.RawQuery), &payload); err != nil {
+		httpError(w, `Failed to parse url query string`, http.StatusInternalServerError, err)
+		return
+	}
+
+	if err := validator.HTTPListSponsorsRequest.Validate(&payload); err != nil {
+		httpError(w, `Invalid input (validation failed)`, http.StatusInternalServerError, err)
+		return
+	}
+	doListSponsors(ctx, w, r, payload)
+}
+
 func httpListUser(ctx context.Context, w http.ResponseWriter, r *http.Request) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("httpListUser")
@@ -1217,6 +1309,30 @@ func httpLookupSession(ctx context.Context, w http.ResponseWriter, r *http.Reque
 		return
 	}
 	doLookupSession(ctx, w, r, payload)
+}
+
+func httpLookupSponsor(ctx context.Context, w http.ResponseWriter, r *http.Request) {
+	if pdebug.Enabled {
+		g := pdebug.Marker("httpLookupSponsor")
+		defer g.End()
+	}
+	if strings.ToLower(r.Method) != `get` {
+		w.Header().Set("Allow", "get")
+		httpError(w, `Method was `+r.Method+`, expected get`, http.StatusNotFound, nil)
+		return
+	}
+
+	var payload model.LookupSponsorRequest
+	if err := urlenc.Unmarshal([]byte(r.URL.RawQuery), &payload); err != nil {
+		httpError(w, `Failed to parse url query string`, http.StatusInternalServerError, err)
+		return
+	}
+
+	if err := validator.HTTPLookupSponsorRequest.Validate(&payload); err != nil {
+		httpError(w, `Invalid input (validation failed)`, http.StatusInternalServerError, err)
+		return
+	}
+	doLookupSponsor(ctx, w, r, payload)
 }
 
 func httpLookupUser(ctx context.Context, w http.ResponseWriter, r *http.Request) {
@@ -1427,6 +1543,40 @@ func httpUpdateSession(ctx context.Context, w http.ResponseWriter, r *http.Reque
 	doUpdateSession(ctx, w, r, payload)
 }
 
+func httpUpdateSponsor(ctx context.Context, w http.ResponseWriter, r *http.Request) {
+	if pdebug.Enabled {
+		g := pdebug.Marker("httpUpdateSponsor")
+		defer g.End()
+	}
+	if strings.ToLower(r.Method) != `post` {
+		w.Header().Set("Allow", "post")
+		httpError(w, `Method was `+r.Method+`, expected post`, http.StatusNotFound, nil)
+		return
+	}
+
+	var payload model.UpdateSponsorRequest
+	jsonbuf := getTransportJSONBuffer()
+	defer releaseTransportJSONBuffer(jsonbuf)
+	if _, err := io.Copy(jsonbuf, io.LimitReader(r.Body, MaxPostSize)); err != nil {
+		httpError(w, `Failed to read request body`, http.StatusInternalServerError, err)
+		return
+	}
+	defer r.Body.Close()
+	if pdebug.Enabled {
+		pdebug.Printf(`-----> %s`, jsonbuf.Bytes())
+	}
+	if err := json.Unmarshal(jsonbuf.Bytes(), &payload); err != nil {
+		httpError(w, `Invalid JSON input`, http.StatusInternalServerError, err)
+		return
+	}
+
+	if err := validator.HTTPUpdateSponsorRequest.Validate(&payload); err != nil {
+		httpError(w, `Invalid input (validation failed)`, http.StatusInternalServerError, err)
+		return
+	}
+	doUpdateSponsor(ctx, w, r, payload)
+}
+
 func httpUpdateUser(ctx context.Context, w http.ResponseWriter, r *http.Request) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("httpUpdateUser")
@@ -1531,6 +1681,11 @@ func (s *Server) SetupRoutes() {
 	r.HandleFunc(`/v1/session/delete`, httpWithContext(httpWithBasicAuth(httpDeleteSession)))
 	r.HandleFunc(`/v1/session/lookup`, httpWithContext(httpLookupSession))
 	r.HandleFunc(`/v1/session/update`, httpWithContext(httpWithBasicAuth(httpUpdateSession)))
+	r.HandleFunc(`/v1/sponsor/add`, httpWithContext(httpWithBasicAuth(httpAddSponsor)))
+	r.HandleFunc(`/v1/sponsor/delete`, httpWithContext(httpWithBasicAuth(httpDeleteSponsor)))
+	r.HandleFunc(`/v1/sponsor/list`, httpWithContext(httpWithBasicAuth(httpListSponsors)))
+	r.HandleFunc(`/v1/sponsor/lookup`, httpWithContext(httpWithBasicAuth(httpLookupSponsor)))
+	r.HandleFunc(`/v1/sponsor/update`, httpWithContext(httpWithBasicAuth(httpUpdateSponsor)))
 	r.HandleFunc(`/v1/survey_session_response/create`, httpWithContext(httpWithBasicAuth(httpCreateSessionSurveyResponse)))
 	r.HandleFunc(`/v1/user/create`, httpWithContext(httpWithBasicAuth(httpCreateUser)))
 	r.HandleFunc(`/v1/user/delete`, httpWithContext(httpWithBasicAuth(httpDeleteUser)))

@@ -98,29 +98,50 @@ func (v *ConferenceSeries) Update(tx *db.Tx, vdb *db.ConferenceSeries, payload m
 
 func (v *ConferenceSeries) ReplaceL10NStrings(tx *db.Tx, m *model.ConferenceSeries, lang string) error {
 	if pdebug.Enabled {
-		g := pdebug.Marker("service.ConferenceSeries.ReplaceL10NStrings")
+		g := pdebug.Marker("service.ConferenceSeries.ReplaceL10NStrings lang = %s", lang)
 		defer g.End()
 	}
-	rows, err := tx.Query(`SELECT oid, parent_id, parent_type, name, language, localized FROM localized_strings WHERE parent_type = ? AND parent_id = ? AND language = ?`, "ConferenceSeries", m.ID, lang)
-	if err != nil {
-		return err
-	}
-
-	var l db.LocalizedString
-	for rows.Next() {
-		if err := l.Scan(rows); err != nil {
+	if lang == "all" {
+		rows, err := tx.Query(`SELECT oid, parent_id, parent_type, name, language, localized FROM localized_strings WHERE parent_type = ? AND parent_id = ?`, "ConferenceSeries", m.ID)
+		if err != nil {
 			return err
 		}
-		if len(l.Localized) == 0 {
-			continue
+
+		var l db.LocalizedString
+		for rows.Next() {
+			if err := l.Scan(rows); err != nil {
+				return err
+			}
+			if len(l.Localized) == 0 {
+				continue
+			}
+			if pdebug.Enabled {
+				pdebug.Printf("Adding key '%s#%s'", l.Name, l.Language)
+			}
+			m.LocalizedFields.Set(l.Language, l.Name, l.Localized)
+		}
+	} else {
+		rows, err := tx.Query(`SELECT oid, parent_id, parent_type, name, language, localized FROM localized_strings WHERE parent_type = ? AND parent_id = ? AND language = ?`, "ConferenceSeries", m.ID, lang)
+		if err != nil {
+			return err
 		}
 
-		switch l.Name {
-		case "title":
-			if pdebug.Enabled {
-				pdebug.Printf("Replacing for key 'title'")
+		var l db.LocalizedString
+		for rows.Next() {
+			if err := l.Scan(rows); err != nil {
+				return err
 			}
-			m.Title = l.Localized
+			if len(l.Localized) == 0 {
+				continue
+			}
+
+			switch l.Name {
+			case "title":
+				if pdebug.Enabled {
+					pdebug.Printf("Replacing for key 'title'")
+				}
+				m.Title = l.Localized
+			}
 		}
 	}
 	return nil

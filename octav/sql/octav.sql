@@ -213,6 +213,24 @@ CREATE TABLE featured_speakers (
     created_on DATETIME NOT NULL,
     modified_on TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     UNIQUE KEY(eid),
-    KEY(conference_id),
+    FOREIGN KEY (conference_id) REFERENCES conferences(eid) ON DELETE CASCADE,
     FOREIGN KEY (speaker_id) REFERENCES users(eid) ON DELETE SET NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE sponsors (
+    oid INTEGER UNSIGNED NOT NULL PRIMARY KEY AUTO_INCREMENT,
+    eid CHAR(64) CHARACTER SET latin1 NOT NULL,
+    conference_id CHAR(64) CHARACTER SET latin1 NOT NULL, -- sponsors are bound to a conference.
+    name TEXT NOT NULL,
+    logo_url1 TEXT NOT NULL, -- it is up to the consumer to choose which logo to use
+    logo_url2 TEXT,
+    logo_url3 TEXT,
+    url TEXT NOT NULL,
+    group_name CHAR(64) CHARACTER SET latin1 NOT NULL,
+    sort_order int not null default 0,
+    created_on DATETIME NOT NULL,
+    modified_on TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    UNIQUE KEY(eid),
+    KEY(sort_order, group_name),
+    FOREIGN KEY (conference_id) REFERENCES conferences(eid) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;

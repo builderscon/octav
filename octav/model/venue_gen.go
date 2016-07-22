@@ -4,27 +4,37 @@ package model
 
 import (
 	"encoding/json"
+	"github.com/builderscon/octav/octav/tools"
 	"time"
 
 	"github.com/builderscon/octav/octav/db"
-	"github.com/builderscon/octav/octav/tools"
 	"github.com/lestrrat/go-pdebug"
 )
 
 var _ = time.Time{}
 
-type VenueL10N struct {
-	Venue
-	L10N tools.LocalizedFields `json:"-"`
+type rawVenue struct {
+	ID        string   `json:"id,omitempty"`
+	Name      string   `json:"name" l10n:"true" decorate:"true"`
+	Address   string   `json:"address" l10n:"true" decorate:"true"`
+	Longitude float64  `json:"longitude,omitempty"`
+	Latitude  float64  `json:"latitude,omitempty"`
+	Rooms     RoomList `json:"rooms,omitempty"`
 }
-type VenueL10NList []VenueL10N
 
-func (v VenueL10N) MarshalJSON() ([]byte, error) {
-	buf, err := json.Marshal(v.Venue)
+func (v Venue) MarshalJSON() ([]byte, error) {
+	var raw rawVenue
+	raw.ID = v.ID
+	raw.Name = v.Name
+	raw.Address = v.Address
+	raw.Longitude = v.Longitude
+	raw.Latitude = v.Latitude
+	raw.Rooms = v.Rooms
+	buf, err := json.Marshal(raw)
 	if err != nil {
 		return nil, err
 	}
-	return tools.MarshalJSONWithL10N(buf, v.L10N)
+	return tools.MarshalJSONWithL10N(buf, v.LocalizedFields)
 }
 
 func (v *Venue) Load(tx *db.Tx, id string) (err error) {
@@ -58,63 +68,5 @@ func (v *Venue) ToRow(vdb *db.Venue) error {
 	vdb.Address = v.Address
 	vdb.Longitude = v.Longitude
 	vdb.Latitude = v.Latitude
-	return nil
-}
-
-func (v VenueL10N) GetPropNames() ([]string, error) {
-	l, _ := v.L10N.GetPropNames()
-	return append(l, "name", "address"), nil
-}
-
-func (v VenueL10N) GetPropValue(s string) (interface{}, error) {
-	switch s {
-	case "id":
-		return v.ID, nil
-	case "name":
-		return v.Name, nil
-	case "address":
-		return v.Address, nil
-	case "longitude":
-		return v.Longitude, nil
-	case "latitude":
-		return v.Latitude, nil
-	case "rooms":
-		return v.Rooms, nil
-	default:
-		return v.L10N.GetPropValue(s)
-	}
-}
-
-func (v *VenueL10N) UnmarshalJSON(data []byte) error {
-	var s Venue
-	if err := json.Unmarshal(data, &s); err != nil {
-		return err
-	}
-
-	v.Venue = s
-	m := make(map[string]interface{})
-	if err := json.Unmarshal(data, &m); err != nil {
-		return err
-	}
-
-	if err := tools.ExtractL10NFields(m, &v.L10N, []string{"name", "address"}); err != nil {
-		return err
-	}
-
-	return nil
-}
-
-func (v *VenueL10N) LoadLocalizedFields(tx *db.Tx) error {
-	ls, err := db.LoadLocalizedStringsForParent(tx, v.Venue.ID, "Venue")
-	if err != nil {
-		return err
-	}
-
-	if len(ls) > 0 {
-		v.L10N = tools.LocalizedFields{}
-		for _, l := range ls {
-			v.L10N.Set(l.Language, l.Name, l.Localized)
-		}
-	}
 	return nil
 }

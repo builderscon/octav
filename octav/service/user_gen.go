@@ -98,34 +98,55 @@ func (v *User) Update(tx *db.Tx, vdb *db.User, payload model.UpdateUserRequest) 
 
 func (v *User) ReplaceL10NStrings(tx *db.Tx, m *model.User, lang string) error {
 	if pdebug.Enabled {
-		g := pdebug.Marker("service.User.ReplaceL10NStrings")
+		g := pdebug.Marker("service.User.ReplaceL10NStrings lang = %s", lang)
 		defer g.End()
 	}
-	rows, err := tx.Query(`SELECT oid, parent_id, parent_type, name, language, localized FROM localized_strings WHERE parent_type = ? AND parent_id = ? AND language = ?`, "User", m.ID, lang)
-	if err != nil {
-		return err
-	}
-
-	var l db.LocalizedString
-	for rows.Next() {
-		if err := l.Scan(rows); err != nil {
+	if lang == "all" {
+		rows, err := tx.Query(`SELECT oid, parent_id, parent_type, name, language, localized FROM localized_strings WHERE parent_type = ? AND parent_id = ?`, "User", m.ID)
+		if err != nil {
 			return err
 		}
-		if len(l.Localized) == 0 {
-			continue
+
+		var l db.LocalizedString
+		for rows.Next() {
+			if err := l.Scan(rows); err != nil {
+				return err
+			}
+			if len(l.Localized) == 0 {
+				continue
+			}
+			if pdebug.Enabled {
+				pdebug.Printf("Adding key '%s#%s'", l.Name, l.Language)
+			}
+			m.LocalizedFields.Set(l.Language, l.Name, l.Localized)
+		}
+	} else {
+		rows, err := tx.Query(`SELECT oid, parent_id, parent_type, name, language, localized FROM localized_strings WHERE parent_type = ? AND parent_id = ? AND language = ?`, "User", m.ID, lang)
+		if err != nil {
+			return err
 		}
 
-		switch l.Name {
-		case "first_name":
-			if pdebug.Enabled {
-				pdebug.Printf("Replacing for key 'first_name'")
+		var l db.LocalizedString
+		for rows.Next() {
+			if err := l.Scan(rows); err != nil {
+				return err
 			}
-			m.FirstName = l.Localized
-		case "last_name":
-			if pdebug.Enabled {
-				pdebug.Printf("Replacing for key 'last_name'")
+			if len(l.Localized) == 0 {
+				continue
 			}
-			m.LastName = l.Localized
+
+			switch l.Name {
+			case "first_name":
+				if pdebug.Enabled {
+					pdebug.Printf("Replacing for key 'first_name'")
+				}
+				m.FirstName = l.Localized
+			case "last_name":
+				if pdebug.Enabled {
+					pdebug.Printf("Replacing for key 'last_name'")
+				}
+				m.LastName = l.Localized
+			}
 		}
 	}
 	return nil

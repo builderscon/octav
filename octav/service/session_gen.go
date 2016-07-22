@@ -98,34 +98,55 @@ func (v *Session) Update(tx *db.Tx, vdb *db.Session, payload model.UpdateSession
 
 func (v *Session) ReplaceL10NStrings(tx *db.Tx, m *model.Session, lang string) error {
 	if pdebug.Enabled {
-		g := pdebug.Marker("service.Session.ReplaceL10NStrings")
+		g := pdebug.Marker("service.Session.ReplaceL10NStrings lang = %s", lang)
 		defer g.End()
 	}
-	rows, err := tx.Query(`SELECT oid, parent_id, parent_type, name, language, localized FROM localized_strings WHERE parent_type = ? AND parent_id = ? AND language = ?`, "Session", m.ID, lang)
-	if err != nil {
-		return err
-	}
-
-	var l db.LocalizedString
-	for rows.Next() {
-		if err := l.Scan(rows); err != nil {
+	if lang == "all" {
+		rows, err := tx.Query(`SELECT oid, parent_id, parent_type, name, language, localized FROM localized_strings WHERE parent_type = ? AND parent_id = ?`, "Session", m.ID)
+		if err != nil {
 			return err
 		}
-		if len(l.Localized) == 0 {
-			continue
+
+		var l db.LocalizedString
+		for rows.Next() {
+			if err := l.Scan(rows); err != nil {
+				return err
+			}
+			if len(l.Localized) == 0 {
+				continue
+			}
+			if pdebug.Enabled {
+				pdebug.Printf("Adding key '%s#%s'", l.Name, l.Language)
+			}
+			m.LocalizedFields.Set(l.Language, l.Name, l.Localized)
+		}
+	} else {
+		rows, err := tx.Query(`SELECT oid, parent_id, parent_type, name, language, localized FROM localized_strings WHERE parent_type = ? AND parent_id = ? AND language = ?`, "Session", m.ID, lang)
+		if err != nil {
+			return err
 		}
 
-		switch l.Name {
-		case "title":
-			if pdebug.Enabled {
-				pdebug.Printf("Replacing for key 'title'")
+		var l db.LocalizedString
+		for rows.Next() {
+			if err := l.Scan(rows); err != nil {
+				return err
 			}
-			m.Title = l.Localized
-		case "abstract":
-			if pdebug.Enabled {
-				pdebug.Printf("Replacing for key 'abstract'")
+			if len(l.Localized) == 0 {
+				continue
 			}
-			m.Abstract = l.Localized
+
+			switch l.Name {
+			case "title":
+				if pdebug.Enabled {
+					pdebug.Printf("Replacing for key 'title'")
+				}
+				m.Title = l.Localized
+			case "abstract":
+				if pdebug.Enabled {
+					pdebug.Printf("Replacing for key 'abstract'")
+				}
+				m.Abstract = l.Localized
+			}
 		}
 	}
 	return nil

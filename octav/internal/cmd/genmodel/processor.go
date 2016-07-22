@@ -81,6 +81,7 @@ type Field struct {
 	JSONName string
 	L10N     bool
 	Name     string
+	Tag      reflect.StructTag
 	Type     string
 }
 
@@ -275,6 +276,7 @@ func (ctx *genctx) extractModelStructs(n ast.Node) bool {
 			var l10n bool
 			var decorate bool
 			var convert bool
+			var ft reflect.StructTag
 			if f.Tag != nil {
 				v := f.Tag.Value
 				if len(v) >= 2 {
@@ -286,8 +288,8 @@ func (ctx *genctx) extractModelStructs(n ast.Node) bool {
 					}
 				}
 
-				st := reflect.StructTag(v)
-				tag := st.Get("json")
+				ft = reflect.StructTag(v)
+				tag := ft.Get("json")
 				if tag == "-" {
 					continue LoopFields
 				}
@@ -298,17 +300,17 @@ func (ctx *genctx) extractModelStructs(n ast.Node) bool {
 					jsname = tl[0]
 				}
 
-				tag = st.Get("l10n")
+				tag = ft.Get("l10n")
 				if b, err := strconv.ParseBool(tag); err == nil && b {
 					l10n = true
 				}
 
-				tag = st.Get("decorate")
+				tag = ft.Get("decorate")
 				if b, err := strconv.ParseBool(tag); err == nil && b {
 					decorate = true
 				}
 
-				if tag = st.Get("assign"); tag == "convert" {
+				if tag = ft.Get("assign"); tag == "convert" {
 					convert = true
 				}
 			}
@@ -324,6 +326,7 @@ func (ctx *genctx) extractModelStructs(n ast.Node) bool {
 				Decorate: decorate,
 				Name:     f.Names[0].Name,
 				JSONName: jsname,
+				Tag:      ft,
 				Type:     typ,
 			}
 
@@ -507,34 +510,39 @@ func generateModelFile(ctx *genctx, m Model) error {
 	buf.WriteString("\n\nimport (")
 	if hasL10N {
 		buf.WriteString("\n" + strconv.Quote("encoding/json"))
+		buf.WriteString("\n" + strconv.Quote("github.com/builderscon/octav/octav/tools"))
 	}
 	buf.WriteString("\n" + strconv.Quote("time"))
 	buf.WriteString("\n\n" + strconv.Quote("github.com/builderscon/octav/octav/db"))
-	if hasL10N {
-		buf.WriteString("\n" + strconv.Quote("github.com/builderscon/octav/octav/tools"))
-	}
 	buf.WriteString("\n" + strconv.Quote("github.com/lestrrat/go-pdebug"))
 	buf.WriteString("\n)")
 	buf.WriteString("\n\nvar _ = time.Time{}")
 
 	if hasL10N {
-		fmt.Fprintf(&buf, "\n\ntype %sL10N struct {", m.Name)
-		fmt.Fprintf(&buf, "\n%s", m.Name)
-		buf.WriteString("\nL10N tools.LocalizedFields `json:" + `"-"` + "`")
+		fmt.Fprintf(&buf, "\n\ntype raw%s struct {", m.Name)
+		for _, f := range m.Fields {
+			fmt.Fprintf(&buf, "\n%s %s", f.Name, f.Type)
+			if f.Tag != "" {
+				fmt.Fprintf(&buf, "`%s`", f.Tag)
+			}
+		}
 		buf.WriteString("\n}")
-		fmt.Fprintf(&buf, "\ntype %sL10NList []%sL10N", m.Name, m.Name)
 
-		fmt.Fprintf(&buf, "\n\nfunc (v %sL10N) MarshalJSON() ([]byte, error) {", m.Name)
-		fmt.Fprintf(&buf, "\nbuf, err := json.Marshal(v.%s)", m.Name)
+		fmt.Fprintf(&buf, "\n\nfunc (%c %s) MarshalJSON() ([]byte, error) {", varname, m.Name)
+		fmt.Fprintf(&buf, "\nvar raw raw%s", m.Name)
+		for _, f := range m.Fields {
+			fmt.Fprintf(&buf, "\nraw.%s = v.%s", f.Name, f.Name)
+		}
+		buf.WriteString("\nbuf, err := json.Marshal(raw)")
 		buf.WriteString("\nif err != nil {")
 		buf.WriteString("\nreturn nil, err")
 		buf.WriteString("\n}")
-		buf.WriteString("\nreturn tools.MarshalJSONWithL10N(buf, v.L10N)")
+		buf.WriteString("\nreturn tools.MarshalJSONWithL10N(buf, v.LocalizedFields)")
 		buf.WriteString("\n}")
 	}
 
 	if hasID {
-		fmt.Fprintf(&buf, "\n\nfunc (v *%s) Load(tx *db.Tx, id string) (err error) {", m.Name)
+		fmt.Fprintf(&buf, "\n\nfunc (%c *%s) Load(tx *db.Tx, id string) (err error) {", varname, m.Name)
 		buf.WriteString("\nif pdebug.Enabled {")
 		fmt.Fprintf(&buf, "\n"+`g := pdebug.Marker("model.%s.Load %%s", id).BindError(&err)`, m.Name)
 		buf.WriteString("\ndefer g.End()")
@@ -549,7 +557,7 @@ func generateModelFile(ctx *genctx, m Model) error {
 		buf.WriteString("\nreturn nil")
 		buf.WriteString("\n}")
 
-		fmt.Fprintf(&buf, "\n\nfunc (v *%s) FromRow(vdb db.%s) error {", m.Name, m.Name)
+		fmt.Fprintf(&buf, "\n\nfunc (%c *%s) FromRow(vdb db.%s) error {", varname, m.Name, m.Name)
 		buf.WriteString("\nv.ID = vdb.EID")
 		for _, f := range m.Fields {
 			if f.Name == "ID" {
@@ -575,7 +583,7 @@ func generateModelFile(ctx *genctx, m Model) error {
 		buf.WriteString("\n}")
 	}
 
-	fmt.Fprintf(&buf, "\n\nfunc (v *%s) ToRow(vdb *db.%s) error {", m.Name, m.Name)
+	fmt.Fprintf(&buf, "\n\nfunc (%c *%s) ToRow(vdb *db.%s) error {", varname, m.Name, m.Name)
 	for _, f := range m.Fields {
 		if f.Name == "ID" {
 			buf.WriteString("\nvdb.EID = v.ID")
@@ -597,7 +605,7 @@ func generateModelFile(ctx *genctx, m Model) error {
 	}
 	buf.WriteString("\nreturn nil")
 	buf.WriteString("\n}")
-
+/*
 	if l10nfields.Len() > 0 {
 		fmt.Fprintf(&buf, "\n\nfunc (%c %sL10N) GetPropNames() ([]string, error) {", varname, m.Name)
 		fmt.Fprintf(&buf, "\nl, _ := %c.L10N.GetPropNames()", varname)
@@ -616,20 +624,6 @@ func generateModelFile(ctx *genctx, m Model) error {
 		fmt.Fprintf(&buf, "\nreturn %c.L10N.GetPropValue(s)", varname)
 		buf.WriteString("\n}\n}")
 
-		/*
-			fmt.Fprintf(&buf, "\n\nfunc (%c %s) MarshalJSON() ([]byte, error) {", varname, m.Name)
-			buf.WriteString("\nm := make(map[string]interface{})")
-			for _, f := range m.Fields {
-				fmt.Fprintf(&buf, "\nm[%s] = %c.%s", strconv.Quote(f.JSONName), varname, f.Name)
-			}
-			buf.WriteString("\nbuf, err := json.Marshal(m)")
-			buf.WriteString("\nif err != nil {")
-			buf.WriteString("\nreturn nil, err")
-			buf.WriteString("\n}")
-			fmt.Fprintf(&buf, "\nreturn tools.MarshalJSONWithL10N(buf, %c.L10N)", varname)
-			buf.WriteString("\n}")
-		*/
-
 		fmt.Fprintf(&buf, "\n\nfunc (v *%sL10N) UnmarshalJSON(data []byte) error {", m.Name)
 		fmt.Fprintf(&buf, "\nvar s %s", m.Name)
 		buf.WriteString("\nif err := json.Unmarshal(data, &s); err != nil {")
@@ -640,7 +634,6 @@ func generateModelFile(ctx *genctx, m Model) error {
 		buf.WriteString("\nif err := json.Unmarshal(data, &m); err != nil {")
 		buf.WriteString("\nreturn err")
 		buf.WriteString("\n}")
-
 		fmt.Fprintf(&buf, "\n\nif err := tools.ExtractL10NFields(m, &v.L10N, []string{%s}); err != nil {", l10nfields.String())
 		buf.WriteString("\nreturn err")
 		buf.WriteString("\n}")
@@ -661,6 +654,8 @@ func generateModelFile(ctx *genctx, m Model) error {
 		buf.WriteString("\nreturn nil")
 		buf.WriteString("\n}")
 	}
+*/
+
 	fsrc, err := format.Source(buf.Bytes())
 	if err != nil {
 		log.Printf("%s", buf.Bytes())
@@ -727,15 +722,15 @@ func generateServiceFile(ctx *genctx, m Model) error {
 
 	fmt.Fprintf(&buf, "\nfunc (v *%s) LookupFromPayload(tx *db.Tx, m *model.%s, payload model.Lookup%sRequest) (err error) {", m.Name, m.Name, m.Name)
 	buf.WriteString("\nif pdebug.Enabled {")
-	fmt.Fprintf(&buf, "\n" + `g := pdebug.Marker("service.%s.LookupFromPayload").BindError(&err)`, m.Name)
+	fmt.Fprintf(&buf, "\n"+`g := pdebug.Marker("service.%s.LookupFromPayload").BindError(&err)`, m.Name)
 	buf.WriteString("\ndefer g.End()")
 	buf.WriteString("\n}")
 	buf.WriteString("\nif err = v.Lookup(tx, m, payload.ID); err != nil {")
-	fmt.Fprintf(&buf, "\n" + `return errors.Wrap(err, "failed to load model.%s from database")`, m.Name)
+	fmt.Fprintf(&buf, "\n"+`return errors.Wrap(err, "failed to load model.%s from database")`, m.Name)
 	buf.WriteString("\n}")
 	if hasL10N || hasDecorate {
 		buf.WriteString("\nif err := v.Decorate(tx, m, payload.Lang.String); err != nil {")
-		fmt.Fprintf(&buf, "\n" + `return errors.Wrap(err, "failed to load associated data for model.%s from database")`, m.Name)
+		fmt.Fprintf(&buf, "\n"+`return errors.Wrap(err, "failed to load associated data for model.%s from database")`, m.Name)
 		buf.WriteString("\n}")
 	}
 	buf.WriteString("\nreturn nil")
@@ -743,12 +738,12 @@ func generateServiceFile(ctx *genctx, m Model) error {
 
 	fmt.Fprintf(&buf, "\nfunc (v *%s) Lookup(tx *db.Tx, m *model.%s, id string) (err error) {", m.Name, m.Name)
 	buf.WriteString("\nif pdebug.Enabled {")
-	fmt.Fprintf(&buf, "\n" + `g := pdebug.Marker("service.%s.Lookup").BindError(&err)`, m.Name)
+	fmt.Fprintf(&buf, "\n"+`g := pdebug.Marker("service.%s.Lookup").BindError(&err)`, m.Name)
 	buf.WriteString("\ndefer g.End()")
 	buf.WriteString("\n}")
 	fmt.Fprintf(&buf, "\n\nr := model.%s{}", m.Name)
 	buf.WriteString("\nif err = r.Load(tx, id); err != nil {")
-	fmt.Fprintf(&buf, "\n" + `return errors.Wrap(err, "failed to load model.%s from database")`, m.Name)
+	fmt.Fprintf(&buf, "\n"+`return errors.Wrap(err, "failed to load model.%s from database")`, m.Name)
 	buf.WriteString("\n}")
 	buf.WriteString("\n*m = r")
 	buf.WriteString("\nreturn nil")
@@ -816,9 +811,28 @@ func generateServiceFile(ctx *genctx, m Model) error {
 	if hasL10N {
 		fmt.Fprintf(&buf, "\n\nfunc (v *%s) ReplaceL10NStrings(tx *db.Tx, m *model.%s, lang string) error {", m.Name, m.Name)
 		buf.WriteString("\nif pdebug.Enabled {")
-		fmt.Fprintf(&buf, "\n"+`g := pdebug.Marker("service.%s.ReplaceL10NStrings")`, m.Name)
+		fmt.Fprintf(&buf, "\n"+`g := pdebug.Marker("service.%s.ReplaceL10NStrings lang = %%s", lang)`, m.Name)
 		buf.WriteString("\ndefer g.End()")
 		buf.WriteString("\n}")
+		buf.WriteString("\nif lang == \"all\" {")
+		fmt.Fprintf(&buf, "\nrows, err := tx.Query(`SELECT oid, parent_id, parent_type, name, language, localized FROM localized_strings WHERE parent_type = ? AND parent_id = ?`, %s, m.ID)", strconv.Quote(m.Name))
+		buf.WriteString("\nif err != nil {")
+		buf.WriteString("\nreturn err")
+		buf.WriteString("\n}")
+		buf.WriteString("\n\nvar l db.LocalizedString")
+		buf.WriteString("\nfor rows.Next() {")
+		buf.WriteString("\nif err := l.Scan(rows); err != nil {")
+		buf.WriteString("\nreturn err")
+		buf.WriteString("\n}")
+		buf.WriteString("\nif len(l.Localized) == 0 {")
+		buf.WriteString("\ncontinue")
+		buf.WriteString("\n}")
+		buf.WriteString("\nif pdebug.Enabled {")
+		buf.WriteString("\npdebug.Printf(\"Adding key '%s#%s'\", l.Name, l.Language)")
+		buf.WriteString("\n}")
+		buf.WriteString("\nm.LocalizedFields.Set(l.Language, l.Name, l.Localized)")
+		buf.WriteString("\n}")
+		buf.WriteString("\n} else {")
 		fmt.Fprintf(&buf, "\nrows, err := tx.Query(`SELECT oid, parent_id, parent_type, name, language, localized FROM localized_strings WHERE parent_type = ? AND parent_id = ? AND language = ?`, %s, m.ID, lang)", strconv.Quote(m.Name))
 		buf.WriteString("\nif err != nil {")
 		buf.WriteString("\nreturn err")
@@ -842,6 +856,7 @@ func generateServiceFile(ctx *genctx, m Model) error {
 			buf.WriteString("\n}")
 			fmt.Fprintf(&buf, "\nm.%s = l.Localized", f.Name)
 		}
+		buf.WriteString("\n}")
 		buf.WriteString("\n}")
 		buf.WriteString("\n}")
 		buf.WriteString("\nreturn nil")

@@ -756,7 +756,7 @@ sub list_featured_speakers {
 
 sub update_featured_speaker {
     my ($self, $payload) = @_;
-    for my $required (qw(id)) {
+    for my $required (qw(id user_id)) {
         if (!$payload->{$required}) {
             die qq|property "$required" must be provided|;
         }
@@ -779,6 +779,86 @@ sub delete_featured_speaker {
         }
     }
     my $uri = URI->new($self->{endpoint} . qq|/v1/featured_speaker/delete|);
+    my $json_payload = JSON::encode_json($payload);
+    my $res = $self->{user_agent}->post($uri, Content => $json_payload);
+    if (!$res->is_success) {
+        $self->{last_error} = $res->status_line;
+        return;
+    }
+    return 1
+}
+
+sub add_sponsor {
+    my ($self, $payload) = @_;
+    for my $required (qw(conference_id logo_url1 name url group_name user_id)) {
+        if (!$payload->{$required}) {
+            die qq|property "$required" must be provided|;
+        }
+    }
+    my $uri = URI->new($self->{endpoint} . qq|/v1/sponsor/add|);
+    my $json_payload = JSON::encode_json($payload);
+    my $res = $self->{user_agent}->post($uri, Content => $json_payload);
+    if (!$res->is_success) {
+        $self->{last_error} = $res->status_line;
+        return;
+    }
+    return JSON::decode_json($res->decoded_content);
+}
+
+sub lookup_sponsor {
+    my ($self, $payload) = @_;
+    for my $required (qw(id)) {
+        if (!$payload->{$required}) {
+            die qq|property "$required" must be provided|;
+        }
+    }
+    my $uri = URI->new($self->{endpoint} . qq|/v1/sponsor/lookup|);
+    $uri->query_form($payload);
+    my $res = $self->{user_agent}->get($uri);
+    if (!$res->is_success) {
+        $self->{last_error} = $res->status_line;
+        return;
+    }
+    return JSON::decode_json($res->decoded_content);
+}
+
+sub list_sponsors {
+    my ($self, $payload) = @_;
+    my $uri = URI->new($self->{endpoint} . qq|/v1/sponsor/list|);
+    $uri->query_form($payload);
+    my $res = $self->{user_agent}->get($uri);
+    if (!$res->is_success) {
+        $self->{last_error} = $res->status_line;
+        return;
+    }
+    return JSON::decode_json($res->decoded_content);
+}
+
+sub update_sponsor {
+    my ($self, $payload) = @_;
+    for my $required (qw(id user_id)) {
+        if (!$payload->{$required}) {
+            die qq|property "$required" must be provided|;
+        }
+    }
+    my $uri = URI->new($self->{endpoint} . qq|/v1/sponsor/update|);
+    my $json_payload = JSON::encode_json($payload);
+    my $res = $self->{user_agent}->post($uri, Content => $json_payload);
+    if (!$res->is_success) {
+        $self->{last_error} = $res->status_line;
+        return;
+    }
+    return 1
+}
+
+sub delete_sponsor {
+    my ($self, $payload) = @_;
+    for my $required (qw(id user_id)) {
+        if (!$payload->{$required}) {
+            die qq|property "$required" must be provided|;
+        }
+    }
+    my $uri = URI->new($self->{endpoint} . qq|/v1/sponsor/delete|);
     my $json_payload = JSON::encode_json($payload);
     my $res = $self->{user_agent}->post($uri, Content => $json_payload);
     if (!$res->is_success) {

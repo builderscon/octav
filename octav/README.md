@@ -94,6 +94,23 @@ Sessions can be regeistered to be presented at a room.
 
 Sessions for a particular conference can only be created by administrators of that conference.
 
+## Featured Speakers
+
+Sometimes you have to announce your pscheduled speakers even before your speakers can register on your system.
+
+This allows you to register a special section for those speakers, so you can promote them independently of your session registrations.
+
+## Sponsors
+
+A sponsor for a conference has 
+
+* name
+* url
+* logo url
+* group_name
+
+The group is used to group sponsors so you can differentiate how you present your sponsors. For example, perhaps you want to show "tier-1" group the largest, "tier-2" smaller, et al.
+
 # Code generation directions
 
 ## If you edited spec/v1/api.json

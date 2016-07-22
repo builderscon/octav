@@ -82,11 +82,11 @@
       "type": "object",
       "properties": {
         "id": {"$ref": "#/definitions/uuid"},
-        "conference_id": {"$ref": "#/definitions/uuid"},
-        "user_id": {"$ref": "#/definitions/uuid"},
         "avatar_url": {"$ref": "#/definitions/url" },
+        "conference_id": {"$ref": "#/definitions/uuid"},
         "display_name": { "$ref": "#/definitions/string_en_not_empty" },
-        "description": { "$ref": "#/definitions/string_en_not_empty" }
+        "description": { "$ref": "#/definitions/string_en_not_empty" },
+        "speaker_id": {"$ref": "#/definitions/uuid"}
       },
       "patternProperties": {
         "display_name#[a-z]+": { "$ref": "#/definitions/string_i18n" },
@@ -97,6 +97,29 @@
       "type": "array",
       "items": { "$ref": "#/definitions/featured_speaker" },
       "hsup.type": "[]model.FeaturedSpeaker"
+    },
+    "sponsor": {
+      "hsup.type": "model.Sponsor",
+      "type": "object",
+      "properties": {
+        "id": {"$ref": "#/definitions/uuid"},
+        "conference_id": {"$ref": "#/definitions/uuid"},
+        "logo_url1": {"$ref": "#/definitions/url" },
+        "logo_url2": {"$ref": "#/definitions/url" },
+        "logo_url3": {"$ref": "#/definitions/url" },
+        "name": { "$ref": "#/definitions/string_en_not_empty" },
+        "group_name": { "$ref": "#/definitions/string_en_not_empty" },
+        "sort_order": { "$ref": "#/definitions/positiveInteger" },
+        "url": {"$ref": "#/definitions/url" }
+      },
+      "patternProperties": {
+        "name#[a-z]+": { "$ref": "#/definitions/string_i18n" }
+      }
+    },
+    "sponsor_array": {
+      "type": "array",
+      "items": { "$ref": "#/definitions/sponsor" },
+      "hsup.type": "[]model.Sponsor"
     },
     "idprovider_name": {
       "type": "string",
@@ -1204,10 +1227,9 @@
       "rel": "update",
       "schema": {
         "type": "object",
-        "required": ["id"],
+        "required": ["id","user_id"],
         "properties": {
           "id": {"$ref": "#/definitions/uuid"},
-          "conference_id": {"$ref": "#/definitions/uuid"},
           "speaker_id": {"$ref": "#/definitions/uuid"},
           "avatar_url": {"$ref": "#/definitions/url" },
           "display_name": { "$ref": "#/definitions/string_en_not_empty" },
@@ -1223,6 +1245,103 @@
     {
       "title": "Delete featured speaker",
       "href": "/featured_speaker/delete",
+      "hsup.wrapper": "httpWithBasicAuth",
+      "method": "POST",
+      "rel": "delete",
+      "schema": {
+        "type": "object",
+        "required": ["id","user_id"],
+        "properties": {
+          "id": {"$ref": "#/definitions/uuid"},
+          "user_id": {"$ref": "#/definitions/uuid"}
+        }
+      }
+    },
+    {
+      "title": "Add sponsor",
+      "href": "/sponsor/add",
+      "hsup.wrapper": "httpWithBasicAuth",
+      "method": "POST",
+      "rel": "create",
+      "schema": {
+        "type": "object",
+        "required": ["conference_id","logo_url1","name","url","group_name","user_id"],
+        "properties": {
+          "conference_id": {"$ref": "#/definitions/uuid"},
+          "logo_url1": {"$ref": "#/definitions/url" },
+          "logo_url2": {"$ref": "#/definitions/url" },
+          "logo_url3": {"$ref": "#/definitions/url" },
+          "name": { "$ref": "#/definitions/string_en_not_empty" },
+          "group_name": { "$ref": "#/definitions/string_en_not_empty" },
+          "sort_order": { "$ref": "#/definitions/positiveInteger" },
+          "url": {"$ref": "#/definitions/url" },
+          "user_id": {"$ref": "#/definitions/uuid"}
+        },
+        "patternProperties": {
+          "name#[a-z]+": { "$ref": "#/definitions/string_i18n" }
+        }
+      },
+      "targetSchema": { "$ref": "#/definitions/sponsor" }
+    },
+    {
+      "title": "Lookup sponsor",
+      "href": "/sponsor/lookup",
+      "hsup.wrapper": "httpWithBasicAuth",
+      "rel": "update",
+      "schema": {
+        "type": "object",
+        "required": ["id"],
+        "properties": {
+          "id": {"$ref": "#/definitions/uuid"},
+          "lang": { "$ref": "#/definitions/language" }
+        }
+      },
+      "targetSchema": { "$ref": "#/definitions/sponsor" }
+    },
+    {
+      "title": "List sponsors",
+      "href": "/sponsor/list",
+      "hsup.wrapper": "httpWithBasicAuth",
+      "rel": "list",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "limit": {"$ref": "#/definitions/positiveInteger"},
+          "conference_id": {"$ref": "#/definitions/uuid"},
+          "since": {"$ref": "#/definitions/uuid"},
+          "lang": { "$ref": "#/definitions/language" }
+        }
+      },
+      "targetSchema": { "$ref": "#/definitions/sponsor_array" }
+    },
+    {
+      "title": "Update sponsor",
+      "href": "/sponsor/update",
+      "hsup.wrapper": "httpWithBasicAuth",
+      "method": "POST",
+      "rel": "update",
+      "schema": {
+        "type": "object",
+        "required": ["id","user_id"],
+        "properties": {
+          "id": {"$ref": "#/definitions/uuid"},
+          "logo_url1": {"$ref": "#/definitions/url" },
+          "logo_url2": {"$ref": "#/definitions/url" },
+          "logo_url3": {"$ref": "#/definitions/url" },
+          "name": { "$ref": "#/definitions/string_en_not_empty" },
+          "group_name": { "$ref": "#/definitions/string_en_not_empty" },
+          "sort_order": { "$ref": "#/definitions/positiveInteger" },
+          "url": {"$ref": "#/definitions/url" },
+          "user_id": {"$ref": "#/definitions/uuid"}
+        },
+        "patternProperties": {
+          "name#[a-z]+": { "$ref": "#/definitions/string_i18n" }
+        }
+      }
+    },
+    {
+      "title": "Delete sponsor",
+      "href": "/sponsor/delete",
       "hsup.wrapper": "httpWithBasicAuth",
       "method": "POST",
       "rel": "delete",

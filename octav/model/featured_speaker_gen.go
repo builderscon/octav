@@ -4,27 +4,37 @@ package model
 
 import (
 	"encoding/json"
+	"github.com/builderscon/octav/octav/tools"
 	"time"
 
 	"github.com/builderscon/octav/octav/db"
-	"github.com/builderscon/octav/octav/tools"
 	"github.com/lestrrat/go-pdebug"
 )
 
 var _ = time.Time{}
 
-type FeaturedSpeakerL10N struct {
-	FeaturedSpeaker
-	L10N tools.LocalizedFields `json:"-"`
+type rawFeaturedSpeaker struct {
+	ID           string `json:"id"`
+	ConferenceID string `json:"conference_id"`
+	SpeakerID    string `json:"speaker_id"`
+	AvatarURL    string `json:"avatar_url"`
+	DisplayName  string `json:"display_name" l10n:"true"`
+	Description  string `json:"description" l10n:"true"`
 }
-type FeaturedSpeakerL10NList []FeaturedSpeakerL10N
 
-func (v FeaturedSpeakerL10N) MarshalJSON() ([]byte, error) {
-	buf, err := json.Marshal(v.FeaturedSpeaker)
+func (v FeaturedSpeaker) MarshalJSON() ([]byte, error) {
+	var raw rawFeaturedSpeaker
+	raw.ID = v.ID
+	raw.ConferenceID = v.ConferenceID
+	raw.SpeakerID = v.SpeakerID
+	raw.AvatarURL = v.AvatarURL
+	raw.DisplayName = v.DisplayName
+	raw.Description = v.Description
+	buf, err := json.Marshal(raw)
 	if err != nil {
 		return nil, err
 	}
-	return tools.MarshalJSONWithL10N(buf, v.L10N)
+	return tools.MarshalJSONWithL10N(buf, v.LocalizedFields)
 }
 
 func (v *FeaturedSpeaker) Load(tx *db.Tx, id string) (err error) {
@@ -45,6 +55,10 @@ func (v *FeaturedSpeaker) Load(tx *db.Tx, id string) (err error) {
 
 func (v *FeaturedSpeaker) FromRow(vdb db.FeaturedSpeaker) error {
 	v.ID = vdb.EID
+	v.ConferenceID = vdb.ConferenceID
+	if vdb.SpeakerID.Valid {
+		v.SpeakerID = vdb.SpeakerID.String
+	}
 	if vdb.AvatarURL.Valid {
 		v.AvatarURL = vdb.AvatarURL.String
 	}
@@ -55,65 +69,12 @@ func (v *FeaturedSpeaker) FromRow(vdb db.FeaturedSpeaker) error {
 
 func (v *FeaturedSpeaker) ToRow(vdb *db.FeaturedSpeaker) error {
 	vdb.EID = v.ID
+	vdb.ConferenceID = v.ConferenceID
+	vdb.SpeakerID.Valid = true
+	vdb.SpeakerID.String = v.SpeakerID
 	vdb.AvatarURL.Valid = true
 	vdb.AvatarURL.String = v.AvatarURL
 	vdb.DisplayName = v.DisplayName
 	vdb.Description = v.Description
-	return nil
-}
-
-func (v FeaturedSpeakerL10N) GetPropNames() ([]string, error) {
-	l, _ := v.L10N.GetPropNames()
-	return append(l, "display_name", "description"), nil
-}
-
-func (v FeaturedSpeakerL10N) GetPropValue(s string) (interface{}, error) {
-	switch s {
-	case "id":
-		return v.ID, nil
-	case "user_id":
-		return v.UserID, nil
-	case "avatar_url":
-		return v.AvatarURL, nil
-	case "display_name":
-		return v.DisplayName, nil
-	case "description":
-		return v.Description, nil
-	default:
-		return v.L10N.GetPropValue(s)
-	}
-}
-
-func (v *FeaturedSpeakerL10N) UnmarshalJSON(data []byte) error {
-	var s FeaturedSpeaker
-	if err := json.Unmarshal(data, &s); err != nil {
-		return err
-	}
-
-	v.FeaturedSpeaker = s
-	m := make(map[string]interface{})
-	if err := json.Unmarshal(data, &m); err != nil {
-		return err
-	}
-
-	if err := tools.ExtractL10NFields(m, &v.L10N, []string{"display_name", "description"}); err != nil {
-		return err
-	}
-
-	return nil
-}
-
-func (v *FeaturedSpeakerL10N) LoadLocalizedFields(tx *db.Tx) error {
-	ls, err := db.LoadLocalizedStringsForParent(tx, v.FeaturedSpeaker.ID, "FeaturedSpeaker")
-	if err != nil {
-		return err
-	}
-
-	if len(ls) > 0 {
-		v.L10N = tools.LocalizedFields{}
-		for _, l := range ls {
-			v.L10N.Set(l.Language, l.Name, l.Localized)
-		}
-	}
 	return nil
 }

@@ -359,6 +359,37 @@ func testDeleteFeaturedSpeaker(ctx *TestCtx, id, userID string) error {
 	return nil
 }
 
+func buildersconinc(confID, userID string) *model.AddSponsorRequest {
+	r := &model.AddSponsorRequest{
+		ConferenceID: confID,
+		Name: "builderscon",
+		URL: "http://builderscon.io",
+		GroupName: "tier-1",
+		LogoURL1: "https://avatars2.githubusercontent.com/u/16756101",
+		UserID: userID,
+	}
+	return r
+}
+
+func testCreateSponsor(ctx *TestCtx, in *model.AddSponsorRequest) (*model.Sponsor, error) {
+	res, err := ctx.HTTPClient.AddSponsor(in)
+	if !assert.NoError(ctx.T, err, "CreateSponsor should succeed") {
+		return nil, err
+	}
+	return res, nil
+}
+
+func testDeleteSponsor(ctx *TestCtx, id, userID string) error {
+	err := ctx.HTTPClient.DeleteSponsor(&model.DeleteSponsorRequest{
+		ID: id,
+		UserID: userID,
+	})
+	if !assert.NoError(ctx.T, err, "DeleteSponsor should succeed") {
+		return err
+	}
+	return nil
+}
+
 func TestConferenceCRUD(t *testing.T) {
 	ctx, err := NewTestCtx(t)
 	if !assert.NoError(t, err, "failed to create test ctx") {
@@ -450,11 +481,17 @@ func TestConferenceCRUD(t *testing.T) {
 		return
 	}
 	defer testDeleteFeaturedSpeaker(ctx, fs.ID, user.ID)
+
+	sp, err := testCreateSponsor(ctx, buildersconinc(res.ID, user.ID))
+	if err != nil {
+		return
+	}
+	defer testDeleteSponsor(ctx, sp.ID, user.ID)
 }
 
 func TestRoomCRUD(t *testing.T) {
 	ctx, err := NewTestCtx(t)
-	if !assert.NoError(ctx, err, "failed to create test ctx") {
+	if !assert.NoError(t, err, "failed to create test ctx") {
 		return
 	}
 	defer ctx.Close()
@@ -564,7 +601,7 @@ func bconsession(cid, speakerID, userID string) *model.CreateSessionRequest {
 
 func TestSessionCRUD(t *testing.T) {
 	ctx, err := NewTestCtx(t)
-	if !assert.NoError(ctx, err, "failed to create test ctx") {
+	if !assert.NoError(t, err, "failed to create test ctx") {
 		return
 	}
 	defer ctx.Close()
@@ -667,7 +704,7 @@ func johndoe() *model.CreateUserRequest {
 
 func TestCreateUser(t *testing.T) {
 	ctx, err := NewTestCtx(t)
-	if !assert.NoError(ctx, err, "failed to create test ctx") {
+	if !assert.NoError(t, err, "failed to create test ctx") {
 		return
 	}
 	defer ctx.Close()
@@ -719,7 +756,7 @@ func TestCreateUser(t *testing.T) {
 
 func TestVenueCRUD(t *testing.T) {
 	ctx, err := NewTestCtx(t)
-	if !assert.NoError(ctx, err, "failed to create test ctx") {
+	if !assert.NoError(t, err, "failed to create test ctx") {
 		return
 	}
 	defer ctx.Close()
@@ -773,7 +810,7 @@ func TestVenueCRUD(t *testing.T) {
 
 func TestDeleteConferenceDates(t *testing.T) {
 	ctx, err := NewTestCtx(t)
-	if !assert.NoError(ctx, err, "failed to create test ctx") {
+	if !assert.NoError(t, err, "failed to create test ctx") {
 		return
 	}
 	defer ctx.Close()
@@ -848,7 +885,7 @@ func TestDeleteConferenceDates(t *testing.T) {
 
 func TestConferenceAdmins(t *testing.T) {
 	ctx, err := NewTestCtx(t)
-	if !assert.NoError(ctx, err, "failed to create test ctx") {
+	if !assert.NoError(t, err, "failed to create test ctx") {
 		return
 	}
 	defer ctx.Close()
@@ -926,7 +963,7 @@ func TestConferenceAdmins(t *testing.T) {
 
 func TestListConference(t *testing.T) {
 	ctx, err := NewTestCtx(t)
-	if !assert.NoError(ctx, err, "failed to create test ctx") {
+	if !assert.NoError(t, err, "failed to create test ctx") {
 		return
 	}
 	defer ctx.Close()
@@ -1052,7 +1089,7 @@ func TestListConference(t *testing.T) {
 
 func TestListRoom(t *testing.T) {
 	ctx, err := NewTestCtx(t)
-	if !assert.NoError(ctx, err, "failed to create test ctx") {
+	if !assert.NoError(t, err, "failed to create test ctx") {
 		return
 	}
 	defer ctx.Close()
@@ -1092,7 +1129,7 @@ func TestListRoom(t *testing.T) {
 
 func TestListSessionByConference(t *testing.T) {
 	ctx, err := NewTestCtx(t)
-	if !assert.NoError(ctx, err, "failed to create test ctx") {
+	if !assert.NoError(t, err, "failed to create test ctx") {
 		return
 	}
 	defer ctx.Close()
@@ -1156,7 +1193,7 @@ func TestListSessionByConference(t *testing.T) {
 
 func TestListVenue(t *testing.T) {
 	ctx, err := NewTestCtx(t)
-	if !assert.NoError(ctx, err, "failed to create test ctx") {
+	if !assert.NoError(t, err, "failed to create test ctx") {
 		return
 	}
 	defer ctx.Close()

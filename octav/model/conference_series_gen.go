@@ -4,27 +4,31 @@ package model
 
 import (
 	"encoding/json"
+	"github.com/builderscon/octav/octav/tools"
 	"time"
 
 	"github.com/builderscon/octav/octav/db"
-	"github.com/builderscon/octav/octav/tools"
 	"github.com/lestrrat/go-pdebug"
 )
 
 var _ = time.Time{}
 
-type ConferenceSeriesL10N struct {
-	ConferenceSeries
-	L10N tools.LocalizedFields `json:"-"`
+type rawConferenceSeries struct {
+	ID    string `json:"id"`
+	Slug  string `json:"slug"`
+	Title string `json:"title" l10n:"true"`
 }
-type ConferenceSeriesL10NList []ConferenceSeriesL10N
 
-func (v ConferenceSeriesL10N) MarshalJSON() ([]byte, error) {
-	buf, err := json.Marshal(v.ConferenceSeries)
+func (v ConferenceSeries) MarshalJSON() ([]byte, error) {
+	var raw rawConferenceSeries
+	raw.ID = v.ID
+	raw.Slug = v.Slug
+	raw.Title = v.Title
+	buf, err := json.Marshal(raw)
 	if err != nil {
 		return nil, err
 	}
-	return tools.MarshalJSONWithL10N(buf, v.L10N)
+	return tools.MarshalJSONWithL10N(buf, v.LocalizedFields)
 }
 
 func (v *ConferenceSeries) Load(tx *db.Tx, id string) (err error) {
@@ -54,57 +58,5 @@ func (v *ConferenceSeries) ToRow(vdb *db.ConferenceSeries) error {
 	vdb.EID = v.ID
 	vdb.Slug = v.Slug
 	vdb.Title = v.Title
-	return nil
-}
-
-func (v ConferenceSeriesL10N) GetPropNames() ([]string, error) {
-	l, _ := v.L10N.GetPropNames()
-	return append(l, "title"), nil
-}
-
-func (v ConferenceSeriesL10N) GetPropValue(s string) (interface{}, error) {
-	switch s {
-	case "id":
-		return v.ID, nil
-	case "slug":
-		return v.Slug, nil
-	case "title":
-		return v.Title, nil
-	default:
-		return v.L10N.GetPropValue(s)
-	}
-}
-
-func (v *ConferenceSeriesL10N) UnmarshalJSON(data []byte) error {
-	var s ConferenceSeries
-	if err := json.Unmarshal(data, &s); err != nil {
-		return err
-	}
-
-	v.ConferenceSeries = s
-	m := make(map[string]interface{})
-	if err := json.Unmarshal(data, &m); err != nil {
-		return err
-	}
-
-	if err := tools.ExtractL10NFields(m, &v.L10N, []string{"title"}); err != nil {
-		return err
-	}
-
-	return nil
-}
-
-func (v *ConferenceSeriesL10N) LoadLocalizedFields(tx *db.Tx) error {
-	ls, err := db.LoadLocalizedStringsForParent(tx, v.ConferenceSeries.ID, "ConferenceSeries")
-	if err != nil {
-		return err
-	}
-
-	if len(ls) > 0 {
-		v.L10N = tools.LocalizedFields{}
-		for _, l := range ls {
-			v.L10N.Set(l.Language, l.Name, l.Localized)
-		}
-	}
 	return nil
 }

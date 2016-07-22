@@ -1063,4 +1063,124 @@ func doListFeaturedSpeakers(ctx context.Context, w http.ResponseWriter, r *http.
 	httpJSON(w, l)
 }
 
+func doAddSponsor(ctx context.Context, w http.ResponseWriter, r *http.Request, payload model.AddSponsorRequest) {
+	if pdebug.Enabled {
+		g := pdebug.Marker("doAddSponsor")
+		defer g.End()
+	}
+
+	tx, err := db.Begin()
+	if err != nil {
+		httpError(w, `AddSponsor`, http.StatusInternalServerError, err)
+		return
+	}
+	defer tx.AutoRollback()
+
+	var s service.Sponsor
+	var c model.Sponsor
+	if err := s.CreateFromPayload(tx, payload, &c); err != nil {
+		httpError(w, `AddSponsor`, http.StatusInternalServerError, err)
+		return
+	}
+
+	if err := tx.Commit(); err != nil {
+		httpError(w, `CreateConference`, http.StatusInternalServerError, err)
+		return
+	}
+
+	httpJSON(w, c)
+}
+
+func doDeleteSponsor(ctx context.Context, w http.ResponseWriter, r *http.Request, payload model.DeleteSponsorRequest) {
+	if pdebug.Enabled {
+		g := pdebug.Marker("doDeleteSponsor")
+		defer g.End()
+	}
+
+	tx, err := db.Begin()
+	if err != nil {
+		httpError(w, `DeleteSponsor`, http.StatusInternalServerError, err)
+		return
+	}
+	defer tx.AutoRollback()
+
+	var s service.Sponsor
+	if err := s.DeleteFromPayload(tx, payload); err != nil {
+		httpError(w, `DeleteSponsor`, http.StatusInternalServerError, err)
+		return
+	}
+	if err := tx.Commit(); err != nil {
+		httpError(w, `DeleteSponsor`, http.StatusInternalServerError, err)
+		return
+	}
+	httpJSON(w, map[string]string{"status": "success"})
+}
+
+func doUpdateSponsor(ctx context.Context, w http.ResponseWriter, r *http.Request, payload model.UpdateSponsorRequest) {
+	if pdebug.Enabled {
+		g := pdebug.Marker("doUpdateSponsor")
+		defer g.End()
+	}
+
+	tx, err := db.Begin()
+	if err != nil {
+		httpError(w, `UpdateSponsor`, http.StatusInternalServerError, err)
+		return
+	}
+	defer tx.AutoRollback()
+
+	var s service.Sponsor
+	if err := s.UpdateFromPayload(tx, payload); err != nil {
+		httpError(w, `UpdateSponsor`, http.StatusInternalServerError, err)
+		return
+	}
+	if err := tx.Commit(); err != nil {
+		httpError(w, `UpdateSponsor`, http.StatusInternalServerError, err)
+		return
+	}
+
+	httpJSON(w, map[string]string{"status": "success"})
+}
+
+func doLookupSponsor(ctx context.Context, w http.ResponseWriter, r *http.Request, payload model.LookupSponsorRequest) {
+	if pdebug.Enabled {
+		g := pdebug.Marker("doLookupSponsor")
+		defer g.End()
+	}
+	tx, err := db.Begin()
+	if err != nil {
+		httpError(w, `LookupSponsor`, http.StatusInternalServerError, err)
+		return
+	}
+	defer tx.AutoRollback()
+
+	var s service.Sponsor
+	var c model.Sponsor
+	if err := s.LookupFromPayload(tx, &c, payload); err != nil {
+		httpError(w, `LookupSponsor`, http.StatusInternalServerError, err)
+		return
+	}
+
+	httpJSON(w, c)
+}
+
+func doListSponsors(ctx context.Context, w http.ResponseWriter, r *http.Request, payload model.ListSponsorsRequest) {
+	tx, err := db.Begin()
+	if err != nil {
+		httpError(w, `ListConferencesSeries`, http.StatusInternalServerError, err)
+		return
+	}
+	defer tx.AutoRollback()
+
+	var s service.Sponsor
+	var l model.SponsorList
+	if err := s.ListFromPayload(tx, &l, payload); err != nil {
+		httpError(w, `ListSponsors`, http.StatusInternalServerError, err)
+		return
+	}
+
+	httpJSON(w, l)
+}
+
+
 

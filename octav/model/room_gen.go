@@ -4,27 +4,33 @@ package model
 
 import (
 	"encoding/json"
+	"github.com/builderscon/octav/octav/tools"
 	"time"
 
 	"github.com/builderscon/octav/octav/db"
-	"github.com/builderscon/octav/octav/tools"
 	"github.com/lestrrat/go-pdebug"
 )
 
 var _ = time.Time{}
 
-type RoomL10N struct {
-	Room
-	L10N tools.LocalizedFields `json:"-"`
+type rawRoom struct {
+	ID       string `json:"id"`
+	VenueID  string `json:"venue_id"`
+	Name     string `json:"name" l10n:"true"`
+	Capacity uint   `json:"capacity"`
 }
-type RoomL10NList []RoomL10N
 
-func (v RoomL10N) MarshalJSON() ([]byte, error) {
-	buf, err := json.Marshal(v.Room)
+func (v Room) MarshalJSON() ([]byte, error) {
+	var raw rawRoom
+	raw.ID = v.ID
+	raw.VenueID = v.VenueID
+	raw.Name = v.Name
+	raw.Capacity = v.Capacity
+	buf, err := json.Marshal(raw)
 	if err != nil {
 		return nil, err
 	}
-	return tools.MarshalJSONWithL10N(buf, v.L10N)
+	return tools.MarshalJSONWithL10N(buf, v.LocalizedFields)
 }
 
 func (v *Room) Load(tx *db.Tx, id string) (err error) {
@@ -56,59 +62,5 @@ func (v *Room) ToRow(vdb *db.Room) error {
 	vdb.VenueID = v.VenueID
 	vdb.Name = v.Name
 	vdb.Capacity = v.Capacity
-	return nil
-}
-
-func (v RoomL10N) GetPropNames() ([]string, error) {
-	l, _ := v.L10N.GetPropNames()
-	return append(l, "name"), nil
-}
-
-func (v RoomL10N) GetPropValue(s string) (interface{}, error) {
-	switch s {
-	case "id":
-		return v.ID, nil
-	case "venue_id":
-		return v.VenueID, nil
-	case "name":
-		return v.Name, nil
-	case "capacity":
-		return v.Capacity, nil
-	default:
-		return v.L10N.GetPropValue(s)
-	}
-}
-
-func (v *RoomL10N) UnmarshalJSON(data []byte) error {
-	var s Room
-	if err := json.Unmarshal(data, &s); err != nil {
-		return err
-	}
-
-	v.Room = s
-	m := make(map[string]interface{})
-	if err := json.Unmarshal(data, &m); err != nil {
-		return err
-	}
-
-	if err := tools.ExtractL10NFields(m, &v.L10N, []string{"name"}); err != nil {
-		return err
-	}
-
-	return nil
-}
-
-func (v *RoomL10N) LoadLocalizedFields(tx *db.Tx) error {
-	ls, err := db.LoadLocalizedStringsForParent(tx, v.Room.ID, "Room")
-	if err != nil {
-		return err
-	}
-
-	if len(ls) > 0 {
-		v.L10N = tools.LocalizedFields{}
-		for _, l := range ls {
-			v.L10N.Set(l.Language, l.Name, l.Localized)
-		}
-	}
 	return nil
 }
