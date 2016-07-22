@@ -17,6 +17,7 @@ func (v *Sponsor) populateRowForCreate(vdb *db.Sponsor, payload model.CreateSpon
 	vdb.LogoURL1 = payload.LogoURL1
 	vdb.URL = payload.URL
 	vdb.GroupName = payload.GroupName
+	vdb.SortOrder = payload.SortOrder
 
 	if payload.LogoURL2.Valid() {
 		vdb.LogoURL2.Valid = true
@@ -46,6 +47,10 @@ func (v *Sponsor) populateRowForUpdate(vdb *db.Sponsor, payload model.UpdateSpon
 
 	if payload.GroupName.Valid() {
 		vdb.GroupName = payload.GroupName.String
+	}
+
+	if payload.SortOrder.Valid() {
+		vdb.SortOrder = int(payload.SortOrder.Int)
 	}
 
 	if payload.LogoURL2.Valid() {

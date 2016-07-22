@@ -197,6 +197,7 @@ type Sponsor struct {
 	LogoURL3     sql.NullString
 	URL          string
 	GroupName    string
+	SortOrder    int
 	CreatedOn    time.Time
 	ModifiedOn   NullTime
 }

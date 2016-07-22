@@ -227,7 +227,10 @@ CREATE TABLE sponsors (
     logo_url3 TEXT,
     url TEXT NOT NULL,
     group_name CHAR(64) CHARACTER SET latin1 NOT NULL,
+    sort_order int not null default 0,
+    created_on DATETIME NOT NULL,
+    modified_on TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     UNIQUE KEY(eid),
-    KEY(group_name),
+    KEY(sort_order, group_name),
     FOREIGN KEY (conference_id) REFERENCES conferences(eid) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;

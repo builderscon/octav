@@ -99,7 +99,7 @@
       "hsup.type": "[]model.FeaturedSpeaker"
     },
     "sponsor": {
-      "hsup.type": "model.FeaturedSpeaker",
+      "hsup.type": "model.Sponsor",
       "type": "object",
       "properties": {
         "id": {"$ref": "#/definitions/uuid"},
@@ -109,6 +109,7 @@
         "logo_url3": {"$ref": "#/definitions/url" },
         "name": { "$ref": "#/definitions/string_en_not_empty" },
         "group_name": { "$ref": "#/definitions/string_en_not_empty" },
+        "sort_order": { "$ref": "#/definitions/positiveInteger" },
         "url": {"$ref": "#/definitions/url" }
       },
       "patternProperties": {
@@ -1272,6 +1273,7 @@
           "logo_url3": {"$ref": "#/definitions/url" },
           "name": { "$ref": "#/definitions/string_en_not_empty" },
           "group_name": { "$ref": "#/definitions/string_en_not_empty" },
+          "sort_order": { "$ref": "#/definitions/positiveInteger" },
           "url": {"$ref": "#/definitions/url" },
           "user_id": {"$ref": "#/definitions/uuid"}
         },
@@ -1328,6 +1330,7 @@
           "logo_url3": {"$ref": "#/definitions/url" },
           "name": { "$ref": "#/definitions/string_en_not_empty" },
           "group_name": { "$ref": "#/definitions/string_en_not_empty" },
+          "sort_order": { "$ref": "#/definitions/positiveInteger" },
           "url": {"$ref": "#/definitions/url" },
           "user_id": {"$ref": "#/definitions/uuid"}
         },

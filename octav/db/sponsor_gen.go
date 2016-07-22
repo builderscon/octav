@@ -12,7 +12,7 @@ import (
 	"github.com/pkg/errors"
 )
 
-const SponsorStdSelectColumns = "sponsors.oid, sponsors.eid, sponsors.conference_id, sponsors.name, sponsors.logo_url1, sponsors.logo_url2, sponsors.logo_url3, sponsors.url, sponsors.group_name, sponsors.created_on, sponsors.modified_on"
+const SponsorStdSelectColumns = "sponsors.oid, sponsors.eid, sponsors.conference_id, sponsors.name, sponsors.logo_url1, sponsors.logo_url2, sponsors.logo_url3, sponsors.url, sponsors.group_name, sponsors.sort_order, sponsors.created_on, sponsors.modified_on"
 const SponsorTable = "sponsors"
 
 type SponsorList []Sponsor
@@ -20,7 +20,7 @@ type SponsorList []Sponsor
 func (s *Sponsor) Scan(scanner interface {
 	Scan(...interface{}) error
 }) error {
-	return scanner.Scan(&s.OID, &s.EID, &s.ConferenceID, &s.Name, &s.LogoURL1, &s.LogoURL2, &s.LogoURL3, &s.URL, &s.GroupName, &s.CreatedOn, &s.ModifiedOn)
+	return scanner.Scan(&s.OID, &s.EID, &s.ConferenceID, &s.Name, &s.LogoURL1, &s.LogoURL2, &s.LogoURL3, &s.URL, &s.GroupName, &s.SortOrder, &s.CreatedOn, &s.ModifiedOn)
 }
 
 func (s *Sponsor) LoadByEID(tx *Tx, eid string) error {
@@ -57,8 +57,8 @@ func (s *Sponsor) Create(tx *Tx, opts ...InsertOption) (err error) {
 	}
 	stmt.WriteString("INTO ")
 	stmt.WriteString(SponsorTable)
-	stmt.WriteString(` (eid, conference_id, name, logo_url1, logo_url2, logo_url3, url, group_name, created_on, modified_on) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`)
-	result, err := tx.Exec(stmt.String(), s.EID, s.ConferenceID, s.Name, s.LogoURL1, s.LogoURL2, s.LogoURL3, s.URL, s.GroupName, s.CreatedOn, s.ModifiedOn)
+	stmt.WriteString(` (eid, conference_id, name, logo_url1, logo_url2, logo_url3, url, group_name, sort_order, created_on, modified_on) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`)
+	result, err := tx.Exec(stmt.String(), s.EID, s.ConferenceID, s.Name, s.LogoURL1, s.LogoURL2, s.LogoURL3, s.URL, s.GroupName, s.SortOrder, s.CreatedOn, s.ModifiedOn)
 	if err != nil {
 		return err
 	}
@@ -74,11 +74,11 @@ func (s *Sponsor) Create(tx *Tx, opts ...InsertOption) (err error) {
 
 func (s Sponsor) Update(tx *Tx) error {
 	if s.OID != 0 {
-		_, err := tx.Exec(`UPDATE `+SponsorTable+` SET eid = ?, conference_id = ?, name = ?, logo_url1 = ?, logo_url2 = ?, logo_url3 = ?, url = ?, group_name = ? WHERE oid = ?`, s.EID, s.ConferenceID, s.Name, s.LogoURL1, s.LogoURL2, s.LogoURL3, s.URL, s.GroupName, s.OID)
+		_, err := tx.Exec(`UPDATE `+SponsorTable+` SET eid = ?, conference_id = ?, name = ?, logo_url1 = ?, logo_url2 = ?, logo_url3 = ?, url = ?, group_name = ?, sort_order = ? WHERE oid = ?`, s.EID, s.ConferenceID, s.Name, s.LogoURL1, s.LogoURL2, s.LogoURL3, s.URL, s.GroupName, s.SortOrder, s.OID)
 		return err
 	}
 	if s.EID != "" {
-		_, err := tx.Exec(`UPDATE `+SponsorTable+` SET conference_id = ?, name = ?, logo_url1 = ?, logo_url2 = ?, logo_url3 = ?, url = ?, group_name = ? WHERE eid = ?`, s.ConferenceID, s.Name, s.LogoURL1, s.LogoURL2, s.LogoURL3, s.URL, s.GroupName, s.EID)
+		_, err := tx.Exec(`UPDATE `+SponsorTable+` SET conference_id = ?, name = ?, logo_url1 = ?, logo_url2 = ?, logo_url3 = ?, url = ?, group_name = ?, sort_order = ? WHERE eid = ?`, s.ConferenceID, s.Name, s.LogoURL1, s.LogoURL2, s.LogoURL3, s.URL, s.GroupName, s.SortOrder, s.EID)
 		return err
 	}
 	return errors.New("either OID/EID must be filled")

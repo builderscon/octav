@@ -254,7 +254,7 @@ func (c *Client) AddFeaturedSpeaker(in *model.AddFeaturedSpeakerRequest) (ret *m
 	return &payload, nil
 }
 
-func (c *Client) AddSponsor(in *model.AddSponsorRequest) (ret *model.FeaturedSpeaker, err error) {
+func (c *Client) AddSponsor(in *model.AddSponsorRequest) (ret *model.Sponsor, err error) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("client.AddSponsor").BindError(&err)
 		defer g.End()
@@ -302,7 +302,7 @@ func (c *Client) AddSponsor(in *model.AddSponsorRequest) (ret *model.FeaturedSpe
 		return nil, err
 	}
 
-	var payload model.FeaturedSpeaker
+	var payload model.Sponsor
 	err = json.Unmarshal(jsonbuf.Bytes(), &payload)
 	if err != nil {
 		return nil, err
@@ -1922,7 +1922,7 @@ func (c *Client) LookupSession(in *model.LookupSessionRequest) (ret *model.Sessi
 	return &payload, nil
 }
 
-func (c *Client) LookupSponsor(in *model.LookupSponsorRequest) (ret *model.FeaturedSpeaker, err error) {
+func (c *Client) LookupSponsor(in *model.LookupSponsorRequest) (ret *model.Sponsor, err error) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("client.LookupSponsor").BindError(&err)
 		defer g.End()
@@ -1968,7 +1968,7 @@ func (c *Client) LookupSponsor(in *model.LookupSponsorRequest) (ret *model.Featu
 		return nil, err
 	}
 
-	var payload model.FeaturedSpeaker
+	var payload model.Sponsor
 	err = json.Unmarshal(jsonbuf.Bytes(), &payload)
 	if err != nil {
 		return nil, err

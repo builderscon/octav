@@ -22,6 +22,7 @@ type rawSponsor struct {
 	LogoURL3     string `json:"logo_url3,omitempty"`
 	URL          string `json:"url"`
 	GroupName    string `json:"group_name"`
+	SortOrder    int    `json:"sort_order"`
 }
 
 func (v Sponsor) MarshalJSON() ([]byte, error) {
@@ -34,6 +35,7 @@ func (v Sponsor) MarshalJSON() ([]byte, error) {
 	raw.LogoURL3 = v.LogoURL3
 	raw.URL = v.URL
 	raw.GroupName = v.GroupName
+	raw.SortOrder = v.SortOrder
 	buf, err := json.Marshal(raw)
 	if err != nil {
 		return nil, err
@@ -70,6 +72,7 @@ func (v *Sponsor) FromRow(vdb db.Sponsor) error {
 	}
 	v.URL = vdb.URL
 	v.GroupName = vdb.GroupName
+	v.SortOrder = vdb.SortOrder
 	return nil
 }
 
@@ -84,5 +87,6 @@ func (v *Sponsor) ToRow(vdb *db.Sponsor) error {
 	vdb.LogoURL3.String = v.LogoURL3
 	vdb.URL = v.URL
 	vdb.GroupName = v.GroupName
+	vdb.SortOrder = v.SortOrder
 	return nil
 }

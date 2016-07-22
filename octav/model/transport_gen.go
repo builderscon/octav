@@ -4657,6 +4657,7 @@ func (r AddSponsorRequest) collectMarshalData() map[string]interface{} {
 	}
 	m["url"] = r.URL
 	m["group_name"] = r.GroupName
+	m["sort_order"] = r.SortOrder
 	m["user_id"] = r.UserID
 	return m
 }
@@ -4745,6 +4746,15 @@ func (r *AddSponsorRequest) Populate(m map[string]interface{}) error {
 			return ErrInvalidJSONFieldType{Field: "group_name"}
 		}
 	}
+	if jv, ok := m["sort_order"]; ok {
+		switch jv.(type) {
+		case float64:
+			r.SortOrder = int(jv.(float64))
+			delete(m, "sort_order")
+		default:
+			return ErrInvalidJSONFieldType{Field: "sort_order"}
+		}
+	}
 	if jv, ok := m["user_id"]; ok {
 		switch jv.(type) {
 		case string:
@@ -4754,7 +4764,7 @@ func (r *AddSponsorRequest) Populate(m map[string]interface{}) error {
 			return ErrInvalidJSONFieldType{Field: "user_id"}
 		}
 	}
-	if err := tools.ExtractL10NFields(m, &r.L10N, []string{"conference_id", "name", "logo_url1", "logo_url2", "logo_url3", "url", "group_name", "user_id"}); err != nil {
+	if err := tools.ExtractL10NFields(m, &r.L10N, []string{"conference_id", "name", "logo_url1", "logo_url2", "logo_url3", "url", "group_name", "sort_order", "user_id"}); err != nil {
 		return err
 	}
 	return nil
@@ -4762,7 +4772,7 @@ func (r *AddSponsorRequest) Populate(m map[string]interface{}) error {
 
 func (r *AddSponsorRequest) GetPropNames() ([]string, error) {
 	l, _ := r.L10N.GetPropNames()
-	return append(l, "conference_id", "name", "logo_url1", "logo_url2", "logo_url3", "url", "group_name", "user_id"), nil
+	return append(l, "conference_id", "name", "logo_url1", "logo_url2", "logo_url3", "url", "group_name", "sort_order", "user_id"), nil
 }
 
 func (r *AddSponsorRequest) SetPropValue(s string, v interface{}) error {
@@ -4796,6 +4806,11 @@ func (r *AddSponsorRequest) SetPropValue(s string, v interface{}) error {
 			r.GroupName = jv
 			return nil
 		}
+	case "sort_order":
+		if jv, ok := v.(int); ok {
+			r.SortOrder = jv
+			return nil
+		}
 	case "user_id":
 		if jv, ok := v.(string); ok {
 			r.UserID = jv
@@ -4827,6 +4842,9 @@ func (r UpdateSponsorRequest) collectMarshalData() map[string]interface{} {
 	}
 	if r.GroupName.Valid() {
 		m["group_name"] = r.GroupName.Value()
+	}
+	if r.SortOrder.Valid() {
+		m["sort_order"] = r.SortOrder.Value()
 	}
 	m["user_id"] = r.UserID
 	return m
@@ -4904,6 +4922,12 @@ func (r *UpdateSponsorRequest) Populate(m map[string]interface{}) error {
 		}
 		delete(m, "group_name")
 	}
+	if jv, ok := m["sort_order"]; ok {
+		if err := r.SortOrder.Set(jv); err != nil {
+			return errors.New("set field SortOrder failed: " + err.Error())
+		}
+		delete(m, "sort_order")
+	}
 	if jv, ok := m["user_id"]; ok {
 		switch jv.(type) {
 		case string:
@@ -4913,7 +4937,7 @@ func (r *UpdateSponsorRequest) Populate(m map[string]interface{}) error {
 			return ErrInvalidJSONFieldType{Field: "user_id"}
 		}
 	}
-	if err := tools.ExtractL10NFields(m, &r.L10N, []string{"id", "name", "logo_url1", "logo_url2", "logo_url3", "url", "group_name", "user_id"}); err != nil {
+	if err := tools.ExtractL10NFields(m, &r.L10N, []string{"id", "name", "logo_url1", "logo_url2", "logo_url3", "url", "group_name", "sort_order", "user_id"}); err != nil {
 		return err
 	}
 	return nil
@@ -4921,7 +4945,7 @@ func (r *UpdateSponsorRequest) Populate(m map[string]interface{}) error {
 
 func (r *UpdateSponsorRequest) GetPropNames() ([]string, error) {
 	l, _ := r.L10N.GetPropNames()
-	return append(l, "id", "name", "logo_url1", "logo_url2", "logo_url3", "url", "group_name", "user_id"), nil
+	return append(l, "id", "name", "logo_url1", "logo_url2", "logo_url3", "url", "group_name", "sort_order", "user_id"), nil
 }
 
 func (r *UpdateSponsorRequest) SetPropValue(s string, v interface{}) error {
@@ -4943,6 +4967,8 @@ func (r *UpdateSponsorRequest) SetPropValue(s string, v interface{}) error {
 		return r.URL.Set(v)
 	case "group_name":
 		return r.GroupName.Set(v)
+	case "sort_order":
+		return r.SortOrder.Set(v)
 	case "user_id":
 		if jv, ok := v.(string); ok {
 			r.UserID = jv

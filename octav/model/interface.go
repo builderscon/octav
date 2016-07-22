@@ -638,6 +638,7 @@ type Sponsor struct {
 	LogoURL3              string `json:"logo_url3,omitempty"`
 	URL                   string `json:"url"`
 	GroupName             string `json:"group_name"`
+	SortOrder             int    `json:"sort_order"`
 }
 type SponsorList []Sponsor
 
@@ -650,7 +651,7 @@ type LookupSponsorRequest struct {
 // +transport
 type ListSponsorsRequest struct {
 	ConferenceID string            `json:"conference_id"`
-	GroupName    jsval.MaybeString  `json:"group_name" urlenc:"group_name,omitempty,string"`
+	GroupName    jsval.MaybeString `json:"group_name" urlenc:"group_name,omitempty,string"`
 	Since        jsval.MaybeString `json:"since" urlenc:"since,omitempty,string"`
 	Lang         jsval.MaybeString `json:"lang" urlenc:"lang,omitempty,string"`
 	Limit        jsval.MaybeInt    `json:"limit" urlenc:"limit,omitempty,int64"`
@@ -665,6 +666,7 @@ type AddSponsorRequest struct {
 	LogoURL3     jsval.MaybeString     `json:"logo_url3,omitempty"`
 	URL          string                `json:"url"`
 	GroupName    string                `json:"group_name"`
+	SortOrder    int                   `json:"sort_order"`
 	L10N         tools.LocalizedFields `json:"-"`
 	UserID       string                `json:"user_id"`
 }
@@ -681,6 +683,7 @@ type UpdateSponsorRequest struct {
 	LogoURL3  jsval.MaybeString     `json:"logo_url3,omitempty"`
 	URL       jsval.MaybeString     `json:"url,omitempty"`
 	GroupName jsval.MaybeString     `json:"group_name,omitempty"`
+	SortOrder jsval.MaybeInt        `json:"sort_order,omitempty"`
 	L10N      tools.LocalizedFields `json:"-"`
 	UserID    string                `json:"user_id"`
 }

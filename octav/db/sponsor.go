@@ -16,7 +16,17 @@ func (v *SponsorList) LoadByConferenceSinceEID(tx *Tx, confID, since string, lim
 }
 
 func (v *SponsorList) LoadByConferenceSince(tx *Tx, confID string, since int64, limit int) error {
-	rows, err := tx.Query(`SELECT `+SponsorStdSelectColumns+` FROM `+SponsorTable+` WHERE conference_id = ? AND featured_speakers.oid > ? ORDER BY oid ASC LIMIT `+strconv.Itoa(limit), confID, since)
+	stmt := getStmtBuf()
+	defer releaseStmtBuf(stmt)
+
+	stmt.WriteString(`SELECT `)
+	stmt.WriteString(SponsorStdSelectColumns)
+	stmt.WriteString(` FROM `)
+	stmt.WriteString(SponsorTable)
+	stmt.WriteString(` WHERE conference_id = ? AND featured_speakers.oid > ? ORDER BY oid ASC LIMIT `)
+	stmt.WriteString(strconv.Itoa(limit))
+
+	rows, err := tx.Query(stmt.String(), confID, since)
 	if err != nil {
 		return err
 	}
@@ -38,6 +48,7 @@ func LoadSponsors(tx *Tx, venues *SponsorList, cid string) error {
 	stmt.WriteString(` WHERE `)
 	stmt.WriteString(SponsorTable)
 	stmt.WriteString(`.conference_id = ?`)
+	stmt.WriteString(` ORDER BY sort_order ASC, group_name ASC`)
 
 	rows, err := tx.Query(stmt.String(), cid)
 	if err != nil {
