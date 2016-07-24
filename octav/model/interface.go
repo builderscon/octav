@@ -24,7 +24,7 @@ type Conference struct {
 	tools.LocalizedFields `json:"-"`
 	ID                    string              `json:"id"`
 	Title                 string              `json:"title" l10n:"true"`
-	Description           string              `json:"description" l10n:"true"`
+	Description           string              `json:"description,omitempty" l10n:"true"`
 	SeriesID              string              `json:"series_id,omitempty"`
 	Series                *ConferenceSeries   `json:"series,omitempty" decorate:"true"`
 	SubTitle              string              `json:"sub_title" l10n:"true"`
