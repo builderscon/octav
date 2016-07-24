@@ -141,6 +141,11 @@ func (v *Conference) ReplaceL10NStrings(tx *db.Tx, m *model.Conference, lang str
 					pdebug.Printf("Replacing for key 'title'")
 				}
 				m.Title = l.Localized
+			case "description":
+				if pdebug.Enabled {
+					pdebug.Printf("Replacing for key 'description'")
+				}
+				m.Description = l.Localized
 			case "sub_title":
 				if pdebug.Enabled {
 					pdebug.Printf("Replacing for key 'sub_title'")

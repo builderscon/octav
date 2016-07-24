@@ -12,7 +12,7 @@ import (
 	"github.com/pkg/errors"
 )
 
-const ConferenceStdSelectColumns = "conferences.oid, conferences.eid, conferences.series_id, conferences.slug, conferences.title, conferences.status, conferences.sub_title, conferences.created_by, conferences.created_on, conferences.modified_on"
+const ConferenceStdSelectColumns = "conferences.oid, conferences.eid, conferences.series_id, conferences.slug, conferences.description, conferences.title, conferences.status, conferences.sub_title, conferences.created_by, conferences.created_on, conferences.modified_on"
 const ConferenceTable = "conferences"
 
 type ConferenceList []Conference
@@ -20,7 +20,7 @@ type ConferenceList []Conference
 func (c *Conference) Scan(scanner interface {
 	Scan(...interface{}) error
 }) error {
-	return scanner.Scan(&c.OID, &c.EID, &c.SeriesID, &c.Slug, &c.Title, &c.Status, &c.SubTitle, &c.CreatedBy, &c.CreatedOn, &c.ModifiedOn)
+	return scanner.Scan(&c.OID, &c.EID, &c.SeriesID, &c.Slug, &c.Description, &c.Title, &c.Status, &c.SubTitle, &c.CreatedBy, &c.CreatedOn, &c.ModifiedOn)
 }
 
 func (c *Conference) LoadByEID(tx *Tx, eid string) error {
@@ -57,8 +57,8 @@ func (c *Conference) Create(tx *Tx, opts ...InsertOption) (err error) {
 	}
 	stmt.WriteString("INTO ")
 	stmt.WriteString(ConferenceTable)
-	stmt.WriteString(` (eid, series_id, slug, title, status, sub_title, created_by, created_on, modified_on) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`)
-	result, err := tx.Exec(stmt.String(), c.EID, c.SeriesID, c.Slug, c.Title, c.Status, c.SubTitle, c.CreatedBy, c.CreatedOn, c.ModifiedOn)
+	stmt.WriteString(` (eid, series_id, slug, description, title, status, sub_title, created_by, created_on, modified_on) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`)
+	result, err := tx.Exec(stmt.String(), c.EID, c.SeriesID, c.Slug, c.Description, c.Title, c.Status, c.SubTitle, c.CreatedBy, c.CreatedOn, c.ModifiedOn)
 	if err != nil {
 		return err
 	}
@@ -74,11 +74,11 @@ func (c *Conference) Create(tx *Tx, opts ...InsertOption) (err error) {
 
 func (c Conference) Update(tx *Tx) error {
 	if c.OID != 0 {
-		_, err := tx.Exec(`UPDATE `+ConferenceTable+` SET eid = ?, series_id = ?, slug = ?, title = ?, status = ?, sub_title = ?, created_by = ? WHERE oid = ?`, c.EID, c.SeriesID, c.Slug, c.Title, c.Status, c.SubTitle, c.CreatedBy, c.OID)
+		_, err := tx.Exec(`UPDATE `+ConferenceTable+` SET eid = ?, series_id = ?, slug = ?, description = ?, title = ?, status = ?, sub_title = ?, created_by = ? WHERE oid = ?`, c.EID, c.SeriesID, c.Slug, c.Description, c.Title, c.Status, c.SubTitle, c.CreatedBy, c.OID)
 		return err
 	}
 	if c.EID != "" {
-		_, err := tx.Exec(`UPDATE `+ConferenceTable+` SET series_id = ?, slug = ?, title = ?, status = ?, sub_title = ?, created_by = ? WHERE eid = ?`, c.SeriesID, c.Slug, c.Title, c.Status, c.SubTitle, c.CreatedBy, c.EID)
+		_, err := tx.Exec(`UPDATE `+ConferenceTable+` SET series_id = ?, slug = ?, description = ?, title = ?, status = ?, sub_title = ?, created_by = ? WHERE eid = ?`, c.SeriesID, c.Slug, c.Description, c.Title, c.Status, c.SubTitle, c.CreatedBy, c.EID)
 		return err
 	}
 	return errors.New("either OID/EID must be filled")

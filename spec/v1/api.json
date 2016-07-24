@@ -715,7 +715,8 @@
         "properties": {
           "user_id": { "$ref": "#/definitions/uuid" },
           "slug": { "$ref": "#/definitions/slug_top" },
-          "title": { "type": "string" }
+          "title": { "$ref": "#/definitions/string_en" },
+          "description": { "$ref": "#/definitions/string_en" }
         },
         "required": ["user_id","slug","title"]
       },
