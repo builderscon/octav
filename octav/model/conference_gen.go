@@ -16,6 +16,7 @@ var _ = time.Time{}
 type rawConference struct {
 	ID               string              `json:"id"`
 	Title            string              `json:"title" l10n:"true"`
+	Description      string              `json:"description" l10n:"true"`
 	SeriesID         string              `json:"series_id,omitempty"`
 	Series           *ConferenceSeries   `json:"series,omitempty" decorate:"true"`
 	SubTitle         string              `json:"sub_title" l10n:"true"`
@@ -31,6 +32,7 @@ func (v Conference) MarshalJSON() ([]byte, error) {
 	var raw rawConference
 	raw.ID = v.ID
 	raw.Title = v.Title
+	raw.Description = v.Description
 	raw.SeriesID = v.SeriesID
 	raw.Series = v.Series
 	raw.SubTitle = v.SubTitle
@@ -66,6 +68,9 @@ func (v *Conference) Load(tx *db.Tx, id string) (err error) {
 func (v *Conference) FromRow(vdb db.Conference) error {
 	v.ID = vdb.EID
 	v.Title = vdb.Title
+	if vdb.Description.Valid {
+		v.Description = vdb.Description.String
+	}
 	v.SeriesID = vdb.SeriesID
 	if vdb.SubTitle.Valid {
 		v.SubTitle = vdb.SubTitle.String
@@ -77,6 +82,8 @@ func (v *Conference) FromRow(vdb db.Conference) error {
 func (v *Conference) ToRow(vdb *db.Conference) error {
 	vdb.EID = v.ID
 	vdb.Title = v.Title
+	vdb.Description.Valid = true
+	vdb.Description.String = v.Description
 	vdb.SeriesID = v.SeriesID
 	vdb.SubTitle.Valid = true
 	vdb.SubTitle.String = v.SubTitle

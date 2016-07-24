@@ -67,6 +67,7 @@ CREATE TABLE conferences (
     oid INTEGER UNSIGNED NOT NULL PRIMARY KEY AUTO_INCREMENT,
     eid CHAR(64) CHARACTER SET latin1 NOT NULL,
     series_id CHAR(64) CHARACTER SET latin1 NOT NULL,
+    description TEXT,
     slug TEXT NOT NULL,
     title TEXT NOT NULL,
     sub_title TEXT,

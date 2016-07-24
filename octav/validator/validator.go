@@ -1066,12 +1066,16 @@ func init() {
 					jsval.EmptyConstraint,
 				).
 				AddProp(
+					"description",
+					jsval.Reference(M).RefersTo("#/definitions/string_en"),
+				).
+				AddProp(
 					"slug",
 					jsval.Reference(M).RefersTo("#/definitions/slug_top"),
 				).
 				AddProp(
 					"title",
-					jsval.String(),
+					jsval.Reference(M).RefersTo("#/definitions/string_en"),
 				).
 				AddProp(
 					"user_id",

@@ -20,6 +20,10 @@ func (v *Conference) populateRowForCreate(vdb *db.Conference, payload model.Crea
 	vdb.SeriesID = payload.SeriesID
 	vdb.Status = "private"
 
+	if payload.Description.Valid() {
+		vdb.Description.Valid = true
+		vdb.Description.String = payload.Description.String
+	}
 	if payload.SubTitle.Valid() {
 		vdb.SubTitle.Valid = true
 		vdb.SubTitle.String = payload.SubTitle.String
@@ -42,6 +46,11 @@ func (v *Conference) populateRowForUpdate(vdb *db.Conference, payload model.Upda
 
 	if payload.Status.Valid() {
 		vdb.Status = payload.Status.String
+	}
+
+	if payload.Description.Valid() {
+		vdb.Description.Valid = true
+		vdb.Description.String = payload.Description.String
 	}
 
 	if payload.SubTitle.Valid() {
