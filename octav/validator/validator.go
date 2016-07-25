@@ -1886,7 +1886,7 @@ func init() {
 				).
 				AddProp(
 					"status",
-					jsval.Reference(M).RefersTo("#/definitions/conference_status"),
+					jsval.String(),
 				),
 		)
 
