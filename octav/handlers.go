@@ -1093,6 +1093,7 @@ func doAddSponsor(ctx context.Context, w http.ResponseWriter, r *http.Request, p
 	if cb, ok := errors.IsFinalizationRequired(err); ok {
 		if err := cb(); err != nil {
 			httpError(w, `CreateConference`, http.StatusInternalServerError, err)
+			return
 		}
 	}
 
