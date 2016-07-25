@@ -1,5 +1,5 @@
 """OCTAV Client Library"""
-"""DO NOT EDIT: This file was generated from ../spec/v1/api.json on Fri Jul 22 13:49:34 2016"""
+"""DO NOT EDIT: This file was generated from ../spec/v1/api.json on Tue Jul 26 06:47:00 2016"""
 
 import json
 import os
@@ -390,7 +390,7 @@ class Octav(object):
         return None
     return res.json()
 
-  def create_conference_series (self, slug, title, user_id):
+  def create_conference_series (self, slug, title, user_id, description=None):
     payload = {}
     if slug is None:
             raise 'property slug must be provided'
@@ -401,6 +401,8 @@ class Octav(object):
     if user_id is None:
             raise 'property user_id must be provided'
     payload['user_id'] = user_id
+    if description is not None:
+        payload['description'] = description
     if slug is not None:
         payload['slug'] = slug
     if title is not None:
