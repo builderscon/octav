@@ -2,7 +2,6 @@ package service
 
 import (
 	"bytes"
-	"context"
 	"io"
 	"mime/multipart"
 	"net/http"
@@ -11,10 +10,10 @@ import (
 	"github.com/builderscon/octav/octav/db"
 	"github.com/builderscon/octav/octav/model"
 	"github.com/builderscon/octav/octav/tools"
-	"google.golang.org/cloud/storage"
-
 	"github.com/lestrrat/go-pdebug"
 	"github.com/pkg/errors"
+	"golang.org/x/net/context"
+	"google.golang.org/cloud/storage"
 )
 
 func (v *Sponsor) populateRowForCreate(vdb *db.Sponsor, payload model.CreateSponsorRequest) error {
@@ -78,6 +77,12 @@ type finalizeFunc func() error
 
 func (ff finalizeFunc) FinalizeFunc() func() error {
 	return ff
+}
+
+// Ignorable always returns true, otherwise the caller will have to
+// bail out immediately
+func (ff finalizeFunc) Ignorable() bool {
+	return true
 }
 
 func (ff finalizeFunc) Error() string {
