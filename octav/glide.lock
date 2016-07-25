@@ -1,5 +1,5 @@
-hash: 05f2a7d92c1b19909382bb3ddeb1efa2b75615e603ae6d13a1cd6b6f340dea43
-updated: 2016-07-21T22:00:50.355443561+09:00
+hash: 6ad6184ce5a500e1757e299b72fdda537b1bb312b1a42e975880e1cefddcce28
+updated: 2016-07-25T10:39:41.616968901+09:00
 imports:
 - name: github.com/davecgh/go-spew
   version: 5215b55f46b2b919f50a1df0eaa5886afe4e3b3d
@@ -7,6 +7,10 @@ imports:
   - spew
 - name: github.com/go-sql-driver/mysql
   version: 3654d25ec346ee8ce71a68431025458d52a38ac0
+- name: github.com/golang/protobuf
+  version: 874264fbbb43f4d91e999fecb4b40143ed611400
+  subpackages:
+  - proto
 - name: github.com/gorilla/context
   version: aed02d124ae4a0e94fea4541c8effd05bf0c8296
 - name: github.com/gorilla/mux
@@ -38,7 +42,7 @@ imports:
 - name: github.com/lestrrat/go-urlenc
   version: c952b9a8b42e2b36637e0c5acee8a0f0898b8d80
 - name: github.com/pkg/errors
-  version: cc5fbb72d9b1b5f664ff3c11ed7896ee23ad9276
+  version: 1d2e60385a13aaa66134984235061c2f9302520e
 - name: github.com/shogo82148/go-sql-proxy
   version: 0ff9659b5642274097d62b43b2d754b001ed4f4d
 - name: github.com/stretchr/testify
@@ -49,9 +53,65 @@ imports:
   version: 4d38db76854b199960801a1734443fd02870d7e1
   subpackages:
   - context
+  - context/ctxhttp
+  - http2
+  - trace
+  - http2/hpack
+  - lex/httplex
+  - internal/timeseries
+- name: golang.org/x/oauth2
+  version: 1364adb2c63445016c5ed4518fc71f6a3cda6169
+  subpackages:
+  - google
+  - internal
+  - jws
+  - jwt
 - name: golang.org/x/text
   version: 0a5a09ee4409a616bfa03115120f0bffacdff508
   subpackages:
   - language
   - internal/tag
+- name: google.golang.org/api
+  version: 663fefdcec4e1ec9033ba302202321d3bff5fe6d
+  subpackages:
+  - googleapi
+  - storage/v1
+  - googleapi/internal/uritemplates
+  - gensupport
+  - option
+  - transport
+  - internal
+- name: google.golang.org/appengine
+  version: 267c27e7492265b84fc6719503b14a1e17975d79
+  subpackages:
+  - urlfetch
+  - socket
+  - internal
+  - internal/urlfetch
+  - internal/socket
+  - internal/base
+  - internal/datastore
+  - internal/log
+  - internal/remote_api
+  - internal/app_identity
+  - internal/modules
+- name: google.golang.org/cloud
+  version: 4f1a5ca1c906ba5ff5ff9fba3bee49d526a8d03f
+  subpackages:
+  - storage
+  - internal/transport
+  - internal
+  - compute/metadata
+- name: google.golang.org/grpc
+  version: afdabe5738c5296bd52692f9577185d95bd5e828
+  subpackages:
+  - codes
+  - credentials
+  - grpclog
+  - internal
+  - metadata
+  - naming
+  - transport
+  - credentials/oauth
+  - peer
 devImports: []

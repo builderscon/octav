@@ -308,6 +308,14 @@ func httpAddSponsor(ctx context.Context, w http.ResponseWriter, r *http.Request)
 		return
 	}
 
+	if r.Header.Get("Content-Type") == "multipart/form-data" {
+		if err := r.ParseMultipartForm(MaxPostSize); err != nil {
+			httpError(w, `Invalid multipart data`, http.StatusInternalServerError, err)
+			return
+		}
+		payload.MultipartForm = r.MultipartForm
+	}
+
 	if err := validator.HTTPAddSponsorRequest.Validate(&payload); err != nil {
 		httpError(w, `Invalid input (validation failed)`, http.StatusInternalServerError, err)
 		return

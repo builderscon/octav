@@ -6,6 +6,7 @@ import (
 	"net/http"
 
 	"github.com/builderscon/octav/octav/db"
+	"github.com/builderscon/octav/octav/internal/errors"
 	"github.com/builderscon/octav/octav/model"
 	"github.com/builderscon/octav/octav/service"
 	"github.com/lestrrat/go-apache-logformat"
@@ -1078,7 +1079,7 @@ func doAddSponsor(ctx context.Context, w http.ResponseWriter, r *http.Request, p
 
 	var s service.Sponsor
 	var c model.Sponsor
-	if err := s.CreateFromPayload(tx, payload, &c); err != nil {
+	if err := s.CreateFromPayload(ctx, tx, payload, &c); !errors.IsIgnorable(err) {
 		httpError(w, `AddSponsor`, http.StatusInternalServerError, err)
 		return
 	}
@@ -1086,6 +1087,13 @@ func doAddSponsor(ctx context.Context, w http.ResponseWriter, r *http.Request, p
 	if err := tx.Commit(); err != nil {
 		httpError(w, `CreateConference`, http.StatusInternalServerError, err)
 		return
+	}
+
+	// This extra bit is for finalizing the image upload
+	if cb, ok := errors.IsFinalizationRequired(err); ok {
+		if err := cb(); err != nil {
+			httpError(w, `CreateConference`, http.StatusInternalServerError, err)
+		}
 	}
 
 	httpJSON(w, c)

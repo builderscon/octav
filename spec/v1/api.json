@@ -1261,6 +1261,7 @@
     {
       "title": "Add sponsor",
       "href": "/sponsor/add",
+      "encType": "multipart/form-data",
       "hsup.wrapper": "httpWithBasicAuth",
       "method": "POST",
       "rel": "create",

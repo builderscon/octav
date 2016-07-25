@@ -40,3 +40,57 @@ func Wrap(cause error, message string) error {
 func Wrapf(cause error, format string, args ...interface{}) error {
 	return daverr.Wrapf(cause, format, args...)
 }
+
+type causer interface {
+	Cause() error
+}
+
+type ignorableError interface {
+	Ignorable() bool
+}
+
+func IsIgnorable(err error) bool {
+	if err == nil { // If the error is a nil error, then we can just ignore this
+		return true
+	}
+
+	for err != nil {
+		// If the error implements an ignorable error, return the value
+		if ie, ok := err.(ignorableError); ok {
+			return ie.Ignorable()
+		}
+
+		// chase the root cause
+		if ce, ok := err.(causer); ok {
+			err = ce.Cause()
+			continue
+		}
+
+		break
+	}
+	return false
+}
+
+type finalizationRequiredError interface {
+	FinalizeFunc() func() error
+}
+
+func IsFinalizationRequired(err error) (func() error , bool) {
+	for err != nil {
+		if fre, ok := err.(finalizationRequiredError); ok {
+			if cb := fre.FinalizeFunc(); cb != nil {
+				return cb, true
+			}
+			return nil, false
+		}
+
+		if ce, ok := err.(causer); ok {
+			err = ce.Cause()
+			continue
+		}
+
+		break
+	}
+	return nil, false
+}
+

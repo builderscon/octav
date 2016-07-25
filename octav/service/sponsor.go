@@ -1,9 +1,17 @@
 package service
 
 import (
+	"bytes"
+	"context"
+	"io"
+	"mime/multipart"
+	"net/http"
+	"time"
+
 	"github.com/builderscon/octav/octav/db"
 	"github.com/builderscon/octav/octav/model"
 	"github.com/builderscon/octav/octav/tools"
+	"google.golang.org/cloud/storage"
 
 	"github.com/lestrrat/go-pdebug"
 	"github.com/pkg/errors"
@@ -66,10 +74,82 @@ func (v *Sponsor) populateRowForUpdate(vdb *db.Sponsor, payload model.UpdateSpon
 	return nil
 }
 
-func (v *Sponsor) CreateFromPayload(tx *db.Tx, payload model.AddSponsorRequest, result *model.Sponsor) error {
+type finalizeFunc func() error
+
+func (ff finalizeFunc) FinalizeFunc() func() error {
+	return ff
+}
+
+func (ff finalizeFunc) Error() string {
+	return "operation needs finalization"
+}
+
+func (v *Sponsor) CreateFromPayload(ctx context.Context, tx *db.Tx, payload model.AddSponsorRequest, result *model.Sponsor) (err error) {
 	su := User{}
 	if err := su.IsConferenceAdministrator(tx, payload.ConferenceID, payload.UserID); err != nil {
 		return errors.Wrap(err, "creating a featured speaker requires conference administrator privilege")
+	}
+
+	if payload.MultipartForm != nil && payload.MultipartForm.File != nil {
+		var imgf multipart.File
+		if fhs := payload.MultipartForm.File["logo"]; len(fhs) > 0 {
+			imgf, err = fhs[0].Open()
+			if err != nil {
+				return errors.Wrap(err, "failed to open logo file from multipart form")
+			}
+		}
+
+		var imgbuf bytes.Buffer
+		if _, err := io.Copy(&imgbuf, imgf); err != nil {
+			return errors.Wrap(err, "failed to copy logo image data to memory")
+		}
+		imgtyp := http.DetectContentType(imgbuf.Bytes())
+
+		// Only work with image/png or image/jpeg
+		var suffix string
+		switch imgtyp {
+		case "image/png":
+			suffix = "png"
+		case "image/jpeg":
+			suffix = "jpeg"
+		default:
+			return errors.Errorf("Unsupported image type %s", imgtyp)
+		}
+
+		// TODO: Validate the image
+		// TODO: Avoid Google Storage hardcoding?
+		// Upload this to a temporary location, then upon successful write to DB
+		// rename it to $conference_id/$sponsor_id
+		tmpname := time.Now().UTC().Format("2006-01-02") + "/" + tools.RandomString(64) + "." + suffix
+		wc := v.Storage.Bucket("media").Object(tmpname).NewWriter(ctx)
+		wc.ContentType = imgtyp
+		wc.ACL = []storage.ACLRule{{storage.AllUsers, storage.RoleReader}}
+		if _, err := io.Copy(wc, &imgbuf); err != nil {
+			return errors.Wrap(err, "failed to write image to temporary location")
+		}
+		// Note: DO NOT defer wc.Close(), as it's part of the write operation.
+		// If wc.Close() does not complete w/o errors. the write failed
+		if err := wc.Close(); err != nil {
+			return errors.Wrap(err, "failed to write image to temporary location")
+		}
+
+		defer func() {
+			if err != nil || result == nil {
+				// no op
+				return
+			}
+			// Even though there was no error, create an error value that has a
+			// FinalizeFunc() method, so the callee will recognize it
+			err = finalizeFunc(func() error {
+				src := v.Storage.Bucket("media").Object(tmpname)
+				dst := v.Storage.Bucket("media").Object(result.ConferenceID + "-" + result.ID + "." + suffix)
+
+				if _, err = src.CopyTo(ctx, dst, nil); err != nil {
+					return err
+				}
+				return nil
+			})
+		}()
 	}
 
 	vdb := db.Sponsor{}

@@ -2,6 +2,7 @@ package model
 
 import (
 	"errors"
+	"mime/multipart"
 	"time"
 
 	"github.com/builderscon/octav/octav/tools"
@@ -663,16 +664,17 @@ type ListSponsorsRequest struct {
 
 // +transport
 type AddSponsorRequest struct {
-	ConferenceID string                `json:"conference_id"`
-	Name         string                `json:"name"`
-	LogoURL1     string                `json:"logo_url1"`
-	LogoURL2     jsval.MaybeString     `json:"logo_url2,omitempty"`
-	LogoURL3     jsval.MaybeString     `json:"logo_url3,omitempty"`
-	URL          string                `json:"url"`
-	GroupName    string                `json:"group_name"`
-	SortOrder    int                   `json:"sort_order"`
-	L10N         tools.LocalizedFields `json:"-"`
-	UserID       string                `json:"user_id"`
+	ConferenceID  string                `json:"conference_id"`
+	Name          string                `json:"name"`
+	MultipartForm *multipart.Form       `json:"-"`
+	LogoURL1      string                `json:"logo_url1"`
+	LogoURL2      jsval.MaybeString     `json:"logo_url2,omitempty"`
+	LogoURL3      jsval.MaybeString     `json:"logo_url3,omitempty"`
+	URL           string                `json:"url"`
+	GroupName     string                `json:"group_name"`
+	SortOrder     int                   `json:"sort_order"`
+	L10N          tools.LocalizedFields `json:"-"`
+	UserID        string                `json:"user_id"`
 }
 type CreateSponsorRequest struct {
 	AddSponsorRequest
