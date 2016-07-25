@@ -919,7 +919,7 @@
             ]
           },
           "since": { "$ref": "#/definitions/uuid" },
-          "status": { "$ref": "#/definitions/conference_status" }
+          "status": { "type": "string" }
         }
       },
       "targetSchema": { "$ref": "#/definitions/conference_array" }
