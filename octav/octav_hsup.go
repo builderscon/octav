@@ -135,6 +135,7 @@ func httpAddConferenceAdmin(ctx context.Context, w http.ResponseWriter, r *http.
 		defer r.Body.Close()
 	default:
 		httpError(w, `Invalid content-type`, http.StatusInternalServerError, nil)
+		return
 	}
 	if pdebug.Enabled {
 		pdebug.Printf(`-----> %s`, jsonbuf.Bytes())
@@ -175,6 +176,7 @@ func httpAddConferenceDates(ctx context.Context, w http.ResponseWriter, r *http.
 		defer r.Body.Close()
 	default:
 		httpError(w, `Invalid content-type`, http.StatusInternalServerError, nil)
+		return
 	}
 	if pdebug.Enabled {
 		pdebug.Printf(`-----> %s`, jsonbuf.Bytes())
@@ -215,6 +217,7 @@ func httpAddConferenceSeriesAdmin(ctx context.Context, w http.ResponseWriter, r 
 		defer r.Body.Close()
 	default:
 		httpError(w, `Invalid content-type`, http.StatusInternalServerError, nil)
+		return
 	}
 	if pdebug.Enabled {
 		pdebug.Printf(`-----> %s`, jsonbuf.Bytes())
@@ -255,6 +258,7 @@ func httpAddConferenceVenue(ctx context.Context, w http.ResponseWriter, r *http.
 		defer r.Body.Close()
 	default:
 		httpError(w, `Invalid content-type`, http.StatusInternalServerError, nil)
+		return
 	}
 	if pdebug.Enabled {
 		pdebug.Printf(`-----> %s`, jsonbuf.Bytes())
@@ -295,6 +299,7 @@ func httpAddFeaturedSpeaker(ctx context.Context, w http.ResponseWriter, r *http.
 		defer r.Body.Close()
 	default:
 		httpError(w, `Invalid content-type`, http.StatusInternalServerError, nil)
+		return
 	}
 	if pdebug.Enabled {
 		pdebug.Printf(`-----> %s`, jsonbuf.Bytes())
@@ -348,6 +353,7 @@ func httpAddSponsor(ctx context.Context, w http.ResponseWriter, r *http.Request)
 		payload.MultipartForm = r.MultipartForm
 	default:
 		httpError(w, `Invalid content-type`, http.StatusInternalServerError, nil)
+		return
 	}
 	if pdebug.Enabled {
 		pdebug.Printf(`-----> %s`, jsonbuf.Bytes())
@@ -388,6 +394,7 @@ func httpCreateConference(ctx context.Context, w http.ResponseWriter, r *http.Re
 		defer r.Body.Close()
 	default:
 		httpError(w, `Invalid content-type`, http.StatusInternalServerError, nil)
+		return
 	}
 	if pdebug.Enabled {
 		pdebug.Printf(`-----> %s`, jsonbuf.Bytes())
@@ -428,6 +435,7 @@ func httpCreateConferenceSeries(ctx context.Context, w http.ResponseWriter, r *h
 		defer r.Body.Close()
 	default:
 		httpError(w, `Invalid content-type`, http.StatusInternalServerError, nil)
+		return
 	}
 	if pdebug.Enabled {
 		pdebug.Printf(`-----> %s`, jsonbuf.Bytes())
@@ -492,6 +500,7 @@ func httpCreateRoom(ctx context.Context, w http.ResponseWriter, r *http.Request)
 		defer r.Body.Close()
 	default:
 		httpError(w, `Invalid content-type`, http.StatusInternalServerError, nil)
+		return
 	}
 	if pdebug.Enabled {
 		pdebug.Printf(`-----> %s`, jsonbuf.Bytes())
@@ -532,6 +541,7 @@ func httpCreateSession(ctx context.Context, w http.ResponseWriter, r *http.Reque
 		defer r.Body.Close()
 	default:
 		httpError(w, `Invalid content-type`, http.StatusInternalServerError, nil)
+		return
 	}
 	if pdebug.Enabled {
 		pdebug.Printf(`-----> %s`, jsonbuf.Bytes())
@@ -596,6 +606,7 @@ func httpCreateUser(ctx context.Context, w http.ResponseWriter, r *http.Request)
 		defer r.Body.Close()
 	default:
 		httpError(w, `Invalid content-type`, http.StatusInternalServerError, nil)
+		return
 	}
 	if pdebug.Enabled {
 		pdebug.Printf(`-----> %s`, jsonbuf.Bytes())
@@ -636,6 +647,7 @@ func httpCreateVenue(ctx context.Context, w http.ResponseWriter, r *http.Request
 		defer r.Body.Close()
 	default:
 		httpError(w, `Invalid content-type`, http.StatusInternalServerError, nil)
+		return
 	}
 	if pdebug.Enabled {
 		pdebug.Printf(`-----> %s`, jsonbuf.Bytes())
@@ -676,6 +688,7 @@ func httpDeleteConference(ctx context.Context, w http.ResponseWriter, r *http.Re
 		defer r.Body.Close()
 	default:
 		httpError(w, `Invalid content-type`, http.StatusInternalServerError, nil)
+		return
 	}
 	if pdebug.Enabled {
 		pdebug.Printf(`-----> %s`, jsonbuf.Bytes())
@@ -716,6 +729,7 @@ func httpDeleteConferenceAdmin(ctx context.Context, w http.ResponseWriter, r *ht
 		defer r.Body.Close()
 	default:
 		httpError(w, `Invalid content-type`, http.StatusInternalServerError, nil)
+		return
 	}
 	if pdebug.Enabled {
 		pdebug.Printf(`-----> %s`, jsonbuf.Bytes())
@@ -756,6 +770,7 @@ func httpDeleteConferenceDates(ctx context.Context, w http.ResponseWriter, r *ht
 		defer r.Body.Close()
 	default:
 		httpError(w, `Invalid content-type`, http.StatusInternalServerError, nil)
+		return
 	}
 	if pdebug.Enabled {
 		pdebug.Printf(`-----> %s`, jsonbuf.Bytes())
@@ -796,6 +811,7 @@ func httpDeleteConferenceSeries(ctx context.Context, w http.ResponseWriter, r *h
 		defer r.Body.Close()
 	default:
 		httpError(w, `Invalid content-type`, http.StatusInternalServerError, nil)
+		return
 	}
 	if pdebug.Enabled {
 		pdebug.Printf(`-----> %s`, jsonbuf.Bytes())
@@ -836,6 +852,7 @@ func httpDeleteConferenceVenue(ctx context.Context, w http.ResponseWriter, r *ht
 		defer r.Body.Close()
 	default:
 		httpError(w, `Invalid content-type`, http.StatusInternalServerError, nil)
+		return
 	}
 	if pdebug.Enabled {
 		pdebug.Printf(`-----> %s`, jsonbuf.Bytes())
@@ -876,6 +893,7 @@ func httpDeleteFeaturedSpeaker(ctx context.Context, w http.ResponseWriter, r *ht
 		defer r.Body.Close()
 	default:
 		httpError(w, `Invalid content-type`, http.StatusInternalServerError, nil)
+		return
 	}
 	if pdebug.Enabled {
 		pdebug.Printf(`-----> %s`, jsonbuf.Bytes())
@@ -916,6 +934,7 @@ func httpDeleteQuestion(ctx context.Context, w http.ResponseWriter, r *http.Requ
 		defer r.Body.Close()
 	default:
 		httpError(w, `Invalid content-type`, http.StatusInternalServerError, nil)
+		return
 	}
 	if pdebug.Enabled {
 		pdebug.Printf(`-----> %s`, jsonbuf.Bytes())
@@ -956,6 +975,7 @@ func httpDeleteRoom(ctx context.Context, w http.ResponseWriter, r *http.Request)
 		defer r.Body.Close()
 	default:
 		httpError(w, `Invalid content-type`, http.StatusInternalServerError, nil)
+		return
 	}
 	if pdebug.Enabled {
 		pdebug.Printf(`-----> %s`, jsonbuf.Bytes())
@@ -996,6 +1016,7 @@ func httpDeleteSession(ctx context.Context, w http.ResponseWriter, r *http.Reque
 		defer r.Body.Close()
 	default:
 		httpError(w, `Invalid content-type`, http.StatusInternalServerError, nil)
+		return
 	}
 	if pdebug.Enabled {
 		pdebug.Printf(`-----> %s`, jsonbuf.Bytes())
@@ -1036,6 +1057,7 @@ func httpDeleteSponsor(ctx context.Context, w http.ResponseWriter, r *http.Reque
 		defer r.Body.Close()
 	default:
 		httpError(w, `Invalid content-type`, http.StatusInternalServerError, nil)
+		return
 	}
 	if pdebug.Enabled {
 		pdebug.Printf(`-----> %s`, jsonbuf.Bytes())
@@ -1076,6 +1098,7 @@ func httpDeleteUser(ctx context.Context, w http.ResponseWriter, r *http.Request)
 		defer r.Body.Close()
 	default:
 		httpError(w, `Invalid content-type`, http.StatusInternalServerError, nil)
+		return
 	}
 	if pdebug.Enabled {
 		pdebug.Printf(`-----> %s`, jsonbuf.Bytes())
@@ -1116,6 +1139,7 @@ func httpDeleteVenue(ctx context.Context, w http.ResponseWriter, r *http.Request
 		defer r.Body.Close()
 	default:
 		httpError(w, `Invalid content-type`, http.StatusInternalServerError, nil)
+		return
 	}
 	if pdebug.Enabled {
 		pdebug.Printf(`-----> %s`, jsonbuf.Bytes())
@@ -1588,6 +1612,7 @@ func httpUpdateConference(ctx context.Context, w http.ResponseWriter, r *http.Re
 		defer r.Body.Close()
 	default:
 		httpError(w, `Invalid content-type`, http.StatusInternalServerError, nil)
+		return
 	}
 	if pdebug.Enabled {
 		pdebug.Printf(`-----> %s`, jsonbuf.Bytes())
@@ -1628,6 +1653,7 @@ func httpUpdateFeaturedSpeaker(ctx context.Context, w http.ResponseWriter, r *ht
 		defer r.Body.Close()
 	default:
 		httpError(w, `Invalid content-type`, http.StatusInternalServerError, nil)
+		return
 	}
 	if pdebug.Enabled {
 		pdebug.Printf(`-----> %s`, jsonbuf.Bytes())
@@ -1668,6 +1694,7 @@ func httpUpdateRoom(ctx context.Context, w http.ResponseWriter, r *http.Request)
 		defer r.Body.Close()
 	default:
 		httpError(w, `Invalid content-type`, http.StatusInternalServerError, nil)
+		return
 	}
 	if pdebug.Enabled {
 		pdebug.Printf(`-----> %s`, jsonbuf.Bytes())
@@ -1708,6 +1735,7 @@ func httpUpdateSession(ctx context.Context, w http.ResponseWriter, r *http.Reque
 		defer r.Body.Close()
 	default:
 		httpError(w, `Invalid content-type`, http.StatusInternalServerError, nil)
+		return
 	}
 	if pdebug.Enabled {
 		pdebug.Printf(`-----> %s`, jsonbuf.Bytes())
@@ -1748,6 +1776,7 @@ func httpUpdateSponsor(ctx context.Context, w http.ResponseWriter, r *http.Reque
 		defer r.Body.Close()
 	default:
 		httpError(w, `Invalid content-type`, http.StatusInternalServerError, nil)
+		return
 	}
 	if pdebug.Enabled {
 		pdebug.Printf(`-----> %s`, jsonbuf.Bytes())
@@ -1788,6 +1817,7 @@ func httpUpdateUser(ctx context.Context, w http.ResponseWriter, r *http.Request)
 		defer r.Body.Close()
 	default:
 		httpError(w, `Invalid content-type`, http.StatusInternalServerError, nil)
+		return
 	}
 	if pdebug.Enabled {
 		pdebug.Printf(`-----> %s`, jsonbuf.Bytes())
@@ -1828,6 +1858,7 @@ func httpUpdateVenue(ctx context.Context, w http.ResponseWriter, r *http.Request
 		defer r.Body.Close()
 	default:
 		httpError(w, `Invalid content-type`, http.StatusInternalServerError, nil)
+		return
 	}
 	if pdebug.Enabled {
 		pdebug.Printf(`-----> %s`, jsonbuf.Bytes())
