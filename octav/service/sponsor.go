@@ -96,65 +96,65 @@ func (v *Sponsor) CreateFromPayload(ctx context.Context, tx *db.Tx, payload mode
 	}
 
 	if payload.MultipartForm != nil && payload.MultipartForm.File != nil {
-		var imgf multipart.File
 		if fhs := payload.MultipartForm.File["logo"]; len(fhs) > 0 {
+			var imgf multipart.File
 			imgf, err = fhs[0].Open()
 			if err != nil {
 				return errors.Wrap(err, "failed to open logo file from multipart form")
 			}
-		}
 
-		var imgbuf bytes.Buffer
-		if _, err := io.Copy(&imgbuf, imgf); err != nil {
-			return errors.Wrap(err, "failed to copy logo image data to memory")
-		}
-		imgtyp := http.DetectContentType(imgbuf.Bytes())
-
-		// Only work with image/png or image/jpeg
-		var suffix string
-		switch imgtyp {
-		case "image/png":
-			suffix = "png"
-		case "image/jpeg":
-			suffix = "jpeg"
-		default:
-			return errors.Errorf("Unsupported image type %s", imgtyp)
-		}
-
-		// TODO: Validate the image
-		// TODO: Avoid Google Storage hardcoding?
-		// Upload this to a temporary location, then upon successful write to DB
-		// rename it to $conference_id/$sponsor_id
-		tmpname := time.Now().UTC().Format("2006-01-02") + "/" + tools.RandomString(64) + "." + suffix
-		wc := v.Storage.Bucket("media").Object(tmpname).NewWriter(ctx)
-		wc.ContentType = imgtyp
-		wc.ACL = []storage.ACLRule{{storage.AllUsers, storage.RoleReader}}
-		if _, err := io.Copy(wc, &imgbuf); err != nil {
-			return errors.Wrap(err, "failed to write image to temporary location")
-		}
-		// Note: DO NOT defer wc.Close(), as it's part of the write operation.
-		// If wc.Close() does not complete w/o errors. the write failed
-		if err := wc.Close(); err != nil {
-			return errors.Wrap(err, "failed to write image to temporary location")
-		}
-
-		defer func() {
-			if err != nil || result == nil {
-				// no op
-				return
+			var imgbuf bytes.Buffer
+			if _, err := io.Copy(&imgbuf, imgf); err != nil {
+				return errors.Wrap(err, "failed to copy logo image data to memory")
 			}
-			// Even though there was no error, create an error value that has a
-			// FinalizeFunc() method, so the callee will recognize it
-			err = finalizeFunc(func() error {
-				src := v.Storage.Bucket("media").Object(tmpname)
-				dst := v.Storage.Bucket("media").Object(result.ConferenceID + "-" + result.ID + "." + suffix)
+			imgtyp := http.DetectContentType(imgbuf.Bytes())
 
-				if _, err = src.CopyTo(ctx, dst, nil); err != nil {
-					return err
+			// Only work with image/png or image/jpeg
+			var suffix string
+			switch imgtyp {
+			case "image/png":
+				suffix = "png"
+			case "image/jpeg":
+				suffix = "jpeg"
+			default:
+				return errors.Errorf("Unsupported image type %s", imgtyp)
+			}
+
+			// TODO: Validate the image
+			// TODO: Avoid Google Storage hardcoding?
+			// Upload this to a temporary location, then upon successful write to DB
+			// rename it to $conference_id/$sponsor_id
+			tmpname := time.Now().UTC().Format("2006-01-02") + "/" + tools.RandomString(64) + "." + suffix
+			wc := v.Storage.Bucket("media").Object(tmpname).NewWriter(ctx)
+			wc.ContentType = imgtyp
+			wc.ACL = []storage.ACLRule{{storage.AllUsers, storage.RoleReader}}
+			if _, err := io.Copy(wc, &imgbuf); err != nil {
+				return errors.Wrap(err, "failed to write image to temporary location")
+			}
+			// Note: DO NOT defer wc.Close(), as it's part of the write operation.
+			// If wc.Close() does not complete w/o errors. the write failed
+			if err := wc.Close(); err != nil {
+				return errors.Wrap(err, "failed to write image to temporary location")
+			}
+
+			defer func() {
+				if err != nil || result == nil {
+					// no op
+					return
 				}
-				return nil
-			})
-		}()
+				// Even though there was no error, create an error value that has a
+				// FinalizeFunc() method, so the callee will recognize it
+				err = finalizeFunc(func() error {
+					src := v.Storage.Bucket("media").Object(tmpname)
+					dst := v.Storage.Bucket("media").Object(result.ConferenceID + "-" + result.ID + "." + suffix)
+
+					if _, err = src.CopyTo(ctx, dst, nil); err != nil {
+						return err
+					}
+					return nil
+				})
+			}()
+		}
 	}
 
 	vdb := db.Sponsor{}
