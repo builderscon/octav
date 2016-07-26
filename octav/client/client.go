@@ -275,8 +275,38 @@ func (c *Client) AddSponsor(in *model.AddSponsorRequest, files map[string]string
 		return nil, err
 	}
 	w.WriteField("payload", jsbuf.String())
-	if fn, ok := files["logo"]; ok {
-		fw, err := w.CreateFormFile("logo", fn)
+	if fn, ok := files["logo1"]; ok {
+		fw, err := w.CreateFormFile("logo1", fn)
+		if err != nil {
+			return nil, err
+		}
+		f, err := os.Open(fn)
+		if err != nil {
+			return nil, err
+		}
+		defer f.Close()
+		_, err = io.Copy(fw, f)
+		if err != nil {
+			return nil, err
+		}
+	}
+	if fn, ok := files["logo2"]; ok {
+		fw, err := w.CreateFormFile("logo2", fn)
+		if err != nil {
+			return nil, err
+		}
+		f, err := os.Open(fn)
+		if err != nil {
+			return nil, err
+		}
+		defer f.Close()
+		_, err = io.Copy(fw, f)
+		if err != nil {
+			return nil, err
+		}
+	}
+	if fn, ok := files["logo3"]; ok {
+		fw, err := w.CreateFormFile("logo3", fn)
 		if err != nil {
 			return nil, err
 		}

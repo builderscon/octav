@@ -888,18 +888,6 @@ func init() {
 					jsval.Reference(M).RefersTo("#/definitions/string_en_not_empty"),
 				).
 				AddProp(
-					"logo_url1",
-					jsval.Reference(M).RefersTo("#/definitions/url"),
-				).
-				AddProp(
-					"logo_url2",
-					jsval.Reference(M).RefersTo("#/definitions/url"),
-				).
-				AddProp(
-					"logo_url3",
-					jsval.Reference(M).RefersTo("#/definitions/url"),
-				).
-				AddProp(
 					"name",
 					jsval.Reference(M).RefersTo("#/definitions/string_en_not_empty"),
 				).

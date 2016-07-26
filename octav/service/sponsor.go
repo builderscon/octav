@@ -14,6 +14,7 @@ import (
 	"github.com/lestrrat/go-pdebug"
 	"github.com/pkg/errors"
 	"golang.org/x/net/context"
+	"golang.org/x/sync/errgroup"
 	"google.golang.org/cloud/storage"
 )
 
@@ -121,7 +122,13 @@ func (v *Sponsor) CreateFromPayload(ctx context.Context, tx *db.Tx, payload mode
 	if payload.MultipartForm != nil && payload.MultipartForm.File != nil {
 		bucketName := v.getMediaBucketName()
 		storagecl := v.getStorageClient(ctx)
-		if fhs := payload.MultipartForm.File["logo"]; len(fhs) > 0 {
+		finalizers := make([]func() error, 0, 3)
+		for _, field := range []string{"logo1", "logo2", "logo3"} {
+			fhs := payload.MultipartForm.File[field]
+			if len(fhs) == 0 {
+				continue
+			}
+
 			var imgf multipart.File
 			imgf, err = fhs[0].Open()
 			if err != nil {
@@ -161,7 +168,23 @@ func (v *Sponsor) CreateFromPayload(ctx context.Context, tx *db.Tx, payload mode
 			if err := wc.Close(); err != nil {
 				return errors.Wrap(err, "failed to write image to temporary location")
 			}
+			finalizers = append(finalizers, func() (err error) {
+				if pdebug.Enabled {
+					g := pdebug.Marker("finalizeFunc for service.Sponsor.CreateFromPayload").BindError(&err)
+					defer g.End()
+				}
+				dstname := result.ConferenceID + "-" + result.ID + "-" + field + "." + suffix
+				src := storagecl.Bucket(bucketName).Object(tmpname)
+				dst := storagecl.Bucket(bucketName).Object(dstname)
 
+				if _, err = src.CopyTo(ctx, dst, nil); err != nil {
+					return errors.Wrapf(err, "failed to copy from '%s' to '%s'", tmpname, dstname)
+				}
+				return nil
+			})
+		}
+
+		if len(finalizers) > 0 {
 			defer func() {
 				if pdebug.Enabled {
 					g := pdebug.Marker("deferred function from service.Sponsor.CreateFromPayload")
@@ -178,19 +201,12 @@ func (v *Sponsor) CreateFromPayload(ctx context.Context, tx *db.Tx, payload mode
 				}
 				// Even though there was no error, create an error value that has a
 				// FinalizeFunc() method, so the callee will recognize it
-				err = finalizeFunc(func() (err error) {
-					if pdebug.Enabled {
-						g := pdebug.Marker("finalizeFunc for service.Sponsor.CreateFromPayload").BindError(&err)
-						defer g.End()
+				err = finalizeFunc(func() error {
+					var g errgroup.Group
+					for _, f := range finalizers {
+						g.Go(f)
 					}
-					dstname := result.ConferenceID + "-" + result.ID + "." + suffix
-					src := storagecl.Bucket(bucketName).Object(tmpname)
-					dst := storagecl.Bucket(bucketName).Object(dstname)
-
-					if _, err = src.CopyTo(ctx, dst, nil); err != nil {
-						return errors.Wrapf(err, "failed to copy from '%s' to '%s'", tmpname, dstname)
-					}
-					return nil
+					return g.Wait()
 				})
 			}()
 		}
