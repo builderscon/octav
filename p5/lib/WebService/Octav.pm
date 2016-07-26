@@ -826,7 +826,7 @@ sub add_sponsor {
     my $uri = URI->new($self->{endpoint} . qq|/v1/sponsor/add|);
     my @request_args;
     my @content;
-    for my $file (qw(logo)) {
+    for my $file (qw(logo1 logo2 logo3)) {
         if (my $fn = delete $payload->{$file}) {
             push @content, ($file => [$fn]);
         }
