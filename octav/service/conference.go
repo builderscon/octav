@@ -419,8 +419,14 @@ func (v *Conference) ListFromPayload(tx *db.Tx, l *model.ConferenceList, payload
 	}
 
 	vdbl := db.ConferenceList{}
-	if err := vdbl.LoadByStatusAndRange(tx, status, payload.Since.String, rs, re, int(payload.Limit.Int)); err != nil {
-		return errors.Wrap(err, "failed to load list from database")
+	if status == "any" {
+		if err := vdbl.LoadByRange(tx, payload.Since.String, rs, re, int(payload.Limit.Int)); err != nil {
+			return errors.Wrap(err, "failed to load list from database")
+		}
+	} else {
+		if err := vdbl.LoadByStatusAndRange(tx, status, payload.Since.String, rs, re, int(payload.Limit.Int)); err != nil {
+			return errors.Wrap(err, "failed to load list from database")
+		}
 	}
 
 	r := make(model.ConferenceList, len(vdbl))

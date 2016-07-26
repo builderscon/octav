@@ -6,8 +6,10 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"mime/multipart"
 	"net/http"
 	"net/url"
+	"os"
 	"sync"
 
 	"github.com/builderscon/octav/octav/model"
@@ -19,6 +21,8 @@ const MaxResponseSize = (1 << 20) * 2
 
 var _ = bytes.MinRead
 var _ = json.Decoder{}
+var _ = multipart.Form{}
+var _ = os.Stdout
 var transportJSONBufferPool = sync.Pool{
 	New: allocTransportJSONBuffer,
 }
@@ -63,7 +67,7 @@ func (c *Client) AddConferenceAdmin(in *model.AddConferenceAdminRequest) (err er
 	if err != nil {
 		return err
 	}
-	buf := bytes.Buffer{}
+	var buf bytes.Buffer
 	err = json.NewEncoder(&buf).Encode(in)
 	if err != nil {
 		return err
@@ -99,7 +103,7 @@ func (c *Client) AddConferenceDates(in *model.AddConferenceDatesRequest) (err er
 	if err != nil {
 		return err
 	}
-	buf := bytes.Buffer{}
+	var buf bytes.Buffer
 	err = json.NewEncoder(&buf).Encode(in)
 	if err != nil {
 		return err
@@ -135,7 +139,7 @@ func (c *Client) AddConferenceSeriesAdmin(in *model.AddConferenceSeriesAdminRequ
 	if err != nil {
 		return err
 	}
-	buf := bytes.Buffer{}
+	var buf bytes.Buffer
 	err = json.NewEncoder(&buf).Encode(in)
 	if err != nil {
 		return err
@@ -171,7 +175,7 @@ func (c *Client) AddConferenceVenue(in *model.AddConferenceVenueRequest) (err er
 	if err != nil {
 		return err
 	}
-	buf := bytes.Buffer{}
+	var buf bytes.Buffer
 	err = json.NewEncoder(&buf).Encode(in)
 	if err != nil {
 		return err
@@ -207,7 +211,7 @@ func (c *Client) AddFeaturedSpeaker(in *model.AddFeaturedSpeakerRequest) (ret *m
 	if err != nil {
 		return nil, err
 	}
-	buf := bytes.Buffer{}
+	var buf bytes.Buffer
 	err = json.NewEncoder(&buf).Encode(in)
 	if err != nil {
 		return nil, err
@@ -254,7 +258,7 @@ func (c *Client) AddFeaturedSpeaker(in *model.AddFeaturedSpeakerRequest) (ret *m
 	return &payload, nil
 }
 
-func (c *Client) AddSponsor(in *model.AddSponsorRequest) (ret *model.Sponsor, err error) {
+func (c *Client) AddSponsor(in *model.AddSponsorRequest, files map[string]string) (ret *model.Sponsor, err error) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("client.AddSponsor").BindError(&err)
 		defer g.End()
@@ -263,8 +267,60 @@ func (c *Client) AddSponsor(in *model.AddSponsorRequest) (ret *model.Sponsor, er
 	if err != nil {
 		return nil, err
 	}
-	buf := bytes.Buffer{}
-	err = json.NewEncoder(&buf).Encode(in)
+	var buf bytes.Buffer
+	w := multipart.NewWriter(&buf)
+	var jsbuf bytes.Buffer
+	err = json.NewEncoder(&jsbuf).Encode(in)
+	if err != nil {
+		return nil, err
+	}
+	w.WriteField("payload", jsbuf.String())
+	if fn, ok := files["logo1"]; ok {
+		fw, err := w.CreateFormFile("logo1", fn)
+		if err != nil {
+			return nil, err
+		}
+		f, err := os.Open(fn)
+		if err != nil {
+			return nil, err
+		}
+		defer f.Close()
+		_, err = io.Copy(fw, f)
+		if err != nil {
+			return nil, err
+		}
+	}
+	if fn, ok := files["logo2"]; ok {
+		fw, err := w.CreateFormFile("logo2", fn)
+		if err != nil {
+			return nil, err
+		}
+		f, err := os.Open(fn)
+		if err != nil {
+			return nil, err
+		}
+		defer f.Close()
+		_, err = io.Copy(fw, f)
+		if err != nil {
+			return nil, err
+		}
+	}
+	if fn, ok := files["logo3"]; ok {
+		fw, err := w.CreateFormFile("logo3", fn)
+		if err != nil {
+			return nil, err
+		}
+		f, err := os.Open(fn)
+		if err != nil {
+			return nil, err
+		}
+		defer f.Close()
+		_, err = io.Copy(fw, f)
+		if err != nil {
+			return nil, err
+		}
+	}
+	err = w.Close()
 	if err != nil {
 		return nil, err
 	}
@@ -276,7 +332,7 @@ func (c *Client) AddSponsor(in *model.AddSponsorRequest) (ret *model.Sponsor, er
 	if err != nil {
 		return nil, err
 	}
-	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("Content-Type", w.FormDataContentType())
 	if c.BasicAuth.Username != "" && c.BasicAuth.Password != "" {
 		req.SetBasicAuth(c.BasicAuth.Username, c.BasicAuth.Password)
 	}
@@ -319,7 +375,7 @@ func (c *Client) CreateConference(in *model.CreateConferenceRequest) (ret *model
 	if err != nil {
 		return nil, err
 	}
-	buf := bytes.Buffer{}
+	var buf bytes.Buffer
 	err = json.NewEncoder(&buf).Encode(in)
 	if err != nil {
 		return nil, err
@@ -375,7 +431,7 @@ func (c *Client) CreateConferenceSeries(in *model.CreateConferenceSeriesRequest)
 	if err != nil {
 		return nil, err
 	}
-	buf := bytes.Buffer{}
+	var buf bytes.Buffer
 	err = json.NewEncoder(&buf).Encode(in)
 	if err != nil {
 		return nil, err
@@ -485,7 +541,7 @@ func (c *Client) CreateRoom(in *model.CreateRoomRequest) (ret *model.Room, err e
 	if err != nil {
 		return nil, err
 	}
-	buf := bytes.Buffer{}
+	var buf bytes.Buffer
 	err = json.NewEncoder(&buf).Encode(in)
 	if err != nil {
 		return nil, err
@@ -541,7 +597,7 @@ func (c *Client) CreateSession(in *model.CreateSessionRequest) (ret *model.Sessi
 	if err != nil {
 		return nil, err
 	}
-	buf := bytes.Buffer{}
+	var buf bytes.Buffer
 	err = json.NewEncoder(&buf).Encode(in)
 	if err != nil {
 		return nil, err
@@ -631,7 +687,7 @@ func (c *Client) CreateUser(in *model.CreateUserRequest) (ret *model.User, err e
 	if err != nil {
 		return nil, err
 	}
-	buf := bytes.Buffer{}
+	var buf bytes.Buffer
 	err = json.NewEncoder(&buf).Encode(in)
 	if err != nil {
 		return nil, err
@@ -687,7 +743,7 @@ func (c *Client) CreateVenue(in *model.CreateVenueRequest) (ret *model.Venue, er
 	if err != nil {
 		return nil, err
 	}
-	buf := bytes.Buffer{}
+	var buf bytes.Buffer
 	err = json.NewEncoder(&buf).Encode(in)
 	if err != nil {
 		return nil, err
@@ -743,7 +799,7 @@ func (c *Client) DeleteConference(in *model.DeleteConferenceRequest) (err error)
 	if err != nil {
 		return err
 	}
-	buf := bytes.Buffer{}
+	var buf bytes.Buffer
 	err = json.NewEncoder(&buf).Encode(in)
 	if err != nil {
 		return err
@@ -779,7 +835,7 @@ func (c *Client) DeleteConferenceAdmin(in *model.DeleteConferenceAdminRequest) (
 	if err != nil {
 		return err
 	}
-	buf := bytes.Buffer{}
+	var buf bytes.Buffer
 	err = json.NewEncoder(&buf).Encode(in)
 	if err != nil {
 		return err
@@ -815,7 +871,7 @@ func (c *Client) DeleteConferenceDates(in *model.DeleteConferenceDatesRequest) (
 	if err != nil {
 		return err
 	}
-	buf := bytes.Buffer{}
+	var buf bytes.Buffer
 	err = json.NewEncoder(&buf).Encode(in)
 	if err != nil {
 		return err
@@ -851,7 +907,7 @@ func (c *Client) DeleteConferenceSeries(in *model.DeleteConferenceSeriesRequest)
 	if err != nil {
 		return err
 	}
-	buf := bytes.Buffer{}
+	var buf bytes.Buffer
 	err = json.NewEncoder(&buf).Encode(in)
 	if err != nil {
 		return err
@@ -887,7 +943,7 @@ func (c *Client) DeleteConferenceVenue(in *model.DeleteConferenceVenueRequest) (
 	if err != nil {
 		return err
 	}
-	buf := bytes.Buffer{}
+	var buf bytes.Buffer
 	err = json.NewEncoder(&buf).Encode(in)
 	if err != nil {
 		return err
@@ -923,7 +979,7 @@ func (c *Client) DeleteFeaturedSpeaker(in *model.DeleteFeaturedSpeakerRequest) (
 	if err != nil {
 		return err
 	}
-	buf := bytes.Buffer{}
+	var buf bytes.Buffer
 	err = json.NewEncoder(&buf).Encode(in)
 	if err != nil {
 		return err
@@ -959,7 +1015,7 @@ func (c *Client) DeleteQuestion(in *model.DeleteQuestionRequest) (err error) {
 	if err != nil {
 		return err
 	}
-	buf := bytes.Buffer{}
+	var buf bytes.Buffer
 	err = json.NewEncoder(&buf).Encode(in)
 	if err != nil {
 		return err
@@ -995,7 +1051,7 @@ func (c *Client) DeleteRoom(in *model.DeleteRoomRequest) (err error) {
 	if err != nil {
 		return err
 	}
-	buf := bytes.Buffer{}
+	var buf bytes.Buffer
 	err = json.NewEncoder(&buf).Encode(in)
 	if err != nil {
 		return err
@@ -1031,7 +1087,7 @@ func (c *Client) DeleteSession(in *model.DeleteSessionRequest) (err error) {
 	if err != nil {
 		return err
 	}
-	buf := bytes.Buffer{}
+	var buf bytes.Buffer
 	err = json.NewEncoder(&buf).Encode(in)
 	if err != nil {
 		return err
@@ -1067,7 +1123,7 @@ func (c *Client) DeleteSponsor(in *model.DeleteSponsorRequest) (err error) {
 	if err != nil {
 		return err
 	}
-	buf := bytes.Buffer{}
+	var buf bytes.Buffer
 	err = json.NewEncoder(&buf).Encode(in)
 	if err != nil {
 		return err
@@ -1103,7 +1159,7 @@ func (c *Client) DeleteUser(in *model.DeleteUserRequest) (err error) {
 	if err != nil {
 		return err
 	}
-	buf := bytes.Buffer{}
+	var buf bytes.Buffer
 	err = json.NewEncoder(&buf).Encode(in)
 	if err != nil {
 		return err
@@ -1139,7 +1195,7 @@ func (c *Client) DeleteVenue(in *model.DeleteVenueRequest) (err error) {
 	if err != nil {
 		return err
 	}
-	buf := bytes.Buffer{}
+	var buf bytes.Buffer
 	err = json.NewEncoder(&buf).Encode(in)
 	if err != nil {
 		return err
@@ -2147,7 +2203,7 @@ func (c *Client) UpdateConference(in *model.UpdateConferenceRequest) (err error)
 	if err != nil {
 		return err
 	}
-	buf := bytes.Buffer{}
+	var buf bytes.Buffer
 	err = json.NewEncoder(&buf).Encode(in)
 	if err != nil {
 		return err
@@ -2183,7 +2239,7 @@ func (c *Client) UpdateFeaturedSpeaker(in *model.UpdateFeaturedSpeakerRequest) (
 	if err != nil {
 		return err
 	}
-	buf := bytes.Buffer{}
+	var buf bytes.Buffer
 	err = json.NewEncoder(&buf).Encode(in)
 	if err != nil {
 		return err
@@ -2219,7 +2275,7 @@ func (c *Client) UpdateRoom(in *model.UpdateRoomRequest) (err error) {
 	if err != nil {
 		return err
 	}
-	buf := bytes.Buffer{}
+	var buf bytes.Buffer
 	err = json.NewEncoder(&buf).Encode(in)
 	if err != nil {
 		return err
@@ -2255,7 +2311,7 @@ func (c *Client) UpdateSession(in *model.UpdateSessionRequest) (err error) {
 	if err != nil {
 		return err
 	}
-	buf := bytes.Buffer{}
+	var buf bytes.Buffer
 	err = json.NewEncoder(&buf).Encode(in)
 	if err != nil {
 		return err
@@ -2291,7 +2347,7 @@ func (c *Client) UpdateSponsor(in *model.UpdateSponsorRequest) (err error) {
 	if err != nil {
 		return err
 	}
-	buf := bytes.Buffer{}
+	var buf bytes.Buffer
 	err = json.NewEncoder(&buf).Encode(in)
 	if err != nil {
 		return err
@@ -2327,7 +2383,7 @@ func (c *Client) UpdateUser(in *model.UpdateUserRequest) (err error) {
 	if err != nil {
 		return err
 	}
-	buf := bytes.Buffer{}
+	var buf bytes.Buffer
 	err = json.NewEncoder(&buf).Encode(in)
 	if err != nil {
 		return err
@@ -2363,7 +2419,7 @@ func (c *Client) UpdateVenue(in *model.UpdateVenueRequest) (err error) {
 	if err != nil {
 		return err
 	}
-	buf := bytes.Buffer{}
+	var buf bytes.Buffer
 	err = json.NewEncoder(&buf).Encode(in)
 	if err != nil {
 		return err

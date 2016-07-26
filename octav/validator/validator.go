@@ -875,7 +875,7 @@ func init() {
 		SetConstraintMap(M).
 		SetRoot(
 			jsval.Object().
-				Required("conference_id", "group_name", "logo_url1", "name", "url", "user_id").
+				Required("conference_id", "group_name", "name", "url", "user_id").
 				AdditionalProperties(
 					jsval.EmptyConstraint,
 				).
@@ -886,18 +886,6 @@ func init() {
 				AddProp(
 					"group_name",
 					jsval.Reference(M).RefersTo("#/definitions/string_en_not_empty"),
-				).
-				AddProp(
-					"logo_url1",
-					jsval.Reference(M).RefersTo("#/definitions/url"),
-				).
-				AddProp(
-					"logo_url2",
-					jsval.Reference(M).RefersTo("#/definitions/url"),
-				).
-				AddProp(
-					"logo_url3",
-					jsval.Reference(M).RefersTo("#/definitions/url"),
 				).
 				AddProp(
 					"name",
@@ -1886,7 +1874,7 @@ func init() {
 				).
 				AddProp(
 					"status",
-					jsval.Reference(M).RefersTo("#/definitions/conference_status"),
+					jsval.String(),
 				),
 		)
 

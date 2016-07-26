@@ -73,8 +73,28 @@ for my $link (@{$schema->{links}}) {
 
     say $tmpout '    my $uri = URI->new($self->{endpoint} . qq|' . $path . '|);';
     if (lc($link->{method}) eq 'post') {
-        say $tmpout '    my $json_payload = JSON::encode_json($payload);';
-        say $tmpout '    my $res = $self->{user_agent}->post($uri, Content => $json_payload);';
+        say $tmpout '    my @request_args;';
+        if ($link->{encType} eq 'multipart/form-data') {
+            # If the encType is multipart/form-data, we must generate
+            # a different type of request
+
+            say $tmpout '    my @content;';
+            # first, remove and push into content args the files that
+            # should be uploaded
+            if (my @files = @{$link->{"hsup.multipartFiles"} || []}) {
+                say $tmpout '    for my $file (qw(' . join(" ", @files) . ')) {';
+                say $tmpout '        if (my $fn = delete $payload->{$file}) {';
+                say $tmpout '            push @content, ($file => [$fn]);';
+                say $tmpout '        }';
+                say $tmpout '    }';
+            }
+            say $tmpout '    push @content, (payload => JSON::encode_json($payload));';
+            say $tmpout '    push @request_args, (Content_Type => "form-data");';
+            say $tmpout '    push @request_args, (Content => \@content);';
+        } else {
+            say $tmpout '    push @request_args, (Content_Type => "application/json", Content => JSON::encode_json($payload));';
+        }
+        say $tmpout '    my $res = $self->{user_agent}->post($uri, @request_args);';
     } else {
         say $tmpout '    $uri->query_form($payload);';
         say $tmpout '    my $res = $self->{user_agent}->get($uri);';

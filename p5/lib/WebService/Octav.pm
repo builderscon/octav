@@ -39,8 +39,9 @@ sub create_user {
         }
     }
     my $uri = URI->new($self->{endpoint} . qq|/v1/user/create|);
-    my $json_payload = JSON::encode_json($payload);
-    my $res = $self->{user_agent}->post($uri, Content => $json_payload);
+    my @request_args;
+    push @request_args, (Content_Type => "application/json", Content => JSON::encode_json($payload));
+    my $res = $self->{user_agent}->post($uri, @request_args);
     if (!$res->is_success) {
         $self->{last_error} = $res->status_line;
         return;
@@ -90,8 +91,9 @@ sub update_user {
         }
     }
     my $uri = URI->new($self->{endpoint} . qq|/v1/user/update|);
-    my $json_payload = JSON::encode_json($payload);
-    my $res = $self->{user_agent}->post($uri, Content => $json_payload);
+    my @request_args;
+    push @request_args, (Content_Type => "application/json", Content => JSON::encode_json($payload));
+    my $res = $self->{user_agent}->post($uri, @request_args);
     if (!$res->is_success) {
         $self->{last_error} = $res->status_line;
         return;
@@ -107,8 +109,9 @@ sub delete_user {
         }
     }
     my $uri = URI->new($self->{endpoint} . qq|/v1/user/delete|);
-    my $json_payload = JSON::encode_json($payload);
-    my $res = $self->{user_agent}->post($uri, Content => $json_payload);
+    my @request_args;
+    push @request_args, (Content_Type => "application/json", Content => JSON::encode_json($payload));
+    my $res = $self->{user_agent}->post($uri, @request_args);
     if (!$res->is_success) {
         $self->{last_error} = $res->status_line;
         return;
@@ -136,8 +139,9 @@ sub create_venue {
         }
     }
     my $uri = URI->new($self->{endpoint} . qq|/v1/venue/create|);
-    my $json_payload = JSON::encode_json($payload);
-    my $res = $self->{user_agent}->post($uri, Content => $json_payload);
+    my @request_args;
+    push @request_args, (Content_Type => "application/json", Content => JSON::encode_json($payload));
+    my $res = $self->{user_agent}->post($uri, @request_args);
     if (!$res->is_success) {
         $self->{last_error} = $res->status_line;
         return;
@@ -182,8 +186,9 @@ sub update_venue {
         }
     }
     my $uri = URI->new($self->{endpoint} . qq|/v1/venue/update|);
-    my $json_payload = JSON::encode_json($payload);
-    my $res = $self->{user_agent}->post($uri, Content => $json_payload);
+    my @request_args;
+    push @request_args, (Content_Type => "application/json", Content => JSON::encode_json($payload));
+    my $res = $self->{user_agent}->post($uri, @request_args);
     if (!$res->is_success) {
         $self->{last_error} = $res->status_line;
         return;
@@ -199,8 +204,9 @@ sub delete_venue {
         }
     }
     my $uri = URI->new($self->{endpoint} . qq|/v1/venue/delete|);
-    my $json_payload = JSON::encode_json($payload);
-    my $res = $self->{user_agent}->post($uri, Content => $json_payload);
+    my @request_args;
+    push @request_args, (Content_Type => "application/json", Content => JSON::encode_json($payload));
+    my $res = $self->{user_agent}->post($uri, @request_args);
     if (!$res->is_success) {
         $self->{last_error} = $res->status_line;
         return;
@@ -216,8 +222,9 @@ sub create_room {
         }
     }
     my $uri = URI->new($self->{endpoint} . qq|/v1/room/create|);
-    my $json_payload = JSON::encode_json($payload);
-    my $res = $self->{user_agent}->post($uri, Content => $json_payload);
+    my @request_args;
+    push @request_args, (Content_Type => "application/json", Content => JSON::encode_json($payload));
+    my $res = $self->{user_agent}->post($uri, @request_args);
     if (!$res->is_success) {
         $self->{last_error} = $res->status_line;
         return;
@@ -233,8 +240,9 @@ sub update_room {
         }
     }
     my $uri = URI->new($self->{endpoint} . qq|/v1/room/update|);
-    my $json_payload = JSON::encode_json($payload);
-    my $res = $self->{user_agent}->post($uri, Content => $json_payload);
+    my @request_args;
+    push @request_args, (Content_Type => "application/json", Content => JSON::encode_json($payload));
+    my $res = $self->{user_agent}->post($uri, @request_args);
     if (!$res->is_success) {
         $self->{last_error} = $res->status_line;
         return;
@@ -267,8 +275,9 @@ sub delete_room {
         }
     }
     my $uri = URI->new($self->{endpoint} . qq|/v1/room/delete|);
-    my $json_payload = JSON::encode_json($payload);
-    my $res = $self->{user_agent}->post($uri, Content => $json_payload);
+    my @request_args;
+    push @request_args, (Content_Type => "application/json", Content => JSON::encode_json($payload));
+    my $res = $self->{user_agent}->post($uri, @request_args);
     if (!$res->is_success) {
         $self->{last_error} = $res->status_line;
         return;
@@ -301,8 +310,9 @@ sub create_conference_series {
         }
     }
     my $uri = URI->new($self->{endpoint} . qq|/v1/conference_series/create|);
-    my $json_payload = JSON::encode_json($payload);
-    my $res = $self->{user_agent}->post($uri, Content => $json_payload);
+    my @request_args;
+    push @request_args, (Content_Type => "application/json", Content => JSON::encode_json($payload));
+    my $res = $self->{user_agent}->post($uri, @request_args);
     if (!$res->is_success) {
         $self->{last_error} = $res->status_line;
         return;
@@ -330,8 +340,9 @@ sub add_conference_series_admin {
         }
     }
     my $uri = URI->new($self->{endpoint} . qq|/v1/conference_series/admin/add|);
-    my $json_payload = JSON::encode_json($payload);
-    my $res = $self->{user_agent}->post($uri, Content => $json_payload);
+    my @request_args;
+    push @request_args, (Content_Type => "application/json", Content => JSON::encode_json($payload));
+    my $res = $self->{user_agent}->post($uri, @request_args);
     if (!$res->is_success) {
         $self->{last_error} = $res->status_line;
         return;
@@ -347,8 +358,9 @@ sub create_conference {
         }
     }
     my $uri = URI->new($self->{endpoint} . qq|/v1/conference/create|);
-    my $json_payload = JSON::encode_json($payload);
-    my $res = $self->{user_agent}->post($uri, Content => $json_payload);
+    my @request_args;
+    push @request_args, (Content_Type => "application/json", Content => JSON::encode_json($payload));
+    my $res = $self->{user_agent}->post($uri, @request_args);
     if (!$res->is_success) {
         $self->{last_error} = $res->status_line;
         return;
@@ -364,8 +376,9 @@ sub add_conference_dates {
         }
     }
     my $uri = URI->new($self->{endpoint} . qq|/v1/conference/dates/add|);
-    my $json_payload = JSON::encode_json($payload);
-    my $res = $self->{user_agent}->post($uri, Content => $json_payload);
+    my @request_args;
+    push @request_args, (Content_Type => "application/json", Content => JSON::encode_json($payload));
+    my $res = $self->{user_agent}->post($uri, @request_args);
     if (!$res->is_success) {
         $self->{last_error} = $res->status_line;
         return;
@@ -381,8 +394,9 @@ sub delete_conference_dates {
         }
     }
     my $uri = URI->new($self->{endpoint} . qq|/v1/conference/dates/delete|);
-    my $json_payload = JSON::encode_json($payload);
-    my $res = $self->{user_agent}->post($uri, Content => $json_payload);
+    my @request_args;
+    push @request_args, (Content_Type => "application/json", Content => JSON::encode_json($payload));
+    my $res = $self->{user_agent}->post($uri, @request_args);
     if (!$res->is_success) {
         $self->{last_error} = $res->status_line;
         return;
@@ -398,8 +412,9 @@ sub add_conference_admin {
         }
     }
     my $uri = URI->new($self->{endpoint} . qq|/v1/conference/admin/add|);
-    my $json_payload = JSON::encode_json($payload);
-    my $res = $self->{user_agent}->post($uri, Content => $json_payload);
+    my @request_args;
+    push @request_args, (Content_Type => "application/json", Content => JSON::encode_json($payload));
+    my $res = $self->{user_agent}->post($uri, @request_args);
     if (!$res->is_success) {
         $self->{last_error} = $res->status_line;
         return;
@@ -415,8 +430,9 @@ sub delete_conference_admin {
         }
     }
     my $uri = URI->new($self->{endpoint} . qq|/v1/conference/admin/delete|);
-    my $json_payload = JSON::encode_json($payload);
-    my $res = $self->{user_agent}->post($uri, Content => $json_payload);
+    my @request_args;
+    push @request_args, (Content_Type => "application/json", Content => JSON::encode_json($payload));
+    my $res = $self->{user_agent}->post($uri, @request_args);
     if (!$res->is_success) {
         $self->{last_error} = $res->status_line;
         return;
@@ -432,8 +448,9 @@ sub add_conference_venue {
         }
     }
     my $uri = URI->new($self->{endpoint} . qq|/v1/conference/venue/add|);
-    my $json_payload = JSON::encode_json($payload);
-    my $res = $self->{user_agent}->post($uri, Content => $json_payload);
+    my @request_args;
+    push @request_args, (Content_Type => "application/json", Content => JSON::encode_json($payload));
+    my $res = $self->{user_agent}->post($uri, @request_args);
     if (!$res->is_success) {
         $self->{last_error} = $res->status_line;
         return;
@@ -449,8 +466,9 @@ sub delete_conference_venue {
         }
     }
     my $uri = URI->new($self->{endpoint} . qq|/v1/conference/venue/delete|);
-    my $json_payload = JSON::encode_json($payload);
-    my $res = $self->{user_agent}->post($uri, Content => $json_payload);
+    my @request_args;
+    push @request_args, (Content_Type => "application/json", Content => JSON::encode_json($payload));
+    my $res = $self->{user_agent}->post($uri, @request_args);
     if (!$res->is_success) {
         $self->{last_error} = $res->status_line;
         return;
@@ -512,8 +530,9 @@ sub update_conference {
         }
     }
     my $uri = URI->new($self->{endpoint} . qq|/v1/conference/update|);
-    my $json_payload = JSON::encode_json($payload);
-    my $res = $self->{user_agent}->post($uri, Content => $json_payload);
+    my @request_args;
+    push @request_args, (Content_Type => "application/json", Content => JSON::encode_json($payload));
+    my $res = $self->{user_agent}->post($uri, @request_args);
     if (!$res->is_success) {
         $self->{last_error} = $res->status_line;
         return;
@@ -529,8 +548,9 @@ sub delete_conference_series {
         }
     }
     my $uri = URI->new($self->{endpoint} . qq|/v1/conference_series/delete|);
-    my $json_payload = JSON::encode_json($payload);
-    my $res = $self->{user_agent}->post($uri, Content => $json_payload);
+    my @request_args;
+    push @request_args, (Content_Type => "application/json", Content => JSON::encode_json($payload));
+    my $res = $self->{user_agent}->post($uri, @request_args);
     if (!$res->is_success) {
         $self->{last_error} = $res->status_line;
         return;
@@ -546,8 +566,9 @@ sub delete_conference {
         }
     }
     my $uri = URI->new($self->{endpoint} . qq|/v1/conference/delete|);
-    my $json_payload = JSON::encode_json($payload);
-    my $res = $self->{user_agent}->post($uri, Content => $json_payload);
+    my @request_args;
+    push @request_args, (Content_Type => "application/json", Content => JSON::encode_json($payload));
+    my $res = $self->{user_agent}->post($uri, @request_args);
     if (!$res->is_success) {
         $self->{last_error} = $res->status_line;
         return;
@@ -563,8 +584,9 @@ sub create_session {
         }
     }
     my $uri = URI->new($self->{endpoint} . qq|/v1/session/create|);
-    my $json_payload = JSON::encode_json($payload);
-    my $res = $self->{user_agent}->post($uri, Content => $json_payload);
+    my @request_args;
+    push @request_args, (Content_Type => "application/json", Content => JSON::encode_json($payload));
+    my $res = $self->{user_agent}->post($uri, @request_args);
     if (!$res->is_success) {
         $self->{last_error} = $res->status_line;
         return;
@@ -597,8 +619,9 @@ sub delete_session {
         }
     }
     my $uri = URI->new($self->{endpoint} . qq|/v1/session/delete|);
-    my $json_payload = JSON::encode_json($payload);
-    my $res = $self->{user_agent}->post($uri, Content => $json_payload);
+    my @request_args;
+    push @request_args, (Content_Type => "application/json", Content => JSON::encode_json($payload));
+    my $res = $self->{user_agent}->post($uri, @request_args);
     if (!$res->is_success) {
         $self->{last_error} = $res->status_line;
         return;
@@ -614,8 +637,9 @@ sub update_session {
         }
     }
     my $uri = URI->new($self->{endpoint} . qq|/v1/session/update|);
-    my $json_payload = JSON::encode_json($payload);
-    my $res = $self->{user_agent}->post($uri, Content => $json_payload);
+    my @request_args;
+    push @request_args, (Content_Type => "application/json", Content => JSON::encode_json($payload));
+    my $res = $self->{user_agent}->post($uri, @request_args);
     if (!$res->is_success) {
         $self->{last_error} = $res->status_line;
         return;
@@ -665,8 +689,9 @@ sub delete_question {
         }
     }
     my $uri = URI->new($self->{endpoint} . qq|/v1/question/delete|);
-    my $json_payload = JSON::encode_json($payload);
-    my $res = $self->{user_agent}->post($uri, Content => $json_payload);
+    my @request_args;
+    push @request_args, (Content_Type => "application/json", Content => JSON::encode_json($payload));
+    my $res = $self->{user_agent}->post($uri, @request_args);
     if (!$res->is_success) {
         $self->{last_error} = $res->status_line;
         return;
@@ -716,8 +741,9 @@ sub add_featured_speaker {
         }
     }
     my $uri = URI->new($self->{endpoint} . qq|/v1/featured_speaker/add|);
-    my $json_payload = JSON::encode_json($payload);
-    my $res = $self->{user_agent}->post($uri, Content => $json_payload);
+    my @request_args;
+    push @request_args, (Content_Type => "application/json", Content => JSON::encode_json($payload));
+    my $res = $self->{user_agent}->post($uri, @request_args);
     if (!$res->is_success) {
         $self->{last_error} = $res->status_line;
         return;
@@ -762,8 +788,9 @@ sub update_featured_speaker {
         }
     }
     my $uri = URI->new($self->{endpoint} . qq|/v1/featured_speaker/update|);
-    my $json_payload = JSON::encode_json($payload);
-    my $res = $self->{user_agent}->post($uri, Content => $json_payload);
+    my @request_args;
+    push @request_args, (Content_Type => "application/json", Content => JSON::encode_json($payload));
+    my $res = $self->{user_agent}->post($uri, @request_args);
     if (!$res->is_success) {
         $self->{last_error} = $res->status_line;
         return;
@@ -779,8 +806,9 @@ sub delete_featured_speaker {
         }
     }
     my $uri = URI->new($self->{endpoint} . qq|/v1/featured_speaker/delete|);
-    my $json_payload = JSON::encode_json($payload);
-    my $res = $self->{user_agent}->post($uri, Content => $json_payload);
+    my @request_args;
+    push @request_args, (Content_Type => "application/json", Content => JSON::encode_json($payload));
+    my $res = $self->{user_agent}->post($uri, @request_args);
     if (!$res->is_success) {
         $self->{last_error} = $res->status_line;
         return;
@@ -790,14 +818,23 @@ sub delete_featured_speaker {
 
 sub add_sponsor {
     my ($self, $payload) = @_;
-    for my $required (qw(conference_id logo_url1 name url group_name user_id)) {
+    for my $required (qw(conference_id name url group_name user_id)) {
         if (!$payload->{$required}) {
             die qq|property "$required" must be provided|;
         }
     }
     my $uri = URI->new($self->{endpoint} . qq|/v1/sponsor/add|);
-    my $json_payload = JSON::encode_json($payload);
-    my $res = $self->{user_agent}->post($uri, Content => $json_payload);
+    my @request_args;
+    my @content;
+    for my $file (qw(logo1 logo2 logo3)) {
+        if (my $fn = delete $payload->{$file}) {
+            push @content, ($file => [$fn]);
+        }
+    }
+    push @content, (payload => JSON::encode_json($payload));
+    push @request_args, (Content_Type => "form-data");
+    push @request_args, (Content => \@content);
+    my $res = $self->{user_agent}->post($uri, @request_args);
     if (!$res->is_success) {
         $self->{last_error} = $res->status_line;
         return;
@@ -842,8 +879,9 @@ sub update_sponsor {
         }
     }
     my $uri = URI->new($self->{endpoint} . qq|/v1/sponsor/update|);
-    my $json_payload = JSON::encode_json($payload);
-    my $res = $self->{user_agent}->post($uri, Content => $json_payload);
+    my @request_args;
+    push @request_args, (Content_Type => "application/json", Content => JSON::encode_json($payload));
+    my $res = $self->{user_agent}->post($uri, @request_args);
     if (!$res->is_success) {
         $self->{last_error} = $res->status_line;
         return;
@@ -859,8 +897,9 @@ sub delete_sponsor {
         }
     }
     my $uri = URI->new($self->{endpoint} . qq|/v1/sponsor/delete|);
-    my $json_payload = JSON::encode_json($payload);
-    my $res = $self->{user_agent}->post($uri, Content => $json_payload);
+    my @request_args;
+    push @request_args, (Content_Type => "application/json", Content => JSON::encode_json($payload));
+    my $res = $self->{user_agent}->post($uri, @request_args);
     if (!$res->is_success) {
         $self->{last_error} = $res->status_line;
         return;

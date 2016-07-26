@@ -1,13 +1,44 @@
 package service
 
 import (
+	"bytes"
+	"io"
+	"mime/multipart"
+	"net/http"
+	"os"
+	"time"
+
 	"github.com/builderscon/octav/octav/db"
 	"github.com/builderscon/octav/octav/model"
 	"github.com/builderscon/octav/octav/tools"
-
 	"github.com/lestrrat/go-pdebug"
 	"github.com/pkg/errors"
+	"golang.org/x/net/context"
+	"golang.org/x/sync/errgroup"
+	"google.golang.org/cloud/storage"
 )
+
+func (v *Sponsor) getMediaBucketName() string {
+	v.bucketOnce.Do(func() {
+		if v.MediaBucketName == "" {
+			v.MediaBucketName = os.Getenv("GOOGLE_STORAGE_MEDIA_BUCKET")
+		}
+	})
+	return v.MediaBucketName
+}
+
+func (v *Sponsor) getStorageClient(ctx context.Context) *storage.Client {
+	v.storageOnce.Do(func() {
+		if v.Storage == nil {
+			client, err := defaultStorageClient(ctx)
+			if err != nil {
+				panic(err.Error())
+			}
+			v.Storage = client
+		}
+	})
+	return v.Storage
+}
 
 func (v *Sponsor) populateRowForCreate(vdb *db.Sponsor, payload model.CreateSponsorRequest) error {
 	vdb.EID = tools.UUID()
@@ -66,10 +97,129 @@ func (v *Sponsor) populateRowForUpdate(vdb *db.Sponsor, payload model.UpdateSpon
 	return nil
 }
 
-func (v *Sponsor) CreateFromPayload(tx *db.Tx, payload model.AddSponsorRequest, result *model.Sponsor) error {
+type finalizeFunc func() error
+
+func (ff finalizeFunc) FinalizeFunc() func() error {
+	return ff
+}
+
+// Ignorable always returns true, otherwise the caller will have to
+// bail out immediately
+func (ff finalizeFunc) Ignorable() bool {
+	return true
+}
+
+func (ff finalizeFunc) Error() string {
+	return "operation needs finalization"
+}
+
+func (v *Sponsor) CreateFromPayload(ctx context.Context, tx *db.Tx, payload model.AddSponsorRequest, result *model.Sponsor) (err error) {
 	su := User{}
 	if err := su.IsConferenceAdministrator(tx, payload.ConferenceID, payload.UserID); err != nil {
 		return errors.Wrap(err, "creating a featured speaker requires conference administrator privilege")
+	}
+
+	if payload.MultipartForm != nil && payload.MultipartForm.File != nil {
+		bucketName := v.getMediaBucketName()
+		finalizers := make([]func() error, 0, 3)
+		for _, field := range []string{"logo1", "logo2", "logo3"} {
+			fhs := payload.MultipartForm.File[field]
+			if len(fhs) == 0 {
+				continue
+			}
+
+			var imgf multipart.File
+			imgf, err = fhs[0].Open()
+			if err != nil {
+				return errors.Wrap(err, "failed to open logo file from multipart form")
+			}
+
+			var imgbuf bytes.Buffer
+			if _, err := io.Copy(&imgbuf, imgf); err != nil {
+				return errors.Wrap(err, "failed to copy logo image data to memory")
+			}
+			imgtyp := http.DetectContentType(imgbuf.Bytes())
+
+			// Only work with image/png or image/jpeg
+			var suffix string
+			switch imgtyp {
+			case "image/png":
+				suffix = "png"
+			case "image/jpeg":
+				suffix = "jpeg"
+			default:
+				return errors.Errorf("Unsupported image type %s", imgtyp)
+			}
+
+			// TODO: Validate the image
+			// TODO: Avoid Google Storage hardcoding?
+			// Upload this to a temporary location, then upon successful write to DB
+			// rename it to $conference_id/$sponsor_id
+			storagecl := v.getStorageClient(ctx)
+			tmpname := time.Now().UTC().Format("2006-01-02") + "/" + tools.RandomString(64) + "." + suffix
+			wc := storagecl.Bucket(bucketName).Object(tmpname).NewWriter(ctx)
+			wc.ContentType = imgtyp
+			wc.ACL = []storage.ACLRule{{storage.AllUsers, storage.RoleReader}}
+			if _, err := io.Copy(wc, &imgbuf); err != nil {
+				return errors.Wrap(err, "failed to write image to temporary location")
+			}
+			// Note: DO NOT defer wc.Close(), as it's part of the write operation.
+			// If wc.Close() does not complete w/o errors. the write failed
+			if err := wc.Close(); err != nil {
+				return errors.Wrap(err, "failed to write image to temporary location")
+			}
+			thisfield := field
+			finalizers = append(finalizers, func() (err error) {
+				if pdebug.Enabled {
+					g := pdebug.Marker("finalizeFunc for service.Sponsor.CreateFromPayload").BindError(&err)
+					defer g.End()
+				}
+				dstname := result.ConferenceID + "-" + result.ID + "-" + thisfield + "." + suffix
+				src := storagecl.Bucket(bucketName).Object(tmpname)
+				dst := storagecl.Bucket(bucketName).Object(dstname)
+
+				if pdebug.Enabled {
+					pdebug.Printf("Copying %s to %s", tmpname, dstname)
+				}
+				if _, err = src.CopyTo(ctx, dst, nil); err != nil {
+					return errors.Wrapf(err, "failed to copy from '%s' to '%s'", tmpname, dstname)
+				}
+				if pdebug.Enabled {
+					pdebug.Printf("Deleting %s", tmpname)
+				}
+				if err := src.Delete(ctx); err != nil {
+					return errors.Wrapf(err, "failed to delete '%s'", tmpname)
+				}
+				return nil
+			})
+		}
+
+		if len(finalizers) > 0 {
+			defer func() {
+				if pdebug.Enabled {
+					g := pdebug.Marker("deferred function from service.Sponsor.CreateFromPayload")
+					defer g.End()
+				}
+
+				if err != nil || result == nil {
+					// no op
+					return
+				}
+
+				if pdebug.Enabled {
+					pdebug.Printf("Creating finalizeFunc for this logo upload")
+				}
+				// Even though there was no error, create an error value that has a
+				// FinalizeFunc() method, so the callee will recognize it
+				err = finalizeFunc(func() error {
+					var g errgroup.Group
+					for _, f := range finalizers {
+						g.Go(f)
+					}
+					return g.Wait()
+				})
+			}()
+		}
 	}
 
 	vdb := db.Sponsor{}

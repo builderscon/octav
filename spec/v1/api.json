@@ -919,7 +919,7 @@
             ]
           },
           "since": { "$ref": "#/definitions/uuid" },
-          "status": { "$ref": "#/definitions/conference_status" }
+          "status": { "type": "string" }
         }
       },
       "targetSchema": { "$ref": "#/definitions/conference_array" }
@@ -1261,17 +1261,16 @@
     {
       "title": "Add sponsor",
       "href": "/sponsor/add",
+      "encType": "multipart/form-data",
       "hsup.wrapper": "httpWithBasicAuth",
+      "hsup.multipartFiles": ["logo1", "logo2", "logo3"],
       "method": "POST",
       "rel": "create",
       "schema": {
         "type": "object",
-        "required": ["conference_id","logo_url1","name","url","group_name","user_id"],
+        "required": ["conference_id","name","url","group_name","user_id"],
         "properties": {
           "conference_id": {"$ref": "#/definitions/uuid"},
-          "logo_url1": {"$ref": "#/definitions/url" },
-          "logo_url2": {"$ref": "#/definitions/url" },
-          "logo_url3": {"$ref": "#/definitions/url" },
           "name": { "$ref": "#/definitions/string_en_not_empty" },
           "group_name": { "$ref": "#/definitions/string_en_not_empty" },
           "sort_order": { "$ref": "#/definitions/positiveInteger" },

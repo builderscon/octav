@@ -451,6 +451,10 @@ func (ctx *InspectionCtx) ExtractStructsFromDecl(decl *ast.GenDecl) error {
 				}
 			}
 
+			if jsname == "-" || jsname == "" {
+				continue
+			}
+
 			typ, err := getTypeName(f.Type)
 			if err != nil {
 				return err

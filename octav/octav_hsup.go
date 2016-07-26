@@ -125,11 +125,18 @@ func httpAddConferenceAdmin(ctx context.Context, w http.ResponseWriter, r *http.
 	var payload model.AddConferenceAdminRequest
 	jsonbuf := getTransportJSONBuffer()
 	defer releaseTransportJSONBuffer(jsonbuf)
-	if _, err := io.Copy(jsonbuf, io.LimitReader(r.Body, MaxPostSize)); err != nil {
-		httpError(w, `Failed to read request body`, http.StatusInternalServerError, err)
+
+	switch ct := r.Header.Get("Content-Type"); {
+	case ct == "application/json":
+		if _, err := io.Copy(jsonbuf, io.LimitReader(r.Body, MaxPostSize)); err != nil {
+			httpError(w, `Failed to read request body`, http.StatusInternalServerError, err)
+			return
+		}
+		defer r.Body.Close()
+	default:
+		httpError(w, `Invalid content-type`, http.StatusInternalServerError, nil)
 		return
 	}
-	defer r.Body.Close()
 	if pdebug.Enabled {
 		pdebug.Printf(`-----> %s`, jsonbuf.Bytes())
 	}
@@ -159,11 +166,18 @@ func httpAddConferenceDates(ctx context.Context, w http.ResponseWriter, r *http.
 	var payload model.AddConferenceDatesRequest
 	jsonbuf := getTransportJSONBuffer()
 	defer releaseTransportJSONBuffer(jsonbuf)
-	if _, err := io.Copy(jsonbuf, io.LimitReader(r.Body, MaxPostSize)); err != nil {
-		httpError(w, `Failed to read request body`, http.StatusInternalServerError, err)
+
+	switch ct := r.Header.Get("Content-Type"); {
+	case ct == "application/json":
+		if _, err := io.Copy(jsonbuf, io.LimitReader(r.Body, MaxPostSize)); err != nil {
+			httpError(w, `Failed to read request body`, http.StatusInternalServerError, err)
+			return
+		}
+		defer r.Body.Close()
+	default:
+		httpError(w, `Invalid content-type`, http.StatusInternalServerError, nil)
 		return
 	}
-	defer r.Body.Close()
 	if pdebug.Enabled {
 		pdebug.Printf(`-----> %s`, jsonbuf.Bytes())
 	}
@@ -193,11 +207,18 @@ func httpAddConferenceSeriesAdmin(ctx context.Context, w http.ResponseWriter, r 
 	var payload model.AddConferenceSeriesAdminRequest
 	jsonbuf := getTransportJSONBuffer()
 	defer releaseTransportJSONBuffer(jsonbuf)
-	if _, err := io.Copy(jsonbuf, io.LimitReader(r.Body, MaxPostSize)); err != nil {
-		httpError(w, `Failed to read request body`, http.StatusInternalServerError, err)
+
+	switch ct := r.Header.Get("Content-Type"); {
+	case ct == "application/json":
+		if _, err := io.Copy(jsonbuf, io.LimitReader(r.Body, MaxPostSize)); err != nil {
+			httpError(w, `Failed to read request body`, http.StatusInternalServerError, err)
+			return
+		}
+		defer r.Body.Close()
+	default:
+		httpError(w, `Invalid content-type`, http.StatusInternalServerError, nil)
 		return
 	}
-	defer r.Body.Close()
 	if pdebug.Enabled {
 		pdebug.Printf(`-----> %s`, jsonbuf.Bytes())
 	}
@@ -227,11 +248,18 @@ func httpAddConferenceVenue(ctx context.Context, w http.ResponseWriter, r *http.
 	var payload model.AddConferenceVenueRequest
 	jsonbuf := getTransportJSONBuffer()
 	defer releaseTransportJSONBuffer(jsonbuf)
-	if _, err := io.Copy(jsonbuf, io.LimitReader(r.Body, MaxPostSize)); err != nil {
-		httpError(w, `Failed to read request body`, http.StatusInternalServerError, err)
+
+	switch ct := r.Header.Get("Content-Type"); {
+	case ct == "application/json":
+		if _, err := io.Copy(jsonbuf, io.LimitReader(r.Body, MaxPostSize)); err != nil {
+			httpError(w, `Failed to read request body`, http.StatusInternalServerError, err)
+			return
+		}
+		defer r.Body.Close()
+	default:
+		httpError(w, `Invalid content-type`, http.StatusInternalServerError, nil)
 		return
 	}
-	defer r.Body.Close()
 	if pdebug.Enabled {
 		pdebug.Printf(`-----> %s`, jsonbuf.Bytes())
 	}
@@ -261,11 +289,18 @@ func httpAddFeaturedSpeaker(ctx context.Context, w http.ResponseWriter, r *http.
 	var payload model.AddFeaturedSpeakerRequest
 	jsonbuf := getTransportJSONBuffer()
 	defer releaseTransportJSONBuffer(jsonbuf)
-	if _, err := io.Copy(jsonbuf, io.LimitReader(r.Body, MaxPostSize)); err != nil {
-		httpError(w, `Failed to read request body`, http.StatusInternalServerError, err)
+
+	switch ct := r.Header.Get("Content-Type"); {
+	case ct == "application/json":
+		if _, err := io.Copy(jsonbuf, io.LimitReader(r.Body, MaxPostSize)); err != nil {
+			httpError(w, `Failed to read request body`, http.StatusInternalServerError, err)
+			return
+		}
+		defer r.Body.Close()
+	default:
+		httpError(w, `Invalid content-type`, http.StatusInternalServerError, nil)
 		return
 	}
-	defer r.Body.Close()
 	if pdebug.Enabled {
 		pdebug.Printf(`-----> %s`, jsonbuf.Bytes())
 	}
@@ -295,11 +330,31 @@ func httpAddSponsor(ctx context.Context, w http.ResponseWriter, r *http.Request)
 	var payload model.AddSponsorRequest
 	jsonbuf := getTransportJSONBuffer()
 	defer releaseTransportJSONBuffer(jsonbuf)
-	if _, err := io.Copy(jsonbuf, io.LimitReader(r.Body, MaxPostSize)); err != nil {
-		httpError(w, `Failed to read request body`, http.StatusInternalServerError, err)
+
+	switch ct := r.Header.Get("Content-Type"); {
+	case ct == "application/json":
+		if _, err := io.Copy(jsonbuf, io.LimitReader(r.Body, MaxPostSize)); err != nil {
+			httpError(w, `Failed to read request body`, http.StatusInternalServerError, err)
+			return
+		}
+		defer r.Body.Close()
+	case strings.HasPrefix(ct, "multipart/"):
+		if err := r.ParseMultipartForm(MaxPostSize); err != nil {
+			httpError(w, `Invalid multipart data`, http.StatusInternalServerError, err)
+			return
+		}
+		vals, ok := r.MultipartForm.Value["payload"]
+		if ok && len(vals) > 0 {
+			if _, err := jsonbuf.WriteString(vals[0]); err != nil {
+				httpError(w, `Failed to read payload`, http.StatusInternalServerError, err)
+				return
+			}
+		}
+		payload.MultipartForm = r.MultipartForm
+	default:
+		httpError(w, `Invalid content-type`, http.StatusInternalServerError, nil)
 		return
 	}
-	defer r.Body.Close()
 	if pdebug.Enabled {
 		pdebug.Printf(`-----> %s`, jsonbuf.Bytes())
 	}
@@ -329,11 +384,18 @@ func httpCreateConference(ctx context.Context, w http.ResponseWriter, r *http.Re
 	var payload model.CreateConferenceRequest
 	jsonbuf := getTransportJSONBuffer()
 	defer releaseTransportJSONBuffer(jsonbuf)
-	if _, err := io.Copy(jsonbuf, io.LimitReader(r.Body, MaxPostSize)); err != nil {
-		httpError(w, `Failed to read request body`, http.StatusInternalServerError, err)
+
+	switch ct := r.Header.Get("Content-Type"); {
+	case ct == "application/json":
+		if _, err := io.Copy(jsonbuf, io.LimitReader(r.Body, MaxPostSize)); err != nil {
+			httpError(w, `Failed to read request body`, http.StatusInternalServerError, err)
+			return
+		}
+		defer r.Body.Close()
+	default:
+		httpError(w, `Invalid content-type`, http.StatusInternalServerError, nil)
 		return
 	}
-	defer r.Body.Close()
 	if pdebug.Enabled {
 		pdebug.Printf(`-----> %s`, jsonbuf.Bytes())
 	}
@@ -363,11 +425,18 @@ func httpCreateConferenceSeries(ctx context.Context, w http.ResponseWriter, r *h
 	var payload model.CreateConferenceSeriesRequest
 	jsonbuf := getTransportJSONBuffer()
 	defer releaseTransportJSONBuffer(jsonbuf)
-	if _, err := io.Copy(jsonbuf, io.LimitReader(r.Body, MaxPostSize)); err != nil {
-		httpError(w, `Failed to read request body`, http.StatusInternalServerError, err)
+
+	switch ct := r.Header.Get("Content-Type"); {
+	case ct == "application/json":
+		if _, err := io.Copy(jsonbuf, io.LimitReader(r.Body, MaxPostSize)); err != nil {
+			httpError(w, `Failed to read request body`, http.StatusInternalServerError, err)
+			return
+		}
+		defer r.Body.Close()
+	default:
+		httpError(w, `Invalid content-type`, http.StatusInternalServerError, nil)
 		return
 	}
-	defer r.Body.Close()
 	if pdebug.Enabled {
 		pdebug.Printf(`-----> %s`, jsonbuf.Bytes())
 	}
@@ -421,11 +490,18 @@ func httpCreateRoom(ctx context.Context, w http.ResponseWriter, r *http.Request)
 	var payload model.CreateRoomRequest
 	jsonbuf := getTransportJSONBuffer()
 	defer releaseTransportJSONBuffer(jsonbuf)
-	if _, err := io.Copy(jsonbuf, io.LimitReader(r.Body, MaxPostSize)); err != nil {
-		httpError(w, `Failed to read request body`, http.StatusInternalServerError, err)
+
+	switch ct := r.Header.Get("Content-Type"); {
+	case ct == "application/json":
+		if _, err := io.Copy(jsonbuf, io.LimitReader(r.Body, MaxPostSize)); err != nil {
+			httpError(w, `Failed to read request body`, http.StatusInternalServerError, err)
+			return
+		}
+		defer r.Body.Close()
+	default:
+		httpError(w, `Invalid content-type`, http.StatusInternalServerError, nil)
 		return
 	}
-	defer r.Body.Close()
 	if pdebug.Enabled {
 		pdebug.Printf(`-----> %s`, jsonbuf.Bytes())
 	}
@@ -455,11 +531,18 @@ func httpCreateSession(ctx context.Context, w http.ResponseWriter, r *http.Reque
 	var payload model.CreateSessionRequest
 	jsonbuf := getTransportJSONBuffer()
 	defer releaseTransportJSONBuffer(jsonbuf)
-	if _, err := io.Copy(jsonbuf, io.LimitReader(r.Body, MaxPostSize)); err != nil {
-		httpError(w, `Failed to read request body`, http.StatusInternalServerError, err)
+
+	switch ct := r.Header.Get("Content-Type"); {
+	case ct == "application/json":
+		if _, err := io.Copy(jsonbuf, io.LimitReader(r.Body, MaxPostSize)); err != nil {
+			httpError(w, `Failed to read request body`, http.StatusInternalServerError, err)
+			return
+		}
+		defer r.Body.Close()
+	default:
+		httpError(w, `Invalid content-type`, http.StatusInternalServerError, nil)
 		return
 	}
-	defer r.Body.Close()
 	if pdebug.Enabled {
 		pdebug.Printf(`-----> %s`, jsonbuf.Bytes())
 	}
@@ -513,11 +596,18 @@ func httpCreateUser(ctx context.Context, w http.ResponseWriter, r *http.Request)
 	var payload model.CreateUserRequest
 	jsonbuf := getTransportJSONBuffer()
 	defer releaseTransportJSONBuffer(jsonbuf)
-	if _, err := io.Copy(jsonbuf, io.LimitReader(r.Body, MaxPostSize)); err != nil {
-		httpError(w, `Failed to read request body`, http.StatusInternalServerError, err)
+
+	switch ct := r.Header.Get("Content-Type"); {
+	case ct == "application/json":
+		if _, err := io.Copy(jsonbuf, io.LimitReader(r.Body, MaxPostSize)); err != nil {
+			httpError(w, `Failed to read request body`, http.StatusInternalServerError, err)
+			return
+		}
+		defer r.Body.Close()
+	default:
+		httpError(w, `Invalid content-type`, http.StatusInternalServerError, nil)
 		return
 	}
-	defer r.Body.Close()
 	if pdebug.Enabled {
 		pdebug.Printf(`-----> %s`, jsonbuf.Bytes())
 	}
@@ -547,11 +637,18 @@ func httpCreateVenue(ctx context.Context, w http.ResponseWriter, r *http.Request
 	var payload model.CreateVenueRequest
 	jsonbuf := getTransportJSONBuffer()
 	defer releaseTransportJSONBuffer(jsonbuf)
-	if _, err := io.Copy(jsonbuf, io.LimitReader(r.Body, MaxPostSize)); err != nil {
-		httpError(w, `Failed to read request body`, http.StatusInternalServerError, err)
+
+	switch ct := r.Header.Get("Content-Type"); {
+	case ct == "application/json":
+		if _, err := io.Copy(jsonbuf, io.LimitReader(r.Body, MaxPostSize)); err != nil {
+			httpError(w, `Failed to read request body`, http.StatusInternalServerError, err)
+			return
+		}
+		defer r.Body.Close()
+	default:
+		httpError(w, `Invalid content-type`, http.StatusInternalServerError, nil)
 		return
 	}
-	defer r.Body.Close()
 	if pdebug.Enabled {
 		pdebug.Printf(`-----> %s`, jsonbuf.Bytes())
 	}
@@ -581,11 +678,18 @@ func httpDeleteConference(ctx context.Context, w http.ResponseWriter, r *http.Re
 	var payload model.DeleteConferenceRequest
 	jsonbuf := getTransportJSONBuffer()
 	defer releaseTransportJSONBuffer(jsonbuf)
-	if _, err := io.Copy(jsonbuf, io.LimitReader(r.Body, MaxPostSize)); err != nil {
-		httpError(w, `Failed to read request body`, http.StatusInternalServerError, err)
+
+	switch ct := r.Header.Get("Content-Type"); {
+	case ct == "application/json":
+		if _, err := io.Copy(jsonbuf, io.LimitReader(r.Body, MaxPostSize)); err != nil {
+			httpError(w, `Failed to read request body`, http.StatusInternalServerError, err)
+			return
+		}
+		defer r.Body.Close()
+	default:
+		httpError(w, `Invalid content-type`, http.StatusInternalServerError, nil)
 		return
 	}
-	defer r.Body.Close()
 	if pdebug.Enabled {
 		pdebug.Printf(`-----> %s`, jsonbuf.Bytes())
 	}
@@ -615,11 +719,18 @@ func httpDeleteConferenceAdmin(ctx context.Context, w http.ResponseWriter, r *ht
 	var payload model.DeleteConferenceAdminRequest
 	jsonbuf := getTransportJSONBuffer()
 	defer releaseTransportJSONBuffer(jsonbuf)
-	if _, err := io.Copy(jsonbuf, io.LimitReader(r.Body, MaxPostSize)); err != nil {
-		httpError(w, `Failed to read request body`, http.StatusInternalServerError, err)
+
+	switch ct := r.Header.Get("Content-Type"); {
+	case ct == "application/json":
+		if _, err := io.Copy(jsonbuf, io.LimitReader(r.Body, MaxPostSize)); err != nil {
+			httpError(w, `Failed to read request body`, http.StatusInternalServerError, err)
+			return
+		}
+		defer r.Body.Close()
+	default:
+		httpError(w, `Invalid content-type`, http.StatusInternalServerError, nil)
 		return
 	}
-	defer r.Body.Close()
 	if pdebug.Enabled {
 		pdebug.Printf(`-----> %s`, jsonbuf.Bytes())
 	}
@@ -649,11 +760,18 @@ func httpDeleteConferenceDates(ctx context.Context, w http.ResponseWriter, r *ht
 	var payload model.DeleteConferenceDatesRequest
 	jsonbuf := getTransportJSONBuffer()
 	defer releaseTransportJSONBuffer(jsonbuf)
-	if _, err := io.Copy(jsonbuf, io.LimitReader(r.Body, MaxPostSize)); err != nil {
-		httpError(w, `Failed to read request body`, http.StatusInternalServerError, err)
+
+	switch ct := r.Header.Get("Content-Type"); {
+	case ct == "application/json":
+		if _, err := io.Copy(jsonbuf, io.LimitReader(r.Body, MaxPostSize)); err != nil {
+			httpError(w, `Failed to read request body`, http.StatusInternalServerError, err)
+			return
+		}
+		defer r.Body.Close()
+	default:
+		httpError(w, `Invalid content-type`, http.StatusInternalServerError, nil)
 		return
 	}
-	defer r.Body.Close()
 	if pdebug.Enabled {
 		pdebug.Printf(`-----> %s`, jsonbuf.Bytes())
 	}
@@ -683,11 +801,18 @@ func httpDeleteConferenceSeries(ctx context.Context, w http.ResponseWriter, r *h
 	var payload model.DeleteConferenceSeriesRequest
 	jsonbuf := getTransportJSONBuffer()
 	defer releaseTransportJSONBuffer(jsonbuf)
-	if _, err := io.Copy(jsonbuf, io.LimitReader(r.Body, MaxPostSize)); err != nil {
-		httpError(w, `Failed to read request body`, http.StatusInternalServerError, err)
+
+	switch ct := r.Header.Get("Content-Type"); {
+	case ct == "application/json":
+		if _, err := io.Copy(jsonbuf, io.LimitReader(r.Body, MaxPostSize)); err != nil {
+			httpError(w, `Failed to read request body`, http.StatusInternalServerError, err)
+			return
+		}
+		defer r.Body.Close()
+	default:
+		httpError(w, `Invalid content-type`, http.StatusInternalServerError, nil)
 		return
 	}
-	defer r.Body.Close()
 	if pdebug.Enabled {
 		pdebug.Printf(`-----> %s`, jsonbuf.Bytes())
 	}
@@ -717,11 +842,18 @@ func httpDeleteConferenceVenue(ctx context.Context, w http.ResponseWriter, r *ht
 	var payload model.DeleteConferenceVenueRequest
 	jsonbuf := getTransportJSONBuffer()
 	defer releaseTransportJSONBuffer(jsonbuf)
-	if _, err := io.Copy(jsonbuf, io.LimitReader(r.Body, MaxPostSize)); err != nil {
-		httpError(w, `Failed to read request body`, http.StatusInternalServerError, err)
+
+	switch ct := r.Header.Get("Content-Type"); {
+	case ct == "application/json":
+		if _, err := io.Copy(jsonbuf, io.LimitReader(r.Body, MaxPostSize)); err != nil {
+			httpError(w, `Failed to read request body`, http.StatusInternalServerError, err)
+			return
+		}
+		defer r.Body.Close()
+	default:
+		httpError(w, `Invalid content-type`, http.StatusInternalServerError, nil)
 		return
 	}
-	defer r.Body.Close()
 	if pdebug.Enabled {
 		pdebug.Printf(`-----> %s`, jsonbuf.Bytes())
 	}
@@ -751,11 +883,18 @@ func httpDeleteFeaturedSpeaker(ctx context.Context, w http.ResponseWriter, r *ht
 	var payload model.DeleteFeaturedSpeakerRequest
 	jsonbuf := getTransportJSONBuffer()
 	defer releaseTransportJSONBuffer(jsonbuf)
-	if _, err := io.Copy(jsonbuf, io.LimitReader(r.Body, MaxPostSize)); err != nil {
-		httpError(w, `Failed to read request body`, http.StatusInternalServerError, err)
+
+	switch ct := r.Header.Get("Content-Type"); {
+	case ct == "application/json":
+		if _, err := io.Copy(jsonbuf, io.LimitReader(r.Body, MaxPostSize)); err != nil {
+			httpError(w, `Failed to read request body`, http.StatusInternalServerError, err)
+			return
+		}
+		defer r.Body.Close()
+	default:
+		httpError(w, `Invalid content-type`, http.StatusInternalServerError, nil)
 		return
 	}
-	defer r.Body.Close()
 	if pdebug.Enabled {
 		pdebug.Printf(`-----> %s`, jsonbuf.Bytes())
 	}
@@ -785,11 +924,18 @@ func httpDeleteQuestion(ctx context.Context, w http.ResponseWriter, r *http.Requ
 	var payload model.DeleteQuestionRequest
 	jsonbuf := getTransportJSONBuffer()
 	defer releaseTransportJSONBuffer(jsonbuf)
-	if _, err := io.Copy(jsonbuf, io.LimitReader(r.Body, MaxPostSize)); err != nil {
-		httpError(w, `Failed to read request body`, http.StatusInternalServerError, err)
+
+	switch ct := r.Header.Get("Content-Type"); {
+	case ct == "application/json":
+		if _, err := io.Copy(jsonbuf, io.LimitReader(r.Body, MaxPostSize)); err != nil {
+			httpError(w, `Failed to read request body`, http.StatusInternalServerError, err)
+			return
+		}
+		defer r.Body.Close()
+	default:
+		httpError(w, `Invalid content-type`, http.StatusInternalServerError, nil)
 		return
 	}
-	defer r.Body.Close()
 	if pdebug.Enabled {
 		pdebug.Printf(`-----> %s`, jsonbuf.Bytes())
 	}
@@ -819,11 +965,18 @@ func httpDeleteRoom(ctx context.Context, w http.ResponseWriter, r *http.Request)
 	var payload model.DeleteRoomRequest
 	jsonbuf := getTransportJSONBuffer()
 	defer releaseTransportJSONBuffer(jsonbuf)
-	if _, err := io.Copy(jsonbuf, io.LimitReader(r.Body, MaxPostSize)); err != nil {
-		httpError(w, `Failed to read request body`, http.StatusInternalServerError, err)
+
+	switch ct := r.Header.Get("Content-Type"); {
+	case ct == "application/json":
+		if _, err := io.Copy(jsonbuf, io.LimitReader(r.Body, MaxPostSize)); err != nil {
+			httpError(w, `Failed to read request body`, http.StatusInternalServerError, err)
+			return
+		}
+		defer r.Body.Close()
+	default:
+		httpError(w, `Invalid content-type`, http.StatusInternalServerError, nil)
 		return
 	}
-	defer r.Body.Close()
 	if pdebug.Enabled {
 		pdebug.Printf(`-----> %s`, jsonbuf.Bytes())
 	}
@@ -853,11 +1006,18 @@ func httpDeleteSession(ctx context.Context, w http.ResponseWriter, r *http.Reque
 	var payload model.DeleteSessionRequest
 	jsonbuf := getTransportJSONBuffer()
 	defer releaseTransportJSONBuffer(jsonbuf)
-	if _, err := io.Copy(jsonbuf, io.LimitReader(r.Body, MaxPostSize)); err != nil {
-		httpError(w, `Failed to read request body`, http.StatusInternalServerError, err)
+
+	switch ct := r.Header.Get("Content-Type"); {
+	case ct == "application/json":
+		if _, err := io.Copy(jsonbuf, io.LimitReader(r.Body, MaxPostSize)); err != nil {
+			httpError(w, `Failed to read request body`, http.StatusInternalServerError, err)
+			return
+		}
+		defer r.Body.Close()
+	default:
+		httpError(w, `Invalid content-type`, http.StatusInternalServerError, nil)
 		return
 	}
-	defer r.Body.Close()
 	if pdebug.Enabled {
 		pdebug.Printf(`-----> %s`, jsonbuf.Bytes())
 	}
@@ -887,11 +1047,18 @@ func httpDeleteSponsor(ctx context.Context, w http.ResponseWriter, r *http.Reque
 	var payload model.DeleteSponsorRequest
 	jsonbuf := getTransportJSONBuffer()
 	defer releaseTransportJSONBuffer(jsonbuf)
-	if _, err := io.Copy(jsonbuf, io.LimitReader(r.Body, MaxPostSize)); err != nil {
-		httpError(w, `Failed to read request body`, http.StatusInternalServerError, err)
+
+	switch ct := r.Header.Get("Content-Type"); {
+	case ct == "application/json":
+		if _, err := io.Copy(jsonbuf, io.LimitReader(r.Body, MaxPostSize)); err != nil {
+			httpError(w, `Failed to read request body`, http.StatusInternalServerError, err)
+			return
+		}
+		defer r.Body.Close()
+	default:
+		httpError(w, `Invalid content-type`, http.StatusInternalServerError, nil)
 		return
 	}
-	defer r.Body.Close()
 	if pdebug.Enabled {
 		pdebug.Printf(`-----> %s`, jsonbuf.Bytes())
 	}
@@ -921,11 +1088,18 @@ func httpDeleteUser(ctx context.Context, w http.ResponseWriter, r *http.Request)
 	var payload model.DeleteUserRequest
 	jsonbuf := getTransportJSONBuffer()
 	defer releaseTransportJSONBuffer(jsonbuf)
-	if _, err := io.Copy(jsonbuf, io.LimitReader(r.Body, MaxPostSize)); err != nil {
-		httpError(w, `Failed to read request body`, http.StatusInternalServerError, err)
+
+	switch ct := r.Header.Get("Content-Type"); {
+	case ct == "application/json":
+		if _, err := io.Copy(jsonbuf, io.LimitReader(r.Body, MaxPostSize)); err != nil {
+			httpError(w, `Failed to read request body`, http.StatusInternalServerError, err)
+			return
+		}
+		defer r.Body.Close()
+	default:
+		httpError(w, `Invalid content-type`, http.StatusInternalServerError, nil)
 		return
 	}
-	defer r.Body.Close()
 	if pdebug.Enabled {
 		pdebug.Printf(`-----> %s`, jsonbuf.Bytes())
 	}
@@ -955,11 +1129,18 @@ func httpDeleteVenue(ctx context.Context, w http.ResponseWriter, r *http.Request
 	var payload model.DeleteVenueRequest
 	jsonbuf := getTransportJSONBuffer()
 	defer releaseTransportJSONBuffer(jsonbuf)
-	if _, err := io.Copy(jsonbuf, io.LimitReader(r.Body, MaxPostSize)); err != nil {
-		httpError(w, `Failed to read request body`, http.StatusInternalServerError, err)
+
+	switch ct := r.Header.Get("Content-Type"); {
+	case ct == "application/json":
+		if _, err := io.Copy(jsonbuf, io.LimitReader(r.Body, MaxPostSize)); err != nil {
+			httpError(w, `Failed to read request body`, http.StatusInternalServerError, err)
+			return
+		}
+		defer r.Body.Close()
+	default:
+		httpError(w, `Invalid content-type`, http.StatusInternalServerError, nil)
 		return
 	}
-	defer r.Body.Close()
 	if pdebug.Enabled {
 		pdebug.Printf(`-----> %s`, jsonbuf.Bytes())
 	}
@@ -1421,11 +1602,18 @@ func httpUpdateConference(ctx context.Context, w http.ResponseWriter, r *http.Re
 	var payload model.UpdateConferenceRequest
 	jsonbuf := getTransportJSONBuffer()
 	defer releaseTransportJSONBuffer(jsonbuf)
-	if _, err := io.Copy(jsonbuf, io.LimitReader(r.Body, MaxPostSize)); err != nil {
-		httpError(w, `Failed to read request body`, http.StatusInternalServerError, err)
+
+	switch ct := r.Header.Get("Content-Type"); {
+	case ct == "application/json":
+		if _, err := io.Copy(jsonbuf, io.LimitReader(r.Body, MaxPostSize)); err != nil {
+			httpError(w, `Failed to read request body`, http.StatusInternalServerError, err)
+			return
+		}
+		defer r.Body.Close()
+	default:
+		httpError(w, `Invalid content-type`, http.StatusInternalServerError, nil)
 		return
 	}
-	defer r.Body.Close()
 	if pdebug.Enabled {
 		pdebug.Printf(`-----> %s`, jsonbuf.Bytes())
 	}
@@ -1455,11 +1643,18 @@ func httpUpdateFeaturedSpeaker(ctx context.Context, w http.ResponseWriter, r *ht
 	var payload model.UpdateFeaturedSpeakerRequest
 	jsonbuf := getTransportJSONBuffer()
 	defer releaseTransportJSONBuffer(jsonbuf)
-	if _, err := io.Copy(jsonbuf, io.LimitReader(r.Body, MaxPostSize)); err != nil {
-		httpError(w, `Failed to read request body`, http.StatusInternalServerError, err)
+
+	switch ct := r.Header.Get("Content-Type"); {
+	case ct == "application/json":
+		if _, err := io.Copy(jsonbuf, io.LimitReader(r.Body, MaxPostSize)); err != nil {
+			httpError(w, `Failed to read request body`, http.StatusInternalServerError, err)
+			return
+		}
+		defer r.Body.Close()
+	default:
+		httpError(w, `Invalid content-type`, http.StatusInternalServerError, nil)
 		return
 	}
-	defer r.Body.Close()
 	if pdebug.Enabled {
 		pdebug.Printf(`-----> %s`, jsonbuf.Bytes())
 	}
@@ -1489,11 +1684,18 @@ func httpUpdateRoom(ctx context.Context, w http.ResponseWriter, r *http.Request)
 	var payload model.UpdateRoomRequest
 	jsonbuf := getTransportJSONBuffer()
 	defer releaseTransportJSONBuffer(jsonbuf)
-	if _, err := io.Copy(jsonbuf, io.LimitReader(r.Body, MaxPostSize)); err != nil {
-		httpError(w, `Failed to read request body`, http.StatusInternalServerError, err)
+
+	switch ct := r.Header.Get("Content-Type"); {
+	case ct == "application/json":
+		if _, err := io.Copy(jsonbuf, io.LimitReader(r.Body, MaxPostSize)); err != nil {
+			httpError(w, `Failed to read request body`, http.StatusInternalServerError, err)
+			return
+		}
+		defer r.Body.Close()
+	default:
+		httpError(w, `Invalid content-type`, http.StatusInternalServerError, nil)
 		return
 	}
-	defer r.Body.Close()
 	if pdebug.Enabled {
 		pdebug.Printf(`-----> %s`, jsonbuf.Bytes())
 	}
@@ -1523,11 +1725,18 @@ func httpUpdateSession(ctx context.Context, w http.ResponseWriter, r *http.Reque
 	var payload model.UpdateSessionRequest
 	jsonbuf := getTransportJSONBuffer()
 	defer releaseTransportJSONBuffer(jsonbuf)
-	if _, err := io.Copy(jsonbuf, io.LimitReader(r.Body, MaxPostSize)); err != nil {
-		httpError(w, `Failed to read request body`, http.StatusInternalServerError, err)
+
+	switch ct := r.Header.Get("Content-Type"); {
+	case ct == "application/json":
+		if _, err := io.Copy(jsonbuf, io.LimitReader(r.Body, MaxPostSize)); err != nil {
+			httpError(w, `Failed to read request body`, http.StatusInternalServerError, err)
+			return
+		}
+		defer r.Body.Close()
+	default:
+		httpError(w, `Invalid content-type`, http.StatusInternalServerError, nil)
 		return
 	}
-	defer r.Body.Close()
 	if pdebug.Enabled {
 		pdebug.Printf(`-----> %s`, jsonbuf.Bytes())
 	}
@@ -1557,11 +1766,18 @@ func httpUpdateSponsor(ctx context.Context, w http.ResponseWriter, r *http.Reque
 	var payload model.UpdateSponsorRequest
 	jsonbuf := getTransportJSONBuffer()
 	defer releaseTransportJSONBuffer(jsonbuf)
-	if _, err := io.Copy(jsonbuf, io.LimitReader(r.Body, MaxPostSize)); err != nil {
-		httpError(w, `Failed to read request body`, http.StatusInternalServerError, err)
+
+	switch ct := r.Header.Get("Content-Type"); {
+	case ct == "application/json":
+		if _, err := io.Copy(jsonbuf, io.LimitReader(r.Body, MaxPostSize)); err != nil {
+			httpError(w, `Failed to read request body`, http.StatusInternalServerError, err)
+			return
+		}
+		defer r.Body.Close()
+	default:
+		httpError(w, `Invalid content-type`, http.StatusInternalServerError, nil)
 		return
 	}
-	defer r.Body.Close()
 	if pdebug.Enabled {
 		pdebug.Printf(`-----> %s`, jsonbuf.Bytes())
 	}
@@ -1591,11 +1807,18 @@ func httpUpdateUser(ctx context.Context, w http.ResponseWriter, r *http.Request)
 	var payload model.UpdateUserRequest
 	jsonbuf := getTransportJSONBuffer()
 	defer releaseTransportJSONBuffer(jsonbuf)
-	if _, err := io.Copy(jsonbuf, io.LimitReader(r.Body, MaxPostSize)); err != nil {
-		httpError(w, `Failed to read request body`, http.StatusInternalServerError, err)
+
+	switch ct := r.Header.Get("Content-Type"); {
+	case ct == "application/json":
+		if _, err := io.Copy(jsonbuf, io.LimitReader(r.Body, MaxPostSize)); err != nil {
+			httpError(w, `Failed to read request body`, http.StatusInternalServerError, err)
+			return
+		}
+		defer r.Body.Close()
+	default:
+		httpError(w, `Invalid content-type`, http.StatusInternalServerError, nil)
 		return
 	}
-	defer r.Body.Close()
 	if pdebug.Enabled {
 		pdebug.Printf(`-----> %s`, jsonbuf.Bytes())
 	}
@@ -1625,11 +1848,18 @@ func httpUpdateVenue(ctx context.Context, w http.ResponseWriter, r *http.Request
 	var payload model.UpdateVenueRequest
 	jsonbuf := getTransportJSONBuffer()
 	defer releaseTransportJSONBuffer(jsonbuf)
-	if _, err := io.Copy(jsonbuf, io.LimitReader(r.Body, MaxPostSize)); err != nil {
-		httpError(w, `Failed to read request body`, http.StatusInternalServerError, err)
+
+	switch ct := r.Header.Get("Content-Type"); {
+	case ct == "application/json":
+		if _, err := io.Copy(jsonbuf, io.LimitReader(r.Body, MaxPostSize)); err != nil {
+			httpError(w, `Failed to read request body`, http.StatusInternalServerError, err)
+			return
+		}
+		defer r.Body.Close()
+	default:
+		httpError(w, `Invalid content-type`, http.StatusInternalServerError, nil)
 		return
 	}
-	defer r.Body.Close()
 	if pdebug.Enabled {
 		pdebug.Printf(`-----> %s`, jsonbuf.Bytes())
 	}
