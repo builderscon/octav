@@ -1,5 +1,5 @@
-hash: 6ad6184ce5a500e1757e299b72fdda537b1bb312b1a42e975880e1cefddcce28
-updated: 2016-07-25T10:39:41.616968901+09:00
+hash: a2bb315d20a4d886cc37aacf92f8a46115bb3e8a3455d619fb012a40438bc518
+updated: 2016-07-27T00:18:57.346922638+09:00
 imports:
 - name: github.com/davecgh/go-spew
   version: 5215b55f46b2b919f50a1df0eaa5886afe4e3b3d
@@ -50,7 +50,7 @@ imports:
   subpackages:
   - assert
 - name: golang.org/x/net
-  version: 4d38db76854b199960801a1734443fd02870d7e1
+  version: 9f2c271364b418388d150f9c12ecbf12794095c1
   subpackages:
   - context
   - context/ctxhttp
@@ -66,42 +66,46 @@ imports:
   - internal
   - jws
   - jwt
+- name: golang.org/x/sync
+  version: 316e794f7b5e3df4e95175a45a5fb8b12f85cb4f
+  subpackages:
+  - errgroup
 - name: golang.org/x/text
-  version: 0a5a09ee4409a616bfa03115120f0bffacdff508
+  version: 784b12aec457d4ae6fb9107ff08748b8ea946b76
   subpackages:
   - language
   - internal/tag
 - name: google.golang.org/api
-  version: 663fefdcec4e1ec9033ba302202321d3bff5fe6d
+  version: 98fb9acd1db48fbee55cb4b285fe229a5b62170b
   subpackages:
+  - option
   - googleapi
   - storage/v1
+  - internal
   - googleapi/internal/uritemplates
   - gensupport
-  - option
   - transport
-  - internal
 - name: google.golang.org/appengine
   version: 267c27e7492265b84fc6719503b14a1e17975d79
   subpackages:
   - urlfetch
-  - socket
   - internal
+  - internal/app_identity
+  - internal/modules
   - internal/urlfetch
-  - internal/socket
   - internal/base
   - internal/datastore
   - internal/log
   - internal/remote_api
-  - internal/app_identity
-  - internal/modules
+  - socket
+  - internal/socket
 - name: google.golang.org/cloud
-  version: 4f1a5ca1c906ba5ff5ff9fba3bee49d526a8d03f
+  version: f3b4fda9d963b307ee3260dbf1620dbe0717f7fa
   subpackages:
   - storage
-  - internal/transport
-  - internal
   - compute/metadata
+  - internal
+  - internal/transport
 - name: google.golang.org/grpc
   version: afdabe5738c5296bd52692f9577185d95bd5e828
   subpackages:
@@ -112,6 +116,6 @@ imports:
   - metadata
   - naming
   - transport
-  - credentials/oauth
   - peer
+  - credentials/oauth
 devImports: []
