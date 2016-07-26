@@ -1,6 +1,9 @@
 package errors
 
-import daverr "github.com/pkg/errors"
+import (
+	"github.com/lestrrat/go-pdebug"
+	daverr "github.com/pkg/errors"
+)
 
 type httpCodeError struct {
 	error
@@ -75,8 +78,9 @@ type finalizationRequiredError interface {
 	FinalizeFunc() func() error
 }
 
-func IsFinalizationRequired(err error) (func() error , bool) {
+func IsFinalizationRequired(err error) (func() error, bool) {
 	for err != nil {
+		pdebug.Printf("%#v", err)
 		if fre, ok := err.(finalizationRequiredError); ok {
 			if cb := fre.FinalizeFunc(); cb != nil {
 				return cb, true
@@ -93,4 +97,3 @@ func IsFinalizationRequired(err error) (func() error , bool) {
 	}
 	return nil, false
 }
-
