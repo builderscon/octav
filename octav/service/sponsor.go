@@ -177,8 +177,17 @@ func (v *Sponsor) CreateFromPayload(ctx context.Context, tx *db.Tx, payload mode
 				src := storagecl.Bucket(bucketName).Object(tmpname)
 				dst := storagecl.Bucket(bucketName).Object(dstname)
 
+				if pdebug.Enabled {
+					pdebug.Printf("Copying %s to %s", tmpname, dstname)
+				}
 				if _, err = src.CopyTo(ctx, dst, nil); err != nil {
 					return errors.Wrapf(err, "failed to copy from '%s' to '%s'", tmpname, dstname)
+				}
+				if pdebug.Enabled {
+					pdebug.Printf("Deleting %s", tmpname)
+				}
+				if err := src.Delete(ctx); err != nil {
+					return errors.Wrapf(err, "failed to delete '%s'", tmpname)
 				}
 				return nil
 			})
