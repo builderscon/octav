@@ -818,7 +818,7 @@ sub delete_featured_speaker {
 
 sub add_sponsor {
     my ($self, $payload) = @_;
-    for my $required (qw(conference_id logo_url1 name url group_name user_id)) {
+    for my $required (qw(conference_id name url group_name user_id)) {
         if (!$payload->{$required}) {
             die qq|property "$required" must be provided|;
         }
