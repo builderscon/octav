@@ -638,7 +638,7 @@ type Sponsor struct {
 	ID                    string `json:"id"`
 	ConferenceID          string `json:"conference_id"`
 	Name                  string `json:"name" l10n:"true"`
-	LogoURL1              string `json:"logo_url1"`
+	LogoURL1              string `json:"logo_url1,omitempty"`
 	LogoURL2              string `json:"logo_url2,omitempty"`
 	LogoURL3              string `json:"logo_url3,omitempty"`
 	URL                   string `json:"url"`
@@ -663,13 +663,12 @@ type ListSponsorsRequest struct {
 }
 
 // +transport
+// Note: Logos can be uploaded as multipart/form-data messages, but is not
+// part of this request payload.
 type AddSponsorRequest struct {
 	ConferenceID  string                `json:"conference_id"`
 	Name          string                `json:"name"`
 	MultipartForm *multipart.Form       `json:"-"`
-	LogoURL1      string                `json:"logo_url1"`
-	LogoURL2      jsval.MaybeString     `json:"logo_url2,omitempty"`
-	LogoURL3      jsval.MaybeString     `json:"logo_url3,omitempty"`
 	URL           string                `json:"url"`
 	GroupName     string                `json:"group_name"`
 	SortOrder     int                   `json:"sort_order"`
@@ -682,11 +681,10 @@ type CreateSponsorRequest struct {
 
 // +transport
 type UpdateSponsorRequest struct {
+	// Note: Logos can be uploaded as multipart/form-data messages, but is not
+	// part of this request payload.
 	ID        string                `json:"id"`
 	Name      jsval.MaybeString     `json:"name,omitempty"`
-	LogoURL1  jsval.MaybeString     `json:"logo_url1,omitempty"`
-	LogoURL2  jsval.MaybeString     `json:"logo_url2,omitempty"`
-	LogoURL3  jsval.MaybeString     `json:"logo_url3,omitempty"`
 	URL       jsval.MaybeString     `json:"url,omitempty"`
 	GroupName jsval.MaybeString     `json:"group_name,omitempty"`
 	SortOrder jsval.MaybeInt        `json:"sort_order,omitempty"`

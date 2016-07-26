@@ -17,7 +17,7 @@ type rawSponsor struct {
 	ID           string `json:"id"`
 	ConferenceID string `json:"conference_id"`
 	Name         string `json:"name" l10n:"true"`
-	LogoURL1     string `json:"logo_url1"`
+	LogoURL1     string `json:"logo_url1,omitempty"`
 	LogoURL2     string `json:"logo_url2,omitempty"`
 	LogoURL3     string `json:"logo_url3,omitempty"`
 	URL          string `json:"url"`
@@ -63,7 +63,9 @@ func (v *Sponsor) FromRow(vdb db.Sponsor) error {
 	v.ID = vdb.EID
 	v.ConferenceID = vdb.ConferenceID
 	v.Name = vdb.Name
-	v.LogoURL1 = vdb.LogoURL1
+	if vdb.LogoURL1.Valid {
+		v.LogoURL1 = vdb.LogoURL1.String
+	}
 	if vdb.LogoURL2.Valid {
 		v.LogoURL2 = vdb.LogoURL2.String
 	}
@@ -80,7 +82,8 @@ func (v *Sponsor) ToRow(vdb *db.Sponsor) error {
 	vdb.EID = v.ID
 	vdb.ConferenceID = v.ConferenceID
 	vdb.Name = v.Name
-	vdb.LogoURL1 = v.LogoURL1
+	vdb.LogoURL1.Valid = true
+	vdb.LogoURL1.String = v.LogoURL1
 	vdb.LogoURL2.Valid = true
 	vdb.LogoURL2.String = v.LogoURL2
 	vdb.LogoURL3.Valid = true

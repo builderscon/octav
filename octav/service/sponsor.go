@@ -45,20 +45,12 @@ func (v *Sponsor) populateRowForCreate(vdb *db.Sponsor, payload model.CreateSpon
 
 	vdb.ConferenceID = payload.ConferenceID
 	vdb.Name = payload.Name
-	vdb.LogoURL1 = payload.LogoURL1
 	vdb.URL = payload.URL
 	vdb.GroupName = payload.GroupName
 	vdb.SortOrder = payload.SortOrder
-
-	if payload.LogoURL2.Valid() {
-		vdb.LogoURL2.Valid = true
-		vdb.LogoURL2.String = payload.LogoURL2.String
-	}
-
-	if payload.LogoURL3.Valid() {
-		vdb.LogoURL3.Valid = true
-		vdb.LogoURL3.String = payload.LogoURL3.String
-	}
+	vdb.LogoURL1 = "http://storage.googleapis.com/media-builderscon-1248/system/nophoto_600.png"
+	vdb.LogoURL2 = "http://storage.googleapis.com/media-builderscon-1248/system/nophoto_400.png"
+	vdb.LogoURL3 = "http://storage.googleapis.com/media-builderscon-1248/system/nophoto_200.png"
 
 	return nil
 }
@@ -72,6 +64,14 @@ func (v *Sponsor) populateRowForUpdate(vdb *db.Sponsor, payload model.UpdateSpon
 		vdb.LogoURL1 = payload.LogoURL1.String
 	}
 
+	if payload.LogoURL2.Valid() {
+		vdb.LogoURL2 = payload.LogoURL2.String
+	}
+
+	if payload.LogoURL2.Valid() {
+		vdb.LogoURL2 = payload.LogoURL2.String
+	}
+
 	if payload.URL.Valid() {
 		vdb.URL = payload.URL.String
 	}
@@ -82,16 +82,6 @@ func (v *Sponsor) populateRowForUpdate(vdb *db.Sponsor, payload model.UpdateSpon
 
 	if payload.SortOrder.Valid() {
 		vdb.SortOrder = int(payload.SortOrder.Int)
-	}
-
-	if payload.LogoURL2.Valid() {
-		vdb.LogoURL2.Valid = true
-		vdb.LogoURL2.String = payload.LogoURL2.String
-	}
-
-	if payload.LogoURL3.Valid() {
-		vdb.LogoURL3.Valid = true
-		vdb.LogoURL3.String = payload.LogoURL3.String
 	}
 
 	return nil
@@ -121,6 +111,7 @@ func (v *Sponsor) CreateFromPayload(ctx context.Context, tx *db.Tx, payload mode
 
 	if payload.MultipartForm != nil && payload.MultipartForm.File != nil {
 		bucketName := v.getMediaBucketName()
+		prefix := "http://storage.googleapis.com/" + bucketName
 		finalizers := make([]func() error, 0, 3)
 		for _, field := range []string{"logo1", "logo2", "logo3"} {
 			fhs := payload.MultipartForm.File[field]
@@ -168,13 +159,21 @@ func (v *Sponsor) CreateFromPayload(ctx context.Context, tx *db.Tx, payload mode
 			if err := wc.Close(); err != nil {
 				return errors.Wrap(err, "failed to write image to temporary location")
 			}
-			thisfield := field
+			dstname := "conferences/" + result.ConferenceID + "/" + result.ID + "-" + field + "." + suffix
+			switch field {
+			case "logo1":
+				payload.LogoURL1.Set(prefix + "/" + dstname)
+			case "logo2":
+				payload.LogoURL2.Set(prefix + "/" + dstname)
+			case "logo3":
+				payload.LogoURL3.Set(prefix + "/" + dstname)
+			}
+
 			finalizers = append(finalizers, func() (err error) {
 				if pdebug.Enabled {
 					g := pdebug.Marker("finalizeFunc for service.Sponsor.CreateFromPayload").BindError(&err)
 					defer g.End()
 				}
-				dstname := result.ConferenceID + "-" + result.ID + "-" + thisfield + "." + suffix
 				src := storagecl.Bucket(bucketName).Object(tmpname)
 				dst := storagecl.Bucket(bucketName).Object(dstname)
 
