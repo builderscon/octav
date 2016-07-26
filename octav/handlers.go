@@ -1079,7 +1079,9 @@ func doAddSponsor(ctx context.Context, w http.ResponseWriter, r *http.Request, p
 
 	var s service.Sponsor
 	var c model.Sponsor
-	if err := s.CreateFromPayload(ctx, tx, payload, &c); !errors.IsIgnorable(err) {
+
+	var createErr error
+	if createErr = s.CreateFromPayload(ctx, tx, payload, &c); !errors.IsIgnorable(createErr) {
 		httpError(w, `AddSponsor`, http.StatusInternalServerError, err)
 		return
 	}
@@ -1090,7 +1092,7 @@ func doAddSponsor(ctx context.Context, w http.ResponseWriter, r *http.Request, p
 	}
 
 	// This extra bit is for finalizing the image upload
-	if cb, ok := errors.IsFinalizationRequired(err); ok {
+	if cb, ok := errors.IsFinalizationRequired(createErr); ok {
 		if err := cb(); err != nil {
 			httpError(w, `CreateConference`, http.StatusInternalServerError, err)
 			return
