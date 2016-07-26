@@ -9,6 +9,7 @@ import (
 	"mime/multipart"
 	"net/http"
 	"net/url"
+	"os"
 	"sync"
 
 	"github.com/builderscon/octav/octav/model"
@@ -21,6 +22,7 @@ const MaxResponseSize = (1 << 20) * 2
 var _ = bytes.MinRead
 var _ = json.Decoder{}
 var _ = multipart.Form{}
+var _ = os.Stdout
 var transportJSONBufferPool = sync.Pool{
 	New: allocTransportJSONBuffer,
 }
@@ -256,7 +258,7 @@ func (c *Client) AddFeaturedSpeaker(in *model.AddFeaturedSpeakerRequest) (ret *m
 	return &payload, nil
 }
 
-func (c *Client) AddSponsor(in *model.AddSponsorRequest) (ret *model.Sponsor, err error) {
+func (c *Client) AddSponsor(in *model.AddSponsorRequest, files map[string]string) (ret *model.Sponsor, err error) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("client.AddSponsor").BindError(&err)
 		defer g.End()
@@ -273,11 +275,22 @@ func (c *Client) AddSponsor(in *model.AddSponsorRequest) (ret *model.Sponsor, er
 		return nil, err
 	}
 	w.WriteField("payload", jsbuf.String())
-	err = w.Close()
-	if err != nil {
-		return nil, err
+	if fn, ok := files["logo"]; ok {
+		fw, err := w.CreateFormFile("logo", fn)
+		if err != nil {
+			return nil, err
+		}
+		f, err := os.Open(fn)
+		if err != nil {
+			return nil, err
+		}
+		defer f.Close()
+		_, err = io.Copy(fw, f)
+		if err != nil {
+			return nil, err
+		}
 	}
-	err = json.NewEncoder(&buf).Encode(in)
+	err = w.Close()
 	if err != nil {
 		return nil, err
 	}

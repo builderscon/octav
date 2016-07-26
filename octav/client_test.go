@@ -372,7 +372,7 @@ func buildersconinc(confID, userID string) *model.AddSponsorRequest {
 }
 
 func testCreateSponsor(ctx *TestCtx, in *model.AddSponsorRequest) (*model.Sponsor, error) {
-	res, err := ctx.HTTPClient.AddSponsor(in)
+	res, err := ctx.HTTPClient.AddSponsor(in, nil)
 	if !assert.NoError(ctx.T, err, "CreateSponsor should succeed") {
 		return nil, err
 	}

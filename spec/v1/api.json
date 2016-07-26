@@ -1263,6 +1263,7 @@
       "href": "/sponsor/add",
       "encType": "multipart/form-data",
       "hsup.wrapper": "httpWithBasicAuth",
+      "hsup.multipartFiles": ["logo"],
       "method": "POST",
       "rel": "create",
       "schema": {
