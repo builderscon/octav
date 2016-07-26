@@ -875,7 +875,7 @@ func init() {
 		SetConstraintMap(M).
 		SetRoot(
 			jsval.Object().
-				Required("conference_id", "group_name", "logo_url1", "name", "url", "user_id").
+				Required("conference_id", "group_name", "name", "url", "user_id").
 				AdditionalProperties(
 					jsval.EmptyConstraint,
 				).
