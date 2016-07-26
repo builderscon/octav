@@ -1079,7 +1079,6 @@ func doAddSponsor(ctx context.Context, w http.ResponseWriter, r *http.Request, p
 
 	var s service.Sponsor
 	var c model.Sponsor
-	s.Storage = service.GoogleStorageClient
 	if err := s.CreateFromPayload(ctx, tx, payload, &c); !errors.IsIgnorable(err) {
 		httpError(w, `AddSponsor`, http.StatusInternalServerError, err)
 		return
@@ -1115,7 +1114,6 @@ func doDeleteSponsor(ctx context.Context, w http.ResponseWriter, r *http.Request
 	defer tx.AutoRollback()
 
 	var s service.Sponsor
-	s.Storage = service.GoogleStorageClient
 	if err := s.DeleteFromPayload(tx, payload); err != nil {
 		httpError(w, `DeleteSponsor`, http.StatusInternalServerError, err)
 		return
@@ -1141,7 +1139,6 @@ func doUpdateSponsor(ctx context.Context, w http.ResponseWriter, r *http.Request
 	defer tx.AutoRollback()
 
 	var s service.Sponsor
-	s.Storage = service.GoogleStorageClient
 	if err := s.UpdateFromPayload(tx, payload); err != nil {
 		httpError(w, `UpdateSponsor`, http.StatusInternalServerError, err)
 		return
@@ -1168,7 +1165,6 @@ func doLookupSponsor(ctx context.Context, w http.ResponseWriter, r *http.Request
 
 	var s service.Sponsor
 	var c model.Sponsor
-	s.Storage = service.GoogleStorageClient
 	if err := s.LookupFromPayload(tx, &c, payload); err != nil {
 		httpError(w, `LookupSponsor`, http.StatusInternalServerError, err)
 		return
@@ -1187,7 +1183,6 @@ func doListSponsors(ctx context.Context, w http.ResponseWriter, r *http.Request,
 
 	var s service.Sponsor
 	var l model.SponsorList
-	s.Storage = service.GoogleStorageClient
 	if err := s.ListFromPayload(tx, &l, payload); err != nil {
 		httpError(w, `ListSponsors`, http.StatusInternalServerError, err)
 		return

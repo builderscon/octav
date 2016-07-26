@@ -5,6 +5,7 @@ import (
 	"io"
 	"mime/multipart"
 	"net/http"
+	"os"
 	"time"
 
 	"github.com/builderscon/octav/octav/db"
@@ -15,6 +16,28 @@ import (
 	"golang.org/x/net/context"
 	"google.golang.org/cloud/storage"
 )
+
+func (v *Sponsor) getMediaBucketName() string {
+	v.bucketOnce.Do(func() {
+		if v.MediaBucketName == "" {
+			v.MediaBucketName = os.Getenv("GOOGLE_STORAGE_MEDIA_BUCKET")
+		}
+	})
+	return v.MediaBucketName
+}
+
+func (v *Sponsor) getStorageClient(ctx context.Context) *storage.Client {
+	v.storageOnce.Do(func() {
+		if v.Storage == nil {
+			client, err := defaultStorageClient(ctx)
+			if err != nil {
+				panic(err.Error())
+			}
+			v.Storage = client
+		}
+	})
+	return v.Storage
+}
 
 func (v *Sponsor) populateRowForCreate(vdb *db.Sponsor, payload model.CreateSponsorRequest) error {
 	vdb.EID = tools.UUID()
@@ -96,6 +119,8 @@ func (v *Sponsor) CreateFromPayload(ctx context.Context, tx *db.Tx, payload mode
 	}
 
 	if payload.MultipartForm != nil && payload.MultipartForm.File != nil {
+		bucketName := v.getMediaBucketName()
+		storagecl := v.getStorageClient(ctx)
 		if fhs := payload.MultipartForm.File["logo"]; len(fhs) > 0 {
 			var imgf multipart.File
 			imgf, err = fhs[0].Open()
@@ -125,7 +150,7 @@ func (v *Sponsor) CreateFromPayload(ctx context.Context, tx *db.Tx, payload mode
 			// Upload this to a temporary location, then upon successful write to DB
 			// rename it to $conference_id/$sponsor_id
 			tmpname := time.Now().UTC().Format("2006-01-02") + "/" + tools.RandomString(64) + "." + suffix
-			wc := v.Storage.Bucket("media").Object(tmpname).NewWriter(ctx)
+			wc := storagecl.Bucket(bucketName).Object(tmpname).NewWriter(ctx)
 			wc.ContentType = imgtyp
 			wc.ACL = []storage.ACLRule{{storage.AllUsers, storage.RoleReader}}
 			if _, err := io.Copy(wc, &imgbuf); err != nil {
@@ -145,8 +170,8 @@ func (v *Sponsor) CreateFromPayload(ctx context.Context, tx *db.Tx, payload mode
 				// Even though there was no error, create an error value that has a
 				// FinalizeFunc() method, so the callee will recognize it
 				err = finalizeFunc(func() error {
-					src := v.Storage.Bucket("media").Object(tmpname)
-					dst := v.Storage.Bucket("media").Object(result.ConferenceID + "-" + result.ID + "." + suffix)
+					src := storagecl.Bucket(bucketName).Object(tmpname)
+					dst := storagecl.Bucket(bucketName).Object(result.ConferenceID + "-" + result.ID + "." + suffix)
 
 					if _, err = src.CopyTo(ctx, dst, nil); err != nil {
 						return err

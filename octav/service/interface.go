@@ -1,6 +1,10 @@
 package service
 
-import "google.golang.org/cloud/storage"
+import (
+	"sync"
+
+	"google.golang.org/cloud/storage"
+)
 
 type ErrInvalidJSONFieldType struct {
 	Field string
@@ -18,7 +22,10 @@ type Question struct{}
 type Room struct{}
 type Session struct{}
 type Sponsor struct {
-	Storage *storage.Client
+	bucketOnce      sync.Once
+	storageOnce     sync.Once
+	MediaBucketName string
+	Storage         *storage.Client
 }
 type User struct{}
 type Venue struct{}

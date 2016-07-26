@@ -1,24 +1,22 @@
 package service
 
 import (
+	"github.com/pkg/errors"
 	"golang.org/x/net/context"
 	"golang.org/x/oauth2/google"
 	"google.golang.org/cloud"
 	"google.golang.org/cloud/storage"
 )
 
-var GoogleStorageClient *storage.Client
-
-func init() {
-	ctx := context.Background()
+func defaultStorageClient(ctx context.Context) (*storage.Client, error) {
 	tokesrc, err := google.DefaultTokenSource(ctx, storage.ScopeFullControl)
 	if err != nil {
-		panic("failed to get default token source for storage client: " + err.Error())
+		return nil, errors.Wrap(err, "failed to get default token source for storage client")
 	}
 
 	client, err := storage.NewClient(ctx, cloud.WithTokenSource(tokesrc))
 	if err != nil {
-		panic("failed to create storage client: " + err.Error())
+		return nil, errors.Wrap(err, "failed to create storage client")
 	}
-	GoogleStorageClient = client
+	return client, nil
 }
