@@ -168,12 +168,13 @@ func (v *Sponsor) CreateFromPayload(ctx context.Context, tx *db.Tx, payload mode
 			if err := wc.Close(); err != nil {
 				return errors.Wrap(err, "failed to write image to temporary location")
 			}
+			thisfield := field
 			finalizers = append(finalizers, func() (err error) {
 				if pdebug.Enabled {
 					g := pdebug.Marker("finalizeFunc for service.Sponsor.CreateFromPayload").BindError(&err)
 					defer g.End()
 				}
-				dstname := result.ConferenceID + "-" + result.ID + "-" + field + "." + suffix
+				dstname := result.ConferenceID + "-" + result.ID + "-" + thisfield + "." + suffix
 				src := storagecl.Bucket(bucketName).Object(tmpname)
 				dst := storagecl.Bucket(bucketName).Object(dstname)
 
