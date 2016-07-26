@@ -1268,7 +1268,7 @@
       "rel": "create",
       "schema": {
         "type": "object",
-        "required": ["conference_id","logo_url1","name","url","group_name","user_id"],
+        "required": ["conference_id","name","url","group_name","user_id"],
         "properties": {
           "conference_id": {"$ref": "#/definitions/uuid"},
           "name": { "$ref": "#/definitions/string_en_not_empty" },
