@@ -163,18 +163,32 @@ func (v *Sponsor) CreateFromPayload(ctx context.Context, tx *db.Tx, payload mode
 			}
 
 			defer func() {
+				if pdebug.Enabled {
+					g := pdebug.Marker("deferred function from service.Sponsor.CreateFromPayload")
+					defer g.End()
+				}
+
 				if err != nil || result == nil {
 					// no op
 					return
 				}
+
+				if pdebug.Enabled {
+					pdebug.Printf("Creating finalizeFunc for this logo upload")
+				}
 				// Even though there was no error, create an error value that has a
 				// FinalizeFunc() method, so the callee will recognize it
-				err = finalizeFunc(func() error {
+				err = finalizeFunc(func() (err error) {
+					if pdebug.Enabled {
+						g := pdebug.Marker("finalizeFunc for service.Sponsor.CreateFromPayload").BindError(&err)
+						defer g.End()
+					}
+					dstname := result.ConferenceID + "-" + result.ID + "." + suffix
 					src := storagecl.Bucket(bucketName).Object(tmpname)
-					dst := storagecl.Bucket(bucketName).Object(result.ConferenceID + "-" + result.ID + "." + suffix)
+					dst := storagecl.Bucket(bucketName).Object(dstname)
 
 					if _, err = src.CopyTo(ctx, dst, nil); err != nil {
-						return err
+						return errors.Wrapf(err, "failed to copy from '%s' to '%s'", tmpname, dstname)
 					}
 					return nil
 				})
