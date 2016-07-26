@@ -121,9 +121,9 @@ func (v *Sponsor) CreateFromPayload(ctx context.Context, tx *db.Tx, payload mode
 
 	if payload.MultipartForm != nil && payload.MultipartForm.File != nil {
 		bucketName := v.getMediaBucketName()
-		storagecl := v.getStorageClient(ctx)
 		finalizers := make([]func() error, 0, 3)
 		for _, field := range []string{"logo1", "logo2", "logo3"} {
+			storagecl := v.getStorageClient(ctx)
 			fhs := payload.MultipartForm.File[field]
 			if len(fhs) == 0 {
 				continue
