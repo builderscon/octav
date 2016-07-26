@@ -123,7 +123,6 @@ func (v *Sponsor) CreateFromPayload(ctx context.Context, tx *db.Tx, payload mode
 		bucketName := v.getMediaBucketName()
 		finalizers := make([]func() error, 0, 3)
 		for _, field := range []string{"logo1", "logo2", "logo3"} {
-			storagecl := v.getStorageClient(ctx)
 			fhs := payload.MultipartForm.File[field]
 			if len(fhs) == 0 {
 				continue
@@ -156,6 +155,7 @@ func (v *Sponsor) CreateFromPayload(ctx context.Context, tx *db.Tx, payload mode
 			// TODO: Avoid Google Storage hardcoding?
 			// Upload this to a temporary location, then upon successful write to DB
 			// rename it to $conference_id/$sponsor_id
+			storagecl := v.getStorageClient(ctx)
 			tmpname := time.Now().UTC().Format("2006-01-02") + "/" + tools.RandomString(64) + "." + suffix
 			wc := storagecl.Bucket(bucketName).Object(tmpname).NewWriter(ctx)
 			wc.ContentType = imgtyp
