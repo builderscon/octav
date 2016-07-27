@@ -690,9 +690,9 @@ type UpdateSponsorRequest struct {
 	UserID        string                `json:"user_id"`
 
 	// These fields are only used internally
-	LogoURL1 string `json:"-"`
-	LogoURL2 string `json:"-"`
-	LogoURL3 string `json:"-"`
+	LogoURL1 jsval.MaybeString `json:"-"`
+	LogoURL2 jsval.MaybeString `json:"-"`
+	LogoURL3 jsval.MaybeString `json:"-"`
 }
 
 // +transport

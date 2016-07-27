@@ -57,19 +57,19 @@ func (v *Sponsor) populateRowForUpdate(vdb *db.Sponsor, payload model.UpdateSpon
 		vdb.Name = payload.Name.String
 	}
 
-	if payload.LogoURL1 != vdb.LogoURL1.String {
+	if payload.LogoURL1.Valid() {
 		vdb.LogoURL1.Valid = true
-		vdb.LogoURL1.String = payload.LogoURL1
+		vdb.LogoURL1.String = payload.LogoURL1.String
 	}
 
-	if payload.LogoURL2 != vdb.LogoURL2.String {
+	if payload.LogoURL2.Valid() {
 		vdb.LogoURL2.Valid = true
-		vdb.LogoURL2.String = payload.LogoURL2
+		vdb.LogoURL2.String = payload.LogoURL2.String
 	}
 
-	if payload.LogoURL3 != vdb.LogoURL3.String {
+	if payload.LogoURL3.Valid() {
 		vdb.LogoURL3.Valid = true
-		vdb.LogoURL3.String = payload.LogoURL3
+		vdb.LogoURL3.String = payload.LogoURL3.String
 	}
 
 	if payload.URL.Valid() {
@@ -103,14 +103,14 @@ func (ff finalizeFunc) Error() string {
 	return "operation needs finalization"
 }
 
-func (v *Sponsor) UploadImagesFromPayload(ctx context.Context, tx *db.Tx, row *db.Sponsor, form *multipart.Form) (err error) {
+func (v *Sponsor) UploadImagesFromPayload(ctx context.Context, tx *db.Tx, row *db.Sponsor, payload *model.UpdateSponsorRequest) (err error) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("service.Sponsor.UploadImagesFromPayload").BindError(&err)
 		defer g.End()
 	}
 
 	// There's nothing to do
-	if form == nil || form.File == nil {
+	if payload.MultipartForm == nil || payload.MultipartForm.File == nil {
 		return nil
 	}
 
@@ -119,7 +119,7 @@ func (v *Sponsor) UploadImagesFromPayload(ctx context.Context, tx *db.Tx, row *d
 
 	finalizers := make([]func() error, 0, 3)
 	for _, field := range []string{"logo1", "logo2", "logo3"} {
-		fhs := form.File[field]
+		fhs := payload.MultipartForm.File[field]
 		if len(fhs) == 0 {
 			continue
 		}
@@ -173,14 +173,11 @@ func (v *Sponsor) UploadImagesFromPayload(ctx context.Context, tx *db.Tx, row *d
 		dstname := "conferences/" + row.ConferenceID + "/" + row.EID + "-" + field + "." + suffix
 		switch field {
 		case "logo1":
-			row.LogoURL1.Valid = true
-			row.LogoURL1.String = prefix + "/" + dstname
+			payload.LogoURL1.Set(prefix + "/" + dstname)
 		case "logo2":
-			row.LogoURL2.Valid = true
-			row.LogoURL2.String = prefix + "/" + dstname
+			payload.LogoURL2.Set(prefix + "/" + dstname)
 		case "logo3":
-			row.LogoURL3.Valid = true
-			row.LogoURL3.String = prefix + "/" + dstname
+			payload.LogoURL3.Set(prefix + "/" + dstname)
 		}
 
 		finalizers = append(finalizers, func() (err error) {
@@ -264,7 +261,7 @@ func (v *Sponsor) UpdateFromPayload(ctx context.Context, tx *db.Tx, payload mode
 	}
 
 	var uploadErr error
-	if uploadErr := v.UploadImagesFromPayload(ctx, tx, &vdb, payload.MultipartForm); !errors.IsIgnorable(uploadErr) {
+	if uploadErr := v.UploadImagesFromPayload(ctx, tx, &vdb, &payload); !errors.IsIgnorable(uploadErr) {
 		return errors.Wrap(uploadErr, "failed to process image uploads")
 	}
 
