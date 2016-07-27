@@ -674,6 +674,11 @@ type AddSponsorRequest struct {
 	SortOrder     int                   `json:"sort_order"`
 	L10N          tools.LocalizedFields `json:"-"`
 	UserID        string                `json:"user_id"`
+
+	// These fields are only used internally
+	LogoURL1 string `json:"-"`
+	LogoURL2 string `json:"-"`
+	LogoURL3 string `json:"-"`
 }
 type CreateSponsorRequest struct {
 	AddSponsorRequest
@@ -690,6 +695,11 @@ type UpdateSponsorRequest struct {
 	SortOrder jsval.MaybeInt        `json:"sort_order,omitempty"`
 	L10N      tools.LocalizedFields `json:"-"`
 	UserID    string                `json:"user_id"`
+
+	// These fields are only used internally
+	LogoURL1 string `json:"-"`
+	LogoURL2 string `json:"-"`
+	LogoURL3 string `json:"-"`
 }
 
 // +transport

@@ -48,9 +48,19 @@ func (v *Sponsor) populateRowForCreate(vdb *db.Sponsor, payload model.CreateSpon
 	vdb.URL = payload.URL
 	vdb.GroupName = payload.GroupName
 	vdb.SortOrder = payload.SortOrder
-	vdb.LogoURL1 = "http://storage.googleapis.com/media-builderscon-1248/system/nophoto_600.png"
-	vdb.LogoURL2 = "http://storage.googleapis.com/media-builderscon-1248/system/nophoto_400.png"
-	vdb.LogoURL3 = "http://storage.googleapis.com/media-builderscon-1248/system/nophoto_200.png"
+
+	if payload.LogoURL1 != "" {
+		vdb.LogoURL1.Valid = true
+		vdb.LogoURL1.String = payload.LogoURL1
+	}
+	if payload.LogoURL2 != "" {
+		vdb.LogoURL2.Valid = true
+		vdb.LogoURL2.String = payload.LogoURL2
+	}
+	if payload.LogoURL3 != "" {
+		vdb.LogoURL3.Valid = true
+		vdb.LogoURL3.String = payload.LogoURL3
+	}
 
 	return nil
 }
@@ -60,16 +70,19 @@ func (v *Sponsor) populateRowForUpdate(vdb *db.Sponsor, payload model.UpdateSpon
 		vdb.Name = payload.Name.String
 	}
 
-	if payload.LogoURL1.Valid() {
-		vdb.LogoURL1 = payload.LogoURL1.String
+	if payload.LogoURL1 != vdb.LogoURL1.String {
+		vdb.LogoURL1.Valid = true
+		vdb.LogoURL1.String = payload.LogoURL1
 	}
 
-	if payload.LogoURL2.Valid() {
-		vdb.LogoURL2 = payload.LogoURL2.String
+	if payload.LogoURL2 != vdb.LogoURL2.String {
+		vdb.LogoURL2.Valid = true
+		vdb.LogoURL2.String = payload.LogoURL2
 	}
 
-	if payload.LogoURL2.Valid() {
-		vdb.LogoURL2 = payload.LogoURL2.String
+	if payload.LogoURL3 != vdb.LogoURL3.String {
+		vdb.LogoURL3.Valid = true
+		vdb.LogoURL3.String = payload.LogoURL3
 	}
 
 	if payload.URL.Valid() {
@@ -106,7 +119,7 @@ func (ff finalizeFunc) Error() string {
 func (v *Sponsor) CreateFromPayload(ctx context.Context, tx *db.Tx, payload model.AddSponsorRequest, result *model.Sponsor) (err error) {
 	su := User{}
 	if err := su.IsConferenceAdministrator(tx, payload.ConferenceID, payload.UserID); err != nil {
-		return errors.Wrap(err, "creating a featured speaker requires conference administrator privilege")
+		return errors.Wrap(err, "creating a featured sponsor requires conference administrator privilege")
 	}
 
 	if payload.MultipartForm != nil && payload.MultipartForm.File != nil {
@@ -162,11 +175,11 @@ func (v *Sponsor) CreateFromPayload(ctx context.Context, tx *db.Tx, payload mode
 			dstname := "conferences/" + result.ConferenceID + "/" + result.ID + "-" + field + "." + suffix
 			switch field {
 			case "logo1":
-				payload.LogoURL1.Set(prefix + "/" + dstname)
+				payload.LogoURL1 = prefix + "/" + dstname
 			case "logo2":
-				payload.LogoURL2.Set(prefix + "/" + dstname)
+				payload.LogoURL2 = prefix + "/" + dstname
 			case "logo3":
-				payload.LogoURL3.Set(prefix + "/" + dstname)
+				payload.LogoURL3 = prefix + "/" + dstname
 			}
 
 			finalizers = append(finalizers, func() (err error) {
@@ -243,21 +256,21 @@ func (v *Sponsor) UpdateFromPayload(tx *db.Tx, payload model.UpdateSponsorReques
 
 	vdb := db.Sponsor{}
 	if err := vdb.LoadByEID(tx, payload.ID); err != nil {
-		return errors.Wrap(err, "failed to load featured speaker from database")
+		return errors.Wrap(err, "failed to load featured sponsor from database")
 	}
 
 	su := User{}
 	if err := su.IsConferenceAdministrator(tx, vdb.ConferenceID, payload.UserID); err != nil {
-		return errors.Wrap(err, "updating a featured speaker requires conference administrator privilege")
+		return errors.Wrap(err, "updating a featured sponsor requires conference administrator privilege")
 	}
 
-	return errors.Wrap(v.Update(tx, &vdb, payload), "failed to load featured speaker from database")
+	return errors.Wrap(v.Update(tx, &vdb, payload), "failed to load featured sponsor from database")
 }
 
 func (v *Sponsor) DeleteFromPayload(tx *db.Tx, payload model.DeleteSponsorRequest) error {
 	var m db.Sponsor
 	if err := m.LoadByEID(tx, payload.ID); err != nil {
-		return errors.Wrap(err, "failed to load featured speaker from database")
+		return errors.Wrap(err, "failed to load featured sponsor from database")
 	}
 
 	su := User{}
@@ -271,7 +284,7 @@ func (v *Sponsor) DeleteFromPayload(tx *db.Tx, payload model.DeleteSponsorReques
 func (v *Sponsor) ListFromPayload(tx *db.Tx, result *model.SponsorList, payload model.ListSponsorsRequest) error {
 	var vdbl db.SponsorList
 	if err := vdbl.LoadByConferenceSinceEID(tx, payload.ConferenceID, payload.Since.String, int(payload.Limit.Int)); err != nil {
-		return errors.Wrap(err, "failed to load featured speakers from database")
+		return errors.Wrap(err, "failed to load featured sponsor from database")
 	}
 
 	l := make(model.SponsorList, len(vdbl))
@@ -289,12 +302,24 @@ func (v *Sponsor) ListFromPayload(tx *db.Tx, result *model.SponsorList, payload 
 	return nil
 }
 
-func (v *Sponsor) Decorate(tx *db.Tx, speaker *model.Sponsor, lang string) error {
+func (v *Sponsor) Decorate(tx *db.Tx, sponsor *model.Sponsor, lang string) error {
+	if sponsor.LogoURL1 == "" {
+		sponsor.LogoURL1 = "http://storage.googleapis.com/media-builderscon-1248/system/nophoto_600.png"
+	}
+
+	if sponsor.LogoURL2 == "" {
+		sponsor.LogoURL2 = "http://storage.googleapis.com/media-builderscon-1248/system/nophoto_400.png"
+	}
+
+	if sponsor.LogoURL3 == "" {
+		sponsor.LogoURL3 = "http://storage.googleapis.com/media-builderscon-1248/system/nophoto_200.png"
+	}
+
 	if lang == "" {
 		return nil
 	}
 
-	if err := v.ReplaceL10NStrings(tx, speaker, lang); err != nil {
+	if err := v.ReplaceL10NStrings(tx, sponsor, lang); err != nil {
 		return errors.Wrap(err, "failed to replace L10N strings")
 	}
 
