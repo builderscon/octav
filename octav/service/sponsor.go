@@ -305,7 +305,7 @@ func (v *Sponsor) DeleteFromPayload(ctx context.Context, tx *db.Tx, payload mode
 
 	// For (current) testing purposes, we don't want to actually
 	// access the Google storage backend.
-	if inTesting {
+	if InTesting {
 		return
 	}
 

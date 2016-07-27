@@ -7,6 +7,7 @@ import (
 
 	"github.com/builderscon/octav/octav/db"
 	"github.com/builderscon/octav/octav/model"
+	"github.com/builderscon/octav/octav/service"
 	"github.com/builderscon/octav/octav/tools"
 	"github.com/lestrrat/go-pdebug"
 	"github.com/pkg/errors"
@@ -17,6 +18,7 @@ func TestMain(m *testing.M) {
 	flag.Parse()
 	// We don't call m.Run() directly here so that we can
 	// make sure that defer() gets fired.
+	service.InTesting = true
 	os.Exit(setupAndRun(m))
 }
 
@@ -159,5 +161,3 @@ func testCreateConference(ctx *TestCtx, in *model.CreateConferenceRequest, fail 
 	}
 	return res, nil
 }
-
-

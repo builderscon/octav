@@ -6,9 +6,9 @@ import (
 	"google.golang.org/cloud/storage"
 )
 
-// Testing grudingly exists to tell if we are running under
+// InTesting grudingly exists to tell if we are running under
 // testing mode.
-var inTesting bool
+var InTesting bool
 
 type ErrInvalidJSONFieldType struct {
 	Field string

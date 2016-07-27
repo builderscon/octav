@@ -1,5 +1,5 @@
 package service
 
 func init() {
-	inTesting = true
+	InTesting = true
 }
