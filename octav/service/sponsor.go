@@ -303,6 +303,12 @@ func (v *Sponsor) DeleteFromPayload(ctx context.Context, tx *db.Tx, payload mode
 		return errors.Wrap(err, "failed to delete from database")
 	}
 
+	// For (current) testing purposes, we don't want to actually
+	// access the Google storage backend.
+	if inTesting {
+		return
+	}
+
 	// This operation need not necessarily succeed. Spawn goroutines and deal with
 	// it asynchronously
 	go func() {
