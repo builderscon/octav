@@ -223,7 +223,7 @@ CREATE TABLE sponsors (
     eid CHAR(64) CHARACTER SET latin1 NOT NULL,
     conference_id CHAR(64) CHARACTER SET latin1 NOT NULL, -- sponsors are bound to a conference.
     name TEXT NOT NULL,
-    logo_url1 TEXT NOT NULL, -- it is up to the consumer to choose which logo to use
+    logo_url1 TEXT, -- it is up to the consumer to choose which logo to use
     logo_url2 TEXT,
     logo_url3 TEXT,
     url TEXT NOT NULL,

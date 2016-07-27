@@ -1080,23 +1080,14 @@ func doAddSponsor(ctx context.Context, w http.ResponseWriter, r *http.Request, p
 	var s service.Sponsor
 	var c model.Sponsor
 
-	var createErr error
-	if createErr = s.CreateFromPayload(ctx, tx, payload, &c); !errors.IsIgnorable(createErr) {
-		httpError(w, `AddSponsor`, http.StatusInternalServerError, err)
+	if err := s.CreateFromPayload(ctx, tx, payload, &c); err != nil {
+		httpError(w, `Faild to create sponsor from payload`, http.StatusInternalServerError, err)
 		return
 	}
 
 	if err := tx.Commit(); err != nil {
-		httpError(w, `CreateConference`, http.StatusInternalServerError, err)
+		httpError(w, `Failed to commit transaction`, http.StatusInternalServerError, err)
 		return
-	}
-
-	// This extra bit is for finalizing the image upload
-	if cb, ok := errors.IsFinalizationRequired(createErr); ok {
-		if err := cb(); err != nil {
-			httpError(w, `CreateConference`, http.StatusInternalServerError, err)
-			return
-		}
 	}
 
 	httpJSON(w, c)
@@ -1116,7 +1107,7 @@ func doDeleteSponsor(ctx context.Context, w http.ResponseWriter, r *http.Request
 	defer tx.AutoRollback()
 
 	var s service.Sponsor
-	if err := s.DeleteFromPayload(tx, payload); err != nil {
+	if err := s.DeleteFromPayload(ctx, tx, payload); err != nil {
 		httpError(w, `DeleteSponsor`, http.StatusInternalServerError, err)
 		return
 	}
@@ -1141,13 +1132,23 @@ func doUpdateSponsor(ctx context.Context, w http.ResponseWriter, r *http.Request
 	defer tx.AutoRollback()
 
 	var s service.Sponsor
-	if err := s.UpdateFromPayload(tx, payload); err != nil {
-		httpError(w, `UpdateSponsor`, http.StatusInternalServerError, err)
+	updateErr := s.UpdateFromPayload(ctx, tx, payload)
+	if !errors.IsIgnorable(updateErr) {
+		httpError(w, `Failed to update data from payload`, http.StatusInternalServerError, updateErr)
 		return
 	}
+
 	if err := tx.Commit(); err != nil {
-		httpError(w, `UpdateSponsor`, http.StatusInternalServerError, err)
+		httpError(w, `Failed to commit data`, http.StatusInternalServerError, err)
 		return
+	}
+
+	// This extra bit is for finalizing the image upload
+	if cb, ok := errors.IsFinalizationRequired(updateErr); ok {
+		if err := cb(); err != nil {
+			httpError(w, `Failed to finalize image uploads`, http.StatusInternalServerError, err)
+			return
+		}
 	}
 
 	httpJSON(w, map[string]string{"status": "success"})

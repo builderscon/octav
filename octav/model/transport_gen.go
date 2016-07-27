@@ -4670,13 +4670,6 @@ func (r AddSponsorRequest) collectMarshalData() map[string]interface{} {
 	m := make(map[string]interface{})
 	m["conference_id"] = r.ConferenceID
 	m["name"] = r.Name
-	m["logo_url1"] = r.LogoURL1
-	if r.LogoURL2.Valid() {
-		m["logo_url2"] = r.LogoURL2.Value()
-	}
-	if r.LogoURL3.Valid() {
-		m["logo_url3"] = r.LogoURL3.Value()
-	}
 	m["url"] = r.URL
 	m["group_name"] = r.GroupName
 	m["sort_order"] = r.SortOrder
@@ -4729,27 +4722,6 @@ func (r *AddSponsorRequest) Populate(m map[string]interface{}) error {
 			return ErrInvalidJSONFieldType{Field: "name"}
 		}
 	}
-	if jv, ok := m["logo_url1"]; ok {
-		switch jv.(type) {
-		case string:
-			r.LogoURL1 = jv.(string)
-			delete(m, "logo_url1")
-		default:
-			return ErrInvalidJSONFieldType{Field: "logo_url1"}
-		}
-	}
-	if jv, ok := m["logo_url2"]; ok {
-		if err := r.LogoURL2.Set(jv); err != nil {
-			return errors.New("set field LogoURL2 failed: " + err.Error())
-		}
-		delete(m, "logo_url2")
-	}
-	if jv, ok := m["logo_url3"]; ok {
-		if err := r.LogoURL3.Set(jv); err != nil {
-			return errors.New("set field LogoURL3 failed: " + err.Error())
-		}
-		delete(m, "logo_url3")
-	}
 	if jv, ok := m["url"]; ok {
 		switch jv.(type) {
 		case string:
@@ -4786,7 +4758,7 @@ func (r *AddSponsorRequest) Populate(m map[string]interface{}) error {
 			return ErrInvalidJSONFieldType{Field: "user_id"}
 		}
 	}
-	if err := tools.ExtractL10NFields(m, &r.L10N, []string{"conference_id", "name", "logo_url1", "logo_url2", "logo_url3", "url", "group_name", "sort_order", "user_id"}); err != nil {
+	if err := tools.ExtractL10NFields(m, &r.L10N, []string{"conference_id", "name", "url", "group_name", "sort_order", "user_id"}); err != nil {
 		return err
 	}
 	return nil
@@ -4794,7 +4766,7 @@ func (r *AddSponsorRequest) Populate(m map[string]interface{}) error {
 
 func (r *AddSponsorRequest) GetPropNames() ([]string, error) {
 	l, _ := r.L10N.GetPropNames()
-	return append(l, "conference_id", "name", "logo_url1", "logo_url2", "logo_url3", "url", "group_name", "sort_order", "user_id"), nil
+	return append(l, "conference_id", "name", "url", "group_name", "sort_order", "user_id"), nil
 }
 
 func (r *AddSponsorRequest) SetPropValue(s string, v interface{}) error {
@@ -4809,15 +4781,6 @@ func (r *AddSponsorRequest) SetPropValue(s string, v interface{}) error {
 			r.Name = jv
 			return nil
 		}
-	case "logo_url1":
-		if jv, ok := v.(string); ok {
-			r.LogoURL1 = jv
-			return nil
-		}
-	case "logo_url2":
-		return r.LogoURL2.Set(v)
-	case "logo_url3":
-		return r.LogoURL3.Set(v)
 	case "url":
 		if jv, ok := v.(string); ok {
 			r.URL = jv
@@ -4849,15 +4812,6 @@ func (r UpdateSponsorRequest) collectMarshalData() map[string]interface{} {
 	m["id"] = r.ID
 	if r.Name.Valid() {
 		m["name"] = r.Name.Value()
-	}
-	if r.LogoURL1.Valid() {
-		m["logo_url1"] = r.LogoURL1.Value()
-	}
-	if r.LogoURL2.Valid() {
-		m["logo_url2"] = r.LogoURL2.Value()
-	}
-	if r.LogoURL3.Valid() {
-		m["logo_url3"] = r.LogoURL3.Value()
 	}
 	if r.URL.Valid() {
 		m["url"] = r.URL.Value()
@@ -4914,24 +4868,6 @@ func (r *UpdateSponsorRequest) Populate(m map[string]interface{}) error {
 		}
 		delete(m, "name")
 	}
-	if jv, ok := m["logo_url1"]; ok {
-		if err := r.LogoURL1.Set(jv); err != nil {
-			return errors.New("set field LogoURL1 failed: " + err.Error())
-		}
-		delete(m, "logo_url1")
-	}
-	if jv, ok := m["logo_url2"]; ok {
-		if err := r.LogoURL2.Set(jv); err != nil {
-			return errors.New("set field LogoURL2 failed: " + err.Error())
-		}
-		delete(m, "logo_url2")
-	}
-	if jv, ok := m["logo_url3"]; ok {
-		if err := r.LogoURL3.Set(jv); err != nil {
-			return errors.New("set field LogoURL3 failed: " + err.Error())
-		}
-		delete(m, "logo_url3")
-	}
 	if jv, ok := m["url"]; ok {
 		if err := r.URL.Set(jv); err != nil {
 			return errors.New("set field URL failed: " + err.Error())
@@ -4959,7 +4895,7 @@ func (r *UpdateSponsorRequest) Populate(m map[string]interface{}) error {
 			return ErrInvalidJSONFieldType{Field: "user_id"}
 		}
 	}
-	if err := tools.ExtractL10NFields(m, &r.L10N, []string{"id", "name", "logo_url1", "logo_url2", "logo_url3", "url", "group_name", "sort_order", "user_id"}); err != nil {
+	if err := tools.ExtractL10NFields(m, &r.L10N, []string{"id", "name", "url", "group_name", "sort_order", "user_id"}); err != nil {
 		return err
 	}
 	return nil
@@ -4967,7 +4903,7 @@ func (r *UpdateSponsorRequest) Populate(m map[string]interface{}) error {
 
 func (r *UpdateSponsorRequest) GetPropNames() ([]string, error) {
 	l, _ := r.L10N.GetPropNames()
-	return append(l, "id", "name", "logo_url1", "logo_url2", "logo_url3", "url", "group_name", "sort_order", "user_id"), nil
+	return append(l, "id", "name", "url", "group_name", "sort_order", "user_id"), nil
 }
 
 func (r *UpdateSponsorRequest) SetPropValue(s string, v interface{}) error {
@@ -4979,12 +4915,6 @@ func (r *UpdateSponsorRequest) SetPropValue(s string, v interface{}) error {
 		}
 	case "name":
 		return r.Name.Set(v)
-	case "logo_url1":
-		return r.LogoURL1.Set(v)
-	case "logo_url2":
-		return r.LogoURL2.Set(v)
-	case "logo_url3":
-		return r.LogoURL3.Set(v)
 	case "url":
 		return r.URL.Set(v)
 	case "group_name":

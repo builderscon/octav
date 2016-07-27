@@ -9,10 +9,10 @@ import (
 	"time"
 
 	"github.com/builderscon/octav/octav/db"
+	"github.com/builderscon/octav/octav/internal/errors"
 	"github.com/builderscon/octav/octav/model"
 	"github.com/builderscon/octav/octav/tools"
 	"github.com/lestrrat/go-pdebug"
-	"github.com/pkg/errors"
 	"golang.org/x/net/context"
 	"golang.org/x/sync/errgroup"
 	"google.golang.org/cloud/storage"
@@ -45,20 +45,9 @@ func (v *Sponsor) populateRowForCreate(vdb *db.Sponsor, payload model.CreateSpon
 
 	vdb.ConferenceID = payload.ConferenceID
 	vdb.Name = payload.Name
-	vdb.LogoURL1 = payload.LogoURL1
 	vdb.URL = payload.URL
 	vdb.GroupName = payload.GroupName
 	vdb.SortOrder = payload.SortOrder
-
-	if payload.LogoURL2.Valid() {
-		vdb.LogoURL2.Valid = true
-		vdb.LogoURL2.String = payload.LogoURL2.String
-	}
-
-	if payload.LogoURL3.Valid() {
-		vdb.LogoURL3.Valid = true
-		vdb.LogoURL3.String = payload.LogoURL3.String
-	}
 
 	return nil
 }
@@ -69,7 +58,18 @@ func (v *Sponsor) populateRowForUpdate(vdb *db.Sponsor, payload model.UpdateSpon
 	}
 
 	if payload.LogoURL1.Valid() {
-		vdb.LogoURL1 = payload.LogoURL1.String
+		vdb.LogoURL1.Valid = true
+		vdb.LogoURL1.String = payload.LogoURL1.String
+	}
+
+	if payload.LogoURL2.Valid() {
+		vdb.LogoURL2.Valid = true
+		vdb.LogoURL2.String = payload.LogoURL2.String
+	}
+
+	if payload.LogoURL3.Valid() {
+		vdb.LogoURL3.Valid = true
+		vdb.LogoURL3.String = payload.LogoURL3.String
 	}
 
 	if payload.URL.Valid() {
@@ -82,16 +82,6 @@ func (v *Sponsor) populateRowForUpdate(vdb *db.Sponsor, payload model.UpdateSpon
 
 	if payload.SortOrder.Valid() {
 		vdb.SortOrder = int(payload.SortOrder.Int)
-	}
-
-	if payload.LogoURL2.Valid() {
-		vdb.LogoURL2.Valid = true
-		vdb.LogoURL2.String = payload.LogoURL2.String
-	}
-
-	if payload.LogoURL3.Valid() {
-		vdb.LogoURL3.Valid = true
-		vdb.LogoURL3.String = payload.LogoURL3.String
 	}
 
 	return nil
@@ -113,113 +103,138 @@ func (ff finalizeFunc) Error() string {
 	return "operation needs finalization"
 }
 
-func (v *Sponsor) CreateFromPayload(ctx context.Context, tx *db.Tx, payload model.AddSponsorRequest, result *model.Sponsor) (err error) {
-	su := User{}
-	if err := su.IsConferenceAdministrator(tx, payload.ConferenceID, payload.UserID); err != nil {
-		return errors.Wrap(err, "creating a featured speaker requires conference administrator privilege")
+func (v *Sponsor) UploadImagesFromPayload(ctx context.Context, tx *db.Tx, row *db.Sponsor, payload *model.UpdateSponsorRequest) (err error) {
+	if pdebug.Enabled {
+		g := pdebug.Marker("service.Sponsor.UploadImagesFromPayload").BindError(&err)
+		defer g.End()
 	}
 
-	if payload.MultipartForm != nil && payload.MultipartForm.File != nil {
-		bucketName := v.getMediaBucketName()
-		finalizers := make([]func() error, 0, 3)
-		for _, field := range []string{"logo1", "logo2", "logo3"} {
-			fhs := payload.MultipartForm.File[field]
-			if len(fhs) == 0 {
-				continue
+	// There's nothing to do
+	if payload.MultipartForm == nil || payload.MultipartForm.File == nil {
+		return nil
+	}
+
+	bucketName := v.getMediaBucketName()
+	prefix := "http://storage.googleapis.com/" + bucketName
+
+	finalizers := make([]func() error, 0, 3)
+	for _, field := range []string{"logo1", "logo2", "logo3"} {
+		fhs := payload.MultipartForm.File[field]
+		if len(fhs) == 0 {
+			continue
+		}
+
+		var imgf multipart.File
+		imgf, err = fhs[0].Open()
+		if err != nil {
+			return errors.Wrap(err, "failed to open logo file from multipart form")
+		}
+
+		var imgbuf bytes.Buffer
+		if _, err := io.Copy(&imgbuf, imgf); err != nil {
+			return errors.Wrap(err, "failed to copy logo image data to memory")
+		}
+		imgtyp := http.DetectContentType(imgbuf.Bytes())
+
+		// Only work with image/png or image/jpeg
+		var suffix string
+		switch imgtyp {
+		case "image/png":
+			suffix = "png"
+		case "image/jpeg":
+			suffix = "jpeg"
+		default:
+			return errors.Errorf("Unsupported image type %s", imgtyp)
+		}
+
+		// TODO: Validate the image
+		// TODO: Avoid Google Storage hardcoding?
+		// Upload this to a temporary location, then upon successful write to DB
+		// rename it to $conference_id/$sponsor_id
+		storagecl := v.getStorageClient(ctx)
+		tmpname := time.Now().UTC().Format("2006-01-02") + "/" + tools.RandomString(64) + "." + suffix
+		wc := storagecl.Bucket(bucketName).Object(tmpname).NewWriter(ctx)
+		wc.ContentType = imgtyp
+		wc.ACL = []storage.ACLRule{{storage.AllUsers, storage.RoleReader}}
+
+		if pdebug.Enabled {
+			pdebug.Printf("Writing '%s' to %s", field, tmpname)
+		}
+
+		if _, err := io.Copy(wc, &imgbuf); err != nil {
+			return errors.Wrap(err, "failed to write image to temporary location")
+		}
+		// Note: DO NOT defer wc.Close(), as it's part of the write operation.
+		// If wc.Close() does not complete w/o errors. the write failed
+		if err := wc.Close(); err != nil {
+			return errors.Wrap(err, "failed to write image to temporary location")
+		}
+
+		dstname := "conferences/" + row.ConferenceID + "/" + row.EID + "-" + field + "." + suffix
+		switch field {
+		case "logo1":
+			payload.LogoURL1.Set(prefix + "/" + dstname)
+		case "logo2":
+			payload.LogoURL2.Set(prefix + "/" + dstname)
+		case "logo3":
+			payload.LogoURL3.Set(prefix + "/" + dstname)
+		}
+
+		finalizers = append(finalizers, func() (err error) {
+			if pdebug.Enabled {
+				g := pdebug.Marker("Finalizer for service.Sponsor.UploadImagesFromPayload").BindError(&err)
+				defer g.End()
 			}
 
-			var imgf multipart.File
-			imgf, err = fhs[0].Open()
+			src := storagecl.Bucket(bucketName).Object(tmpname)
+			dst := storagecl.Bucket(bucketName).Object(dstname)
+
+			if pdebug.Enabled {
+				pdebug.Printf("Copying %s to %s", tmpname, dstname)
+			}
+
+			attrs, err := src.Attrs(ctx)
 			if err != nil {
-				return errors.Wrap(err, "failed to open logo file from multipart form")
+				return errors.Wrapf(err, "failed to fetch object attrs for '%s'", tmpname)
 			}
 
-			var imgbuf bytes.Buffer
-			if _, err := io.Copy(&imgbuf, imgf); err != nil {
-				return errors.Wrap(err, "failed to copy logo image data to memory")
-			}
-			imgtyp := http.DetectContentType(imgbuf.Bytes())
-
-			// Only work with image/png or image/jpeg
-			var suffix string
-			switch imgtyp {
-			case "image/png":
-				suffix = "png"
-			case "image/jpeg":
-				suffix = "jpeg"
-			default:
-				return errors.Errorf("Unsupported image type %s", imgtyp)
+			if _, err = src.CopyTo(ctx, dst, attrs); err != nil {
+				return errors.Wrapf(err, "failed to copy from '%s' to '%s'", tmpname, dstname)
 			}
 
-			// TODO: Validate the image
-			// TODO: Avoid Google Storage hardcoding?
-			// Upload this to a temporary location, then upon successful write to DB
-			// rename it to $conference_id/$sponsor_id
-			storagecl := v.getStorageClient(ctx)
-			tmpname := time.Now().UTC().Format("2006-01-02") + "/" + tools.RandomString(64) + "." + suffix
-			wc := storagecl.Bucket(bucketName).Object(tmpname).NewWriter(ctx)
-			wc.ContentType = imgtyp
-			wc.ACL = []storage.ACLRule{{storage.AllUsers, storage.RoleReader}}
-			if _, err := io.Copy(wc, &imgbuf); err != nil {
-				return errors.Wrap(err, "failed to write image to temporary location")
+			if pdebug.Enabled {
+				pdebug.Printf("Deleting %s", tmpname)
 			}
-			// Note: DO NOT defer wc.Close(), as it's part of the write operation.
-			// If wc.Close() does not complete w/o errors. the write failed
-			if err := wc.Close(); err != nil {
-				return errors.Wrap(err, "failed to write image to temporary location")
+			if err := src.Delete(ctx); err != nil {
+				return errors.Wrapf(err, "failed to delete '%s'", tmpname)
 			}
-			thisfield := field
-			finalizers = append(finalizers, func() (err error) {
-				if pdebug.Enabled {
-					g := pdebug.Marker("finalizeFunc for service.Sponsor.CreateFromPayload").BindError(&err)
-					defer g.End()
-				}
-				dstname := result.ConferenceID + "-" + result.ID + "-" + thisfield + "." + suffix
-				src := storagecl.Bucket(bucketName).Object(tmpname)
-				dst := storagecl.Bucket(bucketName).Object(dstname)
 
-				if pdebug.Enabled {
-					pdebug.Printf("Copying %s to %s", tmpname, dstname)
-				}
-				if _, err = src.CopyTo(ctx, dst, nil); err != nil {
-					return errors.Wrapf(err, "failed to copy from '%s' to '%s'", tmpname, dstname)
-				}
-				if pdebug.Enabled {
-					pdebug.Printf("Deleting %s", tmpname)
-				}
-				if err := src.Delete(ctx); err != nil {
-					return errors.Wrapf(err, "failed to delete '%s'", tmpname)
-				}
-				return nil
-			})
+			return nil
+		})
+	}
+
+	if len(finalizers) == 0 {
+		return nil
+	}
+
+	return finalizeFunc(func() error {
+		var g errgroup.Group
+		for _, f := range finalizers {
+			g.Go(f)
 		}
+		return g.Wait()
+	})
+}
 
-		if len(finalizers) > 0 {
-			defer func() {
-				if pdebug.Enabled {
-					g := pdebug.Marker("deferred function from service.Sponsor.CreateFromPayload")
-					defer g.End()
-				}
+func (v *Sponsor) CreateFromPayload(ctx context.Context, tx *db.Tx, payload model.AddSponsorRequest, result *model.Sponsor) (err error) {
+	if pdebug.Enabled {
+		g := pdebug.Marker("service.Sponsor.CreateFromPayload").BindError(&err)
+		defer g.End()
+	}
 
-				if err != nil || result == nil {
-					// no op
-					return
-				}
-
-				if pdebug.Enabled {
-					pdebug.Printf("Creating finalizeFunc for this logo upload")
-				}
-				// Even though there was no error, create an error value that has a
-				// FinalizeFunc() method, so the callee will recognize it
-				err = finalizeFunc(func() error {
-					var g errgroup.Group
-					for _, f := range finalizers {
-						g.Go(f)
-					}
-					return g.Wait()
-				})
-			}()
-		}
+	su := User{}
+	if err := su.IsConferenceAdministrator(tx, payload.ConferenceID, payload.UserID); err != nil {
+		return errors.Wrap(err, "creating a featured sponsor requires conference administrator privilege")
 	}
 
 	vdb := db.Sponsor{}
@@ -236,7 +251,7 @@ func (v *Sponsor) CreateFromPayload(ctx context.Context, tx *db.Tx, payload mode
 	return nil
 }
 
-func (v *Sponsor) UpdateFromPayload(tx *db.Tx, payload model.UpdateSponsorRequest) (err error) {
+func (v *Sponsor) UpdateFromPayload(ctx context.Context, tx *db.Tx, payload model.UpdateSponsorRequest) (err error) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("service.Sponsor.UpdateFromPayload").BindError(&err)
 		defer g.End()
@@ -244,21 +259,39 @@ func (v *Sponsor) UpdateFromPayload(tx *db.Tx, payload model.UpdateSponsorReques
 
 	vdb := db.Sponsor{}
 	if err := vdb.LoadByEID(tx, payload.ID); err != nil {
-		return errors.Wrap(err, "failed to load featured speaker from database")
+		return errors.Wrap(err, "failed to load featured sponsor from database")
 	}
 
 	su := User{}
 	if err := su.IsConferenceAdministrator(tx, vdb.ConferenceID, payload.UserID); err != nil {
-		return errors.Wrap(err, "updating a featured speaker requires conference administrator privilege")
+		return errors.Wrap(err, "updating a featured sponsor requires conference administrator privilege")
 	}
 
-	return errors.Wrap(v.Update(tx, &vdb, payload), "failed to load featured speaker from database")
+	var uploadErr error
+	if uploadErr = v.UploadImagesFromPayload(ctx, tx, &vdb, &payload); !errors.IsIgnorable(uploadErr) {
+		return errors.Wrap(uploadErr, "failed to process image uploads")
+	}
+
+	if err := v.Update(tx, &vdb, payload); err != nil {
+		return errors.Wrap(err, "failed to load featured sponsor from database")
+	}
+
+	if _, ok := errors.IsFinalizationRequired(uploadErr); ok {
+		return uploadErr
+	}
+	return nil
+
 }
 
-func (v *Sponsor) DeleteFromPayload(tx *db.Tx, payload model.DeleteSponsorRequest) error {
+func (v *Sponsor) DeleteFromPayload(ctx context.Context, tx *db.Tx, payload model.DeleteSponsorRequest) (err error) {
+	if pdebug.Enabled {
+		g := pdebug.Marker("service.Sponsor.DeleteFromPayload").BindError(&err)
+		defer g.End()
+	}
+
 	var m db.Sponsor
 	if err := m.LoadByEID(tx, payload.ID); err != nil {
-		return errors.Wrap(err, "failed to load featured speaker from database")
+		return errors.Wrap(err, "failed to load featured sponsor from database")
 	}
 
 	su := User{}
@@ -266,13 +299,66 @@ func (v *Sponsor) DeleteFromPayload(tx *db.Tx, payload model.DeleteSponsorReques
 		return errors.Wrap(err, "deleting venues require administrator privileges")
 	}
 
-	return errors.Wrap(v.Delete(tx, m.EID), "failed to delete from database")
+	if err := v.Delete(tx, m.EID); err != nil {
+		return errors.Wrap(err, "failed to delete from database")
+	}
+
+	// For (current) testing purposes, we don't want to actually
+	// access the Google storage backend.
+	if InTesting {
+		return
+	}
+
+	// This operation need not necessarily succeed. Spawn goroutines and deal with
+	// it asynchronously
+	go func() {
+		if pdebug.Enabled {
+			g := pdebug.Marker("service.Sponsor.DeleteFromPayload cleanup")
+			defer g.End()
+		}
+		cl := v.getStorageClient(ctx)
+		bn := v.getMediaBucketName()
+		b := cl.Bucket(bn)
+		q := &storage.Query{
+			Prefix: "conferences/" + m.ConferenceID + "/" + m.EID + "-logo",
+		}
+		for {
+			if pdebug.Enabled {
+				pdebug.Printf("Listing bucket '%s' with query '%s'", bn, q)
+			}
+			objects, err := b.List(ctx, q)
+			if err != nil {
+				if pdebug.Enabled {
+					pdebug.Printf("Error while listing from bucket '%s'", bn)
+				}
+				return
+			}
+
+			for _, obj := range objects.Results {
+				if pdebug.Enabled {
+					pdebug.Printf("Deleting object '%s'", obj.Name)
+				}
+				if err := b.Object(obj.Name).Delete(ctx); err != nil {
+					if pdebug.Enabled {
+						pdebug.Printf("Failed to delete '%s': %s", obj.Name, err)
+					}
+				}
+			}
+			if objects.Next == nil {
+				return
+			}
+
+			q = objects.Next
+		}
+	}()
+
+	return nil
 }
 
 func (v *Sponsor) ListFromPayload(tx *db.Tx, result *model.SponsorList, payload model.ListSponsorsRequest) error {
 	var vdbl db.SponsorList
 	if err := vdbl.LoadByConferenceSinceEID(tx, payload.ConferenceID, payload.Since.String, int(payload.Limit.Int)); err != nil {
-		return errors.Wrap(err, "failed to load featured speakers from database")
+		return errors.Wrap(err, "failed to load featured sponsor from database")
 	}
 
 	l := make(model.SponsorList, len(vdbl))
@@ -290,12 +376,29 @@ func (v *Sponsor) ListFromPayload(tx *db.Tx, result *model.SponsorList, payload 
 	return nil
 }
 
-func (v *Sponsor) Decorate(tx *db.Tx, speaker *model.Sponsor, lang string) error {
+func (v *Sponsor) Decorate(tx *db.Tx, sponsor *model.Sponsor, lang string) (err error) {
+	if pdebug.Enabled {
+		g := pdebug.Marker("service.Sponsor.Decorate").BindError(&err)
+		defer g.End()
+	}
+
+	if sponsor.LogoURL1 == "" {
+		sponsor.LogoURL1 = "http://storage.googleapis.com/media-builderscon-1248/system/nophoto_600.png"
+	}
+
+	if sponsor.LogoURL2 == "" {
+		sponsor.LogoURL2 = "http://storage.googleapis.com/media-builderscon-1248/system/nophoto_400.png"
+	}
+
+	if sponsor.LogoURL3 == "" {
+		sponsor.LogoURL3 = "http://storage.googleapis.com/media-builderscon-1248/system/nophoto_200.png"
+	}
+
 	if lang == "" {
 		return nil
 	}
 
-	if err := v.ReplaceL10NStrings(tx, speaker, lang); err != nil {
+	if err := v.ReplaceL10NStrings(tx, sponsor, lang); err != nil {
 		return errors.Wrap(err, "failed to replace L10N strings")
 	}
 
