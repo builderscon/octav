@@ -1133,7 +1133,7 @@ func doUpdateSponsor(ctx context.Context, w http.ResponseWriter, r *http.Request
 
 	var s service.Sponsor
 	var updateErr error
-	if updateErr := s.UpdateFromPayload(ctx, tx, payload); !errors.IsIgnorable(updateErr) {
+	if updateErr = s.UpdateFromPayload(ctx, tx, payload); !errors.IsIgnorable(updateErr) {
 		httpError(w, `Failed to update data from payload`, http.StatusInternalServerError, updateErr)
 		return
 	}
