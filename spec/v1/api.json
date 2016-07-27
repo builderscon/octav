@@ -1261,9 +1261,7 @@
     {
       "title": "Add sponsor",
       "href": "/sponsor/add",
-      "encType": "multipart/form-data",
       "hsup.wrapper": "httpWithBasicAuth",
-      "hsup.multipartFiles": ["logo1", "logo2", "logo3"],
       "method": "POST",
       "rel": "create",
       "schema": {
@@ -1317,6 +1315,8 @@
     {
       "title": "Update sponsor",
       "href": "/sponsor/update",
+      "encType": "multipart/form-data",
+      "hsup.multipartFiles": ["logo1", "logo2", "logo3"],
       "hsup.wrapper": "httpWithBasicAuth",
       "method": "POST",
       "rel": "update",
@@ -1325,9 +1325,6 @@
         "required": ["id","user_id"],
         "properties": {
           "id": {"$ref": "#/definitions/uuid"},
-          "logo_url1": {"$ref": "#/definitions/url" },
-          "logo_url2": {"$ref": "#/definitions/url" },
-          "logo_url3": {"$ref": "#/definitions/url" },
           "name": { "$ref": "#/definitions/string_en_not_empty" },
           "group_name": { "$ref": "#/definitions/string_en_not_empty" },
           "sort_order": { "$ref": "#/definitions/positiveInteger" },

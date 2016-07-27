@@ -365,14 +365,13 @@ func buildersconinc(confID, userID string) *model.AddSponsorRequest {
 		Name: "builderscon",
 		URL: "http://builderscon.io",
 		GroupName: "tier-1",
-		LogoURL1: "https://avatars2.githubusercontent.com/u/16756101",
 		UserID: userID,
 	}
 	return r
 }
 
 func testCreateSponsor(ctx *TestCtx, in *model.AddSponsorRequest) (*model.Sponsor, error) {
-	res, err := ctx.HTTPClient.AddSponsor(in, nil)
+	res, err := ctx.HTTPClient.AddSponsor(in)
 	if !assert.NoError(ctx.T, err, "CreateSponsor should succeed") {
 		return nil, err
 	}

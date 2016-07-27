@@ -338,19 +338,6 @@ func httpAddSponsor(ctx context.Context, w http.ResponseWriter, r *http.Request)
 			return
 		}
 		defer r.Body.Close()
-	case strings.HasPrefix(ct, "multipart/"):
-		if err := r.ParseMultipartForm(MaxPostSize); err != nil {
-			httpError(w, `Invalid multipart data`, http.StatusInternalServerError, err)
-			return
-		}
-		vals, ok := r.MultipartForm.Value["payload"]
-		if ok && len(vals) > 0 {
-			if _, err := jsonbuf.WriteString(vals[0]); err != nil {
-				httpError(w, `Failed to read payload`, http.StatusInternalServerError, err)
-				return
-			}
-		}
-		payload.MultipartForm = r.MultipartForm
 	default:
 		httpError(w, `Invalid content-type`, http.StatusInternalServerError, nil)
 		return
@@ -1774,6 +1761,19 @@ func httpUpdateSponsor(ctx context.Context, w http.ResponseWriter, r *http.Reque
 			return
 		}
 		defer r.Body.Close()
+	case strings.HasPrefix(ct, "multipart/"):
+		if err := r.ParseMultipartForm(MaxPostSize); err != nil {
+			httpError(w, `Invalid multipart data`, http.StatusInternalServerError, err)
+			return
+		}
+		vals, ok := r.MultipartForm.Value["payload"]
+		if ok && len(vals) > 0 {
+			if _, err := jsonbuf.WriteString(vals[0]); err != nil {
+				httpError(w, `Failed to read payload`, http.StatusInternalServerError, err)
+				return
+			}
+		}
+		payload.MultipartForm = r.MultipartForm
 	default:
 		httpError(w, `Invalid content-type`, http.StatusInternalServerError, nil)
 		return

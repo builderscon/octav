@@ -663,22 +663,14 @@ type ListSponsorsRequest struct {
 }
 
 // +transport
-// Note: Logos can be uploaded as multipart/form-data messages, but is not
-// part of this request payload.
 type AddSponsorRequest struct {
-	ConferenceID  string                `json:"conference_id"`
-	Name          string                `json:"name"`
-	MultipartForm *multipart.Form       `json:"-"`
-	URL           string                `json:"url"`
-	GroupName     string                `json:"group_name"`
-	SortOrder     int                   `json:"sort_order"`
-	L10N          tools.LocalizedFields `json:"-"`
-	UserID        string                `json:"user_id"`
-
-	// These fields are only used internally
-	LogoURL1 string `json:"-"`
-	LogoURL2 string `json:"-"`
-	LogoURL3 string `json:"-"`
+	ConferenceID string                `json:"conference_id"`
+	Name         string                `json:"name"`
+	URL          string                `json:"url"`
+	GroupName    string                `json:"group_name"`
+	SortOrder    int                   `json:"sort_order"`
+	L10N         tools.LocalizedFields `json:"-"`
+	UserID       string                `json:"user_id"`
 }
 type CreateSponsorRequest struct {
 	AddSponsorRequest
@@ -688,13 +680,14 @@ type CreateSponsorRequest struct {
 type UpdateSponsorRequest struct {
 	// Note: Logos can be uploaded as multipart/form-data messages, but is not
 	// part of this request payload.
-	ID        string                `json:"id"`
-	Name      jsval.MaybeString     `json:"name,omitempty"`
-	URL       jsval.MaybeString     `json:"url,omitempty"`
-	GroupName jsval.MaybeString     `json:"group_name,omitempty"`
-	SortOrder jsval.MaybeInt        `json:"sort_order,omitempty"`
-	L10N      tools.LocalizedFields `json:"-"`
-	UserID    string                `json:"user_id"`
+	ID            string                `json:"id"`
+	Name          jsval.MaybeString     `json:"name,omitempty"`
+	URL           jsval.MaybeString     `json:"url,omitempty"`
+	GroupName     jsval.MaybeString     `json:"group_name,omitempty"`
+	MultipartForm *multipart.Form       `json:"-"`
+	SortOrder     jsval.MaybeInt        `json:"sort_order,omitempty"`
+	L10N          tools.LocalizedFields `json:"-"`
+	UserID        string                `json:"user_id"`
 
 	// These fields are only used internally
 	LogoURL1 string `json:"-"`
