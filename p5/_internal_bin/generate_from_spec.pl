@@ -19,6 +19,8 @@ open(my $tmpout, '>', \$buf);
 say $tmpout <<'EOM';
 package WebService::Octav;
 use strict;
+use File::Basename ();
+use File::LibMagic;
 use JSON;
 use LWP::UserAgent;
 use URI;
@@ -79,12 +81,14 @@ for my $link (@{$schema->{links}}) {
             # a different type of request
 
             say $tmpout '    my @content;';
+            say $tmpout '    my $magic = File::LibMagic->new();';
             # first, remove and push into content args the files that
             # should be uploaded
             if (my @files = @{$link->{"hsup.multipartFiles"} || []}) {
                 say $tmpout '    for my $file (qw(' . join(" ", @files) . ')) {';
                 say $tmpout '        if (my $fn = delete $payload->{$file}) {';
-                say $tmpout '            push @content, ($file => [$fn]);';
+                say $tmpout '            my $info = $magic->info_from_filename($fn);';
+                say $tmpout '            push @content, ($file => [$fn, File::Basename::basename($fn), Content_Type => $info->{mime_type}]);';
                 say $tmpout '        }';
                 say $tmpout '    }';
             }

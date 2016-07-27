@@ -8,6 +8,7 @@ on 'test' => sub {
     requires 'Test::More', '0.98';
 };
 
+requires 'File::LibMagic';
 requires 'JSON';
 requires 'LWP::UserAgent';
 requires 'URI';
