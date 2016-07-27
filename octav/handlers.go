@@ -1107,7 +1107,7 @@ func doDeleteSponsor(ctx context.Context, w http.ResponseWriter, r *http.Request
 	defer tx.AutoRollback()
 
 	var s service.Sponsor
-	if err := s.DeleteFromPayload(tx, payload); err != nil {
+	if err := s.DeleteFromPayload(ctx, tx, payload); err != nil {
 		httpError(w, `DeleteSponsor`, http.StatusInternalServerError, err)
 		return
 	}

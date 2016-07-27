@@ -283,7 +283,7 @@ func (v *Sponsor) UpdateFromPayload(ctx context.Context, tx *db.Tx, payload mode
 
 }
 
-func (v *Sponsor) DeleteFromPayload(tx *db.Tx, payload model.DeleteSponsorRequest) error {
+func (v *Sponsor) DeleteFromPayload(ctx context.Context, tx *db.Tx, payload model.DeleteSponsorRequest) error {
 	var m db.Sponsor
 	if err := m.LoadByEID(tx, payload.ID); err != nil {
 		return errors.Wrap(err, "failed to load featured sponsor from database")
@@ -294,7 +294,37 @@ func (v *Sponsor) DeleteFromPayload(tx *db.Tx, payload model.DeleteSponsorReques
 		return errors.Wrap(err, "deleting venues require administrator privileges")
 	}
 
-	return errors.Wrap(v.Delete(tx, m.EID), "failed to delete from database")
+	if err := v.Delete(tx, m.EID); err != nil {
+		return errors.Wrap(err, "failed to delete from database")
+	}
+
+	// This operation need not necessarily succeed. Spawn goroutines and deal with
+	// it asynchronously
+	go func() {
+		cl := v.getStorageClient(ctx)
+		bn := v.getMediaBucketName()
+		b := cl.Bucket(bn)
+		q := &storage.Query{
+			Prefix: "conferences/" + m.ConferenceID + "/" + m.EID + "-logo",
+		}
+		for {
+			objects, err := b.List(ctx, q)
+			if err != nil {
+				return
+			}
+
+			for _, obj := range objects.Results {
+				b.Object(obj.Name).Delete(ctx)
+			}
+			if objects.Next == nil {
+				return
+			}
+
+			q = objects.Next
+		}
+	}()
+
+	return nil
 }
 
 func (v *Sponsor) ListFromPayload(tx *db.Tx, result *model.SponsorList, payload model.ListSponsorsRequest) error {
