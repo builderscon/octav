@@ -183,7 +183,12 @@ func (v *Sponsor) UploadImagesFromPayload(ctx context.Context, tx *db.Tx, row *d
 			row.LogoURL3.String = prefix + "/" + dstname
 		}
 
-		finalizers = append(finalizers, func() error {
+		finalizers = append(finalizers, func() (err error) {
+			if pdebug.Enabled {
+				g := pdebug.Marker("Finalizer for service.Sponsor.UploadImagesFromPayload").BindError(&err)
+				defer g.End()
+			}
+
 			src := storagecl.Bucket(bucketName).Object(tmpname)
 			dst := storagecl.Bucket(bucketName).Object(dstname)
 
@@ -205,16 +210,16 @@ func (v *Sponsor) UploadImagesFromPayload(ctx context.Context, tx *db.Tx, row *d
 	}
 
 	if len(finalizers) == 0 {
-		return finalizeFunc(func() error {
-			var g errgroup.Group
-			for _, f := range finalizers {
-				g.Go(f)
-			}
-			return g.Wait()
-		})
+		return nil
 	}
 
-	return nil
+	return finalizeFunc(func() error {
+		var g errgroup.Group
+		for _, f := range finalizers {
+			g.Go(f)
+		}
+		return g.Wait()
+	})
 }
 
 func (v *Sponsor) CreateFromPayload(ctx context.Context, tx *db.Tx, payload model.AddSponsorRequest, result *model.Sponsor) (err error) {
