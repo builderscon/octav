@@ -192,9 +192,16 @@ func (v *Sponsor) UploadImagesFromPayload(ctx context.Context, tx *db.Tx, row *d
 			if pdebug.Enabled {
 				pdebug.Printf("Copying %s to %s", tmpname, dstname)
 			}
-			if _, err = src.CopyTo(ctx, dst, nil); err != nil {
+
+			attrs, err := src.Attrs(ctx)
+			if err != nil {
+				return errors.Wrapf(err, "failed to fetch object attrs for '%s'", tmpname)
+			}
+
+			if _, err = src.CopyTo(ctx, dst, attrs); err != nil {
 				return errors.Wrapf(err, "failed to copy from '%s' to '%s'", tmpname, dstname)
 			}
+
 			if pdebug.Enabled {
 				pdebug.Printf("Deleting %s", tmpname)
 			}
