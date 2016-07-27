@@ -351,20 +351,28 @@ func (v *Conference) Decorate(tx *db.Tx, c *model.Conference, lang string) error
 		return errors.Wrapf(err, "failed to load sponsors for '%s'", c.ID)
 	}
 
-	if lang != "" {
-		sv := Venue{}
-		for i := range c.Venues {
-			if err := sv.Decorate(tx, &c.Venues[i], lang); err != nil {
-				return errors.Wrap(err, "failed to decorate venue with associated data")
-			}
+	sv := Venue{}
+	for i := range c.Venues {
+		if err := sv.Decorate(tx, &c.Venues[i], lang); err != nil {
+			return errors.Wrap(err, "failed to decorate venue with associated data")
 		}
-		sfs := FeaturedSpeaker{}
-		for i := range c.FeaturedSpeakers {
-			if err := sfs.Decorate(tx, &c.FeaturedSpeakers[i], lang); err != nil {
-				return errors.Wrap(err, "failed to decorate featured speakers with associated data")
-			}
-		}
+	}
 
+	sfs := FeaturedSpeaker{}
+	for i := range c.FeaturedSpeakers {
+		if err := sfs.Decorate(tx, &c.FeaturedSpeakers[i], lang); err != nil {
+			return errors.Wrap(err, "failed to decorate featured speakers with associated data")
+		}
+	}
+
+	sps := Sponsor{}
+	for i := range c.Sponsors {
+		if err := sps.Decorate(tx, &c.Sponsors[i], lang); err != nil {
+			return errors.Wrap(err, "failed to decorate sponsors with associated data")
+		}
+	}
+
+	if lang != "" {
 		if err := v.ReplaceL10NStrings(tx, c, lang); err != nil {
 			return errors.Wrap(err, "failed to replace L10N strings")
 		}

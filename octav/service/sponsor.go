@@ -318,7 +318,12 @@ func (v *Sponsor) ListFromPayload(tx *db.Tx, result *model.SponsorList, payload 
 	return nil
 }
 
-func (v *Sponsor) Decorate(tx *db.Tx, sponsor *model.Sponsor, lang string) error {
+func (v *Sponsor) Decorate(tx *db.Tx, sponsor *model.Sponsor, lang string) (err error) {
+	if pdebug.Enabled {
+		g := pdebug.Marker("service.Sponsor.Decorate").BindError(&err)
+		defer g.End()
+	}
+
 	if sponsor.LogoURL1 == "" {
 		sponsor.LogoURL1 = "http://storage.googleapis.com/media-builderscon-1248/system/nophoto_600.png"
 	}
