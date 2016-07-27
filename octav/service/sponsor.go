@@ -268,7 +268,7 @@ func (v *Sponsor) UpdateFromPayload(ctx context.Context, tx *db.Tx, payload mode
 	}
 
 	var uploadErr error
-	if uploadErr := v.UploadImagesFromPayload(ctx, tx, &vdb, &payload); !errors.IsIgnorable(uploadErr) {
+	if uploadErr = v.UploadImagesFromPayload(ctx, tx, &vdb, &payload); !errors.IsIgnorable(uploadErr) {
 		return errors.Wrap(uploadErr, "failed to process image uploads")
 	}
 
@@ -276,8 +276,8 @@ func (v *Sponsor) UpdateFromPayload(ctx context.Context, tx *db.Tx, payload mode
 		return errors.Wrap(err, "failed to load featured sponsor from database")
 	}
 
-	if cb, ok := errors.IsFinalizationRequired(uploadErr); ok {
-		return errors.Wrap(cb(), "failed to finalize image upload")
+	if _, ok := errors.IsFinalizationRequired(uploadErr); ok {
+		return uploadErr
 	}
 	return nil
 
