@@ -264,7 +264,7 @@ func (v *Sponsor) UpdateFromPayload(ctx context.Context, tx *db.Tx, payload mode
 	}
 
 	var uploadErr error
-	if uploadErr := v.UploadImagesFromPayload(ctx, tx, &vdb, payload.MultipartForm); uploadErr != nil {
+	if uploadErr := v.UploadImagesFromPayload(ctx, tx, &vdb, payload.MultipartForm); !errors.IsIgnorable(uploadErr) {
 		return errors.Wrap(uploadErr, "failed to process image uploads")
 	}
 
