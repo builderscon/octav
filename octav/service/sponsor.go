@@ -283,7 +283,12 @@ func (v *Sponsor) UpdateFromPayload(ctx context.Context, tx *db.Tx, payload mode
 
 }
 
-func (v *Sponsor) DeleteFromPayload(ctx context.Context, tx *db.Tx, payload model.DeleteSponsorRequest) error {
+func (v *Sponsor) DeleteFromPayload(ctx context.Context, tx *db.Tx, payload model.DeleteSponsorRequest) (err error) {
+	if pdebug.Enabled {
+		g := pdebug.Marker("service.Sponsor.DeleteFromPayload").BindError(&err)
+		defer g.End()
+	}
+
 	var m db.Sponsor
 	if err := m.LoadByEID(tx, payload.ID); err != nil {
 		return errors.Wrap(err, "failed to load featured sponsor from database")
@@ -301,6 +306,10 @@ func (v *Sponsor) DeleteFromPayload(ctx context.Context, tx *db.Tx, payload mode
 	// This operation need not necessarily succeed. Spawn goroutines and deal with
 	// it asynchronously
 	go func() {
+		if pdebug.Enabled {
+			g := pdebug.Marker("service.Sponsor.DeleteFromPayload cleanup")
+			defer g.End()
+		}
 		cl := v.getStorageClient(ctx)
 		bn := v.getMediaBucketName()
 		b := cl.Bucket(bn)
@@ -308,13 +317,26 @@ func (v *Sponsor) DeleteFromPayload(ctx context.Context, tx *db.Tx, payload mode
 			Prefix: "conferences/" + m.ConferenceID + "/" + m.EID + "-logo",
 		}
 		for {
+			if pdebug.Enabled {
+				pdebug.Printf("Listing bucket '%s' with query '%s'", bn, q)
+			}
 			objects, err := b.List(ctx, q)
 			if err != nil {
+				if pdebug.Enabled {
+					pdebug.Printf("Error while listing from bucket '%s'", bn)
+				}
 				return
 			}
 
 			for _, obj := range objects.Results {
-				b.Object(obj.Name).Delete(ctx)
+				if pdebug.Enabled {
+					pdebug.Printf("Deleting object '%s'", obj.Name)
+				}
+				if err := b.Object(obj.Name).Delete(ctx); err != nil {
+					if pdebug.Enabled {
+						pdebug.Printf("Failed to delete '%s': %s", obj.Name, err)
+					}
+				}
 			}
 			if objects.Next == nil {
 				return
