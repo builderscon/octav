@@ -117,6 +117,11 @@ func (ff finalizeFunc) Error() string {
 }
 
 func (v *Sponsor) CreateFromPayload(ctx context.Context, tx *db.Tx, payload model.AddSponsorRequest, result *model.Sponsor) (err error) {
+	if pdebug.Enabled {
+		g := pdebug.Marker("service.Sponsor.CreateFromPayload").BindError(&err)
+		defer g.End()
+	}
+
 	su := User{}
 	if err := su.IsConferenceAdministrator(tx, payload.ConferenceID, payload.UserID); err != nil {
 		return errors.Wrap(err, "creating a featured sponsor requires conference administrator privilege")
@@ -164,6 +169,11 @@ func (v *Sponsor) CreateFromPayload(ctx context.Context, tx *db.Tx, payload mode
 			wc := storagecl.Bucket(bucketName).Object(tmpname).NewWriter(ctx)
 			wc.ContentType = imgtyp
 			wc.ACL = []storage.ACLRule{{storage.AllUsers, storage.RoleReader}}
+
+			if pdebug.Enabled {
+				pdebug.Printf("Writing '%s' to %s", field, tmpname)
+			}
+
 			if _, err := io.Copy(wc, &imgbuf); err != nil {
 				return errors.Wrap(err, "failed to write image to temporary location")
 			}
