@@ -1,7 +1,6 @@
 package errors
 
 import (
-	"github.com/lestrrat/go-pdebug"
 	daverr "github.com/pkg/errors"
 )
 
@@ -57,15 +56,16 @@ func IsIgnorable(err error) bool {
 		return true
 	}
 
-	for err != nil {
+	// Copy to e to make sure we don't tamper with err
+	for e := err; e != nil; {
 		// If the error implements an ignorable error, return the value
-		if ie, ok := err.(ignorableError); ok {
+		if ie, ok := e.(ignorableError); ok {
 			return ie.Ignorable()
 		}
 
 		// chase the root cause
-		if ce, ok := err.(causer); ok {
-			err = ce.Cause()
+		if ce, ok := e.(causer); ok {
+			e = ce.Cause()
 			continue
 		}
 
@@ -79,17 +79,17 @@ type finalizationRequiredError interface {
 }
 
 func IsFinalizationRequired(err error) (func() error, bool) {
-	for err != nil {
-		pdebug.Printf("%#v", err)
-		if fre, ok := err.(finalizationRequiredError); ok {
+	// Copy to e to make sure we don't tamper with err
+	for e := err; e != nil; {
+		if fre, ok := e.(finalizationRequiredError); ok {
 			if cb := fre.FinalizeFunc(); cb != nil {
 				return cb, true
 			}
 			return nil, false
 		}
 
-		if ce, ok := err.(causer); ok {
-			err = ce.Cause()
+		if ce, ok := e.(causer); ok {
+			e = ce.Cause()
 			continue
 		}
 
