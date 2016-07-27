@@ -1082,19 +1082,19 @@ func doAddSponsor(ctx context.Context, w http.ResponseWriter, r *http.Request, p
 
 	var createErr error
 	if createErr = s.CreateFromPayload(ctx, tx, payload, &c); !errors.IsIgnorable(createErr) {
-		httpError(w, `AddSponsor`, http.StatusInternalServerError, err)
+		httpError(w, `Faild to create sponsor from payload`, http.StatusInternalServerError, createErr)
 		return
 	}
 
 	if err := tx.Commit(); err != nil {
-		httpError(w, `CreateConference`, http.StatusInternalServerError, err)
+		httpError(w, `Failed to commit transaction`, http.StatusInternalServerError, err)
 		return
 	}
 
 	// This extra bit is for finalizing the image upload
 	if cb, ok := errors.IsFinalizationRequired(createErr); ok {
 		if err := cb(); err != nil {
-			httpError(w, `CreateConference`, http.StatusInternalServerError, err)
+			httpError(w, `Failed to finalize image uploads`, http.StatusInternalServerError, err)
 			return
 		}
 	}
