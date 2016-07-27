@@ -825,15 +825,7 @@ sub add_sponsor {
     }
     my $uri = URI->new($self->{endpoint} . qq|/v1/sponsor/add|);
     my @request_args;
-    my @content;
-    for my $file (qw(logo1 logo2 logo3)) {
-        if (my $fn = delete $payload->{$file}) {
-            push @content, ($file => [$fn]);
-        }
-    }
-    push @content, (payload => JSON::encode_json($payload));
-    push @request_args, (Content_Type => "form-data");
-    push @request_args, (Content => \@content);
+    push @request_args, (Content_Type => "application/json", Content => JSON::encode_json($payload));
     my $res = $self->{user_agent}->post($uri, @request_args);
     if (!$res->is_success) {
         $self->{last_error} = $res->status_line;
@@ -880,7 +872,15 @@ sub update_sponsor {
     }
     my $uri = URI->new($self->{endpoint} . qq|/v1/sponsor/update|);
     my @request_args;
-    push @request_args, (Content_Type => "application/json", Content => JSON::encode_json($payload));
+    my @content;
+    for my $file (qw(logo1 logo2 logo3)) {
+        if (my $fn = delete $payload->{$file}) {
+            push @content, ($file => [$fn]);
+        }
+    }
+    push @content, (payload => JSON::encode_json($payload));
+    push @request_args, (Content_Type => "form-data");
+    push @request_args, (Content => \@content);
     my $res = $self->{user_agent}->post($uri, @request_args);
     if (!$res->is_success) {
         $self->{last_error} = $res->status_line;
