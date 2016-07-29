@@ -43,6 +43,11 @@ func (v *Conference) populateRowForUpdate(vdb *db.Conference, payload model.Upda
 		vdb.SeriesID = payload.SeriesID.String
 	}
 
+	if payload.CoverURL.Valid() {
+		vdb.CoverURL.Valid = true
+		vdb.CoverURL.String = payload.CoverURL.String
+	}
+
 	if payload.Slug.Valid() {
 		vdb.Slug = payload.Slug.String
 	}
