@@ -273,7 +273,7 @@ func doUpdateConference(ctx context.Context, w http.ResponseWriter, r *http.Requ
 
 	var s service.Conference
 	var updateErr error
-	if updateErr := s.UpdateFromPayload(ctx, tx, payload); !errors.IsIgnorable(updateErr) {
+	if updateErr = s.UpdateFromPayload(ctx, tx, payload); !errors.IsIgnorable(updateErr) {
 		httpError(w, `UpdateConference`, http.StatusInternalServerError, updateErr)
 		return
 	}
