@@ -71,6 +71,7 @@ CREATE TABLE conferences (
     slug TEXT NOT NULL,
     title TEXT NOT NULL,
     sub_title TEXT,
+    cover_url TEXT,
     status CHAR(64) CHARACTER SET latin1 NOT NULL default "private",
     created_by CHAR(64) CHARACTER SET latin1 NOT NULL,
     created_on DATETIME NOT NULL,

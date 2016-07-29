@@ -314,7 +314,7 @@ func testLookupConference(ctx *TestCtx, id, lang string) (*model.Conference, err
 }
 
 func testUpdateConference(ctx *TestCtx, in *model.UpdateConferenceRequest) error {
-	err := ctx.HTTPClient.UpdateConference(in)
+	err := ctx.HTTPClient.UpdateConference(in, nil)
 	if !assert.NoError(ctx.T, err, "UpdateConference succeeds") {
 		return err
 	}
@@ -439,6 +439,7 @@ func TestConferenceCRUD(t *testing.T) {
 	// The result from LookupConference contains the administrator field
 	// Remove that (and make sure it's populated), then do the comparison
 	res2.Administrators = model.UserList(nil)
+	res2.CoverURL = "" // XXX Dunno if this should be populated at Create time. it is for Lookup
 	res2.Series = (*model.ConferenceSeries)(nil)
 	if !assert.Equal(ctx.T, res2, res, "LookupConference is the same as the conference created") {
 		return

@@ -272,7 +272,7 @@ func doUpdateConference(ctx context.Context, w http.ResponseWriter, r *http.Requ
 	defer tx.AutoRollback()
 
 	var s service.Conference
-	if err := s.UpdateFromPayload(tx, payload); err != nil {
+	if err := s.UpdateFromPayload(ctx, tx, payload); err != nil {
 		httpError(w, `UpdateConference`, http.StatusInternalServerError, err)
 		return
 	}

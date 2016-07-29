@@ -930,7 +930,8 @@
       "hsup.wrapper": "httpWithBasicAuth",
       "method": "POST",
       "href": "/conference/update",
-      "encType": "application/json",
+      "encType": "multipart/form-data",
+      "hsup.multipartFiles": ["cover"],
       "schema": {
         "properties": {
           "id": { "$ref": "#/definitions/uuid" },

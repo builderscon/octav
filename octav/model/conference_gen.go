@@ -17,6 +17,7 @@ type rawConference struct {
 	ID               string              `json:"id"`
 	Title            string              `json:"title" l10n:"true"`
 	Description      string              `json:"description,omitempty" l10n:"true"`
+	CoverURL         string              `json:"cover_url"`
 	SeriesID         string              `json:"series_id,omitempty"`
 	Series           *ConferenceSeries   `json:"series,omitempty" decorate:"true"`
 	SubTitle         string              `json:"sub_title" l10n:"true"`
@@ -33,6 +34,7 @@ func (v Conference) MarshalJSON() ([]byte, error) {
 	raw.ID = v.ID
 	raw.Title = v.Title
 	raw.Description = v.Description
+	raw.CoverURL = v.CoverURL
 	raw.SeriesID = v.SeriesID
 	raw.Series = v.Series
 	raw.SubTitle = v.SubTitle
@@ -71,6 +73,9 @@ func (v *Conference) FromRow(vdb db.Conference) error {
 	if vdb.Description.Valid {
 		v.Description = vdb.Description.String
 	}
+	if vdb.CoverURL.Valid {
+		v.CoverURL = vdb.CoverURL.String
+	}
 	v.SeriesID = vdb.SeriesID
 	if vdb.SubTitle.Valid {
 		v.SubTitle = vdb.SubTitle.String
@@ -84,6 +89,8 @@ func (v *Conference) ToRow(vdb *db.Conference) error {
 	vdb.Title = v.Title
 	vdb.Description.Valid = true
 	vdb.Description.String = v.Description
+	vdb.CoverURL.Valid = true
+	vdb.CoverURL.String = v.CoverURL
 	vdb.SeriesID = v.SeriesID
 	vdb.SubTitle.Valid = true
 	vdb.SubTitle.String = v.SubTitle

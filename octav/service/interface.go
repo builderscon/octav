@@ -1,11 +1,5 @@
 package service
 
-import (
-	"sync"
-
-	"google.golang.org/cloud/storage"
-)
-
 // InTesting grudingly exists to tell if we are running under
 // testing mode.
 var InTesting bool
@@ -19,17 +13,16 @@ type ErrInvalidFieldType struct {
 }
 
 type Client struct{}
-type Conference struct{}
+type Conference struct{
+	Storage StorageClient
+}
 type ConferenceSeries struct{}
 type FeaturedSpeaker struct{}
 type Question struct{}
 type Room struct{}
 type Session struct{}
 type Sponsor struct {
-	bucketOnce      sync.Once
-	storageOnce     sync.Once
-	MediaBucketName string
-	Storage         *storage.Client
+	Storage StorageClient
 }
 type User struct{}
 type Venue struct{}

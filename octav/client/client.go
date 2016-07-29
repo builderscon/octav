@@ -2142,7 +2142,7 @@ func (c *Client) LookupVenue(in *model.LookupVenueRequest) (ret *model.Venue, er
 	return &payload, nil
 }
 
-func (c *Client) UpdateConference(in *model.UpdateConferenceRequest) (err error) {
+func (c *Client) UpdateConference(in *model.UpdateConferenceRequest, files map[string]string) (err error) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("client.UpdateConference").BindError(&err)
 		defer g.End()
@@ -2152,7 +2152,29 @@ func (c *Client) UpdateConference(in *model.UpdateConferenceRequest) (err error)
 		return err
 	}
 	var buf bytes.Buffer
-	err = json.NewEncoder(&buf).Encode(in)
+	w := multipart.NewWriter(&buf)
+	var jsbuf bytes.Buffer
+	err = json.NewEncoder(&jsbuf).Encode(in)
+	if err != nil {
+		return err
+	}
+	w.WriteField("payload", jsbuf.String())
+	if fn, ok := files["cover"]; ok {
+		fw, err := w.CreateFormFile("cover", fn)
+		if err != nil {
+			return err
+		}
+		f, err := os.Open(fn)
+		if err != nil {
+			return err
+		}
+		defer f.Close()
+		_, err = io.Copy(fw, f)
+		if err != nil {
+			return err
+		}
+	}
+	err = w.Close()
 	if err != nil {
 		return err
 	}
@@ -2164,7 +2186,7 @@ func (c *Client) UpdateConference(in *model.UpdateConferenceRequest) (err error)
 	if err != nil {
 		return err
 	}
-	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("Content-Type", w.FormDataContentType())
 	if c.BasicAuth.Username != "" && c.BasicAuth.Password != "" {
 		req.SetBasicAuth(c.BasicAuth.Username, c.BasicAuth.Password)
 	}

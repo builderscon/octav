@@ -1,16 +1,23 @@
 package service
 
 import (
+	"bytes"
+	"context"
 	"database/sql"
+	"io"
+	"mime/multipart"
+	"net/http"
 	"regexp"
 	"strings"
 	"time"
 
+	"google.golang.org/cloud/storage"
+
 	"github.com/builderscon/octav/octav/db"
+	"github.com/builderscon/octav/octav/internal/errors"
 	"github.com/builderscon/octav/octav/model"
 	"github.com/builderscon/octav/octav/tools"
 	"github.com/lestrrat/go-pdebug"
-	"github.com/pkg/errors"
 )
 
 func (v *Conference) populateRowForCreate(vdb *db.Conference, payload model.CreateConferenceRequest) error {
@@ -331,6 +338,11 @@ func (v *Conference) Decorate(tx *db.Tx, c *model.Conference, lang string) error
 		c.Series = &s
 	}
 
+	if c.CoverURL == "" {
+		// TODO: fix later
+		c.CoverURL = "https://conf.builderscon.io/assets/images/heroimage.png"
+	}
+
 	if err := v.LoadDates(tx, &c.Dates, c.ID); err != nil {
 		return errors.Wrapf(err, "failed to load conference date for '%s'", c.ID)
 	}
@@ -381,7 +393,83 @@ func (v *Conference) Decorate(tx *db.Tx, c *model.Conference, lang string) error
 	return nil
 }
 
-func (v *Conference) UpdateFromPayload(tx *db.Tx, payload model.UpdateConferenceRequest) (err error) {
+func (v *Conference) GetStorage() StorageClient {
+	if cl := v.Storage; cl != nil {
+		return cl
+	}
+	return DefaultStorage
+}
+
+func (v *Conference) UploadImagesFromPayload(ctx context.Context, tx *db.Tx, row *db.Conference, payload *model.UpdateConferenceRequest) (err error) {
+	if pdebug.Enabled {
+		g := pdebug.Marker("service.Conference.UploadImagesFromPayload").BindError(&err)
+		defer g.End()
+	}
+
+	// There's nothing to do
+	if payload.MultipartForm == nil || payload.MultipartForm.File == nil {
+		return nil
+	}
+
+	field := "cover"
+	fhs := payload.MultipartForm.File[field]
+	if len(fhs) == 0 {
+		return nil
+	}
+
+	var imgf multipart.File
+	imgf, err = fhs[0].Open()
+	if err != nil {
+		return errors.Wrap(err, "failed to open cover file from multipart form")
+	}
+
+	var imgbuf bytes.Buffer
+	if _, err := io.Copy(&imgbuf, imgf); err != nil {
+		return errors.Wrap(err, "failed to copy cover image data to memory")
+	}
+	ct := http.DetectContentType(imgbuf.Bytes())
+
+	// Only work with image/png or image/jpeg
+	var suffix string
+	switch ct {
+	case "image/png":
+		suffix = "png"
+	case "image/jpeg":
+		suffix = "jpeg"
+	default:
+		return errors.Errorf("Unsupported image type %s", ct)
+	}
+
+	// TODO: Validate the image
+	// TODO: Avoid Google Storage hardcoding?
+	// Upload this to a temporary location, then upon successful write to DB
+	// rename it to $conference_id/$sponsor_id
+	tmpname := time.Now().UTC().Format("2006-01-02") + "/" + tools.RandomString(64) + "." + suffix
+	cl := v.GetStorage()
+	cl.Upload(ctx, tmpname, &imgbuf, WithObjectAttrs(storage.ObjectAttrs{
+		ContentType: ct,
+		ACL: []storage.ACLRule{
+			{storage.AllUsers, storage.RoleReader},
+		},
+	}))
+
+	if pdebug.Enabled {
+		pdebug.Printf("Writing '%s' to %s", field, tmpname)
+	}
+
+	dstname := "conferences/" + row.EID + "/cover." + suffix
+	payload.CoverURL.Set(cl.URLFor(dstname))
+
+	return finalizeFunc(func() (err error) {
+		if pdebug.Enabled {
+			g := pdebug.Marker("Finalizer for service.Conference.UploadImagesFromPayload").BindError(&err)
+			defer g.End()
+		}
+		return cl.Move(ctx, tmpname, dstname)
+	})
+}
+
+func (v *Conference) UpdateFromPayload(ctx context.Context, tx *db.Tx, payload model.UpdateConferenceRequest) (err error) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("service.Conference.UpdateFromPayload").BindError(&err)
 		defer g.End()
@@ -397,7 +485,19 @@ func (v *Conference) UpdateFromPayload(tx *db.Tx, payload model.UpdateConference
 		return errors.Wrap(err, "failed to load conference from database")
 	}
 
-	return errors.Wrap(v.Update(tx, &vdb, payload), "failed to load conference from database")
+	var uploadErr error
+	if uploadErr = v.UploadImagesFromPayload(ctx, tx, &vdb, &payload); !errors.IsIgnorable(uploadErr) {
+		return errors.Wrap(uploadErr, "failed to process image uploads")
+	}
+
+	if err := v.Update(tx, &vdb, payload); err != nil {
+		return errors.Wrap(err, "failed to update sponsor in database")
+	}
+
+	if _, ok := errors.IsFinalizationRequired(uploadErr); ok {
+		return uploadErr
+	}
+	return nil
 }
 
 func (v *Conference) ListFromPayload(tx *db.Tx, l *model.ConferenceList, payload model.ListConferenceRequest) (err error) {
@@ -421,7 +521,7 @@ func (v *Conference) ListFromPayload(tx *db.Tx, l *model.ConferenceList, payload
 		}
 	}
 
-	status := "public";
+	status := "public"
 	if payload.Status.Valid() {
 		status = payload.Status.String
 	}
@@ -486,6 +586,3 @@ func (v *Conference) LoadSponsors(tx *db.Tx, cdl *model.SponsorList, cid string)
 	*cdl = res
 	return nil
 }
-
-
-
