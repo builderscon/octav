@@ -428,7 +428,7 @@ func doConferenceUpdate(args cmdargs) int {
 	if err != nil {
 		return errOut(err)
 	}
-	if err := cl.UpdateConference(&r); err != nil {
+	if err := cl.UpdateConference(&r, nil); err != nil {
 		return errOut(err)
 	}
 
