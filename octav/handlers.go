@@ -272,8 +272,9 @@ func doUpdateConference(ctx context.Context, w http.ResponseWriter, r *http.Requ
 	defer tx.AutoRollback()
 
 	var s service.Conference
-	if err := s.UpdateFromPayload(tx, payload); err != nil {
-		httpError(w, `UpdateConference`, http.StatusInternalServerError, err)
+	var updateErr error
+	if updateErr = s.UpdateFromPayload(ctx, tx, payload); !errors.IsIgnorable(updateErr) {
+		httpError(w, `UpdateConference`, http.StatusInternalServerError, updateErr)
 		return
 	}
 	if err := tx.Commit(); err != nil {
@@ -281,6 +282,13 @@ func doUpdateConference(ctx context.Context, w http.ResponseWriter, r *http.Requ
 		return
 	}
 
+	// This extra bit is for finalizing the image upload
+	if cb, ok := errors.IsFinalizationRequired(updateErr); ok {
+		if err := cb(); err != nil {
+			httpError(w, `Failed to finalize image uploads`, http.StatusInternalServerError, err)
+			return
+		}
+	}
 	httpJSON(w, map[string]string{"status": "success"})
 }
 

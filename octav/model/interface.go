@@ -26,6 +26,7 @@ type Conference struct {
 	ID                    string              `json:"id"`
 	Title                 string              `json:"title" l10n:"true"`
 	Description           string              `json:"description,omitempty" l10n:"true"`
+	CoverURL              string              `json:"cover_url"`
 	SeriesID              string              `json:"series_id,omitempty"`
 	Series                *ConferenceSeries   `json:"series,omitempty" decorate:"true"`
 	SubTitle              string              `json:"sub_title" l10n:"true"`
@@ -189,16 +190,19 @@ type LookupConferenceBySlugRequest struct {
 
 // +transport
 type UpdateConferenceRequest struct {
-	ID          string            `json:"id"`
-	Title       jsval.MaybeString `json:"title,omitempty" l10n:"true"`
-	Description jsval.MaybeString `json:"description" l10n:"true"`
-	SeriesID    jsval.MaybeString `json:"series_id,omitempty"`
-	Slug        jsval.MaybeString `json:"slug,omitempty"`
-	SubTitle    jsval.MaybeString `json:"sub_title,omitempty" l10n:"true"`
-	Status      jsval.MaybeString `json:"status,omitempty"`
-	UserID      string            `json:"user_id"`
-	// TODO dates
-	L10N tools.LocalizedFields `json:"-"`
+	ID            string                `json:"id"`
+	Title         jsval.MaybeString     `json:"title,omitempty" l10n:"true"`
+	Description   jsval.MaybeString     `json:"description" l10n:"true"`
+	MultipartForm *multipart.Form       `json:"-"`
+	SeriesID      jsval.MaybeString     `json:"series_id,omitempty"`
+	Slug          jsval.MaybeString     `json:"slug,omitempty"`
+	SubTitle      jsval.MaybeString     `json:"sub_title,omitempty" l10n:"true"`
+	Status        jsval.MaybeString     `json:"status,omitempty"`
+	UserID        string                `json:"user_id"`
+	L10N          tools.LocalizedFields `json:"-"`
+
+	// These fields are only used internally
+	CoverURL jsval.MaybeString `json:"-"`
 }
 
 // Date is used to store simple dates YYYY-MM-DD

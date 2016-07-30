@@ -26,12 +26,13 @@ type ConferenceSeries struct {
 type Conference struct {
 	OID         int64  // intenral id, used for sorting and what not
 	EID         string // ID that is visible to the outside
+	CoverURL    sql.NullString
+	Description sql.NullString
 	SeriesID    string // ConferenceSeries ID
 	Slug        string
-	Description sql.NullString
-	Title       string
 	Status      string
 	SubTitle    sql.NullString
+	Title       string
 	CreatedBy   string // User ID that creates this conference
 	CreatedOn   time.Time
 	ModifiedOn  NullTime

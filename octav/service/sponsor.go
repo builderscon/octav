@@ -5,7 +5,6 @@ import (
 	"io"
 	"mime/multipart"
 	"net/http"
-	"os"
 	"time"
 
 	"github.com/builderscon/octav/octav/db"
@@ -17,28 +16,6 @@ import (
 	"golang.org/x/sync/errgroup"
 	"google.golang.org/cloud/storage"
 )
-
-func (v *Sponsor) getMediaBucketName() string {
-	v.bucketOnce.Do(func() {
-		if v.MediaBucketName == "" {
-			v.MediaBucketName = os.Getenv("GOOGLE_STORAGE_MEDIA_BUCKET")
-		}
-	})
-	return v.MediaBucketName
-}
-
-func (v *Sponsor) getStorageClient(ctx context.Context) *storage.Client {
-	v.storageOnce.Do(func() {
-		if v.Storage == nil {
-			client, err := defaultStorageClient(ctx)
-			if err != nil {
-				panic(err.Error())
-			}
-			v.Storage = client
-		}
-	})
-	return v.Storage
-}
 
 func (v *Sponsor) populateRowForCreate(vdb *db.Sponsor, payload model.CreateSponsorRequest) error {
 	vdb.EID = tools.UUID()
@@ -103,6 +80,13 @@ func (ff finalizeFunc) Error() string {
 	return "operation needs finalization"
 }
 
+func (v *Sponsor) GetStorage() StorageClient {
+	if cl := v.Storage; cl != nil {
+		return cl
+	}
+	return DefaultStorage
+}
+
 func (v *Sponsor) UploadImagesFromPayload(ctx context.Context, tx *db.Tx, row *db.Sponsor, payload *model.UpdateSponsorRequest) (err error) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("service.Sponsor.UploadImagesFromPayload").BindError(&err)
@@ -114,9 +98,7 @@ func (v *Sponsor) UploadImagesFromPayload(ctx context.Context, tx *db.Tx, row *d
 		return nil
 	}
 
-	bucketName := v.getMediaBucketName()
-	prefix := "http://storage.googleapis.com/" + bucketName
-
+	cl := v.GetStorage()
 	finalizers := make([]func() error, 0, 3)
 	for _, field := range []string{"logo1", "logo2", "logo3"} {
 		fhs := payload.MultipartForm.File[field]
@@ -134,50 +116,43 @@ func (v *Sponsor) UploadImagesFromPayload(ctx context.Context, tx *db.Tx, row *d
 		if _, err := io.Copy(&imgbuf, imgf); err != nil {
 			return errors.Wrap(err, "failed to copy logo image data to memory")
 		}
-		imgtyp := http.DetectContentType(imgbuf.Bytes())
+		ct := http.DetectContentType(imgbuf.Bytes())
 
 		// Only work with image/png or image/jpeg
 		var suffix string
-		switch imgtyp {
+		switch ct {
 		case "image/png":
 			suffix = "png"
 		case "image/jpeg":
 			suffix = "jpeg"
 		default:
-			return errors.Errorf("Unsupported image type %s", imgtyp)
+			return errors.Errorf("Unsupported image type %s", ct)
 		}
 
 		// TODO: Validate the image
 		// TODO: Avoid Google Storage hardcoding?
 		// Upload this to a temporary location, then upon successful write to DB
 		// rename it to $conference_id/$sponsor_id
-		storagecl := v.getStorageClient(ctx)
 		tmpname := time.Now().UTC().Format("2006-01-02") + "/" + tools.RandomString(64) + "." + suffix
-		wc := storagecl.Bucket(bucketName).Object(tmpname).NewWriter(ctx)
-		wc.ContentType = imgtyp
-		wc.ACL = []storage.ACLRule{{storage.AllUsers, storage.RoleReader}}
-
-		if pdebug.Enabled {
-			pdebug.Printf("Writing '%s' to %s", field, tmpname)
-		}
-
-		if _, err := io.Copy(wc, &imgbuf); err != nil {
-			return errors.Wrap(err, "failed to write image to temporary location")
-		}
-		// Note: DO NOT defer wc.Close(), as it's part of the write operation.
-		// If wc.Close() does not complete w/o errors. the write failed
-		if err := wc.Close(); err != nil {
-			return errors.Wrap(err, "failed to write image to temporary location")
+		err = cl.Upload(ctx, tmpname, &imgbuf, WithObjectAttrs(storage.ObjectAttrs{
+			ContentType: ct,
+			ACL: []storage.ACLRule{
+				{storage.AllUsers, storage.RoleReader},
+			},
+		}))
+		if err != nil {
+			return errors.Wrap(err, "failed to upload file")
 		}
 
 		dstname := "conferences/" + row.ConferenceID + "/" + row.EID + "-" + field + "." + suffix
+		fullURL := cl.URLFor(dstname)
 		switch field {
 		case "logo1":
-			payload.LogoURL1.Set(prefix + "/" + dstname)
+			payload.LogoURL1.Set(fullURL)
 		case "logo2":
-			payload.LogoURL2.Set(prefix + "/" + dstname)
+			payload.LogoURL2.Set(fullURL)
 		case "logo3":
-			payload.LogoURL3.Set(prefix + "/" + dstname)
+			payload.LogoURL3.Set(fullURL)
 		}
 
 		finalizers = append(finalizers, func() (err error) {
@@ -186,30 +161,7 @@ func (v *Sponsor) UploadImagesFromPayload(ctx context.Context, tx *db.Tx, row *d
 				defer g.End()
 			}
 
-			src := storagecl.Bucket(bucketName).Object(tmpname)
-			dst := storagecl.Bucket(bucketName).Object(dstname)
-
-			if pdebug.Enabled {
-				pdebug.Printf("Copying %s to %s", tmpname, dstname)
-			}
-
-			attrs, err := src.Attrs(ctx)
-			if err != nil {
-				return errors.Wrapf(err, "failed to fetch object attrs for '%s'", tmpname)
-			}
-
-			if _, err = src.CopyTo(ctx, dst, attrs); err != nil {
-				return errors.Wrapf(err, "failed to copy from '%s' to '%s'", tmpname, dstname)
-			}
-
-			if pdebug.Enabled {
-				pdebug.Printf("Deleting %s", tmpname)
-			}
-			if err := src.Delete(ctx); err != nil {
-				return errors.Wrapf(err, "failed to delete '%s'", tmpname)
-			}
-
-			return nil
+			return cl.Move(ctx, tmpname, dstname)
 		})
 	}
 
@@ -273,7 +225,7 @@ func (v *Sponsor) UpdateFromPayload(ctx context.Context, tx *db.Tx, payload mode
 	}
 
 	if err := v.Update(tx, &vdb, payload); err != nil {
-		return errors.Wrap(err, "failed to load featured sponsor from database")
+		return errors.Wrap(err, "failed to update sponsor in database")
 	}
 
 	if _, ok := errors.IsFinalizationRequired(uploadErr); ok {
@@ -316,40 +268,20 @@ func (v *Sponsor) DeleteFromPayload(ctx context.Context, tx *db.Tx, payload mode
 			g := pdebug.Marker("service.Sponsor.DeleteFromPayload cleanup")
 			defer g.End()
 		}
-		cl := v.getStorageClient(ctx)
-		bn := v.getMediaBucketName()
-		b := cl.Bucket(bn)
-		q := &storage.Query{
-			Prefix: "conferences/" + m.ConferenceID + "/" + m.EID + "-logo",
+		prefix := "conferences/" + m.ConferenceID + "/" + m.EID + "-logo"
+		if pdebug.Enabled {
+			pdebug.Printf("Listing objects that match query '%s'", prefix)
 		}
-		for {
+
+		cl := v.GetStorage()
+		list, err := cl.List(ctx, WithQueryPrefix(prefix))
+		if err != nil {
 			if pdebug.Enabled {
-				pdebug.Printf("Listing bucket '%s' with query '%s'", bn, q)
+				pdebug.Printf("Error while listing '%s'", prefix)
 			}
-			objects, err := b.List(ctx, q)
-			if err != nil {
-				if pdebug.Enabled {
-					pdebug.Printf("Error while listing from bucket '%s'", bn)
-				}
-				return
-			}
-
-			for _, obj := range objects.Results {
-				if pdebug.Enabled {
-					pdebug.Printf("Deleting object '%s'", obj.Name)
-				}
-				if err := b.Object(obj.Name).Delete(ctx); err != nil {
-					if pdebug.Enabled {
-						pdebug.Printf("Failed to delete '%s': %s", obj.Name, err)
-					}
-				}
-			}
-			if objects.Next == nil {
-				return
-			}
-
-			q = objects.Next
+			return
 		}
+		cl.DeleteObjects(ctx, list)
 	}()
 
 	return nil

@@ -504,12 +504,19 @@ func processAction(ctx *genctx, action Action) error {
 	buf.WriteString("\nreturn errOut(err)")
 	buf.WriteString("\n}")
 	targetSchema := link.TargetSchema
+
+	var args bytes.Buffer
+	args.WriteString("&r")
+	if link.EncType == "multipart/form-data" {
+		args.WriteString(", nil")
+	}
+
 	if targetSchema == nil {
-		fmt.Fprintf(&buf, "\nif err := cl.%s(&r); err != nil {", clMethodName)
+		fmt.Fprintf(&buf, "\nif err := cl.%s(%s); err != nil {", clMethodName, args.String())
 		buf.WriteString("\nreturn errOut(err)")
 		buf.WriteString("\n}")
 	} else {
-		fmt.Fprintf(&buf, "\nres, err := cl.%s(&r)", clMethodName)
+		fmt.Fprintf(&buf, "\nres, err := cl.%s(%s)", clMethodName, args.String())
 		buf.WriteString("\nif err != nil {")
 		buf.WriteString("\nreturn errOut(err)")
 		buf.WriteString("\n}")
