@@ -136,7 +136,14 @@ func (c *GoogleStorageClient) Upload(ctx context.Context, name string, src io.Re
 
 	storagecl := c.GetClient(ctx)
 	wc := storagecl.Bucket(c.GetBucketName()).Object(name).NewWriter(ctx)
-	wc.ObjectAttrs = attrs
+
+	// Only respect a few fields for now...
+	if attrs.ContentType != "" && wc.ContentType != attrs.ContentType {
+		wc.ContentType = attrs.ContentType
+	}
+	if len(attrs.ACL) > 0 {
+		wc.ACL = attrs.ACL
+	}
 
 	if pdebug.Enabled {
 		pdebug.Printf("Writing to %s", name)
