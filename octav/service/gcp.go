@@ -89,7 +89,11 @@ func (c *GoogleStorageClient) URLFor(fragment string) string {
 	return "http://storage.googleapis.com/" + bucketName + "/" + fragment
 }
 
-func (c *GoogleStorageClient) Move(ctx context.Context, srcName, dstName string, options ...CallOption) error {
+func (c *GoogleStorageClient) Move(ctx context.Context, srcName, dstName string, options ...CallOption) (err error) {
+	if pdebug.Enabled {
+		g := pdebug.Marker("service.GoogleStorageClient.Move").BindError(&err)
+		defer g.End()
+	}
 	storagecl := c.GetClient(ctx)
 	bucketName := c.GetBucketName()
 	src := storagecl.Bucket(bucketName).Object(srcName)
@@ -117,7 +121,11 @@ func (c *GoogleStorageClient) Move(ctx context.Context, srcName, dstName string,
 	return nil
 }
 
-func (c *GoogleStorageClient) Upload(ctx context.Context, name string, src io.Reader, options ...CallOption) error {
+func (c *GoogleStorageClient) Upload(ctx context.Context, name string, src io.Reader, options ...CallOption) (err error) {
+	if pdebug.Enabled {
+		g := pdebug.Marker("service.GoogleStorageClient.Upload").BindError(&err)
+		defer g.End()
+	}
 	var attrs storage.ObjectAttrs
 	for _, option := range options {
 		switch option.(type) {
