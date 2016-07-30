@@ -2,7 +2,6 @@ package service
 
 import (
 	"bytes"
-	"context"
 	"database/sql"
 	"io"
 	"mime/multipart"
@@ -12,6 +11,7 @@ import (
 	"time"
 
 	"google.golang.org/cloud/storage"
+	"golang.org/x/net/context"
 
 	"github.com/builderscon/octav/octav/db"
 	"github.com/builderscon/octav/octav/internal/errors"
