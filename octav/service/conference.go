@@ -451,12 +451,15 @@ func (v *Conference) UploadImagesFromPayload(ctx context.Context, tx *db.Tx, row
 	// rename it to $conference_id/$sponsor_id
 	tmpname := time.Now().UTC().Format("2006-01-02") + "/" + tools.RandomString(64) + "." + suffix
 	cl := v.GetStorage()
-	cl.Upload(ctx, tmpname, &imgbuf, WithObjectAttrs(storage.ObjectAttrs{
+	err = cl.Upload(ctx, tmpname, &imgbuf, WithObjectAttrs(storage.ObjectAttrs{
 		ContentType: ct,
 		ACL: []storage.ACLRule{
 			{storage.AllUsers, storage.RoleReader},
 		},
 	}))
+	if err != nil {
+		return errors.Wrap(err, "failed to upload file")
+	}
 
 	if pdebug.Enabled {
 		pdebug.Printf("Writing '%s' to %s", field, tmpname)
