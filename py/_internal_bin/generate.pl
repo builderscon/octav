@@ -24,7 +24,17 @@ EOM
 say $tmpout <<'EOM';
 import json
 import os
-import requests
+
+if os.getenv('SERVER_SOFTWARE', '').startswith('Google App Engine/') or os.getenv('SERVER_SOFTWARE', '').startswith('Development/'):
+    from urllib3.contrib.appengine import AppEngineManager as PoolManager
+else:
+    from urllib3 import PoolManager
+
+import sys
+if sys.version[0] == "3":
+    from urllib.parse import urlencode
+else:
+    from urllib import urlencode
 
 class Octav(object):
   def __init__(self, endpoint, key, secret, debug=False):
@@ -37,17 +47,16 @@ class Octav(object):
     self.debug = debug
     self.endpoint = endpoint
     self.error = None
+    self.http = PoolManager()
     self.key = key
     self.secret = secret
-    self.session = requests.Session()
-    self.session.mount('http://', requests.adapters.HTTPAdapter(max_retries=0))
 
   def extract_error(self, r):
     try:
       js = r.json()
       self.error = js["message"]
     except:
-      self.error = r.status_code
+      self.error = r.status
 
   def last_error(self):
     return self.error
@@ -79,35 +88,49 @@ for my $link (@{$schema->{links}}) {
     }
     print $tmpout "):\n";
 
-    say $tmpout '    payload = {}';
+    say $tmpout '    try:';
+    say $tmpout '        payload = {}';
     foreach my $name (sort @$required) {
-        say $tmpout '    if ' . $name . ' is None:';
+        say $tmpout "        if $name is None:";
         say $tmpout "            raise 'property $name must be provided'";
-        say $tmpout "    payload['" . $name . "'] = " . $name;
+        say $tmpout "        payload['" . $name . "'] = " . $name;
     }
 
     foreach my $key (sort @keys) {
-        say $tmpout "    if $key is not None:";
-        say $tmpout "        payload['" . $key . "'] = " . $key;
+        say $tmpout "        if $key is not None:";
+        say $tmpout "            payload['" . $key . "'] = " . $key;
     }
-    say $tmpout '    uri = self.endpoint + "' . $path . '"';
+    say $tmpout q|        uri = '%s|, $path, q|' % self.endpoint|;
     if (lc($link->{method}) eq 'post') {
-        say $tmpout '    if self.debug:';
-        say $tmpout '        print("POST " + uri)';
-        say $tmpout '    res = self.session.post(uri, auth=(self.key, self.secret), json=payload)';
+        say $tmpout q|        if self.debug:|;
+        say $tmpout q|            print('POST %s' % uri)|;
+        say $tmpout q|        hdrs = urllib3.util.make_headers(|;
+        say $tmpout q|            basic_auth='%s:%s' % (self.key, self.secret),|;
+        say $tmpout q|        )|;
+        say $tmpout q|        hdrs['Content-Type']= 'application/json'|;
+        say $tmpout q|        res = self.http.request('POST', uri, headers=hdrs, body=json.dumps(payload))|;
     } else {
-        say $tmpout '    if self.debug:';
-        say $tmpout '        print("GET " + uri)';
-        say $tmpout '    res = self.session.get(uri, params=payload)';
+        say $tmpout q|        qs = urlencode(payload)|;
+        say $tmpout q|        if self.debug:|;
+        say $tmpout q|            print('GET %s?%s' % (uri, qs))|;
+        say $tmpout q|        res = self.http.request('GET', '%s?%s' % (uri, qs))|;
     }
-    say $tmpout '    if res.status_code != 200:';
-    say $tmpout '        self.extract_error(res)';
-    say $tmpout '        return None';
+
+    say $tmpout '        if self.debug:';
+    say $tmpout '            print(res)';
+    say $tmpout '        if res.status != 200:';
+    say $tmpout '            self.extract_error(res)';
+    say $tmpout '            return None';
     if ($link->{targetSchema}) {
-        say $tmpout '    return res.json()'
+        say $tmpout '        return json.loads(res.data)';
     } else {
-        say $tmpout '    return True';
+        say $tmpout '        return True';
     }
+    say $tmpout '    except BaseException, e:';
+    say $tmpout '        if self.debug:';
+    say $tmpout '            print("error during http access: " + repr(e))';
+    say $tmpout '        self.error = repr(e)';
+    say $tmpout '        return None';
     say $tmpout '';
 }
 
