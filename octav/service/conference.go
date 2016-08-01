@@ -345,7 +345,7 @@ func (v *Conference) Decorate(tx *db.Tx, c *model.Conference, lang string) error
 
 	if c.CoverURL == "" {
 		// TODO: fix later
-		c.CoverURL = "https://conf.builderscon.io/assets/images/heroimage.png"
+		c.CoverURL = "https://builderscon.io/assets/images/heroimage.png"
 	}
 
 	if err := v.LoadDates(tx, &c.Dates, c.ID); err != nil {
