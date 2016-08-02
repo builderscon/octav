@@ -21,6 +21,7 @@ type FeaturedSpeaker struct{}
 type Question struct{}
 type Room struct{}
 type Session struct{}
+type SessionType struct{}
 type Sponsor struct {
 	Storage StorageClient
 }

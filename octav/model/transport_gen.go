@@ -11,6 +11,344 @@ import (
 	"github.com/lestrrat/go-urlenc"
 )
 
+func (r LookupSessionTypeRequest) collectMarshalData() map[string]interface{} {
+	m := make(map[string]interface{})
+	m["id"] = r.ID
+	if r.Lang.Valid() {
+		m["lang"] = r.Lang.Value()
+	}
+	return m
+}
+
+func (r LookupSessionTypeRequest) MarshalJSON() ([]byte, error) {
+	m := r.collectMarshalData()
+	buf, err := json.Marshal(m)
+	if err != nil {
+		return nil, err
+	}
+	return buf, nil
+}
+
+func (r LookupSessionTypeRequest) MarshalURL() ([]byte, error) {
+	m := r.collectMarshalData()
+	buf, err := urlenc.Marshal(m)
+	if err != nil {
+		return nil, err
+	}
+	return buf, nil
+}
+
+func (r *LookupSessionTypeRequest) UnmarshalJSON(data []byte) error {
+	m := make(map[string]interface{})
+	if err := json.Unmarshal(data, &m); err != nil {
+		return err
+	}
+	return r.Populate(m)
+}
+
+func (r *LookupSessionTypeRequest) Populate(m map[string]interface{}) error {
+	if jv, ok := m["id"]; ok {
+		switch jv.(type) {
+		case string:
+			r.ID = jv.(string)
+			delete(m, "id")
+		default:
+			return ErrInvalidJSONFieldType{Field: "id"}
+		}
+	}
+	if jv, ok := m["lang"]; ok {
+		if err := r.Lang.Set(jv); err != nil {
+			return errors.New("set field Lang failed: " + err.Error())
+		}
+		delete(m, "lang")
+	}
+	return nil
+}
+
+func (r CreateSessionTypeRequest) collectMarshalData() map[string]interface{} {
+	m := make(map[string]interface{})
+	m["conference_id"] = r.ConferenceID
+	m["name"] = r.Name
+	m["abstract"] = r.Abstract
+	m["duration"] = r.Duration
+	if r.SubmissionStart.Valid() {
+		m["submission_start"] = r.SubmissionStart.Value()
+	}
+	if r.SubmissionEnd.Valid() {
+		m["submission_end"] = r.SubmissionEnd.Value()
+	}
+	m["user_id"] = r.UserID
+	return m
+}
+
+func (r CreateSessionTypeRequest) MarshalJSON() ([]byte, error) {
+	m := r.collectMarshalData()
+	buf, err := json.Marshal(m)
+	if err != nil {
+		return nil, err
+	}
+	return tools.MarshalJSONWithL10N(buf, r.L10N)
+}
+
+func (r CreateSessionTypeRequest) MarshalURL() ([]byte, error) {
+	m := r.collectMarshalData()
+	buf, err := urlenc.Marshal(m)
+	if err != nil {
+		return nil, err
+	}
+	return tools.MarshalURLWithL10N(buf, r.L10N)
+}
+
+func (r *CreateSessionTypeRequest) UnmarshalJSON(data []byte) error {
+	m := make(map[string]interface{})
+	if err := json.Unmarshal(data, &m); err != nil {
+		return err
+	}
+	return r.Populate(m)
+}
+
+func (r *CreateSessionTypeRequest) Populate(m map[string]interface{}) error {
+	if jv, ok := m["conference_id"]; ok {
+		switch jv.(type) {
+		case string:
+			r.ConferenceID = jv.(string)
+			delete(m, "conference_id")
+		default:
+			return ErrInvalidJSONFieldType{Field: "conference_id"}
+		}
+	}
+	if jv, ok := m["name"]; ok {
+		switch jv.(type) {
+		case string:
+			r.Name = jv.(string)
+			delete(m, "name")
+		default:
+			return ErrInvalidJSONFieldType{Field: "name"}
+		}
+	}
+	if jv, ok := m["abstract"]; ok {
+		switch jv.(type) {
+		case string:
+			r.Abstract = jv.(string)
+			delete(m, "abstract")
+		default:
+			return ErrInvalidJSONFieldType{Field: "abstract"}
+		}
+	}
+	if jv, ok := m["duration"]; ok {
+		switch jv.(type) {
+		case float64:
+			r.Duration = int(jv.(float64))
+			delete(m, "duration")
+		default:
+			return ErrInvalidJSONFieldType{Field: "duration"}
+		}
+	}
+	if jv, ok := m["submission_start"]; ok {
+		if err := r.SubmissionStart.Set(jv); err != nil {
+			return errors.New("set field SubmissionStart failed: " + err.Error())
+		}
+		delete(m, "submission_start")
+	}
+	if jv, ok := m["submission_end"]; ok {
+		if err := r.SubmissionEnd.Set(jv); err != nil {
+			return errors.New("set field SubmissionEnd failed: " + err.Error())
+		}
+		delete(m, "submission_end")
+	}
+	if jv, ok := m["user_id"]; ok {
+		switch jv.(type) {
+		case string:
+			r.UserID = jv.(string)
+			delete(m, "user_id")
+		default:
+			return ErrInvalidJSONFieldType{Field: "user_id"}
+		}
+	}
+	if err := tools.ExtractL10NFields(m, &r.L10N, []string{"conference_id", "name", "abstract", "duration", "submission_start", "submission_end", "user_id"}); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (r *CreateSessionTypeRequest) GetPropNames() ([]string, error) {
+	l, _ := r.L10N.GetPropNames()
+	return append(l, "conference_id", "name", "abstract", "duration", "submission_start", "submission_end", "user_id"), nil
+}
+
+func (r *CreateSessionTypeRequest) SetPropValue(s string, v interface{}) error {
+	switch s {
+	case "conference_id":
+		if jv, ok := v.(string); ok {
+			r.ConferenceID = jv
+			return nil
+		}
+	case "name":
+		if jv, ok := v.(string); ok {
+			r.Name = jv
+			return nil
+		}
+	case "abstract":
+		if jv, ok := v.(string); ok {
+			r.Abstract = jv
+			return nil
+		}
+	case "duration":
+		if jv, ok := v.(int); ok {
+			r.Duration = jv
+			return nil
+		}
+	case "submission_start":
+		return r.SubmissionStart.Set(v)
+	case "submission_end":
+		return r.SubmissionEnd.Set(v)
+	case "user_id":
+		if jv, ok := v.(string); ok {
+			r.UserID = jv
+			return nil
+		}
+	default:
+		return errors.New("unknown column '" + s + "'")
+	}
+	return ErrInvalidFieldType{Field: s}
+}
+
+func (r UpdateSessionTypeRequest) collectMarshalData() map[string]interface{} {
+	m := make(map[string]interface{})
+	m["id"] = r.ID
+	if r.Name.Valid() {
+		m["name"] = r.Name.Value()
+	}
+	if r.Abstract.Valid() {
+		m["abstract"] = r.Abstract.Value()
+	}
+	if r.Duration.Valid() {
+		m["duration"] = r.Duration.Value()
+	}
+	if r.SubmissionStart.Valid() {
+		m["submission_start"] = r.SubmissionStart.Value()
+	}
+	if r.SubmissionEnd.Valid() {
+		m["submission_end"] = r.SubmissionEnd.Value()
+	}
+	m["user_id"] = r.UserID
+	return m
+}
+
+func (r UpdateSessionTypeRequest) MarshalJSON() ([]byte, error) {
+	m := r.collectMarshalData()
+	buf, err := json.Marshal(m)
+	if err != nil {
+		return nil, err
+	}
+	return tools.MarshalJSONWithL10N(buf, r.L10N)
+}
+
+func (r UpdateSessionTypeRequest) MarshalURL() ([]byte, error) {
+	m := r.collectMarshalData()
+	buf, err := urlenc.Marshal(m)
+	if err != nil {
+		return nil, err
+	}
+	return tools.MarshalURLWithL10N(buf, r.L10N)
+}
+
+func (r *UpdateSessionTypeRequest) UnmarshalJSON(data []byte) error {
+	m := make(map[string]interface{})
+	if err := json.Unmarshal(data, &m); err != nil {
+		return err
+	}
+	return r.Populate(m)
+}
+
+func (r *UpdateSessionTypeRequest) Populate(m map[string]interface{}) error {
+	if jv, ok := m["id"]; ok {
+		switch jv.(type) {
+		case string:
+			r.ID = jv.(string)
+			delete(m, "id")
+		default:
+			return ErrInvalidJSONFieldType{Field: "id"}
+		}
+	}
+	if jv, ok := m["name"]; ok {
+		if err := r.Name.Set(jv); err != nil {
+			return errors.New("set field Name failed: " + err.Error())
+		}
+		delete(m, "name")
+	}
+	if jv, ok := m["abstract"]; ok {
+		if err := r.Abstract.Set(jv); err != nil {
+			return errors.New("set field Abstract failed: " + err.Error())
+		}
+		delete(m, "abstract")
+	}
+	if jv, ok := m["duration"]; ok {
+		if err := r.Duration.Set(jv); err != nil {
+			return errors.New("set field Duration failed: " + err.Error())
+		}
+		delete(m, "duration")
+	}
+	if jv, ok := m["submission_start"]; ok {
+		if err := r.SubmissionStart.Set(jv); err != nil {
+			return errors.New("set field SubmissionStart failed: " + err.Error())
+		}
+		delete(m, "submission_start")
+	}
+	if jv, ok := m["submission_end"]; ok {
+		if err := r.SubmissionEnd.Set(jv); err != nil {
+			return errors.New("set field SubmissionEnd failed: " + err.Error())
+		}
+		delete(m, "submission_end")
+	}
+	if jv, ok := m["user_id"]; ok {
+		switch jv.(type) {
+		case string:
+			r.UserID = jv.(string)
+			delete(m, "user_id")
+		default:
+			return ErrInvalidJSONFieldType{Field: "user_id"}
+		}
+	}
+	if err := tools.ExtractL10NFields(m, &r.L10N, []string{"id", "name", "abstract", "duration", "submission_start", "submission_end", "user_id"}); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (r *UpdateSessionTypeRequest) GetPropNames() ([]string, error) {
+	l, _ := r.L10N.GetPropNames()
+	return append(l, "id", "name", "abstract", "duration", "submission_start", "submission_end", "user_id"), nil
+}
+
+func (r *UpdateSessionTypeRequest) SetPropValue(s string, v interface{}) error {
+	switch s {
+	case "id":
+		if jv, ok := v.(string); ok {
+			r.ID = jv
+			return nil
+		}
+	case "name":
+		return r.Name.Set(v)
+	case "abstract":
+		return r.Abstract.Set(v)
+	case "duration":
+		return r.Duration.Set(v)
+	case "submission_start":
+		return r.SubmissionStart.Set(v)
+	case "submission_end":
+		return r.SubmissionEnd.Set(v)
+	case "user_id":
+		if jv, ok := v.(string); ok {
+			r.UserID = jv
+			return nil
+		}
+	default:
+		return errors.New("unknown column '" + s + "'")
+	}
+	return ErrInvalidFieldType{Field: s}
+}
+
 func (r LookupConferenceSeriesRequest) collectMarshalData() map[string]interface{} {
 	m := make(map[string]interface{})
 	m["id"] = r.ID

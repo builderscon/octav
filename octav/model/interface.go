@@ -59,6 +59,49 @@ type Room struct {
 type RoomList []Room
 
 // +model
+type SessionType struct {
+	tools.LocalizedFields `json:"-"`
+	ID                    string    `json:"id"`
+	ConferenceID          string    `json:"conference_id"`
+	Name                  string    `json:"name"`
+	Abstract              string    `json:"abstract"`
+	Duration              int       `json:"duration"`
+	SubmissionStart       time.Time `json:"submission_start,omitempty"`
+	SubmissionEnd         time.Time `json:"submission_end,omitempty"`
+}
+type SessionTypeList []SessionType
+
+// +transport
+type LookupSessionTypeRequest struct {
+	ID   string            `json:"id" urlenc:"id"`
+	Lang jsval.MaybeString `json:"lang" urlenc:"lang,omitempty,string"`
+}
+
+// +transport
+type CreateSessionTypeRequest struct {
+	ConferenceID    string                `json:"conference_id"`
+	Name            string                `json:"name"`
+	Abstract        string                `json:"abstract"`
+	Duration        int                   `json:"duration"`
+	SubmissionStart MaybeJSONTime         `json:"submission_start,omitempty"`
+	SubmissionEnd   MaybeJSONTime         `json:"submission_end,omitempty"`
+	L10N            tools.LocalizedFields `json:"-"`
+	UserID          string                `json:"user_id"`
+}
+
+// +transport
+type UpdateSessionTypeRequest struct {
+	ID              string                `json:"id"`
+	Name            jsval.MaybeString     `json:"name,omitempty"`
+	Abstract        jsval.MaybeString     `json:"abstract,omitempty"`
+	Duration        jsval.MaybeInt        `json:"duration,omitempty"`
+	SubmissionStart MaybeJSONTime         `json:"submission_start,omitempty,JSONTime"`
+	SubmissionEnd   MaybeJSONTime         `json:"submission_end,omitempty,JSONTime"`
+	L10N            tools.LocalizedFields `json:"-"`
+	UserID          string                `json:"user_id"`
+}
+
+// +model
 type Session struct {
 	tools.LocalizedFields `json:"-"`
 	ID                    string      `json:"id"`

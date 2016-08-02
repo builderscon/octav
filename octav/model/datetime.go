@@ -3,11 +3,12 @@ package model
 import (
 	"bytes"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"reflect"
 	"time"
 	"unicode"
+
+	"github.com/pkg/errors"
 )
 
 func NewDate(y, m, d int) Date {
@@ -149,7 +150,7 @@ func (cd ConferenceDate) MarshalJSON() ([]byte, error) {
 	// { date: "YYYY-MM-DD", open: "HH:MM", close: "HH:MM" }
 	m := map[string]string{
 		"encoded": cd.String(),
-		"date":  cd.Date.String(),
+		"date":    cd.Date.String(),
 	}
 	if s := cd.Open.String(); len(s) > 0 {
 		m["open"] = cd.Open.String()
@@ -334,5 +335,60 @@ func (cdl *ConferenceDateList) Extract(v interface{}) error {
 	}
 
 	*cdl = ret
+	return nil
+}
+
+type JSONTime time.Time
+
+func (t JSONTime) MarshalJSON() ([]byte, error) {
+	return json.Marshal(time.Time(t).Format(time.RFC3339))
+}
+
+func (t *JSONTime) UnmarshalJSON(buf []byte) error {
+	x, err := time.Parse(time.RFC3339, string(buf))
+	if err != nil {
+		return errors.Wrap(err, "failed to parse time using RFC3339")
+	}
+	*t = JSONTime(x)
+	return nil
+}
+
+type MaybeJSONTime struct {
+	JSONTime
+	ValidFlag bool
+}
+
+func (t MaybeJSONTime) Valid() bool {
+	return t.ValidFlag
+}
+
+func (t MaybeJSONTime) Value() interface{} {
+	return t.JSONTime
+}
+
+func (t *MaybeJSONTime) Set(x interface{}) error {
+	switch x.(type) {
+	case time.Time:
+		t.JSONTime = JSONTime(x.(time.Time))
+		t.ValidFlag = true
+	case JSONTime:
+		t.JSONTime = x.(JSONTime)
+		t.ValidFlag = true
+	default:
+		return errors.New("invalid type for MaybeJSONTime.Set")
+	}
+	return nil
+}
+
+func (t *MaybeJSONTime) Reset() {
+	t.JSONTime = JSONTime{}
+	t.ValidFlag = false
+}
+
+func (t *MaybeJSONTime) UnmarshalJSON(buf []byte) error {
+	if err := json.Unmarshal(buf, &t.JSONTime); err != nil {
+		return errors.Wrap(err, "failed to unmarshal JSONTime")
+	}
+	t.ValidFlag = true
 	return nil
 }
