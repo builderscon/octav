@@ -2519,7 +2519,6 @@ func (c *Client) UpdateSessionType(in *model.UpdateSessionTypeRequest) (err erro
 		return err
 	}
 	if res.StatusCode != http.StatusOK {
-		io.Copy(os.Stderr, res.Body)
 		return fmt.Errorf(`Invalid response: '%s'`, res.Status)
 	}
 	return nil
