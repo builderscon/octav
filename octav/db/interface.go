@@ -85,6 +85,20 @@ type Room struct {
 	ModifiedOn NullTime
 }
 
+// +DB tablename:"session_types"
+type SessionType struct {
+	OID             int64  // OID is the internal id, used for sorting and what not
+	EID             string // EID is the ID that is visible to the outside
+	ConferenceID    string // ConferenceID is the ID of the conference that this session belongs to
+	Name            string
+	Abstract        string
+	Duration        int
+	SubmissionStart NullTime
+	SubmissionEnd   NullTime
+	CreatedOn       time.Time
+	ModifiedOn      NullTime
+}
+
 // +DB tablename:"sessions"
 type Session struct {
 	OID               int64          // OID is the internal id, used for sorting and what not

@@ -23,7 +23,9 @@ func (v *SponsorList) LoadByConferenceSince(tx *Tx, confID string, since int64, 
 	stmt.WriteString(SponsorStdSelectColumns)
 	stmt.WriteString(` FROM `)
 	stmt.WriteString(SponsorTable)
-	stmt.WriteString(` WHERE conference_id = ? AND featured_speakers.oid > ? ORDER BY oid ASC LIMIT `)
+	stmt.WriteString(` WHERE conference_id = ? AND `)
+	stmt.WriteString(SponsorTable)
+	stmt.WriteString(`.oid > ? ORDER BY oid ASC LIMIT `)
 	stmt.WriteString(strconv.Itoa(limit))
 
 	rows, err := tx.Query(stmt.String(), confID, since)

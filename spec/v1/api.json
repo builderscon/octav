@@ -314,6 +314,28 @@
     "duration": {
       "type": "integer"
     },
+    "session_type_array": {
+      "type": "array",
+      "hsup.type": "[]model.SessionType",
+      "items": {"$ref": "#/definitions/session_type"}
+    },
+    "session_type": {
+      "type": "object",
+      "hsup.type": "model.SessionType",
+      "properties": {
+        "id": {"$ref": "#/definitions/uuid"},
+        "conference_id": {"$ref": "#/definitions/uuid"},
+        "name": {"$ref":"#/definitions/string_en"},
+        "abstract": {"$ref":"#/definitions/string_en"},
+        "duration": {"$ref":"#/definitions/positiveInteger"},
+        "submission_start": {"$ref":"#/definitions/rfc3339"},
+        "submission_end": {"$ref":"#/definitions/rfc3339"}
+      },
+      "patternProperties":{
+        "name#[a-z]+": { "$ref": "#/definitions/string_i18n" },
+        "abstract#[a-z]+": { "$ref": "#/definitions/string_i18n" }
+      }
+    },
     "session_array": {
       "type": "array",
       "hsup.type": "[]model.Session",
@@ -406,6 +428,10 @@
       "type": "array",
       "items": {"$ref": "#/definitions/question"},
       "hsup.type": "[]model.Question"
+    },
+    "rfc3339": {
+      "type": "string",
+      "pattern": "^(\\d\\d\\d\\d)(-)?(\\d\\d)(-)?(\\d\\d)(T)?(\\d\\d)(:)?(\\d\\d)(:)?(\\d\\d)(\\.\\d+)?(Z|([+-])(\\d\\d)(:)?(\\d\\d))$"
     }
   },
   "pathStart": "/v1",
@@ -873,6 +899,100 @@
       }
     },
     {
+      "title": "Add session type",
+      "rel": "update",
+      "hsup.wrapper": "httpWithBasicAuth",
+      "method": "POST",
+      "href": "/conference/session_type/add",
+      "ecnType": "application/json",
+      "schema": {
+        "required": ["user_id","conference_id","name","abstract", "duration"],
+        "properties": {
+          "conference_id": {"$ref": "#/definitions/uuid"},
+          "name": {"$ref":"#/definitions/string_en"},
+          "abstract": {"$ref":"#/definitions/string_en"},
+          "duration": {"$ref":"#/definitions/positiveInteger"},
+          "user_id": {"$ref":"#/definitions/uuid"},
+          "submission_start": {"$ref":"#/definitions/rfc3339"},
+          "submission_end": {"$ref":"#/definitions/rfc3339"}
+        },
+        "patternProperties":{
+          "name#[a-z]+": { "$ref": "#/definitions/string_i18n" },
+          "abstract#[a-z]+": { "$ref": "#/definitions/string_i18n" }
+        }
+      }
+    },
+    {
+      "title": "Delete session type",
+      "rel": "delete",
+      "hsup.wrapper": "httpWithBasicAuth",
+      "method": "POST",
+      "href": "/session_type/delete",
+      "ecnType": "application/json",
+      "schema": {
+        "properties": {
+          "id": {"$ref": "#/definitions/uuid"},
+          "user_id": {"$ref":"#/definitions/uuid"}
+        },
+        "required": ["id","user_id"]
+      }
+    },
+    {
+      "title": "Lookup session type",
+      "href": "/session_type/lookup",
+      "hsup.wrapper": "httpWithBasicAuth",
+      "rel": "update",
+      "schema": {
+        "required": ["id"],
+        "properties": {
+          "id": {"$ref": "#/definitions/uuid"},
+          "lang": { "$ref": "#/definitions/language" }
+        }
+      },
+      "targetSchema": { "$ref": "#/definitions/session_type" }
+    },
+    {
+      "title": "Update session type",
+      "href": "/session_type/update",
+      "encType": "application/json",
+      "hsup.wrapper": "httpWithBasicAuth",
+      "method": "POST",
+      "rel": "update",
+      "schema": {
+        "type": "object",
+        "required": ["id","user_id"],
+        "properties": {
+          "id": {"$ref": "#/definitions/uuid"},
+          "name": {"$ref":"#/definitions/string_en"},
+          "abstract": {"$ref":"#/definitions/string_en"},
+          "duration": {"$ref":"#/definitions/positiveInteger"},
+          "user_id": {"$ref":"#/definitions/uuid"},
+          "submission_start": {"$ref":"#/definitions/rfc3339"},
+          "submission_end": {"$ref":"#/definitions/rfc3339"}
+        },
+        "patternProperties":{
+          "name#[a-z]+": { "$ref": "#/definitions/string_i18n" },
+          "abstract#[a-z]+": { "$ref": "#/definitions/string_i18n" }
+        }
+      }
+    },
+    {
+      "title": "List session types by conference",
+      "href": "/session_type/list",
+      "hsup.wrapper": "httpWithBasicAuth",
+      "rel": "list",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "limit": {"$ref": "#/definitions/positiveIntegerDefault10"},
+          "conference_id": {"$ref": "#/definitions/uuid"},
+          "since": {"$ref": "#/definitions/uuid"},
+          "lang": { "$ref": "#/definitions/language" }
+        }
+      },
+      "targetSchema": { "$ref": "#/definitions/session_type_array" }
+    },
+    {
       "title": "Lookup conference",
       "href": "/conference/lookup",
       "rel": "lookup",
@@ -988,14 +1108,14 @@
       "href": "/session/create",
       "schema": {
         "type": "object",
-        "required": ["conference_id", "speaker_id", "title", "abstract", "duration", "user_id"],
+        "required": ["conference_id", "speaker_id", "title", "abstract", "session_type_id", "user_id"],
         "properties": {
           "conference_id": { "$ref": "#/definitions/uuid" },
           "speaker_id": { "$ref": "#/definitions/uuid" },
+          "session_type_id": { "$ref": "#/definitions/uuid" },
           "title": { "$ref": "#/definitions/string_en" },
           "abstract": { "$ref": "#/definitions/markdown_en" },
           "memo": { "type": "string" },
-          "duration": { "$ref": "#/definitions/duration" },
           "material_level": { "$ref": "#/definitions/material_level" },
           "tags": { "type": "string" },
           "category": { "type": "string" },

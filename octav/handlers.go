@@ -1202,5 +1202,124 @@ func doListSponsors(ctx context.Context, w http.ResponseWriter, r *http.Request,
 	httpJSON(w, l)
 }
 
+func doAddSessionType(ctx context.Context, w http.ResponseWriter, r *http.Request, payload model.AddSessionTypeRequest) {
+	if pdebug.Enabled {
+		g := pdebug.Marker("doAddSessionType")
+		defer g.End()
+	}
 
+	tx, err := db.Begin()
+	if err != nil {
+		httpError(w, `AddSessionType`, http.StatusInternalServerError, err)
+		return
+	}
+	defer tx.AutoRollback()
+
+	var s service.SessionType
+	var c model.SessionType
+
+	if err := s.CreateFromPayload(ctx, tx, payload, &c); err != nil {
+		httpError(w, `Faild to create sponsor from payload`, http.StatusInternalServerError, err)
+		return
+	}
+
+	if err := tx.Commit(); err != nil {
+		httpError(w, `Failed to commit transaction`, http.StatusInternalServerError, err)
+		return
+	}
+
+	httpJSON(w, c)
+}
+
+func doDeleteSessionType(ctx context.Context, w http.ResponseWriter, r *http.Request, payload model.DeleteSessionTypeRequest) {
+	if pdebug.Enabled {
+		g := pdebug.Marker("doDeleteSessionType")
+		defer g.End()
+	}
+
+	tx, err := db.Begin()
+	if err != nil {
+		httpError(w, `DeleteSessionType`, http.StatusInternalServerError, err)
+		return
+	}
+	defer tx.AutoRollback()
+
+	var s service.SessionType
+	if err := s.DeleteFromPayload(ctx, tx, payload); err != nil {
+		httpError(w, `DeleteSessionType`, http.StatusInternalServerError, err)
+		return
+	}
+	if err := tx.Commit(); err != nil {
+		httpError(w, `DeleteSessionType`, http.StatusInternalServerError, err)
+		return
+	}
+	httpJSON(w, map[string]string{"status": "success"})
+}
+
+func doUpdateSessionType(ctx context.Context, w http.ResponseWriter, r *http.Request, payload model.UpdateSessionTypeRequest) {
+	if pdebug.Enabled {
+		g := pdebug.Marker("doUpdateSessionType")
+		defer g.End()
+	}
+
+	tx, err := db.Begin()
+	if err != nil {
+		httpError(w, `UpdateSessionType`, http.StatusInternalServerError, err)
+		return
+	}
+	defer tx.AutoRollback()
+
+	var s service.SessionType
+	if err := s.UpdateFromPayload(ctx, tx, payload); err != nil {
+		httpError(w, `Failed to update data from payload`, http.StatusInternalServerError, err)
+		return
+	}
+
+	if err := tx.Commit(); err != nil {
+		httpError(w, `Failed to commit data`, http.StatusInternalServerError, err)
+		return
+	}
+
+	httpJSON(w, map[string]string{"status": "success"})
+}
+
+func doLookupSessionType(ctx context.Context, w http.ResponseWriter, r *http.Request, payload model.LookupSessionTypeRequest) {
+	if pdebug.Enabled {
+		g := pdebug.Marker("doLookupSessionType")
+		defer g.End()
+	}
+	tx, err := db.Begin()
+	if err != nil {
+		httpError(w, `LookupSessionType`, http.StatusInternalServerError, err)
+		return
+	}
+	defer tx.AutoRollback()
+
+	var s service.SessionType
+	var c model.SessionType
+	if err := s.LookupFromPayload(tx, &c, payload); err != nil {
+		httpError(w, `LookupSessionType`, http.StatusInternalServerError, err)
+		return
+	}
+
+	httpJSON(w, c)
+}
+
+func doListSessionTypesByConference(ctx context.Context, w http.ResponseWriter, r *http.Request, payload model.ListSessionTypesByConferenceRequest) {
+	tx, err := db.Begin()
+	if err != nil {
+		httpError(w, `doListSessionTypesbyConference`, http.StatusInternalServerError, err)
+		return
+	}
+	defer tx.AutoRollback()
+
+	var s service.SessionType
+	var l model.SessionTypeList
+	if err := s.ListFromPayload(tx, &l, payload); err != nil {
+		httpError(w, `doListSessionTypesbyConference`, http.StatusInternalServerError, err)
+		return
+	}
+
+	httpJSON(w, l)
+}
 

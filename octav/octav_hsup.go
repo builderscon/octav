@@ -316,6 +316,47 @@ func httpAddFeaturedSpeaker(ctx context.Context, w http.ResponseWriter, r *http.
 	doAddFeaturedSpeaker(ctx, w, r, payload)
 }
 
+func httpAddSessionType(ctx context.Context, w http.ResponseWriter, r *http.Request) {
+	if pdebug.Enabled {
+		g := pdebug.Marker("httpAddSessionType")
+		defer g.End()
+	}
+	if strings.ToLower(r.Method) != `post` {
+		w.Header().Set("Allow", "post")
+		httpError(w, `Method was `+r.Method+`, expected post`, http.StatusNotFound, nil)
+		return
+	}
+
+	var payload model.AddSessionTypeRequest
+	jsonbuf := getTransportJSONBuffer()
+	defer releaseTransportJSONBuffer(jsonbuf)
+
+	switch ct := r.Header.Get("Content-Type"); {
+	case ct == "application/json":
+		if _, err := io.Copy(jsonbuf, io.LimitReader(r.Body, MaxPostSize)); err != nil {
+			httpError(w, `Failed to read request body`, http.StatusInternalServerError, err)
+			return
+		}
+		defer r.Body.Close()
+	default:
+		httpError(w, `Invalid content-type`, http.StatusInternalServerError, nil)
+		return
+	}
+	if pdebug.Enabled {
+		pdebug.Printf(`-----> %s`, jsonbuf.Bytes())
+	}
+	if err := json.Unmarshal(jsonbuf.Bytes(), &payload); err != nil {
+		httpError(w, `Invalid JSON input`, http.StatusInternalServerError, err)
+		return
+	}
+
+	if err := validator.HTTPAddSessionTypeRequest.Validate(&payload); err != nil {
+		httpError(w, `Invalid input (validation failed)`, http.StatusInternalServerError, err)
+		return
+	}
+	doAddSessionType(ctx, w, r, payload)
+}
+
 func httpAddSponsor(ctx context.Context, w http.ResponseWriter, r *http.Request) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("httpAddSponsor")
@@ -1020,6 +1061,47 @@ func httpDeleteSession(ctx context.Context, w http.ResponseWriter, r *http.Reque
 	doDeleteSession(ctx, w, r, payload)
 }
 
+func httpDeleteSessionType(ctx context.Context, w http.ResponseWriter, r *http.Request) {
+	if pdebug.Enabled {
+		g := pdebug.Marker("httpDeleteSessionType")
+		defer g.End()
+	}
+	if strings.ToLower(r.Method) != `post` {
+		w.Header().Set("Allow", "post")
+		httpError(w, `Method was `+r.Method+`, expected post`, http.StatusNotFound, nil)
+		return
+	}
+
+	var payload model.DeleteSessionTypeRequest
+	jsonbuf := getTransportJSONBuffer()
+	defer releaseTransportJSONBuffer(jsonbuf)
+
+	switch ct := r.Header.Get("Content-Type"); {
+	case ct == "application/json":
+		if _, err := io.Copy(jsonbuf, io.LimitReader(r.Body, MaxPostSize)); err != nil {
+			httpError(w, `Failed to read request body`, http.StatusInternalServerError, err)
+			return
+		}
+		defer r.Body.Close()
+	default:
+		httpError(w, `Invalid content-type`, http.StatusInternalServerError, nil)
+		return
+	}
+	if pdebug.Enabled {
+		pdebug.Printf(`-----> %s`, jsonbuf.Bytes())
+	}
+	if err := json.Unmarshal(jsonbuf.Bytes(), &payload); err != nil {
+		httpError(w, `Invalid JSON input`, http.StatusInternalServerError, err)
+		return
+	}
+
+	if err := validator.HTTPDeleteSessionTypeRequest.Validate(&payload); err != nil {
+		httpError(w, `Invalid input (validation failed)`, http.StatusInternalServerError, err)
+		return
+	}
+	doDeleteSessionType(ctx, w, r, payload)
+}
+
 func httpDeleteSponsor(ctx context.Context, w http.ResponseWriter, r *http.Request) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("httpDeleteSponsor")
@@ -1287,6 +1369,30 @@ func httpListSessionByConference(ctx context.Context, w http.ResponseWriter, r *
 	doListSessionByConference(ctx, w, r, payload)
 }
 
+func httpListSessionTypesByConference(ctx context.Context, w http.ResponseWriter, r *http.Request) {
+	if pdebug.Enabled {
+		g := pdebug.Marker("httpListSessionTypesByConference")
+		defer g.End()
+	}
+	if strings.ToLower(r.Method) != `get` {
+		w.Header().Set("Allow", "get")
+		httpError(w, `Method was `+r.Method+`, expected get`, http.StatusNotFound, nil)
+		return
+	}
+
+	var payload model.ListSessionTypesByConferenceRequest
+	if err := urlenc.Unmarshal([]byte(r.URL.RawQuery), &payload); err != nil {
+		httpError(w, `Failed to parse url query string`, http.StatusInternalServerError, err)
+		return
+	}
+
+	if err := validator.HTTPListSessionTypesByConferenceRequest.Validate(&payload); err != nil {
+		httpError(w, `Invalid input (validation failed)`, http.StatusInternalServerError, err)
+		return
+	}
+	doListSessionTypesByConference(ctx, w, r, payload)
+}
+
 func httpListSponsors(ctx context.Context, w http.ResponseWriter, r *http.Request) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("httpListSponsors")
@@ -1477,6 +1583,30 @@ func httpLookupSession(ctx context.Context, w http.ResponseWriter, r *http.Reque
 		return
 	}
 	doLookupSession(ctx, w, r, payload)
+}
+
+func httpLookupSessionType(ctx context.Context, w http.ResponseWriter, r *http.Request) {
+	if pdebug.Enabled {
+		g := pdebug.Marker("httpLookupSessionType")
+		defer g.End()
+	}
+	if strings.ToLower(r.Method) != `get` {
+		w.Header().Set("Allow", "get")
+		httpError(w, `Method was `+r.Method+`, expected get`, http.StatusNotFound, nil)
+		return
+	}
+
+	var payload model.LookupSessionTypeRequest
+	if err := urlenc.Unmarshal([]byte(r.URL.RawQuery), &payload); err != nil {
+		httpError(w, `Failed to parse url query string`, http.StatusInternalServerError, err)
+		return
+	}
+
+	if err := validator.HTTPLookupSessionTypeRequest.Validate(&payload); err != nil {
+		httpError(w, `Invalid input (validation failed)`, http.StatusInternalServerError, err)
+		return
+	}
+	doLookupSessionType(ctx, w, r, payload)
 }
 
 func httpLookupSponsor(ctx context.Context, w http.ResponseWriter, r *http.Request) {
@@ -1752,6 +1882,47 @@ func httpUpdateSession(ctx context.Context, w http.ResponseWriter, r *http.Reque
 	doUpdateSession(ctx, w, r, payload)
 }
 
+func httpUpdateSessionType(ctx context.Context, w http.ResponseWriter, r *http.Request) {
+	if pdebug.Enabled {
+		g := pdebug.Marker("httpUpdateSessionType")
+		defer g.End()
+	}
+	if strings.ToLower(r.Method) != `post` {
+		w.Header().Set("Allow", "post")
+		httpError(w, `Method was `+r.Method+`, expected post`, http.StatusNotFound, nil)
+		return
+	}
+
+	var payload model.UpdateSessionTypeRequest
+	jsonbuf := getTransportJSONBuffer()
+	defer releaseTransportJSONBuffer(jsonbuf)
+
+	switch ct := r.Header.Get("Content-Type"); {
+	case ct == "application/json":
+		if _, err := io.Copy(jsonbuf, io.LimitReader(r.Body, MaxPostSize)); err != nil {
+			httpError(w, `Failed to read request body`, http.StatusInternalServerError, err)
+			return
+		}
+		defer r.Body.Close()
+	default:
+		httpError(w, `Invalid content-type`, http.StatusInternalServerError, nil)
+		return
+	}
+	if pdebug.Enabled {
+		pdebug.Printf(`-----> %s`, jsonbuf.Bytes())
+	}
+	if err := json.Unmarshal(jsonbuf.Bytes(), &payload); err != nil {
+		httpError(w, `Invalid JSON input`, http.StatusInternalServerError, err)
+		return
+	}
+
+	if err := validator.HTTPUpdateSessionTypeRequest.Validate(&payload); err != nil {
+		httpError(w, `Invalid input (validation failed)`, http.StatusInternalServerError, err)
+		return
+	}
+	doUpdateSessionType(ctx, w, r, payload)
+}
+
 func httpUpdateSponsor(ctx context.Context, w http.ResponseWriter, r *http.Request) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("httpUpdateSponsor")
@@ -1899,6 +2070,7 @@ func (s *Server) SetupRoutes() {
 	r.HandleFunc(`/v1/conference/list`, httpWithContext(httpListConference))
 	r.HandleFunc(`/v1/conference/lookup`, httpWithContext(httpLookupConference))
 	r.HandleFunc(`/v1/conference/lookup_by_slug`, httpWithContext(httpLookupConferenceBySlug))
+	r.HandleFunc(`/v1/conference/session_type/add`, httpWithContext(httpWithBasicAuth(httpAddSessionType)))
 	r.HandleFunc(`/v1/conference/update`, httpWithContext(httpWithBasicAuth(httpUpdateConference)))
 	r.HandleFunc(`/v1/conference/venue/add`, httpWithContext(httpWithBasicAuth(httpAddConferenceVenue)))
 	r.HandleFunc(`/v1/conference/venue/delete`, httpWithContext(httpWithBasicAuth(httpDeleteConferenceVenue)))
@@ -1924,6 +2096,10 @@ func (s *Server) SetupRoutes() {
 	r.HandleFunc(`/v1/session/delete`, httpWithContext(httpWithBasicAuth(httpDeleteSession)))
 	r.HandleFunc(`/v1/session/lookup`, httpWithContext(httpLookupSession))
 	r.HandleFunc(`/v1/session/update`, httpWithContext(httpWithBasicAuth(httpUpdateSession)))
+	r.HandleFunc(`/v1/session_type/delete`, httpWithContext(httpWithBasicAuth(httpDeleteSessionType)))
+	r.HandleFunc(`/v1/session_type/list`, httpWithContext(httpWithBasicAuth(httpListSessionTypesByConference)))
+	r.HandleFunc(`/v1/session_type/lookup`, httpWithContext(httpWithBasicAuth(httpLookupSessionType)))
+	r.HandleFunc(`/v1/session_type/update`, httpWithContext(httpWithBasicAuth(httpUpdateSessionType)))
 	r.HandleFunc(`/v1/sponsor/add`, httpWithContext(httpWithBasicAuth(httpAddSponsor)))
 	r.HandleFunc(`/v1/sponsor/delete`, httpWithContext(httpWithBasicAuth(httpDeleteSponsor)))
 	r.HandleFunc(`/v1/sponsor/list`, httpWithContext(httpWithBasicAuth(httpListSponsors)))

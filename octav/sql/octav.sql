@@ -114,6 +114,22 @@ CREATE TABLE conference_venues (
     UNIQUE KEY(conference_id, venue_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
+-- per conference session types. When a new conference is created,
+-- a standard set of types are automatically created.
+CREATE TABLE session_types (
+    oid              INTEGER UNSIGNED NOT NULL PRIMARY KEY AUTO_INCREMENT,
+    eid              CHAR(64) CHARACTER SET latin1 NOT NULL,
+    conference_id    CHAR(64) CHARACTER SET latin1,
+    name             TEXT NOT NULL, -- "Lightning Talk"
+    abstract         TEXT NOT NULL, -- "5 minute talks about anything you want"
+    duration         INTEGER UNSIGNED NOT NULL,
+    submission_start DATETIME,
+    submission_end   DATETIME,
+    created_on       DATETIME NOT NULL,
+    modified_on      TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (conference_id) REFERENCES conferences(eid) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
 CREATE TABLE sessions (
     oid INTEGER UNSIGNED NOT NULL PRIMARY KEY AUTO_INCREMENT,
     eid CHAR(64) CHARACTER SET latin1 NOT NULL,

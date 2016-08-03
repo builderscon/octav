@@ -1363,14 +1363,14 @@ func doSessionCreate(args cmdargs) int {
 	fs.StringVar(&category, "category", "", "")
 	var conference_id string
 	fs.StringVar(&conference_id, "conference_id", "", "")
-	var duration int64
-	fs.Int64Var(&duration, "duration", 0, "")
 	var material_level string
 	fs.StringVar(&material_level, "material_level", "", "")
 	var memo string
 	fs.StringVar(&memo, "memo", "", "")
 	var photo_permission string
 	fs.StringVar(&photo_permission, "photo_permission", "", "")
+	var type_id string
+	fs.StringVar(&type_id, "type_id", "", "")
 	var slide_language string
 	fs.StringVar(&slide_language, "slide_language", "", "")
 	var slide_subtitles string
@@ -1406,9 +1406,6 @@ func doSessionCreate(args cmdargs) int {
 	if conference_id != "" {
 		m["conference_id"] = conference_id
 	}
-	if duration != 0 {
-		m["duration"] = duration
-	}
 	if material_level != "" {
 		m["material_level"] = material_level
 	}
@@ -1417,6 +1414,9 @@ func doSessionCreate(args cmdargs) int {
 	}
 	if photo_permission != "" {
 		m["photo_permission"] = photo_permission
+	}
+	if type_id != "" {
+		m["session_type_id"] = type_id
 	}
 	if slide_language != "" {
 		m["slide_language"] = slide_language

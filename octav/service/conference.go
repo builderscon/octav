@@ -3,6 +3,7 @@ package service
 import (
 	"bytes"
 	"database/sql"
+	"fmt"
 	"io"
 	"mime/multipart"
 	"net/http"
@@ -10,8 +11,8 @@ import (
 	"strings"
 	"time"
 
-	"google.golang.org/cloud/storage"
 	"golang.org/x/net/context"
+	"google.golang.org/cloud/storage"
 
 	"github.com/builderscon/octav/octav/db"
 	"github.com/builderscon/octav/octav/internal/errors"
@@ -72,6 +73,42 @@ func (v *Conference) populateRowForUpdate(vdb *db.Conference, payload model.Upda
 	return nil
 }
 
+func (v *Conference) CreateDefaultSessionTypes(tx *db.Tx, c *model.Conference) (err error) {
+	if pdebug.Enabled {
+		g := pdebug.Marker("service.Conference.CreateDefaultSessionTypes").BindError(&err)
+		defer g.End()
+	}
+	sst := SessionType{}
+
+	var stocktypes []model.AddSessionTypeRequest
+
+	for _, dur := range []int{3600, 1800} {
+		r := model.AddSessionTypeRequest{
+			Name:     fmt.Sprintf("%d min", dur/60),
+			Abstract: fmt.Sprintf("%d minute session", dur/60),
+			Duration: dur,
+		}
+		r.L10N.Set("ja", "abstract", fmt.Sprintf("%d分枠", dur/60))
+		stocktypes = append(stocktypes, r)
+	}
+	r := model.AddSessionTypeRequest{
+		Name:     "Lightning Talk",
+		Abstract: "5 minute session about anything you want",
+		Duration: 300,
+	}
+	r.L10N.Set("ja", "abstract", "5分間で強制終了、初心者も安心枠")
+	stocktypes = append(stocktypes, r)
+
+	for _, r := range stocktypes {
+		var vdb db.SessionType
+		r.ConferenceID = c.ID
+		if err := sst.Create(tx, &vdb, model.CreateSessionTypeRequest{r}); err != nil {
+			return errors.Wrap(err, "failed to create default session type")
+		}
+	}
+	return nil
+}
+
 func (v *Conference) CreateFromPayload(tx *db.Tx, payload model.CreateConferenceRequest, result *model.Conference) error {
 	su := User{}
 	if err := su.IsConferenceSeriesAdministrator(tx, payload.SeriesID, payload.UserID); err != nil {
@@ -90,6 +127,10 @@ func (v *Conference) CreateFromPayload(tx *db.Tx, payload model.CreateConference
 	c := model.Conference{}
 	if err := c.FromRow(vdb); err != nil {
 		return errors.Wrap(err, "failed to populate model from database")
+	}
+
+	if err := v.CreateDefaultSessionTypes(tx, &c); err != nil {
+		return errors.Wrap(err, "failed to create default session types")
 	}
 
 	*result = c
