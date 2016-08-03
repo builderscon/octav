@@ -6,6 +6,7 @@ import (
 	"strconv"
 	"sync"
 	"testing"
+	"time"
 
 	"github.com/builderscon/octav/octav"
 	"github.com/builderscon/octav/octav/client"
@@ -64,6 +65,18 @@ func NewTestCtx(t *testing.T) (*TestCtx, error) {
 	}
 
 	return ctx, nil
+}
+
+func (ctx *TestCtx) Subtest(name string, cb func(*TestCtx)) {
+	ctx.T.Run(name, func(t *testing.T) {
+		localctx := &TestCtx{
+			T:          t,
+			APIClient:  ctx.APIClient,
+			Superuser:  ctx.Superuser,
+			HTTPClient: ctx.HTTPClient,
+		}
+		cb(localctx)
+	})
 }
 
 func (ctx *TestCtx) Close() error {
@@ -321,6 +334,15 @@ func testUpdateConference(ctx *TestCtx, in *model.UpdateConferenceRequest) error
 	return nil
 }
 
+func testMakeConferencePublic(ctx *TestCtx, conferenceID, userID string) error {
+	r := model.UpdateConferenceRequest{
+		ID:     conferenceID,
+		UserID: userID,
+	}
+	r.Status.Set("public")
+	return testUpdateConference(ctx, &r)
+}
+
 func testDeleteConference(ctx *TestCtx, id string) error {
 	err := ctx.HTTPClient.DeleteConference(&model.DeleteConferenceRequest{ID: id})
 	if !assert.NoError(ctx.T, err, "DeleteConference should be successful") {
@@ -332,9 +354,9 @@ func testDeleteConference(ctx *TestCtx, id string) error {
 func larrywall(confID, userID string) *model.AddFeaturedSpeakerRequest {
 	r := &model.AddFeaturedSpeakerRequest{
 		ConferenceID: confID,
-		DisplayName: `Larry Wall (TimToady)`,
-		Description: `Larry Wall is a computer programmer and author, most widely known as the creator of the Perl programming language.`,
-		UserID: userID,
+		DisplayName:  `Larry Wall (TimToady)`,
+		Description:  `Larry Wall is a computer programmer and author, most widely known as the creator of the Perl programming language.`,
+		UserID:       userID,
 	}
 	r.AvatarURL.Set(`https://upload.wikimedia.org/wikipedia/commons/b/b3/Larry_Wall_YAPC_2007.jpg`)
 	return r
@@ -350,7 +372,7 @@ func testCreateFeaturedSpeaker(ctx *TestCtx, in *model.AddFeaturedSpeakerRequest
 
 func testDeleteFeaturedSpeaker(ctx *TestCtx, id, userID string) error {
 	err := ctx.HTTPClient.DeleteFeaturedSpeaker(&model.DeleteFeaturedSpeakerRequest{
-		ID: id,
+		ID:     id,
 		UserID: userID,
 	})
 	if !assert.NoError(ctx.T, err, "DeleteFeaturedSpeaker should succeed") {
@@ -362,10 +384,10 @@ func testDeleteFeaturedSpeaker(ctx *TestCtx, id, userID string) error {
 func buildersconinc(confID, userID string) *model.AddSponsorRequest {
 	r := &model.AddSponsorRequest{
 		ConferenceID: confID,
-		Name: "builderscon",
-		URL: "http://builderscon.io",
-		GroupName: "tier-1",
-		UserID: userID,
+		Name:         "builderscon",
+		URL:          "http://builderscon.io",
+		GroupName:    "tier-1",
+		UserID:       userID,
 	}
 	return r
 }
@@ -380,7 +402,7 @@ func testCreateSponsor(ctx *TestCtx, in *model.AddSponsorRequest) (*model.Sponso
 
 func testDeleteSponsor(ctx *TestCtx, id, userID string) error {
 	err := ctx.HTTPClient.DeleteSponsor(&model.DeleteSponsorRequest{
-		ID: id,
+		ID:     id,
 		UserID: userID,
 	})
 	if !assert.NoError(ctx.T, err, "DeleteSponsor should succeed") {
@@ -552,14 +574,6 @@ func TestRoomCRUD(t *testing.T) {
 	}
 }
 
-func testCreateSession(ctx *TestCtx, in *model.CreateSessionRequest) (*model.Session, error) {
-	res, err := ctx.HTTPClient.CreateSession(in)
-	if !assert.NoError(ctx.T, err, "CreateSession should succeed") {
-		return nil, err
-	}
-	return res, nil
-}
-
 func testLookupSession(ctx *TestCtx, id, lang string) (*model.Session, error) {
 	r := &model.LookupSessionRequest{ID: id}
 	if lang != "" {
@@ -588,15 +602,29 @@ func testDeleteSession(ctx *TestCtx, sessionID, userID string) error {
 	return err
 }
 
-func bconsession(cid, speakerID, userID string) *model.CreateSessionRequest {
+func bconsession(cid, speakerID, userID, sessionTypeID string) *model.CreateSessionRequest {
 	in := model.CreateSessionRequest{}
-	in.ConferenceID.Set(cid)
+	in.ConferenceID = cid
 	in.SpeakerID.Set(speakerID)
 	in.Title.Set("How To Write A Conference Backend")
-	in.Duration.Set(60)
+	in.SessionTypeID = sessionTypeID
 	in.Abstract.Set("Use lots of reflection and generate lots of code")
 	in.UserID = userID
 	return &in
+}
+
+func testStartSubmission(ctx *TestCtx, sessionTypeID, userID string, ref time.Time) error {
+	r := &model.UpdateSessionTypeRequest{
+		ID:     sessionTypeID,
+		UserID: userID,
+	}
+	r.SubmissionStart.Set(ref.Add(-1 * 24 * time.Hour).Format(time.RFC3339))
+	r.SubmissionEnd.Set(ref.Add(24 * time.Hour).Format(time.RFC3339))
+	err := ctx.HTTPClient.UpdateSessionType(r)
+	if !assert.NoError(ctx.T, err, "StartSessionSubmission should be successful") {
+		return err
+	}
+	return err
 }
 
 func TestSessionCRUD(t *testing.T) {
@@ -633,7 +661,40 @@ func TestSessionCRUD(t *testing.T) {
 	}
 	defer testDeleteConference(ctx, conference.ID)
 
-	res, err := testCreateSession(ctx, bconsession(conference.ID, user.ID, user.ID))
+	// Make sure the conference is public
+	if err := testMakeConferencePublic(ctx, conference.ID, user.ID); err != nil {
+		return
+	}
+
+	list, err := ctx.HTTPClient.ListSessionTypesByConference(&model.ListSessionTypesByConferenceRequest{
+		ConferenceID: conference.ID,
+	})
+	if !assert.NoError(ctx.T, err) {
+		return
+	}
+	if !assert.True(ctx.T, len(list) > 0) {
+		return
+	}
+
+	// Make this one session type to NOT accept talks right now
+	ctx.Subtest("Proposal submission should be rejected if out of range", func(ctx *TestCtx) {
+		stype := list[1]
+		// Set time at 1 month ago
+		if err := testStartSubmission(ctx, stype.ID, user.ID, time.Now().Add(-1*24*30*time.Hour)); err != nil {
+			return
+		}
+		_, err := testCreateSessionFail(ctx, bconsession(conference.ID, user.ID, user.ID, stype.ID))
+		if err != nil {
+			return
+		}
+	})
+
+	stype := list[0]
+	if err := testStartSubmission(ctx, stype.ID, user.ID, time.Now()); err != nil {
+		return
+	}
+
+	res, err := testCreateSessionPass(ctx, bconsession(conference.ID, user.ID, user.ID, stype.ID))
 	if err != nil {
 		return
 	}
@@ -1011,7 +1072,7 @@ func TestListConference(t *testing.T) {
 
 		err = ctx.HTTPClient.AddConferenceDates(&model.AddConferenceDatesRequest{
 			ConferenceID: conf.ID,
-			UserID: user.ID,
+			UserID:       user.ID,
 			Dates: []model.ConferenceDate{
 				model.ConferenceDate{
 					Date:  model.NewDate(2016, 3, 22),
@@ -1027,7 +1088,7 @@ func TestListConference(t *testing.T) {
 		defer testDeleteConference(ctx, conf.ID)
 
 		req := &model.UpdateConferenceRequest{
-			ID: confs[i].ID,
+			ID:     confs[i].ID,
 			UserID: user.ID,
 		}
 		req.Status.Set("public")
@@ -1062,7 +1123,7 @@ func TestListConference(t *testing.T) {
 	// Make some of them private
 	for i := 0; i < 5; i++ {
 		req := &model.UpdateConferenceRequest{
-			ID: confs[i*2].ID,
+			ID:     confs[i*2].ID,
 			UserID: user.ID,
 		}
 		req.Status.Set("private")
@@ -1071,10 +1132,10 @@ func TestListConference(t *testing.T) {
 		}
 	}
 
-  res, err = ctx.HTTPClient.ListConference(&in)
-  if !assert.NoError(ctx.T, err, "ListConference should succeed") {
-    return
-  }
+	res, err = ctx.HTTPClient.ListConference(&in)
+	if !assert.NoError(ctx.T, err, "ListConference should succeed") {
+		return
+	}
 
 	if !assert.Len(ctx.T, res, 5, "ListConference returns 5 conferences") {
 		return
@@ -1161,15 +1222,34 @@ func TestListSessionByConference(t *testing.T) {
 	}
 	defer testDeleteConference(ctx, conference.ID)
 
+	if err := testMakeConferencePublic(ctx, conference.ID, user.ID); err != nil {
+		return
+	}
+
+	list, err := ctx.HTTPClient.ListSessionTypesByConference(&model.ListSessionTypesByConferenceRequest{
+		ConferenceID: conference.ID,
+	})
+	if !assert.NoError(ctx.T, err) {
+		return
+	}
+	if !assert.True(ctx.T, len(list) > 0) {
+		return
+	}
+
+	stype := list[0]
+	if err := testStartSubmission(ctx, stype.ID, user.ID, time.Now()); err != nil {
+		return
+	}
+
 	for i := 0; i < 10; i++ {
 		sin := model.CreateSessionRequest{}
-		sin.ConferenceID.Set(conference.ID)
+		sin.ConferenceID = conference.ID
 		sin.SpeakerID.Set(user.ID)
 		sin.Title.Set(fmt.Sprintf("Title %d", i))
-		sin.Duration.Set(60)
+		sin.SessionTypeID = stype.ID
 		sin.Abstract.Set("Use lots of reflection and generate lots of code")
 		sin.UserID = user.ID
-		_, err := testCreateSession(ctx, &sin)
+		_, err := testCreateSessionPass(ctx, &sin)
 		if err != nil {
 			return
 		}
@@ -1212,4 +1292,3 @@ func TestListVenue(t *testing.T) {
 		return
 	}
 }
-

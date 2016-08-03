@@ -152,12 +152,36 @@ func testCreateConference(ctx *TestCtx, in *model.CreateConferenceRequest, fail 
 	res, err := ctx.HTTPClient.CreateConference(in)
 	if fail {
 		if !assert.Error(ctx.T, err, "CreateConference should fail") {
-			return nil, errors.New("expected operation to fail, but succeeded")
+			return nil, errors.Wrap(err, "expected operation to fail, but succeeded")
 		}
 		return nil, nil
 	}
 	if !assert.NoError(ctx.T, err, "CreateConference should succeed") {
-		return nil, err
+		return nil, errors.Wrap(err, "expected operation to succeed, but failed")
 	}
 	return res, nil
 }
+
+func testCreateSessionPass(ctx *TestCtx, in *model.CreateSessionRequest) (*model.Session, error) {
+	return testCreateSession(ctx, in, false)
+}
+
+func testCreateSessionFail(ctx *TestCtx, in *model.CreateSessionRequest) (*model.Session, error) {
+	return testCreateSession(ctx, in, true)
+}
+
+func testCreateSession(ctx *TestCtx, in *model.CreateSessionRequest, fail bool) (*model.Session, error) {
+	res, err := ctx.HTTPClient.CreateSession(in)
+	if fail {
+		if !assert.Error(ctx.T, err, "CreateSession should fail") {
+			return nil, errors.Wrap(err, "expected operation to fail, but succeeded")
+		}
+		return nil, nil
+	}
+	if !assert.NoError(ctx.T, err, "CreateSession should succeed") {
+		return nil, errors.Wrap(err, "expected operation to suceed, but failed")
+	}
+	return res, nil
+}
+
+

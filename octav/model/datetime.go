@@ -374,8 +374,15 @@ func (t *MaybeJSONTime) Set(x interface{}) error {
 	case JSONTime:
 		t.JSONTime = x.(JSONTime)
 		t.ValidFlag = true
+	case string:
+		v, err := time.Parse(time.RFC3339, x.(string))
+		if err != nil {
+			return errors.Wrap(err, "failed to parse string value for MaybeJSONTime")
+		}
+		t.JSONTime = JSONTime(v)
+		t.ValidFlag = true
 	default:
-		return errors.New("invalid type for MaybeJSONTime.Set")
+		return errors.Errorf("invalid type %s for MaybeJSONTime.Set", reflect.TypeOf(x))
 	}
 	return nil
 }

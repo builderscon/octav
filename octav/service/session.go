@@ -10,9 +10,9 @@ import (
 
 func (v *Session) populateRowForCreate(vdb *db.Session, payload model.CreateSessionRequest) error {
 	vdb.EID = tools.UUID()
-	vdb.ConferenceID = payload.ConferenceID.String
+	vdb.ConferenceID = payload.ConferenceID
 	vdb.SpeakerID = payload.SpeakerID.String
-	vdb.Duration = int(payload.Duration.Int)
+	vdb.Duration = payload.Duration
 	vdb.HasInterpretation = false
 	vdb.Status = "pending"
 	vdb.SortOrder = 0
@@ -236,6 +236,20 @@ func (v *Session) CreateFromPayload(tx *db.Tx, result *model.Session, payload mo
 	if err := su.Lookup(tx, &u, payload.UserID); err != nil {
 		return errors.Wrapf(err, "failed to load user %s", payload.UserID)
 	}
+
+	// Check if this session type is allowed to be submitted right now
+	sst := SessionType{}
+	if err := sst.IsAcceptingSubmissions(tx, payload.SessionTypeID); err != nil {
+		return errors.Wrap(err, "not accepting submissions for this session type")
+	}
+
+	// Load the session type, so we can populate payload.Duration
+	var mst model.SessionType
+	if err := sst.Lookup(tx, &mst, payload.SessionTypeID); err != nil {
+		return errors.Wrap(err, "failed to lookup session type")
+	}
+
+	payload.Duration = mst.Duration
 
 	var vdb db.Session
 	if err := v.Create(tx, &vdb, payload); err != nil {

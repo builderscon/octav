@@ -65,7 +65,7 @@ func (r *LookupSessionTypeRequest) Populate(m map[string]interface{}) error {
 	return nil
 }
 
-func (r CreateSessionTypeRequest) collectMarshalData() map[string]interface{} {
+func (r AddSessionTypeRequest) collectMarshalData() map[string]interface{} {
 	m := make(map[string]interface{})
 	m["conference_id"] = r.ConferenceID
 	m["name"] = r.Name
@@ -81,7 +81,7 @@ func (r CreateSessionTypeRequest) collectMarshalData() map[string]interface{} {
 	return m
 }
 
-func (r CreateSessionTypeRequest) MarshalJSON() ([]byte, error) {
+func (r AddSessionTypeRequest) MarshalJSON() ([]byte, error) {
 	m := r.collectMarshalData()
 	buf, err := json.Marshal(m)
 	if err != nil {
@@ -90,7 +90,7 @@ func (r CreateSessionTypeRequest) MarshalJSON() ([]byte, error) {
 	return tools.MarshalJSONWithL10N(buf, r.L10N)
 }
 
-func (r CreateSessionTypeRequest) MarshalURL() ([]byte, error) {
+func (r AddSessionTypeRequest) MarshalURL() ([]byte, error) {
 	m := r.collectMarshalData()
 	buf, err := urlenc.Marshal(m)
 	if err != nil {
@@ -99,7 +99,7 @@ func (r CreateSessionTypeRequest) MarshalURL() ([]byte, error) {
 	return tools.MarshalURLWithL10N(buf, r.L10N)
 }
 
-func (r *CreateSessionTypeRequest) UnmarshalJSON(data []byte) error {
+func (r *AddSessionTypeRequest) UnmarshalJSON(data []byte) error {
 	m := make(map[string]interface{})
 	if err := json.Unmarshal(data, &m); err != nil {
 		return err
@@ -107,7 +107,7 @@ func (r *CreateSessionTypeRequest) UnmarshalJSON(data []byte) error {
 	return r.Populate(m)
 }
 
-func (r *CreateSessionTypeRequest) Populate(m map[string]interface{}) error {
+func (r *AddSessionTypeRequest) Populate(m map[string]interface{}) error {
 	if jv, ok := m["conference_id"]; ok {
 		switch jv.(type) {
 		case string:
@@ -171,12 +171,12 @@ func (r *CreateSessionTypeRequest) Populate(m map[string]interface{}) error {
 	return nil
 }
 
-func (r *CreateSessionTypeRequest) GetPropNames() ([]string, error) {
+func (r *AddSessionTypeRequest) GetPropNames() ([]string, error) {
 	l, _ := r.L10N.GetPropNames()
 	return append(l, "conference_id", "name", "abstract", "duration", "submission_start", "submission_end", "user_id"), nil
 }
 
-func (r *CreateSessionTypeRequest) SetPropValue(s string, v interface{}) error {
+func (r *AddSessionTypeRequest) SetPropValue(s string, v interface{}) error {
 	switch s {
 	case "conference_id":
 		if jv, ok := v.(string); ok {
@@ -211,6 +211,133 @@ func (r *CreateSessionTypeRequest) SetPropValue(s string, v interface{}) error {
 		return errors.New("unknown column '" + s + "'")
 	}
 	return ErrInvalidFieldType{Field: s}
+}
+
+func (r DeleteSessionTypeRequest) collectMarshalData() map[string]interface{} {
+	m := make(map[string]interface{})
+	m["id"] = r.ID
+	m["user_id"] = r.UserID
+	return m
+}
+
+func (r DeleteSessionTypeRequest) MarshalJSON() ([]byte, error) {
+	m := r.collectMarshalData()
+	buf, err := json.Marshal(m)
+	if err != nil {
+		return nil, err
+	}
+	return buf, nil
+}
+
+func (r DeleteSessionTypeRequest) MarshalURL() ([]byte, error) {
+	m := r.collectMarshalData()
+	buf, err := urlenc.Marshal(m)
+	if err != nil {
+		return nil, err
+	}
+	return buf, nil
+}
+
+func (r *DeleteSessionTypeRequest) UnmarshalJSON(data []byte) error {
+	m := make(map[string]interface{})
+	if err := json.Unmarshal(data, &m); err != nil {
+		return err
+	}
+	return r.Populate(m)
+}
+
+func (r *DeleteSessionTypeRequest) Populate(m map[string]interface{}) error {
+	if jv, ok := m["id"]; ok {
+		switch jv.(type) {
+		case string:
+			r.ID = jv.(string)
+			delete(m, "id")
+		default:
+			return ErrInvalidJSONFieldType{Field: "id"}
+		}
+	}
+	if jv, ok := m["user_id"]; ok {
+		switch jv.(type) {
+		case string:
+			r.UserID = jv.(string)
+			delete(m, "user_id")
+		default:
+			return ErrInvalidJSONFieldType{Field: "user_id"}
+		}
+	}
+	return nil
+}
+
+func (r ListSessionTypesByConferenceRequest) collectMarshalData() map[string]interface{} {
+	m := make(map[string]interface{})
+	m["conference_id"] = r.ConferenceID
+	if r.Since.Valid() {
+		m["since"] = r.Since.Value()
+	}
+	if r.Limit.Valid() {
+		m["limit"] = r.Limit.Value()
+	}
+	if r.Lang.Valid() {
+		m["lang"] = r.Lang.Value()
+	}
+	return m
+}
+
+func (r ListSessionTypesByConferenceRequest) MarshalJSON() ([]byte, error) {
+	m := r.collectMarshalData()
+	buf, err := json.Marshal(m)
+	if err != nil {
+		return nil, err
+	}
+	return buf, nil
+}
+
+func (r ListSessionTypesByConferenceRequest) MarshalURL() ([]byte, error) {
+	m := r.collectMarshalData()
+	buf, err := urlenc.Marshal(m)
+	if err != nil {
+		return nil, err
+	}
+	return buf, nil
+}
+
+func (r *ListSessionTypesByConferenceRequest) UnmarshalJSON(data []byte) error {
+	m := make(map[string]interface{})
+	if err := json.Unmarshal(data, &m); err != nil {
+		return err
+	}
+	return r.Populate(m)
+}
+
+func (r *ListSessionTypesByConferenceRequest) Populate(m map[string]interface{}) error {
+	if jv, ok := m["conference_id"]; ok {
+		switch jv.(type) {
+		case string:
+			r.ConferenceID = jv.(string)
+			delete(m, "conference_id")
+		default:
+			return ErrInvalidJSONFieldType{Field: "conference_id"}
+		}
+	}
+	if jv, ok := m["since"]; ok {
+		if err := r.Since.Set(jv); err != nil {
+			return errors.New("set field Since failed: " + err.Error())
+		}
+		delete(m, "since")
+	}
+	if jv, ok := m["limit"]; ok {
+		if err := r.Limit.Set(jv); err != nil {
+			return errors.New("set field Limit failed: " + err.Error())
+		}
+		delete(m, "limit")
+	}
+	if jv, ok := m["lang"]; ok {
+		if err := r.Lang.Set(jv); err != nil {
+			return errors.New("set field Lang failed: " + err.Error())
+		}
+		delete(m, "lang")
+	}
+	return nil
 }
 
 func (r UpdateSessionTypeRequest) collectMarshalData() map[string]interface{} {
@@ -2191,12 +2318,11 @@ func (r *ListRoomRequest) Populate(m map[string]interface{}) error {
 
 func (r CreateSessionRequest) collectMarshalData() map[string]interface{} {
 	m := make(map[string]interface{})
-	if r.ConferenceID.Valid() {
-		m["conference_id"] = r.ConferenceID.Value()
-	}
+	m["conference_id"] = r.ConferenceID
 	if r.SpeakerID.Valid() {
 		m["speaker_id"] = r.SpeakerID.Value()
 	}
+	m["session_type_id"] = r.SessionTypeID
 	if r.Title.Valid() {
 		m["title"] = r.Title.Value()
 	}
@@ -2205,9 +2331,6 @@ func (r CreateSessionRequest) collectMarshalData() map[string]interface{} {
 	}
 	if r.Memo.Valid() {
 		m["memo"] = r.Memo.Value()
-	}
-	if r.Duration.Valid() {
-		m["duration"] = r.Duration.Value()
 	}
 	if r.MaterialLevel.Valid() {
 		m["material_level"] = r.MaterialLevel.Value()
@@ -2271,16 +2394,28 @@ func (r *CreateSessionRequest) UnmarshalJSON(data []byte) error {
 
 func (r *CreateSessionRequest) Populate(m map[string]interface{}) error {
 	if jv, ok := m["conference_id"]; ok {
-		if err := r.ConferenceID.Set(jv); err != nil {
-			return errors.New("set field ConferenceID failed: " + err.Error())
+		switch jv.(type) {
+		case string:
+			r.ConferenceID = jv.(string)
+			delete(m, "conference_id")
+		default:
+			return ErrInvalidJSONFieldType{Field: "conference_id"}
 		}
-		delete(m, "conference_id")
 	}
 	if jv, ok := m["speaker_id"]; ok {
 		if err := r.SpeakerID.Set(jv); err != nil {
 			return errors.New("set field SpeakerID failed: " + err.Error())
 		}
 		delete(m, "speaker_id")
+	}
+	if jv, ok := m["session_type_id"]; ok {
+		switch jv.(type) {
+		case string:
+			r.SessionTypeID = jv.(string)
+			delete(m, "session_type_id")
+		default:
+			return ErrInvalidJSONFieldType{Field: "session_type_id"}
+		}
 	}
 	if jv, ok := m["title"]; ok {
 		if err := r.Title.Set(jv); err != nil {
@@ -2299,12 +2434,6 @@ func (r *CreateSessionRequest) Populate(m map[string]interface{}) error {
 			return errors.New("set field Memo failed: " + err.Error())
 		}
 		delete(m, "memo")
-	}
-	if jv, ok := m["duration"]; ok {
-		if err := r.Duration.Set(jv); err != nil {
-			return errors.New("set field Duration failed: " + err.Error())
-		}
-		delete(m, "duration")
 	}
 	if jv, ok := m["material_level"]; ok {
 		if err := r.MaterialLevel.Set(jv); err != nil {
@@ -2375,7 +2504,7 @@ func (r *CreateSessionRequest) Populate(m map[string]interface{}) error {
 			return ErrInvalidJSONFieldType{Field: "user_id"}
 		}
 	}
-	if err := tools.ExtractL10NFields(m, &r.L10N, []string{"conference_id", "speaker_id", "title", "abstract", "memo", "duration", "material_level", "tags", "category", "spoken_language", "slide_language", "slide_subtitles", "slide_url", "video_url", "photo_permission", "video_permission", "user_id"}); err != nil {
+	if err := tools.ExtractL10NFields(m, &r.L10N, []string{"conference_id", "speaker_id", "session_type_id", "title", "abstract", "memo", "material_level", "tags", "category", "spoken_language", "slide_language", "slide_subtitles", "slide_url", "video_url", "photo_permission", "video_permission", "user_id"}); err != nil {
 		return err
 	}
 	return nil
@@ -2383,23 +2512,29 @@ func (r *CreateSessionRequest) Populate(m map[string]interface{}) error {
 
 func (r *CreateSessionRequest) GetPropNames() ([]string, error) {
 	l, _ := r.L10N.GetPropNames()
-	return append(l, "conference_id", "speaker_id", "title", "abstract", "memo", "duration", "material_level", "tags", "category", "spoken_language", "slide_language", "slide_subtitles", "slide_url", "video_url", "photo_permission", "video_permission", "user_id"), nil
+	return append(l, "conference_id", "speaker_id", "session_type_id", "title", "abstract", "memo", "material_level", "tags", "category", "spoken_language", "slide_language", "slide_subtitles", "slide_url", "video_url", "photo_permission", "video_permission", "user_id"), nil
 }
 
 func (r *CreateSessionRequest) SetPropValue(s string, v interface{}) error {
 	switch s {
 	case "conference_id":
-		return r.ConferenceID.Set(v)
+		if jv, ok := v.(string); ok {
+			r.ConferenceID = jv
+			return nil
+		}
 	case "speaker_id":
 		return r.SpeakerID.Set(v)
+	case "session_type_id":
+		if jv, ok := v.(string); ok {
+			r.SessionTypeID = jv
+			return nil
+		}
 	case "title":
 		return r.Title.Set(v)
 	case "abstract":
 		return r.Abstract.Set(v)
 	case "memo":
 		return r.Memo.Set(v)
-	case "duration":
-		return r.Duration.Set(v)
 	case "material_level":
 		return r.MaterialLevel.Set(v)
 	case "tags":

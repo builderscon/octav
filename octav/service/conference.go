@@ -73,12 +73,25 @@ func (v *Conference) populateRowForUpdate(vdb *db.Conference, payload model.Upda
 	return nil
 }
 
-func (v *Conference) CreateDefaultSessionTypes(tx *db.Tx, c *model.Conference) error {
+func (v *Conference) CreateDefaultSessionTypes(tx *db.Tx, c *model.Conference) (err error) {
+	if pdebug.Enabled {
+		g := pdebug.Marker("service.Conference.CreateDefaultSessionTypes").BindError(&err)
+		defer g.End()
+	}
 	sst := SessionType{}
 
-	var stocktypes []model.CreateSessionTypeRequest
+	var stocktypes []model.AddSessionTypeRequest
 
-	r := model.CreateSessionTypeRequest{
+	for _, dur := range []int{3600, 1800} {
+		r := model.AddSessionTypeRequest{
+			Name:     fmt.Sprintf("%d min", dur/60),
+			Abstract: fmt.Sprintf("%d minute session", dur/60),
+			Duration: dur,
+		}
+		r.L10N.Set("ja", "abstract", fmt.Sprintf("%d分枠", dur/60))
+		stocktypes = append(stocktypes, r)
+	}
+	r := model.AddSessionTypeRequest{
 		Name:     "Lightning Talk",
 		Abstract: "5 minute session about anything you want",
 		Duration: 300,
@@ -86,20 +99,10 @@ func (v *Conference) CreateDefaultSessionTypes(tx *db.Tx, c *model.Conference) e
 	r.L10N.Set("ja", "abstract", "5分間で強制終了、初心者も安心枠")
 	stocktypes = append(stocktypes, r)
 
-	for _, dur := range []int{1800, 3600} {
-		r := model.CreateSessionTypeRequest{
-			Name:     fmt.Sprintf("%d min", 3600/60),
-			Abstract: fmt.Sprintf("%d minute session", 3600/60),
-			Duration: dur,
-		}
-		r.L10N.Set("ja", "abstract", fmt.Sprintf("%d分枠", 3600/60))
-		stocktypes = append(stocktypes, r)
-	}
-
 	for _, r := range stocktypes {
 		var vdb db.SessionType
 		r.ConferenceID = c.ID
-		if err := sst.Create(tx, &vdb, r); err != nil {
+		if err := sst.Create(tx, &vdb, model.CreateSessionTypeRequest{r}); err != nil {
 			return errors.Wrap(err, "failed to create default session type")
 		}
 	}

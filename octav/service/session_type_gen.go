@@ -21,6 +21,9 @@ func (v *SessionType) LookupFromPayload(tx *db.Tx, m *model.SessionType, payload
 	if err = v.Lookup(tx, m, payload.ID); err != nil {
 		return errors.Wrap(err, "failed to load model.SessionType from database")
 	}
+	if err := v.Decorate(tx, m, payload.Lang.String); err != nil {
+		return errors.Wrap(err, "failed to load associated data for model.SessionType from database")
+	}
 	return nil
 }
 func (v *SessionType) Lookup(tx *db.Tx, m *model.SessionType, id string) (err error) {
@@ -54,6 +57,9 @@ func (v *SessionType) Create(tx *db.Tx, vdb *db.SessionType, payload model.Creat
 		return err
 	}
 
+	if err := payload.L10N.CreateLocalizedStrings(tx, "SessionType", vdb.EID); err != nil {
+		return err
+	}
 	return nil
 }
 
@@ -74,6 +80,75 @@ func (v *SessionType) Update(tx *db.Tx, vdb *db.SessionType, payload model.Updat
 	if err := vdb.Update(tx); err != nil {
 		return err
 	}
+
+	return payload.L10N.Foreach(func(l, k, x string) error {
+		if pdebug.Enabled {
+			pdebug.Printf("Updating l10n string for '%s' (%s)", k, l)
+		}
+		ls := db.LocalizedString{
+			ParentType: "SessionType",
+			ParentID:   vdb.EID,
+			Language:   l,
+			Name:       k,
+			Localized:  x,
+		}
+		return ls.Upsert(tx)
+	})
+}
+
+func (v *SessionType) ReplaceL10NStrings(tx *db.Tx, m *model.SessionType, lang string) error {
+	if pdebug.Enabled {
+		g := pdebug.Marker("service.SessionType.ReplaceL10NStrings lang = %s", lang)
+		defer g.End()
+	}
+	if lang == "all" {
+		rows, err := tx.Query(`SELECT oid, parent_id, parent_type, name, language, localized FROM localized_strings WHERE parent_type = ? AND parent_id = ?`, "SessionType", m.ID)
+		if err != nil {
+			return err
+		}
+
+		var l db.LocalizedString
+		for rows.Next() {
+			if err := l.Scan(rows); err != nil {
+				return err
+			}
+			if len(l.Localized) == 0 {
+				continue
+			}
+			if pdebug.Enabled {
+				pdebug.Printf("Adding key '%s#%s'", l.Name, l.Language)
+			}
+			m.LocalizedFields.Set(l.Language, l.Name, l.Localized)
+		}
+	} else {
+		rows, err := tx.Query(`SELECT oid, parent_id, parent_type, name, language, localized FROM localized_strings WHERE parent_type = ? AND parent_id = ? AND language = ?`, "SessionType", m.ID, lang)
+		if err != nil {
+			return err
+		}
+
+		var l db.LocalizedString
+		for rows.Next() {
+			if err := l.Scan(rows); err != nil {
+				return err
+			}
+			if len(l.Localized) == 0 {
+				continue
+			}
+
+			switch l.Name {
+			case "name":
+				if pdebug.Enabled {
+					pdebug.Printf("Replacing for key 'name'")
+				}
+				m.Name = l.Localized
+			case "abstract":
+				if pdebug.Enabled {
+					pdebug.Printf("Replacing for key 'abstract'")
+				}
+				m.Abstract = l.Localized
+			}
+		}
+	}
 	return nil
 }
 
@@ -85,6 +160,9 @@ func (v *SessionType) Delete(tx *db.Tx, id string) error {
 
 	vdb := db.SessionType{EID: id}
 	if err := vdb.Delete(tx); err != nil {
+		return err
+	}
+	if err := db.DeleteLocalizedStringsForParent(tx, id, "SessionType"); err != nil {
 		return err
 	}
 	return nil

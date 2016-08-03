@@ -63,8 +63,8 @@ type SessionType struct {
 	tools.LocalizedFields `json:"-"`
 	ID                    string    `json:"id"`
 	ConferenceID          string    `json:"conference_id"`
-	Name                  string    `json:"name"`
-	Abstract              string    `json:"abstract"`
+	Name                  string    `json:"name" l10n:"true"`
+	Abstract              string    `json:"abstract" l10n:"true"`
 	Duration              int       `json:"duration"`
 	SubmissionStart       time.Time `json:"submission_start,omitempty"`
 	SubmissionEnd         time.Time `json:"submission_end,omitempty"`
@@ -78,15 +78,32 @@ type LookupSessionTypeRequest struct {
 }
 
 // +transport
-type CreateSessionTypeRequest struct {
+type AddSessionTypeRequest struct {
 	ConferenceID    string                `json:"conference_id"`
 	Name            string                `json:"name"`
 	Abstract        string                `json:"abstract"`
 	Duration        int                   `json:"duration"`
-	SubmissionStart MaybeJSONTime         `json:"submission_start,omitempty"`
-	SubmissionEnd   MaybeJSONTime         `json:"submission_end,omitempty"`
+	SubmissionStart jsval.MaybeString     `json:"submission_start,omitempty"`
+	SubmissionEnd   jsval.MaybeString     `json:"submission_end,omitempty"`
 	L10N            tools.LocalizedFields `json:"-"`
 	UserID          string                `json:"user_id"`
+}
+type CreateSessionTypeRequest struct {
+	AddSessionTypeRequest
+}
+
+// +transport
+type DeleteSessionTypeRequest struct {
+	ID     string `json:"id"`
+	UserID string `json:"user_id"`
+}
+
+// +transport
+type ListSessionTypesByConferenceRequest struct {
+	ConferenceID string            `json:"conference_id" urlenc:"conference_id"`
+	Since        jsval.MaybeString `json:"since,omitempty" urlenc:"since,omitempty,string"`
+	Limit        jsval.MaybeInt    `json:"limit,omitempty" urlenc:"limit,omitempty,int64"`
+	Lang         jsval.MaybeString `json:"lang,omitempty" urlenc:"lang,omitempty,string"`
 }
 
 // +transport
@@ -95,8 +112,8 @@ type UpdateSessionTypeRequest struct {
 	Name            jsval.MaybeString     `json:"name,omitempty"`
 	Abstract        jsval.MaybeString     `json:"abstract,omitempty"`
 	Duration        jsval.MaybeInt        `json:"duration,omitempty"`
-	SubmissionStart MaybeJSONTime         `json:"submission_start,omitempty,JSONTime"`
-	SubmissionEnd   MaybeJSONTime         `json:"submission_end,omitempty,JSONTime"`
+	SubmissionStart jsval.MaybeString     `json:"submission_start,omitempty"`
+	SubmissionEnd   jsval.MaybeString     `json:"submission_end,omitempty"`
 	L10N            tools.LocalizedFields `json:"-"`
 	UserID          string                `json:"user_id"`
 }
@@ -385,12 +402,12 @@ type ListRoomRequest struct {
 
 // +transport
 type CreateSessionRequest struct {
-	ConferenceID    jsval.MaybeString     `json:"conference_id,omitempty"`
+	ConferenceID    string                `json:"conference_id"`
 	SpeakerID       jsval.MaybeString     `json:"speaker_id,omitempty"`
+	SessionTypeID   string                `json:"session_type_id"`
 	Title           jsval.MaybeString     `json:"title,omitempty"`
 	Abstract        jsval.MaybeString     `json:"abstract,omitempty"`
 	Memo            jsval.MaybeString     `json:"memo,omitempty"`
-	Duration        jsval.MaybeInt        `json:"duration,omitempty"`
 	MaterialLevel   jsval.MaybeString     `json:"material_level,omitempty"`
 	Tags            jsval.MaybeString     `json:"tags,omitempty"`
 	Category        jsval.MaybeString     `json:"category,omitempty"`
@@ -403,6 +420,7 @@ type CreateSessionRequest struct {
 	VideoPermission jsval.MaybeString     `json:"video_permission,omitempty"`
 	L10N            tools.LocalizedFields `json:"-"`
 	UserID          string                `json:"user_id"`
+	Duration        int                   `json:"-"` // This is not sent from the client, but is used internally
 }
 
 // +transport
