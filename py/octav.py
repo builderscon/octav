@@ -1,5 +1,5 @@
 """OCTAV Client Library"""
-"""DO NOT EDIT: This file was generated from ../spec/v1/api.json on Sat Jul 30 20:11:41 2016"""
+"""DO NOT EDIT: This file was generated from ../spec/v1/api.json on Wed Aug  3 10:35:25 2016"""
 
 import json
 import os
@@ -947,6 +947,189 @@ class Octav(object):
         self.error = repr(e)
         return None
 
+  def add_session_type (self, abstract, conference_id, duration, name, user_id, submission_end=None, submission_start=None):
+    try:
+        payload = {}
+        if abstract is None:
+            raise 'property abstract must be provided'
+        payload['abstract'] = abstract
+        if conference_id is None:
+            raise 'property conference_id must be provided'
+        payload['conference_id'] = conference_id
+        if duration is None:
+            raise 'property duration must be provided'
+        payload['duration'] = duration
+        if name is None:
+            raise 'property name must be provided'
+        payload['name'] = name
+        if user_id is None:
+            raise 'property user_id must be provided'
+        payload['user_id'] = user_id
+        if abstract is not None:
+            payload['abstract'] = abstract
+        if conference_id is not None:
+            payload['conference_id'] = conference_id
+        if duration is not None:
+            payload['duration'] = duration
+        if name is not None:
+            payload['name'] = name
+        if submission_end is not None:
+            payload['submission_end'] = submission_end
+        if submission_start is not None:
+            payload['submission_start'] = submission_start
+        if user_id is not None:
+            payload['user_id'] = user_id
+        uri = '%s/conference/session_type/add' % self.endpoint
+        if self.debug:
+            print('POST %s' % uri)
+        hdrs = urllib3.util.make_headers(
+            basic_auth='%s:%s' % (self.key, self.secret),
+        )
+        hdrs['Content-Type']= 'application/json'
+        res = self.http.request('POST', uri, headers=hdrs, body=json.dumps(payload))
+        if self.debug:
+            print(res)
+        if res.status != 200:
+            self.extract_error(res)
+            return None
+        return True
+    except BaseException, e:
+        if self.debug:
+            print("error during http access: " + repr(e))
+        self.error = repr(e)
+        return None
+
+  def delete_session_type (self, id, user_id):
+    try:
+        payload = {}
+        if id is None:
+            raise 'property id must be provided'
+        payload['id'] = id
+        if user_id is None:
+            raise 'property user_id must be provided'
+        payload['user_id'] = user_id
+        if id is not None:
+            payload['id'] = id
+        if user_id is not None:
+            payload['user_id'] = user_id
+        uri = '%s/session_type/delete' % self.endpoint
+        if self.debug:
+            print('POST %s' % uri)
+        hdrs = urllib3.util.make_headers(
+            basic_auth='%s:%s' % (self.key, self.secret),
+        )
+        hdrs['Content-Type']= 'application/json'
+        res = self.http.request('POST', uri, headers=hdrs, body=json.dumps(payload))
+        if self.debug:
+            print(res)
+        if res.status != 200:
+            self.extract_error(res)
+            return None
+        return True
+    except BaseException, e:
+        if self.debug:
+            print("error during http access: " + repr(e))
+        self.error = repr(e)
+        return None
+
+  def lookup_session_type (self, id, lang=None):
+    try:
+        payload = {}
+        if id is None:
+            raise 'property id must be provided'
+        payload['id'] = id
+        if id is not None:
+            payload['id'] = id
+        if lang is not None:
+            payload['lang'] = lang
+        uri = '%s/session_type/lookup' % self.endpoint
+        qs = urlencode(payload)
+        if self.debug:
+            print('GET %s?%s' % (uri, qs))
+        res = self.http.request('GET', '%s?%s' % (uri, qs))
+        if self.debug:
+            print(res)
+        if res.status != 200:
+            self.extract_error(res)
+            return None
+        return json.loads(res.data)
+    except BaseException, e:
+        if self.debug:
+            print("error during http access: " + repr(e))
+        self.error = repr(e)
+        return None
+
+  def update_session_type (self, id, user_id, abstract=None, duration=None, name=None, submission_end=None, submission_start=None):
+    try:
+        payload = {}
+        if id is None:
+            raise 'property id must be provided'
+        payload['id'] = id
+        if user_id is None:
+            raise 'property user_id must be provided'
+        payload['user_id'] = user_id
+        if abstract is not None:
+            payload['abstract'] = abstract
+        if duration is not None:
+            payload['duration'] = duration
+        if id is not None:
+            payload['id'] = id
+        if name is not None:
+            payload['name'] = name
+        if submission_end is not None:
+            payload['submission_end'] = submission_end
+        if submission_start is not None:
+            payload['submission_start'] = submission_start
+        if user_id is not None:
+            payload['user_id'] = user_id
+        uri = '%s/session_type/update' % self.endpoint
+        if self.debug:
+            print('POST %s' % uri)
+        hdrs = urllib3.util.make_headers(
+            basic_auth='%s:%s' % (self.key, self.secret),
+        )
+        hdrs['Content-Type']= 'application/json'
+        res = self.http.request('POST', uri, headers=hdrs, body=json.dumps(payload))
+        if self.debug:
+            print(res)
+        if res.status != 200:
+            self.extract_error(res)
+            return None
+        return True
+    except BaseException, e:
+        if self.debug:
+            print("error during http access: " + repr(e))
+        self.error = repr(e)
+        return None
+
+  def list_session_types_by_conference (self, conference_id=None, lang=None, limit=None, since=None):
+    try:
+        payload = {}
+        if conference_id is not None:
+            payload['conference_id'] = conference_id
+        if lang is not None:
+            payload['lang'] = lang
+        if limit is not None:
+            payload['limit'] = limit
+        if since is not None:
+            payload['since'] = since
+        uri = '%s/session_type/list' % self.endpoint
+        qs = urlencode(payload)
+        if self.debug:
+            print('GET %s?%s' % (uri, qs))
+        res = self.http.request('GET', '%s?%s' % (uri, qs))
+        if self.debug:
+            print(res)
+        if res.status != 200:
+            self.extract_error(res)
+            return None
+        return json.loads(res.data)
+    except BaseException, e:
+        if self.debug:
+            print("error during http access: " + repr(e))
+        self.error = repr(e)
+        return None
+
   def lookup_conference (self, id, lang=None):
     try:
         payload = {}
@@ -1137,7 +1320,7 @@ class Octav(object):
         self.error = repr(e)
         return None
 
-  def create_session (self, abstract, conference_id, duration, speaker_id, title, user_id, category=None, material_level=None, memo=None, photo_permission=None, slide_language=None, slide_subtitles=None, slide_url=None, spoken_language=None, tags=None, video_permission=None, video_url=None):
+  def create_session (self, abstract, conference_id, session_type_id, speaker_id, title, user_id, category=None, material_level=None, memo=None, photo_permission=None, slide_language=None, slide_subtitles=None, slide_url=None, spoken_language=None, tags=None, video_permission=None, video_url=None):
     try:
         payload = {}
         if abstract is None:
@@ -1146,9 +1329,9 @@ class Octav(object):
         if conference_id is None:
             raise 'property conference_id must be provided'
         payload['conference_id'] = conference_id
-        if duration is None:
-            raise 'property duration must be provided'
-        payload['duration'] = duration
+        if session_type_id is None:
+            raise 'property session_type_id must be provided'
+        payload['session_type_id'] = session_type_id
         if speaker_id is None:
             raise 'property speaker_id must be provided'
         payload['speaker_id'] = speaker_id
@@ -1164,14 +1347,14 @@ class Octav(object):
             payload['category'] = category
         if conference_id is not None:
             payload['conference_id'] = conference_id
-        if duration is not None:
-            payload['duration'] = duration
         if material_level is not None:
             payload['material_level'] = material_level
         if memo is not None:
             payload['memo'] = memo
         if photo_permission is not None:
             payload['photo_permission'] = photo_permission
+        if session_type_id is not None:
+            payload['session_type_id'] = session_type_id
         if slide_language is not None:
             payload['slide_language'] = slide_language
         if slide_subtitles is not None:
