@@ -1,8 +1,9 @@
 """OCTAV Client Library"""
-"""DO NOT EDIT: This file was generated from ../spec/v1/api.json on Thu Aug  4 21:30:21 2016"""
+"""DO NOT EDIT: This file was generated from ../spec/v1/api.json on Fri Aug  5 07:27:20 2016"""
 
 import json
 import os
+import urllib3
 
 if os.getenv('SERVER_SOFTWARE', '').startswith('Google App Engine/') or os.getenv('SERVER_SOFTWARE', '').startswith('Development/'):
     from urllib3.contrib.appengine import AppEngineManager as PoolManager
@@ -43,6 +44,7 @@ class Octav(object):
   def create_user (self, auth_user_id, auth_via, nickname, avatar_url=None, email=None, first_name=None, last_name=None, tshirt_size=None):
     try:
         payload = {}
+        hdrs = {}
         if auth_user_id is None:
             raise 'property auth_user_id must be provided'
         payload['auth_user_id'] = auth_user_id
@@ -69,11 +71,11 @@ class Octav(object):
         if tshirt_size is not None:
             payload['tshirt_size'] = tshirt_size
         uri = '%s/user/create' % self.endpoint
-        if self.debug:
-            print('POST %s' % uri)
         hdrs = urllib3.util.make_headers(
             basic_auth='%s:%s' % (self.key, self.secret),
         )
+        if self.debug:
+            print('POST %s' % uri)
         hdrs['Content-Type']= 'application/json'
         res = self.http.request('POST', uri, headers=hdrs, body=json.dumps(payload))
         if self.debug:
@@ -91,6 +93,7 @@ class Octav(object):
   def lookup_user (self, id):
     try:
         payload = {}
+        hdrs = {}
         if id is None:
             raise 'property id must be provided'
         payload['id'] = id
@@ -100,7 +103,7 @@ class Octav(object):
         qs = urlencode(payload)
         if self.debug:
             print('GET %s?%s' % (uri, qs))
-        res = self.http.request('GET', '%s?%s' % (uri, qs))
+        res = self.http.request('GET', '%s?%s' % (uri, qs), headers=hdrs)
         if self.debug:
             print(res)
         if res.status != 200:
@@ -116,6 +119,7 @@ class Octav(object):
   def lookup_user_by_auth_user_id (self, auth_user_id, auth_via):
     try:
         payload = {}
+        hdrs = {}
         if auth_user_id is None:
             raise 'property auth_user_id must be provided'
         payload['auth_user_id'] = auth_user_id
@@ -127,10 +131,13 @@ class Octav(object):
         if auth_via is not None:
             payload['auth_via'] = auth_via
         uri = '%s/user/lookup_user_by_auth_user_id' % self.endpoint
+        hdrs = urllib3.util.make_headers(
+            basic_auth='%s:%s' % (self.key, self.secret),
+        )
         qs = urlencode(payload)
         if self.debug:
             print('GET %s?%s' % (uri, qs))
-        res = self.http.request('GET', '%s?%s' % (uri, qs))
+        res = self.http.request('GET', '%s?%s' % (uri, qs), headers=hdrs)
         if self.debug:
             print(res)
         if res.status != 200:
@@ -146,6 +153,7 @@ class Octav(object):
   def update_user (self, id, user_id, email=None, first_name=None, last_name=None, nickname=None, tshirt_size=None):
     try:
         payload = {}
+        hdrs = {}
         if id is None:
             raise 'property id must be provided'
         payload['id'] = id
@@ -167,11 +175,11 @@ class Octav(object):
         if user_id is not None:
             payload['user_id'] = user_id
         uri = '%s/user/update' % self.endpoint
-        if self.debug:
-            print('POST %s' % uri)
         hdrs = urllib3.util.make_headers(
             basic_auth='%s:%s' % (self.key, self.secret),
         )
+        if self.debug:
+            print('POST %s' % uri)
         hdrs['Content-Type']= 'application/json'
         res = self.http.request('POST', uri, headers=hdrs, body=json.dumps(payload))
         if self.debug:
@@ -189,6 +197,7 @@ class Octav(object):
   def delete_user (self, id, user_id):
     try:
         payload = {}
+        hdrs = {}
         if id is None:
             raise 'property id must be provided'
         payload['id'] = id
@@ -200,11 +209,11 @@ class Octav(object):
         if user_id is not None:
             payload['user_id'] = user_id
         uri = '%s/user/delete' % self.endpoint
-        if self.debug:
-            print('POST %s' % uri)
         hdrs = urllib3.util.make_headers(
             basic_auth='%s:%s' % (self.key, self.secret),
         )
+        if self.debug:
+            print('POST %s' % uri)
         hdrs['Content-Type']= 'application/json'
         res = self.http.request('POST', uri, headers=hdrs, body=json.dumps(payload))
         if self.debug:
@@ -222,6 +231,7 @@ class Octav(object):
   def list_user (self, lang=None, limit=None, since=None):
     try:
         payload = {}
+        hdrs = {}
         if lang is not None:
             payload['lang'] = lang
         if limit is not None:
@@ -232,7 +242,7 @@ class Octav(object):
         qs = urlencode(payload)
         if self.debug:
             print('GET %s?%s' % (uri, qs))
-        res = self.http.request('GET', '%s?%s' % (uri, qs))
+        res = self.http.request('GET', '%s?%s' % (uri, qs), headers=hdrs)
         if self.debug:
             print(res)
         if res.status != 200:
@@ -248,6 +258,7 @@ class Octav(object):
   def create_venue (self, address, name, user_id, latitude=None, longitude=None):
     try:
         payload = {}
+        hdrs = {}
         if address is None:
             raise 'property address must be provided'
         payload['address'] = address
@@ -268,11 +279,11 @@ class Octav(object):
         if user_id is not None:
             payload['user_id'] = user_id
         uri = '%s/venue/create' % self.endpoint
-        if self.debug:
-            print('POST %s' % uri)
         hdrs = urllib3.util.make_headers(
             basic_auth='%s:%s' % (self.key, self.secret),
         )
+        if self.debug:
+            print('POST %s' % uri)
         hdrs['Content-Type']= 'application/json'
         res = self.http.request('POST', uri, headers=hdrs, body=json.dumps(payload))
         if self.debug:
@@ -290,6 +301,7 @@ class Octav(object):
   def list_venue (self, lang=None, limit=None, since=None):
     try:
         payload = {}
+        hdrs = {}
         if lang is not None:
             payload['lang'] = lang
         if limit is not None:
@@ -300,7 +312,7 @@ class Octav(object):
         qs = urlencode(payload)
         if self.debug:
             print('GET %s?%s' % (uri, qs))
-        res = self.http.request('GET', '%s?%s' % (uri, qs))
+        res = self.http.request('GET', '%s?%s' % (uri, qs), headers=hdrs)
         if self.debug:
             print(res)
         if res.status != 200:
@@ -316,6 +328,7 @@ class Octav(object):
   def lookup_venue (self, id):
     try:
         payload = {}
+        hdrs = {}
         if id is None:
             raise 'property id must be provided'
         payload['id'] = id
@@ -325,7 +338,7 @@ class Octav(object):
         qs = urlencode(payload)
         if self.debug:
             print('GET %s?%s' % (uri, qs))
-        res = self.http.request('GET', '%s?%s' % (uri, qs))
+        res = self.http.request('GET', '%s?%s' % (uri, qs), headers=hdrs)
         if self.debug:
             print(res)
         if res.status != 200:
@@ -341,6 +354,7 @@ class Octav(object):
   def update_venue (self, id, user_id):
     try:
         payload = {}
+        hdrs = {}
         if id is None:
             raise 'property id must be provided'
         payload['id'] = id
@@ -352,11 +366,11 @@ class Octav(object):
         if user_id is not None:
             payload['user_id'] = user_id
         uri = '%s/venue/update' % self.endpoint
-        if self.debug:
-            print('POST %s' % uri)
         hdrs = urllib3.util.make_headers(
             basic_auth='%s:%s' % (self.key, self.secret),
         )
+        if self.debug:
+            print('POST %s' % uri)
         hdrs['Content-Type']= 'application/json'
         res = self.http.request('POST', uri, headers=hdrs, body=json.dumps(payload))
         if self.debug:
@@ -374,6 +388,7 @@ class Octav(object):
   def delete_venue (self, id, user_id):
     try:
         payload = {}
+        hdrs = {}
         if id is None:
             raise 'property id must be provided'
         payload['id'] = id
@@ -385,11 +400,11 @@ class Octav(object):
         if user_id is not None:
             payload['user_id'] = user_id
         uri = '%s/venue/delete' % self.endpoint
-        if self.debug:
-            print('POST %s' % uri)
         hdrs = urllib3.util.make_headers(
             basic_auth='%s:%s' % (self.key, self.secret),
         )
+        if self.debug:
+            print('POST %s' % uri)
         hdrs['Content-Type']= 'application/json'
         res = self.http.request('POST', uri, headers=hdrs, body=json.dumps(payload))
         if self.debug:
@@ -407,6 +422,7 @@ class Octav(object):
   def create_room (self, name, user_id, venue_id, capacity=None):
     try:
         payload = {}
+        hdrs = {}
         if name is None:
             raise 'property name must be provided'
         payload['name'] = name
@@ -425,11 +441,11 @@ class Octav(object):
         if venue_id is not None:
             payload['venue_id'] = venue_id
         uri = '%s/room/create' % self.endpoint
-        if self.debug:
-            print('POST %s' % uri)
         hdrs = urllib3.util.make_headers(
             basic_auth='%s:%s' % (self.key, self.secret),
         )
+        if self.debug:
+            print('POST %s' % uri)
         hdrs['Content-Type']= 'application/json'
         res = self.http.request('POST', uri, headers=hdrs, body=json.dumps(payload))
         if self.debug:
@@ -447,6 +463,7 @@ class Octav(object):
   def update_room (self, id, user_id, capacity=None, name=None, venue_id=None):
     try:
         payload = {}
+        hdrs = {}
         if id is None:
             raise 'property id must be provided'
         payload['id'] = id
@@ -464,11 +481,11 @@ class Octav(object):
         if venue_id is not None:
             payload['venue_id'] = venue_id
         uri = '%s/room/update' % self.endpoint
-        if self.debug:
-            print('POST %s' % uri)
         hdrs = urllib3.util.make_headers(
             basic_auth='%s:%s' % (self.key, self.secret),
         )
+        if self.debug:
+            print('POST %s' % uri)
         hdrs['Content-Type']= 'application/json'
         res = self.http.request('POST', uri, headers=hdrs, body=json.dumps(payload))
         if self.debug:
@@ -486,6 +503,7 @@ class Octav(object):
   def lookup_room (self, id):
     try:
         payload = {}
+        hdrs = {}
         if id is None:
             raise 'property id must be provided'
         payload['id'] = id
@@ -495,7 +513,7 @@ class Octav(object):
         qs = urlencode(payload)
         if self.debug:
             print('GET %s?%s' % (uri, qs))
-        res = self.http.request('GET', '%s?%s' % (uri, qs))
+        res = self.http.request('GET', '%s?%s' % (uri, qs), headers=hdrs)
         if self.debug:
             print(res)
         if res.status != 200:
@@ -511,6 +529,7 @@ class Octav(object):
   def delete_room (self, id, user_id):
     try:
         payload = {}
+        hdrs = {}
         if id is None:
             raise 'property id must be provided'
         payload['id'] = id
@@ -522,11 +541,11 @@ class Octav(object):
         if user_id is not None:
             payload['user_id'] = user_id
         uri = '%s/room/delete' % self.endpoint
-        if self.debug:
-            print('POST %s' % uri)
         hdrs = urllib3.util.make_headers(
             basic_auth='%s:%s' % (self.key, self.secret),
         )
+        if self.debug:
+            print('POST %s' % uri)
         hdrs['Content-Type']= 'application/json'
         res = self.http.request('POST', uri, headers=hdrs, body=json.dumps(payload))
         if self.debug:
@@ -544,6 +563,7 @@ class Octav(object):
   def list_room (self, venue_id, lang=None, limit=None):
     try:
         payload = {}
+        hdrs = {}
         if venue_id is None:
             raise 'property venue_id must be provided'
         payload['venue_id'] = venue_id
@@ -557,7 +577,7 @@ class Octav(object):
         qs = urlencode(payload)
         if self.debug:
             print('GET %s?%s' % (uri, qs))
-        res = self.http.request('GET', '%s?%s' % (uri, qs))
+        res = self.http.request('GET', '%s?%s' % (uri, qs), headers=hdrs)
         if self.debug:
             print(res)
         if res.status != 200:
@@ -573,6 +593,7 @@ class Octav(object):
   def create_conference_series (self, slug, title, user_id, description=None):
     try:
         payload = {}
+        hdrs = {}
         if slug is None:
             raise 'property slug must be provided'
         payload['slug'] = slug
@@ -591,11 +612,11 @@ class Octav(object):
         if user_id is not None:
             payload['user_id'] = user_id
         uri = '%s/conference_series/create' % self.endpoint
-        if self.debug:
-            print('POST %s' % uri)
         hdrs = urllib3.util.make_headers(
             basic_auth='%s:%s' % (self.key, self.secret),
         )
+        if self.debug:
+            print('POST %s' % uri)
         hdrs['Content-Type']= 'application/json'
         res = self.http.request('POST', uri, headers=hdrs, body=json.dumps(payload))
         if self.debug:
@@ -613,6 +634,7 @@ class Octav(object):
   def list_conference_series (self, limit=None, since=None):
     try:
         payload = {}
+        hdrs = {}
         if limit is not None:
             payload['limit'] = limit
         if since is not None:
@@ -621,7 +643,7 @@ class Octav(object):
         qs = urlencode(payload)
         if self.debug:
             print('GET %s?%s' % (uri, qs))
-        res = self.http.request('GET', '%s?%s' % (uri, qs))
+        res = self.http.request('GET', '%s?%s' % (uri, qs), headers=hdrs)
         if self.debug:
             print(res)
         if res.status != 200:
@@ -637,6 +659,7 @@ class Octav(object):
   def add_conference_series_admin (self, admin_id, series_id, user_id):
     try:
         payload = {}
+        hdrs = {}
         if admin_id is None:
             raise 'property admin_id must be provided'
         payload['admin_id'] = admin_id
@@ -653,11 +676,11 @@ class Octav(object):
         if user_id is not None:
             payload['user_id'] = user_id
         uri = '%s/conference_series/admin/add' % self.endpoint
-        if self.debug:
-            print('POST %s' % uri)
         hdrs = urllib3.util.make_headers(
             basic_auth='%s:%s' % (self.key, self.secret),
         )
+        if self.debug:
+            print('POST %s' % uri)
         hdrs['Content-Type']= 'application/json'
         res = self.http.request('POST', uri, headers=hdrs, body=json.dumps(payload))
         if self.debug:
@@ -675,6 +698,7 @@ class Octav(object):
   def create_conference (self, series_id, slug, title, user_id, description=None, sub_title=None):
     try:
         payload = {}
+        hdrs = {}
         if series_id is None:
             raise 'property series_id must be provided'
         payload['series_id'] = series_id
@@ -700,11 +724,11 @@ class Octav(object):
         if user_id is not None:
             payload['user_id'] = user_id
         uri = '%s/conference/create' % self.endpoint
-        if self.debug:
-            print('POST %s' % uri)
         hdrs = urllib3.util.make_headers(
             basic_auth='%s:%s' % (self.key, self.secret),
         )
+        if self.debug:
+            print('POST %s' % uri)
         hdrs['Content-Type']= 'application/json'
         res = self.http.request('POST', uri, headers=hdrs, body=json.dumps(payload))
         if self.debug:
@@ -722,6 +746,7 @@ class Octav(object):
   def add_conference_dates (self, conference_id, dates, user_id):
     try:
         payload = {}
+        hdrs = {}
         if conference_id is None:
             raise 'property conference_id must be provided'
         payload['conference_id'] = conference_id
@@ -738,11 +763,11 @@ class Octav(object):
         if user_id is not None:
             payload['user_id'] = user_id
         uri = '%s/conference/dates/add' % self.endpoint
-        if self.debug:
-            print('POST %s' % uri)
         hdrs = urllib3.util.make_headers(
             basic_auth='%s:%s' % (self.key, self.secret),
         )
+        if self.debug:
+            print('POST %s' % uri)
         hdrs['Content-Type']= 'application/json'
         res = self.http.request('POST', uri, headers=hdrs, body=json.dumps(payload))
         if self.debug:
@@ -760,6 +785,7 @@ class Octav(object):
   def delete_conference_dates (self, conference_id, dates, user_id):
     try:
         payload = {}
+        hdrs = {}
         if conference_id is None:
             raise 'property conference_id must be provided'
         payload['conference_id'] = conference_id
@@ -778,9 +804,6 @@ class Octav(object):
         uri = '%s/conference/dates/delete' % self.endpoint
         if self.debug:
             print('POST %s' % uri)
-        hdrs = urllib3.util.make_headers(
-            basic_auth='%s:%s' % (self.key, self.secret),
-        )
         hdrs['Content-Type']= 'application/json'
         res = self.http.request('POST', uri, headers=hdrs, body=json.dumps(payload))
         if self.debug:
@@ -798,6 +821,7 @@ class Octav(object):
   def add_conference_admin (self, admin_id, conference_id, user_id):
     try:
         payload = {}
+        hdrs = {}
         if admin_id is None:
             raise 'property admin_id must be provided'
         payload['admin_id'] = admin_id
@@ -814,11 +838,11 @@ class Octav(object):
         if user_id is not None:
             payload['user_id'] = user_id
         uri = '%s/conference/admin/add' % self.endpoint
-        if self.debug:
-            print('POST %s' % uri)
         hdrs = urllib3.util.make_headers(
             basic_auth='%s:%s' % (self.key, self.secret),
         )
+        if self.debug:
+            print('POST %s' % uri)
         hdrs['Content-Type']= 'application/json'
         res = self.http.request('POST', uri, headers=hdrs, body=json.dumps(payload))
         if self.debug:
@@ -836,6 +860,7 @@ class Octav(object):
   def delete_conference_admin (self, admin_id, conference_id, user_id):
     try:
         payload = {}
+        hdrs = {}
         if admin_id is None:
             raise 'property admin_id must be provided'
         payload['admin_id'] = admin_id
@@ -852,11 +877,11 @@ class Octav(object):
         if user_id is not None:
             payload['user_id'] = user_id
         uri = '%s/conference/admin/delete' % self.endpoint
-        if self.debug:
-            print('POST %s' % uri)
         hdrs = urllib3.util.make_headers(
             basic_auth='%s:%s' % (self.key, self.secret),
         )
+        if self.debug:
+            print('POST %s' % uri)
         hdrs['Content-Type']= 'application/json'
         res = self.http.request('POST', uri, headers=hdrs, body=json.dumps(payload))
         if self.debug:
@@ -874,6 +899,7 @@ class Octav(object):
   def add_conference_venue (self, conference_id, user_id, venue_id):
     try:
         payload = {}
+        hdrs = {}
         if conference_id is None:
             raise 'property conference_id must be provided'
         payload['conference_id'] = conference_id
@@ -890,11 +916,11 @@ class Octav(object):
         if venue_id is not None:
             payload['venue_id'] = venue_id
         uri = '%s/conference/venue/add' % self.endpoint
-        if self.debug:
-            print('POST %s' % uri)
         hdrs = urllib3.util.make_headers(
             basic_auth='%s:%s' % (self.key, self.secret),
         )
+        if self.debug:
+            print('POST %s' % uri)
         hdrs['Content-Type']= 'application/json'
         res = self.http.request('POST', uri, headers=hdrs, body=json.dumps(payload))
         if self.debug:
@@ -912,6 +938,7 @@ class Octav(object):
   def delete_conference_venue (self, conference_id, user_id, venue_id):
     try:
         payload = {}
+        hdrs = {}
         if conference_id is None:
             raise 'property conference_id must be provided'
         payload['conference_id'] = conference_id
@@ -928,11 +955,11 @@ class Octav(object):
         if venue_id is not None:
             payload['venue_id'] = venue_id
         uri = '%s/conference/venue/delete' % self.endpoint
-        if self.debug:
-            print('POST %s' % uri)
         hdrs = urllib3.util.make_headers(
             basic_auth='%s:%s' % (self.key, self.secret),
         )
+        if self.debug:
+            print('POST %s' % uri)
         hdrs['Content-Type']= 'application/json'
         res = self.http.request('POST', uri, headers=hdrs, body=json.dumps(payload))
         if self.debug:
@@ -950,6 +977,7 @@ class Octav(object):
   def add_session_type (self, abstract, conference_id, duration, name, user_id, submission_end=None, submission_start=None):
     try:
         payload = {}
+        hdrs = {}
         if abstract is None:
             raise 'property abstract must be provided'
         payload['abstract'] = abstract
@@ -980,11 +1008,11 @@ class Octav(object):
         if user_id is not None:
             payload['user_id'] = user_id
         uri = '%s/conference/session_type/add' % self.endpoint
-        if self.debug:
-            print('POST %s' % uri)
         hdrs = urllib3.util.make_headers(
             basic_auth='%s:%s' % (self.key, self.secret),
         )
+        if self.debug:
+            print('POST %s' % uri)
         hdrs['Content-Type']= 'application/json'
         res = self.http.request('POST', uri, headers=hdrs, body=json.dumps(payload))
         if self.debug:
@@ -1002,6 +1030,7 @@ class Octav(object):
   def delete_session_type (self, id, user_id):
     try:
         payload = {}
+        hdrs = {}
         if id is None:
             raise 'property id must be provided'
         payload['id'] = id
@@ -1013,11 +1042,11 @@ class Octav(object):
         if user_id is not None:
             payload['user_id'] = user_id
         uri = '%s/session_type/delete' % self.endpoint
-        if self.debug:
-            print('POST %s' % uri)
         hdrs = urllib3.util.make_headers(
             basic_auth='%s:%s' % (self.key, self.secret),
         )
+        if self.debug:
+            print('POST %s' % uri)
         hdrs['Content-Type']= 'application/json'
         res = self.http.request('POST', uri, headers=hdrs, body=json.dumps(payload))
         if self.debug:
@@ -1035,6 +1064,7 @@ class Octav(object):
   def lookup_session_type (self, id, lang=None):
     try:
         payload = {}
+        hdrs = {}
         if id is None:
             raise 'property id must be provided'
         payload['id'] = id
@@ -1043,10 +1073,13 @@ class Octav(object):
         if lang is not None:
             payload['lang'] = lang
         uri = '%s/session_type/lookup' % self.endpoint
+        hdrs = urllib3.util.make_headers(
+            basic_auth='%s:%s' % (self.key, self.secret),
+        )
         qs = urlencode(payload)
         if self.debug:
             print('GET %s?%s' % (uri, qs))
-        res = self.http.request('GET', '%s?%s' % (uri, qs))
+        res = self.http.request('GET', '%s?%s' % (uri, qs), headers=hdrs)
         if self.debug:
             print(res)
         if res.status != 200:
@@ -1062,6 +1095,7 @@ class Octav(object):
   def update_session_type (self, id, user_id, abstract=None, duration=None, name=None, submission_end=None, submission_start=None):
     try:
         payload = {}
+        hdrs = {}
         if id is None:
             raise 'property id must be provided'
         payload['id'] = id
@@ -1083,11 +1117,11 @@ class Octav(object):
         if user_id is not None:
             payload['user_id'] = user_id
         uri = '%s/session_type/update' % self.endpoint
-        if self.debug:
-            print('POST %s' % uri)
         hdrs = urllib3.util.make_headers(
             basic_auth='%s:%s' % (self.key, self.secret),
         )
+        if self.debug:
+            print('POST %s' % uri)
         hdrs['Content-Type']= 'application/json'
         res = self.http.request('POST', uri, headers=hdrs, body=json.dumps(payload))
         if self.debug:
@@ -1105,6 +1139,7 @@ class Octav(object):
   def list_session_types_by_conference (self, conference_id=None, lang=None, limit=None, since=None):
     try:
         payload = {}
+        hdrs = {}
         if conference_id is not None:
             payload['conference_id'] = conference_id
         if lang is not None:
@@ -1114,10 +1149,13 @@ class Octav(object):
         if since is not None:
             payload['since'] = since
         uri = '%s/session_type/list' % self.endpoint
+        hdrs = urllib3.util.make_headers(
+            basic_auth='%s:%s' % (self.key, self.secret),
+        )
         qs = urlencode(payload)
         if self.debug:
             print('GET %s?%s' % (uri, qs))
-        res = self.http.request('GET', '%s?%s' % (uri, qs))
+        res = self.http.request('GET', '%s?%s' % (uri, qs), headers=hdrs)
         if self.debug:
             print(res)
         if res.status != 200:
@@ -1133,6 +1171,7 @@ class Octav(object):
   def lookup_conference (self, id, lang=None):
     try:
         payload = {}
+        hdrs = {}
         if id is None:
             raise 'property id must be provided'
         payload['id'] = id
@@ -1144,7 +1183,7 @@ class Octav(object):
         qs = urlencode(payload)
         if self.debug:
             print('GET %s?%s' % (uri, qs))
-        res = self.http.request('GET', '%s?%s' % (uri, qs))
+        res = self.http.request('GET', '%s?%s' % (uri, qs), headers=hdrs)
         if self.debug:
             print(res)
         if res.status != 200:
@@ -1160,6 +1199,7 @@ class Octav(object):
   def lookup_conference_by_slug (self, slug, lang=None):
     try:
         payload = {}
+        hdrs = {}
         if slug is None:
             raise 'property slug must be provided'
         payload['slug'] = slug
@@ -1171,7 +1211,7 @@ class Octav(object):
         qs = urlencode(payload)
         if self.debug:
             print('GET %s?%s' % (uri, qs))
-        res = self.http.request('GET', '%s?%s' % (uri, qs))
+        res = self.http.request('GET', '%s?%s' % (uri, qs), headers=hdrs)
         if self.debug:
             print(res)
         if res.status != 200:
@@ -1187,6 +1227,7 @@ class Octav(object):
   def list_conference (self, lang=None, limit=None, range_end=None, range_start=None, since=None, status=None):
     try:
         payload = {}
+        hdrs = {}
         if lang is not None:
             payload['lang'] = lang
         if limit is not None:
@@ -1203,7 +1244,7 @@ class Octav(object):
         qs = urlencode(payload)
         if self.debug:
             print('GET %s?%s' % (uri, qs))
-        res = self.http.request('GET', '%s?%s' % (uri, qs))
+        res = self.http.request('GET', '%s?%s' % (uri, qs), headers=hdrs)
         if self.debug:
             print(res)
         if res.status != 200:
@@ -1219,6 +1260,7 @@ class Octav(object):
   def update_conference (self, id, user_id, description=None, slug=None, status=None, sub_title=None, title=None):
     try:
         payload = {}
+        hdrs = {}
         if id is None:
             raise 'property id must be provided'
         payload['id'] = id
@@ -1240,11 +1282,11 @@ class Octav(object):
         if user_id is not None:
             payload['user_id'] = user_id
         uri = '%s/conference/update' % self.endpoint
-        if self.debug:
-            print('POST %s' % uri)
         hdrs = urllib3.util.make_headers(
             basic_auth='%s:%s' % (self.key, self.secret),
         )
+        if self.debug:
+            print('POST %s' % uri)
         hdrs['Content-Type']= 'application/json'
         res = self.http.request('POST', uri, headers=hdrs, body=json.dumps(payload))
         if self.debug:
@@ -1262,6 +1304,7 @@ class Octav(object):
   def delete_conference_series (self, id, user_id):
     try:
         payload = {}
+        hdrs = {}
         if id is None:
             raise 'property id must be provided'
         payload['id'] = id
@@ -1273,11 +1316,11 @@ class Octav(object):
         if user_id is not None:
             payload['user_id'] = user_id
         uri = '%s/conference_series/delete' % self.endpoint
-        if self.debug:
-            print('POST %s' % uri)
         hdrs = urllib3.util.make_headers(
             basic_auth='%s:%s' % (self.key, self.secret),
         )
+        if self.debug:
+            print('POST %s' % uri)
         hdrs['Content-Type']= 'application/json'
         res = self.http.request('POST', uri, headers=hdrs, body=json.dumps(payload))
         if self.debug:
@@ -1295,17 +1338,18 @@ class Octav(object):
   def delete_conference (self, id):
     try:
         payload = {}
+        hdrs = {}
         if id is None:
             raise 'property id must be provided'
         payload['id'] = id
         if id is not None:
             payload['id'] = id
         uri = '%s/conference/delete' % self.endpoint
-        if self.debug:
-            print('POST %s' % uri)
         hdrs = urllib3.util.make_headers(
             basic_auth='%s:%s' % (self.key, self.secret),
         )
+        if self.debug:
+            print('POST %s' % uri)
         hdrs['Content-Type']= 'application/json'
         res = self.http.request('POST', uri, headers=hdrs, body=json.dumps(payload))
         if self.debug:
@@ -1323,6 +1367,7 @@ class Octav(object):
   def create_session (self, abstract, conference_id, session_type_id, speaker_id, title, user_id, category=None, material_level=None, memo=None, photo_permission=None, slide_language=None, slide_subtitles=None, slide_url=None, spoken_language=None, tags=None, video_permission=None, video_url=None):
     try:
         payload = {}
+        hdrs = {}
         if abstract is None:
             raise 'property abstract must be provided'
         payload['abstract'] = abstract
@@ -1376,11 +1421,11 @@ class Octav(object):
         if video_url is not None:
             payload['video_url'] = video_url
         uri = '%s/session/create' % self.endpoint
-        if self.debug:
-            print('POST %s' % uri)
         hdrs = urllib3.util.make_headers(
             basic_auth='%s:%s' % (self.key, self.secret),
         )
+        if self.debug:
+            print('POST %s' % uri)
         hdrs['Content-Type']= 'application/json'
         res = self.http.request('POST', uri, headers=hdrs, body=json.dumps(payload))
         if self.debug:
@@ -1398,6 +1443,7 @@ class Octav(object):
   def lookup_session (self, id):
     try:
         payload = {}
+        hdrs = {}
         if id is None:
             raise 'property id must be provided'
         payload['id'] = id
@@ -1407,7 +1453,7 @@ class Octav(object):
         qs = urlencode(payload)
         if self.debug:
             print('GET %s?%s' % (uri, qs))
-        res = self.http.request('GET', '%s?%s' % (uri, qs))
+        res = self.http.request('GET', '%s?%s' % (uri, qs), headers=hdrs)
         if self.debug:
             print(res)
         if res.status != 200:
@@ -1423,6 +1469,7 @@ class Octav(object):
   def delete_session (self, id, user_id):
     try:
         payload = {}
+        hdrs = {}
         if id is None:
             raise 'property id must be provided'
         payload['id'] = id
@@ -1434,11 +1481,11 @@ class Octav(object):
         if user_id is not None:
             payload['user_id'] = user_id
         uri = '%s/session/delete' % self.endpoint
-        if self.debug:
-            print('POST %s' % uri)
         hdrs = urllib3.util.make_headers(
             basic_auth='%s:%s' % (self.key, self.secret),
         )
+        if self.debug:
+            print('POST %s' % uri)
         hdrs['Content-Type']= 'application/json'
         res = self.http.request('POST', uri, headers=hdrs, body=json.dumps(payload))
         if self.debug:
@@ -1456,6 +1503,7 @@ class Octav(object):
   def update_session (self, id, user_id, abstract=None, category=None, conference_id=None, confirmed=None, duration=None, has_interpretation=None, material_level=None, memo=None, photo_permission=None, slide_language=None, slide_subtitles=None, slide_url=None, sort_order=None, speaker_id=None, spoken_language=None, status=None, tags=None, title=None, video_permission=None, video_url=None):
     try:
         payload = {}
+        hdrs = {}
         if id is None:
             raise 'property id must be provided'
         payload['id'] = id
@@ -1507,11 +1555,11 @@ class Octav(object):
         if video_url is not None:
             payload['video_url'] = video_url
         uri = '%s/session/update' % self.endpoint
-        if self.debug:
-            print('POST %s' % uri)
         hdrs = urllib3.util.make_headers(
             basic_auth='%s:%s' % (self.key, self.secret),
         )
+        if self.debug:
+            print('POST %s' % uri)
         hdrs['Content-Type']= 'application/json'
         res = self.http.request('POST', uri, headers=hdrs, body=json.dumps(payload))
         if self.debug:
@@ -1529,6 +1577,7 @@ class Octav(object):
   def list_session_by_conference (self, conference_id, date=None):
     try:
         payload = {}
+        hdrs = {}
         if conference_id is None:
             raise 'property conference_id must be provided'
         payload['conference_id'] = conference_id
@@ -1540,7 +1589,7 @@ class Octav(object):
         qs = urlencode(payload)
         if self.debug:
             print('GET %s?%s' % (uri, qs))
-        res = self.http.request('GET', '%s?%s' % (uri, qs))
+        res = self.http.request('GET', '%s?%s' % (uri, qs), headers=hdrs)
         if self.debug:
             print(res)
         if res.status != 200:
@@ -1556,6 +1605,7 @@ class Octav(object):
   def create_question (self, body, session_id, user_id):
     try:
         payload = {}
+        hdrs = {}
         if body is None:
             raise 'property body must be provided'
         payload['body'] = body
@@ -1572,10 +1622,13 @@ class Octav(object):
         if user_id is not None:
             payload['user_id'] = user_id
         uri = '%s/question/create' % self.endpoint
+        hdrs = urllib3.util.make_headers(
+            basic_auth='%s:%s' % (self.key, self.secret),
+        )
         qs = urlencode(payload)
         if self.debug:
             print('GET %s?%s' % (uri, qs))
-        res = self.http.request('GET', '%s?%s' % (uri, qs))
+        res = self.http.request('GET', '%s?%s' % (uri, qs), headers=hdrs)
         if self.debug:
             print(res)
         if res.status != 200:
@@ -1591,17 +1644,18 @@ class Octav(object):
   def delete_question (self, id):
     try:
         payload = {}
+        hdrs = {}
         if id is None:
             raise 'property id must be provided'
         payload['id'] = id
         if id is not None:
             payload['id'] = id
         uri = '%s/question/delete' % self.endpoint
-        if self.debug:
-            print('POST %s' % uri)
         hdrs = urllib3.util.make_headers(
             basic_auth='%s:%s' % (self.key, self.secret),
         )
+        if self.debug:
+            print('POST %s' % uri)
         hdrs['Content-Type']= 'application/json'
         res = self.http.request('POST', uri, headers=hdrs, body=json.dumps(payload))
         if self.debug:
@@ -1619,6 +1673,7 @@ class Octav(object):
   def list_question (self, session_id, limit=None, since=None):
     try:
         payload = {}
+        hdrs = {}
         if session_id is None:
             raise 'property session_id must be provided'
         payload['session_id'] = session_id
@@ -1632,7 +1687,7 @@ class Octav(object):
         qs = urlencode(payload)
         if self.debug:
             print('GET %s?%s' % (uri, qs))
-        res = self.http.request('GET', '%s?%s' % (uri, qs))
+        res = self.http.request('GET', '%s?%s' % (uri, qs), headers=hdrs)
         if self.debug:
             print(res)
         if res.status != 200:
@@ -1648,6 +1703,7 @@ class Octav(object):
   def create_session_survey_response (self, material_quality, overall_rating, session_id, speaker_knowledge, speaker_presentation, user_id, user_prior_knowledge, comment_good=None, comment_improvement=None):
     try:
         payload = {}
+        hdrs = {}
         if material_quality is None:
             raise 'property material_quality must be provided'
         payload['material_quality'] = material_quality
@@ -1688,10 +1744,13 @@ class Octav(object):
         if user_prior_knowledge is not None:
             payload['user_prior_knowledge'] = user_prior_knowledge
         uri = '%s/survey_session_response/create' % self.endpoint
+        hdrs = urllib3.util.make_headers(
+            basic_auth='%s:%s' % (self.key, self.secret),
+        )
         qs = urlencode(payload)
         if self.debug:
             print('GET %s?%s' % (uri, qs))
-        res = self.http.request('GET', '%s?%s' % (uri, qs))
+        res = self.http.request('GET', '%s?%s' % (uri, qs), headers=hdrs)
         if self.debug:
             print(res)
         if res.status != 200:
@@ -1707,6 +1766,7 @@ class Octav(object):
   def add_featured_speaker (self, conference_id, description, display_name, avatar_url=None, speaker_id=None, user_id=None):
     try:
         payload = {}
+        hdrs = {}
         if conference_id is None:
             raise 'property conference_id must be provided'
         payload['conference_id'] = conference_id
@@ -1729,11 +1789,11 @@ class Octav(object):
         if user_id is not None:
             payload['user_id'] = user_id
         uri = '%s/featured_speaker/add' % self.endpoint
-        if self.debug:
-            print('POST %s' % uri)
         hdrs = urllib3.util.make_headers(
             basic_auth='%s:%s' % (self.key, self.secret),
         )
+        if self.debug:
+            print('POST %s' % uri)
         hdrs['Content-Type']= 'application/json'
         res = self.http.request('POST', uri, headers=hdrs, body=json.dumps(payload))
         if self.debug:
@@ -1751,6 +1811,7 @@ class Octav(object):
   def lookup_featured_speaker (self, id, lang=None):
     try:
         payload = {}
+        hdrs = {}
         if id is None:
             raise 'property id must be provided'
         payload['id'] = id
@@ -1759,10 +1820,13 @@ class Octav(object):
         if lang is not None:
             payload['lang'] = lang
         uri = '%s/featured_speaker/lookup' % self.endpoint
+        hdrs = urllib3.util.make_headers(
+            basic_auth='%s:%s' % (self.key, self.secret),
+        )
         qs = urlencode(payload)
         if self.debug:
             print('GET %s?%s' % (uri, qs))
-        res = self.http.request('GET', '%s?%s' % (uri, qs))
+        res = self.http.request('GET', '%s?%s' % (uri, qs), headers=hdrs)
         if self.debug:
             print(res)
         if res.status != 200:
@@ -1778,6 +1842,7 @@ class Octav(object):
   def list_featured_speakers (self, conference_id=None, lang=None, limit=None, since=None):
     try:
         payload = {}
+        hdrs = {}
         if conference_id is not None:
             payload['conference_id'] = conference_id
         if lang is not None:
@@ -1787,10 +1852,13 @@ class Octav(object):
         if since is not None:
             payload['since'] = since
         uri = '%s/featured_speaker/list' % self.endpoint
+        hdrs = urllib3.util.make_headers(
+            basic_auth='%s:%s' % (self.key, self.secret),
+        )
         qs = urlencode(payload)
         if self.debug:
             print('GET %s?%s' % (uri, qs))
-        res = self.http.request('GET', '%s?%s' % (uri, qs))
+        res = self.http.request('GET', '%s?%s' % (uri, qs), headers=hdrs)
         if self.debug:
             print(res)
         if res.status != 200:
@@ -1806,6 +1874,7 @@ class Octav(object):
   def update_featured_speaker (self, id, user_id, avatar_url=None, description=None, display_name=None, speaker_id=None):
     try:
         payload = {}
+        hdrs = {}
         if id is None:
             raise 'property id must be provided'
         payload['id'] = id
@@ -1825,11 +1894,11 @@ class Octav(object):
         if user_id is not None:
             payload['user_id'] = user_id
         uri = '%s/featured_speaker/update' % self.endpoint
-        if self.debug:
-            print('POST %s' % uri)
         hdrs = urllib3.util.make_headers(
             basic_auth='%s:%s' % (self.key, self.secret),
         )
+        if self.debug:
+            print('POST %s' % uri)
         hdrs['Content-Type']= 'application/json'
         res = self.http.request('POST', uri, headers=hdrs, body=json.dumps(payload))
         if self.debug:
@@ -1847,6 +1916,7 @@ class Octav(object):
   def delete_featured_speaker (self, id, user_id):
     try:
         payload = {}
+        hdrs = {}
         if id is None:
             raise 'property id must be provided'
         payload['id'] = id
@@ -1858,11 +1928,11 @@ class Octav(object):
         if user_id is not None:
             payload['user_id'] = user_id
         uri = '%s/featured_speaker/delete' % self.endpoint
-        if self.debug:
-            print('POST %s' % uri)
         hdrs = urllib3.util.make_headers(
             basic_auth='%s:%s' % (self.key, self.secret),
         )
+        if self.debug:
+            print('POST %s' % uri)
         hdrs['Content-Type']= 'application/json'
         res = self.http.request('POST', uri, headers=hdrs, body=json.dumps(payload))
         if self.debug:
@@ -1880,6 +1950,7 @@ class Octav(object):
   def add_sponsor (self, conference_id, group_name, name, url, user_id, sort_order=None):
     try:
         payload = {}
+        hdrs = {}
         if conference_id is None:
             raise 'property conference_id must be provided'
         payload['conference_id'] = conference_id
@@ -1908,11 +1979,11 @@ class Octav(object):
         if user_id is not None:
             payload['user_id'] = user_id
         uri = '%s/sponsor/add' % self.endpoint
-        if self.debug:
-            print('POST %s' % uri)
         hdrs = urllib3.util.make_headers(
             basic_auth='%s:%s' % (self.key, self.secret),
         )
+        if self.debug:
+            print('POST %s' % uri)
         hdrs['Content-Type']= 'application/json'
         res = self.http.request('POST', uri, headers=hdrs, body=json.dumps(payload))
         if self.debug:
@@ -1930,6 +2001,7 @@ class Octav(object):
   def lookup_sponsor (self, id, lang=None):
     try:
         payload = {}
+        hdrs = {}
         if id is None:
             raise 'property id must be provided'
         payload['id'] = id
@@ -1938,10 +2010,13 @@ class Octav(object):
         if lang is not None:
             payload['lang'] = lang
         uri = '%s/sponsor/lookup' % self.endpoint
+        hdrs = urllib3.util.make_headers(
+            basic_auth='%s:%s' % (self.key, self.secret),
+        )
         qs = urlencode(payload)
         if self.debug:
             print('GET %s?%s' % (uri, qs))
-        res = self.http.request('GET', '%s?%s' % (uri, qs))
+        res = self.http.request('GET', '%s?%s' % (uri, qs), headers=hdrs)
         if self.debug:
             print(res)
         if res.status != 200:
@@ -1957,6 +2032,7 @@ class Octav(object):
   def list_sponsors (self, conference_id=None, lang=None, limit=None, since=None):
     try:
         payload = {}
+        hdrs = {}
         if conference_id is not None:
             payload['conference_id'] = conference_id
         if lang is not None:
@@ -1966,10 +2042,13 @@ class Octav(object):
         if since is not None:
             payload['since'] = since
         uri = '%s/sponsor/list' % self.endpoint
+        hdrs = urllib3.util.make_headers(
+            basic_auth='%s:%s' % (self.key, self.secret),
+        )
         qs = urlencode(payload)
         if self.debug:
             print('GET %s?%s' % (uri, qs))
-        res = self.http.request('GET', '%s?%s' % (uri, qs))
+        res = self.http.request('GET', '%s?%s' % (uri, qs), headers=hdrs)
         if self.debug:
             print(res)
         if res.status != 200:
@@ -1985,6 +2064,7 @@ class Octav(object):
   def update_sponsor (self, id, user_id, group_name=None, name=None, sort_order=None, url=None):
     try:
         payload = {}
+        hdrs = {}
         if id is None:
             raise 'property id must be provided'
         payload['id'] = id
@@ -2004,11 +2084,11 @@ class Octav(object):
         if user_id is not None:
             payload['user_id'] = user_id
         uri = '%s/sponsor/update' % self.endpoint
-        if self.debug:
-            print('POST %s' % uri)
         hdrs = urllib3.util.make_headers(
             basic_auth='%s:%s' % (self.key, self.secret),
         )
+        if self.debug:
+            print('POST %s' % uri)
         hdrs['Content-Type']= 'application/json'
         res = self.http.request('POST', uri, headers=hdrs, body=json.dumps(payload))
         if self.debug:
@@ -2026,6 +2106,7 @@ class Octav(object):
   def delete_sponsor (self, id, user_id):
     try:
         payload = {}
+        hdrs = {}
         if id is None:
             raise 'property id must be provided'
         payload['id'] = id
@@ -2037,11 +2118,11 @@ class Octav(object):
         if user_id is not None:
             payload['user_id'] = user_id
         uri = '%s/sponsor/delete' % self.endpoint
-        if self.debug:
-            print('POST %s' % uri)
         hdrs = urllib3.util.make_headers(
             basic_auth='%s:%s' % (self.key, self.secret),
         )
+        if self.debug:
+            print('POST %s' % uri)
         hdrs['Content-Type']= 'application/json'
         res = self.http.request('POST', uri, headers=hdrs, body=json.dumps(payload))
         if self.debug:
