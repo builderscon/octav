@@ -50,8 +50,12 @@ func httpWithBasicAuth(h HandlerWithContext) HandlerWithContext {
 
 		s := service.Client{}
 		if err := s.Authenticate(clientID, clientSecret); err != nil {
+			if pdebug.Enabled {
+				pdebug.Printf("Failed to authenticate client: %s", err)
+			}
 			code := httpCodeFromError(err)
 			httpError(w, http.StatusText(code), code, err)
+			return
 		}
 
 		h(ctx, w, r)
