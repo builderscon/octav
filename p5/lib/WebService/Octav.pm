@@ -75,7 +75,7 @@ sub lookup_user_by_auth_user_id {
             die qq|property "$required" must be provided|;
         }
     }
-    my $uri = URI->new($self->{endpoint} . qq|/v1/user/lookup_by_auth_user_id|);
+    my $uri = URI->new($self->{endpoint} . qq|/v1/user/lookup_user_by_auth_user_id|);
     $uri->query_form($payload);
     my $res = $self->{user_agent}->get($uri);
     if (!$res->is_success) {

@@ -1,5 +1,5 @@
 """OCTAV Client Library"""
-"""DO NOT EDIT: This file was generated from ../spec/v1/api.json on Wed Aug  3 10:35:25 2016"""
+"""DO NOT EDIT: This file was generated from ../spec/v1/api.json on Thu Aug  4 21:30:21 2016"""
 
 import json
 import os
@@ -126,7 +126,7 @@ class Octav(object):
             payload['auth_user_id'] = auth_user_id
         if auth_via is not None:
             payload['auth_via'] = auth_via
-        uri = '%s/user/lookup_by_auth_user_id' % self.endpoint
+        uri = '%s/user/lookup_user_by_auth_user_id' % self.endpoint
         qs = urlencode(payload)
         if self.debug:
             print('GET %s?%s' % (uri, qs))

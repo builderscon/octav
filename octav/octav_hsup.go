@@ -2110,7 +2110,7 @@ func (s *Server) SetupRoutes() {
 	r.HandleFunc(`/v1/user/delete`, httpWithContext(httpWithBasicAuth(httpDeleteUser)))
 	r.HandleFunc(`/v1/user/list`, httpWithContext(httpListUser))
 	r.HandleFunc(`/v1/user/lookup`, httpWithContext(httpLookupUser))
-	r.HandleFunc(`/v1/user/lookup_by_auth_user_id`, httpWithContext(httpWithBasicAuth(httpLookupUserByAuthUserID)))
+	r.HandleFunc(`/v1/user/lookup_user_by_auth_user_id`, httpWithContext(httpWithBasicAuth(httpLookupUserByAuthUserID)))
 	r.HandleFunc(`/v1/user/update`, httpWithContext(httpWithBasicAuth(httpUpdateUser)))
 	r.HandleFunc(`/v1/venue/create`, httpWithContext(httpWithBasicAuth(httpCreateVenue)))
 	r.HandleFunc(`/v1/venue/delete`, httpWithContext(httpWithBasicAuth(httpDeleteVenue)))
