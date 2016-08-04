@@ -58,6 +58,9 @@ func httpWithBasicAuth(h HandlerWithContext) HandlerWithContext {
 			return
 		}
 
+		if pdebug.Enabled {
+			pdebug.Printf("Authentication succeeded, proceeding to call handler")
+		}
 		h(ctx, w, r)
 	})
 }
