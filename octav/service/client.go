@@ -7,6 +7,7 @@ import (
 	"github.com/builderscon/octav/octav/internal/errors"
 	"github.com/builderscon/octav/octav/model"
 	"github.com/builderscon/octav/octav/tools"
+	pdebug "github.com/lestrrat/go-pdebug"
 )
 
 func (v *Client) populateRowForCreate(vdb *db.Client, payload model.CreateClientRequest) error {
@@ -22,7 +23,12 @@ func (v *Client) populateRowForUpdate(vdb *db.Client, payload model.UpdateClient
 	return nil
 }
 
-func (v *Client) Authenticate(clientID, clientSecret string) error {
+func (v *Client) Authenticate(clientID, clientSecret string) (err error) {
+	if pdebug.Enabled {
+		g := pdebug.Marker("service.Client.Authenticate").BindError(&err)
+		defer g.End()
+	}
+
 	tx, err := db.Begin()
 	if err != nil {
 		return errors.Wrap(err, "failed to start transaction")
