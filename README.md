@@ -71,5 +71,5 @@ Admin site URL should be different, so let's assume base url https://admin.build
 | Name            | Description               | 
 |:----------------|:--------------------------|
 | [octav](octav/) | API Server written in Go. |
-| [adminweb](adminweb/) | Web UI for conference admins. [See here for architecture in GKE](gke/deployment/) |
-| [slackgw](slackgw/) | Slack related stuff, including bots. [See here for architecture in GKE](gke/deployment/) |
+| [adminweb](https://github.com/builderscon/admin.builderscon.io) | Web UI for conference admins. [See here for architecture in GKE](https://github.com/builderscon/gcp-deploy) |
+| [slackgw](https://github.com/builderscon/slackbot) | Slack related stuff, including bots. [See here for architecture in GKE](https://github.com/builderscon/gcp-deploy) |
