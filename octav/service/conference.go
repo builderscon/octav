@@ -635,3 +635,24 @@ func (v *Conference) LoadSponsors(tx *db.Tx, cdl *model.SponsorList, cid string)
 	*cdl = res
 	return nil
 }
+
+func (v *Conference) ListByOrganizerFromPayload(tx *db.Tx, l *model.ConferenceList, payload model.ListConferencesByOrganizerRequest) (err error) {
+	var vdbl db.ConferenceList
+	if err := db.ListConferencesByOrganizer(tx, &vdbl, payload.OrganizerID, payload.Since.String, int(payload.Limit.Int)); err != nil {
+		return err
+	}
+
+	res := make(model.ConferenceList, len(vdbl))
+	for i, vdb := range vdbl {
+		if err := (res[i]).FromRow(vdb); err != nil {
+			return errors.Wrap(err, "failed populate model from database")
+		}
+		if err := v.Decorate(tx, &res[i], payload.Lang.String); err != nil {
+			return errors.Wrap(err, "failed to decorate conference with associated data")
+		}
+	}
+	*l = res
+	return nil
+
+}
+

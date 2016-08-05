@@ -1019,6 +1019,20 @@
       "targetSchema": { "$ref": "#/definitions/conference" }
     },
     {
+      "title": "List conferences by organizer",
+      "href": "/conference/list_by_organizer",
+      "rel": "list",
+      "schema": {
+        "properties": {
+          "lang": {"$ref": "#/definitions/language"},
+          "limit": {"$ref": "#/definitions/positiveIntegerDefault10"},
+          "since": {"$ref": "#/definitions/uuid"},
+          "organizer_id": {"$ref": "#/definitions/uuid"}
+        }
+      },
+      "targetSchema": { "$ref": "#/definitions/conference_array" }
+    },
+    {
       "title": "List conference",
       "href": "/conference/list",
       "rel": "list",

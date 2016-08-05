@@ -168,3 +168,43 @@ func (v *ConferenceList) execSQLAndExtract(tx *Tx, sql string, limit int, args .
 	*v = res
 	return nil
 }
+
+func ListConferencesByOrganizer(tx *Tx, l *ConferenceList, orgID, since string, limit int) error {
+	stmt := getStmtBuf()
+	defer releaseStmtBuf(stmt)
+
+	stmt.WriteString(`SELECT `)
+	stmt.WriteString(ConferenceStdSelectColumns)
+	stmt.WriteString(` FROM `)
+	stmt.WriteString(ConferenceTable)
+	stmt.WriteString(` JOIN `)
+	stmt.WriteString(ConferenceAdministratorTable)
+	stmt.WriteString(` ON `)
+	stmt.WriteString(ConferenceTable)
+	stmt.WriteString(`.eid = `)
+	stmt.WriteString(ConferenceAdministratorTable)
+	stmt.WriteString(`.conference_id WHERE `)
+	stmt.WriteString(ConferenceAdministratorTable)
+	stmt.WriteString(`.user_id = ?`)
+	if since != "" {
+		// Unimplemented
+	}
+	if limit > 0 {
+		// Unimplemented
+	}
+
+	rows, err := tx.Query(stmt.String(), orgID)
+	if err != nil {
+		return errors.Wrap(err, "failed to execute query")
+	}
+	res := make(ConferenceList, 0, limit)
+	for rows.Next() {
+		row := Conference{}
+		if err := row.Scan(rows); err != nil {
+			return err
+		}
+		res = append(res, row)
+	}
+	*l = res
+	return nil
+}

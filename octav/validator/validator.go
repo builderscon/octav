@@ -46,6 +46,8 @@ var HTTPListConferenceRequest *jsval.JSVal
 var HTTPListConferenceResponse *jsval.JSVal
 var HTTPListConferenceSeriesRequest *jsval.JSVal
 var HTTPListConferenceSeriesResponse *jsval.JSVal
+var HTTPListConferencesByOrganizerRequest *jsval.JSVal
+var HTTPListConferencesByOrganizerResponse *jsval.JSVal
 var HTTPListFeaturedSpeakersRequest *jsval.JSVal
 var HTTPListFeaturedSpeakersResponse *jsval.JSVal
 var HTTPListQuestionRequest *jsval.JSVal
@@ -2029,6 +2031,43 @@ func init() {
 			jsval.Array().
 				Items(
 					jsval.Reference(M).RefersTo("#/definitions/conference_series"),
+				).
+				AdditionalItems(
+					jsval.EmptyConstraint,
+				),
+		)
+
+	HTTPListConferencesByOrganizerRequest = jsval.New().
+		SetConstraintMap(M).
+		SetRoot(
+			jsval.Object().
+				AdditionalProperties(
+					jsval.EmptyConstraint,
+				).
+				AddProp(
+					"lang",
+					jsval.Reference(M).RefersTo("#/definitions/language"),
+				).
+				AddProp(
+					"limit",
+					jsval.Reference(M).RefersTo("#/definitions/positiveIntegerDefault10"),
+				).
+				AddProp(
+					"organizer_id",
+					jsval.Reference(M).RefersTo("#/definitions/uuid"),
+				).
+				AddProp(
+					"since",
+					jsval.Reference(M).RefersTo("#/definitions/uuid"),
+				),
+		)
+
+	HTTPListConferencesByOrganizerResponse = jsval.New().
+		SetConstraintMap(M).
+		SetRoot(
+			jsval.Array().
+				Items(
+					jsval.Reference(M).RefersTo("#/definitions/conference"),
 				).
 				AdditionalItems(
 					jsval.EmptyConstraint,
