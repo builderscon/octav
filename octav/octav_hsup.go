@@ -1273,6 +1273,30 @@ func httpListConferenceSeries(ctx context.Context, w http.ResponseWriter, r *htt
 	doListConferenceSeries(ctx, w, r, payload)
 }
 
+func httpListConferencesByOrganizer(ctx context.Context, w http.ResponseWriter, r *http.Request) {
+	if pdebug.Enabled {
+		g := pdebug.Marker("httpListConferencesByOrganizer")
+		defer g.End()
+	}
+	if strings.ToLower(r.Method) != `get` {
+		w.Header().Set("Allow", "get")
+		httpError(w, `Method was `+r.Method+`, expected get`, http.StatusNotFound, nil)
+		return
+	}
+
+	var payload model.ListConferencesByOrganizerRequest
+	if err := urlenc.Unmarshal([]byte(r.URL.RawQuery), &payload); err != nil {
+		httpError(w, `Failed to parse url query string`, http.StatusInternalServerError, err)
+		return
+	}
+
+	if err := validator.HTTPListConferencesByOrganizerRequest.Validate(&payload); err != nil {
+		httpError(w, `Invalid input (validation failed)`, http.StatusInternalServerError, err)
+		return
+	}
+	doListConferencesByOrganizer(ctx, w, r, payload)
+}
+
 func httpListFeaturedSpeakers(ctx context.Context, w http.ResponseWriter, r *http.Request) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("httpListFeaturedSpeakers")
@@ -2068,6 +2092,7 @@ func (s *Server) SetupRoutes() {
 	r.HandleFunc(`/v1/conference/dates/delete`, httpWithContext(httpDeleteConferenceDates))
 	r.HandleFunc(`/v1/conference/delete`, httpWithContext(httpWithBasicAuth(httpDeleteConference)))
 	r.HandleFunc(`/v1/conference/list`, httpWithContext(httpListConference))
+	r.HandleFunc(`/v1/conference/list_by_organizer`, httpWithContext(httpListConferencesByOrganizer))
 	r.HandleFunc(`/v1/conference/lookup`, httpWithContext(httpLookupConference))
 	r.HandleFunc(`/v1/conference/lookup_by_slug`, httpWithContext(httpLookupConferenceBySlug))
 	r.HandleFunc(`/v1/conference/session_type/add`, httpWithContext(httpWithBasicAuth(httpAddSessionType)))

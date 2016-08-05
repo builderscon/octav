@@ -765,3 +765,11 @@ type DeleteSponsorRequest struct {
 	ID     string `json:"id"`
 	UserID string `json:"user_id"`
 }
+
+// +transport
+type ListConferencesByOrganizerRequest struct {
+	OrganizerID string            `json:"organizer_id"`
+	Since       jsval.MaybeString `json:"since" urlenc:"since,omitempty,string"`
+	Lang        jsval.MaybeString `json:"lang" urlenc:"lang,omitempty,string"`
+	Limit       jsval.MaybeInt    `json:"limit" urlenc:"limit,omitempty,int64"`
+}

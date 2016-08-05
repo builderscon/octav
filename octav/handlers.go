@@ -1330,3 +1330,22 @@ func doListSessionTypesByConference(ctx context.Context, w http.ResponseWriter, 
 	httpJSON(w, l)
 }
 
+func doListConferencesByOrganizer(ctx context.Context, w http.ResponseWriter, r *http.Request, payload model.ListConferencesByOrganizerRequest) {
+	tx, err := db.Begin()
+	if err != nil {
+		httpError(w, `doListConferencesByOrganizer`, http.StatusInternalServerError, err)
+		return
+	}
+	defer tx.AutoRollback()
+
+	var s service.Conference
+	var l model.ConferenceList
+	if err := s.ListByOrganizerFromPayload(tx, &l, payload); err != nil {
+		httpError(w, `doListConferencesByOrganizer`, http.StatusInternalServerError, err)
+		return
+	}
+
+	httpJSON(w, l)
+}
+
+

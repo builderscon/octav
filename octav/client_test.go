@@ -755,6 +755,7 @@ func johndoe() *model.CreateUserRequest {
 
 	r.Nickname = tools.UUID()
 	r.AuthVia = "github"
+	r.AuthUserID = tools.RandomString(32)
 	r.FirstName.Set("John")
 	r.LastName.Set("Doe")
 	r.Email.Set("john.doe@example.com")
@@ -807,6 +808,18 @@ func TestCreateUser(t *testing.T) {
 	}
 
 	if !assert.Equal(ctx.T, "ドー", res3.LastName, "User.last_name#ja is localized") {
+		return
+	}
+
+	res4, err := ctx.HTTPClient.LookupUserByAuthUserID(&model.LookupUserByAuthUserIDRequest{
+		AuthVia: res.AuthVia,
+		AuthUserID: res.AuthUserID,
+	})
+	if !assert.NoError(ctx.T, err, "LookupUserByAuthUserID should succeed") {
+		return
+	}
+
+	if !assert.Equal(ctx.T, res4, res) {
 		return
 	}
 
