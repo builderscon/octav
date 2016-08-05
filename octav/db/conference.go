@@ -184,8 +184,10 @@ func ListConferencesByOrganizer(tx *Tx, l *ConferenceList, orgID, since string, 
 	stmt.WriteString(`.eid = `)
 	stmt.WriteString(ConferenceAdministratorTable)
 	stmt.WriteString(`.conference_id WHERE `)
+	stmt.WriteString(ConferenceTable)
+	stmt.WriteString(`.status != "private" AND `)
 	stmt.WriteString(ConferenceAdministratorTable)
-	stmt.WriteString(`.user_id = ?`)
+	stmt.WriteString(`.user_id = ? `)
 	if since != "" {
 		// Unimplemented
 	}
