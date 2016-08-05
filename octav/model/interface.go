@@ -68,6 +68,7 @@ type SessionType struct {
 	Duration              int       `json:"duration"`
 	SubmissionStart       time.Time `json:"submission_start,omitempty"`
 	SubmissionEnd         time.Time `json:"submission_end,omitempty"`
+	IsAcceptingSubmission bool      `json:"is_accepting_submission"` // only used to return an easy flag to the client
 }
 type SessionTypeList []SessionType
 

@@ -528,6 +528,10 @@ func init() {
 			jsval.Reference(M).RefersTo("#/definitions/uuid"),
 		).
 		AddProp(
+			"is_accepting_submission",
+			jsval.Boolean(),
+		).
+		AddProp(
 			"name",
 			jsval.Reference(M).RefersTo("#/definitions/string_en"),
 		).
@@ -2776,6 +2780,10 @@ func init() {
 				AddProp(
 					"id",
 					jsval.Reference(M).RefersTo("#/definitions/uuid"),
+				).
+				AddProp(
+					"is_accepting_submission",
+					jsval.Boolean(),
 				).
 				AddProp(
 					"name",

@@ -329,7 +329,8 @@
         "abstract": {"$ref":"#/definitions/string_en"},
         "duration": {"$ref":"#/definitions/positiveInteger"},
         "submission_start": {"$ref":"#/definitions/rfc3339"},
-        "submission_end": {"$ref":"#/definitions/rfc3339"}
+        "submission_end": {"$ref":"#/definitions/rfc3339"},
+        "is_accepting_submission": {"type":"boolean"}
       },
       "patternProperties":{
         "name#[a-z]+": { "$ref": "#/definitions/string_i18n" },
