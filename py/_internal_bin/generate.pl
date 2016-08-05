@@ -37,14 +37,17 @@ if sys.version[0] == "3":
 else:
     from urllib import urlencode
 
+class MissingRequiredArgument(Exception):
+    pass
+
 class Octav(object):
   def __init__(self, endpoint, key, secret, debug=False):
     if not endpoint:
-      raise "endpoint is required"
+      raise MissingRequiredArgument('endpoint is required')
     if not key:
-      raise "key is required"
+      raise MissingRequiredArgument('key is required')
     if not secret:
-      raise "secret is required"
+      raise MissingRequiredArgument('secret is required')
     self.debug = debug
     self.endpoint = endpoint
     self.error = None
@@ -94,7 +97,7 @@ for my $link (@{$schema->{links}}) {
     say $tmpout '        hdrs = {}';
     foreach my $name (sort @$required) {
         say $tmpout "        if $name is None:";
-        say $tmpout "            raise 'property $name must be provided'";
+        say $tmpout "            raise MissingRequiredArgument('property $name must be provided')";
         say $tmpout "        payload['" . $name . "'] = " . $name;
     }
 
