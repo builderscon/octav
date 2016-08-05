@@ -1,5 +1,5 @@
 """OCTAV Client Library"""
-"""DO NOT EDIT: This file was generated from ../spec/v1/api.json on Fri Aug  5 13:03:19 2016"""
+"""DO NOT EDIT: This file was generated from ../spec/v1/api.json on Fri Aug  5 13:34:16 2016"""
 
 import json
 import os
@@ -1227,7 +1227,7 @@ class Octav(object):
         self.error = repr(e)
         return None
 
-  def list_confenreces_by_organizer (self, lang=None, limit=None, organizer_id=None, since=None):
+  def list_conferences_by_organizer (self, lang=None, limit=None, organizer_id=None, since=None):
     try:
         payload = {}
         hdrs = {}
