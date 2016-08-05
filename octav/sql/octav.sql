@@ -13,7 +13,6 @@ CREATE TABLE users (
     created_on DATETIME NOT NULL,
     modified_on TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     UNIQUE KEY(eid),
-    UNIQUE KEY(nickname),
     UNIQUE KEY(auth_via, auth_user_id(191))
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 

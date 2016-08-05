@@ -24,6 +24,7 @@ EOM
 say $tmpout <<'EOM';
 import json
 import os
+import urllib3
 
 if os.getenv('SERVER_SOFTWARE', '').startswith('Google App Engine/') or os.getenv('SERVER_SOFTWARE', '').startswith('Development/'):
     from urllib3.contrib.appengine import AppEngineManager as PoolManager
@@ -90,6 +91,7 @@ for my $link (@{$schema->{links}}) {
 
     say $tmpout '    try:';
     say $tmpout '        payload = {}';
+    say $tmpout '        hdrs = {}';
     foreach my $name (sort @$required) {
         say $tmpout "        if $name is None:";
         say $tmpout "            raise 'property $name must be provided'";
@@ -101,19 +103,21 @@ for my $link (@{$schema->{links}}) {
         say $tmpout "            payload['" . $key . "'] = " . $key;
     }
     say $tmpout q|        uri = '%s|, $path, q|' % self.endpoint|;
-    if (lc($link->{method}) eq 'post') {
-        say $tmpout q|        if self.debug:|;
-        say $tmpout q|            print('POST %s' % uri)|;
+    if ($link->{'hsup.wrapper'} eq 'httpWithBasicAuth') {
         say $tmpout q|        hdrs = urllib3.util.make_headers(|;
         say $tmpout q|            basic_auth='%s:%s' % (self.key, self.secret),|;
         say $tmpout q|        )|;
+    }
+    if (lc($link->{method}) eq 'post') {
+        say $tmpout q|        if self.debug:|;
+        say $tmpout q|            print('POST %s' % uri)|;
         say $tmpout q|        hdrs['Content-Type']= 'application/json'|;
         say $tmpout q|        res = self.http.request('POST', uri, headers=hdrs, body=json.dumps(payload))|;
     } else {
         say $tmpout q|        qs = urlencode(payload)|;
         say $tmpout q|        if self.debug:|;
         say $tmpout q|            print('GET %s?%s' % (uri, qs))|;
-        say $tmpout q|        res = self.http.request('GET', '%s?%s' % (uri, qs))|;
+        say $tmpout q|        res = self.http.request('GET', '%s?%s' % (uri, qs), headers=hdrs)|;
     }
 
     say $tmpout '        if self.debug:';

@@ -2219,7 +2219,7 @@ func (c *Client) LookupUserByAuthUserID(in *model.LookupUserByAuthUserIDRequest)
 		g := pdebug.Marker("client.LookupUserByAuthUserID").BindError(&err)
 		defer g.End()
 	}
-	u, err := url.Parse(c.Endpoint + "/v1/user/lookup_by_auth_user_id")
+	u, err := url.Parse(c.Endpoint + "/v1/user/lookup_user_by_auth_user_id")
 	if err != nil {
 		return nil, err
 	}

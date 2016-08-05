@@ -482,7 +482,7 @@
       "title": "Lookup user by auth user ID",
       "hsup.wrapper": "httpWithBasicAuth",
       "rel": "lookup",
-      "href": "/user/lookup_by_auth_user_id",
+      "href": "/user/lookup_user_by_auth_user_id",
       "method": "GET",
       "schema": {
         "type": "object",
