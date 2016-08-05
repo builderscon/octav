@@ -595,6 +595,18 @@ sub lookup_conference_by_slug {
     return JSON::decode_json($res->decoded_content);
 }
 
+sub list_conferences_by_organizer {
+    my ($self, $payload) = @_;
+    my $uri = URI->new($self->{endpoint} . qq|/v1/conference/list_by_organizer|);
+    $uri->query_form($payload);
+    my $res = $self->{user_agent}->get($uri);
+    if (!$res->is_success) {
+        $self->{last_error} = $res->status_line;
+        return;
+    }
+    return JSON::decode_json($res->decoded_content);
+}
+
 sub list_conference {
     my ($self, $payload) = @_;
     my $uri = URI->new($self->{endpoint} . qq|/v1/conference/list|);
