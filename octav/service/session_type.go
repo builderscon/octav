@@ -180,6 +180,16 @@ func (v *SessionType) Decorate(tx *db.Tx, st *model.SessionType, lang string) (e
 		defer g.End()
 	}
 
+	now := time.Now()
+	ssvalid := !st.SubmissionStart.IsZero()
+	sevalid := !st.SubmissionEnd.IsZero()
+
+	if ssvalid && sevalid {
+		if now.After(st.SubmissionStart) && now.Before(st.SubmissionEnd) {
+			st.IsAcceptingSubmission = true
+		}
+	}
+
 	if lang == "" {
 		return nil
 	}
