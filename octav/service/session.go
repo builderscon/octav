@@ -18,14 +18,38 @@ func (v *Session) populateRowForCreate(vdb *db.Session, payload model.CreateSess
 	vdb.SortOrder = 0
 	vdb.Confirmed = false
 
+	// At least one of the English or Japanese titles must be
+	// non-empty
+	var hasTitle bool
 	if payload.Title.Valid() {
+		hasTitle = true
 		vdb.Title.Valid = true
 		vdb.Title.String = payload.Title.String
 	}
 
+	if s, ok := payload.L10N.Get("ja", "title"); ok && s != ""  {
+		hasTitle = true
+	}
+
+	if !hasTitle {
+		return errors.New("missing title")
+	}
+
+	// At least one of the English or Japanese abstracts must be
+	// non-empty
+	var hasAbstract bool
 	if payload.Abstract.Valid() {
+		hasAbstract = true
 		vdb.Abstract.Valid = true
 		vdb.Abstract.String = payload.Abstract.String
+	}
+
+	if s, ok := payload.L10N.Get("ja", "abstract"); ok && s != ""  {
+		hasAbstract = true
+	}
+
+	if !hasAbstract {
+		return errors.New("missing abstract")
 	}
 
 	if payload.Memo.Valid() {

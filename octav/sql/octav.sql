@@ -135,7 +135,7 @@ CREATE TABLE sessions (
     conference_id CHAR(64) CHARACTER SET latin1,
     room_id CHAR(64) CHARACTER SET latin1,
     speaker_id CHAR(64) CHARACTER SET latin1,
-    title TEXT NOT NULL,
+    title TEXT,
     abstract TEXT,
     memo TEXT,
     starts_on DATETIME,
