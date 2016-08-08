@@ -73,6 +73,7 @@ for my $link (@{$schema->{links}}) {
     my $link_schema = $link->{schema};
     my $required = $link_schema && ($link_schema->{required} || []);
     my $props = $link_schema->{properties} || {};
+    my $patternProperties = $link_schema->{patternProperties} || {};
     my @keys = keys %$props;
     my @args;
 
@@ -85,6 +86,9 @@ for my $link (@{$schema->{links}}) {
     foreach my $key (sort @keys) {
         next if $required{$key};
         push @args, "$key=None";
+    }
+    if (keys %$patternProperties > 0) {
+        push @args, '**args';
     }
     print $tmpout "  def $name (self";
     if (@args) {
@@ -104,6 +108,18 @@ for my $link (@{$schema->{links}}) {
     foreach my $key (sort @keys) {
         say $tmpout "        if $key is not None:";
         say $tmpout "            payload['" . $key . "'] = " . $key;
+    }
+    if (keys(%$patternProperties) > 0) {
+        my @patternKeys;
+        foreach my $key (sort keys %$patternProperties) {
+            $key =~ s/'/\\'/g;
+            push @patternKeys, $key;
+        }
+        say $tmpout "        patterns = [", (join(", ", map { "re.compile('$_')" } @patternKeys)), "]";
+        say $tmpout "        for key in args:";
+        say $tmpout "            for p in patterns:";
+        say $tmpout "                if p.match(key):";
+        say $tmpout "                    payload[key] = args[key]";
     }
     say $tmpout q|        uri = '%s|, $path, q|' % self.endpoint|;
     if ($link->{'hsup.wrapper'} eq 'httpWithBasicAuth') {

@@ -1,5 +1,5 @@
 """OCTAV Client Library"""
-"""DO NOT EDIT: This file was generated from ../spec/v1/api.json on Fri Aug  5 13:34:16 2016"""
+"""DO NOT EDIT: This file was generated from ../spec/v1/api.json on Mon Aug  8 12:58:32 2016"""
 
 import json
 import os
@@ -44,7 +44,7 @@ class Octav(object):
   def last_error(self):
     return self.error
 
-  def create_user (self, auth_user_id, auth_via, nickname, avatar_url=None, email=None, first_name=None, last_name=None, tshirt_size=None):
+  def create_user (self, auth_user_id, auth_via, nickname, avatar_url=None, email=None, first_name=None, last_name=None, tshirt_size=None, **args):
     try:
         payload = {}
         hdrs = {}
@@ -73,6 +73,11 @@ class Octav(object):
             payload['nickname'] = nickname
         if tshirt_size is not None:
             payload['tshirt_size'] = tshirt_size
+        patterns = [re.compile('first_name#[a-z]+'), re.compile('last_name#[a-z]+')]
+        for key in args:
+            for p in patterns:
+                if p.match(key):
+                    payload[key] = args[key]
         uri = '%s/user/create' % self.endpoint
         hdrs = urllib3.util.make_headers(
             basic_auth='%s:%s' % (self.key, self.secret),
@@ -153,7 +158,7 @@ class Octav(object):
         self.error = repr(e)
         return None
 
-  def update_user (self, id, user_id, email=None, first_name=None, last_name=None, nickname=None, tshirt_size=None):
+  def update_user (self, id, user_id, email=None, first_name=None, last_name=None, nickname=None, tshirt_size=None, **args):
     try:
         payload = {}
         hdrs = {}
@@ -177,6 +182,11 @@ class Octav(object):
             payload['tshirt_size'] = tshirt_size
         if user_id is not None:
             payload['user_id'] = user_id
+        patterns = [re.compile('first_name#[a-z]+'), re.compile('last_name#[a-z]+')]
+        for key in args:
+            for p in patterns:
+                if p.match(key):
+                    payload[key] = args[key]
         uri = '%s/user/update' % self.endpoint
         hdrs = urllib3.util.make_headers(
             basic_auth='%s:%s' % (self.key, self.secret),
@@ -258,7 +268,7 @@ class Octav(object):
         self.error = repr(e)
         return None
 
-  def create_venue (self, address, name, user_id, latitude=None, longitude=None):
+  def create_venue (self, address, name, user_id, latitude=None, longitude=None, **args):
     try:
         payload = {}
         hdrs = {}
@@ -281,6 +291,11 @@ class Octav(object):
             payload['name'] = name
         if user_id is not None:
             payload['user_id'] = user_id
+        patterns = [re.compile('address#[a-z]+'), re.compile('name#[a-z]+')]
+        for key in args:
+            for p in patterns:
+                if p.match(key):
+                    payload[key] = args[key]
         uri = '%s/venue/create' % self.endpoint
         hdrs = urllib3.util.make_headers(
             basic_auth='%s:%s' % (self.key, self.secret),
@@ -422,7 +437,7 @@ class Octav(object):
         self.error = repr(e)
         return None
 
-  def create_room (self, name, user_id, venue_id, capacity=None):
+  def create_room (self, name, user_id, venue_id, capacity=None, **args):
     try:
         payload = {}
         hdrs = {}
@@ -443,6 +458,11 @@ class Octav(object):
             payload['user_id'] = user_id
         if venue_id is not None:
             payload['venue_id'] = venue_id
+        patterns = [re.compile('name#[a-z]+')]
+        for key in args:
+            for p in patterns:
+                if p.match(key):
+                    payload[key] = args[key]
         uri = '%s/room/create' % self.endpoint
         hdrs = urllib3.util.make_headers(
             basic_auth='%s:%s' % (self.key, self.secret),
@@ -463,7 +483,7 @@ class Octav(object):
         self.error = repr(e)
         return None
 
-  def update_room (self, id, user_id, capacity=None, name=None, venue_id=None):
+  def update_room (self, id, user_id, capacity=None, name=None, venue_id=None, **args):
     try:
         payload = {}
         hdrs = {}
@@ -483,6 +503,11 @@ class Octav(object):
             payload['user_id'] = user_id
         if venue_id is not None:
             payload['venue_id'] = venue_id
+        patterns = [re.compile('name#[a-z]+')]
+        for key in args:
+            for p in patterns:
+                if p.match(key):
+                    payload[key] = args[key]
         uri = '%s/room/update' % self.endpoint
         hdrs = urllib3.util.make_headers(
             basic_auth='%s:%s' % (self.key, self.secret),
@@ -977,7 +1002,7 @@ class Octav(object):
         self.error = repr(e)
         return None
 
-  def add_session_type (self, abstract, conference_id, duration, name, user_id, submission_end=None, submission_start=None):
+  def add_session_type (self, abstract, conference_id, duration, name, user_id, submission_end=None, submission_start=None, **args):
     try:
         payload = {}
         hdrs = {}
@@ -1010,6 +1035,11 @@ class Octav(object):
             payload['submission_start'] = submission_start
         if user_id is not None:
             payload['user_id'] = user_id
+        patterns = [re.compile('abstract#[a-z]+'), re.compile('name#[a-z]+')]
+        for key in args:
+            for p in patterns:
+                if p.match(key):
+                    payload[key] = args[key]
         uri = '%s/conference/session_type/add' % self.endpoint
         hdrs = urllib3.util.make_headers(
             basic_auth='%s:%s' % (self.key, self.secret),
@@ -1095,7 +1125,7 @@ class Octav(object):
         self.error = repr(e)
         return None
 
-  def update_session_type (self, id, user_id, abstract=None, duration=None, name=None, submission_end=None, submission_start=None):
+  def update_session_type (self, id, user_id, abstract=None, duration=None, name=None, submission_end=None, submission_start=None, **args):
     try:
         payload = {}
         hdrs = {}
@@ -1119,6 +1149,11 @@ class Octav(object):
             payload['submission_start'] = submission_start
         if user_id is not None:
             payload['user_id'] = user_id
+        patterns = [re.compile('abstract#[a-z]+'), re.compile('name#[a-z]+')]
+        for key in args:
+            for p in patterns:
+                if p.match(key):
+                    payload[key] = args[key]
         uri = '%s/session_type/update' % self.endpoint
         hdrs = urllib3.util.make_headers(
             basic_auth='%s:%s' % (self.key, self.secret),
@@ -1289,7 +1324,7 @@ class Octav(object):
         self.error = repr(e)
         return None
 
-  def update_conference (self, id, user_id, description=None, slug=None, status=None, sub_title=None, title=None):
+  def update_conference (self, id, user_id, description=None, slug=None, status=None, sub_title=None, title=None, **args):
     try:
         payload = {}
         hdrs = {}
@@ -1313,6 +1348,11 @@ class Octav(object):
             payload['title'] = title
         if user_id is not None:
             payload['user_id'] = user_id
+        patterns = [re.compile('description#[a-z]+'), re.compile('title#[a-z]+')]
+        for key in args:
+            for p in patterns:
+                if p.match(key):
+                    payload[key] = args[key]
         uri = '%s/conference/update' % self.endpoint
         hdrs = urllib3.util.make_headers(
             basic_auth='%s:%s' % (self.key, self.secret),
@@ -1396,7 +1436,7 @@ class Octav(object):
         self.error = repr(e)
         return None
 
-  def create_session (self, abstract, conference_id, session_type_id, speaker_id, title, user_id, category=None, material_level=None, memo=None, photo_permission=None, slide_language=None, slide_subtitles=None, slide_url=None, spoken_language=None, tags=None, video_permission=None, video_url=None):
+  def create_session (self, abstract, conference_id, session_type_id, speaker_id, title, user_id, category=None, material_level=None, memo=None, photo_permission=None, slide_language=None, slide_subtitles=None, slide_url=None, spoken_language=None, tags=None, video_permission=None, video_url=None, **args):
     try:
         payload = {}
         hdrs = {}
@@ -1452,6 +1492,11 @@ class Octav(object):
             payload['video_permission'] = video_permission
         if video_url is not None:
             payload['video_url'] = video_url
+        patterns = [re.compile('abstract#[a-z]+'), re.compile('title#[a-z]+')]
+        for key in args:
+            for p in patterns:
+                if p.match(key):
+                    payload[key] = args[key]
         uri = '%s/session/create' % self.endpoint
         hdrs = urllib3.util.make_headers(
             basic_auth='%s:%s' % (self.key, self.secret),
@@ -1532,7 +1577,7 @@ class Octav(object):
         self.error = repr(e)
         return None
 
-  def update_session (self, id, user_id, abstract=None, category=None, conference_id=None, confirmed=None, duration=None, has_interpretation=None, material_level=None, memo=None, photo_permission=None, slide_language=None, slide_subtitles=None, slide_url=None, sort_order=None, speaker_id=None, spoken_language=None, status=None, tags=None, title=None, video_permission=None, video_url=None):
+  def update_session (self, id, user_id, abstract=None, category=None, conference_id=None, confirmed=None, duration=None, has_interpretation=None, material_level=None, memo=None, photo_permission=None, slide_language=None, slide_subtitles=None, slide_url=None, sort_order=None, speaker_id=None, spoken_language=None, status=None, tags=None, title=None, video_permission=None, video_url=None, **args):
     try:
         payload = {}
         hdrs = {}
@@ -1586,6 +1631,11 @@ class Octav(object):
             payload['video_permission'] = video_permission
         if video_url is not None:
             payload['video_url'] = video_url
+        patterns = [re.compile('abstract#[a-z]+'), re.compile('title#[a-z]+')]
+        for key in args:
+            for p in patterns:
+                if p.match(key):
+                    payload[key] = args[key]
         uri = '%s/session/update' % self.endpoint
         hdrs = urllib3.util.make_headers(
             basic_auth='%s:%s' % (self.key, self.secret),
@@ -1795,7 +1845,7 @@ class Octav(object):
         self.error = repr(e)
         return None
 
-  def add_featured_speaker (self, conference_id, description, display_name, avatar_url=None, speaker_id=None, user_id=None):
+  def add_featured_speaker (self, conference_id, description, display_name, avatar_url=None, speaker_id=None, user_id=None, **args):
     try:
         payload = {}
         hdrs = {}
@@ -1820,6 +1870,11 @@ class Octav(object):
             payload['speaker_id'] = speaker_id
         if user_id is not None:
             payload['user_id'] = user_id
+        patterns = [re.compile('description#[a-z]+'), re.compile('display_name#[a-z]+')]
+        for key in args:
+            for p in patterns:
+                if p.match(key):
+                    payload[key] = args[key]
         uri = '%s/featured_speaker/add' % self.endpoint
         hdrs = urllib3.util.make_headers(
             basic_auth='%s:%s' % (self.key, self.secret),
@@ -1903,7 +1958,7 @@ class Octav(object):
         self.error = repr(e)
         return None
 
-  def update_featured_speaker (self, id, user_id, avatar_url=None, description=None, display_name=None, speaker_id=None):
+  def update_featured_speaker (self, id, user_id, avatar_url=None, description=None, display_name=None, speaker_id=None, **args):
     try:
         payload = {}
         hdrs = {}
@@ -1925,6 +1980,11 @@ class Octav(object):
             payload['speaker_id'] = speaker_id
         if user_id is not None:
             payload['user_id'] = user_id
+        patterns = [re.compile('description#[a-z]+'), re.compile('display_name#[a-z]+')]
+        for key in args:
+            for p in patterns:
+                if p.match(key):
+                    payload[key] = args[key]
         uri = '%s/featured_speaker/update' % self.endpoint
         hdrs = urllib3.util.make_headers(
             basic_auth='%s:%s' % (self.key, self.secret),
@@ -1979,7 +2039,7 @@ class Octav(object):
         self.error = repr(e)
         return None
 
-  def add_sponsor (self, conference_id, group_name, name, url, user_id, sort_order=None):
+  def add_sponsor (self, conference_id, group_name, name, url, user_id, sort_order=None, **args):
     try:
         payload = {}
         hdrs = {}
@@ -2010,6 +2070,11 @@ class Octav(object):
             payload['url'] = url
         if user_id is not None:
             payload['user_id'] = user_id
+        patterns = [re.compile('name#[a-z]+')]
+        for key in args:
+            for p in patterns:
+                if p.match(key):
+                    payload[key] = args[key]
         uri = '%s/sponsor/add' % self.endpoint
         hdrs = urllib3.util.make_headers(
             basic_auth='%s:%s' % (self.key, self.secret),
@@ -2093,7 +2158,7 @@ class Octav(object):
         self.error = repr(e)
         return None
 
-  def update_sponsor (self, id, user_id, group_name=None, name=None, sort_order=None, url=None):
+  def update_sponsor (self, id, user_id, group_name=None, name=None, sort_order=None, url=None, **args):
     try:
         payload = {}
         hdrs = {}
@@ -2115,6 +2180,11 @@ class Octav(object):
             payload['url'] = url
         if user_id is not None:
             payload['user_id'] = user_id
+        patterns = [re.compile('name#[a-z]+')]
+        for key in args:
+            for p in patterns:
+                if p.match(key):
+                    payload[key] = args[key]
         uri = '%s/sponsor/update' % self.endpoint
         hdrs = urllib3.util.make_headers(
             basic_auth='%s:%s' % (self.key, self.secret),
