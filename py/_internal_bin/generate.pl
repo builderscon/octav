@@ -24,6 +24,7 @@ EOM
 say $tmpout <<'EOM';
 import json
 import os
+import re
 import urllib3
 
 if os.getenv('SERVER_SOFTWARE', '').startswith('Google App Engine/') or os.getenv('SERVER_SOFTWARE', '').startswith('Development/'):
