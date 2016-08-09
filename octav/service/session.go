@@ -221,11 +221,15 @@ func (v *Session) Decorate(tx *db.Tx, session *model.Session, lang string) error
 	}
 	// session must be associated with a conference
 	if session.ConferenceID != "" {
-		conf := model.Conference{}
-		if err := conf.Load(tx, session.ConferenceID); err != nil {
+		var cs Conference
+		var mc model.Conference
+		if err := cs.Lookup(tx, &mc, session.ConferenceID); err != nil {
 			return errors.Wrap(err, "failed to load conference")
 		}
-		session.Conference = &conf
+		if err := cs.Decorate(tx, &mc, lang); err != nil {
+			return errors.Wrap(err, "failed to decorate conference")
+		}
+		session.Conference = &mc
 	}
 
 	// ... but not necessarily with a room

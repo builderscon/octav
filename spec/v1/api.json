@@ -98,6 +98,14 @@
       "items": { "$ref": "#/definitions/featured_speaker" },
       "hsup.type": "[]model.FeaturedSpeaker"
     },
+    "object_id": {
+      "type": "object",
+      "hsup.type": "model.ObjectID",
+      "properties": {
+        "id": {"$ref": "#/definitions/uuid"},
+        "type": {"type":"string"}
+      }
+    },
     "sponsor": {
       "hsup.type": "model.Sponsor",
       "type": "object",
@@ -576,7 +584,7 @@
           "address#[a-z]+": { "$ref": "#/definitions/string_i18n" }
         }
       },
-      "targetSchema": { "$ref": "#/definitions/venue" }
+      "targetSchema": {"$ref": "#/definitions/object_id"}
     },
     {
       "title": "List venue",
@@ -661,7 +669,7 @@
           "name#[a-z]+": { "$ref": "#/definitions/string_i18n" }
         }
       },
-      "targetSchema": { "$ref": "#/definitions/room" }
+      "targetSchema": {"$ref": "#/definitions/object_id"}
     },
     {
       "title": "Update room",
@@ -747,7 +755,7 @@
         },
         "required": ["user_id","slug","title"]
       },
-      "targetSchema": { "$ref": "#/definitions/conference_series" }
+      "targetSchema": {"$ref": "#/definitions/object_id"}
     },
     {
       "title": "List conference series",
@@ -797,7 +805,7 @@
         },
         "required": ["series_id", "title", "slug", "user_id"]
       },
-      "targetSchema": { "$ref": "#/definitions/conference" }
+      "targetSchema": {"$ref": "#/definitions/object_id"}
     },
     {
       "title": "Add conference dates",
@@ -1148,7 +1156,7 @@
           "abstract#[a-z]+": { "$ref": "#/definitions/markdown_i18n" }
         }
       },
-      "targetSchema": { "$ref": "#/definitions/session" }
+      "targetSchema": {"$ref": "#/definitions/object_id"}
     },
     {
       "title": "Lookup session",
@@ -1254,7 +1262,7 @@
           "body": {"type":"string"}
         }
       },
-      "targetSchema": { "$ref": "#/definitions/question" }
+      "targetSchema": {"$ref": "#/definitions/object_id"}
     },
     {
       "title": "Delete question",
@@ -1304,7 +1312,8 @@
           "comment_good": {"type": "string"},
           "comment_improvement": {"type": "string"}
         }
-      }
+      },
+      "targetSchema": {"$ref": "#/definitions/object_id"}
     },
     {
       "title": "Add featured speaker",

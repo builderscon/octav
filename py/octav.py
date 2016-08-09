@@ -1,5 +1,5 @@
 """OCTAV Client Library"""
-"""DO NOT EDIT: This file was generated from ../spec/v1/api.json on Tue Aug  9 10:21:26 2016"""
+"""DO NOT EDIT: This file was generated from ../spec/v1/api.json on Tue Aug  9 16:58:11 2016"""
 
 import json
 import os
@@ -1842,7 +1842,7 @@ class Octav(object):
         if res.status != 200:
             self.extract_error(res)
             return None
-        return True
+        return json.loads(res.data)
     except BaseException, e:
         if self.debug:
             print("error during http access: " + repr(e))

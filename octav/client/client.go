@@ -350,7 +350,7 @@ func (c *Client) AddSponsor(in *model.AddSponsorRequest) (ret *model.Sponsor, er
 	return &payload, nil
 }
 
-func (c *Client) CreateConference(in *model.CreateConferenceRequest) (ret *model.Conference, err error) {
+func (c *Client) CreateConference(in *model.CreateConferenceRequest) (ret *model.ObjectID, err error) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("client.CreateConference").BindError(&err)
 		defer g.End()
@@ -398,7 +398,7 @@ func (c *Client) CreateConference(in *model.CreateConferenceRequest) (ret *model
 		return nil, err
 	}
 
-	var payload model.Conference
+	var payload model.ObjectID
 	err = json.Unmarshal(jsonbuf.Bytes(), &payload)
 	if err != nil {
 		return nil, err
@@ -406,7 +406,7 @@ func (c *Client) CreateConference(in *model.CreateConferenceRequest) (ret *model
 	return &payload, nil
 }
 
-func (c *Client) CreateConferenceSeries(in *model.CreateConferenceSeriesRequest) (ret *model.ConferenceSeries, err error) {
+func (c *Client) CreateConferenceSeries(in *model.CreateConferenceSeriesRequest) (ret *model.ObjectID, err error) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("client.CreateConferenceSeries").BindError(&err)
 		defer g.End()
@@ -454,7 +454,7 @@ func (c *Client) CreateConferenceSeries(in *model.CreateConferenceSeriesRequest)
 		return nil, err
 	}
 
-	var payload model.ConferenceSeries
+	var payload model.ObjectID
 	err = json.Unmarshal(jsonbuf.Bytes(), &payload)
 	if err != nil {
 		return nil, err
@@ -462,7 +462,7 @@ func (c *Client) CreateConferenceSeries(in *model.CreateConferenceSeriesRequest)
 	return &payload, nil
 }
 
-func (c *Client) CreateQuestion(in *model.CreateQuestionRequest) (ret *model.Question, err error) {
+func (c *Client) CreateQuestion(in *model.CreateQuestionRequest) (ret *model.ObjectID, err error) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("client.CreateQuestion").BindError(&err)
 		defer g.End()
@@ -508,7 +508,7 @@ func (c *Client) CreateQuestion(in *model.CreateQuestionRequest) (ret *model.Que
 		return nil, err
 	}
 
-	var payload model.Question
+	var payload model.ObjectID
 	err = json.Unmarshal(jsonbuf.Bytes(), &payload)
 	if err != nil {
 		return nil, err
@@ -516,7 +516,7 @@ func (c *Client) CreateQuestion(in *model.CreateQuestionRequest) (ret *model.Que
 	return &payload, nil
 }
 
-func (c *Client) CreateRoom(in *model.CreateRoomRequest) (ret *model.Room, err error) {
+func (c *Client) CreateRoom(in *model.CreateRoomRequest) (ret *model.ObjectID, err error) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("client.CreateRoom").BindError(&err)
 		defer g.End()
@@ -564,7 +564,7 @@ func (c *Client) CreateRoom(in *model.CreateRoomRequest) (ret *model.Room, err e
 		return nil, err
 	}
 
-	var payload model.Room
+	var payload model.ObjectID
 	err = json.Unmarshal(jsonbuf.Bytes(), &payload)
 	if err != nil {
 		return nil, err
@@ -572,7 +572,7 @@ func (c *Client) CreateRoom(in *model.CreateRoomRequest) (ret *model.Room, err e
 	return &payload, nil
 }
 
-func (c *Client) CreateSession(in *model.CreateSessionRequest) (ret *model.Session, err error) {
+func (c *Client) CreateSession(in *model.CreateSessionRequest) (ret *model.ObjectID, err error) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("client.CreateSession").BindError(&err)
 		defer g.End()
@@ -620,7 +620,7 @@ func (c *Client) CreateSession(in *model.CreateSessionRequest) (ret *model.Sessi
 		return nil, err
 	}
 
-	var payload model.Session
+	var payload model.ObjectID
 	err = json.Unmarshal(jsonbuf.Bytes(), &payload)
 	if err != nil {
 		return nil, err
@@ -628,18 +628,18 @@ func (c *Client) CreateSession(in *model.CreateSessionRequest) (ret *model.Sessi
 	return &payload, nil
 }
 
-func (c *Client) CreateSessionSurveyResponse(in *model.CreateSessionSurveyResponseRequest) (err error) {
+func (c *Client) CreateSessionSurveyResponse(in *model.CreateSessionSurveyResponseRequest) (ret *model.ObjectID, err error) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("client.CreateSessionSurveyResponse").BindError(&err)
 		defer g.End()
 	}
 	u, err := url.Parse(c.Endpoint + "/v1/survey_session_response/create")
 	if err != nil {
-		return err
+		return nil, err
 	}
 	buf, err := urlenc.Marshal(in)
 	if err != nil {
-		return err
+		return nil, err
 	}
 	u.RawQuery = string(buf)
 	if pdebug.Enabled {
@@ -647,19 +647,39 @@ func (c *Client) CreateSessionSurveyResponse(in *model.CreateSessionSurveyRespon
 	}
 	req, err := http.NewRequest("GET", u.String(), nil)
 	if err != nil {
-		return err
+		return nil, err
 	}
 	if c.BasicAuth.Username != "" && c.BasicAuth.Password != "" {
 		req.SetBasicAuth(c.BasicAuth.Username, c.BasicAuth.Password)
 	}
 	res, err := c.Client.Do(req)
 	if err != nil {
-		return err
+		return nil, err
 	}
 	if res.StatusCode != http.StatusOK {
-		return fmt.Errorf(`Invalid response: '%s'`, res.Status)
+		return nil, fmt.Errorf(`Invalid response: '%s'`, res.Status)
 	}
-	return nil
+	jsonbuf := getTransportJSONBuffer()
+	defer releaseTransportJSONBuffer(jsonbuf)
+	_, err = io.Copy(jsonbuf, io.LimitReader(res.Body, MaxResponseSize))
+	defer res.Body.Close()
+	if pdebug.Enabled {
+		if err != nil {
+			pdebug.Printf("failed to read respons buffer: %s", err)
+		} else {
+			pdebug.Printf("response buffer: %s", jsonbuf)
+		}
+	}
+	if err != nil {
+		return nil, err
+	}
+
+	var payload model.ObjectID
+	err = json.Unmarshal(jsonbuf.Bytes(), &payload)
+	if err != nil {
+		return nil, err
+	}
+	return &payload, nil
 }
 
 func (c *Client) CreateUser(in *model.CreateUserRequest) (ret *model.User, err error) {
@@ -718,7 +738,7 @@ func (c *Client) CreateUser(in *model.CreateUserRequest) (ret *model.User, err e
 	return &payload, nil
 }
 
-func (c *Client) CreateVenue(in *model.CreateVenueRequest) (ret *model.Venue, err error) {
+func (c *Client) CreateVenue(in *model.CreateVenueRequest) (ret *model.ObjectID, err error) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("client.CreateVenue").BindError(&err)
 		defer g.End()
@@ -766,7 +786,7 @@ func (c *Client) CreateVenue(in *model.CreateVenueRequest) (ret *model.Venue, er
 		return nil, err
 	}
 
-	var payload model.Venue
+	var payload model.ObjectID
 	err = json.Unmarshal(jsonbuf.Bytes(), &payload)
 	if err != nil {
 		return nil, err

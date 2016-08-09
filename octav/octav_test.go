@@ -96,15 +96,15 @@ func testVenueDBCreate(t *testing.T, v *db.Venue) error {
 	return nil
 }
 
-func testCreateVenuePass(ctx *TestCtx, v *model.CreateVenueRequest) (*model.Venue, error) {
+func testCreateVenuePass(ctx *TestCtx, v *model.CreateVenueRequest) (*model.ObjectID, error) {
 	return testCreateVenue(ctx, v, false)
 }
 
-func testCreateVenueFail(ctx *TestCtx, v *model.CreateVenueRequest) (*model.Venue, error) {
+func testCreateVenueFail(ctx *TestCtx, v *model.CreateVenueRequest) (*model.ObjectID, error) {
 	return testCreateVenue(ctx, v, true)
 }
 
-func testCreateVenue(ctx *TestCtx, v *model.CreateVenueRequest, fail bool) (*model.Venue, error) {
+func testCreateVenue(ctx *TestCtx, v *model.CreateVenueRequest, fail bool) (*model.ObjectID, error) {
 	res, err := ctx.HTTPClient.CreateVenue(v)
 	if fail {
 		if !assert.Error(ctx.T, err, "CreateVenue should fail") {
@@ -118,15 +118,15 @@ func testCreateVenue(ctx *TestCtx, v *model.CreateVenueRequest, fail bool) (*mod
 	return res, nil
 }
 
-func testCreateRoomPass(ctx *TestCtx, v *model.CreateRoomRequest) (*model.Room, error) {
+func testCreateRoomPass(ctx *TestCtx, v *model.CreateRoomRequest) (*model.ObjectID, error) {
 	return testCreateRoom(ctx, v, false)
 }
 
-func testCreateRoomFail(ctx *TestCtx, v *model.CreateRoomRequest) (*model.Room, error) {
+func testCreateRoomFail(ctx *TestCtx, v *model.CreateRoomRequest) (*model.ObjectID, error) {
 	return testCreateRoom(ctx, v, true)
 }
 
-func testCreateRoom(ctx *TestCtx, r *model.CreateRoomRequest, fail bool) (*model.Room, error) {
+func testCreateRoom(ctx *TestCtx, r *model.CreateRoomRequest, fail bool) (*model.ObjectID, error) {
 	res, err := ctx.HTTPClient.CreateRoom(r)
 	if fail {
 		if !assert.Error(ctx.T, err, "CreateRoom should fail") {
@@ -140,15 +140,15 @@ func testCreateRoom(ctx *TestCtx, r *model.CreateRoomRequest, fail bool) (*model
 	return res, nil
 }
 
-func testCreateConferencePass(ctx *TestCtx, in *model.CreateConferenceRequest) (*model.Conference, error) {
+func testCreateConferencePass(ctx *TestCtx, in *model.CreateConferenceRequest) (*model.ObjectID, error) {
 	return testCreateConference(ctx, in, false)
 }
 
-func testCreateConferenceFail(ctx *TestCtx, in *model.CreateConferenceRequest) (*model.Conference, error) {
+func testCreateConferenceFail(ctx *TestCtx, in *model.CreateConferenceRequest) (*model.ObjectID, error) {
 	return testCreateConference(ctx, in, true)
 }
 
-func testCreateConference(ctx *TestCtx, in *model.CreateConferenceRequest, fail bool) (*model.Conference, error) {
+func testCreateConference(ctx *TestCtx, in *model.CreateConferenceRequest, fail bool) (*model.ObjectID, error) {
 	res, err := ctx.HTTPClient.CreateConference(in)
 	if fail {
 		if !assert.Error(ctx.T, err, "CreateConference should fail") {
@@ -162,15 +162,15 @@ func testCreateConference(ctx *TestCtx, in *model.CreateConferenceRequest, fail 
 	return res, nil
 }
 
-func testCreateSessionPass(ctx *TestCtx, in *model.CreateSessionRequest) (*model.Session, error) {
+func testCreateSessionPass(ctx *TestCtx, in *model.CreateSessionRequest) (*model.ObjectID, error) {
 	return testCreateSession(ctx, in, false)
 }
 
-func testCreateSessionFail(ctx *TestCtx, in *model.CreateSessionRequest) (*model.Session, error) {
+func testCreateSessionFail(ctx *TestCtx, in *model.CreateSessionRequest) (*model.ObjectID, error) {
 	return testCreateSession(ctx, in, true)
 }
 
-func testCreateSession(ctx *TestCtx, in *model.CreateSessionRequest, fail bool) (*model.Session, error) {
+func testCreateSession(ctx *TestCtx, in *model.CreateSessionRequest, fail bool) (*model.ObjectID, error) {
 	res, err := ctx.HTTPClient.CreateSession(in)
 	if fail {
 		if !assert.Error(ctx.T, err, "CreateSession should fail") {

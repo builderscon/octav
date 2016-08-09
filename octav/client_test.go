@@ -281,16 +281,16 @@ func yapcasia(uid string) *model.CreateConferenceSeriesRequest {
 	}
 }
 
-func yapcasiaTokyo(series *model.ConferenceSeries, userID string) *model.CreateConferenceRequest {
+func yapcasiaTokyo(seriesID , userID string) *model.CreateConferenceRequest {
 	return &model.CreateConferenceRequest{
 		Title:    "YAPC::Asia Tokyo",
-		SeriesID: series.ID,
+		SeriesID: seriesID,
 		Slug:     "2015",
 		UserID:   userID,
 	}
 }
 
-func testCreateConferenceSeries(ctx *TestCtx, in *model.CreateConferenceSeriesRequest) (*model.ConferenceSeries, error) {
+func testCreateConferenceSeries(ctx *TestCtx, in *model.CreateConferenceSeriesRequest) (*model.ObjectID, error) {
 	res, err := ctx.HTTPClient.CreateConferenceSeries(in)
 	if !assert.NoError(ctx.T, err, "CreateConferenceSeries should succeed") {
 		return nil, err
@@ -439,7 +439,7 @@ func TestConferenceCRUD(t *testing.T) {
 		return
 	}
 
-	res, err := testCreateConferencePass(ctx, yapcasiaTokyo(series, user.ID))
+	res, err := testCreateConferencePass(ctx, yapcasiaTokyo(series.ID, user.ID))
 	if err != nil {
 		return
 	}
@@ -449,21 +449,21 @@ func TestConferenceCRUD(t *testing.T) {
 		return
 	}
 
-	res2, err := testLookupConference(ctx, res.ID, "")
+	conf1, err := testLookupConference(ctx, res.ID, "")
 	if err != nil {
 		return
 	}
 
-	if !assert.Len(ctx.T, res2.Administrators, 1, "There should be 1 administrator") {
+	if !assert.Len(ctx.T, conf1.Administrators, 1, "There should be 1 administrator") {
 		return
 	}
 
-	// The result from LookupConference contains the administrator field
-	// Remove that (and make sure it's populated), then do the comparison
-	res2.Administrators = model.UserList(nil)
-	res2.CoverURL = "" // XXX Dunno if this should be populated at Create time. it is for Lookup
-	res2.Series = (*model.ConferenceSeries)(nil)
-	if !assert.Equal(ctx.T, res2, res, "LookupConference is the same as the conference created") {
+	conf2, err := testLookupConference(ctx, res.ID, "ja")
+	if err != nil {
+		return
+	}
+
+	if !assert.Equal(ctx.T, conf1, conf2, "LookupConference is the same") {
 		return
 	}
 
@@ -474,16 +474,15 @@ func TestConferenceCRUD(t *testing.T) {
 		return
 	}
 
-	res3, err := testLookupConference(ctx, res.ID, "ja")
+	conf3, err := testLookupConference(ctx, res.ID, "ja")
 	if err != nil {
 		return
 	}
-
-	if !assert.Equal(ctx.T, res3.SubTitle, "Big Bang!", "Conference.SubTitle is the same as the conference updated") {
+	if !assert.Equal(ctx.T, conf3.SubTitle, "Big Bang!", "Conference.SubTitle is the same as the conference updated") {
 		return
 	}
 
-	if !assert.Equal(ctx.T, "ヤップシー エイジア", res3.Title, "Conference.title#ja is the same as the conference updated") {
+	if !assert.Equal(ctx.T, "ヤップシー エイジア", conf3.Title, "Conference.title#ja is the same as the conference updated") {
 		return
 	}
 
@@ -541,12 +540,17 @@ func TestRoomCRUD(t *testing.T) {
 		return
 	}
 
-	res2, err := testLookupRoom(ctx, res.ID, "")
+	room1, err := testLookupRoom(ctx, res.ID, "ja")
 	if err != nil {
 		return
 	}
 
-	if !assert.Equal(ctx.T, res2, res, "LookupRoom is the same as the room created") {
+	room2, err := testLookupRoom(ctx, res.ID, "ja")
+	if err != nil {
+		return
+	}
+
+	if !assert.Equal(ctx.T, room2, room1, "LookupRoom is the same as the room created") {
 		return
 	}
 
@@ -556,12 +560,12 @@ func TestRoomCRUD(t *testing.T) {
 		return
 	}
 
-	res3, err := testLookupRoom(ctx, res.ID, "ja")
+	room3, err := testLookupRoom(ctx, res.ID, "ja")
 	if err != nil {
 		return
 	}
 
-	if !assert.Equal(ctx.T, "国際会議場", res3.Name, "Room.name#ja is the same as the conference updated") {
+	if !assert.Equal(ctx.T, "国際会議場", room3.Name, "Room.name#ja is the same as the conference updated") {
 		return
 	}
 
@@ -655,7 +659,7 @@ func TestSessionCRUD(t *testing.T) {
 		return
 	}
 
-	conference, err := testCreateConferencePass(ctx, yapcasiaTokyo(series, user.ID))
+	conference, err := testCreateConferencePass(ctx, yapcasiaTokyo(series.ID, user.ID))
 	if err != nil {
 		return
 	}
@@ -704,14 +708,16 @@ func TestSessionCRUD(t *testing.T) {
 		return
 	}
 
-	res2, err := testLookupSession(ctx, res.ID, "")
+	room1, err := testLookupSession(ctx, res.ID, "")
 	if err != nil {
 		return
 	}
 
-	res2.Conference = nil
-	res2.Speaker = nil
-	if !assert.Equal(ctx.T, res2, res, "LookupSession is the same as the room created") {
+	room2, err := testLookupSession(ctx, res.ID, "ja")
+	if err != nil {
+		return
+	}
+	if !assert.Equal(ctx.T, room2, room1, "LookupSession is the same as the room created") {
 		return
 	}
 
@@ -721,12 +727,12 @@ func TestSessionCRUD(t *testing.T) {
 		return
 	}
 
-	res3, err := testLookupSession(ctx, res.ID, "ja")
+	room3, err := testLookupSession(ctx, res.ID, "ja")
 	if err != nil {
 		return
 	}
 
-	if !assert.Equal(ctx.T, "カンファレンス用ソフトウェアの作り方", res3.Title, "Session.title#ja is the same as the conference updated") {
+	if !assert.Equal(ctx.T, "カンファレンス用ソフトウェアの作り方", room3.Title, "Session.title#ja is the same as the conference updated") {
 		return
 	}
 }
@@ -853,12 +859,17 @@ func TestVenueCRUD(t *testing.T) {
 		return
 	}
 
-	res2, err := testLookupVenue(ctx, res.ID, "")
+	room1, err := testLookupVenue(ctx, res.ID, "ja")
 	if err != nil {
 		return
 	}
 
-	if !assert.Equal(ctx.T, res2, res, "LookupVenue is the same as the venue created") {
+	room2, err := testLookupVenue(ctx, res.ID, "ja")
+	if err != nil {
+		return
+	}
+
+	if !assert.Equal(ctx.T, room2, room1, "LookupVenue is the same as the venue created") {
 		return
 	}
 
@@ -868,12 +879,12 @@ func TestVenueCRUD(t *testing.T) {
 		return
 	}
 
-	res3, err := testLookupVenue(ctx, res.ID, "ja")
+	room3, err := testLookupVenue(ctx, res.ID, "ja")
 	if err != nil {
 		return
 	}
 
-	if !assert.Equal(ctx.T, "東京ビッグサイト", res3.Name, "Venue.name#ja is the same as the object updated") {
+	if !assert.Equal(ctx.T, "東京ビッグサイト", room3.Name, "Venue.name#ja is the same as the object updated") {
 		return
 	}
 
@@ -1066,7 +1077,7 @@ func TestListConference(t *testing.T) {
 		return
 	}
 
-	confs := make([]*model.Conference, 10)
+	confs := make([]*model.ObjectID, 10)
 	for i := 0; i < 10; i++ {
 		lf := tools.LocalizedFields{}
 		lf.Set("ja", "title", `リストカンファレンステスト`)
@@ -1229,7 +1240,7 @@ func TestListSessions(t *testing.T) {
 		return
 	}
 
-	conference, err := testCreateConferencePass(ctx, yapcasiaTokyo(series, user.ID))
+	conference, err := testCreateConferencePass(ctx, yapcasiaTokyo(series.ID, user.ID))
 	if err != nil {
 		return
 	}

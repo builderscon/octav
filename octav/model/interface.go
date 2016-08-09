@@ -20,6 +20,12 @@ type ErrInvalidFieldType struct {
 	Field string
 }
 
+// ObjectID is used to return the ID of a newly created object
+type ObjectID struct {
+	ID   string `json:"id"`
+	Type string `json:"type"`
+}
+
 // +model
 type Conference struct {
 	tools.LocalizedFields `json:"-"`
@@ -31,6 +37,7 @@ type Conference struct {
 	Series                *ConferenceSeries   `json:"series,omitempty" decorate:"true"`
 	SubTitle              string              `json:"sub_title" l10n:"true"`
 	Slug                  string              `json:"slug"`
+	FullSlug              string              `json:"full_slug,omitempty"` // Only populated when decorated
 	Status                string              `json:"status"`
 	Dates                 ConferenceDateList  `json:"dates,omitempty"`
 	Administrators        UserList            `json:"administrators,omitempty" decorate:"true"`

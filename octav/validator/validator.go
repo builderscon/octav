@@ -25,6 +25,7 @@ var HTTPCreateRoomResponse *jsval.JSVal
 var HTTPCreateSessionRequest *jsval.JSVal
 var HTTPCreateSessionResponse *jsval.JSVal
 var HTTPCreateSessionSurveyResponseRequest *jsval.JSVal
+var HTTPCreateSessionSurveyResponseResponse *jsval.JSVal
 var HTTPCreateUserRequest *jsval.JSVal
 var HTTPCreateUserResponse *jsval.JSVal
 var HTTPCreateVenueRequest *jsval.JSVal
@@ -1104,48 +1105,12 @@ func init() {
 					jsval.EmptyConstraint,
 				).
 				AddProp(
-					"administrators",
-					jsval.Reference(M).RefersTo("#/definitions/user_array"),
-				).
-				AddProp(
-					"dates",
-					jsval.Reference(M).RefersTo("#/definitions/conference_date_array"),
-				).
-				AddProp(
-					"description",
-					jsval.Reference(M).RefersTo("#/definitions/string_en"),
-				).
-				AddProp(
-					"featured_speakers",
-					jsval.Reference(M).RefersTo("#/definitions/featured_speaker_array"),
-				).
-				AddProp(
 					"id",
 					jsval.Reference(M).RefersTo("#/definitions/uuid"),
 				).
 				AddProp(
-					"name",
-					jsval.Reference(M).RefersTo("#/definitions/string_en"),
-				).
-				AddProp(
-					"slug",
-					jsval.Reference(M).RefersTo("#/definitions/string_en"),
-				).
-				AddProp(
-					"status",
-					jsval.Reference(M).RefersTo("#/definitions/conference_status"),
-				).
-				AddProp(
-					"venue",
-					jsval.Reference(M).RefersTo("#/definitions/venue"),
-				).
-				PatternPropertiesString(
-					"description#[a-z]+",
-					jsval.Reference(M).RefersTo("#/definitions/string_i18n"),
-				).
-				PatternPropertiesString(
-					"title#[a-z]+",
-					jsval.Reference(M).RefersTo("#/definitions/string_i18n"),
+					"type",
+					jsval.String(),
 				),
 		)
 
@@ -1187,11 +1152,7 @@ func init() {
 					jsval.Reference(M).RefersTo("#/definitions/uuid"),
 				).
 				AddProp(
-					"slug",
-					jsval.Reference(M).RefersTo("#/definitions/slug_top"),
-				).
-				AddProp(
-					"title",
+					"type",
 					jsval.String(),
 				),
 		)
@@ -1226,20 +1187,12 @@ func init() {
 					jsval.EmptyConstraint,
 				).
 				AddProp(
-					"body",
-					jsval.String(),
-				).
-				AddProp(
 					"id",
 					jsval.Reference(M).RefersTo("#/definitions/uuid"),
 				).
 				AddProp(
-					"session_id",
-					jsval.Reference(M).RefersTo("#/definitions/uuid"),
-				).
-				AddProp(
-					"user_id",
-					jsval.Reference(M).RefersTo("#/definitions/uuid"),
+					"type",
+					jsval.String(),
 				),
 		)
 
@@ -1281,24 +1234,12 @@ func init() {
 					jsval.EmptyConstraint,
 				).
 				AddProp(
-					"capcity",
-					jsval.Reference(M).RefersTo("#/definitions/positiveInteger"),
-				).
-				AddProp(
 					"id",
 					jsval.Reference(M).RefersTo("#/definitions/uuid"),
 				).
 				AddProp(
-					"name",
+					"type",
 					jsval.String(),
-				).
-				AddProp(
-					"venue_id",
-					jsval.Reference(M).RefersTo("#/definitions/uuid"),
-				).
-				PatternPropertiesString(
-					"name#[a-z]+",
-					jsval.Reference(M).RefersTo("#/definitions/string_i18n"),
 				),
 		)
 
@@ -1396,118 +1337,12 @@ func init() {
 					jsval.EmptyConstraint,
 				).
 				AddProp(
-					"abstract",
+					"id",
+					jsval.Reference(M).RefersTo("#/definitions/uuid"),
+				).
+				AddProp(
+					"type",
 					jsval.String(),
-				).
-				AddProp(
-					"category",
-					jsval.String(),
-				).
-				AddProp(
-					"conference",
-					jsval.OneOf().
-						Add(
-							jsval.NullConstraint,
-						).
-						Add(
-							jsval.Reference(M).RefersTo("#/definitions/conference"),
-						),
-				).
-				AddProp(
-					"confirmed",
-					jsval.Reference(M).RefersTo("#/definitions/boolean_default_false"),
-				).
-				AddProp(
-					"duration",
-					jsval.Reference(M).RefersTo("#/definitions/duration"),
-				).
-				AddProp(
-					"has_interpretation",
-					jsval.Reference(M).RefersTo("#/definitions/boolean_default_false"),
-				).
-				AddProp(
-					"material_level",
-					jsval.Reference(M).RefersTo("#/definitions/material_level"),
-				).
-				AddProp(
-					"memo",
-					jsval.String(),
-				).
-				AddProp(
-					"photo_permission",
-					jsval.Reference(M).RefersTo("#/definitions/binary_permission_default_allow"),
-				).
-				AddProp(
-					"room",
-					jsval.OneOf().
-						Add(
-							jsval.NullConstraint,
-						).
-						Add(
-							jsval.Reference(M).RefersTo("#/definitions/room"),
-						),
-				).
-				AddProp(
-					"slide_language",
-					jsval.Reference(M).RefersTo("#/definitions/language"),
-				).
-				AddProp(
-					"slide_subtitles",
-					jsval.Reference(M).RefersTo("#/definitions/language"),
-				).
-				AddProp(
-					"slide_url",
-					jsval.Reference(M).RefersTo("#/definitions/url"),
-				).
-				AddProp(
-					"speaker",
-					jsval.OneOf().
-						Add(
-							jsval.NullConstraint,
-						).
-						Add(
-							jsval.Object().
-								AdditionalProperties(
-									jsval.EmptyConstraint,
-								),
-						).
-						Add(
-							jsval.Reference(M).RefersTo("#/definitions/speaker_array"),
-						),
-				).
-				AddProp(
-					"spoken_language",
-					jsval.Reference(M).RefersTo("#/definitions/language"),
-				).
-				AddProp(
-					"starts_on",
-					jsval.Reference(M).RefersTo("#/definitions/datetime"),
-				).
-				AddProp(
-					"status",
-					jsval.Reference(M).RefersTo("#/definitions/acceptance_status"),
-				).
-				AddProp(
-					"tags",
-					jsval.OneOf().
-						Add(
-							jsval.String(),
-						).
-						Add(
-							jsval.Reference(M).RefersTo("#/definitions/tag_array"),
-						),
-				).
-				AddProp(
-					"title",
-					jsval.String(),
-				).
-				AddProp(
-					"video_permission",
-					jsval.Reference(M).RefersTo("#/definitions/binary_permission_default_allow"),
-				).
-				AddProp(
-					"video_url",
-					jsval.Reference(M).RefersTo("#/definitions/url"),
 				),
 		)
 
@@ -1554,6 +1389,23 @@ func init() {
 				AddProp(
 					"user_prior_knowledge",
 					jsval.Reference(M).RefersTo("#/definitions/int_rating"),
+				),
+		)
+
+	HTTPCreateSessionSurveyResponseResponse = jsval.New().
+		SetConstraintMap(M).
+		SetRoot(
+			jsval.Object().
+				AdditionalProperties(
+					jsval.EmptyConstraint,
+				).
+				AddProp(
+					"id",
+					jsval.Reference(M).RefersTo("#/definitions/uuid"),
+				).
+				AddProp(
+					"type",
+					jsval.String(),
 				),
 		)
 
@@ -1702,12 +1554,8 @@ func init() {
 					jsval.Reference(M).RefersTo("#/definitions/uuid"),
 				).
 				AddProp(
-					"name",
+					"type",
 					jsval.String(),
-				).
-				AddProp(
-					"rooms",
-					jsval.Reference(M).RefersTo("#/definitions/room_array"),
 				),
 		)
 

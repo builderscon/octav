@@ -217,7 +217,7 @@ func doCreateConference(ctx context.Context, w http.ResponseWriter, r *http.Requ
 		return
 	}
 
-	httpJSON(w, c)
+	httpJSON(w, model.ObjectID{ID: c.ID, Type: "conference"})
 }
 
 func doLookupConferenceBySlug(ctx context.Context, w http.ResponseWriter, r *http.Request, payload model.LookupConferenceBySlugRequest) {

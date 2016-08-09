@@ -22,6 +22,7 @@ type rawConference struct {
 	Series           *ConferenceSeries   `json:"series,omitempty" decorate:"true"`
 	SubTitle         string              `json:"sub_title" l10n:"true"`
 	Slug             string              `json:"slug"`
+	FullSlug         string              `json:"full_slug,omitempty"`
 	Status           string              `json:"status"`
 	Dates            ConferenceDateList  `json:"dates,omitempty"`
 	Administrators   UserList            `json:"administrators,omitempty" decorate:"true"`
@@ -40,6 +41,7 @@ func (v Conference) MarshalJSON() ([]byte, error) {
 	raw.Series = v.Series
 	raw.SubTitle = v.SubTitle
 	raw.Slug = v.Slug
+	raw.FullSlug = v.FullSlug
 	raw.Status = v.Status
 	raw.Dates = v.Dates
 	raw.Administrators = v.Administrators

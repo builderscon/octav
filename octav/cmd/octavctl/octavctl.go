@@ -1476,6 +1476,8 @@ func doSessionLookup(args cmdargs) int {
 	fs := flag.NewFlagSet("octavctl session lookup", flag.ContinueOnError)
 	var id string
 	fs.StringVar(&id, "id", "", "")
+	var lang string
+	fs.StringVar(&lang, "lang", "", "")
 	prepGlobalFlags(fs)
 	if err := fs.Parse([]string(args)); err != nil {
 		return errOut(err)
@@ -1484,6 +1486,9 @@ func doSessionLookup(args cmdargs) int {
 	m := make(map[string]interface{})
 	if id != "" {
 		m["id"] = id
+	}
+	if lang != "" {
+		m["lang"] = lang
 	}
 	r := model.LookupSessionRequest{}
 	if err := r.Populate(m); err != nil {

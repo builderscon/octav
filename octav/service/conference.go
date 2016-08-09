@@ -382,6 +382,7 @@ func (v *Conference) Decorate(tx *db.Tx, c *model.Conference, lang string) error
 			return errors.Wrapf(err, "failed to load conferences series '%s'", seriesID)
 		}
 		c.Series = &s
+		c.FullSlug = s.Slug + "/" + c.Slug
 	}
 
 	if c.CoverURL == "" {
