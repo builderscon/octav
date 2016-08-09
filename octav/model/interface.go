@@ -31,6 +31,7 @@ type Conference struct {
 	Series                *ConferenceSeries   `json:"series,omitempty" decorate:"true"`
 	SubTitle              string              `json:"sub_title" l10n:"true"`
 	Slug                  string              `json:"slug"`
+	Status                string              `json:"status"`
 	Dates                 ConferenceDateList  `json:"dates,omitempty"`
 	Administrators        UserList            `json:"administrators,omitempty" decorate:"true"`
 	Venues                VenueList           `json:"venues,omitempty" decorate:"true"`

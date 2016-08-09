@@ -22,6 +22,7 @@ type rawConference struct {
 	Series           *ConferenceSeries   `json:"series,omitempty" decorate:"true"`
 	SubTitle         string              `json:"sub_title" l10n:"true"`
 	Slug             string              `json:"slug"`
+	Status           string              `json:"status"`
 	Dates            ConferenceDateList  `json:"dates,omitempty"`
 	Administrators   UserList            `json:"administrators,omitempty" decorate:"true"`
 	Venues           VenueList           `json:"venues,omitempty" decorate:"true"`
@@ -39,6 +40,7 @@ func (v Conference) MarshalJSON() ([]byte, error) {
 	raw.Series = v.Series
 	raw.SubTitle = v.SubTitle
 	raw.Slug = v.Slug
+	raw.Status = v.Status
 	raw.Dates = v.Dates
 	raw.Administrators = v.Administrators
 	raw.Venues = v.Venues
@@ -81,6 +83,7 @@ func (v *Conference) FromRow(vdb db.Conference) error {
 		v.SubTitle = vdb.SubTitle.String
 	}
 	v.Slug = vdb.Slug
+	v.Status = vdb.Status
 	return nil
 }
 
@@ -95,5 +98,6 @@ func (v *Conference) ToRow(vdb *db.Conference) error {
 	vdb.SubTitle.Valid = true
 	vdb.SubTitle.String = v.SubTitle
 	vdb.Slug = v.Slug
+	vdb.Status = v.Status
 	return nil
 }
