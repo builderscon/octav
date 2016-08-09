@@ -1,8 +1,9 @@
 """OCTAV Client Library"""
-"""DO NOT EDIT: This file was generated from ../spec/v1/api.json on Mon Aug  8 12:58:32 2016"""
+"""DO NOT EDIT: This file was generated from ../spec/v1/api.json on Tue Aug  9 10:21:26 2016"""
 
 import json
 import os
+import re
 import urllib3
 
 if os.getenv('SERVER_SOFTWARE', '').startswith('Google App Engine/') or os.getenv('SERVER_SOFTWARE', '').startswith('Development/'):
@@ -1436,13 +1437,10 @@ class Octav(object):
         self.error = repr(e)
         return None
 
-  def create_session (self, abstract, conference_id, session_type_id, speaker_id, title, user_id, category=None, material_level=None, memo=None, photo_permission=None, slide_language=None, slide_subtitles=None, slide_url=None, spoken_language=None, tags=None, video_permission=None, video_url=None, **args):
+  def create_session (self, conference_id, session_type_id, speaker_id, user_id, abstract=None, category=None, material_level=None, memo=None, photo_permission=None, slide_language=None, slide_subtitles=None, slide_url=None, spoken_language=None, tags=None, title=None, video_permission=None, video_url=None, **args):
     try:
         payload = {}
         hdrs = {}
-        if abstract is None:
-            raise MissingRequiredArgument('property abstract must be provided')
-        payload['abstract'] = abstract
         if conference_id is None:
             raise MissingRequiredArgument('property conference_id must be provided')
         payload['conference_id'] = conference_id
@@ -1452,9 +1450,6 @@ class Octav(object):
         if speaker_id is None:
             raise MissingRequiredArgument('property speaker_id must be provided')
         payload['speaker_id'] = speaker_id
-        if title is None:
-            raise MissingRequiredArgument('property title must be provided')
-        payload['title'] = title
         if user_id is None:
             raise MissingRequiredArgument('property user_id must be provided')
         payload['user_id'] = user_id
@@ -1517,7 +1512,7 @@ class Octav(object):
         self.error = repr(e)
         return None
 
-  def lookup_session (self, id):
+  def lookup_session (self, id, lang=None):
     try:
         payload = {}
         hdrs = {}
@@ -1526,6 +1521,8 @@ class Octav(object):
         payload['id'] = id
         if id is not None:
             payload['id'] = id
+        if lang is not None:
+            payload['lang'] = lang
         uri = '%s/session/lookup' % self.endpoint
         qs = urlencode(payload)
         if self.debug:
@@ -1656,18 +1653,25 @@ class Octav(object):
         self.error = repr(e)
         return None
 
-  def list_session_by_conference (self, conference_id, date=None):
+  def list_sessions (self, conference_id=None, date=None, lang=None, limit=None, since=None, speaker_id=None, status=None):
     try:
         payload = {}
         hdrs = {}
-        if conference_id is None:
-            raise MissingRequiredArgument('property conference_id must be provided')
-        payload['conference_id'] = conference_id
         if conference_id is not None:
             payload['conference_id'] = conference_id
         if date is not None:
             payload['date'] = date
-        uri = '%s/schedule/list' % self.endpoint
+        if lang is not None:
+            payload['lang'] = lang
+        if limit is not None:
+            payload['limit'] = limit
+        if since is not None:
+            payload['since'] = since
+        if speaker_id is not None:
+            payload['speaker_id'] = speaker_id
+        if status is not None:
+            payload['status'] = status
+        uri = '%s/session/list' % self.endpoint
         qs = urlencode(payload)
         if self.debug:
             print('GET %s?%s' % (uri, qs))

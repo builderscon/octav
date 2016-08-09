@@ -2242,6 +2242,18 @@ func init() {
 						),
 				).
 				AddProp(
+					"lang",
+					jsval.Reference(M).RefersTo("#/definitions/language"),
+				).
+				AddProp(
+					"limit",
+					jsval.Reference(M).RefersTo("#/definitions/positiveInteger"),
+				).
+				AddProp(
+					"since",
+					jsval.Reference(M).RefersTo("#/definitions/uuid"),
+				).
+				AddProp(
 					"speaker_id",
 					jsval.Reference(M).RefersTo("#/definitions/uuid"),
 				).
@@ -2621,6 +2633,10 @@ func init() {
 				AddProp(
 					"id",
 					jsval.Reference(M).RefersTo("#/definitions/uuid"),
+				).
+				AddProp(
+					"lang",
+					jsval.Reference(M).RefersTo("#/definitions/language"),
 				),
 		)
 

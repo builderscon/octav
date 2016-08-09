@@ -1157,7 +1157,8 @@
       "schema": {
         "required": ["id"],
         "properties": {
-          "id": { "$ref": "#/definitions/uuid" }
+          "id": { "$ref": "#/definitions/uuid" },
+          "lang": { "$ref": "#/definitions/language" }
         }
       },
       "targetSchema": { "$ref": "#/definitions/session" }
@@ -1231,7 +1232,10 @@
           },
           "conference_id": { "$ref": "#/definitions/uuid" },
           "status": { "$ref": "#/definitions/acceptance_status" },
-          "speaker_id": { "$ref": "#/definitions/uuid" }
+          "speaker_id": { "$ref": "#/definitions/uuid" },
+          "lang": { "$ref": "#/definitions/language" },
+          "limit": { "$ref": "#/definitions/positiveInteger" },
+          "since": { "$ref": "#/definitions/uuid" }
         }
       },
       "targetSchema": { "$ref": "#/definitions/session_array" }
