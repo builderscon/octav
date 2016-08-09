@@ -1123,7 +1123,7 @@
       "href": "/session/create",
       "schema": {
         "type": "object",
-        "required": ["conference_id", "speaker_id", "title", "abstract", "session_type_id", "user_id"],
+        "required": ["conference_id", "speaker_id", "session_type_id", "user_id"],
         "properties": {
           "conference_id": { "$ref": "#/definitions/uuid" },
           "speaker_id": { "$ref": "#/definitions/uuid" },
@@ -1217,12 +1217,11 @@
       }
     },
     {
-      "title": "List session by conference",
-      "href": "/schedule/list",
+      "title": "List sessions",
+      "href": "/session/list",
       "rel": "list",
       "schema": {
         "type": "object",
-        "required": ["conference_id"],
         "properties": {
           "date": {
             "oneOf": [
@@ -1230,7 +1229,9 @@
               { "$ref": "#/definitions/datestr" }
             ]
           },
-          "conference_id": { "$ref": "#/definitions/uuid" }
+          "conference_id": { "$ref": "#/definitions/uuid" },
+          "status": { "$ref": "#/definitions/acceptance_status" },
+          "speaker_id": { "$ref": "#/definitions/uuid" }
         }
       },
       "targetSchema": { "$ref": "#/definitions/session_array" }

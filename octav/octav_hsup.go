@@ -1369,30 +1369,6 @@ func httpListRoom(ctx context.Context, w http.ResponseWriter, r *http.Request) {
 	doListRoom(ctx, w, r, payload)
 }
 
-func httpListSessionByConference(ctx context.Context, w http.ResponseWriter, r *http.Request) {
-	if pdebug.Enabled {
-		g := pdebug.Marker("httpListSessionByConference")
-		defer g.End()
-	}
-	if strings.ToLower(r.Method) != `get` {
-		w.Header().Set("Allow", "get")
-		httpError(w, `Method was `+r.Method+`, expected get`, http.StatusNotFound, nil)
-		return
-	}
-
-	var payload model.ListSessionByConferenceRequest
-	if err := urlenc.Unmarshal([]byte(r.URL.RawQuery), &payload); err != nil {
-		httpError(w, `Failed to parse url query string`, http.StatusInternalServerError, err)
-		return
-	}
-
-	if err := validator.HTTPListSessionByConferenceRequest.Validate(&payload); err != nil {
-		httpError(w, `Invalid input (validation failed)`, http.StatusInternalServerError, err)
-		return
-	}
-	doListSessionByConference(ctx, w, r, payload)
-}
-
 func httpListSessionTypesByConference(ctx context.Context, w http.ResponseWriter, r *http.Request) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("httpListSessionTypesByConference")
@@ -1415,6 +1391,30 @@ func httpListSessionTypesByConference(ctx context.Context, w http.ResponseWriter
 		return
 	}
 	doListSessionTypesByConference(ctx, w, r, payload)
+}
+
+func httpListSessions(ctx context.Context, w http.ResponseWriter, r *http.Request) {
+	if pdebug.Enabled {
+		g := pdebug.Marker("httpListSessions")
+		defer g.End()
+	}
+	if strings.ToLower(r.Method) != `get` {
+		w.Header().Set("Allow", "get")
+		httpError(w, `Method was `+r.Method+`, expected get`, http.StatusNotFound, nil)
+		return
+	}
+
+	var payload model.ListSessionsRequest
+	if err := urlenc.Unmarshal([]byte(r.URL.RawQuery), &payload); err != nil {
+		httpError(w, `Failed to parse url query string`, http.StatusInternalServerError, err)
+		return
+	}
+
+	if err := validator.HTTPListSessionsRequest.Validate(&payload); err != nil {
+		httpError(w, `Invalid input (validation failed)`, http.StatusInternalServerError, err)
+		return
+	}
+	doListSessions(ctx, w, r, payload)
 }
 
 func httpListSponsors(ctx context.Context, w http.ResponseWriter, r *http.Request) {
@@ -2116,9 +2116,9 @@ func (s *Server) SetupRoutes() {
 	r.HandleFunc(`/v1/room/list`, httpWithContext(httpListRoom))
 	r.HandleFunc(`/v1/room/lookup`, httpWithContext(httpLookupRoom))
 	r.HandleFunc(`/v1/room/update`, httpWithContext(httpWithBasicAuth(httpUpdateRoom)))
-	r.HandleFunc(`/v1/schedule/list`, httpWithContext(httpListSessionByConference))
 	r.HandleFunc(`/v1/session/create`, httpWithContext(httpWithBasicAuth(httpCreateSession)))
 	r.HandleFunc(`/v1/session/delete`, httpWithContext(httpWithBasicAuth(httpDeleteSession)))
+	r.HandleFunc(`/v1/session/list`, httpWithContext(httpListSessions))
 	r.HandleFunc(`/v1/session/lookup`, httpWithContext(httpLookupSession))
 	r.HandleFunc(`/v1/session/update`, httpWithContext(httpWithBasicAuth(httpUpdateSession)))
 	r.HandleFunc(`/v1/session_type/delete`, httpWithContext(httpWithBasicAuth(httpDeleteSessionType)))

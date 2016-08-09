@@ -1201,7 +1201,7 @@ func TestListRoom(t *testing.T) {
 	}
 }
 
-func TestListSessionByConference(t *testing.T) {
+func TestListSessions(t *testing.T) {
 	ctx, err := NewTestCtx(t)
 	if !assert.NoError(t, err, "failed to create test ctx") {
 		return
@@ -1268,14 +1268,13 @@ func TestListSessionByConference(t *testing.T) {
 		}
 	}
 
-	in := model.ListSessionByConferenceRequest{
-		ConferenceID: conference.ID,
-	}
-	res, err := ctx.HTTPClient.ListSessionByConference(&in)
-	if !assert.NoError(ctx.T, err, "ListSessionByConference should succeed") {
+	in := model.ListSessionsRequest{}
+	in.ConferenceID.Set(conference.ID)
+	res, err := ctx.HTTPClient.ListSessions(&in)
+	if !assert.NoError(ctx.T, err, "ListSessions should succeed") {
 		return
 	}
-	if !assert.NoError(ctx.T, validator.HTTPListSessionByConferenceResponse.Validate(res), "Validation should succeed") {
+	if !assert.NoError(ctx.T, validator.HTTPListSessionsResponse.Validate(res), "Validation should succeed") {
 		return
 	}
 

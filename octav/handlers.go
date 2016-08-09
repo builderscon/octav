@@ -929,10 +929,10 @@ func doLookupSession(ctx context.Context, w http.ResponseWriter, r *http.Request
 	httpJSON(w, v)
 }
 
-func doListSessionByConference(ctx context.Context, w http.ResponseWriter, r *http.Request, payload model.ListSessionByConferenceRequest) {
+func doListSessions(ctx context.Context, w http.ResponseWriter, r *http.Request, payload model.ListSessionsRequest) {
 	tx, err := db.Begin()
 	if err != nil {
-		httpError(w, `ListSessionByConference`, http.StatusInternalServerError, err)
+		httpError(w, `ListSessions`, http.StatusInternalServerError, err)
 		return
 	}
 	defer tx.AutoRollback()
@@ -940,7 +940,7 @@ func doListSessionByConference(ctx context.Context, w http.ResponseWriter, r *ht
 	var s service.Session
 	var v model.SessionList
 	if err := s.ListSessionFromPayload(tx, &v, payload); err != nil {
-		httpError(w, `ListSessionByConference`, http.StatusInternalServerError, err)
+		httpError(w, `ListSessions`, http.StatusInternalServerError, err)
 		return
 	}
 

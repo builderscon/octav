@@ -54,10 +54,10 @@ var HTTPListQuestionRequest *jsval.JSVal
 var HTTPListQuestionResponse *jsval.JSVal
 var HTTPListRoomRequest *jsval.JSVal
 var HTTPListRoomResponse *jsval.JSVal
-var HTTPListSessionByConferenceRequest *jsval.JSVal
-var HTTPListSessionByConferenceResponse *jsval.JSVal
 var HTTPListSessionTypesByConferenceRequest *jsval.JSVal
 var HTTPListSessionTypesByConferenceResponse *jsval.JSVal
+var HTTPListSessionsRequest *jsval.JSVal
+var HTTPListSessionsResponse *jsval.JSVal
 var HTTPListSponsorsRequest *jsval.JSVal
 var HTTPListSponsorsResponse *jsval.JSVal
 var HTTPListUserRequest *jsval.JSVal
@@ -1306,7 +1306,7 @@ func init() {
 		SetConstraintMap(M).
 		SetRoot(
 			jsval.Object().
-				Required("abstract", "conference_id", "session_type_id", "speaker_id", "title", "user_id").
+				Required("conference_id", "session_type_id", "speaker_id", "user_id").
 				AdditionalProperties(
 					jsval.EmptyConstraint,
 				).
@@ -2183,42 +2183,6 @@ func init() {
 				),
 		)
 
-	HTTPListSessionByConferenceRequest = jsval.New().
-		SetConstraintMap(M).
-		SetRoot(
-			jsval.Object().
-				Required("conference_id").
-				AdditionalProperties(
-					jsval.EmptyConstraint,
-				).
-				AddProp(
-					"conference_id",
-					jsval.Reference(M).RefersTo("#/definitions/uuid"),
-				).
-				AddProp(
-					"date",
-					jsval.OneOf().
-						Add(
-							jsval.Reference(M).RefersTo("#/definitions/date"),
-						).
-						Add(
-							jsval.Reference(M).RefersTo("#/definitions/datestr"),
-						),
-				),
-		)
-
-	HTTPListSessionByConferenceResponse = jsval.New().
-		SetConstraintMap(M).
-		SetRoot(
-			jsval.Array().
-				Items(
-					jsval.Reference(M).RefersTo("#/definitions/session"),
-				).
-				AdditionalItems(
-					jsval.EmptyConstraint,
-				),
-		)
-
 	HTTPListSessionTypesByConferenceRequest = jsval.New().
 		SetConstraintMap(M).
 		SetRoot(
@@ -2250,6 +2214,49 @@ func init() {
 			jsval.Array().
 				Items(
 					jsval.Reference(M).RefersTo("#/definitions/session_type"),
+				).
+				AdditionalItems(
+					jsval.EmptyConstraint,
+				),
+		)
+
+	HTTPListSessionsRequest = jsval.New().
+		SetConstraintMap(M).
+		SetRoot(
+			jsval.Object().
+				AdditionalProperties(
+					jsval.EmptyConstraint,
+				).
+				AddProp(
+					"conference_id",
+					jsval.Reference(M).RefersTo("#/definitions/uuid"),
+				).
+				AddProp(
+					"date",
+					jsval.OneOf().
+						Add(
+							jsval.Reference(M).RefersTo("#/definitions/date"),
+						).
+						Add(
+							jsval.Reference(M).RefersTo("#/definitions/datestr"),
+						),
+				).
+				AddProp(
+					"speaker_id",
+					jsval.Reference(M).RefersTo("#/definitions/uuid"),
+				).
+				AddProp(
+					"status",
+					jsval.Reference(M).RefersTo("#/definitions/acceptance_status"),
+				),
+		)
+
+	HTTPListSessionsResponse = jsval.New().
+		SetConstraintMap(M).
+		SetRoot(
+			jsval.Array().
+				Items(
+					jsval.Reference(M).RefersTo("#/definitions/session"),
 				).
 				AdditionalItems(
 					jsval.EmptyConstraint,

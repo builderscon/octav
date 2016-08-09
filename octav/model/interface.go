@@ -558,8 +558,10 @@ type LookupVenueRequest struct {
 }
 
 // +transport
-type ListSessionByConferenceRequest struct {
-	ConferenceID string            `json:"conference_id" urlenc:"conference_id"`
+type ListSessionsRequest struct {
+	ConferenceID jsval.MaybeString `json:"conference_id" urlenc:"conference_id,omitempty,string"`
+	SpeakerID    jsval.MaybeString `json:"speaker_id" urlenc:"speaker_id,omitempty,string"`
+	Status       jsval.MaybeString `json:"status" urlenc:"status,omitempty,string"`
 	Date         jsval.MaybeString `json:"date" urlenc:"date,omitempty,string"`
 	Lang         jsval.MaybeString `json:"lang,omitempty" urlenc:"lang,omitempty,string"`
 }

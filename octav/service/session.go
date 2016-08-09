@@ -208,7 +208,7 @@ func (v *Session) populateRowForUpdate(vdb *db.Session, payload model.UpdateSess
 }
 
 func (v *Session) LoadByConference(tx *db.Tx, vdbl *db.SessionList, cid string, date string) error {
-	if err := vdbl.LoadByConference(tx, cid, date); err != nil {
+	if err := vdbl.LoadByConference(tx, cid, "", date, ""); err != nil {
 		return err
 	}
 	return nil
@@ -316,9 +316,36 @@ func (v *Session) UpdateFromPayload(tx *db.Tx, result *model.Session, payload mo
 	return nil
 }
 
-func (v *Session) ListSessionFromPayload(tx *db.Tx, result *model.SessionList, payload model.ListSessionByConferenceRequest) error {
+func (v *Session) ListSessionFromPayload(tx *db.Tx, result *model.SessionList, payload model.ListSessionsRequest) error {
+	// Make sure that we have at least one of the arguments
+	var conferenceID, speakerID, date, status string
+	var hasQuery bool
+	if payload.ConferenceID.Valid() {
+		conferenceID = payload.ConferenceID.String
+		hasQuery = true
+	}
+
+	if payload.SpeakerID.Valid() {
+		speakerID = payload.SpeakerID.String
+		hasQuery = true
+	}
+
+	if payload.Date.Valid() {
+		date = payload.Date.String
+		hasQuery = true
+	}
+
+	if payload.Status.Valid() {
+		status = payload.Status.String
+		hasQuery = true
+	}
+
+	if !hasQuery {
+		return errors.New("no query specified")
+	}
+
 	var vdbl db.SessionList
-	if err := vdbl.LoadByConference(tx, payload.ConferenceID, payload.Date.String); err != nil {
+	if err := vdbl.LoadByConference(tx, conferenceID, speakerID, date, status); err != nil {
 		return errors.Wrap(err, "failed to load from database")
 	}
 

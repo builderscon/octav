@@ -3937,9 +3937,17 @@ func (r *LookupVenueRequest) Populate(m map[string]interface{}) error {
 	return nil
 }
 
-func (r ListSessionByConferenceRequest) collectMarshalData() map[string]interface{} {
+func (r ListSessionsRequest) collectMarshalData() map[string]interface{} {
 	m := make(map[string]interface{})
-	m["conference_id"] = r.ConferenceID
+	if r.ConferenceID.Valid() {
+		m["conference_id"] = r.ConferenceID.Value()
+	}
+	if r.SpeakerID.Valid() {
+		m["speaker_id"] = r.SpeakerID.Value()
+	}
+	if r.Status.Valid() {
+		m["status"] = r.Status.Value()
+	}
 	if r.Date.Valid() {
 		m["date"] = r.Date.Value()
 	}
@@ -3949,7 +3957,7 @@ func (r ListSessionByConferenceRequest) collectMarshalData() map[string]interfac
 	return m
 }
 
-func (r ListSessionByConferenceRequest) MarshalJSON() ([]byte, error) {
+func (r ListSessionsRequest) MarshalJSON() ([]byte, error) {
 	m := r.collectMarshalData()
 	buf, err := json.Marshal(m)
 	if err != nil {
@@ -3958,7 +3966,7 @@ func (r ListSessionByConferenceRequest) MarshalJSON() ([]byte, error) {
 	return buf, nil
 }
 
-func (r ListSessionByConferenceRequest) MarshalURL() ([]byte, error) {
+func (r ListSessionsRequest) MarshalURL() ([]byte, error) {
 	m := r.collectMarshalData()
 	buf, err := urlenc.Marshal(m)
 	if err != nil {
@@ -3967,7 +3975,7 @@ func (r ListSessionByConferenceRequest) MarshalURL() ([]byte, error) {
 	return buf, nil
 }
 
-func (r *ListSessionByConferenceRequest) UnmarshalJSON(data []byte) error {
+func (r *ListSessionsRequest) UnmarshalJSON(data []byte) error {
 	m := make(map[string]interface{})
 	if err := json.Unmarshal(data, &m); err != nil {
 		return err
@@ -3975,15 +3983,24 @@ func (r *ListSessionByConferenceRequest) UnmarshalJSON(data []byte) error {
 	return r.Populate(m)
 }
 
-func (r *ListSessionByConferenceRequest) Populate(m map[string]interface{}) error {
+func (r *ListSessionsRequest) Populate(m map[string]interface{}) error {
 	if jv, ok := m["conference_id"]; ok {
-		switch jv.(type) {
-		case string:
-			r.ConferenceID = jv.(string)
-			delete(m, "conference_id")
-		default:
-			return ErrInvalidJSONFieldType{Field: "conference_id"}
+		if err := r.ConferenceID.Set(jv); err != nil {
+			return errors.New("set field ConferenceID failed: " + err.Error())
 		}
+		delete(m, "conference_id")
+	}
+	if jv, ok := m["speaker_id"]; ok {
+		if err := r.SpeakerID.Set(jv); err != nil {
+			return errors.New("set field SpeakerID failed: " + err.Error())
+		}
+		delete(m, "speaker_id")
+	}
+	if jv, ok := m["status"]; ok {
+		if err := r.Status.Set(jv); err != nil {
+			return errors.New("set field Status failed: " + err.Error())
+		}
+		delete(m, "status")
 	}
 	if jv, ok := m["date"]; ok {
 		if err := r.Date.Set(jv); err != nil {
