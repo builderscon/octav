@@ -281,13 +281,16 @@ func yapcasia(uid string) *model.CreateConferenceSeriesRequest {
 	}
 }
 
-func yapcasiaTokyo(seriesID , userID string) *model.CreateConferenceRequest {
-	return &model.CreateConferenceRequest{
-		Title:    "YAPC::Asia Tokyo",
-		SeriesID: seriesID,
-		Slug:     "2015",
-		UserID:   userID,
+func yapcasiaTokyo(seriesID, userID string) *model.CreateConferenceRequest {
+	r := &model.CreateConferenceRequest{
+		Title:       "YAPC::Asia Tokyo",
+		SeriesID:    seriesID,
+		Slug:        "2015",
+		UserID:      userID,
 	}
+	r.L10N.Set("ja", "description", "最後のYAPC::Asia Tokyo")
+	r.Description.Set("The last YAPC::Asia Tokyo")
+	return r
 }
 
 func testCreateConferenceSeries(ctx *TestCtx, in *model.CreateConferenceSeriesRequest) (*model.ObjectID, error) {
@@ -454,6 +457,10 @@ func TestConferenceCRUD(t *testing.T) {
 		return
 	}
 
+	if !assert.NotEmpty(ctx.T, conf1.Description, "Description should not be empty") {
+		return
+	}
+
 	if !assert.Len(ctx.T, conf1.Administrators, 1, "There should be 1 administrator") {
 		return
 	}
@@ -463,7 +470,16 @@ func TestConferenceCRUD(t *testing.T) {
 		return
 	}
 
-	if !assert.Equal(ctx.T, conf1, conf2, "LookupConference is the same") {
+	if !assert.NotEqual(ctx.T, conf1.Description, conf2.Description, "description should localized") {
+		return
+	}
+
+	conf3, err := testLookupConference(ctx, res.ID, "ja")
+	if err != nil {
+		return
+	}
+
+	if !assert.Equal(ctx.T, conf2, conf3, "LookupConference is the same") {
 		return
 	}
 
@@ -474,15 +490,15 @@ func TestConferenceCRUD(t *testing.T) {
 		return
 	}
 
-	conf3, err := testLookupConference(ctx, res.ID, "ja")
+	conf4, err := testLookupConference(ctx, res.ID, "ja")
 	if err != nil {
 		return
 	}
-	if !assert.Equal(ctx.T, conf3.SubTitle, "Big Bang!", "Conference.SubTitle is the same as the conference updated") {
+	if !assert.Equal(ctx.T, conf4.SubTitle, "Big Bang!", "Conference.SubTitle is the same as the conference updated") {
 		return
 	}
 
-	if !assert.Equal(ctx.T, "ヤップシー エイジア", conf3.Title, "Conference.title#ja is the same as the conference updated") {
+	if !assert.Equal(ctx.T, "ヤップシー エイジア", conf4.Title, "Conference.title#ja is the same as the conference updated") {
 		return
 	}
 
@@ -708,7 +724,7 @@ func TestSessionCRUD(t *testing.T) {
 		return
 	}
 
-	room1, err := testLookupSession(ctx, res.ID, "")
+	room1, err := testLookupSession(ctx, res.ID, "ja")
 	if err != nil {
 		return
 	}
@@ -818,7 +834,7 @@ func TestCreateUser(t *testing.T) {
 	}
 
 	res4, err := ctx.HTTPClient.LookupUserByAuthUserID(&model.LookupUserByAuthUserIDRequest{
-		AuthVia: res.AuthVia,
+		AuthVia:    res.AuthVia,
 		AuthUserID: res.AuthUserID,
 	})
 	if !assert.NoError(ctx.T, err, "LookupUserByAuthUserID should succeed") {

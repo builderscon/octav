@@ -28,22 +28,25 @@ type ObjectID struct {
 
 // +model
 type Conference struct {
-	tools.LocalizedFields `json:"-"`
-	ID                    string              `json:"id"`
-	Title                 string              `json:"title" l10n:"true"`
-	Description           string              `json:"description,omitempty" l10n:"true"`
-	CoverURL              string              `json:"cover_url"`
-	SeriesID              string              `json:"series_id,omitempty"`
-	Series                *ConferenceSeries   `json:"series,omitempty" decorate:"true"`
-	SubTitle              string              `json:"sub_title" l10n:"true"`
-	Slug                  string              `json:"slug"`
-	FullSlug              string              `json:"full_slug,omitempty"` // Only populated when decorated
-	Status                string              `json:"status"`
-	Dates                 ConferenceDateList  `json:"dates,omitempty"`
-	Administrators        UserList            `json:"administrators,omitempty" decorate:"true"`
-	Venues                VenueList           `json:"venues,omitempty" decorate:"true"`
-	FeaturedSpeakers      FeaturedSpeakerList `json:"featured_speakers,omitempty" decorate:"true"`
-	Sponsors              SponsorList         `json:"sponsors,omitempty" decorate:"true"`
+	tools.LocalizedFields     `json:"-"`
+	ID                        string              `json:"id"`
+	Title                     string              `json:"title" l10n:"true"`
+	Description               string              `json:"description,omitempty" l10n:"true"`
+	CFPLeadText               string              `json:"cfp_lead_text,omitempty" l10n:"true"`
+	CFPPreSubmitInstructions  string              `json:"cfp_pre_submit_instructions,omitempty" l10n:"true"`
+	CFPPostSubmitInstructions string              `json:"cfp_post_submit_instructions,omitempty" l10n:"true"`
+	CoverURL                  string              `json:"cover_url"`
+	SeriesID                  string              `json:"series_id,omitempty"`
+	Series                    *ConferenceSeries   `json:"series,omitempty" decorate:"true"`
+	SubTitle                  string              `json:"sub_title" l10n:"true"`
+	Slug                      string              `json:"slug"`
+	FullSlug                  string              `json:"full_slug,omitempty"` // Only populated when decorated
+	Status                    string              `json:"status"`
+	Dates                     ConferenceDateList  `json:"dates,omitempty"`
+	Administrators            UserList            `json:"administrators,omitempty" decorate:"true"`
+	Venues                    VenueList           `json:"venues,omitempty" decorate:"true"`
+	FeaturedSpeakers          FeaturedSpeakerList `json:"featured_speakers,omitempty" decorate:"true"`
+	Sponsors                  SponsorList         `json:"sponsors,omitempty" decorate:"true"`
 }
 type ConferenceList []Conference
 
@@ -236,13 +239,16 @@ type ListConferenceSeriesReponse []ConferenceSeries
 
 // +transport
 type CreateConferenceRequest struct {
-	Title       string                `json:"title" l10n:"true"`
-	Description jsval.MaybeString     `json:"description" l10n:"true"`
-	SeriesID    string                `json:"series_id"`
-	SubTitle    jsval.MaybeString     `json:"sub_title" l10n:"true"`
-	Slug        string                `json:"slug"`
-	UserID      string                `json:"user_id"`
-	L10N        tools.LocalizedFields `json:"-"`
+	Title                     string                `json:"title" l10n:"true"`
+	CFPLeadText               jsval.MaybeString     `json:"cfp_lead_text" l10n:"true"`
+	CFPPreSubmitInstructions  jsval.MaybeString     `json:"cfp_pre_submit_instructions" l10n:"true"`
+	CFPPostSubmitInstructions jsval.MaybeString     `json:"cfp_post_submit_instructions" l10n:"true"`
+	Description               jsval.MaybeString     `json:"description" l10n:"true"`
+	SeriesID                  string                `json:"series_id"`
+	SubTitle                  jsval.MaybeString     `json:"sub_title" l10n:"true"`
+	Slug                      string                `json:"slug"`
+	UserID                    string                `json:"user_id"`
+	L10N                      tools.LocalizedFields `json:"-"`
 }
 
 // +transport

@@ -24,18 +24,28 @@ type ConferenceSeries struct {
 
 // +DB tablename:"conferences"
 type Conference struct {
-	OID         int64  // intenral id, used for sorting and what not
-	EID         string // ID that is visible to the outside
-	CoverURL    sql.NullString
-	Description sql.NullString
-	SeriesID    string // ConferenceSeries ID
-	Slug        string
-	Status      string
-	SubTitle    sql.NullString
-	Title       string
-	CreatedBy   string // User ID that creates this conference
-	CreatedOn   time.Time
-	ModifiedOn  NullTime
+	OID        int64  // intenral id, used for sorting and what not
+	EID        string // ID that is visible to the outside
+	CoverURL   sql.NullString
+	SeriesID   string // ConferenceSeries ID
+	Slug       string
+	Status     string
+	SubTitle   sql.NullString
+	Title      string
+	CreatedBy  string // User ID that creates this conference
+	CreatedOn  time.Time
+	ModifiedOn NullTime
+}
+
+// +DB tablename:"conference_components"
+type ConferenceComponent struct {
+	OID          int64  // intenral id, used for sorting and what not
+	EID          string // ID that is visible to the outside
+	ConferenceID string
+	Name         string
+	Value        string
+	CreatedOn    time.Time
+	ModifiedOn   NullTime
 }
 
 // +DB tablename:"conference_dates"

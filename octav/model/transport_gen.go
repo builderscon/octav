@@ -899,6 +899,15 @@ func (r *AddConferenceSeriesAdminRequest) Populate(m map[string]interface{}) err
 func (r CreateConferenceRequest) collectMarshalData() map[string]interface{} {
 	m := make(map[string]interface{})
 	m["title"] = r.Title
+	if r.CFPLeadText.Valid() {
+		m["cfp_lead_text"] = r.CFPLeadText.Value()
+	}
+	if r.CFPPreSubmitInstructions.Valid() {
+		m["cfp_pre_submit_instructions"] = r.CFPPreSubmitInstructions.Value()
+	}
+	if r.CFPPostSubmitInstructions.Valid() {
+		m["cfp_post_submit_instructions"] = r.CFPPostSubmitInstructions.Value()
+	}
 	if r.Description.Valid() {
 		m["description"] = r.Description.Value()
 	}
@@ -947,6 +956,24 @@ func (r *CreateConferenceRequest) Populate(m map[string]interface{}) error {
 			return ErrInvalidJSONFieldType{Field: "title"}
 		}
 	}
+	if jv, ok := m["cfp_lead_text"]; ok {
+		if err := r.CFPLeadText.Set(jv); err != nil {
+			return errors.New("set field CFPLeadText failed: " + err.Error())
+		}
+		delete(m, "cfp_lead_text")
+	}
+	if jv, ok := m["cfp_pre_submit_instructions"]; ok {
+		if err := r.CFPPreSubmitInstructions.Set(jv); err != nil {
+			return errors.New("set field CFPPreSubmitInstructions failed: " + err.Error())
+		}
+		delete(m, "cfp_pre_submit_instructions")
+	}
+	if jv, ok := m["cfp_post_submit_instructions"]; ok {
+		if err := r.CFPPostSubmitInstructions.Set(jv); err != nil {
+			return errors.New("set field CFPPostSubmitInstructions failed: " + err.Error())
+		}
+		delete(m, "cfp_post_submit_instructions")
+	}
 	if jv, ok := m["description"]; ok {
 		if err := r.Description.Set(jv); err != nil {
 			return errors.New("set field Description failed: " + err.Error())
@@ -986,7 +1013,7 @@ func (r *CreateConferenceRequest) Populate(m map[string]interface{}) error {
 			return ErrInvalidJSONFieldType{Field: "user_id"}
 		}
 	}
-	if err := tools.ExtractL10NFields(m, &r.L10N, []string{"title", "description", "series_id", "sub_title", "slug", "user_id"}); err != nil {
+	if err := tools.ExtractL10NFields(m, &r.L10N, []string{"title", "cfp_lead_text", "cfp_pre_submit_instructions", "cfp_post_submit_instructions", "description", "series_id", "sub_title", "slug", "user_id"}); err != nil {
 		return err
 	}
 	return nil
@@ -994,7 +1021,7 @@ func (r *CreateConferenceRequest) Populate(m map[string]interface{}) error {
 
 func (r *CreateConferenceRequest) GetPropNames() ([]string, error) {
 	l, _ := r.L10N.GetPropNames()
-	return append(l, "title", "description", "series_id", "sub_title", "slug", "user_id"), nil
+	return append(l, "title", "cfp_lead_text", "cfp_pre_submit_instructions", "cfp_post_submit_instructions", "description", "series_id", "sub_title", "slug", "user_id"), nil
 }
 
 func (r *CreateConferenceRequest) SetPropValue(s string, v interface{}) error {
@@ -1004,6 +1031,12 @@ func (r *CreateConferenceRequest) SetPropValue(s string, v interface{}) error {
 			r.Title = jv
 			return nil
 		}
+	case "cfp_lead_text":
+		return r.CFPLeadText.Set(v)
+	case "cfp_pre_submit_instructions":
+		return r.CFPPreSubmitInstructions.Set(v)
+	case "cfp_post_submit_instructions":
+		return r.CFPPostSubmitInstructions.Set(v)
 	case "description":
 		return r.Description.Set(v)
 	case "series_id":

@@ -146,6 +146,21 @@ func (v *Conference) ReplaceL10NStrings(tx *db.Tx, m *model.Conference, lang str
 					pdebug.Printf("Replacing for key 'description'")
 				}
 				m.Description = l.Localized
+			case "cfp_lead_text":
+				if pdebug.Enabled {
+					pdebug.Printf("Replacing for key 'cfp_lead_text'")
+				}
+				m.CFPLeadText = l.Localized
+			case "cfp_pre_submit_instructions":
+				if pdebug.Enabled {
+					pdebug.Printf("Replacing for key 'cfp_pre_submit_instructions'")
+				}
+				m.CFPPreSubmitInstructions = l.Localized
+			case "cfp_post_submit_instructions":
+				if pdebug.Enabled {
+					pdebug.Printf("Replacing for key 'cfp_post_submit_instructions'")
+				}
+				m.CFPPostSubmitInstructions = l.Localized
 			case "sub_title":
 				if pdebug.Enabled {
 					pdebug.Printf("Replacing for key 'sub_title'")

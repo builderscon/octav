@@ -28,10 +28,6 @@ func (v *Conference) populateRowForCreate(vdb *db.Conference, payload model.Crea
 	vdb.SeriesID = payload.SeriesID
 	vdb.Status = "private"
 
-	if payload.Description.Valid() {
-		vdb.Description.Valid = true
-		vdb.Description.String = payload.Description.String
-	}
 	if payload.SubTitle.Valid() {
 		vdb.SubTitle.Valid = true
 		vdb.SubTitle.String = payload.SubTitle.String
@@ -59,11 +55,6 @@ func (v *Conference) populateRowForUpdate(vdb *db.Conference, payload model.Upda
 
 	if payload.Status.Valid() {
 		vdb.Status = payload.Status.String
-	}
-
-	if payload.Description.Valid() {
-		vdb.Description.Valid = true
-		vdb.Description.String = payload.Description.String
 	}
 
 	if payload.SubTitle.Valid() {
@@ -118,6 +109,48 @@ func (v *Conference) CreateFromPayload(tx *db.Tx, payload model.CreateConference
 	vdb := db.Conference{}
 	if err := v.Create(tx, &vdb, payload); err != nil {
 		return errors.Wrap(err, "failed to store in database")
+	}
+
+	// Description, CFPLead, CFPPresubmitInstructions, CFPPostsubmitInstruction
+	// must be created
+	cc := db.ConferenceComponent{
+		ConferenceID: vdb.EID,
+		CreatedOn: time.Now(),
+	}
+	if payload.Description.Valid() && payload.Description.String != "" {
+		cc.EID = tools.UUID()
+		cc.Name = "description"
+		cc.Value = payload.Description.String
+		if err := cc.Create(tx); err != nil {
+			return errors.Wrap(err, "failed to insert description")
+		}
+	}
+
+	if payload.CFPLeadText.Valid() && payload.CFPLeadText.String != "" {
+		cc.EID = tools.UUID()
+		cc.Name = "cfp_lead_text"
+		cc.Value = payload.CFPLeadText.String
+		if err := cc.Create(tx); err != nil {
+			return errors.Wrap(err, "failed to insert description")
+		}
+	}
+
+	if payload.CFPPostSubmitInstructions.Valid() && payload.CFPPostSubmitInstructions.String != "" {
+		cc.EID = tools.UUID()
+		cc.Name = "cfp_post_submit_instructions"
+		cc.Value = payload.CFPPostSubmitInstructions.String
+		if err := cc.Create(tx); err != nil {
+			return errors.Wrap(err, "failed to insert description")
+		}
+	}
+
+	if payload.CFPPreSubmitInstructions.Valid() && payload.CFPPreSubmitInstructions.String != "" {
+		cc.EID = tools.UUID()
+		cc.Name = "cfp_pre_submit_instructions"
+		cc.Value = payload.CFPPreSubmitInstructions.String
+		if err := cc.Create(tx); err != nil {
+			return errors.Wrap(err, "failed to insert description")
+		}
 	}
 
 	if err := v.AddAdministrator(tx, vdb.EID, payload.UserID); err != nil {
@@ -370,7 +403,34 @@ func (v *Conference) LoadVenues(tx *db.Tx, cdl *model.VenueList, cid string) err
 	return nil
 }
 
-func (v *Conference) Decorate(tx *db.Tx, c *model.Conference, lang string) error {
+func (v *Conference) LoadTextComponents(tx *db.Tx, c *model.Conference) error {
+	var ccl db.ConferenceComponentList
+
+	if err := ccl.LoadByConferenceID(tx, c.ID); err != nil {
+		return errors.Wrap(err, "failed to load text components for conference")
+	}
+
+	for _, cc := range ccl {
+		switch cc.Name {
+		case "description":
+			c.Description = cc.Value
+		case "cfp_lead_text":
+			c.CFPLeadText = cc.Value
+		case "cfp_pre_submit_instructions":
+			c.CFPPreSubmitInstructions = cc.Value
+		case "cfp_post_submit_instructions":
+			c.CFPPostSubmitInstructions = cc.Value
+		}
+	}
+	return nil
+}
+
+func (v *Conference) Decorate(tx *db.Tx, c *model.Conference, lang string) (err error) {
+	if pdebug.Enabled {
+		g := pdebug.Marker("service.Conference.Decorate").BindError(&err)
+		defer g.End()
+	}
+
 	if seriesID := c.SeriesID; seriesID != "" {
 		sdb := db.ConferenceSeries{}
 		if err := sdb.LoadByEID(tx, seriesID); err != nil {
@@ -388,6 +448,10 @@ func (v *Conference) Decorate(tx *db.Tx, c *model.Conference, lang string) error
 	if c.CoverURL == "" {
 		// TODO: fix later
 		c.CoverURL = "https://builderscon.io/assets/images/heroimage.png"
+	}
+
+	if err := v.LoadTextComponents(tx, c); err != nil {
+		return errors.Wrapf(err, "failed to load conference text components for '%s'", c.ID)
 	}
 
 	if err := v.LoadDates(tx, &c.Dates, c.ID); err != nil {
@@ -431,7 +495,9 @@ func (v *Conference) Decorate(tx *db.Tx, c *model.Conference, lang string) error
 		}
 	}
 
-	if lang != "" {
+	switch lang {
+	case "", "en":
+	default:
 		if err := v.ReplaceL10NStrings(tx, c, lang); err != nil {
 			return errors.Wrap(err, "failed to replace L10N strings")
 		}

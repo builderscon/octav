@@ -66,7 +66,6 @@ CREATE TABLE conferences (
     oid INTEGER UNSIGNED NOT NULL PRIMARY KEY AUTO_INCREMENT,
     eid CHAR(64) CHARACTER SET latin1 NOT NULL,
     series_id CHAR(64) CHARACTER SET latin1 NOT NULL,
-    description TEXT,
     slug TEXT NOT NULL,
     title TEXT NOT NULL,
     sub_title TEXT,
@@ -79,6 +78,20 @@ CREATE TABLE conferences (
     UNIQUE KEY(eid),
     UNIQUE KEY(series_id, slug(191)),
     KEY (status)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- key, value pairs of long texts that go with a conference
+CREATE TABLE conference_components (
+    oid           INTEGER UNSIGNED NOT NULL PRIMARY KEY AUTO_INCREMENT,
+    eid           CHAR(64) CHARACTER SET latin1 NOT NULL,
+    conference_id CHAR(64) CHARACTER SET latin1 NOT NULL,
+    name          CHAR(64) CHARACTER SET latin1 NOT NULL,
+    value         TEXT NOT NULL,
+    created_on    DATETIME NOT NULL,
+    modified_on   TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    KEY(eid),
+    KEY(name),
+    FOREIGN KEY (conference_id) REFERENCES conferences(eid) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 CREATE TABLE conference_dates (
