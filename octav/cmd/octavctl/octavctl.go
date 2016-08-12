@@ -374,6 +374,8 @@ func doConferenceList(args cmdargs) int {
 
 func doConferenceUpdate(args cmdargs) int {
 	fs := flag.NewFlagSet("octavctl conference update", flag.ContinueOnError)
+	var cfp_lead_text string
+	fs.StringVar(&cfp_lead_text, "cfp_lead_text", "", "")
 	var description string
 	fs.StringVar(&description, "description", "", "")
 	var id string
@@ -394,6 +396,9 @@ func doConferenceUpdate(args cmdargs) int {
 	}
 
 	m := make(map[string]interface{})
+	if cfp_lead_text != "" {
+		m["cfp_lead_text"] = cfp_lead_text
+	}
 	if description != "" {
 		m["description"] = description
 	}

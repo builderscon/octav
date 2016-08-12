@@ -486,6 +486,7 @@ func TestConferenceCRUD(t *testing.T) {
 	in := model.UpdateConferenceRequest{ID: res.ID, UserID: user.ID}
 	in.SubTitle.Set("Big Bang!")
 	in.L10N.Set("ja", "title", "ヤップシー エイジア")
+	in.L10N.Set("ja", "cfp_lead_text", "ばっちこい！")
 	if err := testUpdateConference(ctx, &in); err != nil {
 		return
 	}
@@ -499,6 +500,10 @@ func TestConferenceCRUD(t *testing.T) {
 	}
 
 	if !assert.Equal(ctx.T, "ヤップシー エイジア", conf4.Title, "Conference.title#ja is the same as the conference updated") {
+		return
+	}
+
+	if !assert.Equal(ctx.T, "ばっちこい！", conf4.CFPLeadText, "Conference.cfp_lead_text#ja is the same as the conference updated") {
 		return
 	}
 

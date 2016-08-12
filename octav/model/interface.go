@@ -51,6 +51,32 @@ type Conference struct {
 type ConferenceList []Conference
 
 // +model
+type ConferenceComponent struct {
+	ID           string `json:"id"`
+	ConferenceID string `json:"conference_id"`
+	Name         string `json:"id"`
+	Value        string `json:"value"`
+}
+
+// +transport
+type LookupConferenceComponentRequest struct {
+	ID   string            `json:"id" urlenc:"id"`
+	Lang jsval.MaybeString `json:"lang" urlenc:"lang,omitempty,string"`
+}
+
+type CreateConferenceComponentRequest struct {
+	ConferenceID string `json:"conference_id"`
+	Name         string `json:"name"`
+	Value        string `json:"value"`
+}
+
+type UpdateConferenceComponentRequest struct {
+	ID    string            `json:"id"`
+	Name  jsval.MaybeString `json:"name"`
+	Value jsval.MaybeString `json:"value"`
+}
+
+// +model
 type ConferenceSeries struct {
 	tools.LocalizedFields `json:"-"`
 	ID                    string `json:"id"`
@@ -268,6 +294,7 @@ type UpdateConferenceRequest struct {
 	ID            string                `json:"id"`
 	Title         jsval.MaybeString     `json:"title,omitempty" l10n:"true"`
 	Description   jsval.MaybeString     `json:"description" l10n:"true"`
+	CFPLeadText   jsval.MaybeString     `json:"cfp_lead_text" l10n:"true"`
 	MultipartForm *multipart.Form       `json:"-"`
 	SeriesID      jsval.MaybeString     `json:"series_id,omitempty"`
 	Slug          jsval.MaybeString     `json:"slug,omitempty"`

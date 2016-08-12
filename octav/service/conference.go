@@ -610,6 +610,39 @@ func (v *Conference) UpdateFromPayload(ctx context.Context, tx *db.Tx, payload m
 		return errors.Wrap(err, "failed to update sponsor in database")
 	}
 
+	var ccs ConferenceComponent
+	deletedTextComponents := []string{}
+	addedTextComponents := map[string]string{}
+	if payload.Description.Valid() {
+		s := payload.Description.String
+		if len(s) == 0 {
+			deletedTextComponents = append(deletedTextComponents, s)
+		} else {
+			addedTextComponents["description"] = s
+		}
+	}
+
+	if payload.CFPLeadText.Valid() {
+		s := payload.CFPLeadText.String
+		if len(s) == 0 {
+			deletedTextComponents = append(deletedTextComponents, s)
+		} else {
+			addedTextComponents["cfp_lead_text"] = s
+		}
+	}
+
+	if len(deletedTextComponents) > 0 {
+		if err := ccs.DeleteByConferenceIDAndName(tx, payload.ID, deletedTextComponents...); err != nil {
+			return errors.Wrap(err, "failed to delete components")
+		}
+	}
+
+	if len(addedTextComponents) > 0 {
+		if err := ccs.UpsertByConferenceIDAndName(tx, payload.ID, addedTextComponents); err != nil {
+			return errors.Wrap(err, "failed to register components")
+		}
+	}
+
 	if _, ok := errors.IsFinalizationRequired(uploadErr); ok {
 		return uploadErr
 	}

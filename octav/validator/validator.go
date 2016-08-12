@@ -2911,6 +2911,10 @@ func init() {
 					jsval.EmptyConstraint,
 				).
 				AddProp(
+					"cfp_lead_text",
+					jsval.Reference(M).RefersTo("#/definitions/string_en"),
+				).
+				AddProp(
 					"description",
 					jsval.Reference(M).RefersTo("#/definitions/string_en"),
 				).
@@ -2937,6 +2941,10 @@ func init() {
 				AddProp(
 					"user_id",
 					jsval.Reference(M).RefersTo("#/definitions/uuid"),
+				).
+				PatternPropertiesString(
+					"cfp_lead_text#[a-z]+",
+					jsval.Reference(M).RefersTo("#/definitions/string_i18n"),
 				).
 				PatternPropertiesString(
 					"description#[a-z]+",

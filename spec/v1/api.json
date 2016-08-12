@@ -1079,6 +1079,7 @@
         "properties": {
           "id": { "$ref": "#/definitions/uuid" },
           "description": { "$ref": "#/definitions/string_en" },
+          "cfp_lead_text": { "$ref": "#/definitions/string_en" },
           "slug": { "$ref": "#/definitions/string_en" },
           "status": { "$ref": "#/definitions/conference_status" },
           "sub_title": { "$ref": "#/definitions/string_en" },
@@ -1087,7 +1088,8 @@
         },
         "patternProperties": {
           "title#[a-z]+": { "$ref": "#/definitions/string_i18n" },
-          "description#[a-z]+": { "$ref": "#/definitions/string_i18n" }
+          "description#[a-z]+": { "$ref": "#/definitions/string_i18n" },
+          "cfp_lead_text#[a-z]+": { "$ref": "#/definitions/string_i18n" }
         },
         "required": ["id", "user_id"]
       }
