@@ -1072,6 +1072,18 @@ func init() {
 					jsval.EmptyConstraint,
 				).
 				AddProp(
+					"cfp_lead_text",
+					jsval.Reference(M).RefersTo("#/definitions/string_en"),
+				).
+				AddProp(
+					"cfp_post_submit_instructions",
+					jsval.Reference(M).RefersTo("#/definitions/string_en"),
+				).
+				AddProp(
+					"cfp_pre_submit_instructions",
+					jsval.Reference(M).RefersTo("#/definitions/string_en"),
+				).
+				AddProp(
 					"description",
 					jsval.Reference(M).RefersTo("#/definitions/string_en"),
 				).
@@ -2915,6 +2927,14 @@ func init() {
 					jsval.Reference(M).RefersTo("#/definitions/string_en"),
 				).
 				AddProp(
+					"cfp_post_submit_instructions",
+					jsval.Reference(M).RefersTo("#/definitions/string_en"),
+				).
+				AddProp(
+					"cfp_pre_submit_instructions",
+					jsval.Reference(M).RefersTo("#/definitions/string_en"),
+				).
+				AddProp(
 					"description",
 					jsval.Reference(M).RefersTo("#/definitions/string_en"),
 				).
@@ -2944,6 +2964,14 @@ func init() {
 				).
 				PatternPropertiesString(
 					"cfp_lead_text#[a-z]+",
+					jsval.Reference(M).RefersTo("#/definitions/string_i18n"),
+				).
+				PatternPropertiesString(
+					"cfp_post_submit_instructions#[a-z]+",
+					jsval.Reference(M).RefersTo("#/definitions/string_i18n"),
+				).
+				PatternPropertiesString(
+					"cfp_pre_submit_instructions#[a-z]+",
 					jsval.Reference(M).RefersTo("#/definitions/string_i18n"),
 				).
 				PatternPropertiesString(

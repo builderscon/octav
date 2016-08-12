@@ -291,17 +291,19 @@ type LookupConferenceBySlugRequest struct {
 
 // +transport
 type UpdateConferenceRequest struct {
-	ID            string                `json:"id"`
-	Title         jsval.MaybeString     `json:"title,omitempty" l10n:"true"`
-	Description   jsval.MaybeString     `json:"description" l10n:"true"`
-	CFPLeadText   jsval.MaybeString     `json:"cfp_lead_text" l10n:"true"`
-	MultipartForm *multipart.Form       `json:"-"`
-	SeriesID      jsval.MaybeString     `json:"series_id,omitempty"`
-	Slug          jsval.MaybeString     `json:"slug,omitempty"`
-	SubTitle      jsval.MaybeString     `json:"sub_title,omitempty" l10n:"true"`
-	Status        jsval.MaybeString     `json:"status,omitempty"`
-	UserID        string                `json:"user_id"`
-	L10N          tools.LocalizedFields `json:"-"`
+	ID                        string                `json:"id"`
+	Title                     jsval.MaybeString     `json:"title,omitempty" l10n:"true"`
+	Description               jsval.MaybeString     `json:"description" l10n:"true"`
+	CFPLeadText               jsval.MaybeString     `json:"cfp_lead_text" l10n:"true"`
+	CFPPreSubmitInstructions  jsval.MaybeString     `json:"cfp_pre_submit_instructions" l10n:"true"`
+	CFPPostSubmitInstructions jsval.MaybeString     `json:"cfp_post_submit_instructions" l10n:"true"`
+	MultipartForm             *multipart.Form       `json:"-"`
+	SeriesID                  jsval.MaybeString     `json:"series_id,omitempty"`
+	Slug                      jsval.MaybeString     `json:"slug,omitempty"`
+	SubTitle                  jsval.MaybeString     `json:"sub_title,omitempty" l10n:"true"`
+	Status                    jsval.MaybeString     `json:"status,omitempty"`
+	UserID                    string                `json:"user_id"`
+	L10N                      tools.LocalizedFields `json:"-"`
 
 	// These fields are only used internally
 	CoverURL jsval.MaybeString `json:"-"`

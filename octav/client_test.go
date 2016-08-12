@@ -487,6 +487,8 @@ func TestConferenceCRUD(t *testing.T) {
 	in.SubTitle.Set("Big Bang!")
 	in.L10N.Set("ja", "title", "ヤップシー エイジア")
 	in.L10N.Set("ja", "cfp_lead_text", "ばっちこい！")
+	in.L10N.Set("ja", "cfp_pre_submit_instructions", "事前にこれを読んでね")
+	in.L10N.Set("ja", "cfp_post_submit_instructions", "応募したらこれを読んでね")
 	if err := testUpdateConference(ctx, &in); err != nil {
 		return
 	}
@@ -504,6 +506,14 @@ func TestConferenceCRUD(t *testing.T) {
 	}
 
 	if !assert.Equal(ctx.T, "ばっちこい！", conf4.CFPLeadText, "Conference.cfp_lead_text#ja is the same as the conference updated") {
+		return
+	}
+
+	if !assert.Equal(ctx.T, "事前にこれを読んでね", conf4.CFPPreSubmitInstructions, "Conference.cfp_pre_submit_instructions#ja is the same as the conference updated") {
+		return
+	}
+
+	if !assert.Equal(ctx.T, "応募したらこれを読んでね", conf4.CFPPostSubmitInstructions, "Conference.cfp_post_submit_instructions#ja is the same as the conference updated") {
 		return
 	}
 

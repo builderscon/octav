@@ -1236,6 +1236,12 @@ func (r UpdateConferenceRequest) collectMarshalData() map[string]interface{} {
 	if r.CFPLeadText.Valid() {
 		m["cfp_lead_text"] = r.CFPLeadText.Value()
 	}
+	if r.CFPPreSubmitInstructions.Valid() {
+		m["cfp_pre_submit_instructions"] = r.CFPPreSubmitInstructions.Value()
+	}
+	if r.CFPPostSubmitInstructions.Valid() {
+		m["cfp_post_submit_instructions"] = r.CFPPostSubmitInstructions.Value()
+	}
 	if r.SeriesID.Valid() {
 		m["series_id"] = r.SeriesID.Value()
 	}
@@ -1306,6 +1312,18 @@ func (r *UpdateConferenceRequest) Populate(m map[string]interface{}) error {
 		}
 		delete(m, "cfp_lead_text")
 	}
+	if jv, ok := m["cfp_pre_submit_instructions"]; ok {
+		if err := r.CFPPreSubmitInstructions.Set(jv); err != nil {
+			return errors.New("set field CFPPreSubmitInstructions failed: " + err.Error())
+		}
+		delete(m, "cfp_pre_submit_instructions")
+	}
+	if jv, ok := m["cfp_post_submit_instructions"]; ok {
+		if err := r.CFPPostSubmitInstructions.Set(jv); err != nil {
+			return errors.New("set field CFPPostSubmitInstructions failed: " + err.Error())
+		}
+		delete(m, "cfp_post_submit_instructions")
+	}
 	if jv, ok := m["series_id"]; ok {
 		if err := r.SeriesID.Set(jv); err != nil {
 			return errors.New("set field SeriesID failed: " + err.Error())
@@ -1339,7 +1357,7 @@ func (r *UpdateConferenceRequest) Populate(m map[string]interface{}) error {
 			return ErrInvalidJSONFieldType{Field: "user_id"}
 		}
 	}
-	if err := tools.ExtractL10NFields(m, &r.L10N, []string{"id", "title", "description", "cfp_lead_text", "series_id", "slug", "sub_title", "status", "user_id"}); err != nil {
+	if err := tools.ExtractL10NFields(m, &r.L10N, []string{"id", "title", "description", "cfp_lead_text", "cfp_pre_submit_instructions", "cfp_post_submit_instructions", "series_id", "slug", "sub_title", "status", "user_id"}); err != nil {
 		return err
 	}
 	return nil
@@ -1347,7 +1365,7 @@ func (r *UpdateConferenceRequest) Populate(m map[string]interface{}) error {
 
 func (r *UpdateConferenceRequest) GetPropNames() ([]string, error) {
 	l, _ := r.L10N.GetPropNames()
-	return append(l, "id", "title", "description", "cfp_lead_text", "series_id", "slug", "sub_title", "status", "user_id"), nil
+	return append(l, "id", "title", "description", "cfp_lead_text", "cfp_pre_submit_instructions", "cfp_post_submit_instructions", "series_id", "slug", "sub_title", "status", "user_id"), nil
 }
 
 func (r *UpdateConferenceRequest) SetPropValue(s string, v interface{}) error {
@@ -1363,6 +1381,10 @@ func (r *UpdateConferenceRequest) SetPropValue(s string, v interface{}) error {
 		return r.Description.Set(v)
 	case "cfp_lead_text":
 		return r.CFPLeadText.Set(v)
+	case "cfp_pre_submit_instructions":
+		return r.CFPPreSubmitInstructions.Set(v)
+	case "cfp_post_submit_instructions":
+		return r.CFPPostSubmitInstructions.Set(v)
 	case "series_id":
 		return r.SeriesID.Set(v)
 	case "slug":

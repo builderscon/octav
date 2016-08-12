@@ -175,6 +175,12 @@ func printJSON(v interface{}) error {
 
 func doConferenceCreate(args cmdargs) int {
 	fs := flag.NewFlagSet("octavctl conference create", flag.ContinueOnError)
+	var cfp_lead_text string
+	fs.StringVar(&cfp_lead_text, "cfp_lead_text", "", "")
+	var cfp_post_submit_instructions string
+	fs.StringVar(&cfp_post_submit_instructions, "cfp_post_submit_instructions", "", "")
+	var cfp_pre_submit_instructions string
+	fs.StringVar(&cfp_pre_submit_instructions, "cfp_pre_submit_instructions", "", "")
 	var description string
 	fs.StringVar(&description, "description", "", "")
 	var series_id string
@@ -193,6 +199,15 @@ func doConferenceCreate(args cmdargs) int {
 	}
 
 	m := make(map[string]interface{})
+	if cfp_lead_text != "" {
+		m["cfp_lead_text"] = cfp_lead_text
+	}
+	if cfp_post_submit_instructions != "" {
+		m["cfp_post_submit_instructions"] = cfp_post_submit_instructions
+	}
+	if cfp_pre_submit_instructions != "" {
+		m["cfp_pre_submit_instructions"] = cfp_pre_submit_instructions
+	}
 	if description != "" {
 		m["description"] = description
 	}
@@ -376,6 +391,10 @@ func doConferenceUpdate(args cmdargs) int {
 	fs := flag.NewFlagSet("octavctl conference update", flag.ContinueOnError)
 	var cfp_lead_text string
 	fs.StringVar(&cfp_lead_text, "cfp_lead_text", "", "")
+	var cfp_post_submit_instructions string
+	fs.StringVar(&cfp_post_submit_instructions, "cfp_post_submit_instructions", "", "")
+	var cfp_pre_submit_instructions string
+	fs.StringVar(&cfp_pre_submit_instructions, "cfp_pre_submit_instructions", "", "")
 	var description string
 	fs.StringVar(&description, "description", "", "")
 	var id string
@@ -398,6 +417,12 @@ func doConferenceUpdate(args cmdargs) int {
 	m := make(map[string]interface{})
 	if cfp_lead_text != "" {
 		m["cfp_lead_text"] = cfp_lead_text
+	}
+	if cfp_post_submit_instructions != "" {
+		m["cfp_post_submit_instructions"] = cfp_post_submit_instructions
+	}
+	if cfp_pre_submit_instructions != "" {
+		m["cfp_pre_submit_instructions"] = cfp_pre_submit_instructions
 	}
 	if description != "" {
 		m["description"] = description
