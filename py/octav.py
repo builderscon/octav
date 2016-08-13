@@ -1,5 +1,5 @@
 """OCTAV Client Library"""
-"""DO NOT EDIT: This file was generated from ../spec/v1/api.json on Tue Aug  9 16:58:11 2016"""
+"""DO NOT EDIT: This file was generated from ../spec/v1/api.json on Sat Aug 13 14:13:32 2016"""
 
 import json
 import os
@@ -724,7 +724,7 @@ class Octav(object):
         self.error = repr(e)
         return None
 
-  def create_conference (self, series_id, slug, title, user_id, description=None, sub_title=None):
+  def create_conference (self, series_id, slug, title, user_id, cfp_lead_text=None, cfp_post_submit_instructions=None, cfp_pre_submit_instructions=None, description=None, sub_title=None):
     try:
         payload = {}
         hdrs = {}
@@ -740,6 +740,12 @@ class Octav(object):
         if user_id is None:
             raise MissingRequiredArgument('property user_id must be provided')
         payload['user_id'] = user_id
+        if cfp_lead_text is not None:
+            payload['cfp_lead_text'] = cfp_lead_text
+        if cfp_post_submit_instructions is not None:
+            payload['cfp_post_submit_instructions'] = cfp_post_submit_instructions
+        if cfp_pre_submit_instructions is not None:
+            payload['cfp_pre_submit_instructions'] = cfp_pre_submit_instructions
         if description is not None:
             payload['description'] = description
         if series_id is not None:
@@ -1325,7 +1331,7 @@ class Octav(object):
         self.error = repr(e)
         return None
 
-  def update_conference (self, id, user_id, description=None, slug=None, status=None, sub_title=None, title=None, **args):
+  def update_conference (self, id, user_id, cfp_lead_text=None, cfp_post_submit_instructions=None, cfp_pre_submit_instructions=None, description=None, slug=None, status=None, sub_title=None, title=None, **args):
     try:
         payload = {}
         hdrs = {}
@@ -1335,6 +1341,12 @@ class Octav(object):
         if user_id is None:
             raise MissingRequiredArgument('property user_id must be provided')
         payload['user_id'] = user_id
+        if cfp_lead_text is not None:
+            payload['cfp_lead_text'] = cfp_lead_text
+        if cfp_post_submit_instructions is not None:
+            payload['cfp_post_submit_instructions'] = cfp_post_submit_instructions
+        if cfp_pre_submit_instructions is not None:
+            payload['cfp_pre_submit_instructions'] = cfp_pre_submit_instructions
         if description is not None:
             payload['description'] = description
         if id is not None:
@@ -1349,7 +1361,7 @@ class Octav(object):
             payload['title'] = title
         if user_id is not None:
             payload['user_id'] = user_id
-        patterns = [re.compile('description#[a-z]+'), re.compile('title#[a-z]+')]
+        patterns = [re.compile('cfp_lead_text#[a-z]+'), re.compile('cfp_post_submit_instructions#[a-z]+'), re.compile('cfp_pre_submit_instructions#[a-z]+'), re.compile('description#[a-z]+'), re.compile('title#[a-z]+')]
         for key in args:
             for p in patterns:
                 if p.match(key):
