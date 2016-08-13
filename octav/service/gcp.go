@@ -86,7 +86,7 @@ func (c *GoogleStorageClient) GetClient(ctx context.Context) *storage.Client {
 
 func (c *GoogleStorageClient) URLFor(fragment string) string {
 	bucketName := c.GetBucketName()
-	return "http://storage.googleapis.com/" + bucketName + "/" + fragment
+	return "https://storage.googleapis.com/" + bucketName + "/" + fragment
 }
 
 func (c *GoogleStorageClient) Move(ctx context.Context, srcName, dstName string, options ...CallOption) (err error) {

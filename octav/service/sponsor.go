@@ -315,15 +315,15 @@ func (v *Sponsor) Decorate(tx *db.Tx, sponsor *model.Sponsor, lang string) (err 
 	}
 
 	if sponsor.LogoURL1 == "" {
-		sponsor.LogoURL1 = "http://storage.googleapis.com/media-builderscon-1248/system/nophoto_600.png"
+		sponsor.LogoURL1 = "https://storage.googleapis.com/media-builderscon-1248/system/nophoto_600.png"
 	}
 
 	if sponsor.LogoURL2 == "" {
-		sponsor.LogoURL2 = "http://storage.googleapis.com/media-builderscon-1248/system/nophoto_400.png"
+		sponsor.LogoURL2 = "https://storage.googleapis.com/media-builderscon-1248/system/nophoto_400.png"
 	}
 
 	if sponsor.LogoURL3 == "" {
-		sponsor.LogoURL3 = "http://storage.googleapis.com/media-builderscon-1248/system/nophoto_200.png"
+		sponsor.LogoURL3 = "https://storage.googleapis.com/media-builderscon-1248/system/nophoto_200.png"
 	}
 
 	if lang == "" {
