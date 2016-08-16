@@ -139,6 +139,7 @@ CREATE TABLE session_types (
     submission_end   DATETIME,
     created_on       DATETIME NOT NULL,
     modified_on      TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    KEY (eid),
     FOREIGN KEY (conference_id) REFERENCES conferences(eid) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
@@ -148,6 +149,7 @@ CREATE TABLE sessions (
     conference_id CHAR(64) CHARACTER SET latin1,
     room_id CHAR(64) CHARACTER SET latin1,
     speaker_id CHAR(64) CHARACTER SET latin1,
+    session_type_id CHAR(64) CHARACTER SET latin1,
     title TEXT,
     abstract TEXT,
     memo TEXT,
@@ -169,6 +171,8 @@ CREATE TABLE sessions (
     confirmed TINYINT(1) NOT NULL DEFAULT 0,
     created_on DATETIME NOT NULL,
     modified_on TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    KEY (session_type_id),
+    FOREIGN KEY (session_type_id) REFERENCES session_types(eid),
     FOREIGN KEY (speaker_id) REFERENCES users(eid) ON DELETE SET NULL,
     FOREIGN KEY (conference_id) REFERENCES conferences(eid) ON DELETE SET NULL,
     UNIQUE KEY (eid),
