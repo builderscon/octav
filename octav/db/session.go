@@ -39,6 +39,14 @@ func (v *SessionList) LoadByConference(tx *Tx, conferenceID, speakerID, date, st
 		args = append(args, date)
 	}
 
+	if status != "" {
+		if where.Len() > 0 {
+			where.WriteString(` AND`)
+		}
+		where.WriteString(` status = ?`)
+		args = append(args, status)
+	}
+
 	where.WriteTo(stmt)
 
 	rows, err := tx.Query(stmt.String(), args...)

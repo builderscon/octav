@@ -333,7 +333,12 @@ func (v *Session) UpdateFromPayload(tx *db.Tx, result *model.Session, payload mo
 	return nil
 }
 
-func (v *Session) ListSessionFromPayload(tx *db.Tx, result *model.SessionList, payload model.ListSessionsRequest) error {
+func (v *Session) ListSessionFromPayload(tx *db.Tx, result *model.SessionList, payload model.ListSessionsRequest) (err error) {
+	if pdebug.Enabled {
+		g := pdebug.Marker("service.Session.ListSessionFromPayload").BindError(&err)
+		defer g.End()
+	}
+
 	// Make sure that we have at least one of the arguments
 	var conferenceID, speakerID, date, status string
 	var hasQuery bool
@@ -349,16 +354,16 @@ func (v *Session) ListSessionFromPayload(tx *db.Tx, result *model.SessionList, p
 
 	if payload.Date.Valid() {
 		date = payload.Date.String
-		hasQuery = true
+		// Don't set the hasQuery flag, as this alone doesn't work
 	}
 
 	if payload.Status.Valid() {
 		status = payload.Status.String
-		hasQuery = true
+		// Don't set the hasQuery flag, as this alone doesn't work
 	}
 
 	if !hasQuery {
-		return errors.New("no query specified")
+		return errors.New("no query specified (one of conference_id/speaker_id is required)")
 	}
 
 	var vdbl db.SessionList

@@ -1325,6 +1325,16 @@ func TestListSessions(t *testing.T) {
 	if !assert.Len(ctx.T, res, 10, "There should be 10 sessions") {
 		return
 	}
+
+	in = model.ListSessionsRequest{}
+	_, err = ctx.HTTPClient.ListSessions(&in)
+	if !assert.Error(ctx.T, err, "Query without conference_id/speaker_id should be an error") {
+		return
+	}
+
+	if !assert.Equal(ctx.T, err.Error(), "no query specified (one of conference_id/speaker_id is required)") {
+		return
+	}
 }
 
 func TestListVenue(t *testing.T) {

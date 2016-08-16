@@ -4,17 +4,18 @@ package client
 import (
 	"bytes"
 	"encoding/json"
-	"fmt"
 	"io"
 	"mime/multipart"
 	"net/http"
 	"net/url"
 	"os"
+	"strings"
 	"sync"
 
 	"github.com/builderscon/octav/octav/model"
 	"github.com/lestrrat/go-pdebug"
 	"github.com/lestrrat/go-urlenc"
+	"github.com/pkg/errors"
 )
 
 const MaxResponseSize = (1 << 20) * 2
@@ -43,6 +44,10 @@ func releaseTransportJSONBuffer(buf *bytes.Buffer) {
 type BasicAuth struct {
 	Username string
 	Password string
+}
+
+type ErrJSON struct {
+	Error string `json:"error,omitempty"`
 }
 
 type Client struct {
@@ -89,7 +94,16 @@ func (c *Client) AddConferenceAdmin(in *model.AddConferenceAdminRequest) (err er
 		return err
 	}
 	if res.StatusCode != http.StatusOK {
-		return fmt.Errorf(`Invalid response: '%s'`, res.Status)
+		if strings.HasPrefix(strings.ToLower(res.Header.Get(`Content-Type`)), `application/json`) {
+			var errjson ErrJSON
+			if err := json.NewDecoder(res.Body).Decode(&errjson); err != nil {
+				return errors.Errorf(`Invalid response: '%s'`, res.Status)
+			}
+			if len(errjson.Error) > 0 {
+				return errors.New(errjson.Error)
+			}
+		}
+		return errors.Errorf(`Invalid response: '%s'`, res.Status)
 	}
 	return nil
 }
@@ -125,7 +139,16 @@ func (c *Client) AddConferenceDates(in *model.AddConferenceDatesRequest) (err er
 		return err
 	}
 	if res.StatusCode != http.StatusOK {
-		return fmt.Errorf(`Invalid response: '%s'`, res.Status)
+		if strings.HasPrefix(strings.ToLower(res.Header.Get(`Content-Type`)), `application/json`) {
+			var errjson ErrJSON
+			if err := json.NewDecoder(res.Body).Decode(&errjson); err != nil {
+				return errors.Errorf(`Invalid response: '%s'`, res.Status)
+			}
+			if len(errjson.Error) > 0 {
+				return errors.New(errjson.Error)
+			}
+		}
+		return errors.Errorf(`Invalid response: '%s'`, res.Status)
 	}
 	return nil
 }
@@ -161,7 +184,16 @@ func (c *Client) AddConferenceSeriesAdmin(in *model.AddConferenceSeriesAdminRequ
 		return err
 	}
 	if res.StatusCode != http.StatusOK {
-		return fmt.Errorf(`Invalid response: '%s'`, res.Status)
+		if strings.HasPrefix(strings.ToLower(res.Header.Get(`Content-Type`)), `application/json`) {
+			var errjson ErrJSON
+			if err := json.NewDecoder(res.Body).Decode(&errjson); err != nil {
+				return errors.Errorf(`Invalid response: '%s'`, res.Status)
+			}
+			if len(errjson.Error) > 0 {
+				return errors.New(errjson.Error)
+			}
+		}
+		return errors.Errorf(`Invalid response: '%s'`, res.Status)
 	}
 	return nil
 }
@@ -197,7 +229,16 @@ func (c *Client) AddConferenceVenue(in *model.AddConferenceVenueRequest) (err er
 		return err
 	}
 	if res.StatusCode != http.StatusOK {
-		return fmt.Errorf(`Invalid response: '%s'`, res.Status)
+		if strings.HasPrefix(strings.ToLower(res.Header.Get(`Content-Type`)), `application/json`) {
+			var errjson ErrJSON
+			if err := json.NewDecoder(res.Body).Decode(&errjson); err != nil {
+				return errors.Errorf(`Invalid response: '%s'`, res.Status)
+			}
+			if len(errjson.Error) > 0 {
+				return errors.New(errjson.Error)
+			}
+		}
+		return errors.Errorf(`Invalid response: '%s'`, res.Status)
 	}
 	return nil
 }
@@ -233,7 +274,16 @@ func (c *Client) AddFeaturedSpeaker(in *model.AddFeaturedSpeakerRequest) (ret *m
 		return nil, err
 	}
 	if res.StatusCode != http.StatusOK {
-		return nil, fmt.Errorf(`Invalid response: '%s'`, res.Status)
+		if strings.HasPrefix(strings.ToLower(res.Header.Get(`Content-Type`)), `application/json`) {
+			var errjson ErrJSON
+			if err := json.NewDecoder(res.Body).Decode(&errjson); err != nil {
+				return nil, errors.Errorf(`Invalid response: '%s'`, res.Status)
+			}
+			if len(errjson.Error) > 0 {
+				return nil, errors.New(errjson.Error)
+			}
+		}
+		return nil, errors.Errorf(`Invalid response: '%s'`, res.Status)
 	}
 	jsonbuf := getTransportJSONBuffer()
 	defer releaseTransportJSONBuffer(jsonbuf)
@@ -289,7 +339,16 @@ func (c *Client) AddSessionType(in *model.AddSessionTypeRequest) (err error) {
 		return err
 	}
 	if res.StatusCode != http.StatusOK {
-		return fmt.Errorf(`Invalid response: '%s'`, res.Status)
+		if strings.HasPrefix(strings.ToLower(res.Header.Get(`Content-Type`)), `application/json`) {
+			var errjson ErrJSON
+			if err := json.NewDecoder(res.Body).Decode(&errjson); err != nil {
+				return errors.Errorf(`Invalid response: '%s'`, res.Status)
+			}
+			if len(errjson.Error) > 0 {
+				return errors.New(errjson.Error)
+			}
+		}
+		return errors.Errorf(`Invalid response: '%s'`, res.Status)
 	}
 	return nil
 }
@@ -325,7 +384,16 @@ func (c *Client) AddSponsor(in *model.AddSponsorRequest) (ret *model.Sponsor, er
 		return nil, err
 	}
 	if res.StatusCode != http.StatusOK {
-		return nil, fmt.Errorf(`Invalid response: '%s'`, res.Status)
+		if strings.HasPrefix(strings.ToLower(res.Header.Get(`Content-Type`)), `application/json`) {
+			var errjson ErrJSON
+			if err := json.NewDecoder(res.Body).Decode(&errjson); err != nil {
+				return nil, errors.Errorf(`Invalid response: '%s'`, res.Status)
+			}
+			if len(errjson.Error) > 0 {
+				return nil, errors.New(errjson.Error)
+			}
+		}
+		return nil, errors.Errorf(`Invalid response: '%s'`, res.Status)
 	}
 	jsonbuf := getTransportJSONBuffer()
 	defer releaseTransportJSONBuffer(jsonbuf)
@@ -381,7 +449,16 @@ func (c *Client) CreateConference(in *model.CreateConferenceRequest) (ret *model
 		return nil, err
 	}
 	if res.StatusCode != http.StatusOK {
-		return nil, fmt.Errorf(`Invalid response: '%s'`, res.Status)
+		if strings.HasPrefix(strings.ToLower(res.Header.Get(`Content-Type`)), `application/json`) {
+			var errjson ErrJSON
+			if err := json.NewDecoder(res.Body).Decode(&errjson); err != nil {
+				return nil, errors.Errorf(`Invalid response: '%s'`, res.Status)
+			}
+			if len(errjson.Error) > 0 {
+				return nil, errors.New(errjson.Error)
+			}
+		}
+		return nil, errors.Errorf(`Invalid response: '%s'`, res.Status)
 	}
 	jsonbuf := getTransportJSONBuffer()
 	defer releaseTransportJSONBuffer(jsonbuf)
@@ -437,7 +514,16 @@ func (c *Client) CreateConferenceSeries(in *model.CreateConferenceSeriesRequest)
 		return nil, err
 	}
 	if res.StatusCode != http.StatusOK {
-		return nil, fmt.Errorf(`Invalid response: '%s'`, res.Status)
+		if strings.HasPrefix(strings.ToLower(res.Header.Get(`Content-Type`)), `application/json`) {
+			var errjson ErrJSON
+			if err := json.NewDecoder(res.Body).Decode(&errjson); err != nil {
+				return nil, errors.Errorf(`Invalid response: '%s'`, res.Status)
+			}
+			if len(errjson.Error) > 0 {
+				return nil, errors.New(errjson.Error)
+			}
+		}
+		return nil, errors.Errorf(`Invalid response: '%s'`, res.Status)
 	}
 	jsonbuf := getTransportJSONBuffer()
 	defer releaseTransportJSONBuffer(jsonbuf)
@@ -491,7 +577,16 @@ func (c *Client) CreateQuestion(in *model.CreateQuestionRequest) (ret *model.Obj
 		return nil, err
 	}
 	if res.StatusCode != http.StatusOK {
-		return nil, fmt.Errorf(`Invalid response: '%s'`, res.Status)
+		if strings.HasPrefix(strings.ToLower(res.Header.Get(`Content-Type`)), `application/json`) {
+			var errjson ErrJSON
+			if err := json.NewDecoder(res.Body).Decode(&errjson); err != nil {
+				return nil, errors.Errorf(`Invalid response: '%s'`, res.Status)
+			}
+			if len(errjson.Error) > 0 {
+				return nil, errors.New(errjson.Error)
+			}
+		}
+		return nil, errors.Errorf(`Invalid response: '%s'`, res.Status)
 	}
 	jsonbuf := getTransportJSONBuffer()
 	defer releaseTransportJSONBuffer(jsonbuf)
@@ -547,7 +642,16 @@ func (c *Client) CreateRoom(in *model.CreateRoomRequest) (ret *model.ObjectID, e
 		return nil, err
 	}
 	if res.StatusCode != http.StatusOK {
-		return nil, fmt.Errorf(`Invalid response: '%s'`, res.Status)
+		if strings.HasPrefix(strings.ToLower(res.Header.Get(`Content-Type`)), `application/json`) {
+			var errjson ErrJSON
+			if err := json.NewDecoder(res.Body).Decode(&errjson); err != nil {
+				return nil, errors.Errorf(`Invalid response: '%s'`, res.Status)
+			}
+			if len(errjson.Error) > 0 {
+				return nil, errors.New(errjson.Error)
+			}
+		}
+		return nil, errors.Errorf(`Invalid response: '%s'`, res.Status)
 	}
 	jsonbuf := getTransportJSONBuffer()
 	defer releaseTransportJSONBuffer(jsonbuf)
@@ -603,7 +707,16 @@ func (c *Client) CreateSession(in *model.CreateSessionRequest) (ret *model.Objec
 		return nil, err
 	}
 	if res.StatusCode != http.StatusOK {
-		return nil, fmt.Errorf(`Invalid response: '%s'`, res.Status)
+		if strings.HasPrefix(strings.ToLower(res.Header.Get(`Content-Type`)), `application/json`) {
+			var errjson ErrJSON
+			if err := json.NewDecoder(res.Body).Decode(&errjson); err != nil {
+				return nil, errors.Errorf(`Invalid response: '%s'`, res.Status)
+			}
+			if len(errjson.Error) > 0 {
+				return nil, errors.New(errjson.Error)
+			}
+		}
+		return nil, errors.Errorf(`Invalid response: '%s'`, res.Status)
 	}
 	jsonbuf := getTransportJSONBuffer()
 	defer releaseTransportJSONBuffer(jsonbuf)
@@ -657,7 +770,16 @@ func (c *Client) CreateSessionSurveyResponse(in *model.CreateSessionSurveyRespon
 		return nil, err
 	}
 	if res.StatusCode != http.StatusOK {
-		return nil, fmt.Errorf(`Invalid response: '%s'`, res.Status)
+		if strings.HasPrefix(strings.ToLower(res.Header.Get(`Content-Type`)), `application/json`) {
+			var errjson ErrJSON
+			if err := json.NewDecoder(res.Body).Decode(&errjson); err != nil {
+				return nil, errors.Errorf(`Invalid response: '%s'`, res.Status)
+			}
+			if len(errjson.Error) > 0 {
+				return nil, errors.New(errjson.Error)
+			}
+		}
+		return nil, errors.Errorf(`Invalid response: '%s'`, res.Status)
 	}
 	jsonbuf := getTransportJSONBuffer()
 	defer releaseTransportJSONBuffer(jsonbuf)
@@ -713,7 +835,16 @@ func (c *Client) CreateUser(in *model.CreateUserRequest) (ret *model.User, err e
 		return nil, err
 	}
 	if res.StatusCode != http.StatusOK {
-		return nil, fmt.Errorf(`Invalid response: '%s'`, res.Status)
+		if strings.HasPrefix(strings.ToLower(res.Header.Get(`Content-Type`)), `application/json`) {
+			var errjson ErrJSON
+			if err := json.NewDecoder(res.Body).Decode(&errjson); err != nil {
+				return nil, errors.Errorf(`Invalid response: '%s'`, res.Status)
+			}
+			if len(errjson.Error) > 0 {
+				return nil, errors.New(errjson.Error)
+			}
+		}
+		return nil, errors.Errorf(`Invalid response: '%s'`, res.Status)
 	}
 	jsonbuf := getTransportJSONBuffer()
 	defer releaseTransportJSONBuffer(jsonbuf)
@@ -769,7 +900,16 @@ func (c *Client) CreateVenue(in *model.CreateVenueRequest) (ret *model.ObjectID,
 		return nil, err
 	}
 	if res.StatusCode != http.StatusOK {
-		return nil, fmt.Errorf(`Invalid response: '%s'`, res.Status)
+		if strings.HasPrefix(strings.ToLower(res.Header.Get(`Content-Type`)), `application/json`) {
+			var errjson ErrJSON
+			if err := json.NewDecoder(res.Body).Decode(&errjson); err != nil {
+				return nil, errors.Errorf(`Invalid response: '%s'`, res.Status)
+			}
+			if len(errjson.Error) > 0 {
+				return nil, errors.New(errjson.Error)
+			}
+		}
+		return nil, errors.Errorf(`Invalid response: '%s'`, res.Status)
 	}
 	jsonbuf := getTransportJSONBuffer()
 	defer releaseTransportJSONBuffer(jsonbuf)
@@ -825,7 +965,16 @@ func (c *Client) DeleteConference(in *model.DeleteConferenceRequest) (err error)
 		return err
 	}
 	if res.StatusCode != http.StatusOK {
-		return fmt.Errorf(`Invalid response: '%s'`, res.Status)
+		if strings.HasPrefix(strings.ToLower(res.Header.Get(`Content-Type`)), `application/json`) {
+			var errjson ErrJSON
+			if err := json.NewDecoder(res.Body).Decode(&errjson); err != nil {
+				return errors.Errorf(`Invalid response: '%s'`, res.Status)
+			}
+			if len(errjson.Error) > 0 {
+				return errors.New(errjson.Error)
+			}
+		}
+		return errors.Errorf(`Invalid response: '%s'`, res.Status)
 	}
 	return nil
 }
@@ -861,7 +1010,16 @@ func (c *Client) DeleteConferenceAdmin(in *model.DeleteConferenceAdminRequest) (
 		return err
 	}
 	if res.StatusCode != http.StatusOK {
-		return fmt.Errorf(`Invalid response: '%s'`, res.Status)
+		if strings.HasPrefix(strings.ToLower(res.Header.Get(`Content-Type`)), `application/json`) {
+			var errjson ErrJSON
+			if err := json.NewDecoder(res.Body).Decode(&errjson); err != nil {
+				return errors.Errorf(`Invalid response: '%s'`, res.Status)
+			}
+			if len(errjson.Error) > 0 {
+				return errors.New(errjson.Error)
+			}
+		}
+		return errors.Errorf(`Invalid response: '%s'`, res.Status)
 	}
 	return nil
 }
@@ -897,7 +1055,16 @@ func (c *Client) DeleteConferenceDates(in *model.DeleteConferenceDatesRequest) (
 		return err
 	}
 	if res.StatusCode != http.StatusOK {
-		return fmt.Errorf(`Invalid response: '%s'`, res.Status)
+		if strings.HasPrefix(strings.ToLower(res.Header.Get(`Content-Type`)), `application/json`) {
+			var errjson ErrJSON
+			if err := json.NewDecoder(res.Body).Decode(&errjson); err != nil {
+				return errors.Errorf(`Invalid response: '%s'`, res.Status)
+			}
+			if len(errjson.Error) > 0 {
+				return errors.New(errjson.Error)
+			}
+		}
+		return errors.Errorf(`Invalid response: '%s'`, res.Status)
 	}
 	return nil
 }
@@ -933,7 +1100,16 @@ func (c *Client) DeleteConferenceSeries(in *model.DeleteConferenceSeriesRequest)
 		return err
 	}
 	if res.StatusCode != http.StatusOK {
-		return fmt.Errorf(`Invalid response: '%s'`, res.Status)
+		if strings.HasPrefix(strings.ToLower(res.Header.Get(`Content-Type`)), `application/json`) {
+			var errjson ErrJSON
+			if err := json.NewDecoder(res.Body).Decode(&errjson); err != nil {
+				return errors.Errorf(`Invalid response: '%s'`, res.Status)
+			}
+			if len(errjson.Error) > 0 {
+				return errors.New(errjson.Error)
+			}
+		}
+		return errors.Errorf(`Invalid response: '%s'`, res.Status)
 	}
 	return nil
 }
@@ -969,7 +1145,16 @@ func (c *Client) DeleteConferenceVenue(in *model.DeleteConferenceVenueRequest) (
 		return err
 	}
 	if res.StatusCode != http.StatusOK {
-		return fmt.Errorf(`Invalid response: '%s'`, res.Status)
+		if strings.HasPrefix(strings.ToLower(res.Header.Get(`Content-Type`)), `application/json`) {
+			var errjson ErrJSON
+			if err := json.NewDecoder(res.Body).Decode(&errjson); err != nil {
+				return errors.Errorf(`Invalid response: '%s'`, res.Status)
+			}
+			if len(errjson.Error) > 0 {
+				return errors.New(errjson.Error)
+			}
+		}
+		return errors.Errorf(`Invalid response: '%s'`, res.Status)
 	}
 	return nil
 }
@@ -1005,7 +1190,16 @@ func (c *Client) DeleteFeaturedSpeaker(in *model.DeleteFeaturedSpeakerRequest) (
 		return err
 	}
 	if res.StatusCode != http.StatusOK {
-		return fmt.Errorf(`Invalid response: '%s'`, res.Status)
+		if strings.HasPrefix(strings.ToLower(res.Header.Get(`Content-Type`)), `application/json`) {
+			var errjson ErrJSON
+			if err := json.NewDecoder(res.Body).Decode(&errjson); err != nil {
+				return errors.Errorf(`Invalid response: '%s'`, res.Status)
+			}
+			if len(errjson.Error) > 0 {
+				return errors.New(errjson.Error)
+			}
+		}
+		return errors.Errorf(`Invalid response: '%s'`, res.Status)
 	}
 	return nil
 }
@@ -1041,7 +1235,16 @@ func (c *Client) DeleteQuestion(in *model.DeleteQuestionRequest) (err error) {
 		return err
 	}
 	if res.StatusCode != http.StatusOK {
-		return fmt.Errorf(`Invalid response: '%s'`, res.Status)
+		if strings.HasPrefix(strings.ToLower(res.Header.Get(`Content-Type`)), `application/json`) {
+			var errjson ErrJSON
+			if err := json.NewDecoder(res.Body).Decode(&errjson); err != nil {
+				return errors.Errorf(`Invalid response: '%s'`, res.Status)
+			}
+			if len(errjson.Error) > 0 {
+				return errors.New(errjson.Error)
+			}
+		}
+		return errors.Errorf(`Invalid response: '%s'`, res.Status)
 	}
 	return nil
 }
@@ -1077,7 +1280,16 @@ func (c *Client) DeleteRoom(in *model.DeleteRoomRequest) (err error) {
 		return err
 	}
 	if res.StatusCode != http.StatusOK {
-		return fmt.Errorf(`Invalid response: '%s'`, res.Status)
+		if strings.HasPrefix(strings.ToLower(res.Header.Get(`Content-Type`)), `application/json`) {
+			var errjson ErrJSON
+			if err := json.NewDecoder(res.Body).Decode(&errjson); err != nil {
+				return errors.Errorf(`Invalid response: '%s'`, res.Status)
+			}
+			if len(errjson.Error) > 0 {
+				return errors.New(errjson.Error)
+			}
+		}
+		return errors.Errorf(`Invalid response: '%s'`, res.Status)
 	}
 	return nil
 }
@@ -1113,7 +1325,16 @@ func (c *Client) DeleteSession(in *model.DeleteSessionRequest) (err error) {
 		return err
 	}
 	if res.StatusCode != http.StatusOK {
-		return fmt.Errorf(`Invalid response: '%s'`, res.Status)
+		if strings.HasPrefix(strings.ToLower(res.Header.Get(`Content-Type`)), `application/json`) {
+			var errjson ErrJSON
+			if err := json.NewDecoder(res.Body).Decode(&errjson); err != nil {
+				return errors.Errorf(`Invalid response: '%s'`, res.Status)
+			}
+			if len(errjson.Error) > 0 {
+				return errors.New(errjson.Error)
+			}
+		}
+		return errors.Errorf(`Invalid response: '%s'`, res.Status)
 	}
 	return nil
 }
@@ -1149,7 +1370,16 @@ func (c *Client) DeleteSessionType(in *model.DeleteSessionTypeRequest) (err erro
 		return err
 	}
 	if res.StatusCode != http.StatusOK {
-		return fmt.Errorf(`Invalid response: '%s'`, res.Status)
+		if strings.HasPrefix(strings.ToLower(res.Header.Get(`Content-Type`)), `application/json`) {
+			var errjson ErrJSON
+			if err := json.NewDecoder(res.Body).Decode(&errjson); err != nil {
+				return errors.Errorf(`Invalid response: '%s'`, res.Status)
+			}
+			if len(errjson.Error) > 0 {
+				return errors.New(errjson.Error)
+			}
+		}
+		return errors.Errorf(`Invalid response: '%s'`, res.Status)
 	}
 	return nil
 }
@@ -1185,7 +1415,16 @@ func (c *Client) DeleteSponsor(in *model.DeleteSponsorRequest) (err error) {
 		return err
 	}
 	if res.StatusCode != http.StatusOK {
-		return fmt.Errorf(`Invalid response: '%s'`, res.Status)
+		if strings.HasPrefix(strings.ToLower(res.Header.Get(`Content-Type`)), `application/json`) {
+			var errjson ErrJSON
+			if err := json.NewDecoder(res.Body).Decode(&errjson); err != nil {
+				return errors.Errorf(`Invalid response: '%s'`, res.Status)
+			}
+			if len(errjson.Error) > 0 {
+				return errors.New(errjson.Error)
+			}
+		}
+		return errors.Errorf(`Invalid response: '%s'`, res.Status)
 	}
 	return nil
 }
@@ -1221,7 +1460,16 @@ func (c *Client) DeleteUser(in *model.DeleteUserRequest) (err error) {
 		return err
 	}
 	if res.StatusCode != http.StatusOK {
-		return fmt.Errorf(`Invalid response: '%s'`, res.Status)
+		if strings.HasPrefix(strings.ToLower(res.Header.Get(`Content-Type`)), `application/json`) {
+			var errjson ErrJSON
+			if err := json.NewDecoder(res.Body).Decode(&errjson); err != nil {
+				return errors.Errorf(`Invalid response: '%s'`, res.Status)
+			}
+			if len(errjson.Error) > 0 {
+				return errors.New(errjson.Error)
+			}
+		}
+		return errors.Errorf(`Invalid response: '%s'`, res.Status)
 	}
 	return nil
 }
@@ -1257,7 +1505,16 @@ func (c *Client) DeleteVenue(in *model.DeleteVenueRequest) (err error) {
 		return err
 	}
 	if res.StatusCode != http.StatusOK {
-		return fmt.Errorf(`Invalid response: '%s'`, res.Status)
+		if strings.HasPrefix(strings.ToLower(res.Header.Get(`Content-Type`)), `application/json`) {
+			var errjson ErrJSON
+			if err := json.NewDecoder(res.Body).Decode(&errjson); err != nil {
+				return errors.Errorf(`Invalid response: '%s'`, res.Status)
+			}
+			if len(errjson.Error) > 0 {
+				return errors.New(errjson.Error)
+			}
+		}
+		return errors.Errorf(`Invalid response: '%s'`, res.Status)
 	}
 	return nil
 }
@@ -1291,7 +1548,16 @@ func (c *Client) ListConference(in *model.ListConferenceRequest) (ret []model.Co
 		return nil, err
 	}
 	if res.StatusCode != http.StatusOK {
-		return nil, fmt.Errorf(`Invalid response: '%s'`, res.Status)
+		if strings.HasPrefix(strings.ToLower(res.Header.Get(`Content-Type`)), `application/json`) {
+			var errjson ErrJSON
+			if err := json.NewDecoder(res.Body).Decode(&errjson); err != nil {
+				return nil, errors.Errorf(`Invalid response: '%s'`, res.Status)
+			}
+			if len(errjson.Error) > 0 {
+				return nil, errors.New(errjson.Error)
+			}
+		}
+		return nil, errors.Errorf(`Invalid response: '%s'`, res.Status)
 	}
 	jsonbuf := getTransportJSONBuffer()
 	defer releaseTransportJSONBuffer(jsonbuf)
@@ -1345,7 +1611,16 @@ func (c *Client) ListConferenceSeries(in *model.ListConferenceSeriesRequest) (re
 		return nil, err
 	}
 	if res.StatusCode != http.StatusOK {
-		return nil, fmt.Errorf(`Invalid response: '%s'`, res.Status)
+		if strings.HasPrefix(strings.ToLower(res.Header.Get(`Content-Type`)), `application/json`) {
+			var errjson ErrJSON
+			if err := json.NewDecoder(res.Body).Decode(&errjson); err != nil {
+				return nil, errors.Errorf(`Invalid response: '%s'`, res.Status)
+			}
+			if len(errjson.Error) > 0 {
+				return nil, errors.New(errjson.Error)
+			}
+		}
+		return nil, errors.Errorf(`Invalid response: '%s'`, res.Status)
 	}
 	jsonbuf := getTransportJSONBuffer()
 	defer releaseTransportJSONBuffer(jsonbuf)
@@ -1399,7 +1674,16 @@ func (c *Client) ListConferencesByOrganizer(in *model.ListConferencesByOrganizer
 		return nil, err
 	}
 	if res.StatusCode != http.StatusOK {
-		return nil, fmt.Errorf(`Invalid response: '%s'`, res.Status)
+		if strings.HasPrefix(strings.ToLower(res.Header.Get(`Content-Type`)), `application/json`) {
+			var errjson ErrJSON
+			if err := json.NewDecoder(res.Body).Decode(&errjson); err != nil {
+				return nil, errors.Errorf(`Invalid response: '%s'`, res.Status)
+			}
+			if len(errjson.Error) > 0 {
+				return nil, errors.New(errjson.Error)
+			}
+		}
+		return nil, errors.Errorf(`Invalid response: '%s'`, res.Status)
 	}
 	jsonbuf := getTransportJSONBuffer()
 	defer releaseTransportJSONBuffer(jsonbuf)
@@ -1453,7 +1737,16 @@ func (c *Client) ListFeaturedSpeakers(in *model.ListFeaturedSpeakersRequest) (re
 		return nil, err
 	}
 	if res.StatusCode != http.StatusOK {
-		return nil, fmt.Errorf(`Invalid response: '%s'`, res.Status)
+		if strings.HasPrefix(strings.ToLower(res.Header.Get(`Content-Type`)), `application/json`) {
+			var errjson ErrJSON
+			if err := json.NewDecoder(res.Body).Decode(&errjson); err != nil {
+				return nil, errors.Errorf(`Invalid response: '%s'`, res.Status)
+			}
+			if len(errjson.Error) > 0 {
+				return nil, errors.New(errjson.Error)
+			}
+		}
+		return nil, errors.Errorf(`Invalid response: '%s'`, res.Status)
 	}
 	jsonbuf := getTransportJSONBuffer()
 	defer releaseTransportJSONBuffer(jsonbuf)
@@ -1507,7 +1800,16 @@ func (c *Client) ListQuestion(in *model.ListQuestionRequest) (ret []model.Questi
 		return nil, err
 	}
 	if res.StatusCode != http.StatusOK {
-		return nil, fmt.Errorf(`Invalid response: '%s'`, res.Status)
+		if strings.HasPrefix(strings.ToLower(res.Header.Get(`Content-Type`)), `application/json`) {
+			var errjson ErrJSON
+			if err := json.NewDecoder(res.Body).Decode(&errjson); err != nil {
+				return nil, errors.Errorf(`Invalid response: '%s'`, res.Status)
+			}
+			if len(errjson.Error) > 0 {
+				return nil, errors.New(errjson.Error)
+			}
+		}
+		return nil, errors.Errorf(`Invalid response: '%s'`, res.Status)
 	}
 	jsonbuf := getTransportJSONBuffer()
 	defer releaseTransportJSONBuffer(jsonbuf)
@@ -1561,7 +1863,16 @@ func (c *Client) ListRoom(in *model.ListRoomRequest) (ret []model.Room, err erro
 		return nil, err
 	}
 	if res.StatusCode != http.StatusOK {
-		return nil, fmt.Errorf(`Invalid response: '%s'`, res.Status)
+		if strings.HasPrefix(strings.ToLower(res.Header.Get(`Content-Type`)), `application/json`) {
+			var errjson ErrJSON
+			if err := json.NewDecoder(res.Body).Decode(&errjson); err != nil {
+				return nil, errors.Errorf(`Invalid response: '%s'`, res.Status)
+			}
+			if len(errjson.Error) > 0 {
+				return nil, errors.New(errjson.Error)
+			}
+		}
+		return nil, errors.Errorf(`Invalid response: '%s'`, res.Status)
 	}
 	jsonbuf := getTransportJSONBuffer()
 	defer releaseTransportJSONBuffer(jsonbuf)
@@ -1615,7 +1926,16 @@ func (c *Client) ListSessionTypesByConference(in *model.ListSessionTypesByConfer
 		return nil, err
 	}
 	if res.StatusCode != http.StatusOK {
-		return nil, fmt.Errorf(`Invalid response: '%s'`, res.Status)
+		if strings.HasPrefix(strings.ToLower(res.Header.Get(`Content-Type`)), `application/json`) {
+			var errjson ErrJSON
+			if err := json.NewDecoder(res.Body).Decode(&errjson); err != nil {
+				return nil, errors.Errorf(`Invalid response: '%s'`, res.Status)
+			}
+			if len(errjson.Error) > 0 {
+				return nil, errors.New(errjson.Error)
+			}
+		}
+		return nil, errors.Errorf(`Invalid response: '%s'`, res.Status)
 	}
 	jsonbuf := getTransportJSONBuffer()
 	defer releaseTransportJSONBuffer(jsonbuf)
@@ -1669,7 +1989,16 @@ func (c *Client) ListSessions(in *model.ListSessionsRequest) (ret []model.Sessio
 		return nil, err
 	}
 	if res.StatusCode != http.StatusOK {
-		return nil, fmt.Errorf(`Invalid response: '%s'`, res.Status)
+		if strings.HasPrefix(strings.ToLower(res.Header.Get(`Content-Type`)), `application/json`) {
+			var errjson ErrJSON
+			if err := json.NewDecoder(res.Body).Decode(&errjson); err != nil {
+				return nil, errors.Errorf(`Invalid response: '%s'`, res.Status)
+			}
+			if len(errjson.Error) > 0 {
+				return nil, errors.New(errjson.Error)
+			}
+		}
+		return nil, errors.Errorf(`Invalid response: '%s'`, res.Status)
 	}
 	jsonbuf := getTransportJSONBuffer()
 	defer releaseTransportJSONBuffer(jsonbuf)
@@ -1723,7 +2052,16 @@ func (c *Client) ListSponsors(in *model.ListSponsorsRequest) (ret []model.Sponso
 		return nil, err
 	}
 	if res.StatusCode != http.StatusOK {
-		return nil, fmt.Errorf(`Invalid response: '%s'`, res.Status)
+		if strings.HasPrefix(strings.ToLower(res.Header.Get(`Content-Type`)), `application/json`) {
+			var errjson ErrJSON
+			if err := json.NewDecoder(res.Body).Decode(&errjson); err != nil {
+				return nil, errors.Errorf(`Invalid response: '%s'`, res.Status)
+			}
+			if len(errjson.Error) > 0 {
+				return nil, errors.New(errjson.Error)
+			}
+		}
+		return nil, errors.Errorf(`Invalid response: '%s'`, res.Status)
 	}
 	jsonbuf := getTransportJSONBuffer()
 	defer releaseTransportJSONBuffer(jsonbuf)
@@ -1777,7 +2115,16 @@ func (c *Client) ListUser(in *model.ListUserRequest) (ret []model.User, err erro
 		return nil, err
 	}
 	if res.StatusCode != http.StatusOK {
-		return nil, fmt.Errorf(`Invalid response: '%s'`, res.Status)
+		if strings.HasPrefix(strings.ToLower(res.Header.Get(`Content-Type`)), `application/json`) {
+			var errjson ErrJSON
+			if err := json.NewDecoder(res.Body).Decode(&errjson); err != nil {
+				return nil, errors.Errorf(`Invalid response: '%s'`, res.Status)
+			}
+			if len(errjson.Error) > 0 {
+				return nil, errors.New(errjson.Error)
+			}
+		}
+		return nil, errors.Errorf(`Invalid response: '%s'`, res.Status)
 	}
 	jsonbuf := getTransportJSONBuffer()
 	defer releaseTransportJSONBuffer(jsonbuf)
@@ -1831,7 +2178,16 @@ func (c *Client) ListVenue(in *model.ListVenueRequest) (ret []model.Venue, err e
 		return nil, err
 	}
 	if res.StatusCode != http.StatusOK {
-		return nil, fmt.Errorf(`Invalid response: '%s'`, res.Status)
+		if strings.HasPrefix(strings.ToLower(res.Header.Get(`Content-Type`)), `application/json`) {
+			var errjson ErrJSON
+			if err := json.NewDecoder(res.Body).Decode(&errjson); err != nil {
+				return nil, errors.Errorf(`Invalid response: '%s'`, res.Status)
+			}
+			if len(errjson.Error) > 0 {
+				return nil, errors.New(errjson.Error)
+			}
+		}
+		return nil, errors.Errorf(`Invalid response: '%s'`, res.Status)
 	}
 	jsonbuf := getTransportJSONBuffer()
 	defer releaseTransportJSONBuffer(jsonbuf)
@@ -1885,7 +2241,16 @@ func (c *Client) LookupConference(in *model.LookupConferenceRequest) (ret *model
 		return nil, err
 	}
 	if res.StatusCode != http.StatusOK {
-		return nil, fmt.Errorf(`Invalid response: '%s'`, res.Status)
+		if strings.HasPrefix(strings.ToLower(res.Header.Get(`Content-Type`)), `application/json`) {
+			var errjson ErrJSON
+			if err := json.NewDecoder(res.Body).Decode(&errjson); err != nil {
+				return nil, errors.Errorf(`Invalid response: '%s'`, res.Status)
+			}
+			if len(errjson.Error) > 0 {
+				return nil, errors.New(errjson.Error)
+			}
+		}
+		return nil, errors.Errorf(`Invalid response: '%s'`, res.Status)
 	}
 	jsonbuf := getTransportJSONBuffer()
 	defer releaseTransportJSONBuffer(jsonbuf)
@@ -1939,7 +2304,16 @@ func (c *Client) LookupConferenceBySlug(in *model.LookupConferenceBySlugRequest)
 		return nil, err
 	}
 	if res.StatusCode != http.StatusOK {
-		return nil, fmt.Errorf(`Invalid response: '%s'`, res.Status)
+		if strings.HasPrefix(strings.ToLower(res.Header.Get(`Content-Type`)), `application/json`) {
+			var errjson ErrJSON
+			if err := json.NewDecoder(res.Body).Decode(&errjson); err != nil {
+				return nil, errors.Errorf(`Invalid response: '%s'`, res.Status)
+			}
+			if len(errjson.Error) > 0 {
+				return nil, errors.New(errjson.Error)
+			}
+		}
+		return nil, errors.Errorf(`Invalid response: '%s'`, res.Status)
 	}
 	jsonbuf := getTransportJSONBuffer()
 	defer releaseTransportJSONBuffer(jsonbuf)
@@ -1993,7 +2367,16 @@ func (c *Client) LookupFeaturedSpeaker(in *model.LookupFeaturedSpeakerRequest) (
 		return nil, err
 	}
 	if res.StatusCode != http.StatusOK {
-		return nil, fmt.Errorf(`Invalid response: '%s'`, res.Status)
+		if strings.HasPrefix(strings.ToLower(res.Header.Get(`Content-Type`)), `application/json`) {
+			var errjson ErrJSON
+			if err := json.NewDecoder(res.Body).Decode(&errjson); err != nil {
+				return nil, errors.Errorf(`Invalid response: '%s'`, res.Status)
+			}
+			if len(errjson.Error) > 0 {
+				return nil, errors.New(errjson.Error)
+			}
+		}
+		return nil, errors.Errorf(`Invalid response: '%s'`, res.Status)
 	}
 	jsonbuf := getTransportJSONBuffer()
 	defer releaseTransportJSONBuffer(jsonbuf)
@@ -2047,7 +2430,16 @@ func (c *Client) LookupRoom(in *model.LookupRoomRequest) (ret *model.Room, err e
 		return nil, err
 	}
 	if res.StatusCode != http.StatusOK {
-		return nil, fmt.Errorf(`Invalid response: '%s'`, res.Status)
+		if strings.HasPrefix(strings.ToLower(res.Header.Get(`Content-Type`)), `application/json`) {
+			var errjson ErrJSON
+			if err := json.NewDecoder(res.Body).Decode(&errjson); err != nil {
+				return nil, errors.Errorf(`Invalid response: '%s'`, res.Status)
+			}
+			if len(errjson.Error) > 0 {
+				return nil, errors.New(errjson.Error)
+			}
+		}
+		return nil, errors.Errorf(`Invalid response: '%s'`, res.Status)
 	}
 	jsonbuf := getTransportJSONBuffer()
 	defer releaseTransportJSONBuffer(jsonbuf)
@@ -2101,7 +2493,16 @@ func (c *Client) LookupSession(in *model.LookupSessionRequest) (ret *model.Sessi
 		return nil, err
 	}
 	if res.StatusCode != http.StatusOK {
-		return nil, fmt.Errorf(`Invalid response: '%s'`, res.Status)
+		if strings.HasPrefix(strings.ToLower(res.Header.Get(`Content-Type`)), `application/json`) {
+			var errjson ErrJSON
+			if err := json.NewDecoder(res.Body).Decode(&errjson); err != nil {
+				return nil, errors.Errorf(`Invalid response: '%s'`, res.Status)
+			}
+			if len(errjson.Error) > 0 {
+				return nil, errors.New(errjson.Error)
+			}
+		}
+		return nil, errors.Errorf(`Invalid response: '%s'`, res.Status)
 	}
 	jsonbuf := getTransportJSONBuffer()
 	defer releaseTransportJSONBuffer(jsonbuf)
@@ -2155,7 +2556,16 @@ func (c *Client) LookupSessionType(in *model.LookupSessionTypeRequest) (ret *mod
 		return nil, err
 	}
 	if res.StatusCode != http.StatusOK {
-		return nil, fmt.Errorf(`Invalid response: '%s'`, res.Status)
+		if strings.HasPrefix(strings.ToLower(res.Header.Get(`Content-Type`)), `application/json`) {
+			var errjson ErrJSON
+			if err := json.NewDecoder(res.Body).Decode(&errjson); err != nil {
+				return nil, errors.Errorf(`Invalid response: '%s'`, res.Status)
+			}
+			if len(errjson.Error) > 0 {
+				return nil, errors.New(errjson.Error)
+			}
+		}
+		return nil, errors.Errorf(`Invalid response: '%s'`, res.Status)
 	}
 	jsonbuf := getTransportJSONBuffer()
 	defer releaseTransportJSONBuffer(jsonbuf)
@@ -2209,7 +2619,16 @@ func (c *Client) LookupSponsor(in *model.LookupSponsorRequest) (ret *model.Spons
 		return nil, err
 	}
 	if res.StatusCode != http.StatusOK {
-		return nil, fmt.Errorf(`Invalid response: '%s'`, res.Status)
+		if strings.HasPrefix(strings.ToLower(res.Header.Get(`Content-Type`)), `application/json`) {
+			var errjson ErrJSON
+			if err := json.NewDecoder(res.Body).Decode(&errjson); err != nil {
+				return nil, errors.Errorf(`Invalid response: '%s'`, res.Status)
+			}
+			if len(errjson.Error) > 0 {
+				return nil, errors.New(errjson.Error)
+			}
+		}
+		return nil, errors.Errorf(`Invalid response: '%s'`, res.Status)
 	}
 	jsonbuf := getTransportJSONBuffer()
 	defer releaseTransportJSONBuffer(jsonbuf)
@@ -2263,7 +2682,16 @@ func (c *Client) LookupUser(in *model.LookupUserRequest) (ret *model.User, err e
 		return nil, err
 	}
 	if res.StatusCode != http.StatusOK {
-		return nil, fmt.Errorf(`Invalid response: '%s'`, res.Status)
+		if strings.HasPrefix(strings.ToLower(res.Header.Get(`Content-Type`)), `application/json`) {
+			var errjson ErrJSON
+			if err := json.NewDecoder(res.Body).Decode(&errjson); err != nil {
+				return nil, errors.Errorf(`Invalid response: '%s'`, res.Status)
+			}
+			if len(errjson.Error) > 0 {
+				return nil, errors.New(errjson.Error)
+			}
+		}
+		return nil, errors.Errorf(`Invalid response: '%s'`, res.Status)
 	}
 	jsonbuf := getTransportJSONBuffer()
 	defer releaseTransportJSONBuffer(jsonbuf)
@@ -2317,7 +2745,16 @@ func (c *Client) LookupUserByAuthUserID(in *model.LookupUserByAuthUserIDRequest)
 		return nil, err
 	}
 	if res.StatusCode != http.StatusOK {
-		return nil, fmt.Errorf(`Invalid response: '%s'`, res.Status)
+		if strings.HasPrefix(strings.ToLower(res.Header.Get(`Content-Type`)), `application/json`) {
+			var errjson ErrJSON
+			if err := json.NewDecoder(res.Body).Decode(&errjson); err != nil {
+				return nil, errors.Errorf(`Invalid response: '%s'`, res.Status)
+			}
+			if len(errjson.Error) > 0 {
+				return nil, errors.New(errjson.Error)
+			}
+		}
+		return nil, errors.Errorf(`Invalid response: '%s'`, res.Status)
 	}
 	jsonbuf := getTransportJSONBuffer()
 	defer releaseTransportJSONBuffer(jsonbuf)
@@ -2371,7 +2808,16 @@ func (c *Client) LookupVenue(in *model.LookupVenueRequest) (ret *model.Venue, er
 		return nil, err
 	}
 	if res.StatusCode != http.StatusOK {
-		return nil, fmt.Errorf(`Invalid response: '%s'`, res.Status)
+		if strings.HasPrefix(strings.ToLower(res.Header.Get(`Content-Type`)), `application/json`) {
+			var errjson ErrJSON
+			if err := json.NewDecoder(res.Body).Decode(&errjson); err != nil {
+				return nil, errors.Errorf(`Invalid response: '%s'`, res.Status)
+			}
+			if len(errjson.Error) > 0 {
+				return nil, errors.New(errjson.Error)
+			}
+		}
+		return nil, errors.Errorf(`Invalid response: '%s'`, res.Status)
 	}
 	jsonbuf := getTransportJSONBuffer()
 	defer releaseTransportJSONBuffer(jsonbuf)
@@ -2449,7 +2895,16 @@ func (c *Client) UpdateConference(in *model.UpdateConferenceRequest, files map[s
 		return err
 	}
 	if res.StatusCode != http.StatusOK {
-		return fmt.Errorf(`Invalid response: '%s'`, res.Status)
+		if strings.HasPrefix(strings.ToLower(res.Header.Get(`Content-Type`)), `application/json`) {
+			var errjson ErrJSON
+			if err := json.NewDecoder(res.Body).Decode(&errjson); err != nil {
+				return errors.Errorf(`Invalid response: '%s'`, res.Status)
+			}
+			if len(errjson.Error) > 0 {
+				return errors.New(errjson.Error)
+			}
+		}
+		return errors.Errorf(`Invalid response: '%s'`, res.Status)
 	}
 	return nil
 }
@@ -2485,7 +2940,16 @@ func (c *Client) UpdateFeaturedSpeaker(in *model.UpdateFeaturedSpeakerRequest) (
 		return err
 	}
 	if res.StatusCode != http.StatusOK {
-		return fmt.Errorf(`Invalid response: '%s'`, res.Status)
+		if strings.HasPrefix(strings.ToLower(res.Header.Get(`Content-Type`)), `application/json`) {
+			var errjson ErrJSON
+			if err := json.NewDecoder(res.Body).Decode(&errjson); err != nil {
+				return errors.Errorf(`Invalid response: '%s'`, res.Status)
+			}
+			if len(errjson.Error) > 0 {
+				return errors.New(errjson.Error)
+			}
+		}
+		return errors.Errorf(`Invalid response: '%s'`, res.Status)
 	}
 	return nil
 }
@@ -2521,7 +2985,16 @@ func (c *Client) UpdateRoom(in *model.UpdateRoomRequest) (err error) {
 		return err
 	}
 	if res.StatusCode != http.StatusOK {
-		return fmt.Errorf(`Invalid response: '%s'`, res.Status)
+		if strings.HasPrefix(strings.ToLower(res.Header.Get(`Content-Type`)), `application/json`) {
+			var errjson ErrJSON
+			if err := json.NewDecoder(res.Body).Decode(&errjson); err != nil {
+				return errors.Errorf(`Invalid response: '%s'`, res.Status)
+			}
+			if len(errjson.Error) > 0 {
+				return errors.New(errjson.Error)
+			}
+		}
+		return errors.Errorf(`Invalid response: '%s'`, res.Status)
 	}
 	return nil
 }
@@ -2557,7 +3030,16 @@ func (c *Client) UpdateSession(in *model.UpdateSessionRequest) (err error) {
 		return err
 	}
 	if res.StatusCode != http.StatusOK {
-		return fmt.Errorf(`Invalid response: '%s'`, res.Status)
+		if strings.HasPrefix(strings.ToLower(res.Header.Get(`Content-Type`)), `application/json`) {
+			var errjson ErrJSON
+			if err := json.NewDecoder(res.Body).Decode(&errjson); err != nil {
+				return errors.Errorf(`Invalid response: '%s'`, res.Status)
+			}
+			if len(errjson.Error) > 0 {
+				return errors.New(errjson.Error)
+			}
+		}
+		return errors.Errorf(`Invalid response: '%s'`, res.Status)
 	}
 	return nil
 }
@@ -2593,7 +3075,16 @@ func (c *Client) UpdateSessionType(in *model.UpdateSessionTypeRequest) (err erro
 		return err
 	}
 	if res.StatusCode != http.StatusOK {
-		return fmt.Errorf(`Invalid response: '%s'`, res.Status)
+		if strings.HasPrefix(strings.ToLower(res.Header.Get(`Content-Type`)), `application/json`) {
+			var errjson ErrJSON
+			if err := json.NewDecoder(res.Body).Decode(&errjson); err != nil {
+				return errors.Errorf(`Invalid response: '%s'`, res.Status)
+			}
+			if len(errjson.Error) > 0 {
+				return errors.New(errjson.Error)
+			}
+		}
+		return errors.Errorf(`Invalid response: '%s'`, res.Status)
 	}
 	return nil
 }
@@ -2681,7 +3172,16 @@ func (c *Client) UpdateSponsor(in *model.UpdateSponsorRequest, files map[string]
 		return err
 	}
 	if res.StatusCode != http.StatusOK {
-		return fmt.Errorf(`Invalid response: '%s'`, res.Status)
+		if strings.HasPrefix(strings.ToLower(res.Header.Get(`Content-Type`)), `application/json`) {
+			var errjson ErrJSON
+			if err := json.NewDecoder(res.Body).Decode(&errjson); err != nil {
+				return errors.Errorf(`Invalid response: '%s'`, res.Status)
+			}
+			if len(errjson.Error) > 0 {
+				return errors.New(errjson.Error)
+			}
+		}
+		return errors.Errorf(`Invalid response: '%s'`, res.Status)
 	}
 	return nil
 }
@@ -2717,7 +3217,16 @@ func (c *Client) UpdateUser(in *model.UpdateUserRequest) (err error) {
 		return err
 	}
 	if res.StatusCode != http.StatusOK {
-		return fmt.Errorf(`Invalid response: '%s'`, res.Status)
+		if strings.HasPrefix(strings.ToLower(res.Header.Get(`Content-Type`)), `application/json`) {
+			var errjson ErrJSON
+			if err := json.NewDecoder(res.Body).Decode(&errjson); err != nil {
+				return errors.Errorf(`Invalid response: '%s'`, res.Status)
+			}
+			if len(errjson.Error) > 0 {
+				return errors.New(errjson.Error)
+			}
+		}
+		return errors.Errorf(`Invalid response: '%s'`, res.Status)
 	}
 	return nil
 }
@@ -2753,7 +3262,16 @@ func (c *Client) UpdateVenue(in *model.UpdateVenueRequest) (err error) {
 		return err
 	}
 	if res.StatusCode != http.StatusOK {
-		return fmt.Errorf(`Invalid response: '%s'`, res.Status)
+		if strings.HasPrefix(strings.ToLower(res.Header.Get(`Content-Type`)), `application/json`) {
+			var errjson ErrJSON
+			if err := json.NewDecoder(res.Body).Decode(&errjson); err != nil {
+				return errors.Errorf(`Invalid response: '%s'`, res.Status)
+			}
+			if len(errjson.Error) > 0 {
+				return errors.New(errjson.Error)
+			}
+		}
+		return errors.Errorf(`Invalid response: '%s'`, res.Status)
 	}
 	return nil
 }
