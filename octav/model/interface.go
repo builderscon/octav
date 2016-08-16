@@ -159,32 +159,34 @@ type UpdateSessionTypeRequest struct {
 // +model
 type Session struct {
 	tools.LocalizedFields `json:"-"`
-	ID                    string      `json:"id"`
-	ConferenceID          string      `json:"conference_id"`
-	RoomID                string      `json:"room_id,omitempty"`
-	SpeakerID             string      `json:"speaker_id"`
-	Title                 string      `json:"title" l10n:"true"`
-	Abstract              string      `json:"abstract" l10n:"true"`
-	Memo                  string      `json:"memo"`
-	StartsOn              time.Time   `json:"starts_on"`
-	Duration              int         `json:"duration"`
-	MaterialLevel         string      `json:"material_level"`
-	Tags                  TagString   `json:"tags,omitempty" assign:"convert"`
-	Category              string      `json:"category,omitempty"`
-	SpokenLanguage        string      `json:"spoken_language,omitempty"`
-	SlideLanguage         string      `json:"slide_language,omitempty"`
-	SlideSubtitles        string      `json:"slide_subtitles,omitempty"`
-	SlideURL              string      `json:"slide_url,omitempty"`
-	VideoURL              string      `json:"video_url,omitempty"`
-	PhotoPermission       string      `json:"photo_permission"`
-	VideoPermission       string      `json:"video_permission"`
-	SortOrder             int         `json:"-"`
-	HasInterpretation     bool        `json:"has_interpretation"`
-	Status                string      `json:"status"`
-	Confirmed             bool        `json:"confirmed"`
-	Conference            *Conference `json:"conference,omitempy" decorate:"true"` // only populated for JSON response
-	Room                  *Room       `json:"room,omitempty" decorate:"true"`      // only populated for JSON response
-	Speaker               *User       `json:"speaker,omitempty" decorate:"true"`   // only populated for JSON response
+	ID                    string       `json:"id"`
+	ConferenceID          string       `json:"conference_id"`
+	RoomID                string       `json:"room_id,omitempty"`
+	SpeakerID             string       `json:"speaker_id"`
+	SessionTypeID         string       `json:"session_type_id"`
+	Title                 string       `json:"title" l10n:"true"`
+	Abstract              string       `json:"abstract" l10n:"true"`
+	Memo                  string       `json:"memo"`
+	StartsOn              time.Time    `json:"starts_on"`
+	Duration              int          `json:"duration"`
+	MaterialLevel         string       `json:"material_level"`
+	Tags                  TagString    `json:"tags,omitempty" assign:"convert"`
+	Category              string       `json:"category,omitempty"`
+	SpokenLanguage        string       `json:"spoken_language,omitempty"`
+	SlideLanguage         string       `json:"slide_language,omitempty"`
+	SlideSubtitles        string       `json:"slide_subtitles,omitempty"`
+	SlideURL              string       `json:"slide_url,omitempty"`
+	VideoURL              string       `json:"video_url,omitempty"`
+	PhotoPermission       string       `json:"photo_permission"`
+	VideoPermission       string       `json:"video_permission"`
+	SortOrder             int          `json:"-"`
+	HasInterpretation     bool         `json:"has_interpretation"`
+	Status                string       `json:"status"`
+	Confirmed             bool         `json:"confirmed"`
+	Conference            *Conference  `json:"conference,omitempy" decorate:"true"`    // only populated for JSON response
+	Room                  *Room        `json:"room,omitempty" decorate:"true"`         // only populated for JSON response
+	Speaker               *User        `json:"speaker,omitempty" decorate:"true"`      // only populated for JSON response
+	SessionType           *SessionType `json:"session_type,omitempty" decorate:"true"` // only populated for JSON response
 }
 type SessionList []Session
 
@@ -478,6 +480,7 @@ type UpdateSessionRequest struct {
 	ID                string                `json:"id"`
 	ConferenceID      jsval.MaybeString     `json:"conference_id,omitempty"`
 	SpeakerID         jsval.MaybeString     `json:"speaker_id,omitempty"`
+	SessionTypeID     jsval.MaybeString     `json:"session_type_id,omitempty"`
 	Title             jsval.MaybeString     `json:"title,omitempty"`
 	Abstract          jsval.MaybeString     `json:"abstract,omitempty"`
 	Memo              jsval.MaybeString     `json:"memo,omitempty"`

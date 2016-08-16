@@ -366,6 +366,12 @@
             { "$ref": "#/definitions/room" }
           ]
         },
+        "session_type": {
+          "oneOf": [
+            { "type": "null" },
+            { "$ref": "#/definitions/session_type" }
+          ]
+        },
         "speaker": {
           "oneOf": [
             { "type": "null" },
@@ -439,8 +445,15 @@
       "hsup.type": "[]model.Question"
     },
     "rfc3339": {
-      "type": "string",
-      "pattern": "^(\\d\\d\\d\\d)(-)?(\\d\\d)(-)?(\\d\\d)(T)?(\\d\\d)(:)?(\\d\\d)(:)?(\\d\\d)(\\.\\d+)?(Z|([+-])(\\d\\d)(:)?(\\d\\d))$"
+      "oneOf": [
+        {
+          "type": "string",
+          "pattern": "^(\\d\\d\\d\\d)(-)?(\\d\\d)(-)?(\\d\\d)(T)?(\\d\\d)(:)?(\\d\\d)(:)?(\\d\\d)(\\.\\d+)?(Z|([+-])(\\d\\d)(:)?(\\d\\d))$"
+        },
+        {
+          "type": "object"
+        }
+      ]
     }
   },
   "pathStart": "/v1",
@@ -1208,6 +1221,7 @@
           "id": { "$ref": "#/definitions/uuid" },
           "conference_id": { "$ref": "#/definitions/uuid" },
           "speaker_id": { "$ref": "#/definitions/uuid" },
+          "session_type_id": { "$ref": "#/definitions/uuid" },
           "title": { "$ref": "#/definitions/string_en" },
           "abstract": { "$ref": "#/definitions/markdown_en" },
           "memo": { "type": "string" },

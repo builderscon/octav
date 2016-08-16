@@ -358,7 +358,16 @@ func init() {
 			"user_id",
 			jsval.Reference(M).RefersTo("#/definitions/uuid"),
 		)
-	R28 = jsval.String().RegexpString("^(\\d\\d\\d\\d)(-)?(\\d\\d)(-)?(\\d\\d)(T)?(\\d\\d)(:)?(\\d\\d)(:)?(\\d\\d)(\\.\\d+)?(Z|([+-])(\\d\\d)(:)?(\\d\\d))$")
+	R28 = jsval.OneOf().
+		Add(
+			jsval.String().RegexpString("^(\\d\\d\\d\\d)(-)?(\\d\\d)(-)?(\\d\\d)(T)?(\\d\\d)(:)?(\\d\\d)(:)?(\\d\\d)(\\.\\d+)?(Z|([+-])(\\d\\d)(:)?(\\d\\d))$"),
+		).
+		Add(
+			jsval.Object().
+				AdditionalProperties(
+					jsval.EmptyConstraint,
+				),
+		)
 	R29 = jsval.Object().
 		AdditionalProperties(
 			jsval.EmptyConstraint,
@@ -444,6 +453,16 @@ func init() {
 				).
 				Add(
 					jsval.Reference(M).RefersTo("#/definitions/room"),
+				),
+		).
+		AddProp(
+			"session_type",
+			jsval.OneOf().
+				Add(
+					jsval.NullConstraint,
+				).
+				Add(
+					jsval.Reference(M).RefersTo("#/definitions/session_type"),
 				),
 		).
 		AddProp(
@@ -2560,6 +2579,16 @@ func init() {
 						),
 				).
 				AddProp(
+					"session_type",
+					jsval.OneOf().
+						Add(
+							jsval.NullConstraint,
+						).
+						Add(
+							jsval.Reference(M).RefersTo("#/definitions/session_type"),
+						),
+				).
+				AddProp(
 					"slide_language",
 					jsval.Reference(M).RefersTo("#/definitions/language"),
 				).
@@ -3107,6 +3136,10 @@ func init() {
 				AddProp(
 					"photo_permission",
 					jsval.Reference(M).RefersTo("#/definitions/binary_permission_default_allow"),
+				).
+				AddProp(
+					"session_type_id",
+					jsval.Reference(M).RefersTo("#/definitions/uuid"),
 				).
 				AddProp(
 					"slide_language",

@@ -116,6 +116,7 @@ type Session struct {
 	ConferenceID      string         // ConferenceID is the ID of the conference that this session belongs to
 	RoomID            sql.NullString // ID of the room where this session will be held at.
 	SpeakerID         string         // ID of the speaker that this session belongs to
+	SessionTypeID     string         // ID of the session type
 	Title             sql.NullString // Title of the session (English)
 	Abstract          sql.NullString // Abstract of the session (English)
 	Memo              sql.NullString // Correspondence between the speaker and the organizer. Should not be publicly available

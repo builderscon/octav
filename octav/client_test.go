@@ -1304,10 +1304,11 @@ func TestListSessions(t *testing.T) {
 		sin.SessionTypeID = stype.ID
 		sin.Abstract.Set("Use lots of reflection and generate lots of code")
 		sin.UserID = user.ID
-		_, err := testCreateSessionPass(ctx, &sin)
+		s, err := testCreateSessionPass(ctx, &sin)
 		if err != nil {
 			return
 		}
+		defer testDeleteSession(ctx, s.ID, user.ID)
 	}
 
 	in := model.ListSessionsRequest{}
@@ -1316,6 +1317,7 @@ func TestListSessions(t *testing.T) {
 	if !assert.NoError(ctx.T, err, "ListSessions should succeed") {
 		return
 	}
+	t.Logf("%#v", res)
 	if !assert.NoError(ctx.T, validator.HTTPListSessionsResponse.Validate(res), "Validation should succeed") {
 		return
 	}

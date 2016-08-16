@@ -2749,6 +2749,9 @@ func (r UpdateSessionRequest) collectMarshalData() map[string]interface{} {
 	if r.SpeakerID.Valid() {
 		m["speaker_id"] = r.SpeakerID.Value()
 	}
+	if r.SessionTypeID.Valid() {
+		m["session_type_id"] = r.SessionTypeID.Value()
+	}
 	if r.Title.Valid() {
 		m["title"] = r.Title.Value()
 	}
@@ -2854,6 +2857,12 @@ func (r *UpdateSessionRequest) Populate(m map[string]interface{}) error {
 			return errors.New("set field SpeakerID failed: " + err.Error())
 		}
 		delete(m, "speaker_id")
+	}
+	if jv, ok := m["session_type_id"]; ok {
+		if err := r.SessionTypeID.Set(jv); err != nil {
+			return errors.New("set field SessionTypeID failed: " + err.Error())
+		}
+		delete(m, "session_type_id")
 	}
 	if jv, ok := m["title"]; ok {
 		if err := r.Title.Set(jv); err != nil {
@@ -2972,7 +2981,7 @@ func (r *UpdateSessionRequest) Populate(m map[string]interface{}) error {
 			return ErrInvalidJSONFieldType{Field: "user_id"}
 		}
 	}
-	if err := tools.ExtractL10NFields(m, &r.L10N, []string{"id", "conference_id", "speaker_id", "title", "abstract", "memo", "duration", "material_level", "tags", "category", "spoken_language", "slide_language", "slide_subtitles", "slide_url", "video_url", "photo_permission", "video_permission", "sort_order", "has_interpretation", "status", "confirmed", "user_id"}); err != nil {
+	if err := tools.ExtractL10NFields(m, &r.L10N, []string{"id", "conference_id", "speaker_id", "session_type_id", "title", "abstract", "memo", "duration", "material_level", "tags", "category", "spoken_language", "slide_language", "slide_subtitles", "slide_url", "video_url", "photo_permission", "video_permission", "sort_order", "has_interpretation", "status", "confirmed", "user_id"}); err != nil {
 		return err
 	}
 	return nil
@@ -2980,7 +2989,7 @@ func (r *UpdateSessionRequest) Populate(m map[string]interface{}) error {
 
 func (r *UpdateSessionRequest) GetPropNames() ([]string, error) {
 	l, _ := r.L10N.GetPropNames()
-	return append(l, "id", "conference_id", "speaker_id", "title", "abstract", "memo", "duration", "material_level", "tags", "category", "spoken_language", "slide_language", "slide_subtitles", "slide_url", "video_url", "photo_permission", "video_permission", "sort_order", "has_interpretation", "status", "confirmed", "user_id"), nil
+	return append(l, "id", "conference_id", "speaker_id", "session_type_id", "title", "abstract", "memo", "duration", "material_level", "tags", "category", "spoken_language", "slide_language", "slide_subtitles", "slide_url", "video_url", "photo_permission", "video_permission", "sort_order", "has_interpretation", "status", "confirmed", "user_id"), nil
 }
 
 func (r *UpdateSessionRequest) SetPropValue(s string, v interface{}) error {
@@ -2994,6 +3003,8 @@ func (r *UpdateSessionRequest) SetPropValue(s string, v interface{}) error {
 		return r.ConferenceID.Set(v)
 	case "speaker_id":
 		return r.SpeakerID.Set(v)
+	case "session_type_id":
+		return r.SessionTypeID.Set(v)
 	case "title":
 		return r.Title.Set(v)
 	case "abstract":

@@ -17,6 +17,7 @@ func (v *Session) populateRowForCreate(vdb *db.Session, payload model.CreateSess
 	vdb.Status = "pending"
 	vdb.SortOrder = 0
 	vdb.Confirmed = false
+	vdb.SessionTypeID = payload.SessionTypeID
 
 	// At least one of the English or Japanese titles must be
 	// non-empty
@@ -117,6 +118,10 @@ func (v *Session) populateRowForUpdate(vdb *db.Session, payload model.UpdateSess
 
 	if payload.SpeakerID.Valid() {
 		vdb.SpeakerID = payload.SpeakerID.String
+	}
+
+	if payload.SessionTypeID.Valid() {
+		vdb.SessionTypeID = payload.SessionTypeID.String
 	}
 
 	if payload.Duration.Valid() {
@@ -234,7 +239,7 @@ func (v *Session) Decorate(tx *db.Tx, session *model.Session, lang string) error
 
 	// ... but not necessarily with a room
 	if session.RoomID != "" {
-		room := model.Room{}
+		var room model.Room
 		if err := room.Load(tx, session.RoomID); err != nil {
 			return errors.Wrap(err, "failed to load room")
 		}
@@ -242,11 +247,19 @@ func (v *Session) Decorate(tx *db.Tx, session *model.Session, lang string) error
 	}
 
 	if session.SpeakerID != "" {
-		speaker := model.User{}
+		var speaker model.User
 		if err := speaker.Load(tx, session.SpeakerID); err != nil {
 			return errors.Wrapf(err, "failed to load speaker '%s'", session.SpeakerID)
 		}
 		session.Speaker = &speaker
+	}
+
+	if session.SessionTypeID != "" {
+		var sessionType model.SessionType
+		if err := sessionType.Load(tx, session.SessionTypeID); err != nil {
+			return errors.Wrapf(err, "failed to load session type '%s'", session.SessionTypeID)
+		}
+		session.SessionType = &sessionType
 	}
 
 	if lang != "" {
