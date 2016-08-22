@@ -62,6 +62,8 @@ type ConferenceComponent struct {
 type LookupConferenceComponentRequest struct {
 	ID   string            `json:"id" urlenc:"id"`
 	Lang jsval.MaybeString `json:"lang" urlenc:"lang,omitempty,string"`
+
+	TrustedCall bool `json:"-"`
 }
 
 type CreateConferenceComponentRequest struct {
@@ -113,6 +115,8 @@ type SessionTypeList []SessionType
 type LookupSessionTypeRequest struct {
 	ID   string            `json:"id" urlenc:"id"`
 	Lang jsval.MaybeString `json:"lang" urlenc:"lang,omitempty,string"`
+
+	TrustedCall bool `json:"-"`
 }
 
 // +transport
@@ -142,6 +146,8 @@ type ListSessionTypesByConferenceRequest struct {
 	Since        jsval.MaybeString `json:"since,omitempty" urlenc:"since,omitempty,string"`
 	Limit        jsval.MaybeInt    `json:"limit,omitempty" urlenc:"limit,omitempty,int64"`
 	Lang         jsval.MaybeString `json:"lang,omitempty" urlenc:"lang,omitempty,string"`
+
+	TrustedCall bool `json:"-"`
 }
 
 // +transport
@@ -224,6 +230,8 @@ type VenueList []Venue
 type LookupConferenceSeriesRequest struct {
 	ID   string            `json:"id"`
 	Lang jsval.MaybeString `json:"lang,omitempty" urlenc:"lang,omitempty,string"`
+
+	TrustedCall bool `json:"-"`
 }
 
 // +transport
@@ -283,12 +291,16 @@ type CreateConferenceRequest struct {
 type LookupConferenceRequest struct {
 	ID   string            `json:"id" urlenc:"id"`
 	Lang jsval.MaybeString `json:"lang,omitempty" urlenc:"lang,omitempty,string"`
+
+	TrustedCall bool `json:"-"`
 }
 
 // +transport
 type LookupConferenceBySlugRequest struct {
 	Slug string            `json:"slug"`
 	Lang jsval.MaybeString `json:"lang,omitempty" urlenc:"lang,omitempty,string"`
+
+	TrustedCall bool `json:"-"`
 }
 
 // +transport
@@ -420,6 +432,8 @@ type CreateRoomRequest struct {
 type LookupRoomRequest struct {
 	ID   string            `json:"id" urlenc:"id"`
 	Lang jsval.MaybeString `json:"lang" urlenc:"lang,omitempty,string"`
+
+	TrustedCall bool `json:"-"`
 }
 
 // +transport
@@ -444,6 +458,8 @@ type ListRoomRequest struct {
 	Since   jsval.MaybeString `json:"since" urlenc:"since,omitempty,string"`
 	Lang    jsval.MaybeString `json:"lang" urlenc:"lang,omitempty,string"`
 	Limit   jsval.MaybeInt    `json:"limit,omitempty" urlenc:"limit,omitempty,int64"`
+
+	TrustedCall bool `json:"-"`
 }
 
 // +transport
@@ -473,6 +489,8 @@ type CreateSessionRequest struct {
 type LookupSessionRequest struct {
 	ID   string            `json:"id" urlenc:"id"`
 	Lang jsval.MaybeString `json:"lang" urlenc:"lang,omitempty,string"`
+
+	TrustedCall bool `json:"-"`
 }
 
 // +transport
@@ -541,6 +559,8 @@ type UpdateUserRequest struct {
 type LookupUserRequest struct {
 	ID   string            `json:"id" urlenc:"id"`
 	Lang jsval.MaybeString `json:"lang,omitempty" urlenc:"lang,omitempty,string"`
+
+	TrustedCall bool `json:"-"`
 }
 
 // +transport
@@ -548,6 +568,8 @@ type LookupUserByAuthUserIDRequest struct {
 	AuthVia    string            `json:"auth_via" urlenc:"auth_via"`
 	AuthUserID string            `json:"auth_user_id" urlenc:"auth_user_id"`
 	Lang       jsval.MaybeString `json:"lang,omitempty" urlenc:"lang,omitempty,string"`
+
+	TrustedCall bool `json:"-"`
 }
 
 // +transport
@@ -561,6 +583,8 @@ type ListUserRequest struct {
 	Since jsval.MaybeString `json:"since" urlenc:"since,omitempty,string"`
 	Lang  jsval.MaybeString `json:"lang" urlenc:"lang,omitempty,string"`
 	Limit jsval.MaybeInt    `json:"limit" urlenc:"limit,omitempty,int64"`
+
+	TrustedCall bool `json:"-"`
 }
 
 // +transport
@@ -595,12 +619,16 @@ type ListVenueRequest struct {
 	Since jsval.MaybeString `json:"since" urlenc:"since,omitempty,string"`
 	Lang  jsval.MaybeString `json:"lang" urlenc:"lang,omitempty,string"`
 	Limit jsval.MaybeInt    `json:"limit" urlenc:"limit,omitempty,int64"`
+
+	TrustedCall bool `json:"-"`
 }
 
 // +transport
 type LookupVenueRequest struct {
 	ID   string            `json:"id" urlenc:"id"`
 	Lang jsval.MaybeString `json:"lang,omitempty" urlenc:"lang,omitempty,string"`
+
+	TrustedCall bool `json:"-"`
 }
 
 // +transport
@@ -610,6 +638,8 @@ type ListSessionsRequest struct {
 	Status       jsval.MaybeString `json:"status" urlenc:"status,omitempty,string"`
 	Date         jsval.MaybeString `json:"date" urlenc:"date,omitempty,string"`
 	Lang         jsval.MaybeString `json:"lang,omitempty" urlenc:"lang,omitempty,string"`
+
+	TrustedCall bool `json:"-"`
 }
 
 // +model
@@ -623,6 +653,8 @@ type Question struct {
 // +transport
 type LookupQuestionRequest struct {
 	ID string `json:"id"`
+
+	TrustedCall bool `json:"-"`
 }
 
 // +transport
@@ -680,6 +712,8 @@ type CreateClientRequest struct {
 // +transport
 type LookupClientRequest struct {
 	ID string `json:"id"`
+
+	TrustedCall bool `json:"-"`
 }
 
 // +transport
@@ -705,6 +739,8 @@ type FeaturedSpeakerList []FeaturedSpeaker
 type LookupFeaturedSpeakerRequest struct {
 	ID   string            `json:"id"`
 	Lang jsval.MaybeString `json:"lang,omitempty" urlenc:"lang,omitempty,string"`
+
+	TrustedCall bool `json:"-"`
 }
 
 // +transport
@@ -713,6 +749,8 @@ type ListFeaturedSpeakersRequest struct {
 	Since        jsval.MaybeString `json:"since" urlenc:"since,omitempty,string"`
 	Lang         jsval.MaybeString `json:"lang" urlenc:"lang,omitempty,string"`
 	Limit        jsval.MaybeInt    `json:"limit" urlenc:"limit,omitempty,int64"`
+
+	TrustedCall bool `json:"-"`
 }
 
 // +transport
@@ -765,6 +803,8 @@ type SponsorList []Sponsor
 type LookupSponsorRequest struct {
 	ID   string            `json:"id"`
 	Lang jsval.MaybeString `json:"lang,omitempty" urlenc:"lang,omitempty,string"`
+
+	TrustedCall bool `json:"-"`
 }
 
 // +transport
@@ -774,6 +814,8 @@ type ListSponsorsRequest struct {
 	Since        jsval.MaybeString `json:"since" urlenc:"since,omitempty,string"`
 	Lang         jsval.MaybeString `json:"lang" urlenc:"lang,omitempty,string"`
 	Limit        jsval.MaybeInt    `json:"limit" urlenc:"limit,omitempty,int64"`
+
+	TrustedCall bool `json:"-"`
 }
 
 // +transport

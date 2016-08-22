@@ -219,7 +219,7 @@ func (v *Session) LoadByConference(tx *db.Tx, vdbl *db.SessionList, cid string, 
 	return nil
 }
 
-func (v *Session) Decorate(tx *db.Tx, session *model.Session, lang string) error {
+func (v *Session) Decorate(tx *db.Tx, session *model.Session, trustedCall bool, lang string) error {
 	if pdebug.Enabled {
 		g := pdebug.Marker("service.Session.Decorate")
 		defer g.End()
@@ -231,7 +231,7 @@ func (v *Session) Decorate(tx *db.Tx, session *model.Session, lang string) error
 		if err := cs.Lookup(tx, &mc, session.ConferenceID); err != nil {
 			return errors.Wrap(err, "failed to load conference")
 		}
-		if err := cs.Decorate(tx, &mc, lang); err != nil {
+		if err := cs.Decorate(tx, &mc, trustedCall, lang); err != nil {
 			return errors.Wrap(err, "failed to decorate conference")
 		}
 		session.Conference = &mc
@@ -239,25 +239,37 @@ func (v *Session) Decorate(tx *db.Tx, session *model.Session, lang string) error
 
 	// ... but not necessarily with a room
 	if session.RoomID != "" {
+		var rs Room
 		var room model.Room
-		if err := room.Load(tx, session.RoomID); err != nil {
+		if err := rs.Lookup(tx, &room, session.RoomID); err != nil {
 			return errors.Wrap(err, "failed to load room")
+		}
+		if err := rs.Decorate(tx, &room, trustedCall, lang); err != nil {
+			return errors.Wrap(err, "failed to decorate room")
 		}
 		session.Room = &room
 	}
 
 	if session.SpeakerID != "" {
+		var us User
 		var speaker model.User
-		if err := speaker.Load(tx, session.SpeakerID); err != nil {
+		if err := us.Lookup(tx, &speaker, session.SpeakerID); err != nil {
 			return errors.Wrapf(err, "failed to load speaker '%s'", session.SpeakerID)
+		}
+		if err := us.Decorate(tx, &speaker, trustedCall, lang); err != nil {
+			return errors.Wrap(err, "failed to decorate speaker")
 		}
 		session.Speaker = &speaker
 	}
 
 	if session.SessionTypeID != "" {
+		var sts SessionType
 		var sessionType model.SessionType
-		if err := sessionType.Load(tx, session.SessionTypeID); err != nil {
+		if err := sts.Lookup(tx, &sessionType, session.SessionTypeID); err != nil {
 			return errors.Wrapf(err, "failed to load session type '%s'", session.SessionTypeID)
+		}
+		if err := sts.Decorate(tx, &sessionType, trustedCall, lang); err != nil {
+			return errors.Wrap(err, "failed to decorate session type")
 		}
 		session.SessionType = &sessionType
 	}
@@ -377,7 +389,7 @@ func (v *Session) ListSessionFromPayload(tx *db.Tx, result *model.SessionList, p
 			return errors.Wrap(err, "failed to populate model from database")
 		}
 
-		if err := v.Decorate(tx, &l[i], payload.Lang.String); err != nil {
+		if err := v.Decorate(tx, &l[i], payload.TrustedCall, payload.Lang.String); err != nil {
 			return errors.Wrap(err, "failed to decorate session with associated data")
 		}
 	}

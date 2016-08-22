@@ -21,7 +21,7 @@ func (v *FeaturedSpeaker) LookupFromPayload(tx *db.Tx, m *model.FeaturedSpeaker,
 	if err = v.Lookup(tx, m, payload.ID); err != nil {
 		return errors.Wrap(err, "failed to load model.FeaturedSpeaker from database")
 	}
-	if err := v.Decorate(tx, m, payload.Lang.String); err != nil {
+	if err := v.Decorate(tx, m, payload.TrustedCall, payload.Lang.String); err != nil {
 		return errors.Wrap(err, "failed to load associated data for model.FeaturedSpeaker from database")
 	}
 	return nil

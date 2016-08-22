@@ -729,7 +729,7 @@ func generateServiceFile(ctx *genctx, m Model) error {
 	fmt.Fprintf(&buf, "\n"+`return errors.Wrap(err, "failed to load model.%s from database")`, m.Name)
 	buf.WriteString("\n}")
 	if hasL10N || hasDecorate {
-		buf.WriteString("\nif err := v.Decorate(tx, m, payload.Lang.String); err != nil {")
+		buf.WriteString("\nif err := v.Decorate(tx, m, payload.TrustedCall, payload.Lang.String); err != nil {")
 		fmt.Fprintf(&buf, "\n"+`return errors.Wrap(err, "failed to load associated data for model.%s from database")`, m.Name)
 		buf.WriteString("\n}")
 	}

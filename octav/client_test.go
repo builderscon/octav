@@ -831,6 +831,9 @@ func TestCreateUser(t *testing.T) {
 		return
 	}
 
+	// Some fields like res2.Email and res2.TshirtSize are hidden
+	res.Email = ""
+	res.TshirtSize = ""
 	if !assert.Equal(ctx.T, res2, res, "LookupUser is the same as the user created") {
 		return
 	}

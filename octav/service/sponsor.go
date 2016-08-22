@@ -299,7 +299,7 @@ func (v *Sponsor) ListFromPayload(tx *db.Tx, result *model.SponsorList, payload 
 			return errors.Wrap(err, "failed to populate model from database")
 		}
 
-		if err := v.Decorate(tx, &l[i], payload.Lang.String); err != nil {
+		if err := v.Decorate(tx, &l[i], payload.TrustedCall, payload.Lang.String); err != nil {
 			return errors.Wrap(err, "failed to decorate venue with associated data")
 		}
 	}
@@ -308,7 +308,7 @@ func (v *Sponsor) ListFromPayload(tx *db.Tx, result *model.SponsorList, payload 
 	return nil
 }
 
-func (v *Sponsor) Decorate(tx *db.Tx, sponsor *model.Sponsor, lang string) (err error) {
+func (v *Sponsor) Decorate(tx *db.Tx, sponsor *model.Sponsor, trustedCall bool, lang string) (err error) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("service.Sponsor.Decorate").BindError(&err)
 		defer g.End()

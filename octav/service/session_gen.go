@@ -21,7 +21,7 @@ func (v *Session) LookupFromPayload(tx *db.Tx, m *model.Session, payload model.L
 	if err = v.Lookup(tx, m, payload.ID); err != nil {
 		return errors.Wrap(err, "failed to load model.Session from database")
 	}
-	if err := v.Decorate(tx, m, payload.Lang.String); err != nil {
+	if err := v.Decorate(tx, m, payload.TrustedCall, payload.Lang.String); err != nil {
 		return errors.Wrap(err, "failed to load associated data for model.Session from database")
 	}
 	return nil

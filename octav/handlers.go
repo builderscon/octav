@@ -22,6 +22,12 @@ func (m middlewareSet) Wrap(h http.Handler) http.Handler {
 	return apachelog.WrapLoggingWriter(h, l)
 }
 
+const trustedCall = "octav.api.trustedCall"
+func isTrustedCall(ctx context.Context) bool {
+	allow, ok := ctx.Value(trustedCall).(bool)
+	return ok && allow
+}
+
 func init() {
 	httpError = httpErrorAsJSON
 	mwset = middlewareSet{}
@@ -61,6 +67,7 @@ func httpWithBasicAuth(h HandlerWithContext) HandlerWithContext {
 		if pdebug.Enabled {
 			pdebug.Printf("Authentication succeeded, proceeding to call handler")
 		}
+		ctx = context.WithValue(ctx, trustedCall, true)
 		h(ctx, w, r)
 	})
 }
@@ -647,6 +654,7 @@ func doListUser(ctx context.Context, w http.ResponseWriter, r *http.Request, pay
 
 	var s service.User
 	var v model.UserList
+	payload.TrustedCall = isTrustedCall(ctx)
 	if err := s.ListFromPayload(tx, &v, payload); err != nil {
 		httpError(w, `ListUsers`, http.StatusInternalServerError, err)
 		return

@@ -425,7 +425,7 @@ func (v *Conference) LoadTextComponents(tx *db.Tx, c *model.Conference) error {
 	return nil
 }
 
-func (v *Conference) Decorate(tx *db.Tx, c *model.Conference, lang string) (err error) {
+func (v *Conference) Decorate(tx *db.Tx, c *model.Conference, trustedCall bool, lang string) (err error) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("service.Conference.Decorate").BindError(&err)
 		defer g.End()
@@ -476,21 +476,21 @@ func (v *Conference) Decorate(tx *db.Tx, c *model.Conference, lang string) (err 
 
 	sv := Venue{}
 	for i := range c.Venues {
-		if err := sv.Decorate(tx, &c.Venues[i], lang); err != nil {
+		if err := sv.Decorate(tx, &c.Venues[i], trustedCall, lang); err != nil {
 			return errors.Wrap(err, "failed to decorate venue with associated data")
 		}
 	}
 
 	sfs := FeaturedSpeaker{}
 	for i := range c.FeaturedSpeakers {
-		if err := sfs.Decorate(tx, &c.FeaturedSpeakers[i], lang); err != nil {
+		if err := sfs.Decorate(tx, &c.FeaturedSpeakers[i], trustedCall, lang); err != nil {
 			return errors.Wrap(err, "failed to decorate featured speakers with associated data")
 		}
 	}
 
 	sps := Sponsor{}
 	for i := range c.Sponsors {
-		if err := sps.Decorate(tx, &c.Sponsors[i], lang); err != nil {
+		if err := sps.Decorate(tx, &c.Sponsors[i], trustedCall, lang); err != nil {
 			return errors.Wrap(err, "failed to decorate sponsors with associated data")
 		}
 	}
@@ -709,7 +709,7 @@ func (v *Conference) ListFromPayload(tx *db.Tx, l *model.ConferenceList, payload
 		if err := (r[i]).FromRow(vdb); err != nil {
 			return errors.Wrap(err, "failed populate model from database")
 		}
-		if err := v.Decorate(tx, &r[i], payload.Lang.String); err != nil {
+		if err := v.Decorate(tx, &r[i], false, payload.Lang.String); err != nil {
 			return errors.Wrap(err, "failed to decorate venue with associated data")
 		}
 	}
@@ -765,7 +765,7 @@ func (v *Conference) ListByOrganizerFromPayload(tx *db.Tx, l *model.ConferenceLi
 		if err := (res[i]).FromRow(vdb); err != nil {
 			return errors.Wrap(err, "failed populate model from database")
 		}
-		if err := v.Decorate(tx, &res[i], payload.Lang.String); err != nil {
+		if err := v.Decorate(tx, &res[i], false, payload.Lang.String); err != nil {
 			return errors.Wrap(err, "failed to decorate conference with associated data")
 		}
 	}

@@ -114,7 +114,7 @@ func (v *ConferenceSeries) AddAdministrator(tx *db.Tx, seriesID, userID string) 
 	return c.Create(tx, db.WithInsertIgnore(true))
 }
 
-func (v *ConferenceSeries) Decorate(tx *db.Tx, c *model.ConferenceSeries, lang string) error {
+func (v *ConferenceSeries) Decorate(tx *db.Tx, c *model.ConferenceSeries, trustedCall bool, lang string) error {
 	if lang == "" {
 		return nil
 	}

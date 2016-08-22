@@ -68,7 +68,7 @@ func (v *Room) ListFromPayload(tx *db.Tx, result *model.RoomList, payload model.
 	}
 
 	for i := range m {
-		if err := v.Decorate(tx, &m[i], payload.Lang.String); err != nil {
+		if err := v.Decorate(tx, &m[i], payload.TrustedCall, payload.Lang.String); err != nil {
 			return errors.Wrap(err, "failed to associate data to model")
 		}
 	}
@@ -100,7 +100,7 @@ func (v *Room) DeleteFromPayload(tx *db.Tx, payload model.DeleteRoomRequest) err
 	return errors.Wrap(v.Delete(tx, payload.ID), "failed to delete from ddatabase")
 }
 
-func (v *Room) Decorate(tx *db.Tx, room *model.Room, lang string) error {
+func (v *Room) Decorate(tx *db.Tx, room *model.Room, trustedCall bool, lang string) error {
 	if lang != "" {
 		if err := v.ReplaceL10NStrings(tx, room, lang); err != nil {
 			return errors.Wrap(err, "failed to replace L10N strings")
