@@ -685,7 +685,7 @@ sub delete_conference {
 
 sub create_session {
     my ($self, $payload) = @_;
-    for my $required (qw(conference_id speaker_id title abstract session_type_id user_id)) {
+    for my $required (qw(conference_id speaker_id session_type_id user_id)) {
         if (!$payload->{$required}) {
             die qq|property "$required" must be provided|;
         }
@@ -754,14 +754,9 @@ sub update_session {
     return 1
 }
 
-sub list_session_by_conference {
+sub list_sessions {
     my ($self, $payload) = @_;
-    for my $required (qw(conference_id)) {
-        if (!$payload->{$required}) {
-            die qq|property "$required" must be provided|;
-        }
-    }
-    my $uri = URI->new($self->{endpoint} . qq|/v1/schedule/list|);
+    my $uri = URI->new($self->{endpoint} . qq|/v1/session/list|);
     $uri->query_form($payload);
     my $res = $self->{user_agent}->get($uri);
     if (!$res->is_success) {
@@ -837,7 +832,7 @@ sub create_session_survey_response {
         $self->{last_error} = $res->status_line;
         return;
     }
-    return 1
+    return JSON::decode_json($res->decoded_content);
 }
 
 sub add_featured_speaker {

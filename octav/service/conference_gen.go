@@ -21,7 +21,7 @@ func (v *Conference) LookupFromPayload(tx *db.Tx, m *model.Conference, payload m
 	if err = v.Lookup(tx, m, payload.ID); err != nil {
 		return errors.Wrap(err, "failed to load model.Conference from database")
 	}
-	if err := v.Decorate(tx, m, payload.Lang.String); err != nil {
+	if err := v.Decorate(tx, m, payload.TrustedCall, payload.Lang.String); err != nil {
 		return errors.Wrap(err, "failed to load associated data for model.Conference from database")
 	}
 	return nil
@@ -146,6 +146,21 @@ func (v *Conference) ReplaceL10NStrings(tx *db.Tx, m *model.Conference, lang str
 					pdebug.Printf("Replacing for key 'description'")
 				}
 				m.Description = l.Localized
+			case "cfp_lead_text":
+				if pdebug.Enabled {
+					pdebug.Printf("Replacing for key 'cfp_lead_text'")
+				}
+				m.CFPLeadText = l.Localized
+			case "cfp_pre_submit_instructions":
+				if pdebug.Enabled {
+					pdebug.Printf("Replacing for key 'cfp_pre_submit_instructions'")
+				}
+				m.CFPPreSubmitInstructions = l.Localized
+			case "cfp_post_submit_instructions":
+				if pdebug.Enabled {
+					pdebug.Printf("Replacing for key 'cfp_post_submit_instructions'")
+				}
+				m.CFPPostSubmitInstructions = l.Localized
 			case "sub_title":
 				if pdebug.Enabled {
 					pdebug.Printf("Replacing for key 'sub_title'")

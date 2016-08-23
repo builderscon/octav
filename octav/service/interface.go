@@ -16,6 +16,7 @@ type Client struct{}
 type Conference struct{
 	Storage StorageClient
 }
+type ConferenceComponent struct {}
 type ConferenceSeries struct{}
 type FeaturedSpeaker struct{}
 type Question struct{}

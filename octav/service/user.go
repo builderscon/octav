@@ -153,7 +153,7 @@ func (v *User) ListFromPayload(tx *db.Tx, result *model.UserList, payload model.
 			return errors.Wrap(err, "failed to populate model from database")
 		}
 
-		if err := v.Decorate(tx, &l[i], payload.Lang.String); err != nil {
+		if err := v.Decorate(tx, &l[i], payload.TrustedCall, payload.Lang.String); err != nil {
 			return errors.Wrap(err, "failed to decorate user with associated data")
 		}
 	}
@@ -218,7 +218,14 @@ func (v *User) IsSessionOwner(tx *db.Tx, sessionID, userID string) error {
 	return errors.Errorf("user %s lacks session owner privileges for %s", userID, sessionID)
 }
 
-func (v *User) Decorate(tx *db.Tx, user *model.User, lang string) error {
+func (v *User) Decorate(tx *db.Tx, user *model.User, trustedCall bool, lang string) error {
+	if !trustedCall {
+		user.Email = ""
+		user.TshirtSize = ""
+		user.AuthVia = ""
+		user.AuthUserID = ""
+	}
+
 	if lang != "" {
 		if err := v.ReplaceL10NStrings(tx, user, lang); err != nil {
 			return errors.Wrap(err, "failed to replace L10N strings")
@@ -238,7 +245,7 @@ func (v *User) LookupUserByAuthUserIDFromPayload(tx *db.Tx, result *model.User, 
 		return errors.Wrap(err, "failed to populate mode from database")
 	}
 
-	if err := v.Decorate(tx, &r, payload.Lang.String); err != nil {
+	if err := v.Decorate(tx, &r, payload.TrustedCall, payload.Lang.String); err != nil {
 		return errors.Wrap(err, "failed to decorate with assocaited data")
 	}
 

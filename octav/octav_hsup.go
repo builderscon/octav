@@ -1369,30 +1369,6 @@ func httpListRoom(ctx context.Context, w http.ResponseWriter, r *http.Request) {
 	doListRoom(ctx, w, r, payload)
 }
 
-func httpListSessionByConference(ctx context.Context, w http.ResponseWriter, r *http.Request) {
-	if pdebug.Enabled {
-		g := pdebug.Marker("httpListSessionByConference")
-		defer g.End()
-	}
-	if strings.ToLower(r.Method) != `get` {
-		w.Header().Set("Allow", "get")
-		httpError(w, `Method was `+r.Method+`, expected get`, http.StatusNotFound, nil)
-		return
-	}
-
-	var payload model.ListSessionByConferenceRequest
-	if err := urlenc.Unmarshal([]byte(r.URL.RawQuery), &payload); err != nil {
-		httpError(w, `Failed to parse url query string`, http.StatusInternalServerError, err)
-		return
-	}
-
-	if err := validator.HTTPListSessionByConferenceRequest.Validate(&payload); err != nil {
-		httpError(w, `Invalid input (validation failed)`, http.StatusInternalServerError, err)
-		return
-	}
-	doListSessionByConference(ctx, w, r, payload)
-}
-
 func httpListSessionTypesByConference(ctx context.Context, w http.ResponseWriter, r *http.Request) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("httpListSessionTypesByConference")
@@ -1415,6 +1391,30 @@ func httpListSessionTypesByConference(ctx context.Context, w http.ResponseWriter
 		return
 	}
 	doListSessionTypesByConference(ctx, w, r, payload)
+}
+
+func httpListSessions(ctx context.Context, w http.ResponseWriter, r *http.Request) {
+	if pdebug.Enabled {
+		g := pdebug.Marker("httpListSessions")
+		defer g.End()
+	}
+	if strings.ToLower(r.Method) != `get` {
+		w.Header().Set("Allow", "get")
+		httpError(w, `Method was `+r.Method+`, expected get`, http.StatusNotFound, nil)
+		return
+	}
+
+	var payload model.ListSessionsRequest
+	if err := urlenc.Unmarshal([]byte(r.URL.RawQuery), &payload); err != nil {
+		httpError(w, `Failed to parse url query string`, http.StatusInternalServerError, err)
+		return
+	}
+
+	if err := validator.HTTPListSessionsRequest.Validate(&payload); err != nil {
+		httpError(w, `Invalid input (validation failed)`, http.StatusInternalServerError, err)
+		return
+	}
+	doListSessions(ctx, w, r, payload)
 }
 
 func httpListSponsors(ctx context.Context, w http.ResponseWriter, r *http.Request) {
@@ -2091,8 +2091,8 @@ func (s *Server) SetupRoutes() {
 	r.HandleFunc(`/v1/conference/dates/add`, httpWithContext(httpWithBasicAuth(httpAddConferenceDates)))
 	r.HandleFunc(`/v1/conference/dates/delete`, httpWithContext(httpDeleteConferenceDates))
 	r.HandleFunc(`/v1/conference/delete`, httpWithContext(httpWithBasicAuth(httpDeleteConference)))
-	r.HandleFunc(`/v1/conference/list`, httpWithContext(httpListConference))
-	r.HandleFunc(`/v1/conference/list_by_organizer`, httpWithContext(httpListConferencesByOrganizer))
+	r.HandleFunc(`/v1/conference/list`, httpWithContext(httpWithOptionalBasicAuth(httpListConference)))
+	r.HandleFunc(`/v1/conference/list_by_organizer`, httpWithContext(httpWithOptionalBasicAuth(httpListConferencesByOrganizer)))
 	r.HandleFunc(`/v1/conference/lookup`, httpWithContext(httpLookupConference))
 	r.HandleFunc(`/v1/conference/lookup_by_slug`, httpWithContext(httpLookupConferenceBySlug))
 	r.HandleFunc(`/v1/conference/session_type/add`, httpWithContext(httpWithBasicAuth(httpAddSessionType)))
@@ -2102,44 +2102,44 @@ func (s *Server) SetupRoutes() {
 	r.HandleFunc(`/v1/conference_series/admin/add`, httpWithContext(httpWithBasicAuth(httpAddConferenceSeriesAdmin)))
 	r.HandleFunc(`/v1/conference_series/create`, httpWithContext(httpWithBasicAuth(httpCreateConferenceSeries)))
 	r.HandleFunc(`/v1/conference_series/delete`, httpWithContext(httpWithBasicAuth(httpDeleteConferenceSeries)))
-	r.HandleFunc(`/v1/conference_series/list`, httpWithContext(httpListConferenceSeries))
+	r.HandleFunc(`/v1/conference_series/list`, httpWithContext(httpWithOptionalBasicAuth(httpListConferenceSeries)))
 	r.HandleFunc(`/v1/featured_speaker/add`, httpWithContext(httpWithBasicAuth(httpAddFeaturedSpeaker)))
 	r.HandleFunc(`/v1/featured_speaker/delete`, httpWithContext(httpWithBasicAuth(httpDeleteFeaturedSpeaker)))
-	r.HandleFunc(`/v1/featured_speaker/list`, httpWithContext(httpWithBasicAuth(httpListFeaturedSpeakers)))
+	r.HandleFunc(`/v1/featured_speaker/list`, httpWithContext(httpWithOptionalBasicAuth(httpListFeaturedSpeakers)))
 	r.HandleFunc(`/v1/featured_speaker/lookup`, httpWithContext(httpWithBasicAuth(httpLookupFeaturedSpeaker)))
 	r.HandleFunc(`/v1/featured_speaker/update`, httpWithContext(httpWithBasicAuth(httpUpdateFeaturedSpeaker)))
 	r.HandleFunc(`/v1/question/create`, httpWithContext(httpWithBasicAuth(httpCreateQuestion)))
 	r.HandleFunc(`/v1/question/delete`, httpWithContext(httpWithBasicAuth(httpDeleteQuestion)))
-	r.HandleFunc(`/v1/question/list`, httpWithContext(httpListQuestion))
+	r.HandleFunc(`/v1/question/list`, httpWithContext(httpWithOptionalBasicAuth(httpListQuestion)))
 	r.HandleFunc(`/v1/room/create`, httpWithContext(httpWithBasicAuth(httpCreateRoom)))
 	r.HandleFunc(`/v1/room/delete`, httpWithContext(httpWithBasicAuth(httpDeleteRoom)))
-	r.HandleFunc(`/v1/room/list`, httpWithContext(httpListRoom))
+	r.HandleFunc(`/v1/room/list`, httpWithContext(httpWithOptionalBasicAuth(httpListRoom)))
 	r.HandleFunc(`/v1/room/lookup`, httpWithContext(httpLookupRoom))
 	r.HandleFunc(`/v1/room/update`, httpWithContext(httpWithBasicAuth(httpUpdateRoom)))
-	r.HandleFunc(`/v1/schedule/list`, httpWithContext(httpListSessionByConference))
 	r.HandleFunc(`/v1/session/create`, httpWithContext(httpWithBasicAuth(httpCreateSession)))
 	r.HandleFunc(`/v1/session/delete`, httpWithContext(httpWithBasicAuth(httpDeleteSession)))
-	r.HandleFunc(`/v1/session/lookup`, httpWithContext(httpLookupSession))
+	r.HandleFunc(`/v1/session/list`, httpWithContext(httpWithOptionalBasicAuth(httpListSessions)))
+	r.HandleFunc(`/v1/session/lookup`, httpWithContext(httpWithOptionalBasicAuth(httpLookupSession)))
 	r.HandleFunc(`/v1/session/update`, httpWithContext(httpWithBasicAuth(httpUpdateSession)))
 	r.HandleFunc(`/v1/session_type/delete`, httpWithContext(httpWithBasicAuth(httpDeleteSessionType)))
-	r.HandleFunc(`/v1/session_type/list`, httpWithContext(httpWithBasicAuth(httpListSessionTypesByConference)))
-	r.HandleFunc(`/v1/session_type/lookup`, httpWithContext(httpWithBasicAuth(httpLookupSessionType)))
+	r.HandleFunc(`/v1/session_type/list`, httpWithContext(httpWithOptionalBasicAuth(httpListSessionTypesByConference)))
+	r.HandleFunc(`/v1/session_type/lookup`, httpWithContext(httpWithOptionalBasicAuth(httpLookupSessionType)))
 	r.HandleFunc(`/v1/session_type/update`, httpWithContext(httpWithBasicAuth(httpUpdateSessionType)))
 	r.HandleFunc(`/v1/sponsor/add`, httpWithContext(httpWithBasicAuth(httpAddSponsor)))
 	r.HandleFunc(`/v1/sponsor/delete`, httpWithContext(httpWithBasicAuth(httpDeleteSponsor)))
-	r.HandleFunc(`/v1/sponsor/list`, httpWithContext(httpWithBasicAuth(httpListSponsors)))
-	r.HandleFunc(`/v1/sponsor/lookup`, httpWithContext(httpWithBasicAuth(httpLookupSponsor)))
+	r.HandleFunc(`/v1/sponsor/list`, httpWithContext(httpWithOptionalBasicAuth(httpListSponsors)))
+	r.HandleFunc(`/v1/sponsor/lookup`, httpWithContext(httpWithOptionalBasicAuth(httpLookupSponsor)))
 	r.HandleFunc(`/v1/sponsor/update`, httpWithContext(httpWithBasicAuth(httpUpdateSponsor)))
 	r.HandleFunc(`/v1/survey_session_response/create`, httpWithContext(httpWithBasicAuth(httpCreateSessionSurveyResponse)))
 	r.HandleFunc(`/v1/user/create`, httpWithContext(httpWithBasicAuth(httpCreateUser)))
 	r.HandleFunc(`/v1/user/delete`, httpWithContext(httpWithBasicAuth(httpDeleteUser)))
-	r.HandleFunc(`/v1/user/list`, httpWithContext(httpListUser))
-	r.HandleFunc(`/v1/user/lookup`, httpWithContext(httpLookupUser))
-	r.HandleFunc(`/v1/user/lookup_user_by_auth_user_id`, httpWithContext(httpWithBasicAuth(httpLookupUserByAuthUserID)))
+	r.HandleFunc(`/v1/user/list`, httpWithContext(httpWithOptionalBasicAuth(httpListUser)))
+	r.HandleFunc(`/v1/user/lookup`, httpWithContext(httpWithOptionalBasicAuth(httpLookupUser)))
+	r.HandleFunc(`/v1/user/lookup_user_by_auth_user_id`, httpWithContext(httpWithOptionalBasicAuth(httpLookupUserByAuthUserID)))
 	r.HandleFunc(`/v1/user/update`, httpWithContext(httpWithBasicAuth(httpUpdateUser)))
 	r.HandleFunc(`/v1/venue/create`, httpWithContext(httpWithBasicAuth(httpCreateVenue)))
 	r.HandleFunc(`/v1/venue/delete`, httpWithContext(httpWithBasicAuth(httpDeleteVenue)))
-	r.HandleFunc(`/v1/venue/list`, httpWithContext(httpListVenue))
+	r.HandleFunc(`/v1/venue/list`, httpWithContext(httpWithOptionalBasicAuth(httpListVenue)))
 	r.HandleFunc(`/v1/venue/lookup`, httpWithContext(httpLookupVenue))
 	r.HandleFunc(`/v1/venue/update`, httpWithContext(httpWithBasicAuth(httpUpdateVenue)))
 }

@@ -66,7 +66,6 @@ CREATE TABLE conferences (
     oid INTEGER UNSIGNED NOT NULL PRIMARY KEY AUTO_INCREMENT,
     eid CHAR(64) CHARACTER SET latin1 NOT NULL,
     series_id CHAR(64) CHARACTER SET latin1 NOT NULL,
-    description TEXT,
     slug TEXT NOT NULL,
     title TEXT NOT NULL,
     sub_title TEXT,
@@ -79,6 +78,20 @@ CREATE TABLE conferences (
     UNIQUE KEY(eid),
     UNIQUE KEY(series_id, slug(191)),
     KEY (status)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- key, value pairs of long texts that go with a conference
+CREATE TABLE conference_components (
+    oid           INTEGER UNSIGNED NOT NULL PRIMARY KEY AUTO_INCREMENT,
+    eid           CHAR(64) CHARACTER SET latin1 NOT NULL,
+    conference_id CHAR(64) CHARACTER SET latin1 NOT NULL,
+    name          CHAR(64) CHARACTER SET latin1 NOT NULL,
+    value         TEXT NOT NULL,
+    created_on    DATETIME NOT NULL,
+    modified_on   TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    KEY(eid),
+    KEY(name),
+    FOREIGN KEY (conference_id) REFERENCES conferences(eid) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 CREATE TABLE conference_dates (
@@ -126,6 +139,7 @@ CREATE TABLE session_types (
     submission_end   DATETIME,
     created_on       DATETIME NOT NULL,
     modified_on      TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    KEY (eid),
     FOREIGN KEY (conference_id) REFERENCES conferences(eid) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
@@ -135,7 +149,8 @@ CREATE TABLE sessions (
     conference_id CHAR(64) CHARACTER SET latin1,
     room_id CHAR(64) CHARACTER SET latin1,
     speaker_id CHAR(64) CHARACTER SET latin1,
-    title TEXT NOT NULL,
+    session_type_id CHAR(64) CHARACTER SET latin1,
+    title TEXT,
     abstract TEXT,
     memo TEXT,
     starts_on DATETIME,
@@ -148,14 +163,17 @@ CREATE TABLE sessions (
     slide_subtitles TEXT,
     slide_url TEXT,
     video_url TEXT,
-    photo_permission CHAR(16) NOT NULL DEFAULT "allow",
-    video_permission CHAR(16) NOT NULL DEFAULT "allow",
+    photo_release CHAR(16) NOT NULL DEFAULT "allow",
+    recording_release CHAR(16) NOT NULL DEFAULT "allow",
+    materials_release CHAR(16) NOT NULL DEFAULT "allow",
     has_interpretation TINYINT(1) NOT NULL DEFAULT 0,
     status CHAR(16) NOT NULL DEFAULT "pending",
     sort_order INTEGER NOT NULL DEFAULT 0,
     confirmed TINYINT(1) NOT NULL DEFAULT 0,
     created_on DATETIME NOT NULL,
     modified_on TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    KEY (session_type_id),
+    FOREIGN KEY (session_type_id) REFERENCES session_types(eid),
     FOREIGN KEY (speaker_id) REFERENCES users(eid) ON DELETE SET NULL,
     FOREIGN KEY (conference_id) REFERENCES conferences(eid) ON DELETE SET NULL,
     UNIQUE KEY (eid),

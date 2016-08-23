@@ -20,24 +20,63 @@ type ErrInvalidFieldType struct {
 	Field string
 }
 
+// ObjectID is used to return the ID of a newly created object
+type ObjectID struct {
+	ID   string `json:"id"`
+	Type string `json:"type"`
+}
+
 // +model
 type Conference struct {
-	tools.LocalizedFields `json:"-"`
-	ID                    string              `json:"id"`
-	Title                 string              `json:"title" l10n:"true"`
-	Description           string              `json:"description,omitempty" l10n:"true"`
-	CoverURL              string              `json:"cover_url"`
-	SeriesID              string              `json:"series_id,omitempty"`
-	Series                *ConferenceSeries   `json:"series,omitempty" decorate:"true"`
-	SubTitle              string              `json:"sub_title" l10n:"true"`
-	Slug                  string              `json:"slug"`
-	Dates                 ConferenceDateList  `json:"dates,omitempty"`
-	Administrators        UserList            `json:"administrators,omitempty" decorate:"true"`
-	Venues                VenueList           `json:"venues,omitempty" decorate:"true"`
-	FeaturedSpeakers      FeaturedSpeakerList `json:"featured_speakers,omitempty" decorate:"true"`
-	Sponsors              SponsorList         `json:"sponsors,omitempty" decorate:"true"`
+	tools.LocalizedFields     `json:"-"`
+	ID                        string              `json:"id"`
+	Title                     string              `json:"title" l10n:"true"`
+	Description               string              `json:"description,omitempty" l10n:"true"`
+	CFPLeadText               string              `json:"cfp_lead_text,omitempty" l10n:"true"`
+	CFPPreSubmitInstructions  string              `json:"cfp_pre_submit_instructions,omitempty" l10n:"true"`
+	CFPPostSubmitInstructions string              `json:"cfp_post_submit_instructions,omitempty" l10n:"true"`
+	CoverURL                  string              `json:"cover_url"`
+	SeriesID                  string              `json:"series_id,omitempty"`
+	Series                    *ConferenceSeries   `json:"series,omitempty" decorate:"true"`
+	SubTitle                  string              `json:"sub_title" l10n:"true"`
+	Slug                      string              `json:"slug"`
+	FullSlug                  string              `json:"full_slug,omitempty"` // Only populated when decorated
+	Status                    string              `json:"status"`
+	Dates                     ConferenceDateList  `json:"dates,omitempty"`
+	Administrators            UserList            `json:"administrators,omitempty" decorate:"true"`
+	Venues                    VenueList           `json:"venues,omitempty" decorate:"true"`
+	FeaturedSpeakers          FeaturedSpeakerList `json:"featured_speakers,omitempty" decorate:"true"`
+	Sponsors                  SponsorList         `json:"sponsors,omitempty" decorate:"true"`
 }
 type ConferenceList []Conference
+
+// +model
+type ConferenceComponent struct {
+	ID           string `json:"id"`
+	ConferenceID string `json:"conference_id"`
+	Name         string `json:"id"`
+	Value        string `json:"value"`
+}
+
+// +transport
+type LookupConferenceComponentRequest struct {
+	ID   string            `json:"id" urlenc:"id"`
+	Lang jsval.MaybeString `json:"lang" urlenc:"lang,omitempty,string"`
+
+	TrustedCall bool `json:"-"`
+}
+
+type CreateConferenceComponentRequest struct {
+	ConferenceID string `json:"conference_id"`
+	Name         string `json:"name"`
+	Value        string `json:"value"`
+}
+
+type UpdateConferenceComponentRequest struct {
+	ID    string            `json:"id"`
+	Name  jsval.MaybeString `json:"name"`
+	Value jsval.MaybeString `json:"value"`
+}
 
 // +model
 type ConferenceSeries struct {
@@ -76,6 +115,8 @@ type SessionTypeList []SessionType
 type LookupSessionTypeRequest struct {
 	ID   string            `json:"id" urlenc:"id"`
 	Lang jsval.MaybeString `json:"lang" urlenc:"lang,omitempty,string"`
+
+	TrustedCall bool `json:"-"`
 }
 
 // +transport
@@ -105,6 +146,8 @@ type ListSessionTypesByConferenceRequest struct {
 	Since        jsval.MaybeString `json:"since,omitempty" urlenc:"since,omitempty,string"`
 	Limit        jsval.MaybeInt    `json:"limit,omitempty" urlenc:"limit,omitempty,int64"`
 	Lang         jsval.MaybeString `json:"lang,omitempty" urlenc:"lang,omitempty,string"`
+
+	TrustedCall bool `json:"-"`
 }
 
 // +transport
@@ -122,32 +165,35 @@ type UpdateSessionTypeRequest struct {
 // +model
 type Session struct {
 	tools.LocalizedFields `json:"-"`
-	ID                    string      `json:"id"`
-	ConferenceID          string      `json:"conference_id"`
-	RoomID                string      `json:"room_id,omitempty"`
-	SpeakerID             string      `json:"speaker_id"`
-	Title                 string      `json:"title" l10n:"true"`
-	Abstract              string      `json:"abstract" l10n:"true"`
-	Memo                  string      `json:"memo"`
-	StartsOn              time.Time   `json:"starts_on"`
-	Duration              int         `json:"duration"`
-	MaterialLevel         string      `json:"material_level"`
-	Tags                  TagString   `json:"tags,omitempty" assign:"convert"`
-	Category              string      `json:"category,omitempty"`
-	SpokenLanguage        string      `json:"spoken_language,omitempty"`
-	SlideLanguage         string      `json:"slide_language,omitempty"`
-	SlideSubtitles        string      `json:"slide_subtitles,omitempty"`
-	SlideURL              string      `json:"slide_url,omitempty"`
-	VideoURL              string      `json:"video_url,omitempty"`
-	PhotoPermission       string      `json:"photo_permission"`
-	VideoPermission       string      `json:"video_permission"`
-	SortOrder             int         `json:"-"`
-	HasInterpretation     bool        `json:"has_interpretation"`
-	Status                string      `json:"status"`
-	Confirmed             bool        `json:"confirmed"`
-	Conference            *Conference `json:"conference,omitempy" decorate:"true"` // only populated for JSON response
-	Room                  *Room       `json:"room,omitempty" decorate:"true"`      // only populated for JSON response
-	Speaker               *User       `json:"speaker,omitempty" decorate:"true"`   // only populated for JSON response
+	ID                    string       `json:"id"`
+	ConferenceID          string       `json:"conference_id"`
+	RoomID                string       `json:"room_id,omitempty"`
+	SpeakerID             string       `json:"speaker_id"`
+	SessionTypeID         string       `json:"session_type_id"`
+	Title                 string       `json:"title" l10n:"true"`
+	Abstract              string       `json:"abstract" l10n:"true"`
+	Memo                  string       `json:"memo"`
+	StartsOn              time.Time    `json:"starts_on"`
+	Duration              int          `json:"duration"`
+	MaterialLevel         string       `json:"material_level"`
+	Tags                  TagString    `json:"tags,omitempty" assign:"convert"`
+	Category              string       `json:"category,omitempty"`
+	SpokenLanguage        string       `json:"spoken_language,omitempty"`
+	SlideLanguage         string       `json:"slide_language,omitempty"`
+	SlideSubtitles        string       `json:"slide_subtitles,omitempty"`
+	SlideURL              string       `json:"slide_url,omitempty"`
+	VideoURL              string       `json:"video_url,omitempty"`
+	PhotoRelease          string       `json:"photo_release"`
+	RecordingRelease      string       `json:"recording_release"`
+	MaterialsRelease      string       `json:"materials_release"`
+	SortOrder             int          `json:"-"`
+	HasInterpretation     bool         `json:"has_interpretation"`
+	Status                string       `json:"status"`
+	Confirmed             bool         `json:"confirmed"`
+	Conference            *Conference  `json:"conference,omitempy" decorate:"true"`    // only populated for JSON response
+	Room                  *Room        `json:"room,omitempty" decorate:"true"`         // only populated for JSON response
+	Speaker               *User        `json:"speaker,omitempty" decorate:"true"`      // only populated for JSON response
+	SessionType           *SessionType `json:"session_type,omitempty" decorate:"true"` // only populated for JSON response
 }
 type SessionList []Session
 
@@ -157,8 +203,8 @@ type TagString string
 type User struct {
 	tools.LocalizedFields `json:"-"`
 	ID                    string `json:"id"`
-	AuthVia               string `json:"auth_via"`
-	AuthUserID            string `json:"auth_user_id"`
+	AuthVia               string `json:"auth_via,omitempty"`
+	AuthUserID            string `json:"auth_user_id,omitempty"`
 	AvatarURL             string `json:"avatar_url,omitempty"`
 	FirstName             string `json:"first_name,omitempty" l10n:"true"`
 	LastName              string `json:"last_name,omitempty" l10n:"true"`
@@ -185,6 +231,8 @@ type VenueList []Venue
 type LookupConferenceSeriesRequest struct {
 	ID   string            `json:"id"`
 	Lang jsval.MaybeString `json:"lang,omitempty" urlenc:"lang,omitempty,string"`
+
+	TrustedCall bool `json:"-"`
 }
 
 // +transport
@@ -228,39 +276,49 @@ type ListConferenceSeriesReponse []ConferenceSeries
 
 // +transport
 type CreateConferenceRequest struct {
-	Title       string                `json:"title" l10n:"true"`
-	Description jsval.MaybeString     `json:"description" l10n:"true"`
-	SeriesID    string                `json:"series_id"`
-	SubTitle    jsval.MaybeString     `json:"sub_title" l10n:"true"`
-	Slug        string                `json:"slug"`
-	UserID      string                `json:"user_id"`
-	L10N        tools.LocalizedFields `json:"-"`
+	Title                     string                `json:"title" l10n:"true"`
+	CFPLeadText               jsval.MaybeString     `json:"cfp_lead_text" l10n:"true"`
+	CFPPreSubmitInstructions  jsval.MaybeString     `json:"cfp_pre_submit_instructions" l10n:"true"`
+	CFPPostSubmitInstructions jsval.MaybeString     `json:"cfp_post_submit_instructions" l10n:"true"`
+	Description               jsval.MaybeString     `json:"description" l10n:"true"`
+	SeriesID                  string                `json:"series_id"`
+	SubTitle                  jsval.MaybeString     `json:"sub_title" l10n:"true"`
+	Slug                      string                `json:"slug"`
+	UserID                    string                `json:"user_id"`
+	L10N                      tools.LocalizedFields `json:"-"`
 }
 
 // +transport
 type LookupConferenceRequest struct {
 	ID   string            `json:"id" urlenc:"id"`
 	Lang jsval.MaybeString `json:"lang,omitempty" urlenc:"lang,omitempty,string"`
+
+	TrustedCall bool `json:"-"`
 }
 
 // +transport
 type LookupConferenceBySlugRequest struct {
 	Slug string            `json:"slug"`
 	Lang jsval.MaybeString `json:"lang,omitempty" urlenc:"lang,omitempty,string"`
+
+	TrustedCall bool `json:"-"`
 }
 
 // +transport
 type UpdateConferenceRequest struct {
-	ID            string                `json:"id"`
-	Title         jsval.MaybeString     `json:"title,omitempty" l10n:"true"`
-	Description   jsval.MaybeString     `json:"description" l10n:"true"`
-	MultipartForm *multipart.Form       `json:"-"`
-	SeriesID      jsval.MaybeString     `json:"series_id,omitempty"`
-	Slug          jsval.MaybeString     `json:"slug,omitempty"`
-	SubTitle      jsval.MaybeString     `json:"sub_title,omitempty" l10n:"true"`
-	Status        jsval.MaybeString     `json:"status,omitempty"`
-	UserID        string                `json:"user_id"`
-	L10N          tools.LocalizedFields `json:"-"`
+	ID                        string                `json:"id"`
+	Title                     jsval.MaybeString     `json:"title,omitempty" l10n:"true"`
+	Description               jsval.MaybeString     `json:"description" l10n:"true"`
+	CFPLeadText               jsval.MaybeString     `json:"cfp_lead_text" l10n:"true"`
+	CFPPreSubmitInstructions  jsval.MaybeString     `json:"cfp_pre_submit_instructions" l10n:"true"`
+	CFPPostSubmitInstructions jsval.MaybeString     `json:"cfp_post_submit_instructions" l10n:"true"`
+	MultipartForm             *multipart.Form       `json:"-"`
+	SeriesID                  jsval.MaybeString     `json:"series_id,omitempty"`
+	Slug                      jsval.MaybeString     `json:"slug,omitempty"`
+	SubTitle                  jsval.MaybeString     `json:"sub_title,omitempty" l10n:"true"`
+	Status                    jsval.MaybeString     `json:"status,omitempty"`
+	UserID                    string                `json:"user_id"`
+	L10N                      tools.LocalizedFields `json:"-"`
 
 	// These fields are only used internally
 	CoverURL jsval.MaybeString `json:"-"`
@@ -375,6 +433,8 @@ type CreateRoomRequest struct {
 type LookupRoomRequest struct {
 	ID   string            `json:"id" urlenc:"id"`
 	Lang jsval.MaybeString `json:"lang" urlenc:"lang,omitempty,string"`
+
+	TrustedCall bool `json:"-"`
 }
 
 // +transport
@@ -399,35 +459,40 @@ type ListRoomRequest struct {
 	Since   jsval.MaybeString `json:"since" urlenc:"since,omitempty,string"`
 	Lang    jsval.MaybeString `json:"lang" urlenc:"lang,omitempty,string"`
 	Limit   jsval.MaybeInt    `json:"limit,omitempty" urlenc:"limit,omitempty,int64"`
+
+	TrustedCall bool `json:"-"`
 }
 
 // +transport
 type CreateSessionRequest struct {
-	ConferenceID    string                `json:"conference_id"`
-	SpeakerID       jsval.MaybeString     `json:"speaker_id,omitempty"`
-	SessionTypeID   string                `json:"session_type_id"`
-	Title           jsval.MaybeString     `json:"title,omitempty"`
-	Abstract        jsval.MaybeString     `json:"abstract,omitempty"`
-	Memo            jsval.MaybeString     `json:"memo,omitempty"`
-	MaterialLevel   jsval.MaybeString     `json:"material_level,omitempty"`
-	Tags            jsval.MaybeString     `json:"tags,omitempty"`
-	Category        jsval.MaybeString     `json:"category,omitempty"`
-	SpokenLanguage  jsval.MaybeString     `json:"spoken_language,omitempty"`
-	SlideLanguage   jsval.MaybeString     `json:"slide_language,omitempty"`
-	SlideSubtitles  jsval.MaybeString     `json:"slide_subtitles,omitempty"`
-	SlideURL        jsval.MaybeString     `json:"slide_url,omitempty"`
-	VideoURL        jsval.MaybeString     `json:"video_url,omitempty"`
-	PhotoPermission jsval.MaybeString     `json:"photo_permission,omitempty"`
-	VideoPermission jsval.MaybeString     `json:"video_permission,omitempty"`
-	L10N            tools.LocalizedFields `json:"-"`
-	UserID          string                `json:"user_id"`
-	Duration        int                   `json:"-"` // This is not sent from the client, but is used internally
+	ConferenceID     string                `json:"conference_id"`
+	SpeakerID        jsval.MaybeString     `json:"speaker_id,omitempty"`
+	SessionTypeID    string                `json:"session_type_id"`
+	Title            jsval.MaybeString     `json:"title,omitempty"`
+	Abstract         jsval.MaybeString     `json:"abstract,omitempty"`
+	Memo             jsval.MaybeString     `json:"memo,omitempty"`
+	MaterialLevel    jsval.MaybeString     `json:"material_level,omitempty"`
+	Tags             jsval.MaybeString     `json:"tags,omitempty"`
+	Category         jsval.MaybeString     `json:"category,omitempty"`
+	SpokenLanguage   jsval.MaybeString     `json:"spoken_language,omitempty"`
+	SlideLanguage    jsval.MaybeString     `json:"slide_language,omitempty"`
+	SlideSubtitles   jsval.MaybeString     `json:"slide_subtitles,omitempty"`
+	SlideURL         jsval.MaybeString     `json:"slide_url,omitempty"`
+	VideoURL         jsval.MaybeString     `json:"video_url,omitempty"`
+	PhotoRelease     jsval.MaybeString     `json:"photo_release,omitempty"`
+	RecordingRelease jsval.MaybeString     `json:"recording_release,omitempty"`
+	MaterialsRelease jsval.MaybeString     `json:"materials_release,omitempty"`
+	L10N             tools.LocalizedFields `json:"-"`
+	UserID           string                `json:"user_id"`
+	Duration         int                   `json:"-"` // This is not sent from the client, but is used internally
 }
 
 // +transport
 type LookupSessionRequest struct {
 	ID   string            `json:"id" urlenc:"id"`
 	Lang jsval.MaybeString `json:"lang" urlenc:"lang,omitempty,string"`
+
+	TrustedCall bool `json:"-"`
 }
 
 // +transport
@@ -435,6 +500,7 @@ type UpdateSessionRequest struct {
 	ID                string                `json:"id"`
 	ConferenceID      jsval.MaybeString     `json:"conference_id,omitempty"`
 	SpeakerID         jsval.MaybeString     `json:"speaker_id,omitempty"`
+	SessionTypeID     jsval.MaybeString     `json:"session_type_id,omitempty"`
 	Title             jsval.MaybeString     `json:"title,omitempty"`
 	Abstract          jsval.MaybeString     `json:"abstract,omitempty"`
 	Memo              jsval.MaybeString     `json:"memo,omitempty"`
@@ -447,8 +513,9 @@ type UpdateSessionRequest struct {
 	SlideSubtitles    jsval.MaybeString     `json:"slide_subtitles,omitempty"`
 	SlideURL          jsval.MaybeString     `json:"slide_url,omitempty"`
 	VideoURL          jsval.MaybeString     `json:"video_url,omitempty"`
-	PhotoPermission   jsval.MaybeString     `json:"photo_permission,omitempty"`
-	VideoPermission   jsval.MaybeString     `json:"video_permission,omitempty"`
+	PhotoRelease      jsval.MaybeString     `json:"photo_release,omitempty"`
+	RecordingRelease  jsval.MaybeString     `json:"recording_release,omitempty"`
+	MaterialsRelease  jsval.MaybeString     `json:"materials_release,omitempty"`
 	SortOrder         jsval.MaybeInt        `json:"sort_order,omitempty"`
 	HasInterpretation jsval.MaybeBool       `json:"has_interpretation,omitempty"`
 	Status            jsval.MaybeString     `json:"status,omitempty"`
@@ -495,6 +562,8 @@ type UpdateUserRequest struct {
 type LookupUserRequest struct {
 	ID   string            `json:"id" urlenc:"id"`
 	Lang jsval.MaybeString `json:"lang,omitempty" urlenc:"lang,omitempty,string"`
+
+	TrustedCall bool `json:"-"`
 }
 
 // +transport
@@ -502,6 +571,8 @@ type LookupUserByAuthUserIDRequest struct {
 	AuthVia    string            `json:"auth_via" urlenc:"auth_via"`
 	AuthUserID string            `json:"auth_user_id" urlenc:"auth_user_id"`
 	Lang       jsval.MaybeString `json:"lang,omitempty" urlenc:"lang,omitempty,string"`
+
+	TrustedCall bool `json:"-"`
 }
 
 // +transport
@@ -515,6 +586,8 @@ type ListUserRequest struct {
 	Since jsval.MaybeString `json:"since" urlenc:"since,omitempty,string"`
 	Lang  jsval.MaybeString `json:"lang" urlenc:"lang,omitempty,string"`
 	Limit jsval.MaybeInt    `json:"limit" urlenc:"limit,omitempty,int64"`
+
+	TrustedCall bool `json:"-"`
 }
 
 // +transport
@@ -549,19 +622,27 @@ type ListVenueRequest struct {
 	Since jsval.MaybeString `json:"since" urlenc:"since,omitempty,string"`
 	Lang  jsval.MaybeString `json:"lang" urlenc:"lang,omitempty,string"`
 	Limit jsval.MaybeInt    `json:"limit" urlenc:"limit,omitempty,int64"`
+
+	TrustedCall bool `json:"-"`
 }
 
 // +transport
 type LookupVenueRequest struct {
 	ID   string            `json:"id" urlenc:"id"`
 	Lang jsval.MaybeString `json:"lang,omitempty" urlenc:"lang,omitempty,string"`
+
+	TrustedCall bool `json:"-"`
 }
 
 // +transport
-type ListSessionByConferenceRequest struct {
-	ConferenceID string            `json:"conference_id" urlenc:"conference_id"`
+type ListSessionsRequest struct {
+	ConferenceID jsval.MaybeString `json:"conference_id" urlenc:"conference_id,omitempty,string"`
+	SpeakerID    jsval.MaybeString `json:"speaker_id" urlenc:"speaker_id,omitempty,string"`
+	Status       jsval.MaybeString `json:"status" urlenc:"status,omitempty,string"`
 	Date         jsval.MaybeString `json:"date" urlenc:"date,omitempty,string"`
 	Lang         jsval.MaybeString `json:"lang,omitempty" urlenc:"lang,omitempty,string"`
+
+	TrustedCall bool `json:"-"`
 }
 
 // +model
@@ -575,6 +656,8 @@ type Question struct {
 // +transport
 type LookupQuestionRequest struct {
 	ID string `json:"id"`
+
+	TrustedCall bool `json:"-"`
 }
 
 // +transport
@@ -632,6 +715,8 @@ type CreateClientRequest struct {
 // +transport
 type LookupClientRequest struct {
 	ID string `json:"id"`
+
+	TrustedCall bool `json:"-"`
 }
 
 // +transport
@@ -657,6 +742,8 @@ type FeaturedSpeakerList []FeaturedSpeaker
 type LookupFeaturedSpeakerRequest struct {
 	ID   string            `json:"id"`
 	Lang jsval.MaybeString `json:"lang,omitempty" urlenc:"lang,omitempty,string"`
+
+	TrustedCall bool `json:"-"`
 }
 
 // +transport
@@ -665,6 +752,8 @@ type ListFeaturedSpeakersRequest struct {
 	Since        jsval.MaybeString `json:"since" urlenc:"since,omitempty,string"`
 	Lang         jsval.MaybeString `json:"lang" urlenc:"lang,omitempty,string"`
 	Limit        jsval.MaybeInt    `json:"limit" urlenc:"limit,omitempty,int64"`
+
+	TrustedCall bool `json:"-"`
 }
 
 // +transport
@@ -717,6 +806,8 @@ type SponsorList []Sponsor
 type LookupSponsorRequest struct {
 	ID   string            `json:"id"`
 	Lang jsval.MaybeString `json:"lang,omitempty" urlenc:"lang,omitempty,string"`
+
+	TrustedCall bool `json:"-"`
 }
 
 // +transport
@@ -726,6 +817,8 @@ type ListSponsorsRequest struct {
 	Since        jsval.MaybeString `json:"since" urlenc:"since,omitempty,string"`
 	Lang         jsval.MaybeString `json:"lang" urlenc:"lang,omitempty,string"`
 	Limit        jsval.MaybeInt    `json:"limit" urlenc:"limit,omitempty,int64"`
+
+	TrustedCall bool `json:"-"`
 }
 
 // +transport

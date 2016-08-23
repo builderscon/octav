@@ -24,18 +24,28 @@ type ConferenceSeries struct {
 
 // +DB tablename:"conferences"
 type Conference struct {
-	OID         int64  // intenral id, used for sorting and what not
-	EID         string // ID that is visible to the outside
-	CoverURL    sql.NullString
-	Description sql.NullString
-	SeriesID    string // ConferenceSeries ID
-	Slug        string
-	Status      string
-	SubTitle    sql.NullString
-	Title       string
-	CreatedBy   string // User ID that creates this conference
-	CreatedOn   time.Time
-	ModifiedOn  NullTime
+	OID        int64  // intenral id, used for sorting and what not
+	EID        string // ID that is visible to the outside
+	CoverURL   sql.NullString
+	SeriesID   string // ConferenceSeries ID
+	Slug       string
+	Status     string
+	SubTitle   sql.NullString
+	Title      string
+	CreatedBy  string // User ID that creates this conference
+	CreatedOn  time.Time
+	ModifiedOn NullTime
+}
+
+// +DB tablename:"conference_components"
+type ConferenceComponent struct {
+	OID          int64  // intenral id, used for sorting and what not
+	EID          string // ID that is visible to the outside
+	ConferenceID string
+	Name         string
+	Value        string
+	CreatedOn    time.Time
+	ModifiedOn   NullTime
 }
 
 // +DB tablename:"conference_dates"
@@ -106,6 +116,7 @@ type Session struct {
 	ConferenceID      string         // ConferenceID is the ID of the conference that this session belongs to
 	RoomID            sql.NullString // ID of the room where this session will be held at.
 	SpeakerID         string         // ID of the speaker that this session belongs to
+	SessionTypeID     string         // ID of the session type
 	Title             sql.NullString // Title of the session (English)
 	Abstract          sql.NullString // Abstract of the session (English)
 	Memo              sql.NullString // Correspondence between the speaker and the organizer. Should not be publicly available
@@ -119,8 +130,9 @@ type Session struct {
 	SlideSubtitles    sql.NullString
 	SlideURL          sql.NullString
 	VideoURL          sql.NullString
-	PhotoPermission   sql.NullString
-	VideoPermission   sql.NullString
+	PhotoRelease      sql.NullString
+	RecordingRelease  sql.NullString
+	MaterialsRelease  sql.NullString
 	HasInterpretation bool
 	Status            string
 	SortOrder         int

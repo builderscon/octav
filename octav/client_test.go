@@ -281,16 +281,19 @@ func yapcasia(uid string) *model.CreateConferenceSeriesRequest {
 	}
 }
 
-func yapcasiaTokyo(series *model.ConferenceSeries, userID string) *model.CreateConferenceRequest {
-	return &model.CreateConferenceRequest{
-		Title:    "YAPC::Asia Tokyo",
-		SeriesID: series.ID,
-		Slug:     "2015",
-		UserID:   userID,
+func yapcasiaTokyo(seriesID, userID string) *model.CreateConferenceRequest {
+	r := &model.CreateConferenceRequest{
+		Title:       "YAPC::Asia Tokyo",
+		SeriesID:    seriesID,
+		Slug:        "2015",
+		UserID:      userID,
 	}
+	r.L10N.Set("ja", "description", "最後のYAPC::Asia Tokyo")
+	r.Description.Set("The last YAPC::Asia Tokyo")
+	return r
 }
 
-func testCreateConferenceSeries(ctx *TestCtx, in *model.CreateConferenceSeriesRequest) (*model.ConferenceSeries, error) {
+func testCreateConferenceSeries(ctx *TestCtx, in *model.CreateConferenceSeriesRequest) (*model.ObjectID, error) {
 	res, err := ctx.HTTPClient.CreateConferenceSeries(in)
 	if !assert.NoError(ctx.T, err, "CreateConferenceSeries should succeed") {
 		return nil, err
@@ -439,7 +442,7 @@ func TestConferenceCRUD(t *testing.T) {
 		return
 	}
 
-	res, err := testCreateConferencePass(ctx, yapcasiaTokyo(series, user.ID))
+	res, err := testCreateConferencePass(ctx, yapcasiaTokyo(series.ID, user.ID))
 	if err != nil {
 		return
 	}
@@ -449,41 +452,68 @@ func TestConferenceCRUD(t *testing.T) {
 		return
 	}
 
-	res2, err := testLookupConference(ctx, res.ID, "")
+	conf1, err := testLookupConference(ctx, res.ID, "")
 	if err != nil {
 		return
 	}
 
-	if !assert.Len(ctx.T, res2.Administrators, 1, "There should be 1 administrator") {
+	if !assert.NotEmpty(ctx.T, conf1.Description, "Description should not be empty") {
 		return
 	}
 
-	// The result from LookupConference contains the administrator field
-	// Remove that (and make sure it's populated), then do the comparison
-	res2.Administrators = model.UserList(nil)
-	res2.CoverURL = "" // XXX Dunno if this should be populated at Create time. it is for Lookup
-	res2.Series = (*model.ConferenceSeries)(nil)
-	if !assert.Equal(ctx.T, res2, res, "LookupConference is the same as the conference created") {
+	if !assert.Len(ctx.T, conf1.Administrators, 1, "There should be 1 administrator") {
+		return
+	}
+
+	conf2, err := testLookupConference(ctx, res.ID, "ja")
+	if err != nil {
+		return
+	}
+
+	if !assert.NotEqual(ctx.T, conf1.Description, conf2.Description, "description should localized") {
+		return
+	}
+
+	conf3, err := testLookupConference(ctx, res.ID, "ja")
+	if err != nil {
+		return
+	}
+
+	if !assert.Equal(ctx.T, conf2, conf3, "LookupConference is the same") {
 		return
 	}
 
 	in := model.UpdateConferenceRequest{ID: res.ID, UserID: user.ID}
 	in.SubTitle.Set("Big Bang!")
 	in.L10N.Set("ja", "title", "ヤップシー エイジア")
+	in.L10N.Set("ja", "cfp_lead_text", "ばっちこい！")
+	in.L10N.Set("ja", "cfp_pre_submit_instructions", "事前にこれを読んでね")
+	in.L10N.Set("ja", "cfp_post_submit_instructions", "応募したらこれを読んでね")
 	if err := testUpdateConference(ctx, &in); err != nil {
 		return
 	}
 
-	res3, err := testLookupConference(ctx, res.ID, "ja")
+	conf4, err := testLookupConference(ctx, res.ID, "ja")
 	if err != nil {
 		return
 	}
-
-	if !assert.Equal(ctx.T, res3.SubTitle, "Big Bang!", "Conference.SubTitle is the same as the conference updated") {
+	if !assert.Equal(ctx.T, conf4.SubTitle, "Big Bang!", "Conference.SubTitle is the same as the conference updated") {
 		return
 	}
 
-	if !assert.Equal(ctx.T, "ヤップシー エイジア", res3.Title, "Conference.title#ja is the same as the conference updated") {
+	if !assert.Equal(ctx.T, "ヤップシー エイジア", conf4.Title, "Conference.title#ja is the same as the conference updated") {
+		return
+	}
+
+	if !assert.Equal(ctx.T, "ばっちこい！", conf4.CFPLeadText, "Conference.cfp_lead_text#ja is the same as the conference updated") {
+		return
+	}
+
+	if !assert.Equal(ctx.T, "事前にこれを読んでね", conf4.CFPPreSubmitInstructions, "Conference.cfp_pre_submit_instructions#ja is the same as the conference updated") {
+		return
+	}
+
+	if !assert.Equal(ctx.T, "応募したらこれを読んでね", conf4.CFPPostSubmitInstructions, "Conference.cfp_post_submit_instructions#ja is the same as the conference updated") {
 		return
 	}
 
@@ -541,12 +571,17 @@ func TestRoomCRUD(t *testing.T) {
 		return
 	}
 
-	res2, err := testLookupRoom(ctx, res.ID, "")
+	room1, err := testLookupRoom(ctx, res.ID, "ja")
 	if err != nil {
 		return
 	}
 
-	if !assert.Equal(ctx.T, res2, res, "LookupRoom is the same as the room created") {
+	room2, err := testLookupRoom(ctx, res.ID, "ja")
+	if err != nil {
+		return
+	}
+
+	if !assert.Equal(ctx.T, room2, room1, "LookupRoom is the same as the room created") {
 		return
 	}
 
@@ -556,12 +591,12 @@ func TestRoomCRUD(t *testing.T) {
 		return
 	}
 
-	res3, err := testLookupRoom(ctx, res.ID, "ja")
+	room3, err := testLookupRoom(ctx, res.ID, "ja")
 	if err != nil {
 		return
 	}
 
-	if !assert.Equal(ctx.T, "国際会議場", res3.Name, "Room.name#ja is the same as the conference updated") {
+	if !assert.Equal(ctx.T, "国際会議場", room3.Name, "Room.name#ja is the same as the conference updated") {
 		return
 	}
 
@@ -655,7 +690,7 @@ func TestSessionCRUD(t *testing.T) {
 		return
 	}
 
-	conference, err := testCreateConferencePass(ctx, yapcasiaTokyo(series, user.ID))
+	conference, err := testCreateConferencePass(ctx, yapcasiaTokyo(series.ID, user.ID))
 	if err != nil {
 		return
 	}
@@ -704,14 +739,20 @@ func TestSessionCRUD(t *testing.T) {
 		return
 	}
 
-	res2, err := testLookupSession(ctx, res.ID, "")
+	session1, err := testLookupSession(ctx, res.ID, "ja")
 	if err != nil {
 		return
 	}
 
-	res2.Conference = nil
-	res2.Speaker = nil
-	if !assert.Equal(ctx.T, res2, res, "LookupSession is the same as the room created") {
+	session2, err := testLookupSession(ctx, res.ID, "ja")
+	if err != nil {
+		return
+	}
+	if !assert.Equal(ctx.T, session2, session1, "LookupSession is the same as the room created") {
+		return
+	}
+
+	if !assert.NotEmpty(ctx.T, session1.Speaker.Email, "email should NOT be empty for authenticated requests") {
 		return
 	}
 
@@ -721,12 +762,12 @@ func TestSessionCRUD(t *testing.T) {
 		return
 	}
 
-	res3, err := testLookupSession(ctx, res.ID, "ja")
+	session3, err := testLookupSession(ctx, res.ID, "ja")
 	if err != nil {
 		return
 	}
 
-	if !assert.Equal(ctx.T, "カンファレンス用ソフトウェアの作り方", res3.Title, "Session.title#ja is the same as the conference updated") {
+	if !assert.Equal(ctx.T, "カンファレンス用ソフトウェアの作り方", session3.Title, "Session.title#ja is the same as the conference updated") {
 		return
 	}
 }
@@ -812,7 +853,7 @@ func TestCreateUser(t *testing.T) {
 	}
 
 	res4, err := ctx.HTTPClient.LookupUserByAuthUserID(&model.LookupUserByAuthUserIDRequest{
-		AuthVia: res.AuthVia,
+		AuthVia:    res.AuthVia,
 		AuthUserID: res.AuthUserID,
 	})
 	if !assert.NoError(ctx.T, err, "LookupUserByAuthUserID should succeed") {
@@ -823,6 +864,24 @@ func TestCreateUser(t *testing.T) {
 		return
 	}
 
+	clientID, clientSecret := ctx.HTTPClient.BasicAuth.Username, ctx.HTTPClient.BasicAuth.Password
+	ctx.HTTPClient.BasicAuth.Username = ""
+	ctx.HTTPClient.BasicAuth.Password = ""
+	res5, err := testLookupUser(ctx, res.ID, "")
+	if err != nil {
+		return
+	}
+
+	res.Email = ""
+	res.TshirtSize = ""
+	res.AuthVia = ""
+	res.AuthUserID = ""
+	if !assert.Equal(ctx.T, res5, res, "Lookup user should be the same (email and tshirt-size should be empty)") {
+		return
+	}
+
+	ctx.HTTPClient.BasicAuth.Username = clientID
+	ctx.HTTPClient.BasicAuth.Password = clientSecret
 	if err := testDeleteUser(ctx, res.ID, ctx.Superuser.EID); err != nil {
 		return
 	}
@@ -853,12 +912,17 @@ func TestVenueCRUD(t *testing.T) {
 		return
 	}
 
-	res2, err := testLookupVenue(ctx, res.ID, "")
+	room1, err := testLookupVenue(ctx, res.ID, "ja")
 	if err != nil {
 		return
 	}
 
-	if !assert.Equal(ctx.T, res2, res, "LookupVenue is the same as the venue created") {
+	room2, err := testLookupVenue(ctx, res.ID, "ja")
+	if err != nil {
+		return
+	}
+
+	if !assert.Equal(ctx.T, room2, room1, "LookupVenue is the same as the venue created") {
 		return
 	}
 
@@ -868,12 +932,12 @@ func TestVenueCRUD(t *testing.T) {
 		return
 	}
 
-	res3, err := testLookupVenue(ctx, res.ID, "ja")
+	room3, err := testLookupVenue(ctx, res.ID, "ja")
 	if err != nil {
 		return
 	}
 
-	if !assert.Equal(ctx.T, "東京ビッグサイト", res3.Name, "Venue.name#ja is the same as the object updated") {
+	if !assert.Equal(ctx.T, "東京ビッグサイト", room3.Name, "Venue.name#ja is the same as the object updated") {
 		return
 	}
 
@@ -1066,7 +1130,7 @@ func TestListConference(t *testing.T) {
 		return
 	}
 
-	confs := make([]*model.Conference, 10)
+	confs := make([]*model.ObjectID, 10)
 	for i := 0; i < 10; i++ {
 		lf := tools.LocalizedFields{}
 		lf.Set("ja", "title", `リストカンファレンステスト`)
@@ -1201,7 +1265,7 @@ func TestListRoom(t *testing.T) {
 	}
 }
 
-func TestListSessionByConference(t *testing.T) {
+func TestListSessions(t *testing.T) {
 	ctx, err := NewTestCtx(t)
 	if !assert.NoError(t, err, "failed to create test ctx") {
 		return
@@ -1229,7 +1293,7 @@ func TestListSessionByConference(t *testing.T) {
 		return
 	}
 
-	conference, err := testCreateConferencePass(ctx, yapcasiaTokyo(series, user.ID))
+	conference, err := testCreateConferencePass(ctx, yapcasiaTokyo(series.ID, user.ID))
 	if err != nil {
 		return
 	}
@@ -1262,24 +1326,35 @@ func TestListSessionByConference(t *testing.T) {
 		sin.SessionTypeID = stype.ID
 		sin.Abstract.Set("Use lots of reflection and generate lots of code")
 		sin.UserID = user.ID
-		_, err := testCreateSessionPass(ctx, &sin)
+		s, err := testCreateSessionPass(ctx, &sin)
 		if err != nil {
 			return
 		}
+		defer testDeleteSession(ctx, s.ID, user.ID)
 	}
 
-	in := model.ListSessionByConferenceRequest{
-		ConferenceID: conference.ID,
-	}
-	res, err := ctx.HTTPClient.ListSessionByConference(&in)
-	if !assert.NoError(ctx.T, err, "ListSessionByConference should succeed") {
+	in := model.ListSessionsRequest{}
+	in.ConferenceID.Set(conference.ID)
+	res, err := ctx.HTTPClient.ListSessions(&in)
+	if !assert.NoError(ctx.T, err, "ListSessions should succeed") {
 		return
 	}
-	if !assert.NoError(ctx.T, validator.HTTPListSessionByConferenceResponse.Validate(res), "Validation should succeed") {
+	t.Logf("%#v", res)
+	if !assert.NoError(ctx.T, validator.HTTPListSessionsResponse.Validate(res), "Validation should succeed") {
 		return
 	}
 
 	if !assert.Len(ctx.T, res, 10, "There should be 10 sessions") {
+		return
+	}
+
+	in = model.ListSessionsRequest{}
+	_, err = ctx.HTTPClient.ListSessions(&in)
+	if !assert.Error(ctx.T, err, "Query without conference_id/speaker_id should be an error") {
+		return
+	}
+
+	if !assert.Equal(ctx.T, err.Error(), "no query specified (one of conference_id/speaker_id is required)") {
 		return
 	}
 }

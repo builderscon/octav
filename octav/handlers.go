@@ -22,6 +22,12 @@ func (m middlewareSet) Wrap(h http.Handler) http.Handler {
 	return apachelog.WrapLoggingWriter(h, l)
 }
 
+const trustedCall = "octav.api.trustedCall"
+func isTrustedCall(ctx context.Context) bool {
+	allow, ok := ctx.Value(trustedCall).(bool)
+	return ok && allow
+}
+
 func init() {
 	httpError = httpErrorAsJSON
 	mwset = middlewareSet{}
@@ -38,11 +44,30 @@ func httpCodeFromError(err error) int {
 	return http.StatusInternalServerError
 }
 
+func httpWithOptionalBasicAuth(h HandlerWithContext) HandlerWithContext {
+	return wrapBasicAuth(h, true)
+}
 func httpWithBasicAuth(h HandlerWithContext) HandlerWithContext {
+	return wrapBasicAuth(h, false)
+}
+
+func wrapBasicAuth(h HandlerWithContext, authIsOptional bool) HandlerWithContext {
 	return HandlerWithContext(func(ctx context.Context, w http.ResponseWriter, r *http.Request) {
 		// Verify access token in the Basic-Auth
 		clientID, clientSecret, ok := r.BasicAuth()
 		if !ok {
+			if pdebug.Enabled {
+				pdebug.Printf("clientID and/or clientSecret not provided")
+			}
+
+			if authIsOptional {
+				// if the authentication is optional, then we can just proceed
+				if pdebug.Enabled {
+					pdebug.Printf("authentication is optional, allowing regular access")
+				}
+				h(ctx, w, r)
+				return
+			}
 			w.Header().Set("WWW-Authenticate", `Basic realm="octav"`)
 			httpError(w, http.StatusText(http.StatusUnauthorized), http.StatusUnauthorized, nil)
 			return
@@ -61,6 +86,7 @@ func httpWithBasicAuth(h HandlerWithContext) HandlerWithContext {
 		if pdebug.Enabled {
 			pdebug.Printf("Authentication succeeded, proceeding to call handler")
 		}
+		ctx = context.WithValue(ctx, trustedCall, true)
 		h(ctx, w, r)
 	})
 }
@@ -217,7 +243,7 @@ func doCreateConference(ctx context.Context, w http.ResponseWriter, r *http.Requ
 		return
 	}
 
-	httpJSON(w, c)
+	httpJSON(w, model.ObjectID{ID: c.ID, Type: "conference"})
 }
 
 func doLookupConferenceBySlug(ctx context.Context, w http.ResponseWriter, r *http.Request, payload model.LookupConferenceBySlugRequest) {
@@ -647,6 +673,7 @@ func doListUser(ctx context.Context, w http.ResponseWriter, r *http.Request, pay
 
 	var s service.User
 	var v model.UserList
+	payload.TrustedCall = isTrustedCall(ctx)
 	if err := s.ListFromPayload(tx, &v, payload); err != nil {
 		httpError(w, `ListUsers`, http.StatusInternalServerError, err)
 		return
@@ -669,6 +696,7 @@ func doLookupUserByAuthUserID(ctx context.Context, w http.ResponseWriter, r *htt
 
 	var s service.User
 	var v model.User
+	payload.TrustedCall = isTrustedCall(ctx)
 	if err := s.LookupUserByAuthUserIDFromPayload(tx, &v, payload); err != nil {
 		httpError(w, `LookupUserByAuthUserID`, http.StatusInternalServerError, err)
 		return
@@ -691,6 +719,7 @@ func doLookupUser(ctx context.Context, w http.ResponseWriter, r *http.Request, p
 
 	var s service.User
 	var v model.User
+	payload.TrustedCall = isTrustedCall(ctx)
 	if err := s.LookupFromPayload(tx, &v, payload); err != nil {
 		httpError(w, `LookupUser`, http.StatusInternalServerError, err)
 		return
@@ -921,6 +950,7 @@ func doLookupSession(ctx context.Context, w http.ResponseWriter, r *http.Request
 
 	var s service.Session
 	var v model.Session
+	payload.TrustedCall = isTrustedCall(ctx)
 	if err := s.LookupFromPayload(tx, &v, payload); err != nil {
 		httpError(w, `LookupSession`, http.StatusInternalServerError, err)
 		return
@@ -929,10 +959,10 @@ func doLookupSession(ctx context.Context, w http.ResponseWriter, r *http.Request
 	httpJSON(w, v)
 }
 
-func doListSessionByConference(ctx context.Context, w http.ResponseWriter, r *http.Request, payload model.ListSessionByConferenceRequest) {
+func doListSessions(ctx context.Context, w http.ResponseWriter, r *http.Request, payload model.ListSessionsRequest) {
 	tx, err := db.Begin()
 	if err != nil {
-		httpError(w, `ListSessionByConference`, http.StatusInternalServerError, err)
+		httpError(w, `ListSessions`, http.StatusInternalServerError, err)
 		return
 	}
 	defer tx.AutoRollback()
@@ -940,7 +970,7 @@ func doListSessionByConference(ctx context.Context, w http.ResponseWriter, r *ht
 	var s service.Session
 	var v model.SessionList
 	if err := s.ListSessionFromPayload(tx, &v, payload); err != nil {
-		httpError(w, `ListSessionByConference`, http.StatusInternalServerError, err)
+		httpError(w, `ListSessions`, http.StatusInternalServerError, err)
 		return
 	}
 

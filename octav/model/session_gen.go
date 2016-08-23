@@ -14,31 +14,34 @@ import (
 var _ = time.Time{}
 
 type rawSession struct {
-	ID                string      `json:"id"`
-	ConferenceID      string      `json:"conference_id"`
-	RoomID            string      `json:"room_id,omitempty"`
-	SpeakerID         string      `json:"speaker_id"`
-	Title             string      `json:"title" l10n:"true"`
-	Abstract          string      `json:"abstract" l10n:"true"`
-	Memo              string      `json:"memo"`
-	StartsOn          time.Time   `json:"starts_on"`
-	Duration          int         `json:"duration"`
-	MaterialLevel     string      `json:"material_level"`
-	Tags              TagString   `json:"tags,omitempty" assign:"convert"`
-	Category          string      `json:"category,omitempty"`
-	SpokenLanguage    string      `json:"spoken_language,omitempty"`
-	SlideLanguage     string      `json:"slide_language,omitempty"`
-	SlideSubtitles    string      `json:"slide_subtitles,omitempty"`
-	SlideURL          string      `json:"slide_url,omitempty"`
-	VideoURL          string      `json:"video_url,omitempty"`
-	PhotoPermission   string      `json:"photo_permission"`
-	VideoPermission   string      `json:"video_permission"`
-	HasInterpretation bool        `json:"has_interpretation"`
-	Status            string      `json:"status"`
-	Confirmed         bool        `json:"confirmed"`
-	Conference        *Conference `json:"conference,omitempy" decorate:"true"`
-	Room              *Room       `json:"room,omitempty" decorate:"true"`
-	Speaker           *User       `json:"speaker,omitempty" decorate:"true"`
+	ID                string       `json:"id"`
+	ConferenceID      string       `json:"conference_id"`
+	RoomID            string       `json:"room_id,omitempty"`
+	SpeakerID         string       `json:"speaker_id"`
+	SessionTypeID     string       `json:"session_type_id"`
+	Title             string       `json:"title" l10n:"true"`
+	Abstract          string       `json:"abstract" l10n:"true"`
+	Memo              string       `json:"memo"`
+	StartsOn          time.Time    `json:"starts_on"`
+	Duration          int          `json:"duration"`
+	MaterialLevel     string       `json:"material_level"`
+	Tags              TagString    `json:"tags,omitempty" assign:"convert"`
+	Category          string       `json:"category,omitempty"`
+	SpokenLanguage    string       `json:"spoken_language,omitempty"`
+	SlideLanguage     string       `json:"slide_language,omitempty"`
+	SlideSubtitles    string       `json:"slide_subtitles,omitempty"`
+	SlideURL          string       `json:"slide_url,omitempty"`
+	VideoURL          string       `json:"video_url,omitempty"`
+	PhotoRelease      string       `json:"photo_release"`
+	RecordingRelease  string       `json:"recording_release"`
+	MaterialsRelease  string       `json:"materials_release"`
+	HasInterpretation bool         `json:"has_interpretation"`
+	Status            string       `json:"status"`
+	Confirmed         bool         `json:"confirmed"`
+	Conference        *Conference  `json:"conference,omitempy" decorate:"true"`
+	Room              *Room        `json:"room,omitempty" decorate:"true"`
+	Speaker           *User        `json:"speaker,omitempty" decorate:"true"`
+	SessionType       *SessionType `json:"session_type,omitempty" decorate:"true"`
 }
 
 func (v Session) MarshalJSON() ([]byte, error) {
@@ -47,6 +50,7 @@ func (v Session) MarshalJSON() ([]byte, error) {
 	raw.ConferenceID = v.ConferenceID
 	raw.RoomID = v.RoomID
 	raw.SpeakerID = v.SpeakerID
+	raw.SessionTypeID = v.SessionTypeID
 	raw.Title = v.Title
 	raw.Abstract = v.Abstract
 	raw.Memo = v.Memo
@@ -60,14 +64,16 @@ func (v Session) MarshalJSON() ([]byte, error) {
 	raw.SlideSubtitles = v.SlideSubtitles
 	raw.SlideURL = v.SlideURL
 	raw.VideoURL = v.VideoURL
-	raw.PhotoPermission = v.PhotoPermission
-	raw.VideoPermission = v.VideoPermission
+	raw.PhotoRelease = v.PhotoRelease
+	raw.RecordingRelease = v.RecordingRelease
+	raw.MaterialsRelease = v.MaterialsRelease
 	raw.HasInterpretation = v.HasInterpretation
 	raw.Status = v.Status
 	raw.Confirmed = v.Confirmed
 	raw.Conference = v.Conference
 	raw.Room = v.Room
 	raw.Speaker = v.Speaker
+	raw.SessionType = v.SessionType
 	buf, err := json.Marshal(raw)
 	if err != nil {
 		return nil, err
@@ -98,6 +104,7 @@ func (v *Session) FromRow(vdb db.Session) error {
 		v.RoomID = vdb.RoomID.String
 	}
 	v.SpeakerID = vdb.SpeakerID
+	v.SessionTypeID = vdb.SessionTypeID
 	if vdb.Title.Valid {
 		v.Title = vdb.Title.String
 	}
@@ -135,11 +142,14 @@ func (v *Session) FromRow(vdb db.Session) error {
 	if vdb.VideoURL.Valid {
 		v.VideoURL = vdb.VideoURL.String
 	}
-	if vdb.PhotoPermission.Valid {
-		v.PhotoPermission = vdb.PhotoPermission.String
+	if vdb.PhotoRelease.Valid {
+		v.PhotoRelease = vdb.PhotoRelease.String
 	}
-	if vdb.VideoPermission.Valid {
-		v.VideoPermission = vdb.VideoPermission.String
+	if vdb.RecordingRelease.Valid {
+		v.RecordingRelease = vdb.RecordingRelease.String
+	}
+	if vdb.MaterialsRelease.Valid {
+		v.MaterialsRelease = vdb.MaterialsRelease.String
 	}
 	v.HasInterpretation = vdb.HasInterpretation
 	v.Status = vdb.Status
@@ -153,6 +163,7 @@ func (v *Session) ToRow(vdb *db.Session) error {
 	vdb.RoomID.Valid = true
 	vdb.RoomID.String = v.RoomID
 	vdb.SpeakerID = v.SpeakerID
+	vdb.SessionTypeID = v.SessionTypeID
 	vdb.Title.Valid = true
 	vdb.Title.String = v.Title
 	vdb.Abstract.Valid = true
@@ -178,10 +189,12 @@ func (v *Session) ToRow(vdb *db.Session) error {
 	vdb.SlideURL.String = v.SlideURL
 	vdb.VideoURL.Valid = true
 	vdb.VideoURL.String = v.VideoURL
-	vdb.PhotoPermission.Valid = true
-	vdb.PhotoPermission.String = v.PhotoPermission
-	vdb.VideoPermission.Valid = true
-	vdb.VideoPermission.String = v.VideoPermission
+	vdb.PhotoRelease.Valid = true
+	vdb.PhotoRelease.String = v.PhotoRelease
+	vdb.RecordingRelease.Valid = true
+	vdb.RecordingRelease.String = v.RecordingRelease
+	vdb.MaterialsRelease.Valid = true
+	vdb.MaterialsRelease.String = v.MaterialsRelease
 	vdb.HasInterpretation = v.HasInterpretation
 	vdb.Status = v.Status
 	vdb.Confirmed = v.Confirmed

@@ -12,7 +12,7 @@ import (
 	"time"
 
 	"golang.org/x/net/context"
-	"google.golang.org/cloud/storage"
+	"cloud.google.com/go/storage"
 
 	"github.com/builderscon/octav/octav/db"
 	"github.com/builderscon/octav/octav/internal/errors"
@@ -28,10 +28,6 @@ func (v *Conference) populateRowForCreate(vdb *db.Conference, payload model.Crea
 	vdb.SeriesID = payload.SeriesID
 	vdb.Status = "private"
 
-	if payload.Description.Valid() {
-		vdb.Description.Valid = true
-		vdb.Description.String = payload.Description.String
-	}
 	if payload.SubTitle.Valid() {
 		vdb.SubTitle.Valid = true
 		vdb.SubTitle.String = payload.SubTitle.String
@@ -59,11 +55,6 @@ func (v *Conference) populateRowForUpdate(vdb *db.Conference, payload model.Upda
 
 	if payload.Status.Valid() {
 		vdb.Status = payload.Status.String
-	}
-
-	if payload.Description.Valid() {
-		vdb.Description.Valid = true
-		vdb.Description.String = payload.Description.String
 	}
 
 	if payload.SubTitle.Valid() {
@@ -118,6 +109,48 @@ func (v *Conference) CreateFromPayload(tx *db.Tx, payload model.CreateConference
 	vdb := db.Conference{}
 	if err := v.Create(tx, &vdb, payload); err != nil {
 		return errors.Wrap(err, "failed to store in database")
+	}
+
+	// Description, CFPLead, CFPPresubmitInstructions, CFPPostsubmitInstruction
+	// must be created
+	cc := db.ConferenceComponent{
+		ConferenceID: vdb.EID,
+		CreatedOn: time.Now(),
+	}
+	if payload.Description.Valid() && payload.Description.String != "" {
+		cc.EID = tools.UUID()
+		cc.Name = "description"
+		cc.Value = payload.Description.String
+		if err := cc.Create(tx); err != nil {
+			return errors.Wrap(err, "failed to insert description")
+		}
+	}
+
+	if payload.CFPLeadText.Valid() && payload.CFPLeadText.String != "" {
+		cc.EID = tools.UUID()
+		cc.Name = "cfp_lead_text"
+		cc.Value = payload.CFPLeadText.String
+		if err := cc.Create(tx); err != nil {
+			return errors.Wrap(err, "failed to insert description")
+		}
+	}
+
+	if payload.CFPPostSubmitInstructions.Valid() && payload.CFPPostSubmitInstructions.String != "" {
+		cc.EID = tools.UUID()
+		cc.Name = "cfp_post_submit_instructions"
+		cc.Value = payload.CFPPostSubmitInstructions.String
+		if err := cc.Create(tx); err != nil {
+			return errors.Wrap(err, "failed to insert description")
+		}
+	}
+
+	if payload.CFPPreSubmitInstructions.Valid() && payload.CFPPreSubmitInstructions.String != "" {
+		cc.EID = tools.UUID()
+		cc.Name = "cfp_pre_submit_instructions"
+		cc.Value = payload.CFPPreSubmitInstructions.String
+		if err := cc.Create(tx); err != nil {
+			return errors.Wrap(err, "failed to insert description")
+		}
 	}
 
 	if err := v.AddAdministrator(tx, vdb.EID, payload.UserID); err != nil {
@@ -301,7 +334,7 @@ func (v *Conference) DeleteAdministratorFromPayload(tx *db.Tx, payload model.Del
 	return db.DeleteConferenceAdministrator(tx, payload.ConferenceID, payload.AdminID)
 }
 
-func (v *Conference) LoadAdmins(tx *db.Tx, cdl *model.UserList, cid string) (err error) {
+func (v *Conference) LoadAdmins(tx *db.Tx, cdl *model.UserList, trustedCall bool, cid, lang string) (err error) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("service.Conference.LoadAdmins").BindError(&err)
 		defer g.End()
@@ -317,12 +350,14 @@ func (v *Conference) LoadAdmins(tx *db.Tx, cdl *model.UserList, cid string) (err
 	}
 
 	res := make(model.UserList, len(vdbl))
+	var us User
 	for i, vdb := range vdbl {
-		var u model.User
-		if err := u.FromRow(vdb); err != nil {
-			return err
+		if err := res[i].FromRow(vdb); err != nil {
+			return errors.Wrap(err, "failed to map database to model")
 		}
-		res[i] = u
+		if err := us.Decorate(tx, &res[i], trustedCall, lang); err != nil {
+			return errors.Wrap(err, "failed to decorate administrator")
+		}
 	}
 	*cdl = res
 	return nil
@@ -370,7 +405,34 @@ func (v *Conference) LoadVenues(tx *db.Tx, cdl *model.VenueList, cid string) err
 	return nil
 }
 
-func (v *Conference) Decorate(tx *db.Tx, c *model.Conference, lang string) error {
+func (v *Conference) LoadTextComponents(tx *db.Tx, c *model.Conference) error {
+	var ccl db.ConferenceComponentList
+
+	if err := ccl.LoadByConferenceID(tx, c.ID); err != nil {
+		return errors.Wrap(err, "failed to load text components for conference")
+	}
+
+	for _, cc := range ccl {
+		switch cc.Name {
+		case "description":
+			c.Description = cc.Value
+		case "cfp_lead_text":
+			c.CFPLeadText = cc.Value
+		case "cfp_pre_submit_instructions":
+			c.CFPPreSubmitInstructions = cc.Value
+		case "cfp_post_submit_instructions":
+			c.CFPPostSubmitInstructions = cc.Value
+		}
+	}
+	return nil
+}
+
+func (v *Conference) Decorate(tx *db.Tx, c *model.Conference, trustedCall bool, lang string) (err error) {
+	if pdebug.Enabled {
+		g := pdebug.Marker("service.Conference.Decorate").BindError(&err)
+		defer g.End()
+	}
+
 	if seriesID := c.SeriesID; seriesID != "" {
 		sdb := db.ConferenceSeries{}
 		if err := sdb.LoadByEID(tx, seriesID); err != nil {
@@ -382,6 +444,7 @@ func (v *Conference) Decorate(tx *db.Tx, c *model.Conference, lang string) error
 			return errors.Wrapf(err, "failed to load conferences series '%s'", seriesID)
 		}
 		c.Series = &s
+		c.FullSlug = s.Slug + "/" + c.Slug
 	}
 
 	if c.CoverURL == "" {
@@ -389,11 +452,15 @@ func (v *Conference) Decorate(tx *db.Tx, c *model.Conference, lang string) error
 		c.CoverURL = "https://builderscon.io/assets/images/heroimage.png"
 	}
 
+	if err := v.LoadTextComponents(tx, c); err != nil {
+		return errors.Wrapf(err, "failed to load conference text components for '%s'", c.ID)
+	}
+
 	if err := v.LoadDates(tx, &c.Dates, c.ID); err != nil {
 		return errors.Wrapf(err, "failed to load conference date for '%s'", c.ID)
 	}
 
-	if err := v.LoadAdmins(tx, &c.Administrators, c.ID); err != nil {
+	if err := v.LoadAdmins(tx, &c.Administrators, trustedCall, c.ID, lang); err != nil {
 		return errors.Wrapf(err, "failed to load administrators for '%s'", c.ID)
 	}
 
@@ -411,26 +478,28 @@ func (v *Conference) Decorate(tx *db.Tx, c *model.Conference, lang string) error
 
 	sv := Venue{}
 	for i := range c.Venues {
-		if err := sv.Decorate(tx, &c.Venues[i], lang); err != nil {
+		if err := sv.Decorate(tx, &c.Venues[i], trustedCall, lang); err != nil {
 			return errors.Wrap(err, "failed to decorate venue with associated data")
 		}
 	}
 
 	sfs := FeaturedSpeaker{}
 	for i := range c.FeaturedSpeakers {
-		if err := sfs.Decorate(tx, &c.FeaturedSpeakers[i], lang); err != nil {
+		if err := sfs.Decorate(tx, &c.FeaturedSpeakers[i], trustedCall, lang); err != nil {
 			return errors.Wrap(err, "failed to decorate featured speakers with associated data")
 		}
 	}
 
 	sps := Sponsor{}
 	for i := range c.Sponsors {
-		if err := sps.Decorate(tx, &c.Sponsors[i], lang); err != nil {
+		if err := sps.Decorate(tx, &c.Sponsors[i], trustedCall, lang); err != nil {
 			return errors.Wrap(err, "failed to decorate sponsors with associated data")
 		}
 	}
 
-	if lang != "" {
+	switch lang {
+	case "", "en":
+	default:
 		if err := v.ReplaceL10NStrings(tx, c, lang); err != nil {
 			return errors.Wrap(err, "failed to replace L10N strings")
 		}
@@ -543,6 +612,57 @@ func (v *Conference) UpdateFromPayload(ctx context.Context, tx *db.Tx, payload m
 		return errors.Wrap(err, "failed to update sponsor in database")
 	}
 
+	var ccs ConferenceComponent
+	deletedTextComponents := []string{}
+	addedTextComponents := map[string]string{}
+	if payload.Description.Valid() {
+		s := payload.Description.String
+		if len(s) == 0 {
+			deletedTextComponents = append(deletedTextComponents, s)
+		} else {
+			addedTextComponents["description"] = s
+		}
+	}
+
+	if payload.CFPLeadText.Valid() {
+		s := payload.CFPLeadText.String
+		if len(s) == 0 {
+			deletedTextComponents = append(deletedTextComponents, s)
+		} else {
+			addedTextComponents["cfp_lead_text"] = s
+		}
+	}
+
+	if payload.CFPPreSubmitInstructions.Valid() {
+		s := payload.CFPPreSubmitInstructions.String
+		if len(s) == 0 {
+			deletedTextComponents = append(deletedTextComponents, s)
+		} else {
+			addedTextComponents["cfp_pre_submit_instructions"] = s
+		}
+	}
+
+	if payload.CFPPostSubmitInstructions.Valid() {
+		s := payload.CFPPostSubmitInstructions.String
+		if len(s) == 0 {
+			deletedTextComponents = append(deletedTextComponents, s)
+		} else {
+			addedTextComponents["cfp_post_submit_instructions"] = s
+		}
+	}
+
+	if len(deletedTextComponents) > 0 {
+		if err := ccs.DeleteByConferenceIDAndName(tx, payload.ID, deletedTextComponents...); err != nil {
+			return errors.Wrap(err, "failed to delete components")
+		}
+	}
+
+	if len(addedTextComponents) > 0 {
+		if err := ccs.UpsertByConferenceIDAndName(tx, payload.ID, addedTextComponents); err != nil {
+			return errors.Wrap(err, "failed to register components")
+		}
+	}
+
 	if _, ok := errors.IsFinalizationRequired(uploadErr); ok {
 		return uploadErr
 	}
@@ -591,7 +711,7 @@ func (v *Conference) ListFromPayload(tx *db.Tx, l *model.ConferenceList, payload
 		if err := (r[i]).FromRow(vdb); err != nil {
 			return errors.Wrap(err, "failed populate model from database")
 		}
-		if err := v.Decorate(tx, &r[i], payload.Lang.String); err != nil {
+		if err := v.Decorate(tx, &r[i], false, payload.Lang.String); err != nil {
 			return errors.Wrap(err, "failed to decorate venue with associated data")
 		}
 	}
@@ -647,7 +767,7 @@ func (v *Conference) ListByOrganizerFromPayload(tx *db.Tx, l *model.ConferenceLi
 		if err := (res[i]).FromRow(vdb); err != nil {
 			return errors.Wrap(err, "failed populate model from database")
 		}
-		if err := v.Decorate(tx, &res[i], payload.Lang.String); err != nil {
+		if err := v.Decorate(tx, &res[i], false, payload.Lang.String); err != nil {
 			return errors.Wrap(err, "failed to decorate conference with associated data")
 		}
 	}

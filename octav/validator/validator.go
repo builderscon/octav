@@ -25,6 +25,7 @@ var HTTPCreateRoomResponse *jsval.JSVal
 var HTTPCreateSessionRequest *jsval.JSVal
 var HTTPCreateSessionResponse *jsval.JSVal
 var HTTPCreateSessionSurveyResponseRequest *jsval.JSVal
+var HTTPCreateSessionSurveyResponseResponse *jsval.JSVal
 var HTTPCreateUserRequest *jsval.JSVal
 var HTTPCreateUserResponse *jsval.JSVal
 var HTTPCreateVenueRequest *jsval.JSVal
@@ -54,10 +55,10 @@ var HTTPListQuestionRequest *jsval.JSVal
 var HTTPListQuestionResponse *jsval.JSVal
 var HTTPListRoomRequest *jsval.JSVal
 var HTTPListRoomResponse *jsval.JSVal
-var HTTPListSessionByConferenceRequest *jsval.JSVal
-var HTTPListSessionByConferenceResponse *jsval.JSVal
 var HTTPListSessionTypesByConferenceRequest *jsval.JSVal
 var HTTPListSessionTypesByConferenceResponse *jsval.JSVal
+var HTTPListSessionsRequest *jsval.JSVal
+var HTTPListSessionsResponse *jsval.JSVal
 var HTTPListSponsorsRequest *jsval.JSVal
 var HTTPListSponsorsResponse *jsval.JSVal
 var HTTPListUserRequest *jsval.JSVal
@@ -357,7 +358,16 @@ func init() {
 			"user_id",
 			jsval.Reference(M).RefersTo("#/definitions/uuid"),
 		)
-	R28 = jsval.String().RegexpString("^(\\d\\d\\d\\d)(-)?(\\d\\d)(-)?(\\d\\d)(T)?(\\d\\d)(:)?(\\d\\d)(:)?(\\d\\d)(\\.\\d+)?(Z|([+-])(\\d\\d)(:)?(\\d\\d))$")
+	R28 = jsval.OneOf().
+		Add(
+			jsval.String().RegexpString("^(\\d\\d\\d\\d)(-)?(\\d\\d)(-)?(\\d\\d)(T)?(\\d\\d)(:)?(\\d\\d)(:)?(\\d\\d)(\\.\\d+)?(Z|([+-])(\\d\\d)(:)?(\\d\\d))$"),
+		).
+		Add(
+			jsval.Object().
+				AdditionalProperties(
+					jsval.EmptyConstraint,
+				),
+		)
 	R29 = jsval.Object().
 		AdditionalProperties(
 			jsval.EmptyConstraint,
@@ -428,11 +438,19 @@ func init() {
 			jsval.Reference(M).RefersTo("#/definitions/material_level"),
 		).
 		AddProp(
+			"materials_release",
+			jsval.Reference(M).RefersTo("#/definitions/binary_permission_default_allow"),
+		).
+		AddProp(
 			"memo",
 			jsval.String(),
 		).
 		AddProp(
-			"photo_permission",
+			"photo_release",
+			jsval.Reference(M).RefersTo("#/definitions/binary_permission_default_allow"),
+		).
+		AddProp(
+			"recording_release",
 			jsval.Reference(M).RefersTo("#/definitions/binary_permission_default_allow"),
 		).
 		AddProp(
@@ -443,6 +461,16 @@ func init() {
 				).
 				Add(
 					jsval.Reference(M).RefersTo("#/definitions/room"),
+				),
+		).
+		AddProp(
+			"session_type",
+			jsval.OneOf().
+				Add(
+					jsval.NullConstraint,
+				).
+				Add(
+					jsval.Reference(M).RefersTo("#/definitions/session_type"),
 				),
 		).
 		AddProp(
@@ -498,10 +526,6 @@ func init() {
 		AddProp(
 			"title",
 			jsval.String(),
-		).
-		AddProp(
-			"video_permission",
-			jsval.Reference(M).RefersTo("#/definitions/binary_permission_default_allow"),
 		).
 		AddProp(
 			"video_url",
@@ -569,7 +593,13 @@ func init() {
 		).
 		AddProp(
 			"email",
-			jsval.Reference(M).RefersTo("#/definitions/email"),
+			jsval.OneOf().
+				Add(
+					jsval.Reference(M).RefersTo("#/definitions/email"),
+				).
+				Add(
+					jsval.NullConstraint,
+				),
 		).
 		AddProp(
 			"id",
@@ -642,7 +672,16 @@ func init() {
 			jsval.EmptyConstraint,
 		)
 	R43 = jsval.String().RegexpString("^\\d\\d:\\d\\d$")
-	R44 = jsval.String().Enum("XXXL", "XXL", "XL", "L", "M", "S", "XS")
+	R44 = jsval.OneOf().
+		Add(
+			jsval.String().Enum("XXXL", "XXL", "XL", "L", "M", "S", "XS"),
+		).
+		Add(
+			jsval.NullConstraint,
+		).
+		Add(
+			jsval.String().MaxLength(0),
+		)
 	R45 = jsval.String().Format("uri")
 	R46 = jsval.Object().
 		AdditionalProperties(
@@ -650,7 +689,16 @@ func init() {
 		).
 		AddProp(
 			"email",
-			jsval.Reference(M).RefersTo("#/definitions/email"),
+			jsval.Any().
+				Add(
+					jsval.Reference(M).RefersTo("#/definitions/email"),
+				).
+				Add(
+					jsval.NullConstraint,
+				).
+				Add(
+					jsval.String().MaxLength(0),
+				),
 		).
 		AddProp(
 			"first_name",
@@ -1071,6 +1119,18 @@ func init() {
 					jsval.EmptyConstraint,
 				).
 				AddProp(
+					"cfp_lead_text",
+					jsval.Reference(M).RefersTo("#/definitions/string_en"),
+				).
+				AddProp(
+					"cfp_post_submit_instructions",
+					jsval.Reference(M).RefersTo("#/definitions/string_en"),
+				).
+				AddProp(
+					"cfp_pre_submit_instructions",
+					jsval.Reference(M).RefersTo("#/definitions/string_en"),
+				).
+				AddProp(
 					"description",
 					jsval.Reference(M).RefersTo("#/definitions/string_en"),
 				).
@@ -1104,48 +1164,12 @@ func init() {
 					jsval.EmptyConstraint,
 				).
 				AddProp(
-					"administrators",
-					jsval.Reference(M).RefersTo("#/definitions/user_array"),
-				).
-				AddProp(
-					"dates",
-					jsval.Reference(M).RefersTo("#/definitions/conference_date_array"),
-				).
-				AddProp(
-					"description",
-					jsval.Reference(M).RefersTo("#/definitions/string_en"),
-				).
-				AddProp(
-					"featured_speakers",
-					jsval.Reference(M).RefersTo("#/definitions/featured_speaker_array"),
-				).
-				AddProp(
 					"id",
 					jsval.Reference(M).RefersTo("#/definitions/uuid"),
 				).
 				AddProp(
-					"name",
-					jsval.Reference(M).RefersTo("#/definitions/string_en"),
-				).
-				AddProp(
-					"slug",
-					jsval.Reference(M).RefersTo("#/definitions/string_en"),
-				).
-				AddProp(
-					"status",
-					jsval.Reference(M).RefersTo("#/definitions/conference_status"),
-				).
-				AddProp(
-					"venue",
-					jsval.Reference(M).RefersTo("#/definitions/venue"),
-				).
-				PatternPropertiesString(
-					"description#[a-z]+",
-					jsval.Reference(M).RefersTo("#/definitions/string_i18n"),
-				).
-				PatternPropertiesString(
-					"title#[a-z]+",
-					jsval.Reference(M).RefersTo("#/definitions/string_i18n"),
+					"type",
+					jsval.String(),
 				),
 		)
 
@@ -1187,11 +1211,7 @@ func init() {
 					jsval.Reference(M).RefersTo("#/definitions/uuid"),
 				).
 				AddProp(
-					"slug",
-					jsval.Reference(M).RefersTo("#/definitions/slug_top"),
-				).
-				AddProp(
-					"title",
+					"type",
 					jsval.String(),
 				),
 		)
@@ -1226,20 +1246,12 @@ func init() {
 					jsval.EmptyConstraint,
 				).
 				AddProp(
-					"body",
-					jsval.String(),
-				).
-				AddProp(
 					"id",
 					jsval.Reference(M).RefersTo("#/definitions/uuid"),
 				).
 				AddProp(
-					"session_id",
-					jsval.Reference(M).RefersTo("#/definitions/uuid"),
-				).
-				AddProp(
-					"user_id",
-					jsval.Reference(M).RefersTo("#/definitions/uuid"),
+					"type",
+					jsval.String(),
 				),
 		)
 
@@ -1281,24 +1293,12 @@ func init() {
 					jsval.EmptyConstraint,
 				).
 				AddProp(
-					"capcity",
-					jsval.Reference(M).RefersTo("#/definitions/positiveInteger"),
-				).
-				AddProp(
 					"id",
 					jsval.Reference(M).RefersTo("#/definitions/uuid"),
 				).
 				AddProp(
-					"name",
+					"type",
 					jsval.String(),
-				).
-				AddProp(
-					"venue_id",
-					jsval.Reference(M).RefersTo("#/definitions/uuid"),
-				).
-				PatternPropertiesString(
-					"name#[a-z]+",
-					jsval.Reference(M).RefersTo("#/definitions/string_i18n"),
 				),
 		)
 
@@ -1306,7 +1306,7 @@ func init() {
 		SetConstraintMap(M).
 		SetRoot(
 			jsval.Object().
-				Required("abstract", "conference_id", "session_type_id", "speaker_id", "title", "user_id").
+				Required("conference_id", "session_type_id", "speaker_id", "user_id").
 				AdditionalProperties(
 					jsval.EmptyConstraint,
 				).
@@ -1327,11 +1327,19 @@ func init() {
 					jsval.Reference(M).RefersTo("#/definitions/material_level"),
 				).
 				AddProp(
+					"materials_release",
+					jsval.Reference(M).RefersTo("#/definitions/binary_permission_default_allow"),
+				).
+				AddProp(
 					"memo",
 					jsval.String(),
 				).
 				AddProp(
-					"photo_permission",
+					"photo_release",
+					jsval.Reference(M).RefersTo("#/definitions/binary_permission_default_allow"),
+				).
+				AddProp(
+					"recording_release",
 					jsval.Reference(M).RefersTo("#/definitions/binary_permission_default_allow"),
 				).
 				AddProp(
@@ -1371,10 +1379,6 @@ func init() {
 					jsval.Reference(M).RefersTo("#/definitions/uuid"),
 				).
 				AddProp(
-					"video_permission",
-					jsval.Reference(M).RefersTo("#/definitions/binary_permission_default_allow"),
-				).
-				AddProp(
 					"video_url",
 					jsval.Reference(M).RefersTo("#/definitions/url"),
 				).
@@ -1396,118 +1400,12 @@ func init() {
 					jsval.EmptyConstraint,
 				).
 				AddProp(
-					"abstract",
+					"id",
+					jsval.Reference(M).RefersTo("#/definitions/uuid"),
+				).
+				AddProp(
+					"type",
 					jsval.String(),
-				).
-				AddProp(
-					"category",
-					jsval.String(),
-				).
-				AddProp(
-					"conference",
-					jsval.OneOf().
-						Add(
-							jsval.NullConstraint,
-						).
-						Add(
-							jsval.Reference(M).RefersTo("#/definitions/conference"),
-						),
-				).
-				AddProp(
-					"confirmed",
-					jsval.Reference(M).RefersTo("#/definitions/boolean_default_false"),
-				).
-				AddProp(
-					"duration",
-					jsval.Reference(M).RefersTo("#/definitions/duration"),
-				).
-				AddProp(
-					"has_interpretation",
-					jsval.Reference(M).RefersTo("#/definitions/boolean_default_false"),
-				).
-				AddProp(
-					"material_level",
-					jsval.Reference(M).RefersTo("#/definitions/material_level"),
-				).
-				AddProp(
-					"memo",
-					jsval.String(),
-				).
-				AddProp(
-					"photo_permission",
-					jsval.Reference(M).RefersTo("#/definitions/binary_permission_default_allow"),
-				).
-				AddProp(
-					"room",
-					jsval.OneOf().
-						Add(
-							jsval.NullConstraint,
-						).
-						Add(
-							jsval.Reference(M).RefersTo("#/definitions/room"),
-						),
-				).
-				AddProp(
-					"slide_language",
-					jsval.Reference(M).RefersTo("#/definitions/language"),
-				).
-				AddProp(
-					"slide_subtitles",
-					jsval.Reference(M).RefersTo("#/definitions/language"),
-				).
-				AddProp(
-					"slide_url",
-					jsval.Reference(M).RefersTo("#/definitions/url"),
-				).
-				AddProp(
-					"speaker",
-					jsval.OneOf().
-						Add(
-							jsval.NullConstraint,
-						).
-						Add(
-							jsval.Object().
-								AdditionalProperties(
-									jsval.EmptyConstraint,
-								),
-						).
-						Add(
-							jsval.Reference(M).RefersTo("#/definitions/speaker_array"),
-						),
-				).
-				AddProp(
-					"spoken_language",
-					jsval.Reference(M).RefersTo("#/definitions/language"),
-				).
-				AddProp(
-					"starts_on",
-					jsval.Reference(M).RefersTo("#/definitions/datetime"),
-				).
-				AddProp(
-					"status",
-					jsval.Reference(M).RefersTo("#/definitions/acceptance_status"),
-				).
-				AddProp(
-					"tags",
-					jsval.OneOf().
-						Add(
-							jsval.String(),
-						).
-						Add(
-							jsval.Reference(M).RefersTo("#/definitions/tag_array"),
-						),
-				).
-				AddProp(
-					"title",
-					jsval.String(),
-				).
-				AddProp(
-					"video_permission",
-					jsval.Reference(M).RefersTo("#/definitions/binary_permission_default_allow"),
-				).
-				AddProp(
-					"video_url",
-					jsval.Reference(M).RefersTo("#/definitions/url"),
 				),
 		)
 
@@ -1554,6 +1452,23 @@ func init() {
 				AddProp(
 					"user_prior_knowledge",
 					jsval.Reference(M).RefersTo("#/definitions/int_rating"),
+				),
+		)
+
+	HTTPCreateSessionSurveyResponseResponse = jsval.New().
+		SetConstraintMap(M).
+		SetRoot(
+			jsval.Object().
+				AdditionalProperties(
+					jsval.EmptyConstraint,
+				).
+				AddProp(
+					"id",
+					jsval.Reference(M).RefersTo("#/definitions/uuid"),
+				).
+				AddProp(
+					"type",
+					jsval.String(),
 				),
 		)
 
@@ -1616,7 +1531,16 @@ func init() {
 				).
 				AddProp(
 					"email",
-					jsval.Reference(M).RefersTo("#/definitions/email"),
+					jsval.Any().
+						Add(
+							jsval.Reference(M).RefersTo("#/definitions/email"),
+						).
+						Add(
+							jsval.NullConstraint,
+						).
+						Add(
+							jsval.String().MaxLength(0),
+						),
 				).
 				AddProp(
 					"first_name",
@@ -1702,12 +1626,8 @@ func init() {
 					jsval.Reference(M).RefersTo("#/definitions/uuid"),
 				).
 				AddProp(
-					"name",
+					"type",
 					jsval.String(),
-				).
-				AddProp(
-					"rooms",
-					jsval.Reference(M).RefersTo("#/definitions/room_array"),
 				),
 		)
 
@@ -2183,42 +2103,6 @@ func init() {
 				),
 		)
 
-	HTTPListSessionByConferenceRequest = jsval.New().
-		SetConstraintMap(M).
-		SetRoot(
-			jsval.Object().
-				Required("conference_id").
-				AdditionalProperties(
-					jsval.EmptyConstraint,
-				).
-				AddProp(
-					"conference_id",
-					jsval.Reference(M).RefersTo("#/definitions/uuid"),
-				).
-				AddProp(
-					"date",
-					jsval.OneOf().
-						Add(
-							jsval.Reference(M).RefersTo("#/definitions/date"),
-						).
-						Add(
-							jsval.Reference(M).RefersTo("#/definitions/datestr"),
-						),
-				),
-		)
-
-	HTTPListSessionByConferenceResponse = jsval.New().
-		SetConstraintMap(M).
-		SetRoot(
-			jsval.Array().
-				Items(
-					jsval.Reference(M).RefersTo("#/definitions/session"),
-				).
-				AdditionalItems(
-					jsval.EmptyConstraint,
-				),
-		)
-
 	HTTPListSessionTypesByConferenceRequest = jsval.New().
 		SetConstraintMap(M).
 		SetRoot(
@@ -2250,6 +2134,61 @@ func init() {
 			jsval.Array().
 				Items(
 					jsval.Reference(M).RefersTo("#/definitions/session_type"),
+				).
+				AdditionalItems(
+					jsval.EmptyConstraint,
+				),
+		)
+
+	HTTPListSessionsRequest = jsval.New().
+		SetConstraintMap(M).
+		SetRoot(
+			jsval.Object().
+				AdditionalProperties(
+					jsval.EmptyConstraint,
+				).
+				AddProp(
+					"conference_id",
+					jsval.Reference(M).RefersTo("#/definitions/uuid"),
+				).
+				AddProp(
+					"date",
+					jsval.OneOf().
+						Add(
+							jsval.Reference(M).RefersTo("#/definitions/date"),
+						).
+						Add(
+							jsval.Reference(M).RefersTo("#/definitions/datestr"),
+						),
+				).
+				AddProp(
+					"lang",
+					jsval.Reference(M).RefersTo("#/definitions/language"),
+				).
+				AddProp(
+					"limit",
+					jsval.Reference(M).RefersTo("#/definitions/positiveInteger"),
+				).
+				AddProp(
+					"since",
+					jsval.Reference(M).RefersTo("#/definitions/uuid"),
+				).
+				AddProp(
+					"speaker_id",
+					jsval.Reference(M).RefersTo("#/definitions/uuid"),
+				).
+				AddProp(
+					"status",
+					jsval.Reference(M).RefersTo("#/definitions/acceptance_status"),
+				),
+		)
+
+	HTTPListSessionsResponse = jsval.New().
+		SetConstraintMap(M).
+		SetRoot(
+			jsval.Array().
+				Items(
+					jsval.Reference(M).RefersTo("#/definitions/session"),
 				).
 				AdditionalItems(
 					jsval.EmptyConstraint,
@@ -2614,6 +2553,10 @@ func init() {
 				AddProp(
 					"id",
 					jsval.Reference(M).RefersTo("#/definitions/uuid"),
+				).
+				AddProp(
+					"lang",
+					jsval.Reference(M).RefersTo("#/definitions/language"),
 				),
 		)
 
@@ -2659,11 +2602,19 @@ func init() {
 					jsval.Reference(M).RefersTo("#/definitions/material_level"),
 				).
 				AddProp(
+					"materials_release",
+					jsval.Reference(M).RefersTo("#/definitions/binary_permission_default_allow"),
+				).
+				AddProp(
 					"memo",
 					jsval.String(),
 				).
 				AddProp(
-					"photo_permission",
+					"photo_release",
+					jsval.Reference(M).RefersTo("#/definitions/binary_permission_default_allow"),
+				).
+				AddProp(
+					"recording_release",
 					jsval.Reference(M).RefersTo("#/definitions/binary_permission_default_allow"),
 				).
 				AddProp(
@@ -2674,6 +2625,16 @@ func init() {
 						).
 						Add(
 							jsval.Reference(M).RefersTo("#/definitions/room"),
+						),
+				).
+				AddProp(
+					"session_type",
+					jsval.OneOf().
+						Add(
+							jsval.NullConstraint,
+						).
+						Add(
+							jsval.Reference(M).RefersTo("#/definitions/session_type"),
 						),
 				).
 				AddProp(
@@ -2729,10 +2690,6 @@ func init() {
 				AddProp(
 					"title",
 					jsval.String(),
-				).
-				AddProp(
-					"video_permission",
-					jsval.Reference(M).RefersTo("#/definitions/binary_permission_default_allow"),
 				).
 				AddProp(
 					"video_url",
@@ -2901,7 +2858,16 @@ func init() {
 				).
 				AddProp(
 					"email",
-					jsval.Reference(M).RefersTo("#/definitions/email"),
+					jsval.Any().
+						Add(
+							jsval.Reference(M).RefersTo("#/definitions/email"),
+						).
+						Add(
+							jsval.NullConstraint,
+						).
+						Add(
+							jsval.String().MaxLength(0),
+						),
 				).
 				AddProp(
 					"first_name",
@@ -2960,7 +2926,16 @@ func init() {
 				).
 				AddProp(
 					"email",
-					jsval.Reference(M).RefersTo("#/definitions/email"),
+					jsval.Any().
+						Add(
+							jsval.Reference(M).RefersTo("#/definitions/email"),
+						).
+						Add(
+							jsval.NullConstraint,
+						).
+						Add(
+							jsval.String().MaxLength(0),
+						),
 				).
 				AddProp(
 					"first_name",
@@ -3040,6 +3015,18 @@ func init() {
 					jsval.EmptyConstraint,
 				).
 				AddProp(
+					"cfp_lead_text",
+					jsval.Reference(M).RefersTo("#/definitions/string_en"),
+				).
+				AddProp(
+					"cfp_post_submit_instructions",
+					jsval.Reference(M).RefersTo("#/definitions/string_en"),
+				).
+				AddProp(
+					"cfp_pre_submit_instructions",
+					jsval.Reference(M).RefersTo("#/definitions/string_en"),
+				).
+				AddProp(
 					"description",
 					jsval.Reference(M).RefersTo("#/definitions/string_en"),
 				).
@@ -3066,6 +3053,18 @@ func init() {
 				AddProp(
 					"user_id",
 					jsval.Reference(M).RefersTo("#/definitions/uuid"),
+				).
+				PatternPropertiesString(
+					"cfp_lead_text#[a-z]+",
+					jsval.Reference(M).RefersTo("#/definitions/string_i18n"),
+				).
+				PatternPropertiesString(
+					"cfp_post_submit_instructions#[a-z]+",
+					jsval.Reference(M).RefersTo("#/definitions/string_i18n"),
+				).
+				PatternPropertiesString(
+					"cfp_pre_submit_instructions#[a-z]+",
+					jsval.Reference(M).RefersTo("#/definitions/string_i18n"),
 				).
 				PatternPropertiesString(
 					"description#[a-z]+",
@@ -3194,12 +3193,24 @@ func init() {
 					jsval.Reference(M).RefersTo("#/definitions/material_level"),
 				).
 				AddProp(
+					"materials_release",
+					jsval.Reference(M).RefersTo("#/definitions/binary_permission_default_allow"),
+				).
+				AddProp(
 					"memo",
 					jsval.String(),
 				).
 				AddProp(
-					"photo_permission",
+					"photo_release",
 					jsval.Reference(M).RefersTo("#/definitions/binary_permission_default_allow"),
+				).
+				AddProp(
+					"recording_release",
+					jsval.Reference(M).RefersTo("#/definitions/binary_permission_default_allow"),
+				).
+				AddProp(
+					"session_type_id",
+					jsval.Reference(M).RefersTo("#/definitions/uuid"),
 				).
 				AddProp(
 					"slide_language",
@@ -3240,10 +3251,6 @@ func init() {
 				AddProp(
 					"user_id",
 					jsval.Reference(M).RefersTo("#/definitions/uuid"),
-				).
-				AddProp(
-					"video_permission",
-					jsval.Reference(M).RefersTo("#/definitions/binary_permission_default_allow"),
 				).
 				AddProp(
 					"video_url",

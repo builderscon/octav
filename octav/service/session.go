@@ -17,15 +17,40 @@ func (v *Session) populateRowForCreate(vdb *db.Session, payload model.CreateSess
 	vdb.Status = "pending"
 	vdb.SortOrder = 0
 	vdb.Confirmed = false
+	vdb.SessionTypeID = payload.SessionTypeID
 
+	// At least one of the English or Japanese titles must be
+	// non-empty
+	var hasTitle bool
 	if payload.Title.Valid() {
+		hasTitle = true
 		vdb.Title.Valid = true
 		vdb.Title.String = payload.Title.String
 	}
 
+	if s, ok := payload.L10N.Get("ja", "title"); ok && s != ""  {
+		hasTitle = true
+	}
+
+	if !hasTitle {
+		return errors.New("missing title")
+	}
+
+	// At least one of the English or Japanese abstracts must be
+	// non-empty
+	var hasAbstract bool
 	if payload.Abstract.Valid() {
+		hasAbstract = true
 		vdb.Abstract.Valid = true
 		vdb.Abstract.String = payload.Abstract.String
+	}
+
+	if s, ok := payload.L10N.Get("ja", "abstract"); ok && s != ""  {
+		hasAbstract = true
+	}
+
+	if !hasAbstract {
+		return errors.New("missing abstract")
 	}
 
 	if payload.Memo.Valid() {
@@ -68,14 +93,19 @@ func (v *Session) populateRowForCreate(vdb *db.Session, payload model.CreateSess
 		vdb.VideoURL.String = payload.VideoURL.String
 	}
 
-	if payload.PhotoPermission.Valid() {
-		vdb.PhotoPermission.Valid = true
-		vdb.PhotoPermission.String = payload.PhotoPermission.String
+	if payload.PhotoRelease.Valid() {
+		vdb.PhotoRelease.Valid = true
+		vdb.PhotoRelease.String = payload.PhotoRelease.String
 	}
 
-	if payload.VideoPermission.Valid() {
-		vdb.VideoPermission.Valid = true
-		vdb.VideoPermission.String = payload.VideoPermission.String
+	if payload.RecordingRelease.Valid() {
+		vdb.RecordingRelease.Valid = true
+		vdb.RecordingRelease.String = payload.RecordingRelease.String
+	}
+
+	if payload.MaterialsRelease.Valid() {
+		vdb.MaterialsRelease.Valid = true
+		vdb.MaterialsRelease.String = payload.MaterialsRelease.String
 	}
 
 	if payload.Tags.Valid() {
@@ -93,6 +123,10 @@ func (v *Session) populateRowForUpdate(vdb *db.Session, payload model.UpdateSess
 
 	if payload.SpeakerID.Valid() {
 		vdb.SpeakerID = payload.SpeakerID.String
+	}
+
+	if payload.SessionTypeID.Valid() {
+		vdb.SessionTypeID = payload.SessionTypeID.String
 	}
 
 	if payload.Duration.Valid() {
@@ -165,14 +199,19 @@ func (v *Session) populateRowForUpdate(vdb *db.Session, payload model.UpdateSess
 		vdb.VideoURL.String = payload.VideoURL.String
 	}
 
-	if payload.PhotoPermission.Valid() {
-		vdb.PhotoPermission.Valid = true
-		vdb.PhotoPermission.String = payload.PhotoPermission.String
+	if payload.PhotoRelease.Valid() {
+		vdb.PhotoRelease.Valid = true
+		vdb.PhotoRelease.String = payload.PhotoRelease.String
 	}
 
-	if payload.VideoPermission.Valid() {
-		vdb.VideoPermission.Valid = true
-		vdb.VideoPermission.String = payload.VideoPermission.String
+	if payload.RecordingRelease.Valid() {
+		vdb.RecordingRelease.Valid = true
+		vdb.RecordingRelease.String = payload.RecordingRelease.String
+	}
+
+	if payload.MaterialsRelease.Valid() {
+		vdb.MaterialsRelease.Valid = true
+		vdb.MaterialsRelease.String = payload.MaterialsRelease.String
 	}
 
 	if payload.Tags.Valid() {
@@ -184,41 +223,65 @@ func (v *Session) populateRowForUpdate(vdb *db.Session, payload model.UpdateSess
 }
 
 func (v *Session) LoadByConference(tx *db.Tx, vdbl *db.SessionList, cid string, date string) error {
-	if err := vdbl.LoadByConference(tx, cid, date); err != nil {
+	if err := vdbl.LoadByConference(tx, cid, "", date, ""); err != nil {
 		return err
 	}
 	return nil
 }
 
-func (v *Session) Decorate(tx *db.Tx, session *model.Session, lang string) error {
+func (v *Session) Decorate(tx *db.Tx, session *model.Session, trustedCall bool, lang string) error {
 	if pdebug.Enabled {
 		g := pdebug.Marker("service.Session.Decorate")
 		defer g.End()
 	}
 	// session must be associated with a conference
 	if session.ConferenceID != "" {
-		conf := model.Conference{}
-		if err := conf.Load(tx, session.ConferenceID); err != nil {
+		var cs Conference
+		var mc model.Conference
+		if err := cs.Lookup(tx, &mc, session.ConferenceID); err != nil {
 			return errors.Wrap(err, "failed to load conference")
 		}
-		session.Conference = &conf
+		if err := cs.Decorate(tx, &mc, trustedCall, lang); err != nil {
+			return errors.Wrap(err, "failed to decorate conference")
+		}
+		session.Conference = &mc
 	}
 
 	// ... but not necessarily with a room
 	if session.RoomID != "" {
-		room := model.Room{}
-		if err := room.Load(tx, session.RoomID); err != nil {
+		var rs Room
+		var room model.Room
+		if err := rs.Lookup(tx, &room, session.RoomID); err != nil {
 			return errors.Wrap(err, "failed to load room")
+		}
+		if err := rs.Decorate(tx, &room, trustedCall, lang); err != nil {
+			return errors.Wrap(err, "failed to decorate room")
 		}
 		session.Room = &room
 	}
 
 	if session.SpeakerID != "" {
-		speaker := model.User{}
-		if err := speaker.Load(tx, session.SpeakerID); err != nil {
+		var us User
+		var speaker model.User
+		if err := us.Lookup(tx, &speaker, session.SpeakerID); err != nil {
 			return errors.Wrapf(err, "failed to load speaker '%s'", session.SpeakerID)
 		}
+		if err := us.Decorate(tx, &speaker, trustedCall, lang); err != nil {
+			return errors.Wrap(err, "failed to decorate speaker")
+		}
 		session.Speaker = &speaker
+	}
+
+	if session.SessionTypeID != "" {
+		var sts SessionType
+		var sessionType model.SessionType
+		if err := sts.Lookup(tx, &sessionType, session.SessionTypeID); err != nil {
+			return errors.Wrapf(err, "failed to load session type '%s'", session.SessionTypeID)
+		}
+		if err := sts.Decorate(tx, &sessionType, trustedCall, lang); err != nil {
+			return errors.Wrap(err, "failed to decorate session type")
+		}
+		session.SessionType = &sessionType
 	}
 
 	if lang != "" {
@@ -292,9 +355,41 @@ func (v *Session) UpdateFromPayload(tx *db.Tx, result *model.Session, payload mo
 	return nil
 }
 
-func (v *Session) ListSessionFromPayload(tx *db.Tx, result *model.SessionList, payload model.ListSessionByConferenceRequest) error {
+func (v *Session) ListSessionFromPayload(tx *db.Tx, result *model.SessionList, payload model.ListSessionsRequest) (err error) {
+	if pdebug.Enabled {
+		g := pdebug.Marker("service.Session.ListSessionFromPayload").BindError(&err)
+		defer g.End()
+	}
+
+	// Make sure that we have at least one of the arguments
+	var conferenceID, speakerID, date, status string
+	var hasQuery bool
+	if payload.ConferenceID.Valid() {
+		conferenceID = payload.ConferenceID.String
+		hasQuery = true
+	}
+
+	if payload.SpeakerID.Valid() {
+		speakerID = payload.SpeakerID.String
+		hasQuery = true
+	}
+
+	if payload.Date.Valid() {
+		date = payload.Date.String
+		// Don't set the hasQuery flag, as this alone doesn't work
+	}
+
+	if payload.Status.Valid() {
+		status = payload.Status.String
+		// Don't set the hasQuery flag, as this alone doesn't work
+	}
+
+	if !hasQuery {
+		return errors.New("no query specified (one of conference_id/speaker_id is required)")
+	}
+
 	var vdbl db.SessionList
-	if err := vdbl.LoadByConference(tx, payload.ConferenceID, payload.Date.String); err != nil {
+	if err := vdbl.LoadByConference(tx, conferenceID, speakerID, date, status); err != nil {
 		return errors.Wrap(err, "failed to load from database")
 	}
 
@@ -304,7 +399,7 @@ func (v *Session) ListSessionFromPayload(tx *db.Tx, result *model.SessionList, p
 			return errors.Wrap(err, "failed to populate model from database")
 		}
 
-		if err := v.Decorate(tx, &l[i], payload.Lang.String); err != nil {
+		if err := v.Decorate(tx, &l[i], payload.TrustedCall, payload.Lang.String); err != nil {
 			return errors.Wrap(err, "failed to decorate session with associated data")
 		}
 	}

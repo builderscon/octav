@@ -1,20 +1,55 @@
 package db
 
-import (
-	"database/sql"
+import "github.com/pkg/errors"
 
-	"github.com/pkg/errors"
-)
+func (v *SessionList) LoadByConference(tx *Tx, conferenceID, speakerID, date, status string) error {
+	// The caller of this method should ensure that query fields are
+	// present and that we don't accidentally run an empty query
+	stmt := getStmtBuf()
+	defer releaseStmtBuf(stmt)
 
-func (v *SessionList) LoadByConference(tx *Tx, cid, date string) error {
-	var rows *sql.Rows
-	var err error
+	stmt.WriteString(`SELECT `)
+	stmt.WriteString(SessionStdSelectColumns)
+	stmt.WriteString(` FROM `)
+	stmt.WriteString(SessionTable)
+	stmt.WriteString(` WHERE `)
 
-	if date == "" {
-		rows, err = tx.Query(`SELECT oid, eid, conference_id, room_id, speaker_id, title, abstract, memo, starts_on, duration, material_level, tags, category, spoken_language, slide_language, slide_subtitles, slide_url, video_url, photo_permission, video_permission, has_interpretation, status, sort_order, confirmed, created_on, modified_on FROM `+SessionTable+` WHERE conference_id = ?`, cid)
-	} else {
-		rows, err = tx.Query(`SELECT oid, eid, conference_id, room_id, speaker_id, title, abstract, memo, starts_on, duration, material_level, tags, category, spoken_language, slide_language, slide_subtitles, slide_url, video_url, photo_permission, video_permission, has_interpretation, status, sort_order, confirmed, created_on, modified_on FROM `+SessionTable+` WHERE conference_id = ? AND DATE(starts_on) = ?`, cid, date)
+	where := getStmtBuf()
+	defer releaseStmtBuf(where)
+
+	var args []interface{}
+	if conferenceID != "" {
+		where.WriteString(` conference_id = ?`)
+		args = append(args, conferenceID)
 	}
+
+	if speakerID != "" {
+		if where.Len() > 0 {
+			where.WriteString(` AND`)
+		}
+		where.WriteString(` speaker_id = ?`)
+		args = append(args, speakerID)
+	}
+
+	if date != "" {
+		if where.Len() > 0 {
+			where.WriteString(` AND`)
+		}
+		where.WriteString(` DATE(date) = ?`)
+		args = append(args, date)
+	}
+
+	if status != "" {
+		if where.Len() > 0 {
+			where.WriteString(` AND`)
+		}
+		where.WriteString(` status = ?`)
+		args = append(args, status)
+	}
+
+	where.WriteTo(stmt)
+
+	rows, err := tx.Query(stmt.String(), args...)
 	if err != nil {
 		return err
 	}
@@ -24,7 +59,6 @@ func (v *SessionList) LoadByConference(tx *Tx, cid, date string) error {
 	}
 	return nil
 }
-
 
 func IsSessionOwner(tx *Tx, sessionID, userID string) error {
 	stmt := getStmtBuf()
@@ -45,4 +79,3 @@ func IsSessionOwner(tx *Tx, sessionID, userID string) error {
 	}
 	return nil
 }
-

@@ -15,8 +15,8 @@ var _ = time.Time{}
 
 type rawUser struct {
 	ID         string `json:"id"`
-	AuthVia    string `json:"auth_via"`
-	AuthUserID string `json:"auth_user_id"`
+	AuthVia    string `json:"auth_via,omitempty"`
+	AuthUserID string `json:"auth_user_id,omitempty"`
 	AvatarURL  string `json:"avatar_url,omitempty"`
 	FirstName  string `json:"first_name,omitempty" l10n:"true"`
 	LastName   string `json:"last_name,omitempty" l10n:"true"`
