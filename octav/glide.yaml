@@ -25,6 +25,7 @@ import:
   subpackages:
   - google
 - package: cloud.google.com/go
+- package: google.golang.org/api
 - package: golang.org/x/sync
   subpackages:
   - errgroup

@@ -1,9 +1,10 @@
-hash: d1d9af2673282affcb4500acee3cedc6d693246444efb33fb238be2f6c9d2ae1
-updated: 2016-08-23T10:52:33.086754454+09:00
+hash: 230cc7f12b441d0dd085edcfbf4f25ef78b130a4e3787808b84ceff11e2cb84f
+updated: 2016-08-23T11:03:48.096119566+09:00
 imports:
 - name: cloud.google.com/go
   version: 242ed68074e53cbb6f78a90c28d9a48bfa2d1093
   subpackages:
+  - storage
   - compute/metadata
   - internal
 - name: github.com/davecgh/go-spew
@@ -81,39 +82,39 @@ imports:
   - language
   - internal/tag
 - name: google.golang.org/api
-  version: 0f8fd0d7684b3f7050ca4bc4ee1c9c2a7d5cb859
+  version: 5c5176a4889d2044061e359412bfd6528f0e2fad
   subpackages:
   - option
   - googleapi
   - storage/v1
+  - transport
   - internal
   - googleapi/internal/uritemplates
   - gensupport
-  - transport
 - name: google.golang.org/appengine
   version: 4f7eeb5305a4ba1966344836ba4af9996b7b4e05
   subpackages:
+  - socket
   - urlfetch
   - internal
   - internal/app_identity
   - internal/modules
+  - internal/socket
   - internal/urlfetch
   - internal/base
   - internal/datastore
   - internal/log
   - internal/remote_api
-  - socket
-  - internal/socket
 - name: google.golang.org/grpc
   version: 0032a855ba5c8a3c8e0d71c2deef354b70af1584
   subpackages:
-  - codes
   - credentials
+  - credentials/oauth
+  - naming
+  - codes
   - grpclog
   - internal
   - metadata
-  - naming
   - transport
   - peer
-  - credentials/oauth
 devImports: []
