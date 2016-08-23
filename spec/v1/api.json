@@ -490,6 +490,7 @@
       "title": "Lookup user",
       "rel": "lookup",
       "href": "/user/lookup",
+      "hsup.wrapper": "httpWithOptionalBasicAuth",
       "method": "GET",
       "schema": {
         "type": "object",

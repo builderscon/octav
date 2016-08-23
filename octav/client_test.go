@@ -831,9 +831,6 @@ func TestCreateUser(t *testing.T) {
 		return
 	}
 
-	// Some fields like res2.Email and res2.TshirtSize are hidden
-	res.Email = ""
-	res.TshirtSize = ""
 	if !assert.Equal(ctx.T, res2, res, "LookupUser is the same as the user created") {
 		return
 	}
@@ -863,6 +860,22 @@ func TestCreateUser(t *testing.T) {
 		return
 	}
 
+	clientID, clientSecret := ctx.HTTPClient.BasicAuth.Username, ctx.HTTPClient.BasicAuth.Password
+	ctx.HTTPClient.BasicAuth.Username = ""
+	ctx.HTTPClient.BasicAuth.Password = ""
+	res5, err := testLookupUser(ctx, res.ID, "")
+	if err != nil {
+		return
+	}
+
+	res.Email = ""
+	res.TshirtSize = ""
+	if !assert.Equal(ctx.T, res5, res, "Lookup user should be the same (email and tshirt-size should be empty)") {
+		return
+	}
+
+	ctx.HTTPClient.BasicAuth.Username = clientID
+	ctx.HTTPClient.BasicAuth.Password = clientSecret
 	if err := testDeleteUser(ctx, res.ID, ctx.Superuser.EID); err != nil {
 		return
 	}

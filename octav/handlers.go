@@ -44,11 +44,30 @@ func httpCodeFromError(err error) int {
 	return http.StatusInternalServerError
 }
 
+func httpWithOptionalBasicAuth(h HandlerWithContext) HandlerWithContext {
+	return wrapBasicAuth(h, true)
+}
 func httpWithBasicAuth(h HandlerWithContext) HandlerWithContext {
+	return wrapBasicAuth(h, false)
+}
+
+func wrapBasicAuth(h HandlerWithContext, authIsOptional bool) HandlerWithContext {
 	return HandlerWithContext(func(ctx context.Context, w http.ResponseWriter, r *http.Request) {
 		// Verify access token in the Basic-Auth
 		clientID, clientSecret, ok := r.BasicAuth()
 		if !ok {
+			if pdebug.Enabled {
+				pdebug.Printf("clientID and/or clientSecret not provided")
+			}
+
+			if authIsOptional {
+				// if the authentication is optional, then we can just proceed
+				if pdebug.Enabled {
+					pdebug.Printf("authentication is optional, allowing regular access")
+				}
+				h(ctx, w, r)
+				return
+			}
 			w.Header().Set("WWW-Authenticate", `Basic realm="octav"`)
 			httpError(w, http.StatusText(http.StatusUnauthorized), http.StatusUnauthorized, nil)
 			return
@@ -677,6 +696,7 @@ func doLookupUserByAuthUserID(ctx context.Context, w http.ResponseWriter, r *htt
 
 	var s service.User
 	var v model.User
+	payload.TrustedCall = isTrustedCall(ctx)
 	if err := s.LookupUserByAuthUserIDFromPayload(tx, &v, payload); err != nil {
 		httpError(w, `LookupUserByAuthUserID`, http.StatusInternalServerError, err)
 		return
@@ -699,6 +719,7 @@ func doLookupUser(ctx context.Context, w http.ResponseWriter, r *http.Request, p
 
 	var s service.User
 	var v model.User
+	payload.TrustedCall = isTrustedCall(ctx)
 	if err := s.LookupFromPayload(tx, &v, payload); err != nil {
 		httpError(w, `LookupUser`, http.StatusInternalServerError, err)
 		return
