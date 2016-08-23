@@ -874,6 +874,8 @@ func TestCreateUser(t *testing.T) {
 
 	res.Email = ""
 	res.TshirtSize = ""
+	res.AuthVia = ""
+	res.AuthUserID = ""
 	if !assert.Equal(ctx.T, res5, res, "Lookup user should be the same (email and tshirt-size should be empty)") {
 		return
 	}

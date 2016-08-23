@@ -222,6 +222,8 @@ func (v *User) Decorate(tx *db.Tx, user *model.User, trustedCall bool, lang stri
 	if !trustedCall {
 		user.Email = ""
 		user.TshirtSize = ""
+		user.AuthVia = ""
+		user.AuthUserID = ""
 	}
 
 	if lang != "" {
