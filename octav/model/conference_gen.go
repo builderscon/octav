@@ -4,7 +4,6 @@ package model
 
 import (
 	"encoding/json"
-	"github.com/builderscon/octav/octav/tools"
 	"time"
 
 	"github.com/builderscon/octav/octav/db"
@@ -58,7 +57,7 @@ func (v Conference) MarshalJSON() ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-	return tools.MarshalJSONWithL10N(buf, v.LocalizedFields)
+	return MarshalJSONWithL10N(buf, v.LocalizedFields)
 }
 
 func (v *Conference) Load(tx *db.Tx, id string) (err error) {

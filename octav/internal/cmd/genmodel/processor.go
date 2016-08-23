@@ -510,7 +510,6 @@ func generateModelFile(ctx *genctx, m Model) error {
 	buf.WriteString("\n\nimport (")
 	if hasL10N {
 		buf.WriteString("\n" + strconv.Quote("encoding/json"))
-		buf.WriteString("\n" + strconv.Quote("github.com/builderscon/octav/octav/tools"))
 	}
 	buf.WriteString("\n" + strconv.Quote("time"))
 	buf.WriteString("\n\n" + strconv.Quote("github.com/builderscon/octav/octav/db"))
@@ -537,7 +536,7 @@ func generateModelFile(ctx *genctx, m Model) error {
 		buf.WriteString("\nif err != nil {")
 		buf.WriteString("\nreturn nil, err")
 		buf.WriteString("\n}")
-		buf.WriteString("\nreturn tools.MarshalJSONWithL10N(buf, v.LocalizedFields)")
+		buf.WriteString("\nreturn MarshalJSONWithL10N(buf, v.LocalizedFields)")
 		buf.WriteString("\n}")
 	}
 
@@ -634,7 +633,7 @@ func generateModelFile(ctx *genctx, m Model) error {
 		buf.WriteString("\nif err := json.Unmarshal(data, &m); err != nil {")
 		buf.WriteString("\nreturn err")
 		buf.WriteString("\n}")
-		fmt.Fprintf(&buf, "\n\nif err := tools.ExtractL10NFields(m, &v.L10N, []string{%s}); err != nil {", l10nfields.String())
+		fmt.Fprintf(&buf, "\n\nif err := ExtractL10NFields(m, &v.L10N, []string{%s}); err != nil {", l10nfields.String())
 		buf.WriteString("\nreturn err")
 		buf.WriteString("\n}")
 		buf.WriteString("\n\nreturn nil")
@@ -646,7 +645,7 @@ func generateModelFile(ctx *genctx, m Model) error {
 		buf.WriteString("\nreturn err")
 		buf.WriteString("\n}")
 		buf.WriteString("\n\nif len(ls) > 0 {")
-		buf.WriteString("\nv.L10N = tools.LocalizedFields{}")
+		buf.WriteString("\nv.L10N = LocalizedFields{}")
 		buf.WriteString("\nfor _, l := range ls {")
 		buf.WriteString("\nv.L10N.Set(l.Language, l.Name, l.Localized)")
 		buf.WriteString("\n}")

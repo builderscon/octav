@@ -6,8 +6,6 @@ import (
 	"encoding/json"
 	"errors"
 
-	"github.com/builderscon/octav/octav/tools"
-
 	"github.com/lestrrat/go-urlenc"
 )
 
@@ -141,7 +139,7 @@ func (r AddSessionTypeRequest) MarshalJSON() ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-	return tools.MarshalJSONWithL10N(buf, r.L10N)
+	return MarshalJSONWithL10N(buf, r.L10N)
 }
 
 func (r AddSessionTypeRequest) MarshalURL() ([]byte, error) {
@@ -150,7 +148,7 @@ func (r AddSessionTypeRequest) MarshalURL() ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-	return tools.MarshalURLWithL10N(buf, r.L10N)
+	return MarshalURLWithL10N(buf, r.L10N)
 }
 
 func (r *AddSessionTypeRequest) UnmarshalJSON(data []byte) error {
@@ -219,7 +217,7 @@ func (r *AddSessionTypeRequest) Populate(m map[string]interface{}) error {
 			return ErrInvalidJSONFieldType{Field: "user_id"}
 		}
 	}
-	if err := tools.ExtractL10NFields(m, &r.L10N, []string{"conference_id", "name", "abstract", "duration", "submission_start", "submission_end", "user_id"}); err != nil {
+	if err := ExtractL10NFields(m, &r.L10N, []string{"conference_id", "name", "abstract", "duration", "submission_start", "submission_end", "user_id"}); err != nil {
 		return err
 	}
 	return nil
@@ -422,7 +420,7 @@ func (r UpdateSessionTypeRequest) MarshalJSON() ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-	return tools.MarshalJSONWithL10N(buf, r.L10N)
+	return MarshalJSONWithL10N(buf, r.L10N)
 }
 
 func (r UpdateSessionTypeRequest) MarshalURL() ([]byte, error) {
@@ -431,7 +429,7 @@ func (r UpdateSessionTypeRequest) MarshalURL() ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-	return tools.MarshalURLWithL10N(buf, r.L10N)
+	return MarshalURLWithL10N(buf, r.L10N)
 }
 
 func (r *UpdateSessionTypeRequest) UnmarshalJSON(data []byte) error {
@@ -491,7 +489,7 @@ func (r *UpdateSessionTypeRequest) Populate(m map[string]interface{}) error {
 			return ErrInvalidJSONFieldType{Field: "user_id"}
 		}
 	}
-	if err := tools.ExtractL10NFields(m, &r.L10N, []string{"id", "name", "abstract", "duration", "submission_start", "submission_end", "user_id"}); err != nil {
+	if err := ExtractL10NFields(m, &r.L10N, []string{"id", "name", "abstract", "duration", "submission_start", "submission_end", "user_id"}); err != nil {
 		return err
 	}
 	return nil
@@ -598,7 +596,7 @@ func (r CreateConferenceSeriesRequest) MarshalJSON() ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-	return tools.MarshalJSONWithL10N(buf, r.L10N)
+	return MarshalJSONWithL10N(buf, r.L10N)
 }
 
 func (r CreateConferenceSeriesRequest) MarshalURL() ([]byte, error) {
@@ -607,7 +605,7 @@ func (r CreateConferenceSeriesRequest) MarshalURL() ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-	return tools.MarshalURLWithL10N(buf, r.L10N)
+	return MarshalURLWithL10N(buf, r.L10N)
 }
 
 func (r *CreateConferenceSeriesRequest) UnmarshalJSON(data []byte) error {
@@ -646,7 +644,7 @@ func (r *CreateConferenceSeriesRequest) Populate(m map[string]interface{}) error
 			return ErrInvalidJSONFieldType{Field: "title"}
 		}
 	}
-	if err := tools.ExtractL10NFields(m, &r.L10N, []string{"user_id", "slug", "title"}); err != nil {
+	if err := ExtractL10NFields(m, &r.L10N, []string{"user_id", "slug", "title"}); err != nil {
 		return err
 	}
 	return nil
@@ -698,7 +696,7 @@ func (r UpdateConferenceSeriesRequest) MarshalJSON() ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-	return tools.MarshalJSONWithL10N(buf, r.L10N)
+	return MarshalJSONWithL10N(buf, r.L10N)
 }
 
 func (r UpdateConferenceSeriesRequest) MarshalURL() ([]byte, error) {
@@ -707,7 +705,7 @@ func (r UpdateConferenceSeriesRequest) MarshalURL() ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-	return tools.MarshalURLWithL10N(buf, r.L10N)
+	return MarshalURLWithL10N(buf, r.L10N)
 }
 
 func (r *UpdateConferenceSeriesRequest) UnmarshalJSON(data []byte) error {
@@ -740,7 +738,7 @@ func (r *UpdateConferenceSeriesRequest) Populate(m map[string]interface{}) error
 		}
 		delete(m, "title")
 	}
-	if err := tools.ExtractL10NFields(m, &r.L10N, []string{"id", "slug", "title"}); err != nil {
+	if err := ExtractL10NFields(m, &r.L10N, []string{"id", "slug", "title"}); err != nil {
 		return err
 	}
 	return nil
@@ -980,7 +978,7 @@ func (r CreateConferenceRequest) MarshalJSON() ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-	return tools.MarshalJSONWithL10N(buf, r.L10N)
+	return MarshalJSONWithL10N(buf, r.L10N)
 }
 
 func (r CreateConferenceRequest) MarshalURL() ([]byte, error) {
@@ -989,7 +987,7 @@ func (r CreateConferenceRequest) MarshalURL() ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-	return tools.MarshalURLWithL10N(buf, r.L10N)
+	return MarshalURLWithL10N(buf, r.L10N)
 }
 
 func (r *CreateConferenceRequest) UnmarshalJSON(data []byte) error {
@@ -1067,7 +1065,7 @@ func (r *CreateConferenceRequest) Populate(m map[string]interface{}) error {
 			return ErrInvalidJSONFieldType{Field: "user_id"}
 		}
 	}
-	if err := tools.ExtractL10NFields(m, &r.L10N, []string{"title", "cfp_lead_text", "cfp_pre_submit_instructions", "cfp_post_submit_instructions", "description", "series_id", "sub_title", "slug", "user_id"}); err != nil {
+	if err := ExtractL10NFields(m, &r.L10N, []string{"title", "cfp_lead_text", "cfp_pre_submit_instructions", "cfp_post_submit_instructions", "description", "series_id", "sub_title", "slug", "user_id"}); err != nil {
 		return err
 	}
 	return nil
@@ -1264,7 +1262,7 @@ func (r UpdateConferenceRequest) MarshalJSON() ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-	return tools.MarshalJSONWithL10N(buf, r.L10N)
+	return MarshalJSONWithL10N(buf, r.L10N)
 }
 
 func (r UpdateConferenceRequest) MarshalURL() ([]byte, error) {
@@ -1273,7 +1271,7 @@ func (r UpdateConferenceRequest) MarshalURL() ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-	return tools.MarshalURLWithL10N(buf, r.L10N)
+	return MarshalURLWithL10N(buf, r.L10N)
 }
 
 func (r *UpdateConferenceRequest) UnmarshalJSON(data []byte) error {
@@ -1357,7 +1355,7 @@ func (r *UpdateConferenceRequest) Populate(m map[string]interface{}) error {
 			return ErrInvalidJSONFieldType{Field: "user_id"}
 		}
 	}
-	if err := tools.ExtractL10NFields(m, &r.L10N, []string{"id", "title", "description", "cfp_lead_text", "cfp_pre_submit_instructions", "cfp_post_submit_instructions", "series_id", "slug", "sub_title", "status", "user_id"}); err != nil {
+	if err := ExtractL10NFields(m, &r.L10N, []string{"id", "title", "description", "cfp_lead_text", "cfp_pre_submit_instructions", "cfp_post_submit_instructions", "series_id", "slug", "sub_title", "status", "user_id"}); err != nil {
 		return err
 	}
 	return nil
@@ -2063,7 +2061,7 @@ func (r CreateRoomRequest) MarshalJSON() ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-	return tools.MarshalJSONWithL10N(buf, r.L10N)
+	return MarshalJSONWithL10N(buf, r.L10N)
 }
 
 func (r CreateRoomRequest) MarshalURL() ([]byte, error) {
@@ -2072,7 +2070,7 @@ func (r CreateRoomRequest) MarshalURL() ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-	return tools.MarshalURLWithL10N(buf, r.L10N)
+	return MarshalURLWithL10N(buf, r.L10N)
 }
 
 func (r *CreateRoomRequest) UnmarshalJSON(data []byte) error {
@@ -2111,7 +2109,7 @@ func (r *CreateRoomRequest) Populate(m map[string]interface{}) error {
 			return ErrInvalidJSONFieldType{Field: "user_id"}
 		}
 	}
-	if err := tools.ExtractL10NFields(m, &r.L10N, []string{"venue_id", "name", "capacity", "user_id"}); err != nil {
+	if err := ExtractL10NFields(m, &r.L10N, []string{"venue_id", "name", "capacity", "user_id"}); err != nil {
 		return err
 	}
 	return nil
@@ -2217,7 +2215,7 @@ func (r UpdateRoomRequest) MarshalJSON() ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-	return tools.MarshalJSONWithL10N(buf, r.L10N)
+	return MarshalJSONWithL10N(buf, r.L10N)
 }
 
 func (r UpdateRoomRequest) MarshalURL() ([]byte, error) {
@@ -2226,7 +2224,7 @@ func (r UpdateRoomRequest) MarshalURL() ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-	return tools.MarshalURLWithL10N(buf, r.L10N)
+	return MarshalURLWithL10N(buf, r.L10N)
 }
 
 func (r *UpdateRoomRequest) UnmarshalJSON(data []byte) error {
@@ -2274,7 +2272,7 @@ func (r *UpdateRoomRequest) Populate(m map[string]interface{}) error {
 			return ErrInvalidJSONFieldType{Field: "user_id"}
 		}
 	}
-	if err := tools.ExtractL10NFields(m, &r.L10N, []string{"id", "venue_id", "name", "capacity", "user_id"}); err != nil {
+	if err := ExtractL10NFields(m, &r.L10N, []string{"id", "venue_id", "name", "capacity", "user_id"}); err != nil {
 		return err
 	}
 	return nil
@@ -2495,7 +2493,7 @@ func (r CreateSessionRequest) MarshalJSON() ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-	return tools.MarshalJSONWithL10N(buf, r.L10N)
+	return MarshalJSONWithL10N(buf, r.L10N)
 }
 
 func (r CreateSessionRequest) MarshalURL() ([]byte, error) {
@@ -2504,7 +2502,7 @@ func (r CreateSessionRequest) MarshalURL() ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-	return tools.MarshalURLWithL10N(buf, r.L10N)
+	return MarshalURLWithL10N(buf, r.L10N)
 }
 
 func (r *CreateSessionRequest) UnmarshalJSON(data []byte) error {
@@ -2633,7 +2631,7 @@ func (r *CreateSessionRequest) Populate(m map[string]interface{}) error {
 			return ErrInvalidJSONFieldType{Field: "user_id"}
 		}
 	}
-	if err := tools.ExtractL10NFields(m, &r.L10N, []string{"conference_id", "speaker_id", "session_type_id", "title", "abstract", "memo", "material_level", "tags", "category", "spoken_language", "slide_language", "slide_subtitles", "slide_url", "video_url", "photo_release", "recording_release", "materials_release", "user_id"}); err != nil {
+	if err := ExtractL10NFields(m, &r.L10N, []string{"conference_id", "speaker_id", "session_type_id", "title", "abstract", "memo", "material_level", "tags", "category", "spoken_language", "slide_language", "slide_subtitles", "slide_url", "video_url", "photo_release", "recording_release", "materials_release", "user_id"}); err != nil {
 		return err
 	}
 	return nil
@@ -2830,7 +2828,7 @@ func (r UpdateSessionRequest) MarshalJSON() ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-	return tools.MarshalJSONWithL10N(buf, r.L10N)
+	return MarshalJSONWithL10N(buf, r.L10N)
 }
 
 func (r UpdateSessionRequest) MarshalURL() ([]byte, error) {
@@ -2839,7 +2837,7 @@ func (r UpdateSessionRequest) MarshalURL() ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-	return tools.MarshalURLWithL10N(buf, r.L10N)
+	return MarshalURLWithL10N(buf, r.L10N)
 }
 
 func (r *UpdateSessionRequest) UnmarshalJSON(data []byte) error {
@@ -3001,7 +2999,7 @@ func (r *UpdateSessionRequest) Populate(m map[string]interface{}) error {
 			return ErrInvalidJSONFieldType{Field: "user_id"}
 		}
 	}
-	if err := tools.ExtractL10NFields(m, &r.L10N, []string{"id", "conference_id", "speaker_id", "session_type_id", "title", "abstract", "memo", "duration", "material_level", "tags", "category", "spoken_language", "slide_language", "slide_subtitles", "slide_url", "video_url", "photo_release", "recording_release", "materials_release", "sort_order", "has_interpretation", "status", "confirmed", "user_id"}); err != nil {
+	if err := ExtractL10NFields(m, &r.L10N, []string{"id", "conference_id", "speaker_id", "session_type_id", "title", "abstract", "memo", "duration", "material_level", "tags", "category", "spoken_language", "slide_language", "slide_subtitles", "slide_url", "video_url", "photo_release", "recording_release", "materials_release", "sort_order", "has_interpretation", "status", "confirmed", "user_id"}); err != nil {
 		return err
 	}
 	return nil
@@ -3158,7 +3156,7 @@ func (r CreateUserRequest) MarshalJSON() ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-	return tools.MarshalJSONWithL10N(buf, r.L10N)
+	return MarshalJSONWithL10N(buf, r.L10N)
 }
 
 func (r CreateUserRequest) MarshalURL() ([]byte, error) {
@@ -3167,7 +3165,7 @@ func (r CreateUserRequest) MarshalURL() ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-	return tools.MarshalURLWithL10N(buf, r.L10N)
+	return MarshalURLWithL10N(buf, r.L10N)
 }
 
 func (r *CreateUserRequest) UnmarshalJSON(data []byte) error {
@@ -3236,7 +3234,7 @@ func (r *CreateUserRequest) Populate(m map[string]interface{}) error {
 		}
 		delete(m, "tshirt_size")
 	}
-	if err := tools.ExtractL10NFields(m, &r.L10N, []string{"first_name", "last_name", "nickname", "email", "auth_via", "auth_user_id", "avatar_url", "tshirt_size"}); err != nil {
+	if err := ExtractL10NFields(m, &r.L10N, []string{"first_name", "last_name", "nickname", "email", "auth_via", "auth_user_id", "avatar_url", "tshirt_size"}); err != nil {
 		return err
 	}
 	return nil
@@ -3317,7 +3315,7 @@ func (r UpdateUserRequest) MarshalJSON() ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-	return tools.MarshalJSONWithL10N(buf, r.L10N)
+	return MarshalJSONWithL10N(buf, r.L10N)
 }
 
 func (r UpdateUserRequest) MarshalURL() ([]byte, error) {
@@ -3326,7 +3324,7 @@ func (r UpdateUserRequest) MarshalURL() ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-	return tools.MarshalURLWithL10N(buf, r.L10N)
+	return MarshalURLWithL10N(buf, r.L10N)
 }
 
 func (r *UpdateUserRequest) UnmarshalJSON(data []byte) error {
@@ -3404,7 +3402,7 @@ func (r *UpdateUserRequest) Populate(m map[string]interface{}) error {
 			return ErrInvalidJSONFieldType{Field: "user_id"}
 		}
 	}
-	if err := tools.ExtractL10NFields(m, &r.L10N, []string{"id", "first_name", "last_name", "nickname", "email", "auth_via", "auth_user_id", "avatar_url", "tshirt_size", "user_id"}); err != nil {
+	if err := ExtractL10NFields(m, &r.L10N, []string{"id", "first_name", "last_name", "nickname", "email", "auth_via", "auth_user_id", "avatar_url", "tshirt_size", "user_id"}); err != nil {
 		return err
 	}
 	return nil
@@ -3708,7 +3706,7 @@ func (r CreateVenueRequest) MarshalJSON() ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-	return tools.MarshalJSONWithL10N(buf, r.L10N)
+	return MarshalJSONWithL10N(buf, r.L10N)
 }
 
 func (r CreateVenueRequest) MarshalURL() ([]byte, error) {
@@ -3717,7 +3715,7 @@ func (r CreateVenueRequest) MarshalURL() ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-	return tools.MarshalURLWithL10N(buf, r.L10N)
+	return MarshalURLWithL10N(buf, r.L10N)
 }
 
 func (r *CreateVenueRequest) UnmarshalJSON(data []byte) error {
@@ -3762,7 +3760,7 @@ func (r *CreateVenueRequest) Populate(m map[string]interface{}) error {
 			return ErrInvalidJSONFieldType{Field: "user_id"}
 		}
 	}
-	if err := tools.ExtractL10NFields(m, &r.L10N, []string{"name", "address", "longitude", "latitude", "user_id"}); err != nil {
+	if err := ExtractL10NFields(m, &r.L10N, []string{"name", "address", "longitude", "latitude", "user_id"}); err != nil {
 		return err
 	}
 	return nil
@@ -3819,7 +3817,7 @@ func (r UpdateVenueRequest) MarshalJSON() ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-	return tools.MarshalJSONWithL10N(buf, r.L10N)
+	return MarshalJSONWithL10N(buf, r.L10N)
 }
 
 func (r UpdateVenueRequest) MarshalURL() ([]byte, error) {
@@ -3828,7 +3826,7 @@ func (r UpdateVenueRequest) MarshalURL() ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-	return tools.MarshalURLWithL10N(buf, r.L10N)
+	return MarshalURLWithL10N(buf, r.L10N)
 }
 
 func (r *UpdateVenueRequest) UnmarshalJSON(data []byte) error {
@@ -3882,7 +3880,7 @@ func (r *UpdateVenueRequest) Populate(m map[string]interface{}) error {
 			return ErrInvalidJSONFieldType{Field: "user_id"}
 		}
 	}
-	if err := tools.ExtractL10NFields(m, &r.L10N, []string{"id", "name", "address", "longitude", "latitude", "user_id"}); err != nil {
+	if err := ExtractL10NFields(m, &r.L10N, []string{"id", "name", "address", "longitude", "latitude", "user_id"}); err != nil {
 		return err
 	}
 	return nil
@@ -4882,7 +4880,7 @@ func (r AddFeaturedSpeakerRequest) MarshalJSON() ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-	return tools.MarshalJSONWithL10N(buf, r.L10N)
+	return MarshalJSONWithL10N(buf, r.L10N)
 }
 
 func (r AddFeaturedSpeakerRequest) MarshalURL() ([]byte, error) {
@@ -4891,7 +4889,7 @@ func (r AddFeaturedSpeakerRequest) MarshalURL() ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-	return tools.MarshalURLWithL10N(buf, r.L10N)
+	return MarshalURLWithL10N(buf, r.L10N)
 }
 
 func (r *AddFeaturedSpeakerRequest) UnmarshalJSON(data []byte) error {
@@ -4951,7 +4949,7 @@ func (r *AddFeaturedSpeakerRequest) Populate(m map[string]interface{}) error {
 			return ErrInvalidJSONFieldType{Field: "user_id"}
 		}
 	}
-	if err := tools.ExtractL10NFields(m, &r.L10N, []string{"conference_id", "speaker_id", "avatar_url", "display_name", "description", "user_id"}); err != nil {
+	if err := ExtractL10NFields(m, &r.L10N, []string{"conference_id", "speaker_id", "avatar_url", "display_name", "description", "user_id"}); err != nil {
 		return err
 	}
 	return nil
@@ -5019,7 +5017,7 @@ func (r UpdateFeaturedSpeakerRequest) MarshalJSON() ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-	return tools.MarshalJSONWithL10N(buf, r.L10N)
+	return MarshalJSONWithL10N(buf, r.L10N)
 }
 
 func (r UpdateFeaturedSpeakerRequest) MarshalURL() ([]byte, error) {
@@ -5028,7 +5026,7 @@ func (r UpdateFeaturedSpeakerRequest) MarshalURL() ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-	return tools.MarshalURLWithL10N(buf, r.L10N)
+	return MarshalURLWithL10N(buf, r.L10N)
 }
 
 func (r *UpdateFeaturedSpeakerRequest) UnmarshalJSON(data []byte) error {
@@ -5082,7 +5080,7 @@ func (r *UpdateFeaturedSpeakerRequest) Populate(m map[string]interface{}) error 
 			return ErrInvalidJSONFieldType{Field: "user_id"}
 		}
 	}
-	if err := tools.ExtractL10NFields(m, &r.L10N, []string{"id", "speaker_id", "avatar_url", "display_name", "description", "user_id"}); err != nil {
+	if err := ExtractL10NFields(m, &r.L10N, []string{"id", "speaker_id", "avatar_url", "display_name", "description", "user_id"}); err != nil {
 		return err
 	}
 	return nil
@@ -5326,7 +5324,7 @@ func (r AddSponsorRequest) MarshalJSON() ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-	return tools.MarshalJSONWithL10N(buf, r.L10N)
+	return MarshalJSONWithL10N(buf, r.L10N)
 }
 
 func (r AddSponsorRequest) MarshalURL() ([]byte, error) {
@@ -5335,7 +5333,7 @@ func (r AddSponsorRequest) MarshalURL() ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-	return tools.MarshalURLWithL10N(buf, r.L10N)
+	return MarshalURLWithL10N(buf, r.L10N)
 }
 
 func (r *AddSponsorRequest) UnmarshalJSON(data []byte) error {
@@ -5401,7 +5399,7 @@ func (r *AddSponsorRequest) Populate(m map[string]interface{}) error {
 			return ErrInvalidJSONFieldType{Field: "user_id"}
 		}
 	}
-	if err := tools.ExtractL10NFields(m, &r.L10N, []string{"conference_id", "name", "url", "group_name", "sort_order", "user_id"}); err != nil {
+	if err := ExtractL10NFields(m, &r.L10N, []string{"conference_id", "name", "url", "group_name", "sort_order", "user_id"}); err != nil {
 		return err
 	}
 	return nil
@@ -5475,7 +5473,7 @@ func (r UpdateSponsorRequest) MarshalJSON() ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-	return tools.MarshalJSONWithL10N(buf, r.L10N)
+	return MarshalJSONWithL10N(buf, r.L10N)
 }
 
 func (r UpdateSponsorRequest) MarshalURL() ([]byte, error) {
@@ -5484,7 +5482,7 @@ func (r UpdateSponsorRequest) MarshalURL() ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-	return tools.MarshalURLWithL10N(buf, r.L10N)
+	return MarshalURLWithL10N(buf, r.L10N)
 }
 
 func (r *UpdateSponsorRequest) UnmarshalJSON(data []byte) error {
@@ -5538,7 +5536,7 @@ func (r *UpdateSponsorRequest) Populate(m map[string]interface{}) error {
 			return ErrInvalidJSONFieldType{Field: "user_id"}
 		}
 	}
-	if err := tools.ExtractL10NFields(m, &r.L10N, []string{"id", "name", "url", "group_name", "sort_order", "user_id"}); err != nil {
+	if err := ExtractL10NFields(m, &r.L10N, []string{"id", "name", "url", "group_name", "sort_order", "user_id"}); err != nil {
 		return err
 	}
 	return nil

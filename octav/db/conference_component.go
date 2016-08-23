@@ -1,6 +1,11 @@
 package db
 
-import "github.com/pkg/errors"
+import (
+	"time"
+
+	"github.com/builderscon/octav/octav/tools"
+	"github.com/pkg/errors"
+)
 
 func DeleteConferenceComponentsByIDAndName(tx *Tx, conferenceID string, names ...string) error {
 	stmt := getStmtBuf()
@@ -16,7 +21,7 @@ func DeleteConferenceComponentsByIDAndName(tx *Tx, conferenceID string, names ..
 	stmt.WriteString(` WHERE conference_id = ? AND name IN (`)
 	for i := range names {
 		stmt.WriteByte('?')
-		if i < l - 1 {
+		if i < l-1 {
 			stmt.WriteByte(',')
 		}
 	}
@@ -45,27 +50,27 @@ func UpsertConferenceComponentsByIDAndName(tx *Tx, conferenceID string, values m
 
 	stmt.WriteString(`INSERT INTO `)
 	stmt.WriteString(ConferenceComponentTable)
-	stmt.WriteString(` (conference_id, name, value) VALUES `)
+	stmt.WriteString(` (eid, conference_id, name, value, created_on) VALUES `)
 
 	var args []interface{}
 	i := 0
+	now := time.Now()
 	for k, v := range values {
-		args = append(args, conferenceID, k, v)
-		stmt.WriteString(`(?, ?, ?)`)
-		if i < l - 1 {
+		args = append(args, tools.UUID(), conferenceID, k, v, now)
+		stmt.WriteString(`(?, ?, ?, ?, ?)`)
+		if i < l-1 {
 			stmt.WriteByte(',')
 		}
 		i++
 	}
 
-	stmt.WriteString(` ON DUPLICATE UPDATE value = VALUES(value)`)
+	stmt.WriteString(` ON DUPLICATE KEY UPDATE value = VALUES(value)`)
 	if _, err := tx.Exec(stmt.String(), args...); err != nil {
 		return errors.Wrap(err, "failed to execute insert statement")
 	}
 
 	return nil
 }
-
 
 func (ccl *ConferenceComponentList) LoadByConferenceID(tx *Tx, cid string) error {
 	stmt := getStmtBuf()

@@ -1,4 +1,4 @@
-package tools
+package model
 
 import (
 	"bytes"
@@ -9,6 +9,7 @@ import (
 
 	"github.com/builderscon/octav/octav/db"
 	"github.com/lestrrat/go-pdebug"
+	urlenc "github.com/lestrrat/go-urlenc"
 	"golang.org/x/text/language"
 )
 
@@ -209,4 +210,38 @@ func ExtractL10NFields(m map[string]interface{}, lf *LocalizedFields, keys []str
 		lf.Set(lang, name, lv.(string))
 	}
 	return nil
+}
+
+func MarshalJSONWithL10N(buf []byte, lf LocalizedFields) (ret []byte, err error) {
+	if pdebug.Enabled {
+		g := pdebug.Marker("MarshalJSONWithL10N").BindError(&err)
+		defer g.End()
+	}
+
+	if lf.Len() == 0 {
+		return buf, nil
+	}
+
+	l10buf, err := json.Marshal(lf)
+	if err != nil {
+		return nil, err
+	}
+	b := bytes.NewBuffer(buf[:len(buf)-1])
+	b.WriteRune(',') // Replace closing '}'
+	b.Write(l10buf[1:])
+
+	return b.Bytes(), nil
+}
+
+func MarshalURLWithL10N(buf []byte, lf LocalizedFields) ([]byte, error) {
+	if lf.Len() == 0 {
+		return buf, nil
+	}
+
+	l10buf, err := urlenc.Marshal(lf)
+	if err != nil {
+		return nil, err
+	}
+
+	return append(append(buf, '&'), l10buf...), nil
 }
