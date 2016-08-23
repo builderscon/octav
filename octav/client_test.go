@@ -739,16 +739,20 @@ func TestSessionCRUD(t *testing.T) {
 		return
 	}
 
-	room1, err := testLookupSession(ctx, res.ID, "ja")
+	session1, err := testLookupSession(ctx, res.ID, "ja")
 	if err != nil {
 		return
 	}
 
-	room2, err := testLookupSession(ctx, res.ID, "ja")
+	session2, err := testLookupSession(ctx, res.ID, "ja")
 	if err != nil {
 		return
 	}
-	if !assert.Equal(ctx.T, room2, room1, "LookupSession is the same as the room created") {
+	if !assert.Equal(ctx.T, session2, session1, "LookupSession is the same as the room created") {
+		return
+	}
+
+	if !assert.NotEmpty(ctx.T, session1.Speaker.Email, "email should NOT be empty for authenticated requests") {
 		return
 	}
 
@@ -758,12 +762,12 @@ func TestSessionCRUD(t *testing.T) {
 		return
 	}
 
-	room3, err := testLookupSession(ctx, res.ID, "ja")
+	session3, err := testLookupSession(ctx, res.ID, "ja")
 	if err != nil {
 		return
 	}
 
-	if !assert.Equal(ctx.T, "カンファレンス用ソフトウェアの作り方", room3.Title, "Session.title#ja is the same as the conference updated") {
+	if !assert.Equal(ctx.T, "カンファレンス用ソフトウェアの作り方", session3.Title, "Session.title#ja is the same as the conference updated") {
 		return
 	}
 }

@@ -503,7 +503,7 @@
     },
     {
       "title": "Lookup user by auth user ID",
-      "hsup.wrapper": "httpWithBasicAuth",
+      "hsup.wrapper": "httpWithOptionalBasicAuth",
       "rel": "lookup",
       "href": "/user/lookup_user_by_auth_user_id",
       "method": "GET",
@@ -563,6 +563,7 @@
       "title": "List user",
       "rel": "list",
       "href": "/user/list",
+      "hsup.wrapper": "httpWithOptionalBasicAuth",
       "schema": {
         "type": "object",
         "properties": {
@@ -604,6 +605,7 @@
       "title": "List venue",
       "rel": "list",
       "href": "/venue/list",
+      "hsup.wrapper": "httpWithOptionalBasicAuth",
       "schema": {
         "type": "object",
         "properties": {
@@ -742,6 +744,7 @@
       "rel": "list",
       "href": "/room/list",
       "method": "GET",
+      "hsup.wrapper": "httpWithOptionalBasicAuth",
       "encType": "application/x-www-form-urlencoded",
       "schema": {
         "properties": {
@@ -775,6 +778,7 @@
       "title": "List conference series",
       "rel": "list",
       "href": "/conference_series/list",
+      "hsup.wrapper": "httpWithOptionalBasicAuth",
       "method": "GET",
       "encType": "application/x-www-form-urlencoded",
       "schema": {
@@ -966,7 +970,7 @@
     {
       "title": "Lookup session type",
       "href": "/session_type/lookup",
-      "hsup.wrapper": "httpWithBasicAuth",
+      "hsup.wrapper": "httpWithOptionalBasicAuth",
       "rel": "update",
       "schema": {
         "required": ["id"],
@@ -1005,7 +1009,7 @@
     {
       "title": "List session types by conference",
       "href": "/session_type/list",
-      "hsup.wrapper": "httpWithBasicAuth",
+      "hsup.wrapper": "httpWithOptionalBasicAuth",
       "rel": "list",
       "schema": {
         "type": "object",
@@ -1048,6 +1052,7 @@
       "title": "List conferences by organizer",
       "href": "/conference/list_by_organizer",
       "rel": "list",
+      "hsup.wrapper": "httpWithOptionalBasicAuth",
       "schema": {
         "properties": {
           "lang": {"$ref": "#/definitions/language"},
@@ -1062,6 +1067,7 @@
       "title": "List conference",
       "href": "/conference/list",
       "rel": "list",
+      "hsup.wrapper": "httpWithOptionalBasicAuth",
       "schema": {
         "properties": {
           "lang": { "$ref": "#/definitions/language" },
@@ -1185,6 +1191,7 @@
       "title": "Lookup session",
       "href": "/session/lookup",
       "rel": "lookup",
+      "hsup.wrapper": "httpWithOptionalBasicAuth",
       "schema": {
         "required": ["id"],
         "properties": {
@@ -1252,6 +1259,7 @@
     {
       "title": "List sessions",
       "href": "/session/list",
+      "hsup.wrapper": "httpWithOptionalBasicAuth",
       "rel": "list",
       "schema": {
         "type": "object",
@@ -1305,6 +1313,7 @@
     {
       "title": "List question",
       "href": "/question/list",
+      "hsup.wrapper": "httpWithOptionalBasicAuth",
       "rel": "list",
       "schema": {
         "type": "object",
@@ -1381,7 +1390,7 @@
     {
       "title": "List featured speakers",
       "href": "/featured_speaker/list",
-      "hsup.wrapper": "httpWithBasicAuth",
+      "hsup.wrapper": "httpWithOptionalBasicAuth",
       "rel": "list",
       "schema": {
         "type": "object",
@@ -1458,7 +1467,7 @@
     {
       "title": "Lookup sponsor",
       "href": "/sponsor/lookup",
-      "hsup.wrapper": "httpWithBasicAuth",
+      "hsup.wrapper": "httpWithOptionalBasicAuth",
       "rel": "update",
       "schema": {
         "type": "object",
@@ -1473,7 +1482,7 @@
     {
       "title": "List sponsors",
       "href": "/sponsor/list",
-      "hsup.wrapper": "httpWithBasicAuth",
+      "hsup.wrapper": "httpWithOptionalBasicAuth",
       "rel": "list",
       "schema": {
         "type": "object",

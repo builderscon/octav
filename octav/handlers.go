@@ -950,6 +950,7 @@ func doLookupSession(ctx context.Context, w http.ResponseWriter, r *http.Request
 
 	var s service.Session
 	var v model.Session
+	payload.TrustedCall = isTrustedCall(ctx)
 	if err := s.LookupFromPayload(tx, &v, payload); err != nil {
 		httpError(w, `LookupSession`, http.StatusInternalServerError, err)
 		return
