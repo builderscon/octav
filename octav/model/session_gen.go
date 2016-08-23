@@ -21,7 +21,7 @@ type rawSession struct {
 	Title             string       `json:"title" l10n:"true"`
 	Abstract          string       `json:"abstract" l10n:"true"`
 	Memo              string       `json:"memo"`
-	StartsOn          time.Time    `json:"starts_on"`
+	StartsOn          time.Time    `json:"starts_on,omitempty"`
 	Duration          int          `json:"duration"`
 	MaterialLevel     string       `json:"material_level"`
 	Tags              TagString    `json:"tags,omitempty" assign:"convert"`
