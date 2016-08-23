@@ -13,14 +13,14 @@ import (
 var _ = time.Time{}
 
 type rawSessionType struct {
-	ID                    string    `json:"id"`
-	ConferenceID          string    `json:"conference_id"`
-	Name                  string    `json:"name" l10n:"true"`
-	Abstract              string    `json:"abstract" l10n:"true"`
-	Duration              int       `json:"duration"`
-	SubmissionStart       time.Time `json:"submission_start,omitempty"`
-	SubmissionEnd         time.Time `json:"submission_end,omitempty"`
-	IsAcceptingSubmission bool      `json:"is_accepting_submission"`
+	ID                    string     `json:"id"`
+	ConferenceID          string     `json:"conference_id"`
+	Name                  string     `json:"name" l10n:"true"`
+	Abstract              string     `json:"abstract" l10n:"true"`
+	Duration              int        `json:"duration"`
+	SubmissionStart       *time.Time `json:"submission_start,omitempty"`
+	SubmissionEnd         *time.Time `json:"submission_end,omitempty"`
+	IsAcceptingSubmission bool       `json:"is_accepting_submission"`
 }
 
 func (v SessionType) MarshalJSON() ([]byte, error) {
@@ -30,8 +30,12 @@ func (v SessionType) MarshalJSON() ([]byte, error) {
 	raw.Name = v.Name
 	raw.Abstract = v.Abstract
 	raw.Duration = v.Duration
-	raw.SubmissionStart = v.SubmissionStart
-	raw.SubmissionEnd = v.SubmissionEnd
+	if !v.SubmissionStart.IsZero() {
+		raw.SubmissionStart = &v.SubmissionStart
+	}
+	if !v.SubmissionEnd.IsZero() {
+		raw.SubmissionEnd = &v.SubmissionEnd
+	}
 	raw.IsAcceptingSubmission = v.IsAcceptingSubmission
 	buf, err := json.Marshal(raw)
 	if err != nil {

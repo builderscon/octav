@@ -520,9 +520,13 @@ func generateModelFile(ctx *genctx, m Model) error {
 	if hasL10N {
 		fmt.Fprintf(&buf, "\n\ntype raw%s struct {", m.Name)
 		for _, f := range m.Fields {
-			fmt.Fprintf(&buf, "\n%s %s", f.Name, f.Type)
-			if f.Tag != "" {
-				fmt.Fprintf(&buf, "`%s`", f.Tag)
+			if f.Type == "time.Time" && strings.Contains(f.Tag.Get("json"), "omitempty") {
+				fmt.Fprintf(&buf, "\n%s *time.Time `%s`", f.Name, f.Tag)
+			} else {
+				fmt.Fprintf(&buf, "\n%s %s", f.Name, f.Type)
+				if f.Tag != "" {
+					fmt.Fprintf(&buf, "`%s`", f.Tag)
+				}
 			}
 		}
 		buf.WriteString("\n}")
@@ -530,7 +534,13 @@ func generateModelFile(ctx *genctx, m Model) error {
 		fmt.Fprintf(&buf, "\n\nfunc (%c %s) MarshalJSON() ([]byte, error) {", varname, m.Name)
 		fmt.Fprintf(&buf, "\nvar raw raw%s", m.Name)
 		for _, f := range m.Fields {
-			fmt.Fprintf(&buf, "\nraw.%s = v.%s", f.Name, f.Name)
+			if f.Type == "time.Time" && strings.Contains(f.Tag.Get("json"), "omitempty") {
+				fmt.Fprintf(&buf, "\nif !v.%s.IsZero() {", f.Name)
+				fmt.Fprintf(&buf, "\nraw.%s = &v.%s", f.Name, f.Name)
+				buf.WriteString("\n}")
+			} else {
+				fmt.Fprintf(&buf, "\nraw.%s = v.%s", f.Name, f.Name)
+			}
 		}
 		buf.WriteString("\nbuf, err := json.Marshal(raw)")
 		buf.WriteString("\nif err != nil {")
@@ -604,56 +614,56 @@ func generateModelFile(ctx *genctx, m Model) error {
 	}
 	buf.WriteString("\nreturn nil")
 	buf.WriteString("\n}")
-/*
-	if l10nfields.Len() > 0 {
-		fmt.Fprintf(&buf, "\n\nfunc (%c %sL10N) GetPropNames() ([]string, error) {", varname, m.Name)
-		fmt.Fprintf(&buf, "\nl, _ := %c.L10N.GetPropNames()", varname)
-		buf.WriteString("\nreturn append(l, ")
-		buf.WriteString(l10nfields.String())
-		buf.WriteString("), nil")
-		buf.WriteString("\n}")
+	/*
+		if l10nfields.Len() > 0 {
+			fmt.Fprintf(&buf, "\n\nfunc (%c %sL10N) GetPropNames() ([]string, error) {", varname, m.Name)
+			fmt.Fprintf(&buf, "\nl, _ := %c.L10N.GetPropNames()", varname)
+			buf.WriteString("\nreturn append(l, ")
+			buf.WriteString(l10nfields.String())
+			buf.WriteString("), nil")
+			buf.WriteString("\n}")
 
-		fmt.Fprintf(&buf, "\n\nfunc (%c %sL10N) GetPropValue(s string) (interface{}, error) {", varname, m.Name)
-		buf.WriteString("\nswitch s {")
-		for _, f := range m.Fields {
-			fmt.Fprintf(&buf, "\ncase %s:", strconv.Quote(f.JSONName))
-			fmt.Fprintf(&buf, "\nreturn %c.%s, nil", varname, f.Name)
+			fmt.Fprintf(&buf, "\n\nfunc (%c %sL10N) GetPropValue(s string) (interface{}, error) {", varname, m.Name)
+			buf.WriteString("\nswitch s {")
+			for _, f := range m.Fields {
+				fmt.Fprintf(&buf, "\ncase %s:", strconv.Quote(f.JSONName))
+				fmt.Fprintf(&buf, "\nreturn %c.%s, nil", varname, f.Name)
+			}
+			buf.WriteString("\ndefault:")
+			fmt.Fprintf(&buf, "\nreturn %c.L10N.GetPropValue(s)", varname)
+			buf.WriteString("\n}\n}")
+
+			fmt.Fprintf(&buf, "\n\nfunc (v *%sL10N) UnmarshalJSON(data []byte) error {", m.Name)
+			fmt.Fprintf(&buf, "\nvar s %s", m.Name)
+			buf.WriteString("\nif err := json.Unmarshal(data, &s); err != nil {")
+			buf.WriteString("\nreturn err")
+			buf.WriteString("\n}")
+			fmt.Fprintf(&buf, "\n\nv.%s = s", m.Name)
+			buf.WriteString("\nm := make(map[string]interface{})")
+			buf.WriteString("\nif err := json.Unmarshal(data, &m); err != nil {")
+			buf.WriteString("\nreturn err")
+			buf.WriteString("\n}")
+			fmt.Fprintf(&buf, "\n\nif err := tools.ExtractL10NFields(m, &v.L10N, []string{%s}); err != nil {", l10nfields.String())
+			buf.WriteString("\nreturn err")
+			buf.WriteString("\n}")
+			buf.WriteString("\n\nreturn nil")
+			buf.WriteString("\n}")
+
+			fmt.Fprintf(&buf, "\n\nfunc (v *%sL10N) LoadLocalizedFields(tx *db.Tx) error {", m.Name)
+			fmt.Fprintf(&buf, "\nls, err := db.LoadLocalizedStringsForParent(tx, v.%s.ID, %s)", m.Name, strconv.Quote(m.Name))
+			buf.WriteString("\nif err != nil {")
+			buf.WriteString("\nreturn err")
+			buf.WriteString("\n}")
+			buf.WriteString("\n\nif len(ls) > 0 {")
+			buf.WriteString("\nv.L10N = tools.LocalizedFields{}")
+			buf.WriteString("\nfor _, l := range ls {")
+			buf.WriteString("\nv.L10N.Set(l.Language, l.Name, l.Localized)")
+			buf.WriteString("\n}")
+			buf.WriteString("\n}")
+			buf.WriteString("\nreturn nil")
+			buf.WriteString("\n}")
 		}
-		buf.WriteString("\ndefault:")
-		fmt.Fprintf(&buf, "\nreturn %c.L10N.GetPropValue(s)", varname)
-		buf.WriteString("\n}\n}")
-
-		fmt.Fprintf(&buf, "\n\nfunc (v *%sL10N) UnmarshalJSON(data []byte) error {", m.Name)
-		fmt.Fprintf(&buf, "\nvar s %s", m.Name)
-		buf.WriteString("\nif err := json.Unmarshal(data, &s); err != nil {")
-		buf.WriteString("\nreturn err")
-		buf.WriteString("\n}")
-		fmt.Fprintf(&buf, "\n\nv.%s = s", m.Name)
-		buf.WriteString("\nm := make(map[string]interface{})")
-		buf.WriteString("\nif err := json.Unmarshal(data, &m); err != nil {")
-		buf.WriteString("\nreturn err")
-		buf.WriteString("\n}")
-		fmt.Fprintf(&buf, "\n\nif err := ExtractL10NFields(m, &v.L10N, []string{%s}); err != nil {", l10nfields.String())
-		buf.WriteString("\nreturn err")
-		buf.WriteString("\n}")
-		buf.WriteString("\n\nreturn nil")
-		buf.WriteString("\n}")
-
-		fmt.Fprintf(&buf, "\n\nfunc (v *%sL10N) LoadLocalizedFields(tx *db.Tx) error {", m.Name)
-		fmt.Fprintf(&buf, "\nls, err := db.LoadLocalizedStringsForParent(tx, v.%s.ID, %s)", m.Name, strconv.Quote(m.Name))
-		buf.WriteString("\nif err != nil {")
-		buf.WriteString("\nreturn err")
-		buf.WriteString("\n}")
-		buf.WriteString("\n\nif len(ls) > 0 {")
-		buf.WriteString("\nv.L10N = LocalizedFields{}")
-		buf.WriteString("\nfor _, l := range ls {")
-		buf.WriteString("\nv.L10N.Set(l.Language, l.Name, l.Localized)")
-		buf.WriteString("\n}")
-		buf.WriteString("\n}")
-		buf.WriteString("\nreturn nil")
-		buf.WriteString("\n}")
-	}
-*/
+	*/
 
 	fsrc, err := format.Source(buf.Bytes())
 	if err != nil {
