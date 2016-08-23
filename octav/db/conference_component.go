@@ -58,7 +58,7 @@ func UpsertConferenceComponentsByIDAndName(tx *Tx, conferenceID string, values m
 		i++
 	}
 
-	stmt.WriteString(` ON DUPLICATE UPDATE value = VALUES(value)`)
+	stmt.WriteString(` ON DUPLICATE KEY UPDATE value = VALUES(value)`)
 	if _, err := tx.Exec(stmt.String(), args...); err != nil {
 		return errors.Wrap(err, "failed to execute insert statement")
 	}
