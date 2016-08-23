@@ -32,8 +32,9 @@ type rawSession struct {
 	SlideSubtitles    string       `json:"slide_subtitles,omitempty"`
 	SlideURL          string       `json:"slide_url,omitempty"`
 	VideoURL          string       `json:"video_url,omitempty"`
-	PhotoPermission   string       `json:"photo_permission"`
-	VideoPermission   string       `json:"video_permission"`
+	PhotoRelease      string       `json:"photo_release"`
+	RecordingRelease  string       `json:"recording_release"`
+	MaterialsRelease  string       `json:"materials_release"`
 	HasInterpretation bool         `json:"has_interpretation"`
 	Status            string       `json:"status"`
 	Confirmed         bool         `json:"confirmed"`
@@ -63,8 +64,9 @@ func (v Session) MarshalJSON() ([]byte, error) {
 	raw.SlideSubtitles = v.SlideSubtitles
 	raw.SlideURL = v.SlideURL
 	raw.VideoURL = v.VideoURL
-	raw.PhotoPermission = v.PhotoPermission
-	raw.VideoPermission = v.VideoPermission
+	raw.PhotoRelease = v.PhotoRelease
+	raw.RecordingRelease = v.RecordingRelease
+	raw.MaterialsRelease = v.MaterialsRelease
 	raw.HasInterpretation = v.HasInterpretation
 	raw.Status = v.Status
 	raw.Confirmed = v.Confirmed
@@ -140,11 +142,14 @@ func (v *Session) FromRow(vdb db.Session) error {
 	if vdb.VideoURL.Valid {
 		v.VideoURL = vdb.VideoURL.String
 	}
-	if vdb.PhotoPermission.Valid {
-		v.PhotoPermission = vdb.PhotoPermission.String
+	if vdb.PhotoRelease.Valid {
+		v.PhotoRelease = vdb.PhotoRelease.String
 	}
-	if vdb.VideoPermission.Valid {
-		v.VideoPermission = vdb.VideoPermission.String
+	if vdb.RecordingRelease.Valid {
+		v.RecordingRelease = vdb.RecordingRelease.String
+	}
+	if vdb.MaterialsRelease.Valid {
+		v.MaterialsRelease = vdb.MaterialsRelease.String
 	}
 	v.HasInterpretation = vdb.HasInterpretation
 	v.Status = vdb.Status
@@ -184,10 +189,12 @@ func (v *Session) ToRow(vdb *db.Session) error {
 	vdb.SlideURL.String = v.SlideURL
 	vdb.VideoURL.Valid = true
 	vdb.VideoURL.String = v.VideoURL
-	vdb.PhotoPermission.Valid = true
-	vdb.PhotoPermission.String = v.PhotoPermission
-	vdb.VideoPermission.Valid = true
-	vdb.VideoPermission.String = v.VideoPermission
+	vdb.PhotoRelease.Valid = true
+	vdb.PhotoRelease.String = v.PhotoRelease
+	vdb.RecordingRelease.Valid = true
+	vdb.RecordingRelease.String = v.RecordingRelease
+	vdb.MaterialsRelease.Valid = true
+	vdb.MaterialsRelease.String = v.MaterialsRelease
 	vdb.HasInterpretation = v.HasInterpretation
 	vdb.Status = v.Status
 	vdb.Confirmed = v.Confirmed

@@ -130,8 +130,9 @@ type Session struct {
 	SlideSubtitles    sql.NullString
 	SlideURL          sql.NullString
 	VideoURL          sql.NullString
-	PhotoPermission   sql.NullString
-	VideoPermission   sql.NullString
+	PhotoRelease      sql.NullString
+	RecordingRelease  sql.NullString
+	MaterialsRelease  sql.NullString
 	HasInterpretation bool
 	Status            string
 	SortOrder         int

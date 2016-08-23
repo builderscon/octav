@@ -2476,11 +2476,14 @@ func (r CreateSessionRequest) collectMarshalData() map[string]interface{} {
 	if r.VideoURL.Valid() {
 		m["video_url"] = r.VideoURL.Value()
 	}
-	if r.PhotoPermission.Valid() {
-		m["photo_permission"] = r.PhotoPermission.Value()
+	if r.PhotoRelease.Valid() {
+		m["photo_release"] = r.PhotoRelease.Value()
 	}
-	if r.VideoPermission.Valid() {
-		m["video_permission"] = r.VideoPermission.Value()
+	if r.RecordingRelease.Valid() {
+		m["recording_release"] = r.RecordingRelease.Value()
+	}
+	if r.MaterialsRelease.Valid() {
+		m["materials_release"] = r.MaterialsRelease.Value()
 	}
 	m["user_id"] = r.UserID
 	return m
@@ -2603,17 +2606,23 @@ func (r *CreateSessionRequest) Populate(m map[string]interface{}) error {
 		}
 		delete(m, "video_url")
 	}
-	if jv, ok := m["photo_permission"]; ok {
-		if err := r.PhotoPermission.Set(jv); err != nil {
-			return errors.New("set field PhotoPermission failed: " + err.Error())
+	if jv, ok := m["photo_release"]; ok {
+		if err := r.PhotoRelease.Set(jv); err != nil {
+			return errors.New("set field PhotoRelease failed: " + err.Error())
 		}
-		delete(m, "photo_permission")
+		delete(m, "photo_release")
 	}
-	if jv, ok := m["video_permission"]; ok {
-		if err := r.VideoPermission.Set(jv); err != nil {
-			return errors.New("set field VideoPermission failed: " + err.Error())
+	if jv, ok := m["recording_release"]; ok {
+		if err := r.RecordingRelease.Set(jv); err != nil {
+			return errors.New("set field RecordingRelease failed: " + err.Error())
 		}
-		delete(m, "video_permission")
+		delete(m, "recording_release")
+	}
+	if jv, ok := m["materials_release"]; ok {
+		if err := r.MaterialsRelease.Set(jv); err != nil {
+			return errors.New("set field MaterialsRelease failed: " + err.Error())
+		}
+		delete(m, "materials_release")
 	}
 	if jv, ok := m["user_id"]; ok {
 		switch jv.(type) {
@@ -2624,7 +2633,7 @@ func (r *CreateSessionRequest) Populate(m map[string]interface{}) error {
 			return ErrInvalidJSONFieldType{Field: "user_id"}
 		}
 	}
-	if err := tools.ExtractL10NFields(m, &r.L10N, []string{"conference_id", "speaker_id", "session_type_id", "title", "abstract", "memo", "material_level", "tags", "category", "spoken_language", "slide_language", "slide_subtitles", "slide_url", "video_url", "photo_permission", "video_permission", "user_id"}); err != nil {
+	if err := tools.ExtractL10NFields(m, &r.L10N, []string{"conference_id", "speaker_id", "session_type_id", "title", "abstract", "memo", "material_level", "tags", "category", "spoken_language", "slide_language", "slide_subtitles", "slide_url", "video_url", "photo_release", "recording_release", "materials_release", "user_id"}); err != nil {
 		return err
 	}
 	return nil
@@ -2632,7 +2641,7 @@ func (r *CreateSessionRequest) Populate(m map[string]interface{}) error {
 
 func (r *CreateSessionRequest) GetPropNames() ([]string, error) {
 	l, _ := r.L10N.GetPropNames()
-	return append(l, "conference_id", "speaker_id", "session_type_id", "title", "abstract", "memo", "material_level", "tags", "category", "spoken_language", "slide_language", "slide_subtitles", "slide_url", "video_url", "photo_permission", "video_permission", "user_id"), nil
+	return append(l, "conference_id", "speaker_id", "session_type_id", "title", "abstract", "memo", "material_level", "tags", "category", "spoken_language", "slide_language", "slide_subtitles", "slide_url", "video_url", "photo_release", "recording_release", "materials_release", "user_id"), nil
 }
 
 func (r *CreateSessionRequest) SetPropValue(s string, v interface{}) error {
@@ -2671,10 +2680,12 @@ func (r *CreateSessionRequest) SetPropValue(s string, v interface{}) error {
 		return r.SlideURL.Set(v)
 	case "video_url":
 		return r.VideoURL.Set(v)
-	case "photo_permission":
-		return r.PhotoPermission.Set(v)
-	case "video_permission":
-		return r.VideoPermission.Set(v)
+	case "photo_release":
+		return r.PhotoRelease.Set(v)
+	case "recording_release":
+		return r.RecordingRelease.Set(v)
+	case "materials_release":
+		return r.MaterialsRelease.Set(v)
 	case "user_id":
 		if jv, ok := v.(string); ok {
 			r.UserID = jv
@@ -2788,11 +2799,14 @@ func (r UpdateSessionRequest) collectMarshalData() map[string]interface{} {
 	if r.VideoURL.Valid() {
 		m["video_url"] = r.VideoURL.Value()
 	}
-	if r.PhotoPermission.Valid() {
-		m["photo_permission"] = r.PhotoPermission.Value()
+	if r.PhotoRelease.Valid() {
+		m["photo_release"] = r.PhotoRelease.Value()
 	}
-	if r.VideoPermission.Valid() {
-		m["video_permission"] = r.VideoPermission.Value()
+	if r.RecordingRelease.Valid() {
+		m["recording_release"] = r.RecordingRelease.Value()
+	}
+	if r.MaterialsRelease.Valid() {
+		m["materials_release"] = r.MaterialsRelease.Value()
 	}
 	if r.SortOrder.Valid() {
 		m["sort_order"] = r.SortOrder.Value()
@@ -2936,17 +2950,23 @@ func (r *UpdateSessionRequest) Populate(m map[string]interface{}) error {
 		}
 		delete(m, "video_url")
 	}
-	if jv, ok := m["photo_permission"]; ok {
-		if err := r.PhotoPermission.Set(jv); err != nil {
-			return errors.New("set field PhotoPermission failed: " + err.Error())
+	if jv, ok := m["photo_release"]; ok {
+		if err := r.PhotoRelease.Set(jv); err != nil {
+			return errors.New("set field PhotoRelease failed: " + err.Error())
 		}
-		delete(m, "photo_permission")
+		delete(m, "photo_release")
 	}
-	if jv, ok := m["video_permission"]; ok {
-		if err := r.VideoPermission.Set(jv); err != nil {
-			return errors.New("set field VideoPermission failed: " + err.Error())
+	if jv, ok := m["recording_release"]; ok {
+		if err := r.RecordingRelease.Set(jv); err != nil {
+			return errors.New("set field RecordingRelease failed: " + err.Error())
 		}
-		delete(m, "video_permission")
+		delete(m, "recording_release")
+	}
+	if jv, ok := m["materials_release"]; ok {
+		if err := r.MaterialsRelease.Set(jv); err != nil {
+			return errors.New("set field MaterialsRelease failed: " + err.Error())
+		}
+		delete(m, "materials_release")
 	}
 	if jv, ok := m["sort_order"]; ok {
 		if err := r.SortOrder.Set(jv); err != nil {
@@ -2981,7 +3001,7 @@ func (r *UpdateSessionRequest) Populate(m map[string]interface{}) error {
 			return ErrInvalidJSONFieldType{Field: "user_id"}
 		}
 	}
-	if err := tools.ExtractL10NFields(m, &r.L10N, []string{"id", "conference_id", "speaker_id", "session_type_id", "title", "abstract", "memo", "duration", "material_level", "tags", "category", "spoken_language", "slide_language", "slide_subtitles", "slide_url", "video_url", "photo_permission", "video_permission", "sort_order", "has_interpretation", "status", "confirmed", "user_id"}); err != nil {
+	if err := tools.ExtractL10NFields(m, &r.L10N, []string{"id", "conference_id", "speaker_id", "session_type_id", "title", "abstract", "memo", "duration", "material_level", "tags", "category", "spoken_language", "slide_language", "slide_subtitles", "slide_url", "video_url", "photo_release", "recording_release", "materials_release", "sort_order", "has_interpretation", "status", "confirmed", "user_id"}); err != nil {
 		return err
 	}
 	return nil
@@ -2989,7 +3009,7 @@ func (r *UpdateSessionRequest) Populate(m map[string]interface{}) error {
 
 func (r *UpdateSessionRequest) GetPropNames() ([]string, error) {
 	l, _ := r.L10N.GetPropNames()
-	return append(l, "id", "conference_id", "speaker_id", "session_type_id", "title", "abstract", "memo", "duration", "material_level", "tags", "category", "spoken_language", "slide_language", "slide_subtitles", "slide_url", "video_url", "photo_permission", "video_permission", "sort_order", "has_interpretation", "status", "confirmed", "user_id"), nil
+	return append(l, "id", "conference_id", "speaker_id", "session_type_id", "title", "abstract", "memo", "duration", "material_level", "tags", "category", "spoken_language", "slide_language", "slide_subtitles", "slide_url", "video_url", "photo_release", "recording_release", "materials_release", "sort_order", "has_interpretation", "status", "confirmed", "user_id"), nil
 }
 
 func (r *UpdateSessionRequest) SetPropValue(s string, v interface{}) error {
@@ -3029,10 +3049,12 @@ func (r *UpdateSessionRequest) SetPropValue(s string, v interface{}) error {
 		return r.SlideURL.Set(v)
 	case "video_url":
 		return r.VideoURL.Set(v)
-	case "photo_permission":
-		return r.PhotoPermission.Set(v)
-	case "video_permission":
-		return r.VideoPermission.Set(v)
+	case "photo_release":
+		return r.PhotoRelease.Set(v)
+	case "recording_release":
+		return r.RecordingRelease.Set(v)
+	case "materials_release":
+		return r.MaterialsRelease.Set(v)
 	case "sort_order":
 		return r.SortOrder.Set(v)
 	case "has_interpretation":

@@ -183,8 +183,9 @@ type Session struct {
 	SlideSubtitles        string       `json:"slide_subtitles,omitempty"`
 	SlideURL              string       `json:"slide_url,omitempty"`
 	VideoURL              string       `json:"video_url,omitempty"`
-	PhotoPermission       string       `json:"photo_permission"`
-	VideoPermission       string       `json:"video_permission"`
+	PhotoRelease          string       `json:"photo_release"`
+	RecordingRelease      string       `json:"recording_release"`
+	MaterialsRelease      string       `json:"materials_release"`
 	SortOrder             int          `json:"-"`
 	HasInterpretation     bool         `json:"has_interpretation"`
 	Status                string       `json:"status"`
@@ -464,25 +465,26 @@ type ListRoomRequest struct {
 
 // +transport
 type CreateSessionRequest struct {
-	ConferenceID    string                `json:"conference_id"`
-	SpeakerID       jsval.MaybeString     `json:"speaker_id,omitempty"`
-	SessionTypeID   string                `json:"session_type_id"`
-	Title           jsval.MaybeString     `json:"title,omitempty"`
-	Abstract        jsval.MaybeString     `json:"abstract,omitempty"`
-	Memo            jsval.MaybeString     `json:"memo,omitempty"`
-	MaterialLevel   jsval.MaybeString     `json:"material_level,omitempty"`
-	Tags            jsval.MaybeString     `json:"tags,omitempty"`
-	Category        jsval.MaybeString     `json:"category,omitempty"`
-	SpokenLanguage  jsval.MaybeString     `json:"spoken_language,omitempty"`
-	SlideLanguage   jsval.MaybeString     `json:"slide_language,omitempty"`
-	SlideSubtitles  jsval.MaybeString     `json:"slide_subtitles,omitempty"`
-	SlideURL        jsval.MaybeString     `json:"slide_url,omitempty"`
-	VideoURL        jsval.MaybeString     `json:"video_url,omitempty"`
-	PhotoPermission jsval.MaybeString     `json:"photo_permission,omitempty"`
-	VideoPermission jsval.MaybeString     `json:"video_permission,omitempty"`
-	L10N            tools.LocalizedFields `json:"-"`
-	UserID          string                `json:"user_id"`
-	Duration        int                   `json:"-"` // This is not sent from the client, but is used internally
+	ConferenceID     string                `json:"conference_id"`
+	SpeakerID        jsval.MaybeString     `json:"speaker_id,omitempty"`
+	SessionTypeID    string                `json:"session_type_id"`
+	Title            jsval.MaybeString     `json:"title,omitempty"`
+	Abstract         jsval.MaybeString     `json:"abstract,omitempty"`
+	Memo             jsval.MaybeString     `json:"memo,omitempty"`
+	MaterialLevel    jsval.MaybeString     `json:"material_level,omitempty"`
+	Tags             jsval.MaybeString     `json:"tags,omitempty"`
+	Category         jsval.MaybeString     `json:"category,omitempty"`
+	SpokenLanguage   jsval.MaybeString     `json:"spoken_language,omitempty"`
+	SlideLanguage    jsval.MaybeString     `json:"slide_language,omitempty"`
+	SlideSubtitles   jsval.MaybeString     `json:"slide_subtitles,omitempty"`
+	SlideURL         jsval.MaybeString     `json:"slide_url,omitempty"`
+	VideoURL         jsval.MaybeString     `json:"video_url,omitempty"`
+	PhotoRelease     jsval.MaybeString     `json:"photo_release,omitempty"`
+	RecordingRelease jsval.MaybeString     `json:"recording_release,omitempty"`
+	MaterialsRelease jsval.MaybeString     `json:"materials_release,omitempty"`
+	L10N             tools.LocalizedFields `json:"-"`
+	UserID           string                `json:"user_id"`
+	Duration         int                   `json:"-"` // This is not sent from the client, but is used internally
 }
 
 // +transport
@@ -511,8 +513,9 @@ type UpdateSessionRequest struct {
 	SlideSubtitles    jsval.MaybeString     `json:"slide_subtitles,omitempty"`
 	SlideURL          jsval.MaybeString     `json:"slide_url,omitempty"`
 	VideoURL          jsval.MaybeString     `json:"video_url,omitempty"`
-	PhotoPermission   jsval.MaybeString     `json:"photo_permission,omitempty"`
-	VideoPermission   jsval.MaybeString     `json:"video_permission,omitempty"`
+	PhotoRelease      jsval.MaybeString     `json:"photo_release,omitempty"`
+	RecordingRelease  jsval.MaybeString     `json:"recording_release,omitempty"`
+	MaterialsRelease  jsval.MaybeString     `json:"materials_release,omitempty"`
 	SortOrder         jsval.MaybeInt        `json:"sort_order,omitempty"`
 	HasInterpretation jsval.MaybeBool       `json:"has_interpretation,omitempty"`
 	Status            jsval.MaybeString     `json:"status,omitempty"`

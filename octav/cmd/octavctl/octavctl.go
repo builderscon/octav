@@ -1395,10 +1395,14 @@ func doSessionCreate(args cmdargs) int {
 	fs.StringVar(&conference_id, "conference_id", "", "")
 	var material_level string
 	fs.StringVar(&material_level, "material_level", "", "")
+	var materials_release string
+	fs.StringVar(&materials_release, "materials_release", "", "")
 	var memo string
 	fs.StringVar(&memo, "memo", "", "")
-	var photo_permission string
-	fs.StringVar(&photo_permission, "photo_permission", "", "")
+	var photo_release string
+	fs.StringVar(&photo_release, "photo_release", "", "")
+	var recording_release string
+	fs.StringVar(&recording_release, "recording_release", "", "")
 	var type_id string
 	fs.StringVar(&type_id, "type_id", "", "")
 	var slide_language string
@@ -1417,8 +1421,6 @@ func doSessionCreate(args cmdargs) int {
 	fs.StringVar(&title, "title", "", "")
 	var user_id string
 	fs.StringVar(&user_id, "user_id", "", "")
-	var video_permission string
-	fs.StringVar(&video_permission, "video_permission", "", "")
 	var video_url string
 	fs.StringVar(&video_url, "video_url", "", "")
 	prepGlobalFlags(fs)
@@ -1439,11 +1441,17 @@ func doSessionCreate(args cmdargs) int {
 	if material_level != "" {
 		m["material_level"] = material_level
 	}
+	if materials_release != "" {
+		m["materials_release"] = materials_release
+	}
 	if memo != "" {
 		m["memo"] = memo
 	}
-	if photo_permission != "" {
-		m["photo_permission"] = photo_permission
+	if photo_release != "" {
+		m["photo_release"] = photo_release
+	}
+	if recording_release != "" {
+		m["recording_release"] = recording_release
 	}
 	if type_id != "" {
 		m["session_type_id"] = type_id
@@ -1471,9 +1479,6 @@ func doSessionCreate(args cmdargs) int {
 	}
 	if user_id != "" {
 		m["user_id"] = user_id
-	}
-	if video_permission != "" {
-		m["video_permission"] = video_permission
 	}
 	if video_url != "" {
 		m["video_url"] = video_url

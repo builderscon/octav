@@ -438,11 +438,19 @@ func init() {
 			jsval.Reference(M).RefersTo("#/definitions/material_level"),
 		).
 		AddProp(
+			"materials_release",
+			jsval.Reference(M).RefersTo("#/definitions/binary_permission_default_allow"),
+		).
+		AddProp(
 			"memo",
 			jsval.String(),
 		).
 		AddProp(
-			"photo_permission",
+			"photo_release",
+			jsval.Reference(M).RefersTo("#/definitions/binary_permission_default_allow"),
+		).
+		AddProp(
+			"recording_release",
 			jsval.Reference(M).RefersTo("#/definitions/binary_permission_default_allow"),
 		).
 		AddProp(
@@ -518,10 +526,6 @@ func init() {
 		AddProp(
 			"title",
 			jsval.String(),
-		).
-		AddProp(
-			"video_permission",
-			jsval.Reference(M).RefersTo("#/definitions/binary_permission_default_allow"),
 		).
 		AddProp(
 			"video_url",
@@ -1299,11 +1303,19 @@ func init() {
 					jsval.Reference(M).RefersTo("#/definitions/material_level"),
 				).
 				AddProp(
+					"materials_release",
+					jsval.Reference(M).RefersTo("#/definitions/binary_permission_default_allow"),
+				).
+				AddProp(
 					"memo",
 					jsval.String(),
 				).
 				AddProp(
-					"photo_permission",
+					"photo_release",
+					jsval.Reference(M).RefersTo("#/definitions/binary_permission_default_allow"),
+				).
+				AddProp(
+					"recording_release",
 					jsval.Reference(M).RefersTo("#/definitions/binary_permission_default_allow"),
 				).
 				AddProp(
@@ -1341,10 +1353,6 @@ func init() {
 				AddProp(
 					"user_id",
 					jsval.Reference(M).RefersTo("#/definitions/uuid"),
-				).
-				AddProp(
-					"video_permission",
-					jsval.Reference(M).RefersTo("#/definitions/binary_permission_default_allow"),
 				).
 				AddProp(
 					"video_url",
@@ -2561,11 +2569,19 @@ func init() {
 					jsval.Reference(M).RefersTo("#/definitions/material_level"),
 				).
 				AddProp(
+					"materials_release",
+					jsval.Reference(M).RefersTo("#/definitions/binary_permission_default_allow"),
+				).
+				AddProp(
 					"memo",
 					jsval.String(),
 				).
 				AddProp(
-					"photo_permission",
+					"photo_release",
+					jsval.Reference(M).RefersTo("#/definitions/binary_permission_default_allow"),
+				).
+				AddProp(
+					"recording_release",
 					jsval.Reference(M).RefersTo("#/definitions/binary_permission_default_allow"),
 				).
 				AddProp(
@@ -2641,10 +2657,6 @@ func init() {
 				AddProp(
 					"title",
 					jsval.String(),
-				).
-				AddProp(
-					"video_permission",
-					jsval.Reference(M).RefersTo("#/definitions/binary_permission_default_allow"),
 				).
 				AddProp(
 					"video_url",
@@ -3130,11 +3142,19 @@ func init() {
 					jsval.Reference(M).RefersTo("#/definitions/material_level"),
 				).
 				AddProp(
+					"materials_release",
+					jsval.Reference(M).RefersTo("#/definitions/binary_permission_default_allow"),
+				).
+				AddProp(
 					"memo",
 					jsval.String(),
 				).
 				AddProp(
-					"photo_permission",
+					"photo_release",
+					jsval.Reference(M).RefersTo("#/definitions/binary_permission_default_allow"),
+				).
+				AddProp(
+					"recording_release",
 					jsval.Reference(M).RefersTo("#/definitions/binary_permission_default_allow"),
 				).
 				AddProp(
@@ -3180,10 +3200,6 @@ func init() {
 				AddProp(
 					"user_id",
 					jsval.Reference(M).RefersTo("#/definitions/uuid"),
-				).
-				AddProp(
-					"video_permission",
-					jsval.Reference(M).RefersTo("#/definitions/binary_permission_default_allow"),
 				).
 				AddProp(
 					"video_url",

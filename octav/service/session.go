@@ -93,14 +93,19 @@ func (v *Session) populateRowForCreate(vdb *db.Session, payload model.CreateSess
 		vdb.VideoURL.String = payload.VideoURL.String
 	}
 
-	if payload.PhotoPermission.Valid() {
-		vdb.PhotoPermission.Valid = true
-		vdb.PhotoPermission.String = payload.PhotoPermission.String
+	if payload.PhotoRelease.Valid() {
+		vdb.PhotoRelease.Valid = true
+		vdb.PhotoRelease.String = payload.PhotoRelease.String
 	}
 
-	if payload.VideoPermission.Valid() {
-		vdb.VideoPermission.Valid = true
-		vdb.VideoPermission.String = payload.VideoPermission.String
+	if payload.RecordingRelease.Valid() {
+		vdb.RecordingRelease.Valid = true
+		vdb.RecordingRelease.String = payload.RecordingRelease.String
+	}
+
+	if payload.MaterialsRelease.Valid() {
+		vdb.MaterialsRelease.Valid = true
+		vdb.MaterialsRelease.String = payload.MaterialsRelease.String
 	}
 
 	if payload.Tags.Valid() {
@@ -194,14 +199,19 @@ func (v *Session) populateRowForUpdate(vdb *db.Session, payload model.UpdateSess
 		vdb.VideoURL.String = payload.VideoURL.String
 	}
 
-	if payload.PhotoPermission.Valid() {
-		vdb.PhotoPermission.Valid = true
-		vdb.PhotoPermission.String = payload.PhotoPermission.String
+	if payload.PhotoRelease.Valid() {
+		vdb.PhotoRelease.Valid = true
+		vdb.PhotoRelease.String = payload.PhotoRelease.String
 	}
 
-	if payload.VideoPermission.Valid() {
-		vdb.VideoPermission.Valid = true
-		vdb.VideoPermission.String = payload.VideoPermission.String
+	if payload.RecordingRelease.Valid() {
+		vdb.RecordingRelease.Valid = true
+		vdb.RecordingRelease.String = payload.RecordingRelease.String
+	}
+
+	if payload.MaterialsRelease.Valid() {
+		vdb.MaterialsRelease.Valid = true
+		vdb.MaterialsRelease.String = payload.MaterialsRelease.String
 	}
 
 	if payload.Tags.Valid() {
