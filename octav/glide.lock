@@ -82,7 +82,7 @@ imports:
   - language
   - internal/tag
 - name: google.golang.org/api
-  version: 5c5176a4889d2044061e359412bfd6528f0e2fad
+  version: 71d10c782fc13eb9f2e2c9af553da218c941851f
   subpackages:
   - option
   - googleapi
