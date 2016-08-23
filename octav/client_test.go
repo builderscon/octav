@@ -111,7 +111,7 @@ func (ctx *TestCtx) SetAPIServer(ts *httptest.Server) {
 }
 
 func bigsight(userID string) *model.CreateVenueRequest {
-	lf := tools.LocalizedFields{}
+	lf := model.LocalizedFields{}
 	lf.Set("ja", "name", `東京ビッグサイト`)
 	lf.Set("ja", "address", `〒135-0063 東京都江東区有明３丁目１０−１`)
 
@@ -127,7 +127,7 @@ func bigsight(userID string) *model.CreateVenueRequest {
 }
 
 func intlConferenceRoom(venueID, userID string) *model.CreateRoomRequest {
-	lf := tools.LocalizedFields{}
+	lf := model.LocalizedFields{}
 	lf.Set("ja", "name", `国際会議場`)
 
 	r := model.CreateRoomRequest{}
@@ -790,7 +790,7 @@ func newuser() *model.CreateUserRequest {
 func johndoe() *model.CreateUserRequest {
 	r := newuser()
 
-	lf := tools.LocalizedFields{}
+	lf := model.LocalizedFields{}
 	lf.Set("ja", "first_name", "ジョン")
 	lf.Set("ja", "last_name", "ドー")
 
@@ -1132,7 +1132,7 @@ func TestListConference(t *testing.T) {
 
 	confs := make([]*model.ObjectID, 10)
 	for i := 0; i < 10; i++ {
-		lf := tools.LocalizedFields{}
+		lf := model.LocalizedFields{}
 		lf.Set("ja", "title", `リストカンファレンステスト`)
 
 		conf, err := testCreateConferencePass(ctx, &model.CreateConferenceRequest{

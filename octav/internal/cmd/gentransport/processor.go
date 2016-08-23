@@ -111,7 +111,6 @@ func (p *Processor) ProcessPkg(pkg *ast.Package) error {
 	buf.WriteString("\n\nimport (")
 	buf.WriteString("\n" + strconv.Quote("encoding/json"))
 	buf.WriteString("\n" + strconv.Quote("errors"))
-	buf.WriteString("\n\n" + strconv.Quote("github.com/builderscon/octav/octav/tools"))
 	buf.WriteString("\n\n" + strconv.Quote("github.com/lestrrat/go-urlenc"))
 	buf.WriteString("\n)")
 
@@ -207,7 +206,7 @@ func (p *Processor) ProcessStruct(buf *bytes.Buffer, s Struct) error {
 		if !s.HasL10N {
 			buf.WriteString("\nreturn buf, nil")
 		} else {
-			fmt.Fprintf(buf, "\nreturn tools.Marshal%sWithL10N(buf, r.L10N)", method)
+			fmt.Fprintf(buf, "\nreturn Marshal%sWithL10N(buf, r.L10N)", method)
 		}
 		buf.WriteString("\n}")
 	}
@@ -276,7 +275,7 @@ func (p *Processor) ProcessStruct(buf *bytes.Buffer, s Struct) error {
 		buf.WriteString("\n}")
 	}
 	if s.HasL10N {
-		buf.WriteString("\nif err := tools.ExtractL10NFields(m, &r.L10N, []string{")
+		buf.WriteString("\nif err := ExtractL10NFields(m, &r.L10N, []string{")
 		for i, f := range s.Fields {
 			buf.WriteString(strconv.Quote(f.JSONName))
 			if i != len(s.Fields)-1 {
