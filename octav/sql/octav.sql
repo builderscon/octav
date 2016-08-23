@@ -187,7 +187,7 @@ CREATE TABLE localized_strings (
     name CHAR(128) BINARY NOT NULL,
     language CHAR(32) BINARY NOT NULL,
     localized TEXT NOT NULL,
-    KEY (parent_id, parent_type, name, language)
+    UNIQUE KEY (parent_id, parent_type, name, language)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 CREATE TABLE questions (
