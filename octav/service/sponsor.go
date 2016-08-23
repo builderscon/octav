@@ -14,7 +14,7 @@ import (
 	"github.com/lestrrat/go-pdebug"
 	"golang.org/x/net/context"
 	"golang.org/x/sync/errgroup"
-	"google.golang.org/cloud/storage"
+	"cloud.google.com/go/storage"
 )
 
 func (v *Sponsor) populateRowForCreate(vdb *db.Sponsor, payload model.CreateSponsorRequest) error {

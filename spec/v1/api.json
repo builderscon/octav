@@ -302,7 +302,12 @@
       "properties": {
         "id": { "$ref": "#/definitions/uuid" },
         "name": { "type": "string" },
-        "email": { "$ref": "#/definitions/email" }
+        "email": {
+          "oneOf": [
+            { "$ref": "#/definitions/email" },
+            { "type": "null" }
+          ]
+        }
       },
       "additionalProperties": {
         "patternProperties": {
@@ -406,8 +411,19 @@
       }
     },
     "tshirt_size": {
-      "type": "string",
-      "enum": ["XXXL","XXL","XL","L","M","S","XS"]
+      "oneOf": [
+        {
+          "type": "string",
+          "enum": ["XXXL","XXL","XL","L","M","S","XS"]
+        },
+        {
+          "type": "null"
+        },
+        {
+          "type": "string",
+          "maxLength": 0
+        }
+      ]
     },
     "user_array": {
       "type": "array",
@@ -421,7 +437,13 @@
         "first_name": { "$ref": "#/definitions/string_en" },
         "last_name": { "$ref": "#/definitions/string_en" },
         "nickname": { "$ref": "#/definitions/string_en" },
-        "email": { "$ref": "#/definitions/email" },
+        "email": {
+          "anyOf": [
+            { "$ref": "#/definitions/email" },
+            { "type": "null" },
+            { "type": "string", "maxLength": 0 }
+          ]
+        },
         "tshirt_size": { "$ref": "#/definitions/tshirt_size" },
         "is_admin": { "$ref": "#/definitions/boolean_default_false" }
       },

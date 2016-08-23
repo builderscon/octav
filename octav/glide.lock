@@ -1,20 +1,25 @@
-hash: a2bb315d20a4d886cc37aacf92f8a46115bb3e8a3455d619fb012a40438bc518
-updated: 2016-07-27T01:00:23.523299594+09:00
+hash: d1d9af2673282affcb4500acee3cedc6d693246444efb33fb238be2f6c9d2ae1
+updated: 2016-08-23T10:52:33.086754454+09:00
 imports:
+- name: cloud.google.com/go
+  version: 242ed68074e53cbb6f78a90c28d9a48bfa2d1093
+  subpackages:
+  - compute/metadata
+  - internal
 - name: github.com/davecgh/go-spew
-  version: 5215b55f46b2b919f50a1df0eaa5886afe4e3b3d
+  version: 6cf5744a041a0022271cefed95ba843f6d87fd51
   subpackages:
   - spew
 - name: github.com/go-sql-driver/mysql
-  version: 3654d25ec346ee8ce71a68431025458d52a38ac0
+  version: 0b58b37b664c21f3010e836f1b931e1d0b0b0685
 - name: github.com/golang/protobuf
-  version: 874264fbbb43f4d91e999fecb4b40143ed611400
+  version: f592bd283e9ef86337a432eb50e592278c3d534d
   subpackages:
   - proto
 - name: github.com/gorilla/context
-  version: aed02d124ae4a0e94fea4541c8effd05bf0c8296
+  version: 08b5f424b9271eedf6f9f0ce86cb9396ed337a42
 - name: github.com/gorilla/mux
-  version: d391bea3118c9fc17a88d62c9189bb791255e0ef
+  version: cf79e51a62d8219d52060dfc1b4e810414ba2d15
 - name: github.com/jessevdk/go-flags
   version: f2785f5820ec967043de79c8be97edfc464ca745
 - name: github.com/lestrrat/go-apache-logformat
@@ -28,11 +33,11 @@ imports:
   subpackages:
   - provider
 - name: github.com/lestrrat/go-jsschema
-  version: 29ed749b2386595fd62b5d919e8cff759c38185a
+  version: 134ddb70a4100eb4bf3c673cc42e8435d23302c3
 - name: github.com/lestrrat/go-jsval
-  version: e20c7e2b576609a3f0d351adda8465b4343d52bc
+  version: 6b944328e3c8c504f412cdc6a8d4f28da31cc129
 - name: github.com/lestrrat/go-pdebug
-  version: a45b04725d5819f9f30fb68085be53b90a1d55f1
+  version: 2e6eaaa5717f81bda41d27070d3c966f40a1e75f
 - name: github.com/lestrrat/go-simple-guard
   version: 9558d700d27518c2737bad3d5f6c1c5e481e1a29
 - name: github.com/lestrrat/go-structinfo
@@ -42,7 +47,7 @@ imports:
 - name: github.com/lestrrat/go-urlenc
   version: c952b9a8b42e2b36637e0c5acee8a0f0898b8d80
 - name: github.com/pkg/errors
-  version: 1d2e60385a13aaa66134984235061c2f9302520e
+  version: 17b591df37844cde689f4d5813e5cea0927d8dd2
 - name: github.com/shogo82148/go-sql-proxy
   version: 0ff9659b5642274097d62b43b2d754b001ed4f4d
 - name: github.com/stretchr/testify
@@ -50,7 +55,7 @@ imports:
   subpackages:
   - assert
 - name: golang.org/x/net
-  version: 9f2c271364b418388d150f9c12ecbf12794095c1
+  version: 7394c112eae4dba7e96bfcfe738e6373d61772b4
   subpackages:
   - context
   - context/ctxhttp
@@ -60,7 +65,7 @@ imports:
   - lex/httplex
   - internal/timeseries
 - name: golang.org/x/oauth2
-  version: 1364adb2c63445016c5ed4518fc71f6a3cda6169
+  version: 3b966c7f301c0c71c53d94dc632a62df0a682cd7
   subpackages:
   - google
   - internal
@@ -71,12 +76,12 @@ imports:
   subpackages:
   - errgroup
 - name: golang.org/x/text
-  version: 784b12aec457d4ae6fb9107ff08748b8ea946b76
+  version: d69c40b4be55797923cec7457fac7a244d91a9b6
   subpackages:
   - language
   - internal/tag
 - name: google.golang.org/api
-  version: 663fefdcec4e1ec9033ba302202321d3bff5fe6d
+  version: 0f8fd0d7684b3f7050ca4bc4ee1c9c2a7d5cb859
   subpackages:
   - option
   - googleapi
@@ -86,7 +91,7 @@ imports:
   - gensupport
   - transport
 - name: google.golang.org/appengine
-  version: 267c27e7492265b84fc6719503b14a1e17975d79
+  version: 4f7eeb5305a4ba1966344836ba4af9996b7b4e05
   subpackages:
   - urlfetch
   - internal
@@ -99,15 +104,8 @@ imports:
   - internal/remote_api
   - socket
   - internal/socket
-- name: google.golang.org/cloud
-  version: f3b4fda9d963b307ee3260dbf1620dbe0717f7fa
-  subpackages:
-  - storage
-  - compute/metadata
-  - internal
-  - internal/transport
 - name: google.golang.org/grpc
-  version: afdabe5738c5296bd52692f9577185d95bd5e828
+  version: 0032a855ba5c8a3c8e0d71c2deef354b70af1584
   subpackages:
   - codes
   - credentials

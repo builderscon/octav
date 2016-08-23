@@ -9,8 +9,8 @@ import (
 	"github.com/pkg/errors"
 	"golang.org/x/net/context"
 	"golang.org/x/oauth2/google"
-	"google.golang.org/cloud"
-	"google.golang.org/cloud/storage"
+	"google.golang.org/api/option"
+	"cloud.google.com/go/storage"
 )
 
 func defaultGoogleStorageClient(ctx context.Context) (*storage.Client, error) {
@@ -19,7 +19,7 @@ func defaultGoogleStorageClient(ctx context.Context) (*storage.Client, error) {
 		return nil, errors.Wrap(err, "failed to get default token source for storage client")
 	}
 
-	client, err := storage.NewClient(ctx, cloud.WithTokenSource(tokesrc))
+	client, err := storage.NewClient(ctx, option.WithTokenSource(tokesrc))
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to create storage client")
 	}

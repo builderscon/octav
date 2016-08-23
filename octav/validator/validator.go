@@ -593,7 +593,13 @@ func init() {
 		).
 		AddProp(
 			"email",
-			jsval.Reference(M).RefersTo("#/definitions/email"),
+			jsval.OneOf().
+				Add(
+					jsval.Reference(M).RefersTo("#/definitions/email"),
+				).
+				Add(
+					jsval.NullConstraint,
+				),
 		).
 		AddProp(
 			"id",
@@ -666,7 +672,16 @@ func init() {
 			jsval.EmptyConstraint,
 		)
 	R43 = jsval.String().RegexpString("^\\d\\d:\\d\\d$")
-	R44 = jsval.String().Enum("XXXL", "XXL", "XL", "L", "M", "S", "XS")
+	R44 = jsval.OneOf().
+		Add(
+			jsval.String().Enum("XXXL", "XXL", "XL", "L", "M", "S", "XS"),
+		).
+		Add(
+			jsval.NullConstraint,
+		).
+		Add(
+			jsval.String().MaxLength(0),
+		)
 	R45 = jsval.String().Format("uri")
 	R46 = jsval.Object().
 		AdditionalProperties(
@@ -674,7 +689,16 @@ func init() {
 		).
 		AddProp(
 			"email",
-			jsval.Reference(M).RefersTo("#/definitions/email"),
+			jsval.Any().
+				Add(
+					jsval.Reference(M).RefersTo("#/definitions/email"),
+				).
+				Add(
+					jsval.NullConstraint,
+				).
+				Add(
+					jsval.String().MaxLength(0),
+				),
 		).
 		AddProp(
 			"first_name",
@@ -1507,7 +1531,16 @@ func init() {
 				).
 				AddProp(
 					"email",
-					jsval.Reference(M).RefersTo("#/definitions/email"),
+					jsval.Any().
+						Add(
+							jsval.Reference(M).RefersTo("#/definitions/email"),
+						).
+						Add(
+							jsval.NullConstraint,
+						).
+						Add(
+							jsval.String().MaxLength(0),
+						),
 				).
 				AddProp(
 					"first_name",
@@ -2825,7 +2858,16 @@ func init() {
 				).
 				AddProp(
 					"email",
-					jsval.Reference(M).RefersTo("#/definitions/email"),
+					jsval.Any().
+						Add(
+							jsval.Reference(M).RefersTo("#/definitions/email"),
+						).
+						Add(
+							jsval.NullConstraint,
+						).
+						Add(
+							jsval.String().MaxLength(0),
+						),
 				).
 				AddProp(
 					"first_name",
@@ -2884,7 +2926,16 @@ func init() {
 				).
 				AddProp(
 					"email",
-					jsval.Reference(M).RefersTo("#/definitions/email"),
+					jsval.Any().
+						Add(
+							jsval.Reference(M).RefersTo("#/definitions/email"),
+						).
+						Add(
+							jsval.NullConstraint,
+						).
+						Add(
+							jsval.String().MaxLength(0),
+						),
 				).
 				AddProp(
 					"first_name",

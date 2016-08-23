@@ -12,7 +12,7 @@ import (
 	"time"
 
 	"golang.org/x/net/context"
-	"google.golang.org/cloud/storage"
+	"cloud.google.com/go/storage"
 
 	"github.com/builderscon/octav/octav/db"
 	"github.com/builderscon/octav/octav/internal/errors"
@@ -334,7 +334,7 @@ func (v *Conference) DeleteAdministratorFromPayload(tx *db.Tx, payload model.Del
 	return db.DeleteConferenceAdministrator(tx, payload.ConferenceID, payload.AdminID)
 }
 
-func (v *Conference) LoadAdmins(tx *db.Tx, cdl *model.UserList, cid string) (err error) {
+func (v *Conference) LoadAdmins(tx *db.Tx, cdl *model.UserList, trustedCall bool, cid, lang string) (err error) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("service.Conference.LoadAdmins").BindError(&err)
 		defer g.End()
@@ -350,12 +350,14 @@ func (v *Conference) LoadAdmins(tx *db.Tx, cdl *model.UserList, cid string) (err
 	}
 
 	res := make(model.UserList, len(vdbl))
+	var us User
 	for i, vdb := range vdbl {
-		var u model.User
-		if err := u.FromRow(vdb); err != nil {
-			return err
+		if err := res[i].FromRow(vdb); err != nil {
+			return errors.Wrap(err, "failed to map database to model")
 		}
-		res[i] = u
+		if err := us.Decorate(tx, &res[i], trustedCall, lang); err != nil {
+			return errors.Wrap(err, "failed to decorate administrator")
+		}
 	}
 	*cdl = res
 	return nil
@@ -458,7 +460,7 @@ func (v *Conference) Decorate(tx *db.Tx, c *model.Conference, trustedCall bool, 
 		return errors.Wrapf(err, "failed to load conference date for '%s'", c.ID)
 	}
 
-	if err := v.LoadAdmins(tx, &c.Administrators, c.ID); err != nil {
+	if err := v.LoadAdmins(tx, &c.Administrators, trustedCall, c.ID, lang); err != nil {
 		return errors.Wrapf(err, "failed to load administrators for '%s'", c.ID)
 	}
 
