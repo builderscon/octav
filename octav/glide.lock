@@ -1,5 +1,5 @@
-hash: 230cc7f12b441d0dd085edcfbf4f25ef78b130a4e3787808b84ceff11e2cb84f
-updated: 2016-08-23T11:03:48.096119566+09:00
+hash: ca2136e4ea54318509a0bc71e583114fb9d354391c48503832ad6bffde3697ea
+updated: 2016-08-24T11:44:01.347974816+09:00
 imports:
 - name: cloud.google.com/go
   version: 242ed68074e53cbb6f78a90c28d9a48bfa2d1093
@@ -55,6 +55,16 @@ imports:
   version: d77da356e56a7428ad25149ca77381849a6a5232
   subpackages:
   - assert
+- name: golang.org/x/net
+  version: 7394c112eae4dba7e96bfcfe738e6373d61772b4
+  subpackages:
+  - context
+  - context/ctxhttp
+  - http2
+  - trace
+  - http2/hpack
+  - lex/httplex
+  - internal/timeseries
 - name: golang.org/x/oauth2
   version: 3b966c7f301c0c71c53d94dc632a62df0a682cd7
   subpackages:
