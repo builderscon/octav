@@ -4,7 +4,7 @@ import (
 	"io"
 	"os"
 
-	"golang.org/x/net/context"
+	"context"
 )
 
 var DefaultStorage StorageClient

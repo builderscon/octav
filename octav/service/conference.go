@@ -11,7 +11,7 @@ import (
 	"strings"
 	"time"
 
-	"golang.org/x/net/context"
+	"context"
 	"cloud.google.com/go/storage"
 
 	"github.com/builderscon/octav/octav/db"

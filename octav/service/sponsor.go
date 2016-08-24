@@ -12,7 +12,7 @@ import (
 	"github.com/builderscon/octav/octav/model"
 	"github.com/builderscon/octav/octav/tools"
 	"github.com/lestrrat/go-pdebug"
-	"golang.org/x/net/context"
+	"context"
 	"golang.org/x/sync/errgroup"
 	"cloud.google.com/go/storage"
 )

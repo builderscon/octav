@@ -8,7 +8,7 @@ import (
 	"github.com/builderscon/octav/octav/tools"
 	pdebug "github.com/lestrrat/go-pdebug"
 	"github.com/pkg/errors"
-	"golang.org/x/net/context"
+	"context"
 )
 
 func (v *SessionType) populateRowForCreate(vdb *db.SessionType, payload model.CreateSessionTypeRequest) error {

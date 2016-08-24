@@ -10,9 +10,6 @@ import:
 - package: github.com/lestrrat/go-tx-guard
 - package: github.com/lestrrat/go-urlenc
 - package: github.com/shogo82148/go-sql-proxy
-- package: golang.org/x/net
-  subpackages:
-  - context
 - package: golang.org/x/text
   subpackages:
   - language
