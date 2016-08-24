@@ -11,7 +11,7 @@ import (
 	"github.com/builderscon/octav/octav/service"
 	"github.com/lestrrat/go-apache-logformat"
 	"github.com/lestrrat/go-pdebug"
-	"golang.org/x/net/context"
+	"context"
 )
 
 var mwset middlewareSet

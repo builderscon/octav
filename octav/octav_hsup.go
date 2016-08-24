@@ -16,7 +16,7 @@ import (
 	"github.com/gorilla/mux"
 	"github.com/lestrrat/go-pdebug"
 	"github.com/lestrrat/go-urlenc"
-	"golang.org/x/net/context"
+	"context"
 )
 
 const MaxPostSize = (1 << 20) * 2

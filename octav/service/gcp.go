@@ -7,7 +7,7 @@ import (
 
 	pdebug "github.com/lestrrat/go-pdebug"
 	"github.com/pkg/errors"
-	"golang.org/x/net/context"
+	"context"
 	"golang.org/x/oauth2/google"
 	"google.golang.org/api/option"
 	"cloud.google.com/go/storage"

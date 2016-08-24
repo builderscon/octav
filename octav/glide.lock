@@ -55,16 +55,6 @@ imports:
   version: d77da356e56a7428ad25149ca77381849a6a5232
   subpackages:
   - assert
-- name: golang.org/x/net
-  version: 7394c112eae4dba7e96bfcfe738e6373d61772b4
-  subpackages:
-  - context
-  - context/ctxhttp
-  - http2
-  - trace
-  - http2/hpack
-  - lex/httplex
-  - internal/timeseries
 - name: golang.org/x/oauth2
   version: 3b966c7f301c0c71c53d94dc632a62df0a682cd7
   subpackages:
