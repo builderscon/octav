@@ -123,7 +123,7 @@ for my $link (@{$schema->{links}}) {
         say $tmpout "                    payload[key] = args[key]";
     }
     say $tmpout q|        uri = '%s|, $path, q|' % self.endpoint|;
-    if ($link->{'hsup.wrapper'} eq 'httpWithBasicAuth') {
+    if ($link->{'hsup.wrapper'} =~ /^httpWith(Optional)?BasicAuth/) {
         say $tmpout q|        hdrs = urllib3.util.make_headers(|;
         say $tmpout q|            basic_auth='%s:%s' % (self.key, self.secret),|;
         say $tmpout q|        )|;

@@ -101,7 +101,10 @@ func (v *Room) ReplaceL10NStrings(tx *db.Tx, m *model.Room, lang string) error {
 		g := pdebug.Marker("service.Room.ReplaceL10NStrings lang = %s", lang)
 		defer g.End()
 	}
-	if lang == "all" {
+	switch lang {
+	case "en":
+		return nil
+	case "all":
 		rows, err := tx.Query(`SELECT oid, parent_id, parent_type, name, language, localized FROM localized_strings WHERE parent_type = ? AND parent_id = ?`, "Room", m.ID)
 		if err != nil {
 			return err
@@ -120,7 +123,7 @@ func (v *Room) ReplaceL10NStrings(tx *db.Tx, m *model.Room, lang string) error {
 			}
 			m.LocalizedFields.Set(l.Language, l.Name, l.Localized)
 		}
-	} else {
+	default:
 		rows, err := tx.Query(`SELECT oid, parent_id, parent_type, name, language, localized FROM localized_strings WHERE parent_type = ? AND parent_id = ? AND language = ?`, "Room", m.ID, lang)
 		if err != nil {
 			return err
