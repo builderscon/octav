@@ -1,5 +1,5 @@
 """OCTAV Client Library"""
-"""DO NOT EDIT: This file was generated from ../spec/v1/api.json on Wed Aug 24 07:01:43 2016"""
+"""DO NOT EDIT: This file was generated from ../spec/v1/api.json on Thu Aug 25 13:36:49 2016"""
 
 import json
 import os
@@ -112,7 +112,7 @@ class Octav(object):
         hdrs = urllib3.util.make_headers(
             basic_auth='%s:%s' % (self.key, self.secret),
         )
-        qs = urlencode(payload)
+        qs = urlencode(payload, True)
         if self.debug:
             print('GET %s?%s' % (uri, qs))
         res = self.http.request('GET', '%s?%s' % (uri, qs), headers=hdrs)
@@ -146,7 +146,7 @@ class Octav(object):
         hdrs = urllib3.util.make_headers(
             basic_auth='%s:%s' % (self.key, self.secret),
         )
-        qs = urlencode(payload)
+        qs = urlencode(payload, True)
         if self.debug:
             print('GET %s?%s' % (uri, qs))
         res = self.http.request('GET', '%s?%s' % (uri, qs), headers=hdrs)
@@ -259,7 +259,7 @@ class Octav(object):
         hdrs = urllib3.util.make_headers(
             basic_auth='%s:%s' % (self.key, self.secret),
         )
-        qs = urlencode(payload)
+        qs = urlencode(payload, True)
         if self.debug:
             print('GET %s?%s' % (uri, qs))
         res = self.http.request('GET', '%s?%s' % (uri, qs), headers=hdrs)
@@ -337,7 +337,7 @@ class Octav(object):
         hdrs = urllib3.util.make_headers(
             basic_auth='%s:%s' % (self.key, self.secret),
         )
-        qs = urlencode(payload)
+        qs = urlencode(payload, True)
         if self.debug:
             print('GET %s?%s' % (uri, qs))
         res = self.http.request('GET', '%s?%s' % (uri, qs), headers=hdrs)
@@ -363,7 +363,7 @@ class Octav(object):
         if id is not None:
             payload['id'] = id
         uri = '%s/venue/lookup' % self.endpoint
-        qs = urlencode(payload)
+        qs = urlencode(payload, True)
         if self.debug:
             print('GET %s?%s' % (uri, qs))
         res = self.http.request('GET', '%s?%s' % (uri, qs), headers=hdrs)
@@ -548,7 +548,7 @@ class Octav(object):
         if id is not None:
             payload['id'] = id
         uri = '%s/room/lookup' % self.endpoint
-        qs = urlencode(payload)
+        qs = urlencode(payload, True)
         if self.debug:
             print('GET %s?%s' % (uri, qs))
         res = self.http.request('GET', '%s?%s' % (uri, qs), headers=hdrs)
@@ -615,7 +615,7 @@ class Octav(object):
         hdrs = urllib3.util.make_headers(
             basic_auth='%s:%s' % (self.key, self.secret),
         )
-        qs = urlencode(payload)
+        qs = urlencode(payload, True)
         if self.debug:
             print('GET %s?%s' % (uri, qs))
         res = self.http.request('GET', '%s?%s' % (uri, qs), headers=hdrs)
@@ -684,7 +684,7 @@ class Octav(object):
         hdrs = urllib3.util.make_headers(
             basic_auth='%s:%s' % (self.key, self.secret),
         )
-        qs = urlencode(payload)
+        qs = urlencode(payload, True)
         if self.debug:
             print('GET %s?%s' % (uri, qs))
         res = self.http.request('GET', '%s?%s' % (uri, qs), headers=hdrs)
@@ -1131,7 +1131,7 @@ class Octav(object):
         hdrs = urllib3.util.make_headers(
             basic_auth='%s:%s' % (self.key, self.secret),
         )
-        qs = urlencode(payload)
+        qs = urlencode(payload, True)
         if self.debug:
             print('GET %s?%s' % (uri, qs))
         res = self.http.request('GET', '%s?%s' % (uri, qs), headers=hdrs)
@@ -1212,7 +1212,7 @@ class Octav(object):
         hdrs = urllib3.util.make_headers(
             basic_auth='%s:%s' % (self.key, self.secret),
         )
-        qs = urlencode(payload)
+        qs = urlencode(payload, True)
         if self.debug:
             print('GET %s?%s' % (uri, qs))
         res = self.http.request('GET', '%s?%s' % (uri, qs), headers=hdrs)
@@ -1240,7 +1240,7 @@ class Octav(object):
         if lang is not None:
             payload['lang'] = lang
         uri = '%s/conference/lookup' % self.endpoint
-        qs = urlencode(payload)
+        qs = urlencode(payload, True)
         if self.debug:
             print('GET %s?%s' % (uri, qs))
         res = self.http.request('GET', '%s?%s' % (uri, qs), headers=hdrs)
@@ -1268,7 +1268,7 @@ class Octav(object):
         if slug is not None:
             payload['slug'] = slug
         uri = '%s/conference/lookup_by_slug' % self.endpoint
-        qs = urlencode(payload)
+        qs = urlencode(payload, True)
         if self.debug:
             print('GET %s?%s' % (uri, qs))
         res = self.http.request('GET', '%s?%s' % (uri, qs), headers=hdrs)
@@ -1300,7 +1300,7 @@ class Octav(object):
         hdrs = urllib3.util.make_headers(
             basic_auth='%s:%s' % (self.key, self.secret),
         )
-        qs = urlencode(payload)
+        qs = urlencode(payload, True)
         if self.debug:
             print('GET %s?%s' % (uri, qs))
         res = self.http.request('GET', '%s?%s' % (uri, qs), headers=hdrs)
@@ -1336,7 +1336,7 @@ class Octav(object):
         hdrs = urllib3.util.make_headers(
             basic_auth='%s:%s' % (self.key, self.secret),
         )
-        qs = urlencode(payload)
+        qs = urlencode(payload, True)
         if self.debug:
             print('GET %s?%s' % (uri, qs))
         res = self.http.request('GET', '%s?%s' % (uri, qs), headers=hdrs)
@@ -1562,7 +1562,7 @@ class Octav(object):
         hdrs = urllib3.util.make_headers(
             basic_auth='%s:%s' % (self.key, self.secret),
         )
-        qs = urlencode(payload)
+        qs = urlencode(payload, True)
         if self.debug:
             print('GET %s?%s' % (uri, qs))
         res = self.http.request('GET', '%s?%s' % (uri, qs), headers=hdrs)
@@ -1717,7 +1717,7 @@ class Octav(object):
         hdrs = urllib3.util.make_headers(
             basic_auth='%s:%s' % (self.key, self.secret),
         )
-        qs = urlencode(payload)
+        qs = urlencode(payload, True)
         if self.debug:
             print('GET %s?%s' % (uri, qs))
         res = self.http.request('GET', '%s?%s' % (uri, qs), headers=hdrs)
@@ -1756,7 +1756,7 @@ class Octav(object):
         hdrs = urllib3.util.make_headers(
             basic_auth='%s:%s' % (self.key, self.secret),
         )
-        qs = urlencode(payload)
+        qs = urlencode(payload, True)
         if self.debug:
             print('GET %s?%s' % (uri, qs))
         res = self.http.request('GET', '%s?%s' % (uri, qs), headers=hdrs)
@@ -1818,7 +1818,7 @@ class Octav(object):
         hdrs = urllib3.util.make_headers(
             basic_auth='%s:%s' % (self.key, self.secret),
         )
-        qs = urlencode(payload)
+        qs = urlencode(payload, True)
         if self.debug:
             print('GET %s?%s' % (uri, qs))
         res = self.http.request('GET', '%s?%s' % (uri, qs), headers=hdrs)
@@ -1881,7 +1881,7 @@ class Octav(object):
         hdrs = urllib3.util.make_headers(
             basic_auth='%s:%s' % (self.key, self.secret),
         )
-        qs = urlencode(payload)
+        qs = urlencode(payload, True)
         if self.debug:
             print('GET %s?%s' % (uri, qs))
         res = self.http.request('GET', '%s?%s' % (uri, qs), headers=hdrs)
@@ -1962,7 +1962,7 @@ class Octav(object):
         hdrs = urllib3.util.make_headers(
             basic_auth='%s:%s' % (self.key, self.secret),
         )
-        qs = urlencode(payload)
+        qs = urlencode(payload, True)
         if self.debug:
             print('GET %s?%s' % (uri, qs))
         res = self.http.request('GET', '%s?%s' % (uri, qs), headers=hdrs)
@@ -1994,7 +1994,7 @@ class Octav(object):
         hdrs = urllib3.util.make_headers(
             basic_auth='%s:%s' % (self.key, self.secret),
         )
-        qs = urlencode(payload)
+        qs = urlencode(payload, True)
         if self.debug:
             print('GET %s?%s' % (uri, qs))
         res = self.http.request('GET', '%s?%s' % (uri, qs), headers=hdrs)
@@ -2162,7 +2162,7 @@ class Octav(object):
         hdrs = urllib3.util.make_headers(
             basic_auth='%s:%s' % (self.key, self.secret),
         )
-        qs = urlencode(payload)
+        qs = urlencode(payload, True)
         if self.debug:
             print('GET %s?%s' % (uri, qs))
         res = self.http.request('GET', '%s?%s' % (uri, qs), headers=hdrs)
@@ -2194,7 +2194,7 @@ class Octav(object):
         hdrs = urllib3.util.make_headers(
             basic_auth='%s:%s' % (self.key, self.secret),
         )
-        qs = urlencode(payload)
+        qs = urlencode(payload, True)
         if self.debug:
             print('GET %s?%s' % (uri, qs))
         res = self.http.request('GET', '%s?%s' % (uri, qs), headers=hdrs)
