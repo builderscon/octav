@@ -1323,7 +1323,6 @@ func TestListSessions(t *testing.T) {
 	if !assert.NoError(ctx.T, err, "ListSessions should succeed") {
 		return
 	}
-	t.Logf("%#v", res)
 	if !assert.NoError(ctx.T, validator.HTTPListSessionsResponse.Validate(res), "Validation should succeed") {
 		return
 	}
