@@ -395,25 +395,6 @@ func buildersconinc(confID, userID string) *model.AddSponsorRequest {
 	return r
 }
 
-func testCreateSponsor(ctx *TestCtx, in *model.AddSponsorRequest) (*model.Sponsor, error) {
-	res, err := ctx.HTTPClient.AddSponsor(in)
-	if !assert.NoError(ctx.T, err, "CreateSponsor should succeed") {
-		return nil, err
-	}
-	return res, nil
-}
-
-func testDeleteSponsor(ctx *TestCtx, id, userID string) error {
-	err := ctx.HTTPClient.DeleteSponsor(&model.DeleteSponsorRequest{
-		ID:     id,
-		UserID: userID,
-	})
-	if !assert.NoError(ctx.T, err, "DeleteSponsor should succeed") {
-		return err
-	}
-	return nil
-}
-
 func TestConferenceCRUD(t *testing.T) {
 	ctx, err := NewTestCtx(t)
 	if !assert.NoError(t, err, "failed to create test ctx") {
@@ -609,34 +590,6 @@ func TestRoomCRUD(t *testing.T) {
 	}
 }
 
-func testLookupSession(ctx *TestCtx, id, lang string) (*model.Session, error) {
-	r := &model.LookupSessionRequest{ID: id}
-	if lang != "" {
-		r.Lang.Set(lang)
-	}
-	v, err := ctx.HTTPClient.LookupSession(r)
-	if !assert.NoError(ctx.T, err, "LookupSession succeeds") {
-		return nil, err
-	}
-	return v, nil
-}
-
-func testUpdateSession(ctx *TestCtx, in *model.UpdateSessionRequest) error {
-	err := ctx.HTTPClient.UpdateSession(in)
-	if !assert.NoError(ctx.T, err, "UpdateSession succeeds") {
-		return err
-	}
-	return nil
-}
-
-func testDeleteSession(ctx *TestCtx, sessionID, userID string) error {
-	err := ctx.HTTPClient.DeleteSession(&model.DeleteSessionRequest{ID: sessionID, UserID: userID})
-	if !assert.NoError(ctx.T, err, "DeleteSession should be successful") {
-		return err
-	}
-	return err
-}
-
 func bconsession(cid, speakerID, userID, sessionTypeID string) *model.CreateSessionRequest {
 	in := model.CreateSessionRequest{}
 	in.ConferenceID = cid
@@ -674,6 +627,12 @@ func TestSessionCRUD(t *testing.T) {
 
 	ctx.SetAPIServer(ts)
 
+	organizer, err := testCreateUser(ctx, johndoe())
+	if err != nil {
+		return
+	}
+	defer testDeleteUser(ctx, organizer.ID, ctx.Superuser.EID)
+
 	user, err := testCreateUser(ctx, johndoe())
 	if err != nil {
 		return
@@ -686,18 +645,18 @@ func TestSessionCRUD(t *testing.T) {
 	}
 	defer testDeleteConferenceSeries(ctx, series.ID, ctx.Superuser.EID)
 
-	if err := testAddConferenceSeriesAdmin(ctx, series.ID, user.ID, ctx.Superuser.EID); err != nil {
+	if err := testAddConferenceSeriesAdmin(ctx, series.ID, organizer.ID, ctx.Superuser.EID); err != nil {
 		return
 	}
 
-	conference, err := testCreateConferencePass(ctx, yapcasiaTokyo(series.ID, user.ID))
+	conference, err := testCreateConferencePass(ctx, yapcasiaTokyo(series.ID, organizer.ID))
 	if err != nil {
 		return
 	}
 	defer testDeleteConference(ctx, conference.ID)
 
 	// Make sure the conference is public
-	if err := testMakeConferencePublic(ctx, conference.ID, user.ID); err != nil {
+	if err := testMakeConferencePublic(ctx, conference.ID, organizer.ID); err != nil {
 		return
 	}
 
@@ -715,7 +674,7 @@ func TestSessionCRUD(t *testing.T) {
 	ctx.Subtest("Proposal submission should be rejected if out of range", func(ctx *TestCtx) {
 		stype := list[1]
 		// Set time at 1 month ago
-		if err := testStartSubmission(ctx, stype.ID, user.ID, time.Now().Add(-1*24*30*time.Hour)); err != nil {
+		if err := testStartSubmission(ctx, stype.ID, organizer.ID, time.Now().Add(-1*24*30*time.Hour)); err != nil {
 			return
 		}
 		_, err := testCreateSessionFail(ctx, bconsession(conference.ID, user.ID, user.ID, stype.ID))
@@ -725,7 +684,7 @@ func TestSessionCRUD(t *testing.T) {
 	})
 
 	stype := list[0]
-	if err := testStartSubmission(ctx, stype.ID, user.ID, time.Now()); err != nil {
+	if err := testStartSubmission(ctx, stype.ID, organizer.ID, time.Now()); err != nil {
 		return
 	}
 
@@ -733,7 +692,7 @@ func TestSessionCRUD(t *testing.T) {
 	if err != nil {
 		return
 	}
-	defer testDeleteSession(ctx, res.ID, user.ID)
+	defer testDeleteSessionPass(ctx, res.ID, user.ID)
 
 	if !assert.NoError(ctx.T, validator.HTTPCreateSessionResponse.Validate(res), "Validation should succeed") {
 		return
@@ -770,6 +729,31 @@ func TestSessionCRUD(t *testing.T) {
 	if !assert.Equal(ctx.T, "カンファレンス用ソフトウェアの作り方", session3.Title, "Session.title#ja is the same as the conference updated") {
 		return
 	}
+
+	ctx.Subtest("Proposals should not be deleted if accepted", func(ctx *TestCtx) {
+		res, err := testCreateSessionPass(ctx, bconsession(conference.ID, user.ID, user.ID, stype.ID))
+		if err != nil {
+			return
+		}
+
+		in := model.UpdateSessionRequest{
+			ID: res.ID,
+			UserID: ctx.Superuser.EID,
+		}
+		in.Status.Set(model.StatusAccepted)
+		if err := testUpdateSession(ctx, &in); err != nil {
+			testDeleteSessionPass(ctx, res.ID, ctx.Superuser.EID)
+			return
+		}
+
+		if err := testDeleteSessionFail(ctx, res.ID, user.ID); err != nil {
+			return
+		}
+
+		if err := testDeleteSessionPass(ctx, res.ID, ctx.Superuser.EID); err != nil {
+			return
+		}
+	})
 }
 
 var ghidL = sync.Mutex{}
@@ -1330,7 +1314,7 @@ func TestListSessions(t *testing.T) {
 		if err != nil {
 			return
 		}
-		defer testDeleteSession(ctx, s.ID, user.ID)
+		defer testDeleteSessionPass(ctx, s.ID, user.ID)
 	}
 
 	in := model.ListSessionsRequest{}
@@ -1339,7 +1323,6 @@ func TestListSessions(t *testing.T) {
 	if !assert.NoError(ctx.T, err, "ListSessions should succeed") {
 		return
 	}
-	t.Logf("%#v", res)
 	if !assert.NoError(ctx.T, validator.HTTPListSessionsResponse.Validate(res), "Validation should succeed") {
 		return
 	}

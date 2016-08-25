@@ -4,6 +4,7 @@ import (
 	"github.com/builderscon/octav/octav/db"
 	"github.com/builderscon/octav/octav/model"
 	"github.com/builderscon/octav/octav/tools"
+	pdebug "github.com/lestrrat/go-pdebug"
 	"github.com/pkg/errors"
 )
 
@@ -41,7 +42,6 @@ func (v *User) populateRowForCreate(vdb *db.User, payload model.CreateUserReques
 
 	return nil
 }
-
 
 func (v *User) populateRowForUpdate(vdb *db.User, payload model.UpdateUserRequest) error {
 	if payload.Nickname.Valid() {
@@ -143,7 +143,7 @@ func (v *User) IsOwnerUser(tx *db.Tx, targetID, userID string) error {
 
 func (v *User) ListFromPayload(tx *db.Tx, result *model.UserList, payload model.ListUserRequest) error {
 	var vdbl db.UserList
-	if err :=  vdbl.LoadSinceEID(tx, payload.Since.String, int(payload.Limit.Int)); err != nil {
+	if err := vdbl.LoadSinceEID(tx, payload.Since.String, int(payload.Limit.Int)); err != nil {
 		return errors.Wrap(err, "failed to load from database")
 	}
 
@@ -200,12 +200,17 @@ func (v *User) UpdateFromPayload(tx *db.Tx, payload model.UpdateUserRequest) err
 	return errors.Wrap(v.Update(tx, &vdb, payload), "failed to update database")
 }
 
-func (v *User) IsSessionOwner(tx *db.Tx, sessionID, userID string) error {
+func (v *User) IsSessionOwner(tx *db.Tx, sessionID, userID string) (err error) {
+	if pdebug.Enabled {
+		g := pdebug.Marker("session.User.IsSessionOwner session ID = %s, user ID = %s", sessionID, userID).BindError(&err)
+		defer g.End()
+	}
+
 	if err := db.IsSessionOwner(tx, sessionID, userID); err == nil {
 		return nil
 	}
 
-	ss := Session{}
+	var ss Session
 	var m model.Session
 	if err := ss.Lookup(tx, &m, sessionID); err != nil {
 		return errors.Wrap(err, "failed to load session")
@@ -252,4 +257,3 @@ func (v *User) LookupUserByAuthUserIDFromPayload(tx *db.Tx, result *model.User, 
 	*result = r
 	return nil
 }
-

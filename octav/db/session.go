@@ -1,6 +1,9 @@
 package db
 
-import "github.com/pkg/errors"
+import (
+	pdebug "github.com/lestrrat/go-pdebug"
+	"github.com/pkg/errors"
+)
 
 func (v *SessionList) LoadByConference(tx *Tx, conferenceID, speakerID, date, status string) error {
 	// The caller of this method should ensure that query fields are
@@ -60,14 +63,19 @@ func (v *SessionList) LoadByConference(tx *Tx, conferenceID, speakerID, date, st
 	return nil
 }
 
-func IsSessionOwner(tx *Tx, sessionID, userID string) error {
+func IsSessionOwner(tx *Tx, sessionID, userID string) (err error) {
+	if pdebug.Enabled {
+		g := pdebug.Marker("db.IsSessionOwner %s %s", sessionID, userID).BindError(&err)
+		defer g.End()
+	}
+
 	stmt := getStmtBuf()
 	defer releaseStmtBuf(stmt)
 
 	stmt.WriteString(`SELECT 1 FROM `)
 	stmt.WriteString(SessionTable)
-	stmt.WriteString(` WHERE id = ? AND speaker_id = ?`)
-	row := tx.QueryRow(stmt.String())
+	stmt.WriteString(` WHERE eid = ? AND speaker_id = ?`)
+	row := tx.QueryRow(stmt.String(), sessionID, userID)
 	var r int
 
 	if err := row.Scan(&r); err != nil {
