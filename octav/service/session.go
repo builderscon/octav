@@ -408,7 +408,12 @@ func (v *Session) ListSessionFromPayload(tx *db.Tx, result *model.SessionList, p
 	return nil
 }
 
-func (v *Session) DeleteFromPayload(tx *db.Tx, payload model.DeleteSessionRequest) error {
+func (v *Session) DeleteFromPayload(tx *db.Tx, payload model.DeleteSessionRequest) (err error) {
+	if pdebug.Enabled {
+		g := pdebug.Marker("service.Session.DeleteFromPayload %s", payload.ID).BindError(&err)
+		defer g.End()
+	}
+
 	// First, we need to load the target session
 	var s model.Session
 	if err := v.Lookup(tx, &s, payload.ID); err != nil {
@@ -416,10 +421,24 @@ func (v *Session) DeleteFromPayload(tx *db.Tx, payload model.DeleteSessionReques
 	}
 
 	if s.Status == model.StatusAccepted {
+		if pdebug.Enabled {
+			pdebug.Printf("Session is already accepted, this required conference administrator privileges")
+		}
 		// The only user(s) that can delete an accepted session is an administrator.
-		su := User{}
+		var su User
 		if err := su.IsConferenceAdministrator(tx, s.ConferenceID, payload.UserID); err != nil {
-			return errors.Wrap(err, "deleting sessions require administrator privileges")
+			return errors.Wrap(err, "deleting accepted sessions require administrator privileges")
+		}
+	} else {
+		if s.SpeakerID != payload.UserID {
+			if pdebug.Enabled {
+				pdebug.Printf("User is not the owner of session, requires conference administrator privileges")
+			}
+
+			var su User
+			if err := su.IsConferenceAdministrator(tx, s.ConferenceID, payload.UserID); err != nil {
+				return errors.Wrap(err, "deleting sessions require operation from speaker or user with administrator privileges")
+			}
 		}
 	}
 
