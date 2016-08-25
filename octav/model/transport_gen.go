@@ -4096,9 +4096,7 @@ func (r ListSessionsRequest) collectMarshalData() map[string]interface{} {
 	if r.SpeakerID.Valid() {
 		m["speaker_id"] = r.SpeakerID.Value()
 	}
-	if r.Status.Valid() {
-		m["status"] = r.Status.Value()
-	}
+	m["status"] = r.Status
 	if r.Date.Valid() {
 		m["date"] = r.Date.Value()
 	}
@@ -4148,10 +4146,22 @@ func (r *ListSessionsRequest) Populate(m map[string]interface{}) error {
 		delete(m, "speaker_id")
 	}
 	if jv, ok := m["status"]; ok {
-		if err := r.Status.Set(jv); err != nil {
-			return errors.New("set field Status failed: " + err.Error())
+		switch jv.(type) {
+		case []interface{}:
+			jvl := jv.([]interface{})
+			list := make([]string, len(jvl))
+			for i, el := range jvl {
+				switch el.(type) {
+				case string:
+					list[i] = el.(string)
+				default:
+					return ErrInvalidJSONFieldType{Field: "status"}
+				}
+			}
+			r.Status = list
+		default:
+			return ErrInvalidJSONFieldType{Field: "status"}
 		}
-		delete(m, "status")
 	}
 	if jv, ok := m["date"]; ok {
 		if err := r.Date.Set(jv); err != nil {
