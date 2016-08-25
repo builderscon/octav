@@ -223,7 +223,7 @@ func (v *Session) populateRowForUpdate(vdb *db.Session, payload model.UpdateSess
 }
 
 func (v *Session) LoadByConference(tx *db.Tx, vdbl *db.SessionList, cid string, date string) error {
-	if err := vdbl.LoadByConference(tx, cid, "", date, ""); err != nil {
+	if err := vdbl.LoadByConference(tx, cid, "", date, nil); err != nil {
 		return err
 	}
 	return nil
@@ -360,14 +360,14 @@ func (v *Session) UpdateFromPayload(tx *db.Tx, result *model.Session, payload mo
 	return nil
 }
 
-func (v *Session) ListSessionFromPayload(tx *db.Tx, result *model.SessionList, payload model.ListSessionsRequest) (err error) {
+func (v *Session) ListFromPayload(tx *db.Tx, result *model.SessionList, payload model.ListSessionsRequest) (err error) {
 	if pdebug.Enabled {
-		g := pdebug.Marker("service.Session.ListSessionFromPayload").BindError(&err)
+		g := pdebug.Marker("service.Session.ListFromPayload").BindError(&err)
 		defer g.End()
 	}
 
 	// Make sure that we have at least one of the arguments
-	var conferenceID, speakerID, date, status string
+	var conferenceID, speakerID, date string
 	var hasQuery bool
 	if payload.ConferenceID.Valid() {
 		conferenceID = payload.ConferenceID.String
@@ -384,9 +384,9 @@ func (v *Session) ListSessionFromPayload(tx *db.Tx, result *model.SessionList, p
 		// Don't set the hasQuery flag, as this alone doesn't work
 	}
 
-	if payload.Status.Valid() {
-		status = payload.Status.String
-		// Don't set the hasQuery flag, as this alone doesn't work
+	status := payload.Status
+	if len(status) == 0 {
+		status = append(status, model.StatusAccepted)
 	}
 
 	if !hasQuery {

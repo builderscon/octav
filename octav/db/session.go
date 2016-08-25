@@ -5,7 +5,12 @@ import (
 	"github.com/pkg/errors"
 )
 
-func (v *SessionList) LoadByConference(tx *Tx, conferenceID, speakerID, date, status string) error {
+func (v *SessionList) LoadByConference(tx *Tx, conferenceID, speakerID, date string, status []string) (err error) {
+	if pdebug.Enabled {
+		g := pdebug.Marker("db.SessionList.LoadByConference %s,%s,%s", conferenceID, speakerID, status).BindError(&err)
+		defer g.End()
+	}
+
 	// The caller of this method should ensure that query fields are
 	// present and that we don't accidentally run an empty query
 	stmt := getStmtBuf()
@@ -42,12 +47,19 @@ func (v *SessionList) LoadByConference(tx *Tx, conferenceID, speakerID, date, st
 		args = append(args, date)
 	}
 
-	if status != "" {
+	if l := len(status); l > 0 {
 		if where.Len() > 0 {
 			where.WriteString(` AND`)
 		}
-		where.WriteString(` status = ?`)
-		args = append(args, status)
+		where.WriteString(` status IN (`)
+		for i, st := range status {
+			where.WriteString(`?`)
+			if i < l - 1 {
+				where.WriteString(`, `)
+			}
+			args = append(args, st)
+		}
+		where.WriteString(`)`)
 	}
 
 	where.WriteTo(stmt)

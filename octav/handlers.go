@@ -970,7 +970,7 @@ func doListSessions(ctx context.Context, w http.ResponseWriter, r *http.Request,
 
 	var s service.Session
 	var v model.SessionList
-	if err := s.ListSessionFromPayload(tx, &v, payload); err != nil {
+	if err := s.ListFromPayload(tx, &v, payload); err != nil {
 		httpError(w, `ListSessions`, http.StatusInternalServerError, err)
 		return
 	}

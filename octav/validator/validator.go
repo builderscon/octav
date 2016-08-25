@@ -2179,7 +2179,13 @@ func init() {
 				).
 				AddProp(
 					"status",
-					jsval.Reference(M).RefersTo("#/definitions/acceptance_status"),
+					jsval.Array().
+						Items(
+							jsval.Reference(M).RefersTo("#/definitions/acceptance_status"),
+						).
+						AdditionalItems(
+							jsval.EmptyConstraint,
+						),
 				),
 		)
 

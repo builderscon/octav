@@ -1318,6 +1318,7 @@ func TestListSessions(t *testing.T) {
 	}
 
 	in := model.ListSessionsRequest{}
+	in.Status = []string{model.StatusPending}
 	in.ConferenceID.Set(conference.ID)
 	res, err := ctx.HTTPClient.ListSessions(&in)
 	if !assert.NoError(ctx.T, err, "ListSessions should succeed") {

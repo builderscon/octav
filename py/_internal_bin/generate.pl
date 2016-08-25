@@ -134,7 +134,7 @@ for my $link (@{$schema->{links}}) {
         say $tmpout q|        hdrs['Content-Type']= 'application/json'|;
         say $tmpout q|        res = self.http.request('POST', uri, headers=hdrs, body=json.dumps(payload))|;
     } else {
-        say $tmpout q|        qs = urlencode(payload)|;
+        say $tmpout q|        qs = urlencode(payload, True)|;
         say $tmpout q|        if self.debug:|;
         say $tmpout q|            print('GET %s?%s' % (uri, qs))|;
         say $tmpout q|        res = self.http.request('GET', '%s?%s' % (uri, qs), headers=hdrs)|;
