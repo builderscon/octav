@@ -328,8 +328,13 @@ func (v *Session) CreateFromPayload(tx *db.Tx, result *model.Session, payload mo
 	return nil
 }
 
-func (v *Session) UpdateFromPayload(tx *db.Tx, result *model.Session, payload model.UpdateSessionRequest) error {
-	su := User{}
+func (v *Session) UpdateFromPayload(tx *db.Tx, result *model.Session, payload model.UpdateSessionRequest) (err error) {
+	if pdebug.Enabled {
+		g := pdebug.Marker("service.Session.UpdateFromPayload %s", payload.ID).BindError(&err)
+		defer g.End()
+	}
+
+	var su User
 	if err := su.IsSessionOwner(tx, payload.ID, payload.UserID); err != nil {
 		return errors.Wrap(err, "updating sessions require session owner privileges")
 	}
@@ -418,6 +423,10 @@ func (v *Session) DeleteFromPayload(tx *db.Tx, payload model.DeleteSessionReques
 	var s model.Session
 	if err := v.Lookup(tx, &s, payload.ID); err != nil {
 		return errors.Wrap(err, "failed to lookup session")
+	}
+
+	if pdebug.Enabled {
+		pdebug.Printf("Session status is %s", s.Status)
 	}
 
 	if s.Status == model.StatusAccepted {

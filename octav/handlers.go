@@ -581,6 +581,7 @@ func doUpdateSession(ctx context.Context, w http.ResponseWriter, r *http.Request
 		httpError(w, `UpdateConference`, http.StatusNotFound, err)
 		return
 	}
+
 	if err := tx.Commit(); err != nil {
 		httpError(w, `UpdateSession`, http.StatusInternalServerError, err)
 		return

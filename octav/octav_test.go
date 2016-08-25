@@ -184,4 +184,65 @@ func testCreateSession(ctx *TestCtx, in *model.CreateSessionRequest, fail bool) 
 	return res, nil
 }
 
+func testDeleteSponsor(ctx *TestCtx, id, userID string) error {
+	err := ctx.HTTPClient.DeleteSponsor(&model.DeleteSponsorRequest{
+		ID:     id,
+		UserID: userID,
+	})
+	if !assert.NoError(ctx.T, err, "DeleteSponsor should succeed") {
+		return err
+	}
+	return nil
+}
+
+func testCreateSponsor(ctx *TestCtx, in *model.AddSponsorRequest) (*model.Sponsor, error) {
+	res, err := ctx.HTTPClient.AddSponsor(in)
+	if !assert.NoError(ctx.T, err, "CreateSponsor should succeed") {
+		return nil, err
+	}
+	return res, nil
+}
+
+func testLookupSession(ctx *TestCtx, id, lang string) (*model.Session, error) {
+	r := &model.LookupSessionRequest{ID: id}
+	if lang != "" {
+		r.Lang.Set(lang)
+	}
+	v, err := ctx.HTTPClient.LookupSession(r)
+	if !assert.NoError(ctx.T, err, "LookupSession succeeds") {
+		return nil, err
+	}
+	return v, nil
+}
+
+func testUpdateSession(ctx *TestCtx, in *model.UpdateSessionRequest) error {
+	err := ctx.HTTPClient.UpdateSession(in)
+	if !assert.NoError(ctx.T, err, "UpdateSession succeeds") {
+		return err
+	}
+	return nil
+}
+
+func testDeleteSession(ctx *TestCtx, sessionID, userID string, fail bool) error {
+	err := ctx.HTTPClient.DeleteSession(&model.DeleteSessionRequest{ID: sessionID, UserID: userID})
+	if fail {
+		if !assert.Error(ctx.T, err, "DeleteSession should fail") {
+			return errors.New("expected operation to fail, but succeeded")
+		}
+		return nil
+	}
+
+	if !assert.NoError(ctx.T, err, "DeleteSession should be successful") {
+		return err
+	}
+	return nil
+}
+
+func testDeleteSessionPass(ctx *TestCtx, sessionID, userID string) error {
+	return testDeleteSession(ctx, sessionID, userID, false)
+}
+
+func testDeleteSessionFail(ctx *TestCtx, sessionID, userID string) error {
+	return testDeleteSession(ctx, sessionID, userID, true)
+}
 
