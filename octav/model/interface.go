@@ -9,6 +9,12 @@ import (
 	"github.com/lestrrat/go-jsval"
 )
 
+const (
+	StatusPending  = "pending"
+	StatusAccepted = "accepted"
+	StatusRejected = "rejected"
+)
+
 var ErrInvalidConferenceHour = errors.New("invalid conference hour specification")
 
 type ErrInvalidJSONFieldType struct {
