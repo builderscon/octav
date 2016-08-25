@@ -407,3 +407,23 @@ func (v *Session) ListSessionFromPayload(tx *db.Tx, result *model.SessionList, p
 	*result = l
 	return nil
 }
+
+func (v *Session) DeleteFromPayload(tx *db.Tx, payload model.DeleteSessionRequest) error {
+	// First, we need to load the target session
+	var s model.Session
+	if err := v.Lookup(tx, &s, payload.ID); err != nil {
+		return errors.Wrap(err, "failed to lookup session")
+	}
+
+	// The only user(s) that can delete a session is an administrator.
+	su := User{}
+	if err := su.IsConferenceAdministrator(tx, s.ConferenceID, payload.UserID); err != nil {
+		return errors.Wrap(err, "deleting sessions require administrator privileges")
+	}
+
+	if err := v.Delete(tx, payload.ID); err != nil {
+		return errors.Wrap(err, "failed to delete session")
+	}
+	return nil
+}
+

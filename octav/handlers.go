@@ -604,7 +604,7 @@ func doDeleteSession(ctx context.Context, w http.ResponseWriter, r *http.Request
 	defer tx.AutoRollback()
 
 	var s service.Session
-	if err := s.Delete(tx, payload.ID); err != nil {
+	if err := s.DeleteFromPayload(tx, payload); err != nil {
 		httpError(w, `DeleteSession`, http.StatusInternalServerError, err)
 		return
 	}
