@@ -1,11 +1,13 @@
 package service
 
 import (
+	"time"
+
 	"github.com/builderscon/octav/octav/db"
+	"github.com/builderscon/octav/octav/internal/errors"
 	"github.com/builderscon/octav/octav/model"
 	"github.com/builderscon/octav/octav/tools"
 	pdebug "github.com/lestrrat/go-pdebug"
-	"github.com/pkg/errors"
 )
 
 func (v *User) populateRowForCreate(vdb *db.User, payload model.CreateUserRequest) error {
@@ -255,5 +257,55 @@ func (v *User) LookupUserByAuthUserIDFromPayload(tx *db.Tx, result *model.User, 
 	}
 
 	*result = r
+	return nil
+}
+
+func (v *User) CreateTemporaryEmailFromPayload(tx *db.Tx, key *string, payload model.CreateTemporaryEmailRequest) (err error) {
+	if pdebug.Enabled {
+		g := pdebug.Marker("service.User.CreateTemporaryEmailFromPayload").BindError(&err)
+		defer g.End()
+	}
+
+	var row db.TemporaryEmail
+
+	row.UserID = payload.TargetID
+	row.Email = payload.Email
+	row.ConfirmationKey = tools.UUID()
+	row.ExpiresOn = time.Now().Add(time.Duration(24 * time.Hour))
+
+	if err := row.Create(tx); err != nil {
+		return errors.Wrap(err, "failed to create temporary email")
+	}
+
+	*key = row.ConfirmationKey
+
+	return nil
+}
+
+func (v *User) ConfirmTemporaryEmailFromPayload(tx *db.Tx, payload model.ConfirmTemporaryEmailRequest) (err error) {
+	if pdebug.Enabled {
+		g := pdebug.Marker("service.User.ConfirmTemporaryEmailFromPayload").BindError(&err)
+		defer g.End()
+	}
+
+	var row db.TemporaryEmail
+	if err := row.LoadByUserIDAndConfirmationKey(tx, payload.TargetID, payload.ConfirmationKey); err != nil {
+		return errors.Wrap(err, "failed to load temporary email")
+	}
+
+	var u db.User
+	if err := u.LoadByEID(tx, payload.TargetID); err != nil {
+		return errors.Wrap(err, "failed to load user")
+	}
+
+	u.Email.String = row.Email
+	if err := u.Update(tx); err != nil {
+		return errors.Wrap(err, "failed to update user")
+	}
+
+	if err := row.Delete(tx); err != nil {
+		return errors.Wrap(err, "failed to delete temporary email")
+	}
+
 	return nil
 }

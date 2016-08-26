@@ -879,3 +879,23 @@ type LocalizedFields struct {
 	// Language -> field/value
 	fields map[string]map[string]string
 }
+
+// +transport
+type CreateTemporaryEmailRequest struct {
+	TargetID string `json:"target_id"` // ID of the user to register the email for
+	UserID   string `json:"user_id"`   // ID of the user making this request
+	Email    string `json:"email"`
+}
+
+// +transport
+type CreateTemporaryEmailResponse struct {
+	ConfirmationKey string `json:"confirmation_key,omitempty"`
+}
+
+// +transport
+type ConfirmTemporaryEmailRequest struct {
+	TargetID string `json:"target_id"` // ID of the user to register the email for
+	UserID   string `json:"user_id"`   // ID of the user making this request
+	ConfirmationKey string `json:"confirmation_key"`
+}
+

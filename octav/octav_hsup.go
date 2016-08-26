@@ -398,6 +398,47 @@ func httpAddSponsor(ctx context.Context, w http.ResponseWriter, r *http.Request)
 	doAddSponsor(ctx, w, r, payload)
 }
 
+func httpConfirmTemporaryEmail(ctx context.Context, w http.ResponseWriter, r *http.Request) {
+	if pdebug.Enabled {
+		g := pdebug.Marker("httpConfirmTemporaryEmail")
+		defer g.End()
+	}
+	if strings.ToLower(r.Method) != `post` {
+		w.Header().Set("Allow", "post")
+		httpError(w, `Method was `+r.Method+`, expected post`, http.StatusNotFound, nil)
+		return
+	}
+
+	var payload model.ConfirmTemporaryEmailRequest
+	jsonbuf := getTransportJSONBuffer()
+	defer releaseTransportJSONBuffer(jsonbuf)
+
+	switch ct := r.Header.Get("Content-Type"); {
+	case ct == "application/json":
+		if _, err := io.Copy(jsonbuf, io.LimitReader(r.Body, MaxPostSize)); err != nil {
+			httpError(w, `Failed to read request body`, http.StatusInternalServerError, err)
+			return
+		}
+		defer r.Body.Close()
+	default:
+		httpError(w, `Invalid content-type`, http.StatusInternalServerError, nil)
+		return
+	}
+	if pdebug.Enabled {
+		pdebug.Printf(`-----> %s`, jsonbuf.Bytes())
+	}
+	if err := json.Unmarshal(jsonbuf.Bytes(), &payload); err != nil {
+		httpError(w, `Invalid JSON input`, http.StatusInternalServerError, err)
+		return
+	}
+
+	if err := validator.HTTPConfirmTemporaryEmailRequest.Validate(&payload); err != nil {
+		httpError(w, `Invalid input (validation failed)`, http.StatusInternalServerError, err)
+		return
+	}
+	doConfirmTemporaryEmail(ctx, w, r, payload)
+}
+
 func httpCreateConference(ctx context.Context, w http.ResponseWriter, r *http.Request) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("httpCreateConference")
@@ -608,6 +649,47 @@ func httpCreateSessionSurveyResponse(ctx context.Context, w http.ResponseWriter,
 		return
 	}
 	doCreateSessionSurveyResponse(ctx, w, r, payload)
+}
+
+func httpCreateTemporaryEmail(ctx context.Context, w http.ResponseWriter, r *http.Request) {
+	if pdebug.Enabled {
+		g := pdebug.Marker("httpCreateTemporaryEmail")
+		defer g.End()
+	}
+	if strings.ToLower(r.Method) != `post` {
+		w.Header().Set("Allow", "post")
+		httpError(w, `Method was `+r.Method+`, expected post`, http.StatusNotFound, nil)
+		return
+	}
+
+	var payload model.CreateTemporaryEmailRequest
+	jsonbuf := getTransportJSONBuffer()
+	defer releaseTransportJSONBuffer(jsonbuf)
+
+	switch ct := r.Header.Get("Content-Type"); {
+	case ct == "application/json":
+		if _, err := io.Copy(jsonbuf, io.LimitReader(r.Body, MaxPostSize)); err != nil {
+			httpError(w, `Failed to read request body`, http.StatusInternalServerError, err)
+			return
+		}
+		defer r.Body.Close()
+	default:
+		httpError(w, `Invalid content-type`, http.StatusInternalServerError, nil)
+		return
+	}
+	if pdebug.Enabled {
+		pdebug.Printf(`-----> %s`, jsonbuf.Bytes())
+	}
+	if err := json.Unmarshal(jsonbuf.Bytes(), &payload); err != nil {
+		httpError(w, `Invalid JSON input`, http.StatusInternalServerError, err)
+		return
+	}
+
+	if err := validator.HTTPCreateTemporaryEmailRequest.Validate(&payload); err != nil {
+		httpError(w, `Invalid input (validation failed)`, http.StatusInternalServerError, err)
+		return
+	}
+	doCreateTemporaryEmail(ctx, w, r, payload)
 }
 
 func httpCreateUser(ctx context.Context, w http.ResponseWriter, r *http.Request) {
@@ -2103,6 +2185,7 @@ func (s *Server) SetupRoutes() {
 	r.HandleFunc(`/v1/conference_series/create`, httpWithContext(httpWithBasicAuth(httpCreateConferenceSeries)))
 	r.HandleFunc(`/v1/conference_series/delete`, httpWithContext(httpWithBasicAuth(httpDeleteConferenceSeries)))
 	r.HandleFunc(`/v1/conference_series/list`, httpWithContext(httpWithOptionalBasicAuth(httpListConferenceSeries)))
+	r.HandleFunc(`/v1/email/create`, httpWithContext(httpWithBasicAuth(httpConfirmTemporaryEmail)))
 	r.HandleFunc(`/v1/featured_speaker/add`, httpWithContext(httpWithBasicAuth(httpAddFeaturedSpeaker)))
 	r.HandleFunc(`/v1/featured_speaker/delete`, httpWithContext(httpWithBasicAuth(httpDeleteFeaturedSpeaker)))
 	r.HandleFunc(`/v1/featured_speaker/list`, httpWithContext(httpWithOptionalBasicAuth(httpListFeaturedSpeakers)))

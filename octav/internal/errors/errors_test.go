@@ -1,6 +1,7 @@
 package errors_test
 
 import (
+	"database/sql"
 	"fmt"
 	"testing"
 
@@ -85,5 +86,14 @@ func TestFinalizationRequired(t *testing.T) {
 				return
 			}
 		}
+	}
+}
+
+func TestSQLNoRows(t *testing.T) {
+	if !assert.True(t, errors.IsSQLNoRows(sql.ErrNoRows), "should be true") {
+		return
+	}
+	if !assert.False(t, errors.IsSQLNoRows(errors.New("blah")), "should be false") {
+		return
 	}
 }

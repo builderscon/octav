@@ -1561,6 +1561,44 @@
           "user_id": {"$ref": "#/definitions/uuid"}
         }
       }
+    },
+    {
+      "title": "Create temporary email",
+      "href": "/email/create",
+      "hsup.wrapper": "httpWithBasicAuth",
+      "method": "POST",
+      "rel": "create",
+      "schema": {
+        "type": "object",
+        "required": ["target_id", "user_id", "email"],
+        "properties": {
+          "target_id": {"$ref": "#/definitions/uuid"},
+          "user_id": {"$ref": "#/definitions/uuid"},
+          "email": { "$ref": "#/definitions/email" }
+        }
+      },
+      "targetSchema": {
+        "type": "object",
+        "properties": {
+          "confirmation_key": {"$ref": "#/definitions/uuid"}
+        }
+      }
+    },
+    {
+      "title": "Confirm temporary email",
+      "href": "/email/create",
+      "hsup.wrapper": "httpWithBasicAuth",
+      "method": "POST",
+      "rel": "update",
+      "schema": {
+        "type": "object",
+        "required": ["target_id", "user_id", "confirmation_key"],
+        "properties": {
+          "target_id": {"$ref": "#/definitions/uuid"},
+          "user_id": {"$ref": "#/definitions/uuid"},
+          "confirmation_key": { "$ref": "#/definitions/uuid" }
+        }
+      }
     }
   ]
 }

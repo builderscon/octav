@@ -1379,4 +1379,46 @@ func doListConferencesByOrganizer(ctx context.Context, w http.ResponseWriter, r 
 	httpJSON(w, l)
 }
 
+func doCreateTemporaryEmail(ctx context.Context, w http.ResponseWriter, r *http.Request, payload model.CreateTemporaryEmailRequest) {
+	tx, err := db.Begin()
+	if err != nil {
+		httpError(w, `doCreateTemporaryEmail`, http.StatusInternalServerError, err)
+		return
+	}
+	defer tx.AutoRollback()
+
+	var res model.CreateTemporaryEmailResponse
+	var s service.User
+	if err := s.CreateTemporaryEmailFromPayload(tx, &res.ConfirmationKey, payload); err != nil {
+		httpError(w, `doCreateTemporaryEmail`, http.StatusInternalServerError, err)
+		return
+	}
+
+	if err := tx.Commit(); err != nil {
+		httpError(w, `Failed to commit data`, http.StatusInternalServerError, err)
+		return
+	}
+
+	httpJSON(w, res)
+}
+
+func doConfirmTemporaryEmail(ctx context.Context, w http.ResponseWriter, r *http.Request, payload model.ConfirmTemporaryEmailRequest) {
+	tx, err := db.Begin()
+	if err != nil {
+		httpError(w, `doConfirmTemporaryEmail`, http.StatusInternalServerError, err)
+		return
+	}
+	defer tx.AutoRollback()
+
+	var s service.User
+	if err := s.ConfirmTemporaryEmailFromPayload(tx, payload); err != nil {
+		httpError(w, `doConfirmTemporaryEmail`, http.StatusInternalServerError, err)
+		return
+	}
+
+	if err := tx.Commit(); err != nil {
+		httpError(w, `Failed to commit data`, http.StatusInternalServerError, err)
+		return
+	}
+}
 

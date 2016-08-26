@@ -229,3 +229,12 @@ type Sponsor struct {
 	CreatedOn    time.Time
 	ModifiedOn   NullTime
 }
+
+// +DB tablename:"temporary_email"
+type TemporaryEmail struct {
+	OID             int64
+	UserID          string
+	ConfirmationKey string
+	Email           string
+	ExpiresOn       time.Time
+}

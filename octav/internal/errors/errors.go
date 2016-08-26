@@ -1,6 +1,8 @@
 package errors
 
 import (
+	"database/sql"
+
 	daverr "github.com/pkg/errors"
 )
 
@@ -79,7 +81,10 @@ type finalizationRequiredError interface {
 }
 
 func IsFinalizationRequired(err error) (func() error, bool) {
-	// Copy to e to make sure we don't tamper with err
+	if err == nil {
+		return nil, false
+	}
+
 	for e := err; e != nil; {
 		if fre, ok := e.(finalizationRequiredError); ok {
 			if cb := fre.FinalizeFunc(); cb != nil {
@@ -96,4 +101,34 @@ func IsFinalizationRequired(err error) (func() error, bool) {
 		break
 	}
 	return nil, false
+}
+
+func findCause(err error, tester func(error) (error, bool)) (error, bool) {
+	if err == nil {
+		return nil, false
+	}
+
+	for e := err; e != nil; {
+		if ie, ok := tester(e); ok {
+			return ie, ok
+		}
+
+		if ce, ok := e.(causer); ok {
+			e = ce.Cause()
+			continue
+		}
+
+		break
+	}
+	return nil, false
+}
+
+func IsSQLNoRows(err error) bool {
+	_, ok := findCause(err, func(v error) (error, bool) {
+		if v == sql.ErrNoRows {
+			return v, true
+		}
+		return nil, false
+	})
+	return ok
 }

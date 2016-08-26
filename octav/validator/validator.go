@@ -14,6 +14,7 @@ var HTTPAddFeaturedSpeakerResponse *jsval.JSVal
 var HTTPAddSessionTypeRequest *jsval.JSVal
 var HTTPAddSponsorRequest *jsval.JSVal
 var HTTPAddSponsorResponse *jsval.JSVal
+var HTTPConfirmTemporaryEmailRequest *jsval.JSVal
 var HTTPCreateConferenceRequest *jsval.JSVal
 var HTTPCreateConferenceResponse *jsval.JSVal
 var HTTPCreateConferenceSeriesRequest *jsval.JSVal
@@ -26,6 +27,8 @@ var HTTPCreateSessionRequest *jsval.JSVal
 var HTTPCreateSessionResponse *jsval.JSVal
 var HTTPCreateSessionSurveyResponseRequest *jsval.JSVal
 var HTTPCreateSessionSurveyResponseResponse *jsval.JSVal
+var HTTPCreateTemporaryEmailRequest *jsval.JSVal
+var HTTPCreateTemporaryEmailResponse *jsval.JSVal
 var HTTPCreateUserRequest *jsval.JSVal
 var HTTPCreateUserResponse *jsval.JSVal
 var HTTPCreateVenueRequest *jsval.JSVal
@@ -1110,6 +1113,28 @@ func init() {
 				),
 		)
 
+	HTTPConfirmTemporaryEmailRequest = jsval.New().
+		SetConstraintMap(M).
+		SetRoot(
+			jsval.Object().
+				Required("confirmation_key", "target_id", "user_id").
+				AdditionalProperties(
+					jsval.EmptyConstraint,
+				).
+				AddProp(
+					"confirmation_key",
+					jsval.Reference(M).RefersTo("#/definitions/uuid"),
+				).
+				AddProp(
+					"target_id",
+					jsval.Reference(M).RefersTo("#/definitions/uuid"),
+				).
+				AddProp(
+					"user_id",
+					jsval.Reference(M).RefersTo("#/definitions/uuid"),
+				),
+		)
+
 	HTTPCreateConferenceRequest = jsval.New().
 		SetConstraintMap(M).
 		SetRoot(
@@ -1469,6 +1494,41 @@ func init() {
 				AddProp(
 					"type",
 					jsval.String(),
+				),
+		)
+
+	HTTPCreateTemporaryEmailRequest = jsval.New().
+		SetConstraintMap(M).
+		SetRoot(
+			jsval.Object().
+				Required("email", "target_id", "user_id").
+				AdditionalProperties(
+					jsval.EmptyConstraint,
+				).
+				AddProp(
+					"email",
+					jsval.Reference(M).RefersTo("#/definitions/email"),
+				).
+				AddProp(
+					"target_id",
+					jsval.Reference(M).RefersTo("#/definitions/uuid"),
+				).
+				AddProp(
+					"user_id",
+					jsval.Reference(M).RefersTo("#/definitions/uuid"),
+				),
+		)
+
+	HTTPCreateTemporaryEmailResponse = jsval.New().
+		SetConstraintMap(M).
+		SetRoot(
+			jsval.Object().
+				AdditionalProperties(
+					jsval.EmptyConstraint,
+				).
+				AddProp(
+					"confirmation_key",
+					jsval.Reference(M).RefersTo("#/definitions/uuid"),
 				),
 		)
 
