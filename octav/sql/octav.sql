@@ -273,8 +273,8 @@ CREATE TABLE sponsors (
 CREATE TABLE temporary_email (
     oid INTEGER UNSIGNED NOT NULL PRIMARY KEY AUTO_INCREMENT,
     user_id CHAR(64) CHARACTER SET latin1 NOT NULL,
-    email CHAR(512) CHARACTER SET latin1 NOT NULL,
-    confirmation_key CHAR(64) NOT NULL,
+    email TEXT CHARACTER SET latin1 NOT NULL,
+    confirmation_key CHAR(64) BINARY NOT NULL,
     expires_on DATETIME NOT NULL,
     UNIQUE KEY(confirmation_key),
     UNIQUE KEY(user_id),
