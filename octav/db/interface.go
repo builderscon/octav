@@ -230,7 +230,7 @@ type Sponsor struct {
 	ModifiedOn   NullTime
 }
 
-// +DB tablename:"temporary_email"
+// +DB tablename:"temporary_emails"
 type TemporaryEmail struct {
 	OID             int64
 	UserID          string

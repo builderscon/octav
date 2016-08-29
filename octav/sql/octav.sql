@@ -270,7 +270,7 @@ CREATE TABLE sponsors (
     FOREIGN KEY (conference_id) REFERENCES conferences(eid) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
-CREATE TABLE temporary_email (
+CREATE TABLE temporary_emails (
     oid INTEGER UNSIGNED NOT NULL PRIMARY KEY AUTO_INCREMENT,
     user_id CHAR(64) CHARACTER SET latin1 NOT NULL,
     email TEXT CHARACTER SET latin1 NOT NULL,
@@ -279,5 +279,5 @@ CREATE TABLE temporary_email (
     UNIQUE KEY(confirmation_key),
     UNIQUE KEY(user_id),
     FOREIGN KEY (user_id) REFERENCES users(eid) ON DELETE CASCADE
-)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 

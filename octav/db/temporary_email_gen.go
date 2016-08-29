@@ -10,8 +10,8 @@ import (
 	"github.com/pkg/errors"
 )
 
-const TemporaryEmailStdSelectColumns = "temporary_email.oid, temporary_email.user_id, temporary_email.confirmation_key, temporary_email.email, temporary_email.expires_on"
-const TemporaryEmailTable = "temporary_email"
+const TemporaryEmailStdSelectColumns = "temporary_emails.oid, temporary_emails.user_id, temporary_emails.confirmation_key, temporary_emails.email, temporary_emails.expires_on"
+const TemporaryEmailTable = "temporary_emails"
 
 type TemporaryEmailList []TemporaryEmail
 
