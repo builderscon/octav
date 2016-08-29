@@ -1011,4 +1011,40 @@ sub delete_sponsor {
     return 1
 }
 
+sub create_temporary_email {
+    my ($self, $payload) = @_;
+    for my $required (qw(target_id user_id email)) {
+        if (!$payload->{$required}) {
+            die qq|property "$required" must be provided|;
+        }
+    }
+    my $uri = URI->new($self->{endpoint} . qq|/v1/email/create|);
+    my @request_args;
+    push @request_args, (Content_Type => "application/json", Content => JSON::encode_json($payload));
+    my $res = $self->{user_agent}->post($uri, @request_args);
+    if (!$res->is_success) {
+        $self->{last_error} = $res->status_line;
+        return;
+    }
+    return JSON::decode_json($res->decoded_content);
+}
+
+sub confirm_temporary_email {
+    my ($self, $payload) = @_;
+    for my $required (qw(target_id user_id confirmation_key)) {
+        if (!$payload->{$required}) {
+            die qq|property "$required" must be provided|;
+        }
+    }
+    my $uri = URI->new($self->{endpoint} . qq|/v1/email/create|);
+    my @request_args;
+    push @request_args, (Content_Type => "application/json", Content => JSON::encode_json($payload));
+    my $res = $self->{user_agent}->post($uri, @request_args);
+    if (!$res->is_success) {
+        $self->{last_error} = $res->status_line;
+        return;
+    }
+    return 1
+}
+
 1;
