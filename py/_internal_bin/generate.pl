@@ -58,9 +58,12 @@ class Octav(object):
 
   def extract_error(self, r):
     try:
-      js = r.json()
-      self.error = js["message"]
-    except:
+      js = json.loads(r.data)
+      if 'error' in js:
+        self.error = js['error']
+      elif 'message' in js:
+        self.error = js['message']
+    except BaseException as e:
       self.error = r.status
 
   def last_error(self):

@@ -1,5 +1,5 @@
 """OCTAV Client Library"""
-"""DO NOT EDIT: This file was generated from ../spec/v1/api.json on Tue Aug 30 07:01:39 2016"""
+"""DO NOT EDIT: This file was generated from ../spec/v1/api.json on Tue Aug 30 07:10:03 2016"""
 
 import json
 import os
@@ -37,9 +37,12 @@ class Octav(object):
 
   def extract_error(self, r):
     try:
-      js = r.json()
-      self.error = js["message"]
-    except:
+      js = json.loads(r.data)
+      if 'error' in js:
+        self.error = js['error']
+      elif 'message' in js:
+        self.error = js['message']
+    except BaseException as e:
       self.error = r.status
 
   def last_error(self):
