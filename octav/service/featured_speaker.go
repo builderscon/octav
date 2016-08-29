@@ -8,7 +8,9 @@ import (
 	"github.com/pkg/errors"
 )
 
-func (v *FeaturedSpeaker) populateRowForCreate(vdb *db.FeaturedSpeaker, payload model.CreateFeaturedSpeakerRequest) error {
+func (v *FeaturedSpeakerSvc) Init() {}
+
+func (v *FeaturedSpeakerSvc) populateRowForCreate(vdb *db.FeaturedSpeaker, payload model.CreateFeaturedSpeakerRequest) error {
 	vdb.EID = tools.UUID()
 	vdb.ConferenceID = payload.ConferenceID
 	vdb.DisplayName = payload.DisplayName
@@ -27,7 +29,7 @@ func (v *FeaturedSpeaker) populateRowForCreate(vdb *db.FeaturedSpeaker, payload 
 	return nil
 }
 
-func (v *FeaturedSpeaker) populateRowForUpdate(vdb *db.FeaturedSpeaker, payload model.UpdateFeaturedSpeakerRequest) error {
+func (v *FeaturedSpeakerSvc) populateRowForUpdate(vdb *db.FeaturedSpeaker, payload model.UpdateFeaturedSpeakerRequest) error {
 	if payload.DisplayName.Valid() {
 		vdb.DisplayName = payload.DisplayName.String
 	}
@@ -49,8 +51,8 @@ func (v *FeaturedSpeaker) populateRowForUpdate(vdb *db.FeaturedSpeaker, payload 
 	return nil
 }
 
-func (v *FeaturedSpeaker) CreateFromPayload(tx *db.Tx, payload model.AddFeaturedSpeakerRequest, result *model.FeaturedSpeaker) error {
-	su := User{}
+func (v *FeaturedSpeakerSvc) CreateFromPayload(tx *db.Tx, payload model.AddFeaturedSpeakerRequest, result *model.FeaturedSpeaker) error {
+	su := User()
 	if err := su.IsConferenceAdministrator(tx, payload.ConferenceID, payload.UserID); err != nil {
 		return errors.Wrap(err, "creating a featured speaker requires conference administrator privilege")
 	}
@@ -69,7 +71,7 @@ func (v *FeaturedSpeaker) CreateFromPayload(tx *db.Tx, payload model.AddFeatured
 	return nil
 }
 
-func (v *FeaturedSpeaker) UpdateFromPayload(tx *db.Tx, payload model.UpdateFeaturedSpeakerRequest) (err error) {
+func (v *FeaturedSpeakerSvc) UpdateFromPayload(tx *db.Tx, payload model.UpdateFeaturedSpeakerRequest) (err error) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("service.FeaturedSpeaker.UpdateFromPayload").BindError(&err)
 		defer g.End()
@@ -80,7 +82,7 @@ func (v *FeaturedSpeaker) UpdateFromPayload(tx *db.Tx, payload model.UpdateFeatu
 		return errors.Wrap(err, "failed to load featured speaker from database")
 	}
 
-	su := User{}
+	su := User()
 	if err := su.IsConferenceAdministrator(tx, vdb.ConferenceID, payload.UserID); err != nil {
 		return errors.Wrap(err, "updating a featured speaker requires conference administrator privilege")
 	}
@@ -88,13 +90,13 @@ func (v *FeaturedSpeaker) UpdateFromPayload(tx *db.Tx, payload model.UpdateFeatu
 	return errors.Wrap(v.Update(tx, &vdb, payload), "failed to load featured speaker from database")
 }
 
-func (v *FeaturedSpeaker) DeleteFromPayload(tx *db.Tx, payload model.DeleteFeaturedSpeakerRequest) error {
+func (v *FeaturedSpeakerSvc) DeleteFromPayload(tx *db.Tx, payload model.DeleteFeaturedSpeakerRequest) error {
 	var m db.FeaturedSpeaker
 	if err := m.LoadByEID(tx, payload.ID); err != nil {
 		return errors.Wrap(err, "failed to load featured speaker from database")
 	}
 
-	su := User{}
+	su := User()
 	if err := su.IsConferenceAdministrator(tx, m.ConferenceID, payload.UserID); err != nil {
 		return errors.Wrap(err, "deleting venues require administrator privileges")
 	}
@@ -102,7 +104,7 @@ func (v *FeaturedSpeaker) DeleteFromPayload(tx *db.Tx, payload model.DeleteFeatu
 	return errors.Wrap(v.Delete(tx, m.EID), "failed to delete from database")
 }
 
-func (v *FeaturedSpeaker) ListFromPayload(tx *db.Tx, result *model.FeaturedSpeakerList, payload model.ListFeaturedSpeakersRequest) error {
+func (v *FeaturedSpeakerSvc) ListFromPayload(tx *db.Tx, result *model.FeaturedSpeakerList, payload model.ListFeaturedSpeakersRequest) error {
 	var vdbl db.FeaturedSpeakerList
 	if err := vdbl.LoadByConferenceSinceEID(tx, payload.ConferenceID, payload.Since.String, int(payload.Limit.Int)); err != nil {
 		return errors.Wrap(err, "failed to load featured speakers from database")
@@ -123,7 +125,7 @@ func (v *FeaturedSpeaker) ListFromPayload(tx *db.Tx, result *model.FeaturedSpeak
 	return nil
 }
 
-func (v *FeaturedSpeaker) Decorate(tx *db.Tx, speaker *model.FeaturedSpeaker, trustedCall bool, lang string) error {
+func (v *FeaturedSpeakerSvc) Decorate(tx *db.Tx, speaker *model.FeaturedSpeaker, trustedCall bool, lang string) error {
 	if lang == "" {
 		return nil
 	}

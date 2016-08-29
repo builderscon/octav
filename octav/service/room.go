@@ -7,7 +7,9 @@ import (
 	"github.com/pkg/errors"
 )
 
-func (v *Room) populateRowForCreate(vdb *db.Room, payload model.CreateRoomRequest) error {
+func (v *RoomSvc) Init() {}
+
+func (v *RoomSvc) populateRowForCreate(vdb *db.Room, payload model.CreateRoomRequest) error {
 	vdb.EID = tools.UUID()
 
 	if payload.VenueID.Valid() {
@@ -25,7 +27,7 @@ func (v *Room) populateRowForCreate(vdb *db.Room, payload model.CreateRoomReques
 	return nil
 }
 
-func (v *Room) populateRowForUpdate(vdb *db.Room, payload model.UpdateRoomRequest) error {
+func (v *RoomSvc) populateRowForUpdate(vdb *db.Room, payload model.UpdateRoomRequest) error {
 	if payload.VenueID.Valid() {
 		vdb.VenueID = payload.VenueID.String
 	}
@@ -41,8 +43,8 @@ func (v *Room) populateRowForUpdate(vdb *db.Room, payload model.UpdateRoomReques
 	return nil
 }
 
-func (v *Room) CreateFromPayload(tx *db.Tx, result *model.Room, payload model.CreateRoomRequest) error {
-	su := User{}
+func (v *RoomSvc) CreateFromPayload(tx *db.Tx, result *model.Room, payload model.CreateRoomRequest) error {
+	su := User()
 	if err := su.IsAdministrator(tx, payload.UserID); err != nil {
 		return errors.Wrap(err, "creating a room requires conference administrator privilege")
 	}
@@ -61,7 +63,7 @@ func (v *Room) CreateFromPayload(tx *db.Tx, result *model.Room, payload model.Cr
 	return nil
 }
 
-func (v *Room) ListFromPayload(tx *db.Tx, result *model.RoomList, payload model.ListRoomRequest) error {
+func (v *RoomSvc) ListFromPayload(tx *db.Tx, result *model.RoomList, payload model.ListRoomRequest) error {
 	var m model.RoomList
 	if err := m.LoadForVenue(tx, payload.VenueID, payload.Since.String, int(payload.Limit.Int)); err != nil {
 		return errors.Wrap(err, "failed to load from database")
@@ -77,8 +79,8 @@ func (v *Room) ListFromPayload(tx *db.Tx, result *model.RoomList, payload model.
 	return nil
 }
 
-func (v *Room) UpdateFromPayload(tx *db.Tx, payload model.UpdateRoomRequest) error {
-	su := User{}
+func (v *RoomSvc) UpdateFromPayload(tx *db.Tx, payload model.UpdateRoomRequest) error {
+	su := User()
 	if err := su.IsAdministrator(tx, payload.UserID); err != nil {
 		return errors.Wrap(err, "deleting rooms require administrator privileges")
 	}
@@ -91,8 +93,8 @@ func (v *Room) UpdateFromPayload(tx *db.Tx, payload model.UpdateRoomRequest) err
 	return errors.Wrap(v.Update(tx, &vdb, payload), "failed to update database")
 }
 
-func (v *Room) DeleteFromPayload(tx *db.Tx, payload model.DeleteRoomRequest) error {
-	su := User{}
+func (v *RoomSvc) DeleteFromPayload(tx *db.Tx, payload model.DeleteRoomRequest) error {
+	su := User()
 	if err := su.IsAdministrator(tx, payload.UserID); err != nil {
 		return errors.Wrap(err, "deleting rooms require administrator privileges")
 	}
@@ -100,7 +102,7 @@ func (v *Room) DeleteFromPayload(tx *db.Tx, payload model.DeleteRoomRequest) err
 	return errors.Wrap(v.Delete(tx, payload.ID), "failed to delete from ddatabase")
 }
 
-func (v *Room) Decorate(tx *db.Tx, room *model.Room, trustedCall bool, lang string) error {
+func (v *RoomSvc) Decorate(tx *db.Tx, room *model.Room, trustedCall bool, lang string) error {
 	if lang != "" {
 		if err := v.ReplaceL10NStrings(tx, room, lang); err != nil {
 			return errors.Wrap(err, "failed to replace L10N strings")

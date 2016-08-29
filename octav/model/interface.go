@@ -882,9 +882,10 @@ type LocalizedFields struct {
 
 // +transport
 type CreateTemporaryEmailRequest struct {
-	TargetID string `json:"target_id"` // ID of the user to register the email for
-	UserID   string `json:"user_id"`   // ID of the user making this request
-	Email    string `json:"email"`
+	TargetID string            `json:"target_id"` // ID of the user to register the email for
+	UserID   string            `json:"user_id"`   // ID of the user making this request
+	Email    string            `json:"email"`
+	Lang     jsval.MaybeString `json:"lang"`
 }
 
 // +transport
@@ -894,8 +895,7 @@ type CreateTemporaryEmailResponse struct {
 
 // +transport
 type ConfirmTemporaryEmailRequest struct {
-	TargetID string `json:"target_id"` // ID of the user to register the email for
-	UserID   string `json:"user_id"`   // ID of the user making this request
+	TargetID        string `json:"target_id"` // ID of the user to register the email for
+	UserID          string `json:"user_id"`   // ID of the user making this request
 	ConfirmationKey string `json:"confirmation_key"`
 }
-

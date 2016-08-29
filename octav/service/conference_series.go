@@ -8,14 +8,16 @@ import (
 	"github.com/pkg/errors"
 )
 
-func (v *ConferenceSeries) populateRowForCreate(vdb *db.ConferenceSeries, payload model.CreateConferenceSeriesRequest) error {
+func (v *ConferenceSeriesSvc) Init() {}
+
+func (v *ConferenceSeriesSvc) populateRowForCreate(vdb *db.ConferenceSeries, payload model.CreateConferenceSeriesRequest) error {
 	vdb.EID = tools.UUID()
 	vdb.Slug = payload.Slug
 	vdb.Title = payload.Title
 	return nil
 }
 
-func (v *ConferenceSeries) populateRowForUpdate(vdb *db.ConferenceSeries, payload model.UpdateConferenceSeriesRequest) error {
+func (v *ConferenceSeriesSvc) populateRowForUpdate(vdb *db.ConferenceSeries, payload model.UpdateConferenceSeriesRequest) error {
 	if payload.Slug.Valid() {
 		vdb.Slug = payload.Slug.String
 	}
@@ -27,14 +29,14 @@ func (v *ConferenceSeries) populateRowForUpdate(vdb *db.ConferenceSeries, payloa
 	return nil
 }
 
-func (v *ConferenceSeries) DeleteFromPayload(tx *db.Tx, payload model.DeleteConferenceSeriesRequest) (err error) {
+func (v *ConferenceSeriesSvc) DeleteFromPayload(tx *db.Tx, payload model.DeleteConferenceSeriesRequest) (err error) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("service.ConferenceSeries.DeleteFromPayload").BindError(&err)
 		defer g.End()
 	}
 
-	u := model.User{}
-	su := User{}
+	var u model.User
+	su := User()
 	if err := su.Lookup(tx, &u, payload.UserID); err != nil {
 		return errors.Wrap(err, "failed to load user from database")
 	}
@@ -49,13 +51,13 @@ func (v *ConferenceSeries) DeleteFromPayload(tx *db.Tx, payload model.DeleteConf
 
 // CreateFromPayload adds extra logic around Create to verify data
 // and create accessory data.
-func (v *ConferenceSeries) CreateFromPayload(tx *db.Tx, result *model.ConferenceSeries, payload model.CreateConferenceSeriesRequest) (err error) {
+func (v *ConferenceSeriesSvc) CreateFromPayload(tx *db.Tx, result *model.ConferenceSeries, payload model.CreateConferenceSeriesRequest) (err error) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("service.ConferenceSeries.CreateFromPayload").BindError(&err)
 		defer g.End()
 	}
 
-	su := User{}
+	su := User()
 	if err := su.IsSystemAdmin(tx, payload.UserID); err != nil {
 		return errors.Wrap(err, "creating a conference series requires system administrator privilege")
 	}
@@ -82,7 +84,7 @@ func (v *ConferenceSeries) CreateFromPayload(tx *db.Tx, result *model.Conference
 	return nil
 }
 
-func (v *ConferenceSeries) LoadByRange(tx *db.Tx, l *[]model.ConferenceSeries, since string, limit int) error {
+func (v *ConferenceSeriesSvc) LoadByRange(tx *db.Tx, l *[]model.ConferenceSeries, since string, limit int) error {
 	vdbl := db.ConferenceSeriesList{}
 	if err := vdbl.LoadSinceEID(tx, since, limit); err != nil {
 		return errors.Wrap(err, "failed to load list of conference series")
@@ -99,14 +101,14 @@ func (v *ConferenceSeries) LoadByRange(tx *db.Tx, l *[]model.ConferenceSeries, s
 	return nil
 }
 
-func (v *ConferenceSeries) AddAdministratorFromPayload(tx *db.Tx, payload model.AddConferenceSeriesAdminRequest) error {
+func (v *ConferenceSeriesSvc) AddAdministratorFromPayload(tx *db.Tx, payload model.AddConferenceSeriesAdminRequest) error {
 	if err := db.IsConferenceSeriesAdministrator(tx, payload.SeriesID, payload.UserID); err != nil {
 		return errors.Wrap(err, "adding a conference series administrator requires conference series administrator privilege")
 	}
 	return errors.Wrap(v.AddAdministrator(tx, payload.SeriesID, payload.AdminID), "failed to add administrator")
 }
 
-func (v *ConferenceSeries) AddAdministrator(tx *db.Tx, seriesID, userID string) error {
+func (v *ConferenceSeriesSvc) AddAdministrator(tx *db.Tx, seriesID, userID string) error {
 	c := db.ConferenceSeriesAdministrator{
 		SeriesID: seriesID,
 		UserID:   userID,
@@ -114,7 +116,7 @@ func (v *ConferenceSeries) AddAdministrator(tx *db.Tx, seriesID, userID string) 
 	return c.Create(tx, db.WithInsertIgnore(true))
 }
 
-func (v *ConferenceSeries) Decorate(tx *db.Tx, c *model.ConferenceSeries, trustedCall bool, lang string) error {
+func (v *ConferenceSeriesSvc) Decorate(tx *db.Tx, c *model.ConferenceSeries, trustedCall bool, lang string) error {
 	if lang == "" {
 		return nil
 	}

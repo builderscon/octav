@@ -7,7 +7,9 @@ import (
 	"github.com/pkg/errors"
 )
 
-func (v *Venue) populateRowForCreate(vdb *db.Venue, payload model.CreateVenueRequest) error {
+func (v *VenueSvc) Init() {}
+
+func (v *VenueSvc) populateRowForCreate(vdb *db.Venue, payload model.CreateVenueRequest) error {
 	vdb.EID = tools.UUID()
 	vdb.Name = payload.Name.String
 	vdb.Address = payload.Address.String
@@ -16,7 +18,7 @@ func (v *Venue) populateRowForCreate(vdb *db.Venue, payload model.CreateVenueReq
 	return nil
 }
 
-func (v *Venue) populateRowForUpdate(vdb *db.Venue, payload model.UpdateVenueRequest) error {
+func (v *VenueSvc) populateRowForUpdate(vdb *db.Venue, payload model.UpdateVenueRequest) error {
 	if payload.Name.Valid() {
 	vdb.Name = payload.Name.String
 	}
@@ -35,7 +37,7 @@ func (v *Venue) populateRowForUpdate(vdb *db.Venue, payload model.UpdateVenueReq
 	return nil
 }
 
-func (v *Venue) LoadRooms(tx *db.Tx, cdl *model.RoomList, venueID string) error {
+func (v *VenueSvc) LoadRooms(tx *db.Tx, cdl *model.RoomList, venueID string) error {
 	var vdbl db.RoomList
 	if err := db.LoadVenueRooms(tx, &vdbl, venueID); err != nil {
 		return err
@@ -53,13 +55,13 @@ func (v *Venue) LoadRooms(tx *db.Tx, cdl *model.RoomList, venueID string) error 
 	return nil
 }
 
-func (v *Venue) Decorate(tx *db.Tx, venue *model.Venue, trustedCall bool, lang string) error {
+func (v *VenueSvc) Decorate(tx *db.Tx, venue *model.Venue, trustedCall bool, lang string) error {
 	if err := v.LoadRooms(tx, &venue.Rooms, venue.ID); err != nil {
 		return err
 	}
 
 	if lang != "" {
-		sr := Room{}
+		sr := Room()
 		for i := range venue.Rooms {
 			if err := sr.ReplaceL10NStrings(tx, &venue.Rooms[i], lang); err != nil {
 				return errors.Wrap(err, "failed to replace L10N strings")
@@ -74,18 +76,18 @@ func (v *Venue) Decorate(tx *db.Tx, venue *model.Venue, trustedCall bool, lang s
 	return nil
 }
 
-func (v *Venue) CreateFromPayload(tx *db.Tx, venue *model.Venue, payload model.CreateVenueRequest) error {
-	su := User{}
+func (v *VenueSvc) CreateFromPayload(tx *db.Tx, venue *model.Venue, payload model.CreateVenueRequest) error {
+	su := User()
 	if err := su.IsAdministrator(tx, payload.UserID); err != nil {
 		return errors.Wrap(err, "creating venues require administrator privileges")
 	}
 
-	vdb := db.Venue{}
+	var vdb db.Venue
 	if err := v.Create(tx, &vdb, payload); err != nil {
 		return errors.Wrap(err, "failed to store in database")
 	}
 
-	r := model.Venue{}
+	var r model.Venue
 	if err := r.FromRow(vdb); err != nil {
 		return errors.Wrap(err, "failed to populate model from database")
 	}
@@ -94,8 +96,8 @@ func (v *Venue) CreateFromPayload(tx *db.Tx, venue *model.Venue, payload model.C
 	return nil
 }
 
-func (v *Venue) UpdateFromPayload(tx *db.Tx, venue *model.Venue, payload model.UpdateVenueRequest) error {
-	vdb := db.Venue{}
+func (v *VenueSvc) UpdateFromPayload(tx *db.Tx, venue *model.Venue, payload model.UpdateVenueRequest) error {
+	var vdb db.Venue
 	if err := vdb.LoadByEID(tx, payload.ID); err != nil {
 		return errors.Wrap(err, "failed to load from database")
 	}
@@ -107,7 +109,7 @@ func (v *Venue) UpdateFromPayload(tx *db.Tx, venue *model.Venue, payload model.U
 		return errors.Wrap(err, "failed to update database")
 	}
 
-	r := model.Venue{}
+	var r model.Venue
 	if err := r.FromRow(vdb); err != nil {
 		return errors.Wrap(err, "failed to populate model from database")
 	}
@@ -116,8 +118,8 @@ func (v *Venue) UpdateFromPayload(tx *db.Tx, venue *model.Venue, payload model.U
 	return nil
 }
 
-func (v *Venue) DeleteFromPayload(tx *db.Tx, payload model.DeleteVenueRequest) error {
-	su := User{}
+func (v *VenueSvc) DeleteFromPayload(tx *db.Tx, payload model.DeleteVenueRequest) error {
+	su := User()
 	if err := su.IsAdministrator(tx, payload.UserID); err != nil {
 		return errors.Wrap(err, "deleting venues require administrator privileges")
 	}
@@ -125,8 +127,8 @@ func (v *Venue) DeleteFromPayload(tx *db.Tx, payload model.DeleteVenueRequest) e
 	return errors.Wrap(v.Delete(tx, payload.ID), "failed to delete from database")
 }
 
-func (v *Venue) ListFromPayload(tx *db.Tx, result *model.VenueList, payload model.ListVenueRequest) error {
-	vdbl := db.VenueList{}
+func (v *VenueSvc) ListFromPayload(tx *db.Tx, result *model.VenueList, payload model.ListVenueRequest) error {
+	var vdbl db.VenueList
 	if err := vdbl.LoadSinceEID(tx, payload.Since.String, int(payload.Limit.Int)); err != nil {
 		return errors.Wrap(err, "failed to load from database")
 	}
