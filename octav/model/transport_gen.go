@@ -5715,6 +5715,9 @@ func (r CreateTemporaryEmailRequest) collectMarshalData() map[string]interface{}
 	m["target_id"] = r.TargetID
 	m["user_id"] = r.UserID
 	m["email"] = r.Email
+	if r.Lang.Valid() {
+		m["lang"] = r.Lang.Value()
+	}
 	return m
 }
 
@@ -5771,6 +5774,12 @@ func (r *CreateTemporaryEmailRequest) Populate(m map[string]interface{}) error {
 		default:
 			return ErrInvalidJSONFieldType{Field: "email"}
 		}
+	}
+	if jv, ok := m["lang"]; ok {
+		if err := r.Lang.Set(jv); err != nil {
+			return errors.New("set field Lang failed: " + err.Error())
+		}
+		delete(m, "lang")
 	}
 	return nil
 }
