@@ -1,5 +1,5 @@
-hash: ca2136e4ea54318509a0bc71e583114fb9d354391c48503832ad6bffde3697ea
-updated: 2016-08-24T11:44:01.347974816+09:00
+hash: 9cf984b2ddc34d919f4372f664bf0700445b23d8579090975721a416f2dd2f52
+updated: 2016-08-29T12:52:26.350703563+09:00
 imports:
 - name: cloud.google.com/go
   version: 242ed68074e53cbb6f78a90c28d9a48bfa2d1093
@@ -47,6 +47,12 @@ imports:
   version: 40dc337a64f229bb420dc224b6f2981115d686fa
 - name: github.com/lestrrat/go-urlenc
   version: c952b9a8b42e2b36637e0c5acee8a0f0898b8d80
+- name: github.com/mattn/anko
+  version: a8c68fa2983e7dd5d3472992b1fbe2f7c44261f0
+  subpackages:
+  - ast
+  - parser
+  - vm
 - name: github.com/pkg/errors
   version: 17b591df37844cde689f4d5813e5cea0927d8dd2
 - name: github.com/shogo82148/go-sql-proxy
@@ -117,4 +123,8 @@ imports:
   - metadata
   - transport
   - peer
+- name: gopkg.in/leonelquinteros/gotext.v1
+  version: a735812a72672008b3902f8b2bc1302166a9a8ea
+- name: gopkg.in/mailgun/mailgun-go.v1
+  version: 369a1fa57ce6fb314e627087b9fff0db5c266c0f
 devImports: []
