@@ -42,7 +42,7 @@ $(INTERNAL_BIN_DIR)/glide: $(INTERNAL_BIN_DIR)/glide-$(GOOS)-$(GOARCH)
 $(INTERNAL_BIN_DIR)/glide-$(GOOS)-$(GOARCH):
 	@mkdir -p $(INTERNAL_BIN_DIR)
 	@echo "Installing glide for $(GOOS)/$(GOARCH)..."
-	@wget -O - https://github.com/Masterminds/glide/releases/download/0.10.2/glide-0.10.2-$(GOOS)-$(GOARCH).tar.gz | tar xvz
+	@wget -O - https://github.com/Masterminds/glide/releases/download/0.12.0/glide-0.12.0-$(GOOS)-$(GOARCH).tar.gz | tar xvz
 	@mv $(GOOS)-$(GOARCH)/glide $(INTERNAL_BIN_DIR)/glide-$(GOOS)-$(GOARCH)
 	@rm -rf $(GOOS)-$(GOARCH)
 	@ln -sf glide-$(GOOS)-$(GOARCH) $(INTERNAL_BIN_DIR)/glide 
