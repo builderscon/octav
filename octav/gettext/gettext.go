@@ -56,11 +56,15 @@ func (v *Gettext) AddLocale(name string, l *gotext.Locale) {
 	v.Locales[name] = l
 }
 
-func (v *Gettext) Get(locale, domain, name string, args ...interface{}) string {
+func (v *Gettext) Get(locale, domain, s string, args ...interface{}) string {
 	v.mu.RLock()
 	defer v.mu.RUnlock()
 
-	return v.Locales[locale].GetD(domain, name, args...)
+	l, ok := v.Locales[locale]
+	if !ok {
+		return s
+	}
+	return l.GetD(domain, s, args...)
 }
 
 func SetDomain(name string) {
