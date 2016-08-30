@@ -810,6 +810,7 @@ func init() {
 	M.SetReference("#/definitions/uuid", R48)
 	M.SetReference("#/definitions/venue", R49)
 	HTTPAddConferenceAdminRequest = jsval.New().
+		SetName("HTTPAddConferenceAdminRequest").
 		SetConstraintMap(M).
 		SetRoot(
 			jsval.Object().
@@ -832,6 +833,7 @@ func init() {
 		)
 
 	HTTPAddConferenceDatesRequest = jsval.New().
+		SetName("HTTPAddConferenceDatesRequest").
 		SetConstraintMap(M).
 		SetRoot(
 			jsval.Object().
@@ -854,6 +856,7 @@ func init() {
 		)
 
 	HTTPAddConferenceSeriesAdminRequest = jsval.New().
+		SetName("HTTPAddConferenceSeriesAdminRequest").
 		SetConstraintMap(M).
 		SetRoot(
 			jsval.Object().
@@ -876,6 +879,7 @@ func init() {
 		)
 
 	HTTPAddConferenceVenueRequest = jsval.New().
+		SetName("HTTPAddConferenceVenueRequest").
 		SetConstraintMap(M).
 		SetRoot(
 			jsval.Object().
@@ -898,6 +902,7 @@ func init() {
 		)
 
 	HTTPAddFeaturedSpeakerRequest = jsval.New().
+		SetName("HTTPAddFeaturedSpeakerRequest").
 		SetConstraintMap(M).
 		SetRoot(
 			jsval.Object().
@@ -940,6 +945,7 @@ func init() {
 		)
 
 	HTTPAddFeaturedSpeakerResponse = jsval.New().
+		SetName("HTTPAddFeaturedSpeakerResponse").
 		SetConstraintMap(M).
 		SetRoot(
 			jsval.Object().
@@ -981,6 +987,7 @@ func init() {
 		)
 
 	HTTPAddSessionTypeRequest = jsval.New().
+		SetName("HTTPAddSessionTypeRequest").
 		SetConstraintMap(M).
 		SetRoot(
 			jsval.Object().
@@ -1027,6 +1034,7 @@ func init() {
 		)
 
 	HTTPAddSponsorRequest = jsval.New().
+		SetName("HTTPAddSponsorRequest").
 		SetConstraintMap(M).
 		SetRoot(
 			jsval.Object().
@@ -1065,6 +1073,7 @@ func init() {
 		)
 
 	HTTPAddSponsorResponse = jsval.New().
+		SetName("HTTPAddSponsorResponse").
 		SetConstraintMap(M).
 		SetRoot(
 			jsval.Object().
@@ -1114,6 +1123,7 @@ func init() {
 		)
 
 	HTTPConfirmTemporaryEmailRequest = jsval.New().
+		SetName("HTTPConfirmTemporaryEmailRequest").
 		SetConstraintMap(M).
 		SetRoot(
 			jsval.Object().
@@ -1136,6 +1146,7 @@ func init() {
 		)
 
 	HTTPCreateConferenceRequest = jsval.New().
+		SetName("HTTPCreateConferenceRequest").
 		SetConstraintMap(M).
 		SetRoot(
 			jsval.Object().
@@ -1182,6 +1193,7 @@ func init() {
 		)
 
 	HTTPCreateConferenceResponse = jsval.New().
+		SetName("HTTPCreateConferenceResponse").
 		SetConstraintMap(M).
 		SetRoot(
 			jsval.Object().
@@ -1199,6 +1211,7 @@ func init() {
 		)
 
 	HTTPCreateConferenceSeriesRequest = jsval.New().
+		SetName("HTTPCreateConferenceSeriesRequest").
 		SetConstraintMap(M).
 		SetRoot(
 			jsval.Object().
@@ -1225,6 +1238,7 @@ func init() {
 		)
 
 	HTTPCreateConferenceSeriesResponse = jsval.New().
+		SetName("HTTPCreateConferenceSeriesResponse").
 		SetConstraintMap(M).
 		SetRoot(
 			jsval.Object().
@@ -1242,6 +1256,7 @@ func init() {
 		)
 
 	HTTPCreateQuestionRequest = jsval.New().
+		SetName("HTTPCreateQuestionRequest").
 		SetConstraintMap(M).
 		SetRoot(
 			jsval.Object().
@@ -1264,6 +1279,7 @@ func init() {
 		)
 
 	HTTPCreateQuestionResponse = jsval.New().
+		SetName("HTTPCreateQuestionResponse").
 		SetConstraintMap(M).
 		SetRoot(
 			jsval.Object().
@@ -1281,6 +1297,7 @@ func init() {
 		)
 
 	HTTPCreateRoomRequest = jsval.New().
+		SetName("HTTPCreateRoomRequest").
 		SetConstraintMap(M).
 		SetRoot(
 			jsval.Object().
@@ -1311,6 +1328,7 @@ func init() {
 		)
 
 	HTTPCreateRoomResponse = jsval.New().
+		SetName("HTTPCreateRoomResponse").
 		SetConstraintMap(M).
 		SetRoot(
 			jsval.Object().
@@ -1328,6 +1346,7 @@ func init() {
 		)
 
 	HTTPCreateSessionRequest = jsval.New().
+		SetName("HTTPCreateSessionRequest").
 		SetConstraintMap(M).
 		SetRoot(
 			jsval.Object().
@@ -1418,6 +1437,7 @@ func init() {
 		)
 
 	HTTPCreateSessionResponse = jsval.New().
+		SetName("HTTPCreateSessionResponse").
 		SetConstraintMap(M).
 		SetRoot(
 			jsval.Object().
@@ -1435,6 +1455,7 @@ func init() {
 		)
 
 	HTTPCreateSessionSurveyResponseRequest = jsval.New().
+		SetName("HTTPCreateSessionSurveyResponseRequest").
 		SetConstraintMap(M).
 		SetRoot(
 			jsval.Object().
@@ -1481,6 +1502,7 @@ func init() {
 		)
 
 	HTTPCreateSessionSurveyResponseResponse = jsval.New().
+		SetName("HTTPCreateSessionSurveyResponseResponse").
 		SetConstraintMap(M).
 		SetRoot(
 			jsval.Object().
@@ -1498,6 +1520,7 @@ func init() {
 		)
 
 	HTTPCreateTemporaryEmailRequest = jsval.New().
+		SetName("HTTPCreateTemporaryEmailRequest").
 		SetConstraintMap(M).
 		SetRoot(
 			jsval.Object().
@@ -1520,6 +1543,7 @@ func init() {
 		)
 
 	HTTPCreateTemporaryEmailResponse = jsval.New().
+		SetName("HTTPCreateTemporaryEmailResponse").
 		SetConstraintMap(M).
 		SetRoot(
 			jsval.Object().
@@ -1533,6 +1557,7 @@ func init() {
 		)
 
 	HTTPCreateUserRequest = jsval.New().
+		SetName("HTTPCreateUserRequest").
 		SetConstraintMap(M).
 		SetRoot(
 			jsval.Object().
@@ -1583,6 +1608,7 @@ func init() {
 		)
 
 	HTTPCreateUserResponse = jsval.New().
+		SetName("HTTPCreateUserResponse").
 		SetConstraintMap(M).
 		SetRoot(
 			jsval.Object().
@@ -1637,6 +1663,7 @@ func init() {
 		)
 
 	HTTPCreateVenueRequest = jsval.New().
+		SetName("HTTPCreateVenueRequest").
 		SetConstraintMap(M).
 		SetRoot(
 			jsval.Object().
@@ -1675,6 +1702,7 @@ func init() {
 		)
 
 	HTTPCreateVenueResponse = jsval.New().
+		SetName("HTTPCreateVenueResponse").
 		SetConstraintMap(M).
 		SetRoot(
 			jsval.Object().
@@ -1692,6 +1720,7 @@ func init() {
 		)
 
 	HTTPDeleteConferenceAdminRequest = jsval.New().
+		SetName("HTTPDeleteConferenceAdminRequest").
 		SetConstraintMap(M).
 		SetRoot(
 			jsval.Object().
@@ -1714,6 +1743,7 @@ func init() {
 		)
 
 	HTTPDeleteConferenceDatesRequest = jsval.New().
+		SetName("HTTPDeleteConferenceDatesRequest").
 		SetConstraintMap(M).
 		SetRoot(
 			jsval.Object().
@@ -1742,6 +1772,7 @@ func init() {
 		)
 
 	HTTPDeleteConferenceRequest = jsval.New().
+		SetName("HTTPDeleteConferenceRequest").
 		SetConstraintMap(M).
 		SetRoot(
 			jsval.Object().
@@ -1756,6 +1787,7 @@ func init() {
 		)
 
 	HTTPDeleteConferenceSeriesRequest = jsval.New().
+		SetName("HTTPDeleteConferenceSeriesRequest").
 		SetConstraintMap(M).
 		SetRoot(
 			jsval.Object().
@@ -1774,6 +1806,7 @@ func init() {
 		)
 
 	HTTPDeleteConferenceVenueRequest = jsval.New().
+		SetName("HTTPDeleteConferenceVenueRequest").
 		SetConstraintMap(M).
 		SetRoot(
 			jsval.Object().
@@ -1796,6 +1829,7 @@ func init() {
 		)
 
 	HTTPDeleteFeaturedSpeakerRequest = jsval.New().
+		SetName("HTTPDeleteFeaturedSpeakerRequest").
 		SetConstraintMap(M).
 		SetRoot(
 			jsval.Object().
@@ -1814,6 +1848,7 @@ func init() {
 		)
 
 	HTTPDeleteQuestionRequest = jsval.New().
+		SetName("HTTPDeleteQuestionRequest").
 		SetConstraintMap(M).
 		SetRoot(
 			jsval.Object().
@@ -1828,6 +1863,7 @@ func init() {
 		)
 
 	HTTPDeleteRoomRequest = jsval.New().
+		SetName("HTTPDeleteRoomRequest").
 		SetConstraintMap(M).
 		SetRoot(
 			jsval.Object().
@@ -1846,6 +1882,7 @@ func init() {
 		)
 
 	HTTPDeleteSessionRequest = jsval.New().
+		SetName("HTTPDeleteSessionRequest").
 		SetConstraintMap(M).
 		SetRoot(
 			jsval.Object().
@@ -1864,6 +1901,7 @@ func init() {
 		)
 
 	HTTPDeleteSessionTypeRequest = jsval.New().
+		SetName("HTTPDeleteSessionTypeRequest").
 		SetConstraintMap(M).
 		SetRoot(
 			jsval.Object().
@@ -1882,6 +1920,7 @@ func init() {
 		)
 
 	HTTPDeleteSponsorRequest = jsval.New().
+		SetName("HTTPDeleteSponsorRequest").
 		SetConstraintMap(M).
 		SetRoot(
 			jsval.Object().
@@ -1900,6 +1939,7 @@ func init() {
 		)
 
 	HTTPDeleteUserRequest = jsval.New().
+		SetName("HTTPDeleteUserRequest").
 		SetConstraintMap(M).
 		SetRoot(
 			jsval.Object().
@@ -1918,6 +1958,7 @@ func init() {
 		)
 
 	HTTPDeleteVenueRequest = jsval.New().
+		SetName("HTTPDeleteVenueRequest").
 		SetConstraintMap(M).
 		SetRoot(
 			jsval.Object().
@@ -1936,6 +1977,7 @@ func init() {
 		)
 
 	HTTPListConferenceRequest = jsval.New().
+		SetName("HTTPListConferenceRequest").
 		SetConstraintMap(M).
 		SetRoot(
 			jsval.Object().
@@ -1981,6 +2023,7 @@ func init() {
 		)
 
 	HTTPListConferenceResponse = jsval.New().
+		SetName("HTTPListConferenceResponse").
 		SetConstraintMap(M).
 		SetRoot(
 			jsval.Array().
@@ -1993,6 +2036,7 @@ func init() {
 		)
 
 	HTTPListConferenceSeriesRequest = jsval.New().
+		SetName("HTTPListConferenceSeriesRequest").
 		SetConstraintMap(M).
 		SetRoot(
 			jsval.Object().
@@ -2010,6 +2054,7 @@ func init() {
 		)
 
 	HTTPListConferenceSeriesResponse = jsval.New().
+		SetName("HTTPListConferenceSeriesResponse").
 		SetConstraintMap(M).
 		SetRoot(
 			jsval.Array().
@@ -2022,6 +2067,7 @@ func init() {
 		)
 
 	HTTPListConferencesByOrganizerRequest = jsval.New().
+		SetName("HTTPListConferencesByOrganizerRequest").
 		SetConstraintMap(M).
 		SetRoot(
 			jsval.Object().
@@ -2047,6 +2093,7 @@ func init() {
 		)
 
 	HTTPListConferencesByOrganizerResponse = jsval.New().
+		SetName("HTTPListConferencesByOrganizerResponse").
 		SetConstraintMap(M).
 		SetRoot(
 			jsval.Array().
@@ -2059,6 +2106,7 @@ func init() {
 		)
 
 	HTTPListFeaturedSpeakersRequest = jsval.New().
+		SetName("HTTPListFeaturedSpeakersRequest").
 		SetConstraintMap(M).
 		SetRoot(
 			jsval.Object().
@@ -2084,6 +2132,7 @@ func init() {
 		)
 
 	HTTPListFeaturedSpeakersResponse = jsval.New().
+		SetName("HTTPListFeaturedSpeakersResponse").
 		SetConstraintMap(M).
 		SetRoot(
 			jsval.Array().
@@ -2096,6 +2145,7 @@ func init() {
 		)
 
 	HTTPListQuestionRequest = jsval.New().
+		SetName("HTTPListQuestionRequest").
 		SetConstraintMap(M).
 		SetRoot(
 			jsval.Object().
@@ -2118,6 +2168,7 @@ func init() {
 		)
 
 	HTTPListQuestionResponse = jsval.New().
+		SetName("HTTPListQuestionResponse").
 		SetConstraintMap(M).
 		SetRoot(
 			jsval.Array().
@@ -2130,6 +2181,7 @@ func init() {
 		)
 
 	HTTPListRoomRequest = jsval.New().
+		SetName("HTTPListRoomRequest").
 		SetConstraintMap(M).
 		SetRoot(
 			jsval.Object().
@@ -2152,6 +2204,7 @@ func init() {
 		)
 
 	HTTPListRoomResponse = jsval.New().
+		SetName("HTTPListRoomResponse").
 		SetConstraintMap(M).
 		SetRoot(
 			jsval.Array().
@@ -2164,6 +2217,7 @@ func init() {
 		)
 
 	HTTPListSessionTypesByConferenceRequest = jsval.New().
+		SetName("HTTPListSessionTypesByConferenceRequest").
 		SetConstraintMap(M).
 		SetRoot(
 			jsval.Object().
@@ -2189,6 +2243,7 @@ func init() {
 		)
 
 	HTTPListSessionTypesByConferenceResponse = jsval.New().
+		SetName("HTTPListSessionTypesByConferenceResponse").
 		SetConstraintMap(M).
 		SetRoot(
 			jsval.Array().
@@ -2201,6 +2256,7 @@ func init() {
 		)
 
 	HTTPListSessionsRequest = jsval.New().
+		SetName("HTTPListSessionsRequest").
 		SetConstraintMap(M).
 		SetRoot(
 			jsval.Object().
@@ -2250,6 +2306,7 @@ func init() {
 		)
 
 	HTTPListSessionsResponse = jsval.New().
+		SetName("HTTPListSessionsResponse").
 		SetConstraintMap(M).
 		SetRoot(
 			jsval.Array().
@@ -2262,6 +2319,7 @@ func init() {
 		)
 
 	HTTPListSponsorsRequest = jsval.New().
+		SetName("HTTPListSponsorsRequest").
 		SetConstraintMap(M).
 		SetRoot(
 			jsval.Object().
@@ -2287,6 +2345,7 @@ func init() {
 		)
 
 	HTTPListSponsorsResponse = jsval.New().
+		SetName("HTTPListSponsorsResponse").
 		SetConstraintMap(M).
 		SetRoot(
 			jsval.Array().
@@ -2299,6 +2358,7 @@ func init() {
 		)
 
 	HTTPListUserRequest = jsval.New().
+		SetName("HTTPListUserRequest").
 		SetConstraintMap(M).
 		SetRoot(
 			jsval.Object().
@@ -2320,6 +2380,7 @@ func init() {
 		)
 
 	HTTPListUserResponse = jsval.New().
+		SetName("HTTPListUserResponse").
 		SetConstraintMap(M).
 		SetRoot(
 			jsval.Array().
@@ -2332,6 +2393,7 @@ func init() {
 		)
 
 	HTTPListVenueRequest = jsval.New().
+		SetName("HTTPListVenueRequest").
 		SetConstraintMap(M).
 		SetRoot(
 			jsval.Object().
@@ -2353,6 +2415,7 @@ func init() {
 		)
 
 	HTTPListVenueResponse = jsval.New().
+		SetName("HTTPListVenueResponse").
 		SetConstraintMap(M).
 		SetRoot(
 			jsval.Array().
@@ -2365,6 +2428,7 @@ func init() {
 		)
 
 	HTTPLookupConferenceBySlugRequest = jsval.New().
+		SetName("HTTPLookupConferenceBySlugRequest").
 		SetConstraintMap(M).
 		SetRoot(
 			jsval.Object().
@@ -2383,6 +2447,7 @@ func init() {
 		)
 
 	HTTPLookupConferenceBySlugResponse = jsval.New().
+		SetName("HTTPLookupConferenceBySlugResponse").
 		SetConstraintMap(M).
 		SetRoot(
 			jsval.Object().
@@ -2436,6 +2501,7 @@ func init() {
 		)
 
 	HTTPLookupConferenceRequest = jsval.New().
+		SetName("HTTPLookupConferenceRequest").
 		SetConstraintMap(M).
 		SetRoot(
 			jsval.Object().
@@ -2454,6 +2520,7 @@ func init() {
 		)
 
 	HTTPLookupConferenceResponse = jsval.New().
+		SetName("HTTPLookupConferenceResponse").
 		SetConstraintMap(M).
 		SetRoot(
 			jsval.Object().
@@ -2507,6 +2574,7 @@ func init() {
 		)
 
 	HTTPLookupFeaturedSpeakerRequest = jsval.New().
+		SetName("HTTPLookupFeaturedSpeakerRequest").
 		SetConstraintMap(M).
 		SetRoot(
 			jsval.Object().
@@ -2525,6 +2593,7 @@ func init() {
 		)
 
 	HTTPLookupFeaturedSpeakerResponse = jsval.New().
+		SetName("HTTPLookupFeaturedSpeakerResponse").
 		SetConstraintMap(M).
 		SetRoot(
 			jsval.Object().
@@ -2566,6 +2635,7 @@ func init() {
 		)
 
 	HTTPLookupRoomRequest = jsval.New().
+		SetName("HTTPLookupRoomRequest").
 		SetConstraintMap(M).
 		SetRoot(
 			jsval.Object().
@@ -2580,6 +2650,7 @@ func init() {
 		)
 
 	HTTPLookupRoomResponse = jsval.New().
+		SetName("HTTPLookupRoomResponse").
 		SetConstraintMap(M).
 		SetRoot(
 			jsval.Object().
@@ -2609,6 +2680,7 @@ func init() {
 		)
 
 	HTTPLookupSessionRequest = jsval.New().
+		SetName("HTTPLookupSessionRequest").
 		SetConstraintMap(M).
 		SetRoot(
 			jsval.Object().
@@ -2627,6 +2699,7 @@ func init() {
 		)
 
 	HTTPLookupSessionResponse = jsval.New().
+		SetName("HTTPLookupSessionResponse").
 		SetConstraintMap(M).
 		SetRoot(
 			jsval.Object().
@@ -2764,6 +2837,7 @@ func init() {
 		)
 
 	HTTPLookupSessionTypeRequest = jsval.New().
+		SetName("HTTPLookupSessionTypeRequest").
 		SetConstraintMap(M).
 		SetRoot(
 			jsval.Object().
@@ -2782,6 +2856,7 @@ func init() {
 		)
 
 	HTTPLookupSessionTypeResponse = jsval.New().
+		SetName("HTTPLookupSessionTypeResponse").
 		SetConstraintMap(M).
 		SetRoot(
 			jsval.Object().
@@ -2831,6 +2906,7 @@ func init() {
 		)
 
 	HTTPLookupSponsorRequest = jsval.New().
+		SetName("HTTPLookupSponsorRequest").
 		SetConstraintMap(M).
 		SetRoot(
 			jsval.Object().
@@ -2849,6 +2925,7 @@ func init() {
 		)
 
 	HTTPLookupSponsorResponse = jsval.New().
+		SetName("HTTPLookupSponsorResponse").
 		SetConstraintMap(M).
 		SetRoot(
 			jsval.Object().
@@ -2898,6 +2975,7 @@ func init() {
 		)
 
 	HTTPLookupUserByAuthUserIDRequest = jsval.New().
+		SetName("HTTPLookupUserByAuthUserIDRequest").
 		SetConstraintMap(M).
 		SetRoot(
 			jsval.Object().
@@ -2916,6 +2994,7 @@ func init() {
 		)
 
 	HTTPLookupUserByAuthUserIDResponse = jsval.New().
+		SetName("HTTPLookupUserByAuthUserIDResponse").
 		SetConstraintMap(M).
 		SetRoot(
 			jsval.Object().
@@ -2970,6 +3049,7 @@ func init() {
 		)
 
 	HTTPLookupUserRequest = jsval.New().
+		SetName("HTTPLookupUserRequest").
 		SetConstraintMap(M).
 		SetRoot(
 			jsval.Object().
@@ -2984,6 +3064,7 @@ func init() {
 		)
 
 	HTTPLookupUserResponse = jsval.New().
+		SetName("HTTPLookupUserResponse").
 		SetConstraintMap(M).
 		SetRoot(
 			jsval.Object().
@@ -3038,6 +3119,7 @@ func init() {
 		)
 
 	HTTPLookupVenueRequest = jsval.New().
+		SetName("HTTPLookupVenueRequest").
 		SetConstraintMap(M).
 		SetRoot(
 			jsval.Object().
@@ -3052,6 +3134,7 @@ func init() {
 		)
 
 	HTTPLookupVenueResponse = jsval.New().
+		SetName("HTTPLookupVenueResponse").
 		SetConstraintMap(M).
 		SetRoot(
 			jsval.Object().
@@ -3073,6 +3156,7 @@ func init() {
 		)
 
 	HTTPUpdateConferenceRequest = jsval.New().
+		SetName("HTTPUpdateConferenceRequest").
 		SetConstraintMap(M).
 		SetRoot(
 			jsval.Object().
@@ -3143,6 +3227,7 @@ func init() {
 		)
 
 	HTTPUpdateFeaturedSpeakerRequest = jsval.New().
+		SetName("HTTPUpdateFeaturedSpeakerRequest").
 		SetConstraintMap(M).
 		SetRoot(
 			jsval.Object().
@@ -3185,6 +3270,7 @@ func init() {
 		)
 
 	HTTPUpdateRoomRequest = jsval.New().
+		SetName("HTTPUpdateRoomRequest").
 		SetConstraintMap(M).
 		SetRoot(
 			jsval.Object().
@@ -3219,6 +3305,7 @@ func init() {
 		)
 
 	HTTPUpdateSessionRequest = jsval.New().
+		SetName("HTTPUpdateSessionRequest").
 		SetConstraintMap(M).
 		SetRoot(
 			jsval.Object().
@@ -3333,6 +3420,7 @@ func init() {
 		)
 
 	HTTPUpdateSessionTypeRequest = jsval.New().
+		SetName("HTTPUpdateSessionTypeRequest").
 		SetConstraintMap(M).
 		SetRoot(
 			jsval.Object().
@@ -3379,6 +3467,7 @@ func init() {
 		)
 
 	HTTPUpdateSponsorRequest = jsval.New().
+		SetName("HTTPUpdateSponsorRequest").
 		SetConstraintMap(M).
 		SetRoot(
 			jsval.Object().
@@ -3417,6 +3506,7 @@ func init() {
 		)
 
 	HTTPUpdateUserRequest = jsval.New().
+		SetName("HTTPUpdateUserRequest").
 		SetConstraintMap(M).
 		SetRoot(
 			jsval.Object().
@@ -3463,6 +3553,7 @@ func init() {
 		)
 
 	HTTPUpdateVenueRequest = jsval.New().
+		SetName("HTTPUpdateVenueRequest").
 		SetConstraintMap(M).
 		SetRoot(
 			jsval.Object().
