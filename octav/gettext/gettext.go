@@ -14,13 +14,15 @@ var defaultDomain string
 var defaultDomainMutex sync.RWMutex
 var initOnce sync.Once
 
+func init() {
+	SetLocale(Languages[0])
+	SetDomain("messages")
+}
+
 func Default() *Gettext {
 	initOnce.Do(func() {
 		defaultGettext = New("locales")
 		defaultGettext.AddDomain("messages")
-
-		SetLocale(Languages[0])
-		SetDomain("messages")
 	})
 	return defaultGettext
 }
@@ -76,10 +78,15 @@ func SetLocale(name string) {
 }
 
 func Get(s string, args ...interface{}) string {
-	defaultDomainMutex.RLock()
-	defaultLocaleMutex.RLock()
-	defer defaultDomainMutex.RUnlock()
-	defer defaultLocaleMutex.RUnlock()
+	l := Default()
 
-	return Default().Get(defaultLocale, defaultDomain, s, args...)
+	defaultDomainMutex.RLock()
+	dd := defaultDomain
+	defaultDomainMutex.RUnlock()
+
+	defaultLocaleMutex.RLock()
+	dl := defaultLocale
+	defaultLocaleMutex.RUnlock()
+
+	return l.Get(dl, dd, s, args...)
 }
