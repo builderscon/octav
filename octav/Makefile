@@ -12,7 +12,7 @@ endif
 
 SRC_FILES = $(wildcard *.go validator/*.go client/*.go db/*.go model/*.go)
 
-.PHONY: installdeps build_internal_cmd generate build run all clean test initdb gke-apiserver $(INTERNAL_BIN_DIR)/glide hsupsrc
+.PHONY: installdeps build_internal_cmd generate build run all clean test initdb gke-apiserver $(INTERNAL_BIN_DIR)/glide hsupsrc bindatasrc
 
 all: test build
 
