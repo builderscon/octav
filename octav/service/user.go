@@ -326,6 +326,7 @@ func (v *UserSvc) ConfirmTemporaryEmailFromPayload(tx *db.Tx, payload model.Conf
 	}
 
 	u.Email.String = row.Email
+	u.Email.Valid = true
 	if err := u.Update(tx); err != nil {
 		return errors.Wrap(err, "failed to update user")
 	}
