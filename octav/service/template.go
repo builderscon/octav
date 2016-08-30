@@ -6,6 +6,7 @@ import (
 
 	"github.com/builderscon/octav/octav/assets"
 	"github.com/builderscon/octav/octav/gettext"
+	pdebug "github.com/lestrrat/go-pdebug"
 )
 
 func Template() *TemplateSvc {
@@ -23,7 +24,17 @@ func Template() *TemplateSvc {
 			})
 		}
 
-		if _, err := t.Parse(string(b)); err != nil {
+		var tmpl *template.Template
+		if n == t.Name() {
+			tmpl = t
+		} else {
+			tmpl = t.New(n)
+		}
+
+		if pdebug.Enabled {
+			pdebug.Printf("Parsing template %s", n)
+		}
+		if _, err := tmpl.Parse(string(b)); err != nil {
 			panic(err.Error())
 		}
 	}
