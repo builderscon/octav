@@ -19,6 +19,11 @@ func Mailgun() *MailgunSvc {
 }
 
 func (v *MailgunSvc) Init() {
+	if pdebug.Enabled {
+		g := pdebug.Marker("service.Mailgun.Init")
+		defer g.End()
+	}
+
 	f := func(v *string, envname string) {
 		envvar := os.Getenv(envname)
 		if envvar == "" {
@@ -55,7 +60,12 @@ type MailMessage struct {
 	Recipients []string
 }
 
-func (v *MailgunSvc) Send(mm *MailMessage) error {
+func (v *MailgunSvc) Send(mm *MailMessage) (err error) {
+	if pdebug.Enabled {
+		g := pdebug.Marker("service.Mailgun.Send").BindError(&err)
+		defer g.End()
+	}
+
 	if mm.From == "" {
 		mm.From = v.defaultSender
 	}
@@ -63,7 +73,7 @@ func (v *MailgunSvc) Send(mm *MailMessage) error {
 	m := mailgun.NewMessage(mm.From, mm.Subject, mm.Text, mm.Recipients...)
 
 	mg := v.client
-	_, _, err := mg.Send(m)
+	_, _, err = mg.Send(m)
 	if err != nil {
 		return errors.Wrap(err, "failed to send message")
 	}
