@@ -28,3 +28,4 @@ import:
   - errgroup
 - package: gopkg.in/leonelquinteros/gotext.v1
 - package: gopkg.in/mailgun/mailgun-go.v1
+- package: github.com/lestrrat/go-bindata

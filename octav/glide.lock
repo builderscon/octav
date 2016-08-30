@@ -1,5 +1,5 @@
-hash: 9cf984b2ddc34d919f4372f664bf0700445b23d8579090975721a416f2dd2f52
-updated: 2016-08-30T12:24:14.356871498+09:00
+hash: fc59447496cece2d9e8f2f92404bf17ea6c38df4e813d4e7e567cf255701a7af
+updated: 2016-08-30T14:21:43.814159878+09:00
 imports:
 - name: cloud.google.com/go
   version: 4fa13efd3e95632b326090d097cec09cedda7507
@@ -25,6 +25,8 @@ imports:
   version: a8cab0163d48558ffd77076c9c99388529766f63
 - name: github.com/lestrrat/go-apache-logformat
   version: e774e429884c94b2cda0d499397d36d306ba0dee
+- name: github.com/lestrrat/go-bindata
+  version: b9f2acfb40bc204a6e6c1a94547e128554650f95
 - name: github.com/lestrrat/go-jshschema
   version: 4514acd168a63041862eb3d223a09a789cae6b3b
 - name: github.com/lestrrat/go-jspointer
