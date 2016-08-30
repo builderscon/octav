@@ -59,7 +59,7 @@ func (v *TemplateSvc) Init() {
 		pdebug.Printf("Parsed %d templates", parsed)
 	}
 
-	v = &TemplateSvc{
+	*v = TemplateSvc{
 		template: t,
 	}
 }
