@@ -24,6 +24,8 @@ func (v *MailgunSvc) Init() {
 		defer g.End()
 	}
 
+	v = &MailgunSvc{}
+
 	f := func(v *string, envname string) {
 		envvar := os.Getenv(envname)
 		if envvar == "" {
