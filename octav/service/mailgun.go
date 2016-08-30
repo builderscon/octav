@@ -2,8 +2,10 @@ package service
 
 import (
 	"os"
+	"strings"
 	"sync"
 
+	pdebug "github.com/lestrrat/go-pdebug"
 	"github.com/pkg/errors"
 	mailgun "gopkg.in/mailgun/mailgun-go.v1"
 )
@@ -33,6 +35,15 @@ func (v *MailgunSvc) Init() {
 	f(&domain, "MAILGUN_DOMAIN")
 	f(&apiKey, "MAILGUN_API_KEY")
 	f(&publicApiKey, "MAILGUN_PUBLIC_API_KEY")
+
+	if pdebug.Enabled {
+		pdebug.Printf(
+			"Creating Mailgun client with domain=%s, apiKey=%s, publicApiKey=%s",
+			domain,
+			strings.Repeat("*", len(apiKey)-4)+apiKey[len(apiKey)-4:],
+			strings.Repeat("*", len(publicApiKey)-4)+publicApiKey[len(publicApiKey)-4:],
+		)
+	}
 
 	v.client = mailgun.NewMailgun(domain, apiKey, publicApiKey)
 }

@@ -288,6 +288,7 @@ func (v *UserSvc) CreateTemporaryEmailFromPayload(tx *db.Tx, key *string, payloa
 	if err := Template().Execute(&txt, "templates/eml/confirm_registration.eml", row); err != nil {
 		return errors.Wrap(err, "failed to execute template")
 	}
+
 	mg := Mailgun()
 	mm := MailMessage{
 		Recipients: []string{payload.Email},
@@ -295,7 +296,14 @@ func (v *UserSvc) CreateTemporaryEmailFromPayload(tx *db.Tx, key *string, payloa
 		Text:       txt.String(),
 	}
 
-	return errors.Wrap(mg.Send(&mm), "failed to send message")
+	if pdebug.Enabled {
+		pdebug.Printf("Sending via mailgun: %#v", mm)
+	}
+
+	if err := mg.Send(&mm); err != nil {
+		return errors.Wrap(err, "failed to send message")
+	}
+	return nil
 }
 
 func (v *UserSvc) ConfirmTemporaryEmailFromPayload(tx *db.Tx, payload model.ConfirmTemporaryEmailRequest) (err error) {
