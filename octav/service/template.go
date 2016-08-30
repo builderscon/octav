@@ -14,7 +14,7 @@ func Template() *TemplateSvc {
 	var t *template.Template
 	filepath.Walk("template", func(path string, info os.FileInfo, err error) error {
 		if err != nil {
-			if info.IsDir() {
+			if info != nil && info.IsDir() {
 				return filepath.SkipDir
 			}
 			return nil
