@@ -290,6 +290,9 @@ func (v *UserSvc) CreateTemporaryEmailFromPayload(tx *db.Tx, key *string, payloa
 	}
 
 	mg := Mailgun()
+	if pdebug.Enabled {
+		pdebug.Printf("Got mailgun %v", mg)
+	}
 	mm := MailMessage{
 		Recipients: []string{payload.Email},
 		Subject:    gettext.Get("Confirm Your Email Registration"),
