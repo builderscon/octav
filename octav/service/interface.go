@@ -1,5 +1,11 @@
 package service
 
+import (
+	"text/template"
+
+	mailgun "gopkg.in/mailgun/mailgun-go.v1"
+)
+
 // InTesting grudingly exists to tell if we are running under
 // testing mode.
 var InTesting bool
@@ -12,19 +18,27 @@ type ErrInvalidFieldType struct {
 	Field string
 }
 
-type Client struct{}
-type Conference struct{
+type ClientSvc struct{}
+type ConferenceSvc struct {
 	Storage StorageClient
 }
-type ConferenceComponent struct {}
-type ConferenceSeries struct{}
-type FeaturedSpeaker struct{}
-type Question struct{}
-type Room struct{}
-type Session struct{}
-type SessionType struct{}
-type Sponsor struct {
+type ConferenceComponentSvc struct{}
+type ConferenceSeriesSvc struct{}
+type FeaturedSpeakerSvc struct{}
+type MailgunSvc struct {
+	defaultSender string
+	client        mailgun.Mailgun
+}
+
+type QuestionSvc struct{}
+type RoomSvc struct{}
+type SessionSvc struct{}
+type SessionTypeSvc struct{}
+type SponsorSvc struct {
 	Storage StorageClient
 }
-type User struct{}
-type Venue struct{}
+type TemplateSvc struct {
+	template *template.Template
+}
+type UserSvc struct{}
+type VenueSvc struct{}

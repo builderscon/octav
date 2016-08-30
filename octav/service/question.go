@@ -6,7 +6,9 @@ import (
 	"github.com/builderscon/octav/octav/tools"
 )
 
-func (v *Question) populateRowForCreate(vdb *db.Question, payload model.CreateQuestionRequest) error {
+func (v *QuestionSvc) Init() {}
+
+func (v *QuestionSvc) populateRowForCreate(vdb *db.Question, payload model.CreateQuestionRequest) error {
 	vdb.EID = tools.UUID()
 	vdb.SessionID = payload.SessionID
 	vdb.UserID = payload.UserID
@@ -15,7 +17,7 @@ func (v *Question) populateRowForCreate(vdb *db.Question, payload model.CreateQu
 	return nil
 }
 
-func (v *Question) populateRowForUpdate(vdb *db.Question, payload model.UpdateQuestionRequest) error {
+func (v *QuestionSvc) populateRowForUpdate(vdb *db.Question, payload model.UpdateQuestionRequest) error {
 	if payload.SessionID.Valid() {
 		vdb.SessionID = payload.SessionID.String
 	}

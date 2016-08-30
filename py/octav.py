@@ -1,5 +1,5 @@
 """OCTAV Client Library"""
-"""DO NOT EDIT: This file was generated from ../spec/v1/api.json on Thu Aug 25 13:36:49 2016"""
+"""DO NOT EDIT: This file was generated from ../spec/v1/api.json on Tue Aug 30 14:14:47 2016"""
 
 import json
 import os
@@ -37,9 +37,12 @@ class Octav(object):
 
   def extract_error(self, r):
     try:
-      js = r.json()
-      self.error = js["message"]
-    except:
+      js = json.loads(r.data)
+      if 'error' in js:
+        self.error = js['error']
+      elif 'message' in js:
+        self.error = js['message']
+    except BaseException as e:
       self.error = r.status
 
   def last_error(self):
@@ -2272,6 +2275,84 @@ class Octav(object):
         if user_id is not None:
             payload['user_id'] = user_id
         uri = '%s/sponsor/delete' % self.endpoint
+        hdrs = urllib3.util.make_headers(
+            basic_auth='%s:%s' % (self.key, self.secret),
+        )
+        if self.debug:
+            print('POST %s' % uri)
+        hdrs['Content-Type']= 'application/json'
+        res = self.http.request('POST', uri, headers=hdrs, body=json.dumps(payload))
+        if self.debug:
+            print(res)
+        if res.status != 200:
+            self.extract_error(res)
+            return None
+        return True
+    except BaseException, e:
+        if self.debug:
+            print("error during http access: " + repr(e))
+        self.error = repr(e)
+        return None
+
+  def create_temporary_email (self, email, target_id, user_id):
+    try:
+        payload = {}
+        hdrs = {}
+        if email is None:
+            raise MissingRequiredArgument('property email must be provided')
+        payload['email'] = email
+        if target_id is None:
+            raise MissingRequiredArgument('property target_id must be provided')
+        payload['target_id'] = target_id
+        if user_id is None:
+            raise MissingRequiredArgument('property user_id must be provided')
+        payload['user_id'] = user_id
+        if email is not None:
+            payload['email'] = email
+        if target_id is not None:
+            payload['target_id'] = target_id
+        if user_id is not None:
+            payload['user_id'] = user_id
+        uri = '%s/email/create' % self.endpoint
+        hdrs = urllib3.util.make_headers(
+            basic_auth='%s:%s' % (self.key, self.secret),
+        )
+        if self.debug:
+            print('POST %s' % uri)
+        hdrs['Content-Type']= 'application/json'
+        res = self.http.request('POST', uri, headers=hdrs, body=json.dumps(payload))
+        if self.debug:
+            print(res)
+        if res.status != 200:
+            self.extract_error(res)
+            return None
+        return json.loads(res.data)
+    except BaseException, e:
+        if self.debug:
+            print("error during http access: " + repr(e))
+        self.error = repr(e)
+        return None
+
+  def confirm_temporary_email (self, confirmation_key, target_id, user_id):
+    try:
+        payload = {}
+        hdrs = {}
+        if confirmation_key is None:
+            raise MissingRequiredArgument('property confirmation_key must be provided')
+        payload['confirmation_key'] = confirmation_key
+        if target_id is None:
+            raise MissingRequiredArgument('property target_id must be provided')
+        payload['target_id'] = target_id
+        if user_id is None:
+            raise MissingRequiredArgument('property user_id must be provided')
+        payload['user_id'] = user_id
+        if confirmation_key is not None:
+            payload['confirmation_key'] = confirmation_key
+        if target_id is not None:
+            payload['target_id'] = target_id
+        if user_id is not None:
+            payload['user_id'] = user_id
+        uri = '%s/email/confirm' % self.endpoint
         hdrs = urllib3.util.make_headers(
             basic_auth='%s:%s' % (self.key, self.secret),
         )

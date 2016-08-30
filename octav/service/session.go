@@ -8,7 +8,9 @@ import (
 	"github.com/pkg/errors"
 )
 
-func (v *Session) populateRowForCreate(vdb *db.Session, payload model.CreateSessionRequest) error {
+func (v *SessionSvc) Init() {}
+
+func (v *SessionSvc) populateRowForCreate(vdb *db.Session, payload model.CreateSessionRequest) error {
 	vdb.EID = tools.UUID()
 	vdb.ConferenceID = payload.ConferenceID
 	vdb.SpeakerID = payload.SpeakerID.String
@@ -116,7 +118,7 @@ func (v *Session) populateRowForCreate(vdb *db.Session, payload model.CreateSess
 	return nil
 }
 
-func (v *Session) populateRowForUpdate(vdb *db.Session, payload model.UpdateSessionRequest) error {
+func (v *SessionSvc) populateRowForUpdate(vdb *db.Session, payload model.UpdateSessionRequest) error {
 	if payload.ConferenceID.Valid() {
 		vdb.ConferenceID = payload.ConferenceID.String
 	}
@@ -222,21 +224,21 @@ func (v *Session) populateRowForUpdate(vdb *db.Session, payload model.UpdateSess
 	return nil
 }
 
-func (v *Session) LoadByConference(tx *db.Tx, vdbl *db.SessionList, cid string, date string) error {
+func (v *SessionSvc) LoadByConference(tx *db.Tx, vdbl *db.SessionList, cid string, date string) error {
 	if err := vdbl.LoadByConference(tx, cid, "", date, nil); err != nil {
 		return err
 	}
 	return nil
 }
 
-func (v *Session) Decorate(tx *db.Tx, session *model.Session, trustedCall bool, lang string) error {
+func (v *SessionSvc) Decorate(tx *db.Tx, session *model.Session, trustedCall bool, lang string) error {
 	if pdebug.Enabled {
 		g := pdebug.Marker("service.Session.Decorate")
 		defer g.End()
 	}
 	// session must be associated with a conference
 	if session.ConferenceID != "" {
-		var cs Conference
+		var cs ConferenceSvc
 		var mc model.Conference
 		if err := cs.Lookup(tx, &mc, session.ConferenceID); err != nil {
 			return errors.Wrap(err, "failed to load conference")
@@ -249,7 +251,7 @@ func (v *Session) Decorate(tx *db.Tx, session *model.Session, trustedCall bool, 
 
 	// ... but not necessarily with a room
 	if session.RoomID != "" {
-		var rs Room
+		var rs RoomSvc
 		var room model.Room
 		if err := rs.Lookup(tx, &room, session.RoomID); err != nil {
 			return errors.Wrap(err, "failed to load room")
@@ -261,19 +263,19 @@ func (v *Session) Decorate(tx *db.Tx, session *model.Session, trustedCall bool, 
 	}
 
 	if session.SpeakerID != "" {
-		var us User
+		var su UserSvc
 		var speaker model.User
-		if err := us.Lookup(tx, &speaker, session.SpeakerID); err != nil {
+		if err := su.Lookup(tx, &speaker, session.SpeakerID); err != nil {
 			return errors.Wrapf(err, "failed to load speaker '%s'", session.SpeakerID)
 		}
-		if err := us.Decorate(tx, &speaker, trustedCall, lang); err != nil {
+		if err := su.Decorate(tx, &speaker, trustedCall, lang); err != nil {
 			return errors.Wrap(err, "failed to decorate speaker")
 		}
 		session.Speaker = &speaker
 	}
 
 	if session.SessionTypeID != "" {
-		var sts SessionType
+		var sts SessionTypeSvc
 		var sessionType model.SessionType
 		if err := sts.Lookup(tx, &sessionType, session.SessionTypeID); err != nil {
 			return errors.Wrapf(err, "failed to load session type '%s'", session.SessionTypeID)
@@ -293,15 +295,15 @@ func (v *Session) Decorate(tx *db.Tx, session *model.Session, trustedCall bool, 
 	return nil
 }
 
-func (v *Session) CreateFromPayload(tx *db.Tx, result *model.Session, payload model.CreateSessionRequest) error {
+func (v *SessionSvc) CreateFromPayload(tx *db.Tx, result *model.Session, payload model.CreateSessionRequest) error {
 	var u model.User
-	su := User{}
+	su := User()
 	if err := su.Lookup(tx, &u, payload.UserID); err != nil {
 		return errors.Wrapf(err, "failed to load user %s", payload.UserID)
 	}
 
 	// Check if this session type is allowed to be submitted right now
-	sst := SessionType{}
+	sst := SessionType()
 	if err := sst.IsAcceptingSubmissions(tx, payload.SessionTypeID); err != nil {
 		return errors.Wrap(err, "not accepting submissions for this session type")
 	}
@@ -328,18 +330,18 @@ func (v *Session) CreateFromPayload(tx *db.Tx, result *model.Session, payload mo
 	return nil
 }
 
-func (v *Session) UpdateFromPayload(tx *db.Tx, result *model.Session, payload model.UpdateSessionRequest) (err error) {
+func (v *SessionSvc) UpdateFromPayload(tx *db.Tx, result *model.Session, payload model.UpdateSessionRequest) (err error) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("service.Session.UpdateFromPayload %s", payload.ID).BindError(&err)
 		defer g.End()
 	}
 
-	var su User
+	su := User()
 	if err := su.IsSessionOwner(tx, payload.ID, payload.UserID); err != nil {
 		return errors.Wrap(err, "updating sessions require session owner privileges")
 	}
 
-	vdb := db.Session{}
+	var vdb db.Session
 	if err := vdb.LoadByEID(tx, payload.ID); err != nil {
 		return errors.Wrap(err, "failed to load from database")
 	}
@@ -351,7 +353,7 @@ func (v *Session) UpdateFromPayload(tx *db.Tx, result *model.Session, payload mo
 		return errors.Wrap(err, "failed to update database")
 	}
 
-	m := model.Session{}
+	var m model.Session
 	if err := m.FromRow(vdb); err != nil {
 		return errors.Wrap(err, "failed to populate model from database")
 	}
@@ -360,7 +362,7 @@ func (v *Session) UpdateFromPayload(tx *db.Tx, result *model.Session, payload mo
 	return nil
 }
 
-func (v *Session) ListFromPayload(tx *db.Tx, result *model.SessionList, payload model.ListSessionsRequest) (err error) {
+func (v *SessionSvc) ListFromPayload(tx *db.Tx, result *model.SessionList, payload model.ListSessionsRequest) (err error) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("service.Session.ListFromPayload").BindError(&err)
 		defer g.End()
@@ -413,7 +415,7 @@ func (v *Session) ListFromPayload(tx *db.Tx, result *model.SessionList, payload 
 	return nil
 }
 
-func (v *Session) DeleteFromPayload(tx *db.Tx, payload model.DeleteSessionRequest) (err error) {
+func (v *SessionSvc) DeleteFromPayload(tx *db.Tx, payload model.DeleteSessionRequest) (err error) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("service.Session.DeleteFromPayload %s", payload.ID).BindError(&err)
 		defer g.End()
@@ -434,7 +436,7 @@ func (v *Session) DeleteFromPayload(tx *db.Tx, payload model.DeleteSessionReques
 			pdebug.Printf("Session is already accepted, this required conference administrator privileges")
 		}
 		// The only user(s) that can delete an accepted session is an administrator.
-		var su User
+		su := User()
 		if err := su.IsConferenceAdministrator(tx, s.ConferenceID, payload.UserID); err != nil {
 			return errors.Wrap(err, "deleting accepted sessions require administrator privileges")
 		}
@@ -444,7 +446,7 @@ func (v *Session) DeleteFromPayload(tx *db.Tx, payload model.DeleteSessionReques
 				pdebug.Printf("User is not the owner of session, requires conference administrator privileges")
 			}
 
-			var su User
+			su := User()
 			if err := su.IsConferenceAdministrator(tx, s.ConferenceID, payload.UserID); err != nil {
 				return errors.Wrap(err, "deleting sessions require operation from speaker or user with administrator privileges")
 			}

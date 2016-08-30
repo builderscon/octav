@@ -10,20 +10,23 @@ import (
 	pdebug "github.com/lestrrat/go-pdebug"
 )
 
-func (v *Client) populateRowForCreate(vdb *db.Client, payload model.CreateClientRequest) error {
+func (v *ClientSvc) Init() {
+}
+
+func (v *ClientSvc) populateRowForCreate(vdb *db.Client, payload model.CreateClientRequest) error {
 	vdb.EID = tools.RandomString(64)
 	vdb.Secret = tools.RandomString(64)
 	vdb.Name = payload.Name
 	return nil
 }
 
-func (v *Client) populateRowForUpdate(vdb *db.Client, payload model.UpdateClientRequest) error {
+func (v *ClientSvc) populateRowForUpdate(vdb *db.Client, payload model.UpdateClientRequest) error {
 	vdb.Secret = payload.Secret
 	vdb.Name = payload.Name
 	return nil
 }
 
-func (v *Client) Authenticate(clientID, clientSecret string) (err error) {
+func (v *ClientSvc) Authenticate(clientID, clientSecret string) (err error) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("service.Client.Authenticate").BindError(&err)
 		defer g.End()

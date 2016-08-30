@@ -12,6 +12,7 @@ if [ "$TRAVIS" == "true" ]; then
     echo " + Detected running under Travis CI"
     make glide
     make hsupsrc
+    make bindatasrc
     make initdb
     make installdeps
 

@@ -12,7 +12,7 @@ endif
 
 SRC_FILES = $(wildcard *.go validator/*.go client/*.go db/*.go model/*.go)
 
-.PHONY: installdeps build_internal_cmd generate build run all clean test initdb gke-apiserver $(INTERNAL_BIN_DIR)/glide hsupsrc
+.PHONY: installdeps build_internal_cmd generate build run all clean test initdb gke-apiserver $(INTERNAL_BIN_DIR)/glide hsupsrc bindatasrc assets
 
 all: test build
 
@@ -21,6 +21,9 @@ installdeps:
 
 hsupsrc:
 	@go get -d github.com/lestrrat/go-hsup
+
+bindatasrc:
+	@go get -d github.com/lestrrat/go-bindata
 
 $(INTERNAL_BIN_DIR):
 	@mkdir -p $(INTERNAL_BIN_DIR)
@@ -35,6 +38,11 @@ $(INTERNAL_BIN_DIR)/hsup:
 	@echo "Building hsup..."
 	@cd $(shell go list -f '{{ .Dir }}' github.com/lestrrat/go-hsup) && PATH=$(INTERNAL_BIN_DIR):$(PATH) glide install && go build -o $@ cmd/hsup/*.go
 
+$(INTERNAL_BIN_DIR)/go-bindata:
+	@$(MAKE) $(INTERNAL_BIN_DIR)
+	@echo "Building bindata..."
+	@cd $(shell go list -f '{{ .Dir }}' github.com/lestrrat/go-bindata) && PATH=$(INTERNAL_BIN_DIR):$(PATH) go build -o $@ ./go-bindata
+
 glide: $(INTERNAL_BIN_DIR)/glide
 
 $(INTERNAL_BIN_DIR)/glide: $(INTERNAL_BIN_DIR)/glide-$(GOOS)-$(GOARCH)
@@ -42,14 +50,14 @@ $(INTERNAL_BIN_DIR)/glide: $(INTERNAL_BIN_DIR)/glide-$(GOOS)-$(GOARCH)
 $(INTERNAL_BIN_DIR)/glide-$(GOOS)-$(GOARCH):
 	@mkdir -p $(INTERNAL_BIN_DIR)
 	@echo "Installing glide for $(GOOS)/$(GOARCH)..."
-	@wget -O - https://github.com/Masterminds/glide/releases/download/0.10.2/glide-0.10.2-$(GOOS)-$(GOARCH).tar.gz | tar xvz
+	@wget -O - https://github.com/Masterminds/glide/releases/download/v0.12.0/glide-v0.12.0-$(GOOS)-$(GOARCH).tar.gz | tar xvz
 	@mv $(GOOS)-$(GOARCH)/glide $(INTERNAL_BIN_DIR)/glide-$(GOOS)-$(GOARCH)
 	@rm -rf $(GOOS)-$(GOARCH)
 	@ln -sf glide-$(GOOS)-$(GOARCH) $(INTERNAL_BIN_DIR)/glide 
 
 build_internal_cmd: $(patsubst %,$(INTERNAL_BIN_DIR)/%, $(INTERNAL_CMDS))
 
-generate: build_internal_cmd
+generate: build_internal_cmd $(INTERNAL_BIN_DIR)/go-bindata
 	@echo "go generate ."
 	@PATH=$(CURDIR)/_internal_bin:$(PATH) go generate .
 
@@ -83,3 +91,8 @@ clean:
 
 initdb:
 	$(MAKE) -C ../ initdb
+
+assets: $(INTERNAL_BIN_DIR)/go-bindata
+	@echo "Regenerating assets"
+	@PATH=$(CURDIR)/_internal_bin:$(PATH) go-bindata -o assets/assets.go -pkg=assets -ignore=assets.go -prefix=assets assets/...
+

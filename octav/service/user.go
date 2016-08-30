@@ -1,14 +1,20 @@
 package service
 
 import (
+	"bytes"
+	"time"
+
 	"github.com/builderscon/octav/octav/db"
+	"github.com/builderscon/octav/octav/gettext"
+	"github.com/builderscon/octav/octav/internal/errors"
 	"github.com/builderscon/octav/octav/model"
 	"github.com/builderscon/octav/octav/tools"
 	pdebug "github.com/lestrrat/go-pdebug"
-	"github.com/pkg/errors"
 )
 
-func (v *User) populateRowForCreate(vdb *db.User, payload model.CreateUserRequest) error {
+func (v *UserSvc) Init() {}
+
+func (v *UserSvc) populateRowForCreate(vdb *db.User, payload model.CreateUserRequest) error {
 	vdb.EID = tools.UUID()
 
 	vdb.Nickname = payload.Nickname
@@ -43,7 +49,7 @@ func (v *User) populateRowForCreate(vdb *db.User, payload model.CreateUserReques
 	return nil
 }
 
-func (v *User) populateRowForUpdate(vdb *db.User, payload model.UpdateUserRequest) error {
+func (v *UserSvc) populateRowForUpdate(vdb *db.User, payload model.UpdateUserRequest) error {
 	if payload.Nickname.Valid() {
 		vdb.Nickname = payload.Nickname.String
 	}
@@ -84,14 +90,14 @@ func (v *User) populateRowForUpdate(vdb *db.User, payload model.UpdateUserReques
 	return nil
 }
 
-func (v *User) IsAdministrator(tx *db.Tx, id string) error {
+func (v *UserSvc) IsAdministrator(tx *db.Tx, id string) error {
 	// TODO: cache
 	return db.IsAdministrator(tx, id)
 }
 
-func (v *User) IsSystemAdmin(tx *db.Tx, id string) error {
+func (v *UserSvc) IsSystemAdmin(tx *db.Tx, id string) error {
 	// TODO: cache
-	u := model.User{}
+	var u model.User
 	if err := v.Lookup(tx, &u, id); err != nil {
 		return errors.Wrap(err, "failed to load user from database")
 	}
@@ -102,7 +108,7 @@ func (v *User) IsSystemAdmin(tx *db.Tx, id string) error {
 	return nil
 }
 
-func (v *User) IsConferenceSeriesAdministrator(tx *db.Tx, seriesID, userID string) error {
+func (v *UserSvc) IsConferenceSeriesAdministrator(tx *db.Tx, seriesID, userID string) error {
 	// TODO: cache
 	if err := db.IsConferenceSeriesAdministrator(tx, seriesID, userID); err == nil {
 		return nil
@@ -114,14 +120,14 @@ func (v *User) IsConferenceSeriesAdministrator(tx *db.Tx, seriesID, userID strin
 	return errors.Errorf("user %s lacks conference series administrator privileges for %s", userID, seriesID)
 }
 
-func (v *User) IsConferenceAdministrator(tx *db.Tx, confID, userID string) error {
+func (v *UserSvc) IsConferenceAdministrator(tx *db.Tx, confID, userID string) error {
 	// TODO: cache
 	if err := db.IsConferenceAdministrator(tx, confID, userID); err == nil {
 		return nil
 	}
 
-	c := model.Conference{}
-	sc := Conference{}
+	var c model.Conference
+	sc := Conference()
 	if err := sc.Lookup(tx, &c, confID); err != nil {
 		return errors.Wrap(err, "failed to load conference from database")
 	}
@@ -133,7 +139,7 @@ func (v *User) IsConferenceAdministrator(tx *db.Tx, confID, userID string) error
 	return errors.Errorf("user %s lacks conference administrator privileges for %s", userID, confID)
 }
 
-func (v *User) IsOwnerUser(tx *db.Tx, targetID, userID string) error {
+func (v *UserSvc) IsOwnerUser(tx *db.Tx, targetID, userID string) error {
 	if targetID == userID {
 		return nil
 	}
@@ -141,7 +147,7 @@ func (v *User) IsOwnerUser(tx *db.Tx, targetID, userID string) error {
 	return v.IsSystemAdmin(tx, userID)
 }
 
-func (v *User) ListFromPayload(tx *db.Tx, result *model.UserList, payload model.ListUserRequest) error {
+func (v *UserSvc) ListFromPayload(tx *db.Tx, result *model.UserList, payload model.ListUserRequest) error {
 	var vdbl db.UserList
 	if err := vdbl.LoadSinceEID(tx, payload.Since.String, int(payload.Limit.Int)); err != nil {
 		return errors.Wrap(err, "failed to load from database")
@@ -162,10 +168,10 @@ func (v *User) ListFromPayload(tx *db.Tx, result *model.UserList, payload model.
 	return nil
 }
 
-func (v *User) CreateFromPayload(tx *db.Tx, result *model.User, payload model.CreateUserRequest) error {
+func (v *UserSvc) CreateFromPayload(tx *db.Tx, result *model.User, payload model.CreateUserRequest) error {
 	// Normally we would like to limit who can create users, but this
 	// is done via OAuth login, so anybody must be able to do it.
-	vdb := db.User{}
+	var vdb db.User
 	if err := v.Create(tx, &vdb, payload); err != nil {
 		return errors.Wrap(err, "failed to create new user in database")
 	}
@@ -179,7 +185,7 @@ func (v *User) CreateFromPayload(tx *db.Tx, result *model.User, payload model.Cr
 	return nil
 }
 
-func (v *User) DeleteFromPayload(tx *db.Tx, payload model.DeleteUserRequest) error {
+func (v *UserSvc) DeleteFromPayload(tx *db.Tx, payload model.DeleteUserRequest) error {
 	if err := v.IsOwnerUser(tx, payload.ID, payload.UserID); err != nil {
 		return errors.Wrap(err, "deleting a user requires to be the user themselves, or a system administrator")
 	}
@@ -187,12 +193,12 @@ func (v *User) DeleteFromPayload(tx *db.Tx, payload model.DeleteUserRequest) err
 	return errors.Wrap(v.Delete(tx, payload.ID), "failed to delete user")
 }
 
-func (v *User) UpdateFromPayload(tx *db.Tx, payload model.UpdateUserRequest) error {
+func (v *UserSvc) UpdateFromPayload(tx *db.Tx, payload model.UpdateUserRequest) error {
 	if err := v.IsOwnerUser(tx, payload.ID, payload.UserID); err != nil {
 		return errors.Wrap(err, "updating a user requires to be the user themselves, or a system administrator")
 	}
 
-	vdb := db.User{}
+	var vdb db.User
 	if err := vdb.LoadByEID(tx, payload.ID); err != nil {
 		return errors.Wrap(err, "failed to load from database")
 	}
@@ -200,7 +206,7 @@ func (v *User) UpdateFromPayload(tx *db.Tx, payload model.UpdateUserRequest) err
 	return errors.Wrap(v.Update(tx, &vdb, payload), "failed to update database")
 }
 
-func (v *User) IsSessionOwner(tx *db.Tx, sessionID, userID string) (err error) {
+func (v *UserSvc) IsSessionOwner(tx *db.Tx, sessionID, userID string) (err error) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("session.User.IsSessionOwner session ID = %s, user ID = %s", sessionID, userID).BindError(&err)
 		defer g.End()
@@ -210,7 +216,7 @@ func (v *User) IsSessionOwner(tx *db.Tx, sessionID, userID string) (err error) {
 		return nil
 	}
 
-	var ss Session
+	ss := Session()
 	var m model.Session
 	if err := ss.Lookup(tx, &m, sessionID); err != nil {
 		return errors.Wrap(err, "failed to load session")
@@ -223,7 +229,7 @@ func (v *User) IsSessionOwner(tx *db.Tx, sessionID, userID string) (err error) {
 	return errors.Errorf("user %s lacks session owner privileges for %s", userID, sessionID)
 }
 
-func (v *User) Decorate(tx *db.Tx, user *model.User, trustedCall bool, lang string) error {
+func (v *UserSvc) Decorate(tx *db.Tx, user *model.User, trustedCall bool, lang string) error {
 	if !trustedCall {
 		user.Email = ""
 		user.TshirtSize = ""
@@ -239,7 +245,7 @@ func (v *User) Decorate(tx *db.Tx, user *model.User, trustedCall bool, lang stri
 	return nil
 }
 
-func (v *User) LookupUserByAuthUserIDFromPayload(tx *db.Tx, result *model.User, payload model.LookupUserByAuthUserIDRequest) error {
+func (v *UserSvc) LookupUserByAuthUserIDFromPayload(tx *db.Tx, result *model.User, payload model.LookupUserByAuthUserIDRequest) error {
 	var vdb db.User
 	if err := vdb.LoadByAuthUserID(tx, payload.AuthVia, payload.AuthUserID); err != nil {
 		return errors.Wrap(err, "failed to load from database")
@@ -255,5 +261,78 @@ func (v *User) LookupUserByAuthUserIDFromPayload(tx *db.Tx, result *model.User, 
 	}
 
 	*result = r
+	return nil
+}
+
+func (v *UserSvc) CreateTemporaryEmailFromPayload(tx *db.Tx, key *string, payload model.CreateTemporaryEmailRequest) (err error) {
+	if pdebug.Enabled {
+		g := pdebug.Marker("service.User.CreateTemporaryEmailFromPayload").BindError(&err)
+		defer g.End()
+	}
+
+	var row db.TemporaryEmail
+
+	row.UserID = payload.TargetID
+	row.Email = payload.Email
+	row.ConfirmationKey = tools.UUID()
+	row.ExpiresOn = time.Now().Add(time.Duration(24 * time.Hour))
+
+	if err := row.Upsert(tx); err != nil {
+		return errors.Wrap(err, "failed to create temporary email")
+	}
+
+	*key = row.ConfirmationKey
+	gettext.SetLocale(payload.Lang.String)
+
+	var txt bytes.Buffer
+	if err := Template().Execute(&txt, "templates/eml/confirm_registration.eml", row); err != nil {
+		return errors.Wrap(err, "failed to execute template")
+	}
+
+	mg := Mailgun()
+	if pdebug.Enabled {
+		pdebug.Printf("Got mailgun %v", mg)
+	}
+	mm := MailMessage{
+		Recipients: []string{payload.Email},
+		Subject:    gettext.Get("Confirm Your Email Registration"),
+		Text:       txt.String(),
+	}
+
+	if pdebug.Enabled {
+		pdebug.Printf("Sending via mailgun: %#v", mm)
+	}
+
+	if err := mg.Send(&mm); err != nil {
+		return errors.Wrap(err, "failed to send message")
+	}
+	return nil
+}
+
+func (v *UserSvc) ConfirmTemporaryEmailFromPayload(tx *db.Tx, payload model.ConfirmTemporaryEmailRequest) (err error) {
+	if pdebug.Enabled {
+		g := pdebug.Marker("service.User.ConfirmTemporaryEmailFromPayload").BindError(&err)
+		defer g.End()
+	}
+
+	var row db.TemporaryEmail
+	if err := row.LoadByUserIDAndConfirmationKey(tx, payload.TargetID, payload.ConfirmationKey); err != nil {
+		return errors.Wrap(err, "failed to load temporary email")
+	}
+
+	var u db.User
+	if err := u.LoadByEID(tx, payload.TargetID); err != nil {
+		return errors.Wrap(err, "failed to load user")
+	}
+
+	u.Email.String = row.Email
+	if err := u.Update(tx); err != nil {
+		return errors.Wrap(err, "failed to update user")
+	}
+
+	if err := row.Delete(tx); err != nil {
+		return errors.Wrap(err, "failed to delete temporary email")
+	}
+
 	return nil
 }

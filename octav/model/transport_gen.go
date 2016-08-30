@@ -5709,3 +5709,187 @@ func (r *ListConferencesByOrganizerRequest) Populate(m map[string]interface{}) e
 	}
 	return nil
 }
+
+func (r CreateTemporaryEmailRequest) collectMarshalData() map[string]interface{} {
+	m := make(map[string]interface{})
+	m["target_id"] = r.TargetID
+	m["user_id"] = r.UserID
+	m["email"] = r.Email
+	if r.Lang.Valid() {
+		m["lang"] = r.Lang.Value()
+	}
+	return m
+}
+
+func (r CreateTemporaryEmailRequest) MarshalJSON() ([]byte, error) {
+	m := r.collectMarshalData()
+	buf, err := json.Marshal(m)
+	if err != nil {
+		return nil, err
+	}
+	return buf, nil
+}
+
+func (r CreateTemporaryEmailRequest) MarshalURL() ([]byte, error) {
+	m := r.collectMarshalData()
+	buf, err := urlenc.Marshal(m)
+	if err != nil {
+		return nil, err
+	}
+	return buf, nil
+}
+
+func (r *CreateTemporaryEmailRequest) UnmarshalJSON(data []byte) error {
+	m := make(map[string]interface{})
+	if err := json.Unmarshal(data, &m); err != nil {
+		return err
+	}
+	return r.Populate(m)
+}
+
+func (r *CreateTemporaryEmailRequest) Populate(m map[string]interface{}) error {
+	if jv, ok := m["target_id"]; ok {
+		switch jv.(type) {
+		case string:
+			r.TargetID = jv.(string)
+			delete(m, "target_id")
+		default:
+			return ErrInvalidJSONFieldType{Field: "target_id"}
+		}
+	}
+	if jv, ok := m["user_id"]; ok {
+		switch jv.(type) {
+		case string:
+			r.UserID = jv.(string)
+			delete(m, "user_id")
+		default:
+			return ErrInvalidJSONFieldType{Field: "user_id"}
+		}
+	}
+	if jv, ok := m["email"]; ok {
+		switch jv.(type) {
+		case string:
+			r.Email = jv.(string)
+			delete(m, "email")
+		default:
+			return ErrInvalidJSONFieldType{Field: "email"}
+		}
+	}
+	if jv, ok := m["lang"]; ok {
+		if err := r.Lang.Set(jv); err != nil {
+			return errors.New("set field Lang failed: " + err.Error())
+		}
+		delete(m, "lang")
+	}
+	return nil
+}
+
+func (r CreateTemporaryEmailResponse) collectMarshalData() map[string]interface{} {
+	m := make(map[string]interface{})
+	m["confirmation_key"] = r.ConfirmationKey
+	return m
+}
+
+func (r CreateTemporaryEmailResponse) MarshalJSON() ([]byte, error) {
+	m := r.collectMarshalData()
+	buf, err := json.Marshal(m)
+	if err != nil {
+		return nil, err
+	}
+	return buf, nil
+}
+
+func (r CreateTemporaryEmailResponse) MarshalURL() ([]byte, error) {
+	m := r.collectMarshalData()
+	buf, err := urlenc.Marshal(m)
+	if err != nil {
+		return nil, err
+	}
+	return buf, nil
+}
+
+func (r *CreateTemporaryEmailResponse) UnmarshalJSON(data []byte) error {
+	m := make(map[string]interface{})
+	if err := json.Unmarshal(data, &m); err != nil {
+		return err
+	}
+	return r.Populate(m)
+}
+
+func (r *CreateTemporaryEmailResponse) Populate(m map[string]interface{}) error {
+	if jv, ok := m["confirmation_key"]; ok {
+		switch jv.(type) {
+		case string:
+			r.ConfirmationKey = jv.(string)
+			delete(m, "confirmation_key")
+		default:
+			return ErrInvalidJSONFieldType{Field: "confirmation_key"}
+		}
+	}
+	return nil
+}
+
+func (r ConfirmTemporaryEmailRequest) collectMarshalData() map[string]interface{} {
+	m := make(map[string]interface{})
+	m["target_id"] = r.TargetID
+	m["user_id"] = r.UserID
+	m["confirmation_key"] = r.ConfirmationKey
+	return m
+}
+
+func (r ConfirmTemporaryEmailRequest) MarshalJSON() ([]byte, error) {
+	m := r.collectMarshalData()
+	buf, err := json.Marshal(m)
+	if err != nil {
+		return nil, err
+	}
+	return buf, nil
+}
+
+func (r ConfirmTemporaryEmailRequest) MarshalURL() ([]byte, error) {
+	m := r.collectMarshalData()
+	buf, err := urlenc.Marshal(m)
+	if err != nil {
+		return nil, err
+	}
+	return buf, nil
+}
+
+func (r *ConfirmTemporaryEmailRequest) UnmarshalJSON(data []byte) error {
+	m := make(map[string]interface{})
+	if err := json.Unmarshal(data, &m); err != nil {
+		return err
+	}
+	return r.Populate(m)
+}
+
+func (r *ConfirmTemporaryEmailRequest) Populate(m map[string]interface{}) error {
+	if jv, ok := m["target_id"]; ok {
+		switch jv.(type) {
+		case string:
+			r.TargetID = jv.(string)
+			delete(m, "target_id")
+		default:
+			return ErrInvalidJSONFieldType{Field: "target_id"}
+		}
+	}
+	if jv, ok := m["user_id"]; ok {
+		switch jv.(type) {
+		case string:
+			r.UserID = jv.(string)
+			delete(m, "user_id")
+		default:
+			return ErrInvalidJSONFieldType{Field: "user_id"}
+		}
+	}
+	if jv, ok := m["confirmation_key"]; ok {
+		switch jv.(type) {
+		case string:
+			r.ConfirmationKey = jv.(string)
+			delete(m, "confirmation_key")
+		default:
+			return ErrInvalidJSONFieldType{Field: "confirmation_key"}
+		}
+	}
+	return nil
+}
