@@ -12,7 +12,7 @@ endif
 
 SRC_FILES = $(wildcard *.go validator/*.go client/*.go db/*.go model/*.go)
 
-.PHONY: installdeps build_internal_cmd generate build run all clean test initdb gke-apiserver $(INTERNAL_BIN_DIR)/glide hsupsrc bindatasrc
+.PHONY: installdeps build_internal_cmd generate build run all clean test initdb gke-apiserver $(INTERNAL_BIN_DIR)/glide hsupsrc bindatasrc assets
 
 all: test build
 
@@ -91,3 +91,8 @@ clean:
 
 initdb:
 	$(MAKE) -C ../ initdb
+
+assets: $(INTERNAL_BIN_DIR)/go-bindata
+	@echo "Regenerating assets"
+	@PATH=$(CURDIR)/_internal_bin:$(PATH) go-bindata -o assets/assets.go -pkg=assets -ignore=assets.go -prefix=assets assets/...
+
