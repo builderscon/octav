@@ -1,5 +1,5 @@
 """OCTAV Client Library"""
-"""DO NOT EDIT: This file was generated from ../spec/v1/api.json on Tue Aug 30 07:10:03 2016"""
+"""DO NOT EDIT: This file was generated from ../spec/v1/api.json on Tue Aug 30 14:14:47 2016"""
 
 import json
 import os
@@ -2352,7 +2352,7 @@ class Octav(object):
             payload['target_id'] = target_id
         if user_id is not None:
             payload['user_id'] = user_id
-        uri = '%s/email/create' % self.endpoint
+        uri = '%s/email/confirm' % self.endpoint
         hdrs = urllib3.util.make_headers(
             basic_auth='%s:%s' % (self.key, self.secret),
         )
