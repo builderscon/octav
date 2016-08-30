@@ -12,6 +12,7 @@ import (
 func Template() *TemplateSvc {
 	var t *template.Template
 
+	var parsed int
 	for _, n := range assets.AssetNames() {
 		b, err := assets.Asset(n)
 		if err != nil {
@@ -37,6 +38,11 @@ func Template() *TemplateSvc {
 		if _, err := tmpl.Parse(string(b)); err != nil {
 			panic(err.Error())
 		}
+		parsed++
+	}
+
+	if pdebug.Enabled {
+		pdebug.Printf("Parsed %d templates", parsed)
 	}
 
 	return &TemplateSvc{
@@ -44,6 +50,11 @@ func Template() *TemplateSvc {
 	}
 }
 
-func (v *TemplateSvc) Execute(dst io.Writer, name string, vars interface{}) error {
+func (v *TemplateSvc) Execute(dst io.Writer, name string, vars interface{}) (err error) {
+	if pdebug.Enabled {
+		g := pdebug.Marker("service.Template.Execute").BindError(&err)
+		defer g.End()
+	}
+
 	return v.template.ExecuteTemplate(dst, name, vars)
 }
