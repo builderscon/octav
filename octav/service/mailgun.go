@@ -40,7 +40,7 @@ func (v *MailgunSvc) Init() {
 	var apiKey string
 	var publicApiKey string
 	f(&domain, "MAILGUN_DOMAIN")
-	f(&apiKey, "MAILGUN_API_KEY")
+	f(&apiKey, "MAILGUN_SECRET_API_KEY")
 	f(&publicApiKey, "MAILGUN_PUBLIC_API_KEY")
 
 	if pdebug.Enabled {
