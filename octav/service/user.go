@@ -282,10 +282,10 @@ func (v *UserSvc) CreateTemporaryEmailFromPayload(tx *db.Tx, key *string, payloa
 	}
 
 	*key = row.ConfirmationKey
-
 	gettext.SetLocale(payload.Lang.String)
-	txt := bytes.Buffer{}
-	if err := Template().Execute(&txt, "eml/confirm_registration.eml", nil); err != nil {
+
+	var txt bytes.Buffer
+	if err := Template().Execute(&txt, "eml/confirm_registration.eml", row); err != nil {
 		return errors.Wrap(err, "failed to execute template")
 	}
 	mg := Mailgun()

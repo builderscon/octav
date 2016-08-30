@@ -2,40 +2,31 @@ package service
 
 import (
 	"io"
-	"io/ioutil"
-	"os"
-	"path/filepath"
 	"text/template"
 
+	"github.com/builderscon/octav/octav/assets"
 	"github.com/builderscon/octav/octav/gettext"
 )
 
 func Template() *TemplateSvc {
 	var t *template.Template
-	filepath.Walk("template", func(path string, info os.FileInfo, err error) error {
-		if err != nil {
-			if info != nil && info.IsDir() {
-				return filepath.SkipDir
-			}
-			return nil
-		}
 
-		b, err := ioutil.ReadFile(path)
+	for _, n := range assets.AssetNames() {
+		b, err := assets.Asset(n)
 		if err != nil {
-			return err
+			panic(err.Error())
 		}
 
 		if t == nil {
-			t = template.New(path).Funcs(map[string]interface{}{
+			t = template.New(n).Funcs(map[string]interface{}{
 				"gettext": gettext.Get,
 			})
 		}
 
 		if _, err := t.Parse(string(b)); err != nil {
-			return err
+			panic(err.Error())
 		}
-		return nil
-	})
+	}
 
 	return &TemplateSvc{
 		template: t,

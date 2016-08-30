@@ -1,0 +1,5 @@
+{{ gettext "Thank you for registering yoru email with builderscon!" }}
+
+{{ gettext "Please click on the link below to confirm your email address" }}
+
+  https://builderscon.io/user/email/confirm?confirmation_key={{ .ConfirmationKey }}

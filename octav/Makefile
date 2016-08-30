@@ -22,6 +22,9 @@ installdeps:
 hsupsrc:
 	@go get -d github.com/lestrrat/go-hsup
 
+bindatasrc:
+	@go get -d github.com/lestrrat/go-bindata
+
 $(INTERNAL_BIN_DIR):
 	@mkdir -p $(INTERNAL_BIN_DIR)
 
@@ -34,6 +37,11 @@ $(INTERNAL_BIN_DIR)/hsup:
 	@$(MAKE) $(INTERNAL_BIN_DIR)
 	@echo "Building hsup..."
 	@cd $(shell go list -f '{{ .Dir }}' github.com/lestrrat/go-hsup) && PATH=$(INTERNAL_BIN_DIR):$(PATH) glide install && go build -o $@ cmd/hsup/*.go
+
+$(INTERNAL_BIN_DIR)/go-bindata:
+	@$(MAKE) $(INTERNAL_BIN_DIR)
+	@echo "Building bindata..."
+	@cd $(shell go list -f '{{ .Dir }}' github.com/lestrrat/go-bindata) && PATH=$(INTERNAL_BIN_DIR):$(PATH) go build -o $@ ./go-bindata
 
 glide: $(INTERNAL_BIN_DIR)/glide
 
@@ -49,7 +57,7 @@ $(INTERNAL_BIN_DIR)/glide-$(GOOS)-$(GOARCH):
 
 build_internal_cmd: $(patsubst %,$(INTERNAL_BIN_DIR)/%, $(INTERNAL_CMDS))
 
-generate: build_internal_cmd
+generate: build_internal_cmd $(INTERNAL_BIN_DIR)/go-bindata
 	@echo "go generate ."
 	@PATH=$(CURDIR)/_internal_bin:$(PATH) go generate .
 
