@@ -2,6 +2,7 @@ package service
 
 import (
 	"io"
+	"sync"
 	"text/template"
 
 	"github.com/builderscon/octav/octav/assets"
@@ -9,7 +10,20 @@ import (
 	pdebug "github.com/lestrrat/go-pdebug"
 )
 
+var templateSvc *TemplateSvc
+var templateOnce sync.Once
+
 func Template() *TemplateSvc {
+	templateOnce.Do(templateSvc.Init)
+	return templateSvc
+}
+
+func (v *TemplateSvc) Init() {
+	if pdebug.Enabled {
+		g := pdebug.Marker("service.Template.Init")
+		defer g.End()
+	}
+
 	var t *template.Template
 
 	var parsed int
@@ -45,7 +59,7 @@ func Template() *TemplateSvc {
 		pdebug.Printf("Parsed %d templates", parsed)
 	}
 
-	return &TemplateSvc{
+	v = &TemplateSvc{
 		template: t,
 	}
 }
