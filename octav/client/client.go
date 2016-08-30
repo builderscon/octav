@@ -423,7 +423,7 @@ func (c *Client) ConfirmTemporaryEmail(in *model.ConfirmTemporaryEmailRequest) (
 		g := pdebug.Marker("client.ConfirmTemporaryEmail").BindError(&err)
 		defer g.End()
 	}
-	u, err := url.Parse(c.Endpoint + "/v1/email/create")
+	u, err := url.Parse(c.Endpoint + "/v1/email/confirm")
 	if err != nil {
 		return err
 	}
