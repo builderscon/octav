@@ -10,12 +10,12 @@ import (
 	pdebug "github.com/lestrrat/go-pdebug"
 )
 
-var templateSvc *TemplateSvc
+var templateSvc TemplateSvc
 var templateOnce sync.Once
 
 func Template() *TemplateSvc {
 	templateOnce.Do(templateSvc.Init)
-	return templateSvc
+	return &templateSvc
 }
 
 func (v *TemplateSvc) Init() {
@@ -59,9 +59,7 @@ func (v *TemplateSvc) Init() {
 		pdebug.Printf("Parsed %d templates", parsed)
 	}
 
-	*v = TemplateSvc{
-		template: t,
-	}
+	v.template = t
 }
 
 func (v *TemplateSvc) Execute(dst io.Writer, name string, vars interface{}) (err error) {
