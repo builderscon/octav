@@ -10,12 +10,12 @@ import (
 	mailgun "gopkg.in/mailgun/mailgun-go.v1"
 )
 
-var mailgunSvc *MailgunSvc
+var mailgunSvc MailgunSvc
 var mailgunOnce sync.Once
 
 func Mailgun() *MailgunSvc {
 	mailgunOnce.Do(mailgunSvc.Init)
-	return mailgunSvc
+	return &mailgunSvc
 }
 
 func (v *MailgunSvc) Init() {
@@ -23,8 +23,6 @@ func (v *MailgunSvc) Init() {
 		g := pdebug.Marker("service.Mailgun.Init")
 		defer g.End()
 	}
-
-	v = &MailgunSvc{}
 
 	f := func(v *string, envname string) {
 		envvar := os.Getenv(envname)
