@@ -19,3 +19,20 @@ func (vdb *TemporaryEmail) LoadByUserIDAndConfirmationKey(tx *Tx, userID, confir
 
 	return nil
 }
+
+func (vdb *TemporaryEmail) Upsert(tx *Tx) error {
+	stmt := getStmtBuf()
+	defer releaseStmtBuf(stmt)
+
+	stmt.WriteString(`INSERT INTO `)
+	stmt.WriteString(TemporaryEmailTable)
+	stmt.WriteString(` (user_id, confirmation_key, email, expires_on) VALUES (?, ?, ?, ?) `)
+	stmt.WriteString(` ON DUPLICATE KEY UPDATE confirmation_key = VALUE(confirmation_key), expires_on = VALUE(expires_on)`)
+
+	row := tx.QueryRow(stmt.String(), vdb.UserID, vdb.ConfirmationKey, vdb.Email, vdb.ExpiresOn)
+	if err := vdb.Scan(row); err != nil {
+		return errors.Wrap(err, "failed to execute query")
+	}
+
+	return nil
+}

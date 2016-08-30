@@ -277,7 +277,7 @@ func (v *UserSvc) CreateTemporaryEmailFromPayload(tx *db.Tx, key *string, payloa
 	row.ConfirmationKey = tools.UUID()
 	row.ExpiresOn = time.Now().Add(time.Duration(24 * time.Hour))
 
-	if err := row.Create(tx); err != nil {
+	if err := row.Upsert(tx); err != nil {
 		return errors.Wrap(err, "failed to create temporary email")
 	}
 
@@ -285,7 +285,7 @@ func (v *UserSvc) CreateTemporaryEmailFromPayload(tx *db.Tx, key *string, payloa
 	gettext.SetLocale(payload.Lang.String)
 
 	var txt bytes.Buffer
-	if err := Template().Execute(&txt, "eml/confirm_registration.eml", row); err != nil {
+	if err := Template().Execute(&txt, "templates/eml/confirm_registration.eml", row); err != nil {
 		return errors.Wrap(err, "failed to execute template")
 	}
 	mg := Mailgun()
