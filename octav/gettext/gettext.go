@@ -81,5 +81,5 @@ func Get(s string, args ...interface{}) string {
 	defer defaultDomainMutex.RUnlock()
 	defer defaultLocaleMutex.RUnlock()
 
-	return defaultGettext.Get(defaultLocale, defaultDomain, s, args...)
+	return Default().Get(defaultLocale, defaultDomain, s, args...)
 }
