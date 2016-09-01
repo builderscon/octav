@@ -856,7 +856,7 @@ func generateServiceFile(ctx *genctx, m Model) error {
 		buf.WriteString("{\nreturn nil\n}")
 
 		buf.WriteString("\nfor _, extralang := range []string{`ja`} {")
-		fmt.Fprintf(&buf, "\nrows, err := tx.Query(`SELECT localized FROM localized_strings WHERE parent_type = ? AND parent_id = ? AND language = ?`, %s, m.ID, extralang)", strconv.Quote(m.Name))
+		fmt.Fprintf(&buf, "\nrows, err := tx.Query(`SELECT oid, parent_id, parent_type, name, language, localized FROM localized_strings WHERE parent_type = ? AND parent_id = ? AND language = ?`, %s, m.ID, extralang)", strconv.Quote(m.Name))
 		buf.WriteString("\nif err != nil {")
 		buf.WriteString("\nif errors.IsSQLNoRows(err) {")
 		buf.WriteString("\nbreak")

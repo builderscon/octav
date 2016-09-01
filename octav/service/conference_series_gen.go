@@ -116,7 +116,7 @@ func (v *ConferenceSeriesSvc) ReplaceL10NStrings(tx *db.Tx, m *model.ConferenceS
 			return nil
 		}
 		for _, extralang := range []string{`ja`} {
-			rows, err := tx.Query(`SELECT localized FROM localized_strings WHERE parent_type = ? AND parent_id = ? AND language = ?`, "ConferenceSeries", m.ID, extralang)
+			rows, err := tx.Query(`SELECT oid, parent_id, parent_type, name, language, localized FROM localized_strings WHERE parent_type = ? AND parent_id = ? AND language = ?`, "ConferenceSeries", m.ID, extralang)
 			if err != nil {
 				if errors.IsSQLNoRows(err) {
 					break
