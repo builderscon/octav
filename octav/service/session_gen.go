@@ -121,6 +121,9 @@ func (v *SessionSvc) ReplaceL10NStrings(tx *db.Tx, m *model.Session, lang string
 			for _, lang := range []string{"ja"} {
 				row := stmt.QueryRow("Session", m.ID, "Title", lang)
 				if err := row.Scan(&vdb); err != nil {
+					if errors.IsSQLNoRows(err) {
+						break
+					}
 					return errors.Wrap(err, `failed to scan row`)
 				}
 				m.Title = vdb.Localized
@@ -131,6 +134,9 @@ func (v *SessionSvc) ReplaceL10NStrings(tx *db.Tx, m *model.Session, lang string
 			for _, lang := range []string{"ja"} {
 				row := stmt.QueryRow("Session", m.ID, "Abstract", lang)
 				if err := row.Scan(&vdb); err != nil {
+					if errors.IsSQLNoRows(err) {
+						break
+					}
 					return errors.Wrap(err, `failed to scan row`)
 				}
 				m.Abstract = vdb.Localized

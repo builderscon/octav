@@ -121,6 +121,9 @@ func (v *RoomSvc) ReplaceL10NStrings(tx *db.Tx, m *model.Room, lang string) erro
 			for _, lang := range []string{"ja"} {
 				row := stmt.QueryRow("Room", m.ID, "Name", lang)
 				if err := row.Scan(&vdb); err != nil {
+					if errors.IsSQLNoRows(err) {
+						break
+					}
 					return errors.Wrap(err, `failed to scan row`)
 				}
 				m.Name = vdb.Localized

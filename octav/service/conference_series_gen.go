@@ -121,6 +121,9 @@ func (v *ConferenceSeriesSvc) ReplaceL10NStrings(tx *db.Tx, m *model.ConferenceS
 			for _, lang := range []string{"ja"} {
 				row := stmt.QueryRow("ConferenceSeries", m.ID, "Title", lang)
 				if err := row.Scan(&vdb); err != nil {
+					if errors.IsSQLNoRows(err) {
+						break
+					}
 					return errors.Wrap(err, `failed to scan row`)
 				}
 				m.Title = vdb.Localized
