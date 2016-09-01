@@ -115,64 +115,66 @@ func (v *ConferenceSvc) ReplaceL10NStrings(tx *db.Tx, m *model.Conference, lang 
 		if len(m.Title) > 0 && len(m.Description) > 0 && len(m.CFPLeadText) > 0 && len(m.CFPPreSubmitInstructions) > 0 && len(m.CFPPostSubmitInstructions) > 0 && len(m.SubTitle) > 0 {
 			return nil
 		}
-		rows, err := tx.Query(`SELECT localized FROM localized_strings WHERE parent_type = ? AND parent_id = ? AND language = ?`, "Conference", m.ID, lang)
-		if err != nil {
-			if errors.IsSQLNoRows(err) {
-				break
+		for _, extralang := range []string{`ja`} {
+			rows, err := tx.Query(`SELECT localized FROM localized_strings WHERE parent_type = ? AND parent_id = ? AND language = ?`, "Conference", m.ID, extralang)
+			if err != nil {
+				if errors.IsSQLNoRows(err) {
+					break
+				}
+				return errors.Wrap(err, `failed to excute query`)
 			}
-			return errors.Wrap(err, `failed to excute query`)
-		}
 
-		var l db.LocalizedString
-		for rows.Next() {
-			if err := l.Scan(rows); err != nil {
-				return err
-			}
-			if len(l.Localized) == 0 {
-				continue
-			}
-			switch l.Name {
-			case "title":
-				if len(m.Title) == 0 {
-					if pdebug.Enabled {
-						pdebug.Printf("Replacing for key 'title' (fallback en -> %s", l.Language)
-					}
-					m.Title = l.Localized
+			var l db.LocalizedString
+			for rows.Next() {
+				if err := l.Scan(rows); err != nil {
+					return err
 				}
-			case "description":
-				if len(m.Description) == 0 {
-					if pdebug.Enabled {
-						pdebug.Printf("Replacing for key 'description' (fallback en -> %s", l.Language)
-					}
-					m.Description = l.Localized
+				if len(l.Localized) == 0 {
+					continue
 				}
-			case "cfp_lead_text":
-				if len(m.CFPLeadText) == 0 {
-					if pdebug.Enabled {
-						pdebug.Printf("Replacing for key 'cfp_lead_text' (fallback en -> %s", l.Language)
+				switch l.Name {
+				case "title":
+					if len(m.Title) == 0 {
+						if pdebug.Enabled {
+							pdebug.Printf("Replacing for key 'title' (fallback en -> %s", l.Language)
+						}
+						m.Title = l.Localized
 					}
-					m.CFPLeadText = l.Localized
-				}
-			case "cfp_pre_submit_instructions":
-				if len(m.CFPPreSubmitInstructions) == 0 {
-					if pdebug.Enabled {
-						pdebug.Printf("Replacing for key 'cfp_pre_submit_instructions' (fallback en -> %s", l.Language)
+				case "description":
+					if len(m.Description) == 0 {
+						if pdebug.Enabled {
+							pdebug.Printf("Replacing for key 'description' (fallback en -> %s", l.Language)
+						}
+						m.Description = l.Localized
 					}
-					m.CFPPreSubmitInstructions = l.Localized
-				}
-			case "cfp_post_submit_instructions":
-				if len(m.CFPPostSubmitInstructions) == 0 {
-					if pdebug.Enabled {
-						pdebug.Printf("Replacing for key 'cfp_post_submit_instructions' (fallback en -> %s", l.Language)
+				case "cfp_lead_text":
+					if len(m.CFPLeadText) == 0 {
+						if pdebug.Enabled {
+							pdebug.Printf("Replacing for key 'cfp_lead_text' (fallback en -> %s", l.Language)
+						}
+						m.CFPLeadText = l.Localized
 					}
-					m.CFPPostSubmitInstructions = l.Localized
-				}
-			case "sub_title":
-				if len(m.SubTitle) == 0 {
-					if pdebug.Enabled {
-						pdebug.Printf("Replacing for key 'sub_title' (fallback en -> %s", l.Language)
+				case "cfp_pre_submit_instructions":
+					if len(m.CFPPreSubmitInstructions) == 0 {
+						if pdebug.Enabled {
+							pdebug.Printf("Replacing for key 'cfp_pre_submit_instructions' (fallback en -> %s", l.Language)
+						}
+						m.CFPPreSubmitInstructions = l.Localized
 					}
-					m.SubTitle = l.Localized
+				case "cfp_post_submit_instructions":
+					if len(m.CFPPostSubmitInstructions) == 0 {
+						if pdebug.Enabled {
+							pdebug.Printf("Replacing for key 'cfp_post_submit_instructions' (fallback en -> %s", l.Language)
+						}
+						m.CFPPostSubmitInstructions = l.Localized
+					}
+				case "sub_title":
+					if len(m.SubTitle) == 0 {
+						if pdebug.Enabled {
+							pdebug.Printf("Replacing for key 'sub_title' (fallback en -> %s", l.Language)
+						}
+						m.SubTitle = l.Localized
+					}
 				}
 			}
 		}

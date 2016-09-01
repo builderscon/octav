@@ -115,29 +115,31 @@ func (v *ConferenceSeriesSvc) ReplaceL10NStrings(tx *db.Tx, m *model.ConferenceS
 		if len(m.Title) > 0 {
 			return nil
 		}
-		rows, err := tx.Query(`SELECT localized FROM localized_strings WHERE parent_type = ? AND parent_id = ? AND language = ?`, "ConferenceSeries", m.ID, lang)
-		if err != nil {
-			if errors.IsSQLNoRows(err) {
-				break
+		for _, extralang := range []string{`ja`} {
+			rows, err := tx.Query(`SELECT localized FROM localized_strings WHERE parent_type = ? AND parent_id = ? AND language = ?`, "ConferenceSeries", m.ID, extralang)
+			if err != nil {
+				if errors.IsSQLNoRows(err) {
+					break
+				}
+				return errors.Wrap(err, `failed to excute query`)
 			}
-			return errors.Wrap(err, `failed to excute query`)
-		}
 
-		var l db.LocalizedString
-		for rows.Next() {
-			if err := l.Scan(rows); err != nil {
-				return err
-			}
-			if len(l.Localized) == 0 {
-				continue
-			}
-			switch l.Name {
-			case "title":
-				if len(m.Title) == 0 {
-					if pdebug.Enabled {
-						pdebug.Printf("Replacing for key 'title' (fallback en -> %s", l.Language)
+			var l db.LocalizedString
+			for rows.Next() {
+				if err := l.Scan(rows); err != nil {
+					return err
+				}
+				if len(l.Localized) == 0 {
+					continue
+				}
+				switch l.Name {
+				case "title":
+					if len(m.Title) == 0 {
+						if pdebug.Enabled {
+							pdebug.Printf("Replacing for key 'title' (fallback en -> %s", l.Language)
+						}
+						m.Title = l.Localized
 					}
-					m.Title = l.Localized
 				}
 			}
 		}

@@ -115,36 +115,38 @@ func (v *FeaturedSpeakerSvc) ReplaceL10NStrings(tx *db.Tx, m *model.FeaturedSpea
 		if len(m.DisplayName) > 0 && len(m.Description) > 0 {
 			return nil
 		}
-		rows, err := tx.Query(`SELECT localized FROM localized_strings WHERE parent_type = ? AND parent_id = ? AND language = ?`, "FeaturedSpeaker", m.ID, lang)
-		if err != nil {
-			if errors.IsSQLNoRows(err) {
-				break
-			}
-			return errors.Wrap(err, `failed to excute query`)
-		}
-
-		var l db.LocalizedString
-		for rows.Next() {
-			if err := l.Scan(rows); err != nil {
-				return err
-			}
-			if len(l.Localized) == 0 {
-				continue
-			}
-			switch l.Name {
-			case "display_name":
-				if len(m.DisplayName) == 0 {
-					if pdebug.Enabled {
-						pdebug.Printf("Replacing for key 'display_name' (fallback en -> %s", l.Language)
-					}
-					m.DisplayName = l.Localized
+		for _, extralang := range []string{`ja`} {
+			rows, err := tx.Query(`SELECT localized FROM localized_strings WHERE parent_type = ? AND parent_id = ? AND language = ?`, "FeaturedSpeaker", m.ID, extralang)
+			if err != nil {
+				if errors.IsSQLNoRows(err) {
+					break
 				}
-			case "description":
-				if len(m.Description) == 0 {
-					if pdebug.Enabled {
-						pdebug.Printf("Replacing for key 'description' (fallback en -> %s", l.Language)
+				return errors.Wrap(err, `failed to excute query`)
+			}
+
+			var l db.LocalizedString
+			for rows.Next() {
+				if err := l.Scan(rows); err != nil {
+					return err
+				}
+				if len(l.Localized) == 0 {
+					continue
+				}
+				switch l.Name {
+				case "display_name":
+					if len(m.DisplayName) == 0 {
+						if pdebug.Enabled {
+							pdebug.Printf("Replacing for key 'display_name' (fallback en -> %s", l.Language)
+						}
+						m.DisplayName = l.Localized
 					}
-					m.Description = l.Localized
+				case "description":
+					if len(m.Description) == 0 {
+						if pdebug.Enabled {
+							pdebug.Printf("Replacing for key 'description' (fallback en -> %s", l.Language)
+						}
+						m.Description = l.Localized
+					}
 				}
 			}
 		}

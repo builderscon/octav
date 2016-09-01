@@ -115,36 +115,38 @@ func (v *SessionTypeSvc) ReplaceL10NStrings(tx *db.Tx, m *model.SessionType, lan
 		if len(m.Name) > 0 && len(m.Abstract) > 0 {
 			return nil
 		}
-		rows, err := tx.Query(`SELECT localized FROM localized_strings WHERE parent_type = ? AND parent_id = ? AND language = ?`, "SessionType", m.ID, lang)
-		if err != nil {
-			if errors.IsSQLNoRows(err) {
-				break
-			}
-			return errors.Wrap(err, `failed to excute query`)
-		}
-
-		var l db.LocalizedString
-		for rows.Next() {
-			if err := l.Scan(rows); err != nil {
-				return err
-			}
-			if len(l.Localized) == 0 {
-				continue
-			}
-			switch l.Name {
-			case "name":
-				if len(m.Name) == 0 {
-					if pdebug.Enabled {
-						pdebug.Printf("Replacing for key 'name' (fallback en -> %s", l.Language)
-					}
-					m.Name = l.Localized
+		for _, extralang := range []string{`ja`} {
+			rows, err := tx.Query(`SELECT localized FROM localized_strings WHERE parent_type = ? AND parent_id = ? AND language = ?`, "SessionType", m.ID, extralang)
+			if err != nil {
+				if errors.IsSQLNoRows(err) {
+					break
 				}
-			case "abstract":
-				if len(m.Abstract) == 0 {
-					if pdebug.Enabled {
-						pdebug.Printf("Replacing for key 'abstract' (fallback en -> %s", l.Language)
+				return errors.Wrap(err, `failed to excute query`)
+			}
+
+			var l db.LocalizedString
+			for rows.Next() {
+				if err := l.Scan(rows); err != nil {
+					return err
+				}
+				if len(l.Localized) == 0 {
+					continue
+				}
+				switch l.Name {
+				case "name":
+					if len(m.Name) == 0 {
+						if pdebug.Enabled {
+							pdebug.Printf("Replacing for key 'name' (fallback en -> %s", l.Language)
+						}
+						m.Name = l.Localized
 					}
-					m.Abstract = l.Localized
+				case "abstract":
+					if len(m.Abstract) == 0 {
+						if pdebug.Enabled {
+							pdebug.Printf("Replacing for key 'abstract' (fallback en -> %s", l.Language)
+						}
+						m.Abstract = l.Localized
+					}
 				}
 			}
 		}

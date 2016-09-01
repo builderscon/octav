@@ -115,36 +115,38 @@ func (v *UserSvc) ReplaceL10NStrings(tx *db.Tx, m *model.User, lang string) erro
 		if len(m.FirstName) > 0 && len(m.LastName) > 0 {
 			return nil
 		}
-		rows, err := tx.Query(`SELECT localized FROM localized_strings WHERE parent_type = ? AND parent_id = ? AND language = ?`, "User", m.ID, lang)
-		if err != nil {
-			if errors.IsSQLNoRows(err) {
-				break
-			}
-			return errors.Wrap(err, `failed to excute query`)
-		}
-
-		var l db.LocalizedString
-		for rows.Next() {
-			if err := l.Scan(rows); err != nil {
-				return err
-			}
-			if len(l.Localized) == 0 {
-				continue
-			}
-			switch l.Name {
-			case "first_name":
-				if len(m.FirstName) == 0 {
-					if pdebug.Enabled {
-						pdebug.Printf("Replacing for key 'first_name' (fallback en -> %s", l.Language)
-					}
-					m.FirstName = l.Localized
+		for _, extralang := range []string{`ja`} {
+			rows, err := tx.Query(`SELECT localized FROM localized_strings WHERE parent_type = ? AND parent_id = ? AND language = ?`, "User", m.ID, extralang)
+			if err != nil {
+				if errors.IsSQLNoRows(err) {
+					break
 				}
-			case "last_name":
-				if len(m.LastName) == 0 {
-					if pdebug.Enabled {
-						pdebug.Printf("Replacing for key 'last_name' (fallback en -> %s", l.Language)
+				return errors.Wrap(err, `failed to excute query`)
+			}
+
+			var l db.LocalizedString
+			for rows.Next() {
+				if err := l.Scan(rows); err != nil {
+					return err
+				}
+				if len(l.Localized) == 0 {
+					continue
+				}
+				switch l.Name {
+				case "first_name":
+					if len(m.FirstName) == 0 {
+						if pdebug.Enabled {
+							pdebug.Printf("Replacing for key 'first_name' (fallback en -> %s", l.Language)
+						}
+						m.FirstName = l.Localized
 					}
-					m.LastName = l.Localized
+				case "last_name":
+					if len(m.LastName) == 0 {
+						if pdebug.Enabled {
+							pdebug.Printf("Replacing for key 'last_name' (fallback en -> %s", l.Language)
+						}
+						m.LastName = l.Localized
+					}
 				}
 			}
 		}
