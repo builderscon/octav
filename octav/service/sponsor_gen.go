@@ -7,9 +7,9 @@ import (
 	"time"
 
 	"github.com/builderscon/octav/octav/db"
+	"github.com/builderscon/octav/octav/internal/errors"
 	"github.com/builderscon/octav/octav/model"
 	"github.com/lestrrat/go-pdebug"
-	"github.com/pkg/errors"
 )
 
 var _ = time.Time{}
@@ -111,7 +111,38 @@ func (v *SponsorSvc) ReplaceL10NStrings(tx *db.Tx, m *model.Sponsor, lang string
 		defer g.End()
 	}
 	switch lang {
-	case "en":
+	case "", "en":
+		if len(m.Name) > 0 {
+			return nil
+		}
+		for _, extralang := range []string{`ja`} {
+			rows, err := tx.Query(`SELECT oid, parent_id, parent_type, name, language, localized FROM localized_strings WHERE parent_type = ? AND parent_id = ? AND language = ?`, "Sponsor", m.ID, extralang)
+			if err != nil {
+				if errors.IsSQLNoRows(err) {
+					break
+				}
+				return errors.Wrap(err, `failed to excute query`)
+			}
+
+			var l db.LocalizedString
+			for rows.Next() {
+				if err := l.Scan(rows); err != nil {
+					return err
+				}
+				if len(l.Localized) == 0 {
+					continue
+				}
+				switch l.Name {
+				case "name":
+					if len(m.Name) == 0 {
+						if pdebug.Enabled {
+							pdebug.Printf("Replacing for key 'name' (fallback en -> %s", l.Language)
+						}
+						m.Name = l.Localized
+					}
+				}
+			}
+		}
 		return nil
 	case "all":
 		rows, err := tx.Query(`SELECT oid, parent_id, parent_type, name, language, localized FROM localized_strings WHERE parent_type = ? AND parent_id = ?`, "Sponsor", m.ID)

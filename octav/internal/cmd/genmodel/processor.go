@@ -732,9 +732,9 @@ func generateServiceFile(ctx *genctx, m Model) error {
 	buf.WriteString("\n" + strconv.Quote("time"))
 	buf.WriteString("\n" + strconv.Quote("sync"))
 	buf.WriteString("\n\n" + strconv.Quote("github.com/builderscon/octav/octav/db"))
+	buf.WriteString("\n" + strconv.Quote("github.com/builderscon/octav/octav/internal/errors"))
 	buf.WriteString("\n" + strconv.Quote("github.com/builderscon/octav/octav/model"))
 	buf.WriteString("\n" + strconv.Quote("github.com/lestrrat/go-pdebug"))
-	buf.WriteString("\n" + strconv.Quote("github.com/pkg/errors"))
 	buf.WriteString("\n)")
 	buf.WriteString("\n\nvar _ = time.Time{}")
 
@@ -843,7 +843,51 @@ func generateServiceFile(ctx *genctx, m Model) error {
 		buf.WriteString("\ndefer g.End()")
 		buf.WriteString("\n}")
 		buf.WriteString("\nswitch lang {")
-		buf.WriteString("\ncase \"en\":")
+		buf.WriteString("\ncase \"\", \"en\":")
+		buf.WriteString("\nif ")
+		var l10nf []string
+		for _, f := range m.Fields {
+			if !f.L10N {
+				continue
+			}
+			l10nf = append(l10nf, "len(m." + f.Name + ") > 0")
+		}
+		buf.WriteString(strings.Join(l10nf, " && "))
+		buf.WriteString("{\nreturn nil\n}")
+
+		buf.WriteString("\nfor _, extralang := range []string{`ja`} {")
+		fmt.Fprintf(&buf, "\nrows, err := tx.Query(`SELECT oid, parent_id, parent_type, name, language, localized FROM localized_strings WHERE parent_type = ? AND parent_id = ? AND language = ?`, %s, m.ID, extralang)", strconv.Quote(m.Name))
+		buf.WriteString("\nif err != nil {")
+		buf.WriteString("\nif errors.IsSQLNoRows(err) {")
+		buf.WriteString("\nbreak")
+		buf.WriteString("\n}")
+		buf.WriteString("\nreturn errors.Wrap(err, `failed to excute query`)")
+		buf.WriteString("\n}")
+
+		buf.WriteString("\n\nvar l db.LocalizedString")
+		buf.WriteString("\nfor rows.Next() {")
+		buf.WriteString("\nif err := l.Scan(rows); err != nil {")
+		buf.WriteString("\nreturn err")
+		buf.WriteString("\n}")
+		buf.WriteString("\nif len(l.Localized) == 0 {")
+		buf.WriteString("\ncontinue")
+		buf.WriteString("\n}")
+		buf.WriteString("\nswitch l.Name {")
+		for _, f := range m.Fields {
+			if !f.L10N {
+				continue
+			}
+			fmt.Fprintf(&buf, "\ncase %s:", strconv.Quote(f.JSONName))
+			fmt.Fprintf(&buf, "\nif len(m.%s) == 0 {", f.Name)
+			buf.WriteString("\nif pdebug.Enabled {")
+			fmt.Fprintf(&buf, "\n"+`pdebug.Printf("Replacing for key '%s' (fallback en -> %%s", l.Language)`, f.JSONName)
+			buf.WriteString("\n}")
+			fmt.Fprintf(&buf, "\nm.%s = l.Localized", f.Name)
+			buf.WriteString("\n}")
+		}
+		buf.WriteString("\n}")
+		buf.WriteString("\n}")
+		buf.WriteString("\n}")
 		buf.WriteString("\nreturn nil")
 		buf.WriteString("\ncase \"all\":")
 		fmt.Fprintf(&buf, "\nrows, err := tx.Query(`SELECT oid, parent_id, parent_type, name, language, localized FROM localized_strings WHERE parent_type = ? AND parent_id = ?`, %s, m.ID)", strconv.Quote(m.Name))

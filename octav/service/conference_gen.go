@@ -7,9 +7,9 @@ import (
 	"time"
 
 	"github.com/builderscon/octav/octav/db"
+	"github.com/builderscon/octav/octav/internal/errors"
 	"github.com/builderscon/octav/octav/model"
 	"github.com/lestrrat/go-pdebug"
-	"github.com/pkg/errors"
 )
 
 var _ = time.Time{}
@@ -111,7 +111,73 @@ func (v *ConferenceSvc) ReplaceL10NStrings(tx *db.Tx, m *model.Conference, lang 
 		defer g.End()
 	}
 	switch lang {
-	case "en":
+	case "", "en":
+		if len(m.Title) > 0 && len(m.Description) > 0 && len(m.CFPLeadText) > 0 && len(m.CFPPreSubmitInstructions) > 0 && len(m.CFPPostSubmitInstructions) > 0 && len(m.SubTitle) > 0 {
+			return nil
+		}
+		for _, extralang := range []string{`ja`} {
+			rows, err := tx.Query(`SELECT oid, parent_id, parent_type, name, language, localized FROM localized_strings WHERE parent_type = ? AND parent_id = ? AND language = ?`, "Conference", m.ID, extralang)
+			if err != nil {
+				if errors.IsSQLNoRows(err) {
+					break
+				}
+				return errors.Wrap(err, `failed to excute query`)
+			}
+
+			var l db.LocalizedString
+			for rows.Next() {
+				if err := l.Scan(rows); err != nil {
+					return err
+				}
+				if len(l.Localized) == 0 {
+					continue
+				}
+				switch l.Name {
+				case "title":
+					if len(m.Title) == 0 {
+						if pdebug.Enabled {
+							pdebug.Printf("Replacing for key 'title' (fallback en -> %s", l.Language)
+						}
+						m.Title = l.Localized
+					}
+				case "description":
+					if len(m.Description) == 0 {
+						if pdebug.Enabled {
+							pdebug.Printf("Replacing for key 'description' (fallback en -> %s", l.Language)
+						}
+						m.Description = l.Localized
+					}
+				case "cfp_lead_text":
+					if len(m.CFPLeadText) == 0 {
+						if pdebug.Enabled {
+							pdebug.Printf("Replacing for key 'cfp_lead_text' (fallback en -> %s", l.Language)
+						}
+						m.CFPLeadText = l.Localized
+					}
+				case "cfp_pre_submit_instructions":
+					if len(m.CFPPreSubmitInstructions) == 0 {
+						if pdebug.Enabled {
+							pdebug.Printf("Replacing for key 'cfp_pre_submit_instructions' (fallback en -> %s", l.Language)
+						}
+						m.CFPPreSubmitInstructions = l.Localized
+					}
+				case "cfp_post_submit_instructions":
+					if len(m.CFPPostSubmitInstructions) == 0 {
+						if pdebug.Enabled {
+							pdebug.Printf("Replacing for key 'cfp_post_submit_instructions' (fallback en -> %s", l.Language)
+						}
+						m.CFPPostSubmitInstructions = l.Localized
+					}
+				case "sub_title":
+					if len(m.SubTitle) == 0 {
+						if pdebug.Enabled {
+							pdebug.Printf("Replacing for key 'sub_title' (fallback en -> %s", l.Language)
+						}
+						m.SubTitle = l.Localized
+					}
+				}
+			}
+		}
 		return nil
 	case "all":
 		rows, err := tx.Query(`SELECT oid, parent_id, parent_type, name, language, localized FROM localized_strings WHERE parent_type = ? AND parent_id = ?`, "Conference", m.ID)
