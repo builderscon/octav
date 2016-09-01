@@ -7,9 +7,9 @@ import (
 	"time"
 
 	"github.com/builderscon/octav/octav/db"
+	"github.com/builderscon/octav/octav/internal/errors"
 	"github.com/builderscon/octav/octav/model"
 	"github.com/lestrrat/go-pdebug"
-	"github.com/pkg/errors"
 )
 
 var _ = time.Time{}
@@ -111,88 +111,69 @@ func (v *ConferenceSvc) ReplaceL10NStrings(tx *db.Tx, m *model.Conference, lang 
 		defer g.End()
 	}
 	switch lang {
-	case "en":
-		var vdb db.LocalizedString
-		stmt, err := tx.Prepare(`SELECT localized FROM localized_strings WHERE parent_type = ? AND parent_id = ? AND name = ? AND language = ?`)
+	case "", "en":
+		if len(m.Title) > 0 && len(m.Description) > 0 && len(m.CFPLeadText) > 0 && len(m.CFPPreSubmitInstructions) > 0 && len(m.CFPPostSubmitInstructions) > 0 && len(m.SubTitle) > 0 {
+			return nil
+		}
+		rows, err := tx.Query(`SELECT localized FROM localized_strings WHERE parent_type = ? AND parent_id = ? AND language = ?`, "Conference", m.ID, lang)
 		if err != nil {
-			return errors.Wrap(err, `failed to prepare query`)
-		}
-		if len(m.Title) == 0 {
-			for _, lang := range []string{"ja"} {
-				row := stmt.QueryRow("Conference", m.ID, "Title", lang)
-				if err := row.Scan(&vdb); err != nil {
-					if errors.IsSQLNoRows(err) {
-						break
-					}
-					return errors.Wrap(err, `failed to scan row`)
-				}
-				m.Title = vdb.Localized
+			if errors.IsSQLNoRows(err) {
 				break
 			}
+			return errors.Wrap(err, `failed to excute query`)
 		}
-		if len(m.Description) == 0 {
-			for _, lang := range []string{"ja"} {
-				row := stmt.QueryRow("Conference", m.ID, "Description", lang)
-				if err := row.Scan(&vdb); err != nil {
-					if errors.IsSQLNoRows(err) {
-						break
-					}
-					return errors.Wrap(err, `failed to scan row`)
-				}
-				m.Description = vdb.Localized
-				break
+
+		var l db.LocalizedString
+		for rows.Next() {
+			if err := l.Scan(rows); err != nil {
+				return err
 			}
-		}
-		if len(m.CFPLeadText) == 0 {
-			for _, lang := range []string{"ja"} {
-				row := stmt.QueryRow("Conference", m.ID, "CFPLeadText", lang)
-				if err := row.Scan(&vdb); err != nil {
-					if errors.IsSQLNoRows(err) {
-						break
-					}
-					return errors.Wrap(err, `failed to scan row`)
-				}
-				m.CFPLeadText = vdb.Localized
-				break
+			if len(l.Localized) == 0 {
+				continue
 			}
-		}
-		if len(m.CFPPreSubmitInstructions) == 0 {
-			for _, lang := range []string{"ja"} {
-				row := stmt.QueryRow("Conference", m.ID, "CFPPreSubmitInstructions", lang)
-				if err := row.Scan(&vdb); err != nil {
-					if errors.IsSQLNoRows(err) {
-						break
+			switch l.Name {
+			case "title":
+				if len(m.Title) == 0 {
+					if pdebug.Enabled {
+						pdebug.Printf("Replacing for key 'title' (fallback en -> %s", l.Language)
 					}
-					return errors.Wrap(err, `failed to scan row`)
+					m.Title = l.Localized
 				}
-				m.CFPPreSubmitInstructions = vdb.Localized
-				break
-			}
-		}
-		if len(m.CFPPostSubmitInstructions) == 0 {
-			for _, lang := range []string{"ja"} {
-				row := stmt.QueryRow("Conference", m.ID, "CFPPostSubmitInstructions", lang)
-				if err := row.Scan(&vdb); err != nil {
-					if errors.IsSQLNoRows(err) {
-						break
+			case "description":
+				if len(m.Description) == 0 {
+					if pdebug.Enabled {
+						pdebug.Printf("Replacing for key 'description' (fallback en -> %s", l.Language)
 					}
-					return errors.Wrap(err, `failed to scan row`)
+					m.Description = l.Localized
 				}
-				m.CFPPostSubmitInstructions = vdb.Localized
-				break
-			}
-		}
-		if len(m.SubTitle) == 0 {
-			for _, lang := range []string{"ja"} {
-				row := stmt.QueryRow("Conference", m.ID, "SubTitle", lang)
-				if err := row.Scan(&vdb); err != nil {
-					if errors.IsSQLNoRows(err) {
-						break
+			case "cfp_lead_text":
+				if len(m.CFPLeadText) == 0 {
+					if pdebug.Enabled {
+						pdebug.Printf("Replacing for key 'cfp_lead_text' (fallback en -> %s", l.Language)
 					}
-					return errors.Wrap(err, `failed to scan row`)
+					m.CFPLeadText = l.Localized
 				}
-				m.SubTitle = vdb.Localized
-				break
+			case "cfp_pre_submit_instructions":
+				if len(m.CFPPreSubmitInstructions) == 0 {
+					if pdebug.Enabled {
+						pdebug.Printf("Replacing for key 'cfp_pre_submit_instructions' (fallback en -> %s", l.Language)
+					}
+					m.CFPPreSubmitInstructions = l.Localized
+				}
+			case "cfp_post_submit_instructions":
+				if len(m.CFPPostSubmitInstructions) == 0 {
+					if pdebug.Enabled {
+						pdebug.Printf("Replacing for key 'cfp_post_submit_instructions' (fallback en -> %s", l.Language)
+					}
+					m.CFPPostSubmitInstructions = l.Localized
+				}
+			case "sub_title":
+				if len(m.SubTitle) == 0 {
+					if pdebug.Enabled {
+						pdebug.Printf("Replacing for key 'sub_title' (fallback en -> %s", l.Language)
+					}
+					m.SubTitle = l.Localized
+				}
 			}
 		}
 		return nil

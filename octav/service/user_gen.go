@@ -7,9 +7,9 @@ import (
 	"time"
 
 	"github.com/builderscon/octav/octav/db"
+	"github.com/builderscon/octav/octav/internal/errors"
 	"github.com/builderscon/octav/octav/model"
 	"github.com/lestrrat/go-pdebug"
-	"github.com/pkg/errors"
 )
 
 var _ = time.Time{}
@@ -111,36 +111,41 @@ func (v *UserSvc) ReplaceL10NStrings(tx *db.Tx, m *model.User, lang string) erro
 		defer g.End()
 	}
 	switch lang {
-	case "en":
-		var vdb db.LocalizedString
-		stmt, err := tx.Prepare(`SELECT localized FROM localized_strings WHERE parent_type = ? AND parent_id = ? AND name = ? AND language = ?`)
-		if err != nil {
-			return errors.Wrap(err, `failed to prepare query`)
+	case "", "en":
+		if len(m.FirstName) > 0 && len(m.LastName) > 0 {
+			return nil
 		}
-		if len(m.FirstName) == 0 {
-			for _, lang := range []string{"ja"} {
-				row := stmt.QueryRow("User", m.ID, "FirstName", lang)
-				if err := row.Scan(&vdb); err != nil {
-					if errors.IsSQLNoRows(err) {
-						break
-					}
-					return errors.Wrap(err, `failed to scan row`)
-				}
-				m.FirstName = vdb.Localized
+		rows, err := tx.Query(`SELECT localized FROM localized_strings WHERE parent_type = ? AND parent_id = ? AND language = ?`, "User", m.ID, lang)
+		if err != nil {
+			if errors.IsSQLNoRows(err) {
 				break
 			}
+			return errors.Wrap(err, `failed to excute query`)
 		}
-		if len(m.LastName) == 0 {
-			for _, lang := range []string{"ja"} {
-				row := stmt.QueryRow("User", m.ID, "LastName", lang)
-				if err := row.Scan(&vdb); err != nil {
-					if errors.IsSQLNoRows(err) {
-						break
+
+		var l db.LocalizedString
+		for rows.Next() {
+			if err := l.Scan(rows); err != nil {
+				return err
+			}
+			if len(l.Localized) == 0 {
+				continue
+			}
+			switch l.Name {
+			case "first_name":
+				if len(m.FirstName) == 0 {
+					if pdebug.Enabled {
+						pdebug.Printf("Replacing for key 'first_name' (fallback en -> %s", l.Language)
 					}
-					return errors.Wrap(err, `failed to scan row`)
+					m.FirstName = l.Localized
 				}
-				m.LastName = vdb.Localized
-				break
+			case "last_name":
+				if len(m.LastName) == 0 {
+					if pdebug.Enabled {
+						pdebug.Printf("Replacing for key 'last_name' (fallback en -> %s", l.Language)
+					}
+					m.LastName = l.Localized
+				}
 			}
 		}
 		return nil

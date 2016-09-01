@@ -7,9 +7,9 @@ import (
 	"time"
 
 	"github.com/builderscon/octav/octav/db"
+	"github.com/builderscon/octav/octav/internal/errors"
 	"github.com/builderscon/octav/octav/model"
 	"github.com/lestrrat/go-pdebug"
-	"github.com/pkg/errors"
 )
 
 var _ = time.Time{}
@@ -111,36 +111,41 @@ func (v *VenueSvc) ReplaceL10NStrings(tx *db.Tx, m *model.Venue, lang string) er
 		defer g.End()
 	}
 	switch lang {
-	case "en":
-		var vdb db.LocalizedString
-		stmt, err := tx.Prepare(`SELECT localized FROM localized_strings WHERE parent_type = ? AND parent_id = ? AND name = ? AND language = ?`)
-		if err != nil {
-			return errors.Wrap(err, `failed to prepare query`)
+	case "", "en":
+		if len(m.Name) > 0 && len(m.Address) > 0 {
+			return nil
 		}
-		if len(m.Name) == 0 {
-			for _, lang := range []string{"ja"} {
-				row := stmt.QueryRow("Venue", m.ID, "Name", lang)
-				if err := row.Scan(&vdb); err != nil {
-					if errors.IsSQLNoRows(err) {
-						break
-					}
-					return errors.Wrap(err, `failed to scan row`)
-				}
-				m.Name = vdb.Localized
+		rows, err := tx.Query(`SELECT localized FROM localized_strings WHERE parent_type = ? AND parent_id = ? AND language = ?`, "Venue", m.ID, lang)
+		if err != nil {
+			if errors.IsSQLNoRows(err) {
 				break
 			}
+			return errors.Wrap(err, `failed to excute query`)
 		}
-		if len(m.Address) == 0 {
-			for _, lang := range []string{"ja"} {
-				row := stmt.QueryRow("Venue", m.ID, "Address", lang)
-				if err := row.Scan(&vdb); err != nil {
-					if errors.IsSQLNoRows(err) {
-						break
+
+		var l db.LocalizedString
+		for rows.Next() {
+			if err := l.Scan(rows); err != nil {
+				return err
+			}
+			if len(l.Localized) == 0 {
+				continue
+			}
+			switch l.Name {
+			case "name":
+				if len(m.Name) == 0 {
+					if pdebug.Enabled {
+						pdebug.Printf("Replacing for key 'name' (fallback en -> %s", l.Language)
 					}
-					return errors.Wrap(err, `failed to scan row`)
+					m.Name = l.Localized
 				}
-				m.Address = vdb.Localized
-				break
+			case "address":
+				if len(m.Address) == 0 {
+					if pdebug.Enabled {
+						pdebug.Printf("Replacing for key 'address' (fallback en -> %s", l.Language)
+					}
+					m.Address = l.Localized
+				}
 			}
 		}
 		return nil
