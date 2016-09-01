@@ -844,6 +844,31 @@ func generateServiceFile(ctx *genctx, m Model) error {
 		buf.WriteString("\n}")
 		buf.WriteString("\nswitch lang {")
 		buf.WriteString("\ncase \"en\":")
+		var writtenPreamble bool
+		for _, f := range m.Fields {
+			if !f.L10N {
+				continue
+			}
+			if !writtenPreamble {
+				buf.WriteString("\nvar vdb db.LocalizedString")
+				fmt.Fprintf(&buf, "\nstmt, err := tx.Prepare(`SELECT localized FROM localized_strings WHERE parent_type = ? AND parent_id = ? AND name = ? AND language = ?`)")
+				buf.WriteString("\nif err != nil {")
+				buf.WriteString("\nreturn errors.Wrap(err, `failed to prepare query`)")
+				buf.WriteString("\n}")
+				writtenPreamble = true
+			}
+
+			fmt.Fprintf(&buf, "\nif len(m.%s) == 0 {", f.Name)
+			buf.WriteString("\nfor _, lang := range []string{\"ja\"} {")
+			fmt.Fprintf(&buf, "\nrow := stmt.QueryRow(%s, m.ID, %s, lang)", strconv.Quote(m.Name), strconv.Quote(f.Name))
+			buf.WriteString("\nif err := row.Scan(&vdb); err != nil {")
+			buf.WriteString("\nreturn errors.Wrap(err, `failed to scan row`)")
+			buf.WriteString("\n}")
+			fmt.Fprintf(&buf, "\nm.%s = vdb.Localized", f.Name)
+			buf.WriteString("\nbreak")
+			buf.WriteString("\n}")
+			buf.WriteString("\n}")
+		}
 		buf.WriteString("\nreturn nil")
 		buf.WriteString("\ncase \"all\":")
 		fmt.Fprintf(&buf, "\nrows, err := tx.Query(`SELECT oid, parent_id, parent_type, name, language, localized FROM localized_strings WHERE parent_type = ? AND parent_id = ?`, %s, m.ID)", strconv.Quote(m.Name))

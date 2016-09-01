@@ -112,6 +112,31 @@ func (v *UserSvc) ReplaceL10NStrings(tx *db.Tx, m *model.User, lang string) erro
 	}
 	switch lang {
 	case "en":
+		var vdb db.LocalizedString
+		stmt, err := tx.Prepare(`SELECT localized FROM localized_strings WHERE parent_type = ? AND parent_id = ? AND name = ? AND language = ?`)
+		if err != nil {
+			return errors.Wrap(err, `failed to prepare query`)
+		}
+		if len(m.FirstName) == 0 {
+			for _, lang := range []string{"ja"} {
+				row := stmt.QueryRow("User", m.ID, "FirstName", lang)
+				if err := row.Scan(&vdb); err != nil {
+					return errors.Wrap(err, `failed to scan row`)
+				}
+				m.FirstName = vdb.Localized
+				break
+			}
+		}
+		if len(m.LastName) == 0 {
+			for _, lang := range []string{"ja"} {
+				row := stmt.QueryRow("User", m.ID, "LastName", lang)
+				if err := row.Scan(&vdb); err != nil {
+					return errors.Wrap(err, `failed to scan row`)
+				}
+				m.LastName = vdb.Localized
+				break
+			}
+		}
 		return nil
 	case "all":
 		rows, err := tx.Query(`SELECT oid, parent_id, parent_type, name, language, localized FROM localized_strings WHERE parent_type = ? AND parent_id = ?`, "User", m.ID)

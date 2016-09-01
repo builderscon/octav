@@ -112,6 +112,71 @@ func (v *ConferenceSvc) ReplaceL10NStrings(tx *db.Tx, m *model.Conference, lang 
 	}
 	switch lang {
 	case "en":
+		var vdb db.LocalizedString
+		stmt, err := tx.Prepare(`SELECT localized FROM localized_strings WHERE parent_type = ? AND parent_id = ? AND name = ? AND language = ?`)
+		if err != nil {
+			return errors.Wrap(err, `failed to prepare query`)
+		}
+		if len(m.Title) == 0 {
+			for _, lang := range []string{"ja"} {
+				row := stmt.QueryRow("Conference", m.ID, "Title", lang)
+				if err := row.Scan(&vdb); err != nil {
+					return errors.Wrap(err, `failed to scan row`)
+				}
+				m.Title = vdb.Localized
+				break
+			}
+		}
+		if len(m.Description) == 0 {
+			for _, lang := range []string{"ja"} {
+				row := stmt.QueryRow("Conference", m.ID, "Description", lang)
+				if err := row.Scan(&vdb); err != nil {
+					return errors.Wrap(err, `failed to scan row`)
+				}
+				m.Description = vdb.Localized
+				break
+			}
+		}
+		if len(m.CFPLeadText) == 0 {
+			for _, lang := range []string{"ja"} {
+				row := stmt.QueryRow("Conference", m.ID, "CFPLeadText", lang)
+				if err := row.Scan(&vdb); err != nil {
+					return errors.Wrap(err, `failed to scan row`)
+				}
+				m.CFPLeadText = vdb.Localized
+				break
+			}
+		}
+		if len(m.CFPPreSubmitInstructions) == 0 {
+			for _, lang := range []string{"ja"} {
+				row := stmt.QueryRow("Conference", m.ID, "CFPPreSubmitInstructions", lang)
+				if err := row.Scan(&vdb); err != nil {
+					return errors.Wrap(err, `failed to scan row`)
+				}
+				m.CFPPreSubmitInstructions = vdb.Localized
+				break
+			}
+		}
+		if len(m.CFPPostSubmitInstructions) == 0 {
+			for _, lang := range []string{"ja"} {
+				row := stmt.QueryRow("Conference", m.ID, "CFPPostSubmitInstructions", lang)
+				if err := row.Scan(&vdb); err != nil {
+					return errors.Wrap(err, `failed to scan row`)
+				}
+				m.CFPPostSubmitInstructions = vdb.Localized
+				break
+			}
+		}
+		if len(m.SubTitle) == 0 {
+			for _, lang := range []string{"ja"} {
+				row := stmt.QueryRow("Conference", m.ID, "SubTitle", lang)
+				if err := row.Scan(&vdb); err != nil {
+					return errors.Wrap(err, `failed to scan row`)
+				}
+				m.SubTitle = vdb.Localized
+				break
+			}
+		}
 		return nil
 	case "all":
 		rows, err := tx.Query(`SELECT oid, parent_id, parent_type, name, language, localized FROM localized_strings WHERE parent_type = ? AND parent_id = ?`, "Conference", m.ID)
