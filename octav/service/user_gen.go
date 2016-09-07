@@ -46,7 +46,7 @@ func (v *UserSvc) Lookup(tx *db.Tx, m *model.User, id string) (err error) {
 	if err = r.Load(tx, id); err != nil {
 		return errors.Wrap(err, "failed to load model.User from database")
 	}
-	if err = v.PostLookupHook(tx, m); err != nil {
+	if err = v.PostLookupHook(tx, &m); err != nil {
 		return errors.Wrap(err, "failed to execute PostLookupHook")
 	}
 	*m = r

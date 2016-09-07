@@ -406,8 +406,6 @@ func (ctx *genctx) extractServiceStructs(n ast.Node) bool {
 			}
 		}
 
-		println(svc.Name)
-		println(svc.HasPostLookupHook)
 		ctx.Services[svc.Name] = svc
 	}
 
