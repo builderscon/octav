@@ -703,6 +703,10 @@ func doLookupUserByAuthUserID(ctx context.Context, w http.ResponseWriter, r *htt
 		return
 	}
 
+	if s.ShouldVerify(v) {
+		go s.Verify(v)
+	}
+
 	httpJSON(w, v)
 }
 
@@ -724,6 +728,10 @@ func doLookupUser(ctx context.Context, w http.ResponseWriter, r *http.Request, p
 	if err := s.LookupFromPayload(tx, &v, payload); err != nil {
 		httpError(w, `LookupUser`, http.StatusInternalServerError, err)
 		return
+	}
+
+	if s.ShouldVerify(v) {
+		go s.Verify(v)
 	}
 
 	httpJSON(w, v)
