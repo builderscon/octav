@@ -345,7 +345,12 @@ func (v *UserSvc) ShouldVerify(m model.User) bool {
 	return tools.RandFloat64() < 0.1
 }
 
-func (v *UserSvc) Verify(m model.User) error {
+func (v *UserSvc) Verify(m model.User) (err error) {
+	if pdebug.Enabled {
+		g := pdebug.Marker("service.User.Verify").BindError(&err)
+		defer g.End()
+	}
+
 	// Check if the avatar URL is valid
 	res, err := http.Head(m.AvatarURL)
 	if err != nil {
@@ -353,7 +358,14 @@ func (v *UserSvc) Verify(m model.User) error {
 	}
 
 	if res.StatusCode == http.StatusOK {
+		if pdebug.Enabled {
+			pdebug.Printf("AvatarURL verified")
+		}
 		return nil
+	}
+
+	if pdebug.Enabled {
+		pdebug.Printf("AvatarURL %s is invalid", m.AvatarURL)
 	}
 
 	// Dangit, got to update it
