@@ -35,3 +35,13 @@ func RandomString(n int) string {
 
 	return string(b)
 }
+
+func RandFloat64() float64 {
+again:
+	fbig, _ := rand.Int(rand.Reader, maxInt)
+	f := float64(fbig.Int64()) / (1 << 63)
+	if f == 1 {
+		goto again
+	}
+	return f
+}
