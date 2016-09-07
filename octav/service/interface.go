@@ -3,6 +3,8 @@ package service
 import (
 	"text/template"
 
+	"github.com/dghubble/go-twitter/twitter"
+
 	mailgun "gopkg.in/mailgun/mailgun-go.v1"
 )
 
@@ -40,5 +42,9 @@ type SponsorSvc struct {
 type TemplateSvc struct {
 	template *template.Template
 }
+type TwitterSvc struct {
+	*twitter.Client
+}
+// +PostLookupHook
 type UserSvc struct{}
 type VenueSvc struct{}

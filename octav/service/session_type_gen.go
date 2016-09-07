@@ -35,6 +35,7 @@ func (v *SessionTypeSvc) LookupFromPayload(tx *db.Tx, m *model.SessionType, payl
 	}
 	return nil
 }
+
 func (v *SessionTypeSvc) Lookup(tx *db.Tx, m *model.SessionType, id string) (err error) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("service.SessionType.Lookup").BindError(&err)

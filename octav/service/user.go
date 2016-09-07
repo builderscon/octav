@@ -2,6 +2,8 @@ package service
 
 import (
 	"bytes"
+	"net/http"
+	"strconv"
 	"time"
 
 	"github.com/builderscon/octav/octav/db"
@@ -9,6 +11,7 @@ import (
 	"github.com/builderscon/octav/octav/internal/errors"
 	"github.com/builderscon/octav/octav/model"
 	"github.com/builderscon/octav/octav/tools"
+	"github.com/dghubble/go-twitter/twitter"
 	pdebug "github.com/lestrrat/go-pdebug"
 )
 
@@ -335,5 +338,85 @@ func (v *UserSvc) ConfirmTemporaryEmailFromPayload(tx *db.Tx, payload model.Conf
 		return errors.Wrap(err, "failed to delete temporary email")
 	}
 
+	return nil
+}
+
+func (v *UserSvc) ShouldVerify(_ *model.User) bool {
+	return tools.RandFloat64() < 0.1
+}
+
+func (v *UserSvc) Verify(m *model.User) (err error) {
+	if pdebug.Enabled {
+		g := pdebug.Marker("service.User.Verify").BindError(&err)
+		defer g.End()
+	}
+
+	// Check if the avatar URL is valid
+	res, err := http.Head(m.AvatarURL)
+	if err != nil {
+		return errors.Wrap(err, "failed to make HEAD request")
+	}
+
+	if res.StatusCode == http.StatusOK {
+		if pdebug.Enabled {
+			pdebug.Printf("AvatarURL verified")
+		}
+		return nil
+	}
+
+	if pdebug.Enabled {
+		pdebug.Printf("AvatarURL %s is invalid", m.AvatarURL)
+	}
+
+	// Dangit, got to update it
+	var newAvatarURL string
+	switch m.AuthVia {
+	case "twitter":
+		c := Twitter()
+		id, err := strconv.ParseInt(m.AuthUserID, 10, 64)
+		if err != nil {
+			return errors.Wrap(err, "failed to convert user id to int64")
+		}
+		u, _, err := c.Users.Show(&twitter.UserShowParams{UserID: id})
+		if err != nil {
+			return errors.Wrap(err, "failed to fetch twitter user information via users/show")
+		}
+		newAvatarURL = u.ProfileImageURLHttps
+	}
+
+	if len(newAvatarURL) == 0 {
+		return errors.New("failed to fetch a new avatar url")
+	}
+
+	tx, err := db.Begin()
+	if err != nil {
+		return errors.Wrap(err, "failed to start db transaction")
+	}
+	defer tx.AutoRollback()
+
+	payload := model.UpdateUserRequest{
+		ID: m.ID,
+	}
+	payload.AvatarURL.Set(newAvatarURL)
+
+	var vdb db.User
+	if err := vdb.LoadByEID(tx, payload.ID); err != nil {
+		return errors.Wrap(err, "failed to load from database")
+	}
+
+	if err := v.Update(tx, &vdb, payload); err != nil {
+		return errors.Wrap(err, "failed to update database")
+	}
+
+	if err := tx.Commit(); err != nil {
+		return errors.Wrap(err, "failed to commit data to database")
+	}
+	return nil
+}
+
+func (v *UserSvc) PostLookupHook(tx *db.Tx, m *model.User) error {
+	if v.ShouldVerify(m) {
+		go v.Verify(m)
+	}
 	return nil
 }

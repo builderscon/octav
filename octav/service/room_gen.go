@@ -35,6 +35,7 @@ func (v *RoomSvc) LookupFromPayload(tx *db.Tx, m *model.Room, payload model.Look
 	}
 	return nil
 }
+
 func (v *RoomSvc) Lookup(tx *db.Tx, m *model.Room, id string) (err error) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("service.Room.Lookup").BindError(&err)

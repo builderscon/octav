@@ -32,6 +32,7 @@ func (v *ClientSvc) LookupFromPayload(tx *db.Tx, m *model.Client, payload model.
 	}
 	return nil
 }
+
 func (v *ClientSvc) Lookup(tx *db.Tx, m *model.Client, id string) (err error) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("service.Client.Lookup").BindError(&err)

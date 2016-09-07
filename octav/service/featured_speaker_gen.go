@@ -35,6 +35,7 @@ func (v *FeaturedSpeakerSvc) LookupFromPayload(tx *db.Tx, m *model.FeaturedSpeak
 	}
 	return nil
 }
+
 func (v *FeaturedSpeakerSvc) Lookup(tx *db.Tx, m *model.FeaturedSpeaker, id string) (err error) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("service.FeaturedSpeaker.Lookup").BindError(&err)
