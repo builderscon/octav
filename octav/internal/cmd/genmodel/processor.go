@@ -852,7 +852,7 @@ func generateServiceFile(ctx *genctx, m Model) error {
 	buf.WriteString("\n}")
 
 	if svc.HasPostLookupHook {
-		buf.WriteString("\nif err = v.PostLookupHook(tx, &m); err != nil {")
+		buf.WriteString("\nif err = v.PostLookupHook(tx, &r); err != nil {")
 		buf.WriteString("\nreturn errors.Wrap(err, \"failed to execute PostLookupHook\")")
 		buf.WriteString("\n}")
 	}
