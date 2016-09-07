@@ -35,6 +35,7 @@ func (v *SponsorSvc) LookupFromPayload(tx *db.Tx, m *model.Sponsor, payload mode
 	}
 	return nil
 }
+
 func (v *SponsorSvc) Lookup(tx *db.Tx, m *model.Sponsor, id string) (err error) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("service.Sponsor.Lookup").BindError(&err)

@@ -35,6 +35,7 @@ func (v *ConferenceSvc) LookupFromPayload(tx *db.Tx, m *model.Conference, payloa
 	}
 	return nil
 }
+
 func (v *ConferenceSvc) Lookup(tx *db.Tx, m *model.Conference, id string) (err error) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("service.Conference.Lookup").BindError(&err)

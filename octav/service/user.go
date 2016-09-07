@@ -341,11 +341,11 @@ func (v *UserSvc) ConfirmTemporaryEmailFromPayload(tx *db.Tx, payload model.Conf
 	return nil
 }
 
-func (v *UserSvc) ShouldVerify(m model.User) bool {
+func (v *UserSvc) ShouldVerify(_ *model.User) bool {
 	return tools.RandFloat64() < 0.1
 }
 
-func (v *UserSvc) Verify(m model.User) (err error) {
+func (v *UserSvc) Verify(m *model.User) (err error) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("service.User.Verify").BindError(&err)
 		defer g.End()
@@ -410,6 +410,13 @@ func (v *UserSvc) Verify(m model.User) (err error) {
 
 	if err := tx.Commit(); err != nil {
 		return errors.Wrap(err, "failed to commit data to database")
+	}
+	return nil
+}
+
+func (v *UserSvc) PostLookupHook(tx *db.Tx, m *model.User) error {
+	if v.ShouldVerify(m) {
+		go v.Verify(m)
 	}
 	return nil
 }

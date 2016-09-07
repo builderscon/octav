@@ -45,5 +45,6 @@ type TemplateSvc struct {
 type TwitterSvc struct {
 	*twitter.Client
 }
+// +PostLookupHook
 type UserSvc struct{}
 type VenueSvc struct{}

@@ -72,7 +72,13 @@ type genctx struct {
 	DBRows      map[string]DBRow
 	Models      []Model
 	PkgName     string
+	Services    map[string]Service
 	TargetTypes []string
+}
+
+type Service struct {
+	Name              string
+	HasPostLookupHook bool
 }
 
 type Field struct {
@@ -110,6 +116,7 @@ func (p *Processor) Do() error {
 	ctx := genctx{
 		Dir:         p.Dir,
 		DBRows:      make(map[string]DBRow),
+		Services:    make(map[string]Service),
 		TargetTypes: p.Types,
 	}
 	if err := parseModelDir(&ctx, filepath.Join(ctx.Dir, "model")); err != nil {
@@ -117,6 +124,10 @@ func (p *Processor) Do() error {
 	}
 
 	if err := parseDBDir(&ctx, filepath.Join(ctx.Dir, "db")); err != nil {
+		return err
+	}
+
+	if err := parseServiceDir(&ctx, filepath.Join(ctx.Dir, "service")); err != nil {
 		return err
 	}
 
@@ -157,6 +168,10 @@ func parseModelDir(ctx *genctx, dir string) error {
 	return parseDir(ctx, dir, processModelPkg)
 }
 
+func parseServiceDir(ctx *genctx, dir string) error {
+	return parseDir(ctx, dir, processServicePkg)
+}
+
 func parseDBDir(ctx *genctx, dir string) error {
 	return parseDir(ctx, dir, processDBPkg)
 }
@@ -184,6 +199,18 @@ func processModelPkg(ctx *genctx, pkg *ast.Package) error {
 	}
 
 	if err := processPkg(ctx, pkg, ctx.extractModelStructs); err != nil {
+		return err
+	}
+	return nil
+}
+
+func processServicePkg(ctx *genctx, pkg *ast.Package) error {
+	if pdebug.Enabled {
+		g := pdebug.Marker("processServicePkg %s", pkg.Name)
+		defer g.End()
+	}
+
+	if err := processPkg(ctx, pkg, ctx.extractServiceStructs); err != nil {
 		return err
 	}
 	return nil
@@ -333,6 +360,55 @@ func (ctx *genctx) extractModelStructs(n ast.Node) bool {
 			st.Fields = append(st.Fields, field)
 		}
 		ctx.Models = append(ctx.Models, st)
+	}
+
+	return true
+}
+
+func (ctx *genctx) extractServiceStructs(n ast.Node) bool {
+	decl, ok := n.(*ast.GenDecl)
+	if !ok {
+		return true
+	}
+
+	if decl.Tok != token.TYPE {
+		return true
+	}
+
+	for _, spec := range decl.Specs {
+		var t *ast.TypeSpec
+		var ok bool
+
+		if t, ok = spec.(*ast.TypeSpec); !ok {
+			continue
+		}
+
+		if !shouldProceed(ctx, t.Name.Name) {
+			continue
+		}
+
+		_, ok = t.Type.(*ast.StructType)
+		if !ok {
+			continue
+		}
+
+		cgroup := decl.Doc
+		if cgroup == nil {
+			continue
+		}
+
+		var svc Service
+		svc.Name = t.Name.Name
+
+		for _, c := range cgroup.List {
+			if strings.HasPrefix(strings.TrimSpace(strings.TrimPrefix(c.Text, "//")), "+PostLookupHook") {
+				svc.HasPostLookupHook = true
+			}
+		}
+
+		println(svc.Name)
+		println(svc.HasPostLookupHook)
+		ctx.Services[svc.Name] = svc
 	}
 
 	return true
@@ -707,6 +783,10 @@ func generateServiceFile(ctx *genctx, m Model) error {
 	if !ok {
 		return errors.New("could not find matching row for " + m.Name)
 	}
+
+	svcname := m.Name + "Svc"
+	svc := ctx.Services[svcname]
+
 	colnames := make([]string, 0, len(row.Columns))
 	for k := range row.Columns {
 		colnames = append(colnames, k)
@@ -738,7 +818,6 @@ func generateServiceFile(ctx *genctx, m Model) error {
 	buf.WriteString("\n)")
 	buf.WriteString("\n\nvar _ = time.Time{}")
 
-	svcname := m.Name + "Svc"
 	svcvarname := lowerFirst(svcname)
 	oncename := lowerFirst(m.Name + "Once")
 	fmt.Fprintf(&buf, "\n\nvar %s *%s", svcvarname, svcname)
@@ -764,7 +843,7 @@ func generateServiceFile(ctx *genctx, m Model) error {
 	buf.WriteString("\nreturn nil")
 	buf.WriteString("\n}")
 
-	fmt.Fprintf(&buf, "\nfunc (v *%s) Lookup(tx *db.Tx, m *model.%s, id string) (err error) {", svcname, m.Name)
+	fmt.Fprintf(&buf, "\n\nfunc (v *%s) Lookup(tx *db.Tx, m *model.%s, id string) (err error) {", svcname, m.Name)
 	buf.WriteString("\nif pdebug.Enabled {")
 	fmt.Fprintf(&buf, "\n"+`g := pdebug.Marker("service.%s.Lookup").BindError(&err)`, m.Name)
 	buf.WriteString("\ndefer g.End()")
@@ -773,6 +852,13 @@ func generateServiceFile(ctx *genctx, m Model) error {
 	buf.WriteString("\nif err = r.Load(tx, id); err != nil {")
 	fmt.Fprintf(&buf, "\n"+`return errors.Wrap(err, "failed to load model.%s from database")`, m.Name)
 	buf.WriteString("\n}")
+
+	if svc.HasPostLookupHook {
+		buf.WriteString("\nif err = v.PostLookupHook(tx, &m); err != nil {")
+		buf.WriteString("\nreturn errors.Wrap(err, \"failed to execute PostLookupHook\")")
+		buf.WriteString("\n}")
+	}
+
 	buf.WriteString("\n*m = r")
 	buf.WriteString("\nreturn nil")
 	buf.WriteString("\n}")
@@ -850,7 +936,7 @@ func generateServiceFile(ctx *genctx, m Model) error {
 			if !f.L10N {
 				continue
 			}
-			l10nf = append(l10nf, "len(m." + f.Name + ") > 0")
+			l10nf = append(l10nf, "len(m."+f.Name+") > 0")
 		}
 		buf.WriteString(strings.Join(l10nf, " && "))
 		buf.WriteString("{\nreturn nil\n}")

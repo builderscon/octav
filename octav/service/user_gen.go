@@ -35,6 +35,7 @@ func (v *UserSvc) LookupFromPayload(tx *db.Tx, m *model.User, payload model.Look
 	}
 	return nil
 }
+
 func (v *UserSvc) Lookup(tx *db.Tx, m *model.User, id string) (err error) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("service.User.Lookup").BindError(&err)
@@ -44,6 +45,9 @@ func (v *UserSvc) Lookup(tx *db.Tx, m *model.User, id string) (err error) {
 	r := model.User{}
 	if err = r.Load(tx, id); err != nil {
 		return errors.Wrap(err, "failed to load model.User from database")
+	}
+	if err = v.PostLookupHook(tx, m); err != nil {
+		return errors.Wrap(err, "failed to execute PostLookupHook")
 	}
 	*m = r
 	return nil
