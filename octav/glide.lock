@@ -1,5 +1,5 @@
 hash: 6cd7d4a64e8baecb69ea1d18581ea31ab7f00c1aaa3a88c4dfbac7c8cdd4b713
-updated: 2016-09-07T20:34:27.348131985+09:00
+updated: 2016-09-08T20:25:57.73616552+09:00
 imports:
 - name: cloud.google.com/go
   version: e89968106bfb1f9fe3f05a5ca644866acd15edf8
@@ -36,7 +36,7 @@ imports:
 - name: github.com/jessevdk/go-flags
   version: a8cab0163d48558ffd77076c9c99388529766f63
 - name: github.com/lestrrat/go-apache-logformat
-  version: e774e429884c94b2cda0d499397d36d306ba0dee
+  version: 81c916e071444d0e05252550d36285442df0d50b
 - name: github.com/lestrrat/go-bindata
   version: b9f2acfb40bc204a6e6c1a94547e128554650f95
 - name: github.com/lestrrat/go-jshschema

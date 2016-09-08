@@ -4,6 +4,9 @@ import (
 	"bytes"
 	"encoding/json"
 	"net/http"
+	"os"
+
+	"context"
 
 	"github.com/builderscon/octav/octav/db"
 	"github.com/builderscon/octav/octav/internal/errors"
@@ -11,18 +14,18 @@ import (
 	"github.com/builderscon/octav/octav/service"
 	"github.com/lestrrat/go-apache-logformat"
 	"github.com/lestrrat/go-pdebug"
-	"context"
 )
 
 var mwset middlewareSet
+
 type middlewareSet struct{}
 
 func (m middlewareSet) Wrap(h http.Handler) http.Handler {
-	l := apachelog.CombinedLog
-	return apachelog.WrapLoggingWriter(h, l)
+	return apachelog.CombinedLog.Wrap(h, os.Stdout)
 }
 
 const trustedCall = "octav.api.trustedCall"
+
 func isTrustedCall(ctx context.Context) bool {
 	allow, ok := ctx.Value(trustedCall).(bool)
 	return ok && allow
@@ -586,7 +589,6 @@ func doUpdateSession(ctx context.Context, w http.ResponseWriter, r *http.Request
 		httpError(w, `UpdateSession`, http.StatusInternalServerError, err)
 		return
 	}
-
 
 	httpJSON(w, v)
 }
@@ -1421,4 +1423,3 @@ func doConfirmTemporaryEmail(ctx context.Context, w http.ResponseWriter, r *http
 		return
 	}
 }
-
