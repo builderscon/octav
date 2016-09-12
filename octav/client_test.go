@@ -844,6 +844,7 @@ func TestCreateUser(t *testing.T) {
 		return
 	}
 
+	res4.AvatarURL = ""
 	if !assert.Equal(ctx.T, res4, res) {
 		return
 	}
