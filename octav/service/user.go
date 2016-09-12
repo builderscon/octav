@@ -263,7 +263,12 @@ func (v *UserSvc) LookupUserByAuthUserIDFromPayload(tx *db.Tx, result *model.Use
 		return errors.Wrap(err, "failed to decorate with assocaited data")
 	}
 
+	if err := v.PostLookupHook(tx, &r); err != nil {
+		return errors.Wrap(err, "failed to execute PostLookupHook")
+	}
+
 	*result = r
+
 	return nil
 }
 
