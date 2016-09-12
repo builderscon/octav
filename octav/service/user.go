@@ -352,16 +352,18 @@ func (v *UserSvc) Verify(m *model.User) (err error) {
 	}
 
 	// Check if the avatar URL is valid
-	res, err := http.Head(m.AvatarURL)
-	if err != nil {
-		return errors.Wrap(err, "failed to make HEAD request")
-	}
-
-	if res.StatusCode == http.StatusOK {
-		if pdebug.Enabled {
-			pdebug.Printf("AvatarURL verified")
+	if len(m.AvatarURL) > 0 {
+		res, err := http.Head(m.AvatarURL)
+		if err != nil {
+			return errors.Wrap(err, "failed to make HEAD request")
 		}
-		return nil
+
+		if res.StatusCode == http.StatusOK {
+			if pdebug.Enabled {
+				pdebug.Printf("AvatarURL verified")
+			}
+			return nil
+		}
 	}
 
 	if pdebug.Enabled {
@@ -382,6 +384,8 @@ func (v *UserSvc) Verify(m *model.User) (err error) {
 			return errors.Wrap(err, "failed to fetch twitter user information via users/show")
 		}
 		newAvatarURL = u.ProfileImageURLHttps
+	case "github":
+		newAvatarURL = "https://avatars.githubusercontent.com/u/" + m.AuthUserID
 	}
 
 	if len(newAvatarURL) == 0 {
