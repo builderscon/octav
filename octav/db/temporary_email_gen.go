@@ -8,6 +8,7 @@ import (
 
 	"github.com/builderscon/octav/octav/tools"
 	"github.com/lestrrat/go-pdebug"
+	"github.com/lestrrat/go-sqllib"
 	"github.com/pkg/errors"
 )
 
@@ -22,26 +23,26 @@ func (t *TemporaryEmail) Scan(scanner interface {
 	return scanner.Scan(&t.OID, &t.UserID, &t.ConfirmationKey, &t.Email, &t.ExpiresOn)
 }
 
-var sqlTemporaryEmailUpdateByOIDKey StmtKey
-var sqlTemporaryEmailDeleteByOIDKey StmtKey
+var sqlTemporaryEmailUpdateByOIDKey sqllib.Key
+var sqlTemporaryEmailDeleteByOIDKey sqllib.Key
 
 func init() {
-	stmt := tools.GetBuffer()
-	defer tools.ReleaseBuffer(stmt)
+	hooks = append(hooks, func() {
+		stmt := tools.GetBuffer()
+		defer tools.ReleaseBuffer(stmt)
 
-	stmt.Reset()
-	stmt.WriteString(`DELETE FROM `)
-	stmt.WriteString(TemporaryEmailTable)
-	stmt.WriteString(` WHERE oid = ?`)
-	sqlTemporaryEmailDeleteByOIDKey = makeStmtKey(stmt.Bytes())
-	stmtPool.Register(sqlTemporaryEmailDeleteByOIDKey, stmt.String())
+		stmt.Reset()
+		stmt.WriteString(`DELETE FROM `)
+		stmt.WriteString(TemporaryEmailTable)
+		stmt.WriteString(` WHERE oid = ?`)
+		sqlTemporaryEmailDeleteByOIDKey = library.Register(stmt.String())
 
-	stmt.Reset()
-	stmt.WriteString(`UPDATE `)
-	stmt.WriteString(TemporaryEmailTable)
-	stmt.WriteString(` SET user_id = ?, confirmation_key = ?, email = ?, expires_on = ? WHERE oid = ?`)
-	sqlTemporaryEmailUpdateByOIDKey = makeStmtKey(stmt.Bytes())
-	stmtPool.Register(sqlTemporaryEmailUpdateByOIDKey, stmt.String())
+		stmt.Reset()
+		stmt.WriteString(`UPDATE `)
+		stmt.WriteString(TemporaryEmailTable)
+		stmt.WriteString(` SET user_id = ?, confirmation_key = ?, email = ?, expires_on = ? WHERE oid = ?`)
+		sqlTemporaryEmailUpdateByOIDKey = library.Register(stmt.String())
+	})
 }
 
 func (t *TemporaryEmail) Create(tx *Tx, opts ...InsertOption) (err error) {
@@ -82,7 +83,7 @@ func (t *TemporaryEmail) Create(tx *Tx, opts ...InsertOption) (err error) {
 
 func (t TemporaryEmail) Update(tx *Tx) error {
 	if t.OID != 0 {
-		stmt, err := stmtPool.Get(sqlTemporaryEmailUpdateByOIDKey)
+		stmt, err := library.GetStmt(sqlTemporaryEmailUpdateByOIDKey)
 		if err != nil {
 			return errors.Wrap(err, `failed to get statement`)
 		}
@@ -94,7 +95,7 @@ func (t TemporaryEmail) Update(tx *Tx) error {
 
 func (t TemporaryEmail) Delete(tx *Tx) error {
 	if t.OID != 0 {
-		stmt, err := stmtPool.Get(sqlTemporaryEmailDeleteByOIDKey)
+		stmt, err := library.GetStmt(sqlTemporaryEmailDeleteByOIDKey)
 		if err != nil {
 			return errors.Wrap(err, `failed to get statement`)
 		}

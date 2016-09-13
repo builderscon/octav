@@ -9,6 +9,7 @@ import (
 
 	"github.com/builderscon/octav/octav/tools"
 	"github.com/lestrrat/go-pdebug"
+	"github.com/lestrrat/go-sqllib"
 	"github.com/pkg/errors"
 )
 
@@ -23,26 +24,26 @@ func (c *ConferenceAdministrator) Scan(scanner interface {
 	return scanner.Scan(&c.OID, &c.ConferenceID, &c.UserID, &c.CreatedOn, &c.ModifiedOn)
 }
 
-var sqlConferenceAdministratorUpdateByOIDKey StmtKey
-var sqlConferenceAdministratorDeleteByOIDKey StmtKey
+var sqlConferenceAdministratorUpdateByOIDKey sqllib.Key
+var sqlConferenceAdministratorDeleteByOIDKey sqllib.Key
 
 func init() {
-	stmt := tools.GetBuffer()
-	defer tools.ReleaseBuffer(stmt)
+	hooks = append(hooks, func() {
+		stmt := tools.GetBuffer()
+		defer tools.ReleaseBuffer(stmt)
 
-	stmt.Reset()
-	stmt.WriteString(`DELETE FROM `)
-	stmt.WriteString(ConferenceAdministratorTable)
-	stmt.WriteString(` WHERE oid = ?`)
-	sqlConferenceAdministratorDeleteByOIDKey = makeStmtKey(stmt.Bytes())
-	stmtPool.Register(sqlConferenceAdministratorDeleteByOIDKey, stmt.String())
+		stmt.Reset()
+		stmt.WriteString(`DELETE FROM `)
+		stmt.WriteString(ConferenceAdministratorTable)
+		stmt.WriteString(` WHERE oid = ?`)
+		sqlConferenceAdministratorDeleteByOIDKey = library.Register(stmt.String())
 
-	stmt.Reset()
-	stmt.WriteString(`UPDATE `)
-	stmt.WriteString(ConferenceAdministratorTable)
-	stmt.WriteString(` SET conference_id = ?, user_id = ? WHERE oid = ?`)
-	sqlConferenceAdministratorUpdateByOIDKey = makeStmtKey(stmt.Bytes())
-	stmtPool.Register(sqlConferenceAdministratorUpdateByOIDKey, stmt.String())
+		stmt.Reset()
+		stmt.WriteString(`UPDATE `)
+		stmt.WriteString(ConferenceAdministratorTable)
+		stmt.WriteString(` SET conference_id = ?, user_id = ? WHERE oid = ?`)
+		sqlConferenceAdministratorUpdateByOIDKey = library.Register(stmt.String())
+	})
 }
 
 func (c *ConferenceAdministrator) Create(tx *Tx, opts ...InsertOption) (err error) {
@@ -84,7 +85,7 @@ func (c *ConferenceAdministrator) Create(tx *Tx, opts ...InsertOption) (err erro
 
 func (c ConferenceAdministrator) Update(tx *Tx) error {
 	if c.OID != 0 {
-		stmt, err := stmtPool.Get(sqlConferenceAdministratorUpdateByOIDKey)
+		stmt, err := library.GetStmt(sqlConferenceAdministratorUpdateByOIDKey)
 		if err != nil {
 			return errors.Wrap(err, `failed to get statement`)
 		}
@@ -96,7 +97,7 @@ func (c ConferenceAdministrator) Update(tx *Tx) error {
 
 func (c ConferenceAdministrator) Delete(tx *Tx) error {
 	if c.OID != 0 {
-		stmt, err := stmtPool.Get(sqlConferenceAdministratorDeleteByOIDKey)
+		stmt, err := library.GetStmt(sqlConferenceAdministratorDeleteByOIDKey)
 		if err != nil {
 			return errors.Wrap(err, `failed to get statement`)
 		}

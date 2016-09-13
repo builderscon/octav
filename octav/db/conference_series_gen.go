@@ -10,6 +10,7 @@ import (
 
 	"github.com/builderscon/octav/octav/tools"
 	"github.com/lestrrat/go-pdebug"
+	"github.com/lestrrat/go-sqllib"
 	"github.com/pkg/errors"
 )
 
@@ -24,58 +25,55 @@ func (c *ConferenceSeries) Scan(scanner interface {
 	return scanner.Scan(&c.OID, &c.EID, &c.Slug, &c.Title, &c.CreatedOn, &c.ModifiedOn)
 }
 
-var sqlConferenceSeriesUpdateByOIDKey StmtKey
-var sqlConferenceSeriesDeleteByOIDKey StmtKey
-var sqlConferenceSeriesLoadByEIDKey StmtKey
-var sqlConferenceSeriesUpdateByEIDKey StmtKey
-var sqlConferenceSeriesDeleteByEIDKey StmtKey
+var sqlConferenceSeriesUpdateByOIDKey sqllib.Key
+var sqlConferenceSeriesDeleteByOIDKey sqllib.Key
+var sqlConferenceSeriesLoadByEIDKey sqllib.Key
+var sqlConferenceSeriesUpdateByEIDKey sqllib.Key
+var sqlConferenceSeriesDeleteByEIDKey sqllib.Key
 
 func init() {
-	stmt := tools.GetBuffer()
-	defer tools.ReleaseBuffer(stmt)
+	hooks = append(hooks, func() {
+		stmt := tools.GetBuffer()
+		defer tools.ReleaseBuffer(stmt)
 
-	stmt.Reset()
-	stmt.WriteString(`DELETE FROM `)
-	stmt.WriteString(ConferenceSeriesTable)
-	stmt.WriteString(` WHERE oid = ?`)
-	sqlConferenceSeriesDeleteByOIDKey = makeStmtKey(stmt.Bytes())
-	stmtPool.Register(sqlConferenceSeriesDeleteByOIDKey, stmt.String())
+		stmt.Reset()
+		stmt.WriteString(`DELETE FROM `)
+		stmt.WriteString(ConferenceSeriesTable)
+		stmt.WriteString(` WHERE oid = ?`)
+		sqlConferenceSeriesDeleteByOIDKey = library.Register(stmt.String())
 
-	stmt.Reset()
-	stmt.WriteString(`UPDATE `)
-	stmt.WriteString(ConferenceSeriesTable)
-	stmt.WriteString(` SET eid = ?, slug = ?, title = ? WHERE oid = ?`)
-	sqlConferenceSeriesUpdateByOIDKey = makeStmtKey(stmt.Bytes())
-	stmtPool.Register(sqlConferenceSeriesUpdateByOIDKey, stmt.String())
+		stmt.Reset()
+		stmt.WriteString(`UPDATE `)
+		stmt.WriteString(ConferenceSeriesTable)
+		stmt.WriteString(` SET eid = ?, slug = ?, title = ? WHERE oid = ?`)
+		sqlConferenceSeriesUpdateByOIDKey = library.Register(stmt.String())
 
-	stmt.Reset()
-	stmt.WriteString(`SELECT `)
-	stmt.WriteString(ConferenceSeriesStdSelectColumns)
-	stmt.WriteString(` FROM `)
-	stmt.WriteString(ConferenceSeriesTable)
-	stmt.WriteString(` WHERE `)
-	stmt.WriteString(ConferenceSeriesTable)
-	stmt.WriteString(`.eid = ?`)
-	sqlConferenceSeriesLoadByEIDKey = makeStmtKey(stmt.Bytes())
-	stmtPool.Register(sqlConferenceSeriesLoadByEIDKey, stmt.String())
+		stmt.Reset()
+		stmt.WriteString(`SELECT `)
+		stmt.WriteString(ConferenceSeriesStdSelectColumns)
+		stmt.WriteString(` FROM `)
+		stmt.WriteString(ConferenceSeriesTable)
+		stmt.WriteString(` WHERE `)
+		stmt.WriteString(ConferenceSeriesTable)
+		stmt.WriteString(`.eid = ?`)
+		sqlConferenceSeriesLoadByEIDKey = library.Register(stmt.String())
 
-	stmt.Reset()
-	stmt.WriteString(`DELETE FROM `)
-	stmt.WriteString(ConferenceSeriesTable)
-	stmt.WriteString(` WHERE eid = ?`)
-	sqlConferenceSeriesDeleteByEIDKey = makeStmtKey(stmt.Bytes())
-	stmtPool.Register(sqlConferenceSeriesDeleteByEIDKey, stmt.String())
+		stmt.Reset()
+		stmt.WriteString(`DELETE FROM `)
+		stmt.WriteString(ConferenceSeriesTable)
+		stmt.WriteString(` WHERE eid = ?`)
+		sqlConferenceSeriesDeleteByEIDKey = library.Register(stmt.String())
 
-	stmt.Reset()
-	stmt.WriteString(`UPDATE `)
-	stmt.WriteString(ConferenceSeriesTable)
-	stmt.WriteString(` SET eid = ?, slug = ?, title = ? WHERE eid = ?`)
-	sqlConferenceSeriesUpdateByEIDKey = makeStmtKey(stmt.Bytes())
-	stmtPool.Register(sqlConferenceSeriesUpdateByEIDKey, stmt.String())
+		stmt.Reset()
+		stmt.WriteString(`UPDATE `)
+		stmt.WriteString(ConferenceSeriesTable)
+		stmt.WriteString(` SET eid = ?, slug = ?, title = ? WHERE eid = ?`)
+		sqlConferenceSeriesUpdateByEIDKey = library.Register(stmt.String())
+	})
 }
 
 func (c *ConferenceSeries) LoadByEID(tx *Tx, eid string) error {
-	stmt, err := stmtPool.Get(sqlConferenceSeriesLoadByEIDKey)
+	stmt, err := library.GetStmt(sqlConferenceSeriesLoadByEIDKey)
 	if err != nil {
 		return errors.Wrap(err, `failed to get statement`)
 	}
@@ -129,7 +127,7 @@ func (c *ConferenceSeries) Create(tx *Tx, opts ...InsertOption) (err error) {
 
 func (c ConferenceSeries) Update(tx *Tx) error {
 	if c.OID != 0 {
-		stmt, err := stmtPool.Get(sqlConferenceSeriesUpdateByOIDKey)
+		stmt, err := library.GetStmt(sqlConferenceSeriesUpdateByOIDKey)
 		if err != nil {
 			return errors.Wrap(err, `failed to get statement`)
 		}
@@ -137,7 +135,7 @@ func (c ConferenceSeries) Update(tx *Tx) error {
 		return err
 	}
 	if c.EID != "" {
-		stmt, err := stmtPool.Get(sqlConferenceSeriesUpdateByEIDKey)
+		stmt, err := library.GetStmt(sqlConferenceSeriesUpdateByEIDKey)
 		if err != nil {
 			return errors.Wrap(err, `failed to get statement`)
 		}
@@ -149,7 +147,7 @@ func (c ConferenceSeries) Update(tx *Tx) error {
 
 func (c ConferenceSeries) Delete(tx *Tx) error {
 	if c.OID != 0 {
-		stmt, err := stmtPool.Get(sqlConferenceSeriesDeleteByOIDKey)
+		stmt, err := library.GetStmt(sqlConferenceSeriesDeleteByOIDKey)
 		if err != nil {
 			return errors.Wrap(err, `failed to get statement`)
 		}
@@ -158,7 +156,7 @@ func (c ConferenceSeries) Delete(tx *Tx) error {
 	}
 
 	if c.EID != "" {
-		stmt, err := stmtPool.Get(sqlConferenceSeriesDeleteByEIDKey)
+		stmt, err := library.GetStmt(sqlConferenceSeriesDeleteByEIDKey)
 		if err != nil {
 			return errors.Wrap(err, `failed to get statement`)
 		}

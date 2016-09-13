@@ -10,6 +10,7 @@ import (
 
 	"github.com/builderscon/octav/octav/tools"
 	"github.com/lestrrat/go-pdebug"
+	"github.com/lestrrat/go-sqllib"
 	"github.com/pkg/errors"
 )
 
@@ -24,58 +25,55 @@ func (v *Venue) Scan(scanner interface {
 	return scanner.Scan(&v.OID, &v.EID, &v.Name, &v.Address, &v.Latitude, &v.Longitude, &v.CreatedOn, &v.ModifiedOn)
 }
 
-var sqlVenueUpdateByOIDKey StmtKey
-var sqlVenueDeleteByOIDKey StmtKey
-var sqlVenueLoadByEIDKey StmtKey
-var sqlVenueUpdateByEIDKey StmtKey
-var sqlVenueDeleteByEIDKey StmtKey
+var sqlVenueUpdateByOIDKey sqllib.Key
+var sqlVenueDeleteByOIDKey sqllib.Key
+var sqlVenueLoadByEIDKey sqllib.Key
+var sqlVenueUpdateByEIDKey sqllib.Key
+var sqlVenueDeleteByEIDKey sqllib.Key
 
 func init() {
-	stmt := tools.GetBuffer()
-	defer tools.ReleaseBuffer(stmt)
+	hooks = append(hooks, func() {
+		stmt := tools.GetBuffer()
+		defer tools.ReleaseBuffer(stmt)
 
-	stmt.Reset()
-	stmt.WriteString(`DELETE FROM `)
-	stmt.WriteString(VenueTable)
-	stmt.WriteString(` WHERE oid = ?`)
-	sqlVenueDeleteByOIDKey = makeStmtKey(stmt.Bytes())
-	stmtPool.Register(sqlVenueDeleteByOIDKey, stmt.String())
+		stmt.Reset()
+		stmt.WriteString(`DELETE FROM `)
+		stmt.WriteString(VenueTable)
+		stmt.WriteString(` WHERE oid = ?`)
+		sqlVenueDeleteByOIDKey = library.Register(stmt.String())
 
-	stmt.Reset()
-	stmt.WriteString(`UPDATE `)
-	stmt.WriteString(VenueTable)
-	stmt.WriteString(` SET eid = ?, name = ?, address = ?, latitude = ?, longitude = ? WHERE oid = ?`)
-	sqlVenueUpdateByOIDKey = makeStmtKey(stmt.Bytes())
-	stmtPool.Register(sqlVenueUpdateByOIDKey, stmt.String())
+		stmt.Reset()
+		stmt.WriteString(`UPDATE `)
+		stmt.WriteString(VenueTable)
+		stmt.WriteString(` SET eid = ?, name = ?, address = ?, latitude = ?, longitude = ? WHERE oid = ?`)
+		sqlVenueUpdateByOIDKey = library.Register(stmt.String())
 
-	stmt.Reset()
-	stmt.WriteString(`SELECT `)
-	stmt.WriteString(VenueStdSelectColumns)
-	stmt.WriteString(` FROM `)
-	stmt.WriteString(VenueTable)
-	stmt.WriteString(` WHERE `)
-	stmt.WriteString(VenueTable)
-	stmt.WriteString(`.eid = ?`)
-	sqlVenueLoadByEIDKey = makeStmtKey(stmt.Bytes())
-	stmtPool.Register(sqlVenueLoadByEIDKey, stmt.String())
+		stmt.Reset()
+		stmt.WriteString(`SELECT `)
+		stmt.WriteString(VenueStdSelectColumns)
+		stmt.WriteString(` FROM `)
+		stmt.WriteString(VenueTable)
+		stmt.WriteString(` WHERE `)
+		stmt.WriteString(VenueTable)
+		stmt.WriteString(`.eid = ?`)
+		sqlVenueLoadByEIDKey = library.Register(stmt.String())
 
-	stmt.Reset()
-	stmt.WriteString(`DELETE FROM `)
-	stmt.WriteString(VenueTable)
-	stmt.WriteString(` WHERE eid = ?`)
-	sqlVenueDeleteByEIDKey = makeStmtKey(stmt.Bytes())
-	stmtPool.Register(sqlVenueDeleteByEIDKey, stmt.String())
+		stmt.Reset()
+		stmt.WriteString(`DELETE FROM `)
+		stmt.WriteString(VenueTable)
+		stmt.WriteString(` WHERE eid = ?`)
+		sqlVenueDeleteByEIDKey = library.Register(stmt.String())
 
-	stmt.Reset()
-	stmt.WriteString(`UPDATE `)
-	stmt.WriteString(VenueTable)
-	stmt.WriteString(` SET eid = ?, name = ?, address = ?, latitude = ?, longitude = ? WHERE eid = ?`)
-	sqlVenueUpdateByEIDKey = makeStmtKey(stmt.Bytes())
-	stmtPool.Register(sqlVenueUpdateByEIDKey, stmt.String())
+		stmt.Reset()
+		stmt.WriteString(`UPDATE `)
+		stmt.WriteString(VenueTable)
+		stmt.WriteString(` SET eid = ?, name = ?, address = ?, latitude = ?, longitude = ? WHERE eid = ?`)
+		sqlVenueUpdateByEIDKey = library.Register(stmt.String())
+	})
 }
 
 func (v *Venue) LoadByEID(tx *Tx, eid string) error {
-	stmt, err := stmtPool.Get(sqlVenueLoadByEIDKey)
+	stmt, err := library.GetStmt(sqlVenueLoadByEIDKey)
 	if err != nil {
 		return errors.Wrap(err, `failed to get statement`)
 	}
@@ -129,7 +127,7 @@ func (v *Venue) Create(tx *Tx, opts ...InsertOption) (err error) {
 
 func (v Venue) Update(tx *Tx) error {
 	if v.OID != 0 {
-		stmt, err := stmtPool.Get(sqlVenueUpdateByOIDKey)
+		stmt, err := library.GetStmt(sqlVenueUpdateByOIDKey)
 		if err != nil {
 			return errors.Wrap(err, `failed to get statement`)
 		}
@@ -137,7 +135,7 @@ func (v Venue) Update(tx *Tx) error {
 		return err
 	}
 	if v.EID != "" {
-		stmt, err := stmtPool.Get(sqlVenueUpdateByEIDKey)
+		stmt, err := library.GetStmt(sqlVenueUpdateByEIDKey)
 		if err != nil {
 			return errors.Wrap(err, `failed to get statement`)
 		}
@@ -149,7 +147,7 @@ func (v Venue) Update(tx *Tx) error {
 
 func (v Venue) Delete(tx *Tx) error {
 	if v.OID != 0 {
-		stmt, err := stmtPool.Get(sqlVenueDeleteByOIDKey)
+		stmt, err := library.GetStmt(sqlVenueDeleteByOIDKey)
 		if err != nil {
 			return errors.Wrap(err, `failed to get statement`)
 		}
@@ -158,7 +156,7 @@ func (v Venue) Delete(tx *Tx) error {
 	}
 
 	if v.EID != "" {
-		stmt, err := stmtPool.Get(sqlVenueDeleteByEIDKey)
+		stmt, err := library.GetStmt(sqlVenueDeleteByEIDKey)
 		if err != nil {
 			return errors.Wrap(err, `failed to get statement`)
 		}

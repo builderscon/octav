@@ -8,6 +8,7 @@ import (
 
 	"github.com/builderscon/octav/octav/tools"
 	"github.com/lestrrat/go-pdebug"
+	"github.com/lestrrat/go-sqllib"
 	"github.com/pkg/errors"
 )
 
@@ -22,26 +23,26 @@ func (l *LocalizedString) Scan(scanner interface {
 	return scanner.Scan(&l.OID, &l.ParentID, &l.ParentType, &l.Name, &l.Language, &l.Localized)
 }
 
-var sqlLocalizedStringUpdateByOIDKey StmtKey
-var sqlLocalizedStringDeleteByOIDKey StmtKey
+var sqlLocalizedStringUpdateByOIDKey sqllib.Key
+var sqlLocalizedStringDeleteByOIDKey sqllib.Key
 
 func init() {
-	stmt := tools.GetBuffer()
-	defer tools.ReleaseBuffer(stmt)
+	hooks = append(hooks, func() {
+		stmt := tools.GetBuffer()
+		defer tools.ReleaseBuffer(stmt)
 
-	stmt.Reset()
-	stmt.WriteString(`DELETE FROM `)
-	stmt.WriteString(LocalizedStringTable)
-	stmt.WriteString(` WHERE oid = ?`)
-	sqlLocalizedStringDeleteByOIDKey = makeStmtKey(stmt.Bytes())
-	stmtPool.Register(sqlLocalizedStringDeleteByOIDKey, stmt.String())
+		stmt.Reset()
+		stmt.WriteString(`DELETE FROM `)
+		stmt.WriteString(LocalizedStringTable)
+		stmt.WriteString(` WHERE oid = ?`)
+		sqlLocalizedStringDeleteByOIDKey = library.Register(stmt.String())
 
-	stmt.Reset()
-	stmt.WriteString(`UPDATE `)
-	stmt.WriteString(LocalizedStringTable)
-	stmt.WriteString(` SET parent_id = ?, parent_type = ?, name = ?, language = ?, localized = ? WHERE oid = ?`)
-	sqlLocalizedStringUpdateByOIDKey = makeStmtKey(stmt.Bytes())
-	stmtPool.Register(sqlLocalizedStringUpdateByOIDKey, stmt.String())
+		stmt.Reset()
+		stmt.WriteString(`UPDATE `)
+		stmt.WriteString(LocalizedStringTable)
+		stmt.WriteString(` SET parent_id = ?, parent_type = ?, name = ?, language = ?, localized = ? WHERE oid = ?`)
+		sqlLocalizedStringUpdateByOIDKey = library.Register(stmt.String())
+	})
 }
 
 func (l *LocalizedString) Create(tx *Tx, opts ...InsertOption) (err error) {
@@ -82,7 +83,7 @@ func (l *LocalizedString) Create(tx *Tx, opts ...InsertOption) (err error) {
 
 func (l LocalizedString) Update(tx *Tx) error {
 	if l.OID != 0 {
-		stmt, err := stmtPool.Get(sqlLocalizedStringUpdateByOIDKey)
+		stmt, err := library.GetStmt(sqlLocalizedStringUpdateByOIDKey)
 		if err != nil {
 			return errors.Wrap(err, `failed to get statement`)
 		}
@@ -94,7 +95,7 @@ func (l LocalizedString) Update(tx *Tx) error {
 
 func (l LocalizedString) Delete(tx *Tx) error {
 	if l.OID != 0 {
-		stmt, err := stmtPool.Get(sqlLocalizedStringDeleteByOIDKey)
+		stmt, err := library.GetStmt(sqlLocalizedStringDeleteByOIDKey)
 		if err != nil {
 			return errors.Wrap(err, `failed to get statement`)
 		}

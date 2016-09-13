@@ -6,6 +6,7 @@ import (
 	"strconv"
 
 	"github.com/lestrrat/go-pdebug"
+	sqllib "github.com/lestrrat/go-sqllib"
 	"github.com/lestrrat/go-tx-guard"
 	"github.com/pkg/errors"
 )
@@ -18,7 +19,9 @@ type Tx struct {
 	*guard.Tx
 }
 
+var hooks []func()
 var _db *DB // global database connection
+var library *sqllib.Library
 var ErrNoTLSRequested = errors.New("TLS environment variables not set")
 var Trace bool
 
@@ -54,6 +57,11 @@ func Init(dsn string) (err error) {
 	}
 
 	_db = &DB{&guard.DB{conn}}
+	library = sqllib.New(_db)
+
+	for _, h := range hooks {
+		h()
+	}
 
 	return nil
 }
