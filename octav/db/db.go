@@ -35,6 +35,7 @@ func getStmtBuf() *bytes.Buffer {
 }
 func releaseStmtBuf(buf *bytes.Buffer) {
 	buf.Reset()
+	buf.Grow(0)
 	stmtBufPool.Put(buf)
 }
 
