@@ -53,6 +53,8 @@ func setupAndRun(m *testing.M) int {
 		panic(err.Error())
 	}
 
+	service.User().EnableVerify = false
+
 	return m.Run()
 }
 

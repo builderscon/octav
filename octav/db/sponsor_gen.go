@@ -8,7 +8,9 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/builderscon/octav/octav/tools"
 	"github.com/lestrrat/go-pdebug"
+	"github.com/lestrrat/go-sqllib"
 	"github.com/pkg/errors"
 )
 
@@ -23,8 +25,59 @@ func (s *Sponsor) Scan(scanner interface {
 	return scanner.Scan(&s.OID, &s.EID, &s.ConferenceID, &s.Name, &s.LogoURL1, &s.LogoURL2, &s.LogoURL3, &s.URL, &s.GroupName, &s.SortOrder, &s.CreatedOn, &s.ModifiedOn)
 }
 
+var sqlSponsorUpdateByOIDKey sqllib.Key
+var sqlSponsorDeleteByOIDKey sqllib.Key
+var sqlSponsorLoadByEIDKey sqllib.Key
+var sqlSponsorUpdateByEIDKey sqllib.Key
+var sqlSponsorDeleteByEIDKey sqllib.Key
+
+func init() {
+	hooks = append(hooks, func() {
+		stmt := tools.GetBuffer()
+		defer tools.ReleaseBuffer(stmt)
+
+		stmt.Reset()
+		stmt.WriteString(`DELETE FROM `)
+		stmt.WriteString(SponsorTable)
+		stmt.WriteString(` WHERE oid = ?`)
+		sqlSponsorDeleteByOIDKey = library.Register(stmt.String())
+
+		stmt.Reset()
+		stmt.WriteString(`UPDATE `)
+		stmt.WriteString(SponsorTable)
+		stmt.WriteString(` SET eid = ?, conference_id = ?, name = ?, logo_url1 = ?, logo_url2 = ?, logo_url3 = ?, url = ?, group_name = ?, sort_order = ? WHERE oid = ?`)
+		sqlSponsorUpdateByOIDKey = library.Register(stmt.String())
+
+		stmt.Reset()
+		stmt.WriteString(`SELECT `)
+		stmt.WriteString(SponsorStdSelectColumns)
+		stmt.WriteString(` FROM `)
+		stmt.WriteString(SponsorTable)
+		stmt.WriteString(` WHERE `)
+		stmt.WriteString(SponsorTable)
+		stmt.WriteString(`.eid = ?`)
+		sqlSponsorLoadByEIDKey = library.Register(stmt.String())
+
+		stmt.Reset()
+		stmt.WriteString(`DELETE FROM `)
+		stmt.WriteString(SponsorTable)
+		stmt.WriteString(` WHERE eid = ?`)
+		sqlSponsorDeleteByEIDKey = library.Register(stmt.String())
+
+		stmt.Reset()
+		stmt.WriteString(`UPDATE `)
+		stmt.WriteString(SponsorTable)
+		stmt.WriteString(` SET eid = ?, conference_id = ?, name = ?, logo_url1 = ?, logo_url2 = ?, logo_url3 = ?, url = ?, group_name = ?, sort_order = ? WHERE eid = ?`)
+		sqlSponsorUpdateByEIDKey = library.Register(stmt.String())
+	})
+}
+
 func (s *Sponsor) LoadByEID(tx *Tx, eid string) error {
-	row := tx.QueryRow(`SELECT `+SponsorStdSelectColumns+` FROM `+SponsorTable+` WHERE sponsors.eid = ?`, eid)
+	stmt, err := library.GetStmt(sqlSponsorLoadByEIDKey)
+	if err != nil {
+		return errors.Wrap(err, `failed to get statement`)
+	}
+	row := tx.Stmt(stmt).QueryRow(eid)
 	if err := s.Scan(row); err != nil {
 		return err
 	}
@@ -74,11 +127,19 @@ func (s *Sponsor) Create(tx *Tx, opts ...InsertOption) (err error) {
 
 func (s Sponsor) Update(tx *Tx) error {
 	if s.OID != 0 {
-		_, err := tx.Exec(`UPDATE `+SponsorTable+` SET eid = ?, conference_id = ?, name = ?, logo_url1 = ?, logo_url2 = ?, logo_url3 = ?, url = ?, group_name = ?, sort_order = ? WHERE oid = ?`, s.EID, s.ConferenceID, s.Name, s.LogoURL1, s.LogoURL2, s.LogoURL3, s.URL, s.GroupName, s.SortOrder, s.OID)
+		stmt, err := library.GetStmt(sqlSponsorUpdateByOIDKey)
+		if err != nil {
+			return errors.Wrap(err, `failed to get statement`)
+		}
+		_, err = tx.Stmt(stmt).Exec(s.EID, s.ConferenceID, s.Name, s.LogoURL1, s.LogoURL2, s.LogoURL3, s.URL, s.GroupName, s.SortOrder, s.OID)
 		return err
 	}
 	if s.EID != "" {
-		_, err := tx.Exec(`UPDATE `+SponsorTable+` SET conference_id = ?, name = ?, logo_url1 = ?, logo_url2 = ?, logo_url3 = ?, url = ?, group_name = ?, sort_order = ? WHERE eid = ?`, s.ConferenceID, s.Name, s.LogoURL1, s.LogoURL2, s.LogoURL3, s.URL, s.GroupName, s.SortOrder, s.EID)
+		stmt, err := library.GetStmt(sqlSponsorUpdateByEIDKey)
+		if err != nil {
+			return errors.Wrap(err, `failed to get statement`)
+		}
+		_, err = tx.Stmt(stmt).Exec(s.EID, s.ConferenceID, s.Name, s.LogoURL1, s.LogoURL2, s.LogoURL3, s.URL, s.GroupName, s.SortOrder, s.EID)
 		return err
 	}
 	return errors.New("either OID/EID must be filled")
@@ -86,12 +147,20 @@ func (s Sponsor) Update(tx *Tx) error {
 
 func (s Sponsor) Delete(tx *Tx) error {
 	if s.OID != 0 {
-		_, err := tx.Exec(`DELETE FROM `+SponsorTable+` WHERE oid = ?`, s.OID)
+		stmt, err := library.GetStmt(sqlSponsorDeleteByOIDKey)
+		if err != nil {
+			return errors.Wrap(err, `failed to get statement`)
+		}
+		_, err = tx.Stmt(stmt).Exec(s.OID)
 		return err
 	}
 
 	if s.EID != "" {
-		_, err := tx.Exec(`DELETE FROM `+SponsorTable+` WHERE eid = ?`, s.EID)
+		stmt, err := library.GetStmt(sqlSponsorDeleteByEIDKey)
+		if err != nil {
+			return errors.Wrap(err, `failed to get statement`)
+		}
+		_, err = tx.Stmt(stmt).Exec(s.EID)
 		return err
 	}
 

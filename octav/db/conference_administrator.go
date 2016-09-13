@@ -1,12 +1,13 @@
 package db
 
 import (
+	"github.com/builderscon/octav/octav/tools"
 	"github.com/pkg/errors"
 )
 
 func IsConferenceAdministrator(tx *Tx, cid, uid string) error {
-	stmt := getStmtBuf()
-	defer releaseStmtBuf(stmt)
+	stmt := tools.GetBuffer()
+	defer tools.ReleaseBuffer(stmt)
 	stmt.WriteString(`SELECT 1 FROM `)
 	stmt.WriteString(ConferenceAdministratorTable)
 	stmt.WriteString(` WHERE conference_id = ? AND user_id = ?`)
@@ -23,8 +24,8 @@ func IsConferenceAdministrator(tx *Tx, cid, uid string) error {
 }
 
 func DeleteConferenceAdministrator(tx *Tx, cid, uid string) error {
-	stmt := getStmtBuf()
-	defer releaseStmtBuf(stmt)
+	stmt := tools.GetBuffer()
+	defer tools.ReleaseBuffer(stmt)
 	stmt.WriteString(`DELETE FROM `)
 	stmt.WriteString(ConferenceAdministratorTable)
 	stmt.WriteString(` WHERE conference_id = ? AND user_id = ?`)
@@ -34,8 +35,8 @@ func DeleteConferenceAdministrator(tx *Tx, cid, uid string) error {
 }
 
 func LoadConferenceAdministrators(tx *Tx, admins *UserList, cid string) error {
-	stmt := getStmtBuf()
-	defer releaseStmtBuf(stmt)
+	stmt := tools.GetBuffer()
+	defer tools.ReleaseBuffer(stmt)
 	stmt.WriteString(`SELECT `)
 	stmt.WriteString(UserStdSelectColumns)
 	stmt.WriteString(` FROM `)

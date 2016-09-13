@@ -1,6 +1,7 @@
 package db
 
 import (
+	"github.com/builderscon/octav/octav/tools"
 	pdebug "github.com/lestrrat/go-pdebug"
 	"github.com/pkg/errors"
 )
@@ -13,8 +14,8 @@ func (v *SessionList) LoadByConference(tx *Tx, conferenceID, speakerID, date str
 
 	// The caller of this method should ensure that query fields are
 	// present and that we don't accidentally run an empty query
-	stmt := getStmtBuf()
-	defer releaseStmtBuf(stmt)
+	stmt := tools.GetBuffer()
+	defer tools.ReleaseBuffer(stmt)
 
 	stmt.WriteString(`SELECT `)
 	stmt.WriteString(SessionStdSelectColumns)
@@ -22,8 +23,8 @@ func (v *SessionList) LoadByConference(tx *Tx, conferenceID, speakerID, date str
 	stmt.WriteString(SessionTable)
 	stmt.WriteString(` WHERE `)
 
-	where := getStmtBuf()
-	defer releaseStmtBuf(where)
+	where := tools.GetBuffer()
+	defer tools.ReleaseBuffer(where)
 
 	var args []interface{}
 	if conferenceID != "" {
@@ -54,7 +55,7 @@ func (v *SessionList) LoadByConference(tx *Tx, conferenceID, speakerID, date str
 		where.WriteString(` status IN (`)
 		for i, st := range status {
 			where.WriteString(`?`)
-			if i < l - 1 {
+			if i < l-1 {
 				where.WriteString(`, `)
 			}
 			args = append(args, st)
@@ -81,8 +82,8 @@ func IsSessionOwner(tx *Tx, sessionID, userID string) (err error) {
 		defer g.End()
 	}
 
-	stmt := getStmtBuf()
-	defer releaseStmtBuf(stmt)
+	stmt := tools.GetBuffer()
+	defer tools.ReleaseBuffer(stmt)
 
 	stmt.WriteString(`SELECT 1 FROM `)
 	stmt.WriteString(SessionTable)

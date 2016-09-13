@@ -8,7 +8,9 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/builderscon/octav/octav/tools"
 	"github.com/lestrrat/go-pdebug"
+	"github.com/lestrrat/go-sqllib"
 	"github.com/pkg/errors"
 )
 
@@ -23,8 +25,59 @@ func (r *Room) Scan(scanner interface {
 	return scanner.Scan(&r.OID, &r.EID, &r.VenueID, &r.Name, &r.Capacity, &r.CreatedOn, &r.ModifiedOn)
 }
 
+var sqlRoomUpdateByOIDKey sqllib.Key
+var sqlRoomDeleteByOIDKey sqllib.Key
+var sqlRoomLoadByEIDKey sqllib.Key
+var sqlRoomUpdateByEIDKey sqllib.Key
+var sqlRoomDeleteByEIDKey sqllib.Key
+
+func init() {
+	hooks = append(hooks, func() {
+		stmt := tools.GetBuffer()
+		defer tools.ReleaseBuffer(stmt)
+
+		stmt.Reset()
+		stmt.WriteString(`DELETE FROM `)
+		stmt.WriteString(RoomTable)
+		stmt.WriteString(` WHERE oid = ?`)
+		sqlRoomDeleteByOIDKey = library.Register(stmt.String())
+
+		stmt.Reset()
+		stmt.WriteString(`UPDATE `)
+		stmt.WriteString(RoomTable)
+		stmt.WriteString(` SET eid = ?, venue_id = ?, name = ?, capacity = ? WHERE oid = ?`)
+		sqlRoomUpdateByOIDKey = library.Register(stmt.String())
+
+		stmt.Reset()
+		stmt.WriteString(`SELECT `)
+		stmt.WriteString(RoomStdSelectColumns)
+		stmt.WriteString(` FROM `)
+		stmt.WriteString(RoomTable)
+		stmt.WriteString(` WHERE `)
+		stmt.WriteString(RoomTable)
+		stmt.WriteString(`.eid = ?`)
+		sqlRoomLoadByEIDKey = library.Register(stmt.String())
+
+		stmt.Reset()
+		stmt.WriteString(`DELETE FROM `)
+		stmt.WriteString(RoomTable)
+		stmt.WriteString(` WHERE eid = ?`)
+		sqlRoomDeleteByEIDKey = library.Register(stmt.String())
+
+		stmt.Reset()
+		stmt.WriteString(`UPDATE `)
+		stmt.WriteString(RoomTable)
+		stmt.WriteString(` SET eid = ?, venue_id = ?, name = ?, capacity = ? WHERE eid = ?`)
+		sqlRoomUpdateByEIDKey = library.Register(stmt.String())
+	})
+}
+
 func (r *Room) LoadByEID(tx *Tx, eid string) error {
-	row := tx.QueryRow(`SELECT `+RoomStdSelectColumns+` FROM `+RoomTable+` WHERE rooms.eid = ?`, eid)
+	stmt, err := library.GetStmt(sqlRoomLoadByEIDKey)
+	if err != nil {
+		return errors.Wrap(err, `failed to get statement`)
+	}
+	row := tx.Stmt(stmt).QueryRow(eid)
 	if err := r.Scan(row); err != nil {
 		return err
 	}
@@ -74,11 +127,19 @@ func (r *Room) Create(tx *Tx, opts ...InsertOption) (err error) {
 
 func (r Room) Update(tx *Tx) error {
 	if r.OID != 0 {
-		_, err := tx.Exec(`UPDATE `+RoomTable+` SET eid = ?, venue_id = ?, name = ?, capacity = ? WHERE oid = ?`, r.EID, r.VenueID, r.Name, r.Capacity, r.OID)
+		stmt, err := library.GetStmt(sqlRoomUpdateByOIDKey)
+		if err != nil {
+			return errors.Wrap(err, `failed to get statement`)
+		}
+		_, err = tx.Stmt(stmt).Exec(r.EID, r.VenueID, r.Name, r.Capacity, r.OID)
 		return err
 	}
 	if r.EID != "" {
-		_, err := tx.Exec(`UPDATE `+RoomTable+` SET venue_id = ?, name = ?, capacity = ? WHERE eid = ?`, r.VenueID, r.Name, r.Capacity, r.EID)
+		stmt, err := library.GetStmt(sqlRoomUpdateByEIDKey)
+		if err != nil {
+			return errors.Wrap(err, `failed to get statement`)
+		}
+		_, err = tx.Stmt(stmt).Exec(r.EID, r.VenueID, r.Name, r.Capacity, r.EID)
 		return err
 	}
 	return errors.New("either OID/EID must be filled")
@@ -86,12 +147,20 @@ func (r Room) Update(tx *Tx) error {
 
 func (r Room) Delete(tx *Tx) error {
 	if r.OID != 0 {
-		_, err := tx.Exec(`DELETE FROM `+RoomTable+` WHERE oid = ?`, r.OID)
+		stmt, err := library.GetStmt(sqlRoomDeleteByOIDKey)
+		if err != nil {
+			return errors.Wrap(err, `failed to get statement`)
+		}
+		_, err = tx.Stmt(stmt).Exec(r.OID)
 		return err
 	}
 
 	if r.EID != "" {
-		_, err := tx.Exec(`DELETE FROM `+RoomTable+` WHERE eid = ?`, r.EID)
+		stmt, err := library.GetStmt(sqlRoomDeleteByEIDKey)
+		if err != nil {
+			return errors.Wrap(err, `failed to get statement`)
+		}
+		_, err = tx.Stmt(stmt).Exec(r.EID)
 		return err
 	}
 

@@ -14,12 +14,12 @@ import (
 
 var _ = time.Time{}
 
-var userSvc *UserSvc
+var userSvc UserSvc
 var userOnce sync.Once
 
 func User() *UserSvc {
 	userOnce.Do(userSvc.Init)
-	return userSvc
+	return &userSvc
 }
 
 func (v *UserSvc) LookupFromPayload(tx *db.Tx, m *model.User, payload model.LookupUserRequest) (err error) {

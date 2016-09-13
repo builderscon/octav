@@ -14,12 +14,12 @@ import (
 
 var _ = time.Time{}
 
-var sessionTypeSvc *SessionTypeSvc
+var sessionTypeSvc SessionTypeSvc
 var sessionTypeOnce sync.Once
 
 func SessionType() *SessionTypeSvc {
 	sessionTypeOnce.Do(sessionTypeSvc.Init)
-	return sessionTypeSvc
+	return &sessionTypeSvc
 }
 
 func (v *SessionTypeSvc) LookupFromPayload(tx *db.Tx, m *model.SessionType, payload model.LookupSessionTypeRequest) (err error) {

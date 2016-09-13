@@ -8,7 +8,9 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/builderscon/octav/octav/tools"
 	"github.com/lestrrat/go-pdebug"
+	"github.com/lestrrat/go-sqllib"
 	"github.com/pkg/errors"
 )
 
@@ -23,8 +25,59 @@ func (s *SessionType) Scan(scanner interface {
 	return scanner.Scan(&s.OID, &s.EID, &s.ConferenceID, &s.Name, &s.Abstract, &s.Duration, &s.SubmissionStart, &s.SubmissionEnd, &s.CreatedOn, &s.ModifiedOn)
 }
 
+var sqlSessionTypeUpdateByOIDKey sqllib.Key
+var sqlSessionTypeDeleteByOIDKey sqllib.Key
+var sqlSessionTypeLoadByEIDKey sqllib.Key
+var sqlSessionTypeUpdateByEIDKey sqllib.Key
+var sqlSessionTypeDeleteByEIDKey sqllib.Key
+
+func init() {
+	hooks = append(hooks, func() {
+		stmt := tools.GetBuffer()
+		defer tools.ReleaseBuffer(stmt)
+
+		stmt.Reset()
+		stmt.WriteString(`DELETE FROM `)
+		stmt.WriteString(SessionTypeTable)
+		stmt.WriteString(` WHERE oid = ?`)
+		sqlSessionTypeDeleteByOIDKey = library.Register(stmt.String())
+
+		stmt.Reset()
+		stmt.WriteString(`UPDATE `)
+		stmt.WriteString(SessionTypeTable)
+		stmt.WriteString(` SET eid = ?, conference_id = ?, name = ?, abstract = ?, duration = ?, submission_start = ?, submission_end = ? WHERE oid = ?`)
+		sqlSessionTypeUpdateByOIDKey = library.Register(stmt.String())
+
+		stmt.Reset()
+		stmt.WriteString(`SELECT `)
+		stmt.WriteString(SessionTypeStdSelectColumns)
+		stmt.WriteString(` FROM `)
+		stmt.WriteString(SessionTypeTable)
+		stmt.WriteString(` WHERE `)
+		stmt.WriteString(SessionTypeTable)
+		stmt.WriteString(`.eid = ?`)
+		sqlSessionTypeLoadByEIDKey = library.Register(stmt.String())
+
+		stmt.Reset()
+		stmt.WriteString(`DELETE FROM `)
+		stmt.WriteString(SessionTypeTable)
+		stmt.WriteString(` WHERE eid = ?`)
+		sqlSessionTypeDeleteByEIDKey = library.Register(stmt.String())
+
+		stmt.Reset()
+		stmt.WriteString(`UPDATE `)
+		stmt.WriteString(SessionTypeTable)
+		stmt.WriteString(` SET eid = ?, conference_id = ?, name = ?, abstract = ?, duration = ?, submission_start = ?, submission_end = ? WHERE eid = ?`)
+		sqlSessionTypeUpdateByEIDKey = library.Register(stmt.String())
+	})
+}
+
 func (s *SessionType) LoadByEID(tx *Tx, eid string) error {
-	row := tx.QueryRow(`SELECT `+SessionTypeStdSelectColumns+` FROM `+SessionTypeTable+` WHERE session_types.eid = ?`, eid)
+	stmt, err := library.GetStmt(sqlSessionTypeLoadByEIDKey)
+	if err != nil {
+		return errors.Wrap(err, `failed to get statement`)
+	}
+	row := tx.Stmt(stmt).QueryRow(eid)
 	if err := s.Scan(row); err != nil {
 		return err
 	}
@@ -74,11 +127,19 @@ func (s *SessionType) Create(tx *Tx, opts ...InsertOption) (err error) {
 
 func (s SessionType) Update(tx *Tx) error {
 	if s.OID != 0 {
-		_, err := tx.Exec(`UPDATE `+SessionTypeTable+` SET eid = ?, conference_id = ?, name = ?, abstract = ?, duration = ?, submission_start = ?, submission_end = ? WHERE oid = ?`, s.EID, s.ConferenceID, s.Name, s.Abstract, s.Duration, s.SubmissionStart, s.SubmissionEnd, s.OID)
+		stmt, err := library.GetStmt(sqlSessionTypeUpdateByOIDKey)
+		if err != nil {
+			return errors.Wrap(err, `failed to get statement`)
+		}
+		_, err = tx.Stmt(stmt).Exec(s.EID, s.ConferenceID, s.Name, s.Abstract, s.Duration, s.SubmissionStart, s.SubmissionEnd, s.OID)
 		return err
 	}
 	if s.EID != "" {
-		_, err := tx.Exec(`UPDATE `+SessionTypeTable+` SET conference_id = ?, name = ?, abstract = ?, duration = ?, submission_start = ?, submission_end = ? WHERE eid = ?`, s.ConferenceID, s.Name, s.Abstract, s.Duration, s.SubmissionStart, s.SubmissionEnd, s.EID)
+		stmt, err := library.GetStmt(sqlSessionTypeUpdateByEIDKey)
+		if err != nil {
+			return errors.Wrap(err, `failed to get statement`)
+		}
+		_, err = tx.Stmt(stmt).Exec(s.EID, s.ConferenceID, s.Name, s.Abstract, s.Duration, s.SubmissionStart, s.SubmissionEnd, s.EID)
 		return err
 	}
 	return errors.New("either OID/EID must be filled")
@@ -86,12 +147,20 @@ func (s SessionType) Update(tx *Tx) error {
 
 func (s SessionType) Delete(tx *Tx) error {
 	if s.OID != 0 {
-		_, err := tx.Exec(`DELETE FROM `+SessionTypeTable+` WHERE oid = ?`, s.OID)
+		stmt, err := library.GetStmt(sqlSessionTypeDeleteByOIDKey)
+		if err != nil {
+			return errors.Wrap(err, `failed to get statement`)
+		}
+		_, err = tx.Stmt(stmt).Exec(s.OID)
 		return err
 	}
 
 	if s.EID != "" {
-		_, err := tx.Exec(`DELETE FROM `+SessionTypeTable+` WHERE eid = ?`, s.EID)
+		stmt, err := library.GetStmt(sqlSessionTypeDeleteByEIDKey)
+		if err != nil {
+			return errors.Wrap(err, `failed to get statement`)
+		}
+		_, err = tx.Stmt(stmt).Exec(s.EID)
 		return err
 	}
 

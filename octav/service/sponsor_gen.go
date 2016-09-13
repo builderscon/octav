@@ -14,12 +14,12 @@ import (
 
 var _ = time.Time{}
 
-var sponsorSvc *SponsorSvc
+var sponsorSvc SponsorSvc
 var sponsorOnce sync.Once
 
 func Sponsor() *SponsorSvc {
 	sponsorOnce.Do(sponsorSvc.Init)
-	return sponsorSvc
+	return &sponsorSvc
 }
 
 func (v *SponsorSvc) LookupFromPayload(tx *db.Tx, m *model.Sponsor, payload model.LookupSponsorRequest) (err error) {

@@ -7,7 +7,9 @@ import (
 	"database/sql"
 	"time"
 
+	"github.com/builderscon/octav/octav/tools"
 	"github.com/lestrrat/go-pdebug"
+	"github.com/lestrrat/go-sqllib"
 	"github.com/pkg/errors"
 )
 
@@ -20,6 +22,28 @@ func (c *ConferenceVenue) Scan(scanner interface {
 	Scan(...interface{}) error
 }) error {
 	return scanner.Scan(&c.OID, &c.ConferenceID, &c.VenueID, &c.CreatedOn, &c.ModifiedOn)
+}
+
+var sqlConferenceVenueUpdateByOIDKey sqllib.Key
+var sqlConferenceVenueDeleteByOIDKey sqllib.Key
+
+func init() {
+	hooks = append(hooks, func() {
+		stmt := tools.GetBuffer()
+		defer tools.ReleaseBuffer(stmt)
+
+		stmt.Reset()
+		stmt.WriteString(`DELETE FROM `)
+		stmt.WriteString(ConferenceVenueTable)
+		stmt.WriteString(` WHERE oid = ?`)
+		sqlConferenceVenueDeleteByOIDKey = library.Register(stmt.String())
+
+		stmt.Reset()
+		stmt.WriteString(`UPDATE `)
+		stmt.WriteString(ConferenceVenueTable)
+		stmt.WriteString(` SET conference_id = ?, venue_id = ? WHERE oid = ?`)
+		sqlConferenceVenueUpdateByOIDKey = library.Register(stmt.String())
+	})
 }
 
 func (c *ConferenceVenue) Create(tx *Tx, opts ...InsertOption) (err error) {
@@ -61,7 +85,11 @@ func (c *ConferenceVenue) Create(tx *Tx, opts ...InsertOption) (err error) {
 
 func (c ConferenceVenue) Update(tx *Tx) error {
 	if c.OID != 0 {
-		_, err := tx.Exec(`UPDATE `+ConferenceVenueTable+` SET conference_id = ?, venue_id = ? WHERE oid = ?`, c.ConferenceID, c.VenueID, c.OID)
+		stmt, err := library.GetStmt(sqlConferenceVenueUpdateByOIDKey)
+		if err != nil {
+			return errors.Wrap(err, `failed to get statement`)
+		}
+		_, err = tx.Stmt(stmt).Exec(c.ConferenceID, c.VenueID, c.OID)
 		return err
 	}
 	return errors.New("either OID/EID must be filled")
@@ -69,7 +97,11 @@ func (c ConferenceVenue) Update(tx *Tx) error {
 
 func (c ConferenceVenue) Delete(tx *Tx) error {
 	if c.OID != 0 {
-		_, err := tx.Exec(`DELETE FROM `+ConferenceVenueTable+` WHERE oid = ?`, c.OID)
+		stmt, err := library.GetStmt(sqlConferenceVenueDeleteByOIDKey)
+		if err != nil {
+			return errors.Wrap(err, `failed to get statement`)
+		}
+		_, err = tx.Stmt(stmt).Exec(c.OID)
 		return err
 	}
 

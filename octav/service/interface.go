@@ -46,5 +46,7 @@ type TwitterSvc struct {
 	*twitter.Client
 }
 // +PostLookupHook
-type UserSvc struct{}
+type UserSvc struct{
+	EnableVerify bool
+}
 type VenueSvc struct{}

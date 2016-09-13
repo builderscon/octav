@@ -1,6 +1,10 @@
 package db
 
-import "strconv"
+import (
+	"strconv"
+
+	"github.com/builderscon/octav/octav/tools"
+)
 
 func (v *SponsorList) LoadByConferenceSinceEID(tx *Tx, confID, since string, limit int) error {
 	var s int64
@@ -16,8 +20,8 @@ func (v *SponsorList) LoadByConferenceSinceEID(tx *Tx, confID, since string, lim
 }
 
 func (v *SponsorList) LoadByConferenceSince(tx *Tx, confID string, since int64, limit int) error {
-	stmt := getStmtBuf()
-	defer releaseStmtBuf(stmt)
+	stmt := tools.GetBuffer()
+	defer tools.ReleaseBuffer(stmt)
 
 	stmt.WriteString(`SELECT `)
 	stmt.WriteString(SponsorStdSelectColumns)
@@ -40,8 +44,8 @@ func (v *SponsorList) LoadByConferenceSince(tx *Tx, confID string, since int64, 
 }
 
 func LoadSponsors(tx *Tx, venues *SponsorList, cid string) error {
-	stmt := getStmtBuf()
-	defer releaseStmtBuf(stmt)
+	stmt := tools.GetBuffer()
+	defer tools.ReleaseBuffer(stmt)
 
 	stmt.WriteString(`SELECT `)
 	stmt.WriteString(SponsorStdSelectColumns)

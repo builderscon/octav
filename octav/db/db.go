@@ -1,15 +1,14 @@
 package db
 
 import (
-	"bytes"
 	"database/sql"
-	"errors"
 	"os"
 	"strconv"
-	"sync"
 
 	"github.com/lestrrat/go-pdebug"
+	sqllib "github.com/lestrrat/go-sqllib"
 	"github.com/lestrrat/go-tx-guard"
+	"github.com/pkg/errors"
 )
 
 type DB struct {
@@ -20,24 +19,11 @@ type Tx struct {
 	*guard.Tx
 }
 
+var hooks []func()
 var _db *DB // global database connection
+var library *sqllib.Library
 var ErrNoTLSRequested = errors.New("TLS environment variables not set")
 var Trace bool
-
-var stmtBufPool = sync.Pool{
-	New: func() interface{} {
-		return &bytes.Buffer{}
-	},
-}
-
-func getStmtBuf() *bytes.Buffer {
-	return stmtBufPool.Get().(*bytes.Buffer)
-}
-func releaseStmtBuf(buf *bytes.Buffer) {
-	buf.Reset()
-	buf.Grow(0)
-	stmtBufPool.Put(buf)
-}
 
 func init() {
 	if f := os.Getenv("OCTAV_TRACE_DB"); f != "" {
@@ -71,6 +57,11 @@ func Init(dsn string) (err error) {
 	}
 
 	_db = &DB{&guard.DB{conn}}
+	library = sqllib.New(_db)
+
+	for _, h := range hooks {
+		h()
+	}
 
 	return nil
 }

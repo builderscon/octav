@@ -1,12 +1,13 @@
 package db
 
 import (
+	"github.com/builderscon/octav/octav/tools"
 	"github.com/pkg/errors"
 )
 
 func IsConferenceSeriesAdministrator(tx *Tx, sid, uid string) error {
-	stmt := getStmtBuf()
-	defer releaseStmtBuf(stmt)
+	stmt := tools.GetBuffer()
+	defer tools.ReleaseBuffer(stmt)
 	stmt.WriteString(`SELECT 1 FROM `)
 	stmt.WriteString(ConferenceSeriesAdministratorTable)
 	stmt.WriteString(` WHERE series_id = ? AND user_id = ?`)
@@ -21,5 +22,3 @@ func IsConferenceSeriesAdministrator(tx *Tx, sid, uid string) error {
 	}
 	return nil
 }
-
-

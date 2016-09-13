@@ -1,10 +1,13 @@
 package db
 
-import "github.com/pkg/errors"
+import (
+	"github.com/builderscon/octav/octav/tools"
+	"github.com/pkg/errors"
+)
 
 func (vdb *TemporaryEmail) LoadByUserIDAndConfirmationKey(tx *Tx, userID, confirmationKey string) error {
-	stmt := getStmtBuf()
-	defer releaseStmtBuf(stmt)
+	stmt := tools.GetBuffer()
+	defer tools.ReleaseBuffer(stmt)
 
 	stmt.WriteString(`SELECT `)
 	stmt.WriteString(TemporaryEmailStdSelectColumns)
@@ -21,8 +24,8 @@ func (vdb *TemporaryEmail) LoadByUserIDAndConfirmationKey(tx *Tx, userID, confir
 }
 
 func (vdb *TemporaryEmail) Upsert(tx *Tx) error {
-	stmt := getStmtBuf()
-	defer releaseStmtBuf(stmt)
+	stmt := tools.GetBuffer()
+	defer tools.ReleaseBuffer(stmt)
 
 	stmt.WriteString(`INSERT INTO `)
 	stmt.WriteString(TemporaryEmailTable)

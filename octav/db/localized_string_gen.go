@@ -6,7 +6,9 @@ import (
 	"bytes"
 	"database/sql"
 
+	"github.com/builderscon/octav/octav/tools"
 	"github.com/lestrrat/go-pdebug"
+	"github.com/lestrrat/go-sqllib"
 	"github.com/pkg/errors"
 )
 
@@ -19,6 +21,28 @@ func (l *LocalizedString) Scan(scanner interface {
 	Scan(...interface{}) error
 }) error {
 	return scanner.Scan(&l.OID, &l.ParentID, &l.ParentType, &l.Name, &l.Language, &l.Localized)
+}
+
+var sqlLocalizedStringUpdateByOIDKey sqllib.Key
+var sqlLocalizedStringDeleteByOIDKey sqllib.Key
+
+func init() {
+	hooks = append(hooks, func() {
+		stmt := tools.GetBuffer()
+		defer tools.ReleaseBuffer(stmt)
+
+		stmt.Reset()
+		stmt.WriteString(`DELETE FROM `)
+		stmt.WriteString(LocalizedStringTable)
+		stmt.WriteString(` WHERE oid = ?`)
+		sqlLocalizedStringDeleteByOIDKey = library.Register(stmt.String())
+
+		stmt.Reset()
+		stmt.WriteString(`UPDATE `)
+		stmt.WriteString(LocalizedStringTable)
+		stmt.WriteString(` SET parent_id = ?, parent_type = ?, name = ?, language = ?, localized = ? WHERE oid = ?`)
+		sqlLocalizedStringUpdateByOIDKey = library.Register(stmt.String())
+	})
 }
 
 func (l *LocalizedString) Create(tx *Tx, opts ...InsertOption) (err error) {
@@ -59,7 +83,11 @@ func (l *LocalizedString) Create(tx *Tx, opts ...InsertOption) (err error) {
 
 func (l LocalizedString) Update(tx *Tx) error {
 	if l.OID != 0 {
-		_, err := tx.Exec(`UPDATE `+LocalizedStringTable+` SET parent_id = ?, parent_type = ?, name = ?, language = ?, localized = ? WHERE oid = ?`, l.ParentID, l.ParentType, l.Name, l.Language, l.Localized, l.OID)
+		stmt, err := library.GetStmt(sqlLocalizedStringUpdateByOIDKey)
+		if err != nil {
+			return errors.Wrap(err, `failed to get statement`)
+		}
+		_, err = tx.Stmt(stmt).Exec(l.ParentID, l.ParentType, l.Name, l.Language, l.Localized, l.OID)
 		return err
 	}
 	return errors.New("either OID/EID must be filled")
@@ -67,7 +95,11 @@ func (l LocalizedString) Update(tx *Tx) error {
 
 func (l LocalizedString) Delete(tx *Tx) error {
 	if l.OID != 0 {
-		_, err := tx.Exec(`DELETE FROM `+LocalizedStringTable+` WHERE oid = ?`, l.OID)
+		stmt, err := library.GetStmt(sqlLocalizedStringDeleteByOIDKey)
+		if err != nil {
+			return errors.Wrap(err, `failed to get statement`)
+		}
+		_, err = tx.Stmt(stmt).Exec(l.OID)
 		return err
 	}
 

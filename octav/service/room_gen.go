@@ -14,12 +14,12 @@ import (
 
 var _ = time.Time{}
 
-var roomSvc *RoomSvc
+var roomSvc RoomSvc
 var roomOnce sync.Once
 
 func Room() *RoomSvc {
 	roomOnce.Do(roomSvc.Init)
-	return roomSvc
+	return &roomSvc
 }
 
 func (v *RoomSvc) LookupFromPayload(tx *db.Tx, m *model.Room, payload model.LookupRoomRequest) (err error) {

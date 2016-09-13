@@ -5,12 +5,13 @@ import (
 	"io"
 	"time"
 
+	"github.com/builderscon/octav/octav/tools"
 	"github.com/pkg/errors"
 )
 
 func compileRangeWhere(dst io.Writer, args *[]interface{}, since int64, rangeStart, rangeEnd time.Time) error {
-	where := getStmtBuf()
-	defer releaseStmtBuf(where)
+	where := tools.GetBuffer()
+	defer tools.ReleaseBuffer(where)
 
 	where.WriteString(ConferenceTable)
 	where.WriteString(".oid > ?")
@@ -56,8 +57,8 @@ func (v *ConferenceList) LoadByStatusAndRange(tx *Tx, status string, since strin
 		sinceOID = vdb.OID
 	}
 
-	qbuf := getStmtBuf()
-	defer releaseStmtBuf(qbuf)
+	qbuf := tools.GetBuffer()
+	defer tools.ReleaseBuffer(qbuf)
 
 	var hasDate bool
 	if !rangeStart.IsZero() || !rangeEnd.IsZero() {
@@ -108,8 +109,8 @@ func (v *ConferenceList) LoadByRange(tx *Tx, since string, rangeStart, rangeEnd 
 
 	// Use JOIN later
 	var args []interface{}
-	qbuf := getStmtBuf()
-	defer releaseStmtBuf(qbuf)
+	qbuf := tools.GetBuffer()
+	defer tools.ReleaseBuffer(qbuf)
 
 	var hasDate bool
 	if !rangeStart.IsZero() || !rangeEnd.IsZero() {
@@ -166,8 +167,8 @@ func (v *ConferenceList) execSQLAndExtract(tx *Tx, sql string, limit int, args .
 }
 
 func ListConferencesByOrganizer(tx *Tx, l *ConferenceList, orgID, since string, limit int) error {
-	stmt := getStmtBuf()
-	defer releaseStmtBuf(stmt)
+	stmt := tools.GetBuffer()
+	defer tools.ReleaseBuffer(stmt)
 
 	stmt.WriteString(`SELECT `)
 	stmt.WriteString(ConferenceStdSelectColumns)

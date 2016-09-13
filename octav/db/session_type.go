@@ -3,13 +3,14 @@ package db
 import (
 	"strconv"
 
+	"github.com/builderscon/octav/octav/tools"
 	pdebug "github.com/lestrrat/go-pdebug"
 	"github.com/pkg/errors"
 )
 
 func IsAcceptingSubmissions(tx *Tx, id string) error {
-	stmt := getStmtBuf()
-	defer releaseStmtBuf(stmt)
+	stmt := tools.GetBuffer()
+	defer tools.ReleaseBuffer(stmt)
 
 	stmt.WriteString(`SELECT 1 FROM `)
 	stmt.WriteString(ConferenceTable)
@@ -53,8 +54,8 @@ func (v *SessionTypeList) LoadByConferenceSinceEID(tx *Tx, confID, since string,
 }
 
 func (v *SessionTypeList) LoadByConferenceSince(tx *Tx, confID string, since int64, limit int) error {
-	stmt := getStmtBuf()
-	defer releaseStmtBuf(stmt)
+	stmt := tools.GetBuffer()
+	defer tools.ReleaseBuffer(stmt)
 
 	stmt.WriteString(`SELECT `)
 	stmt.WriteString(SessionTypeStdSelectColumns)
@@ -81,8 +82,8 @@ func (v *SessionTypeList) LoadByConferenceSince(tx *Tx, confID string, since int
 }
 
 func LoadSessionTypes(tx *Tx, venues *SessionTypeList, cid string) error {
-	stmt := getStmtBuf()
-	defer releaseStmtBuf(stmt)
+	stmt := tools.GetBuffer()
+	defer tools.ReleaseBuffer(stmt)
 
 	stmt.WriteString(`SELECT `)
 	stmt.WriteString(SessionTypeStdSelectColumns)

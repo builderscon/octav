@@ -1,11 +1,36 @@
 package db
 
-import "strconv"
+import (
+	"strconv"
+
+	"github.com/builderscon/octav/octav/tools"
+	sqllib "github.com/lestrrat/go-sqllib"
+	"github.com/pkg/errors"
+)
+
+var sqlFeaturedSpeakerLoadFeaturedSpeakersKey sqllib.Key
+
+func init() {
+	hooks = append(hooks, func() {
+		buf := tools.GetBuffer()
+		defer tools.ReleaseBuffer(buf)
+
+		buf.WriteString(`SELECT `)
+		buf.WriteString(FeaturedSpeakerStdSelectColumns)
+		buf.WriteString(` FROM `)
+		buf.WriteString(FeaturedSpeakerTable)
+		buf.WriteString(` WHERE `)
+		buf.WriteString(FeaturedSpeakerTable)
+		buf.WriteString(`.conference_id = ?`)
+
+		sqlFeaturedSpeakerLoadFeaturedSpeakersKey = library.Register(buf.String())
+	})
+}
 
 func (v *FeaturedSpeakerList) LoadByConferenceSinceEID(tx *Tx, confID, since string, limit int) error {
 	var s int64
 	if id := since; id != "" {
-		vdb := FeaturedSpeaker{}
+		var vdb FeaturedSpeaker
 		if err := vdb.LoadByEID(tx, id); err != nil {
 			return err
 		}
@@ -28,18 +53,12 @@ func (v *FeaturedSpeakerList) LoadByConferenceSince(tx *Tx, confID string, since
 }
 
 func LoadFeaturedSpeakers(tx *Tx, venues *FeaturedSpeakerList, cid string) error {
-	stmt := getStmtBuf()
-	defer releaseStmtBuf(stmt)
+	stmt, err := library.GetStmt(sqlFeaturedSpeakerLoadFeaturedSpeakersKey)
+	if err != nil {
+		return errors.Wrap(err, "failed to get statement")
+	}
 
-	stmt.WriteString(`SELECT `)
-	stmt.WriteString(FeaturedSpeakerStdSelectColumns)
-	stmt.WriteString(` FROM `)
-	stmt.WriteString(FeaturedSpeakerTable)
-	stmt.WriteString(` WHERE `)
-	stmt.WriteString(FeaturedSpeakerTable)
-	stmt.WriteString(`.conference_id = ?`)
-
-	rows, err := tx.Query(stmt.String(), cid)
+	rows, err := tx.Stmt(stmt).Query(cid)
 	if err != nil {
 		return err
 	}

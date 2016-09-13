@@ -14,12 +14,12 @@ import (
 
 var _ = time.Time{}
 
-var clientSvc *ClientSvc
+var clientSvc ClientSvc
 var clientOnce sync.Once
 
 func Client() *ClientSvc {
 	clientOnce.Do(clientSvc.Init)
-	return clientSvc
+	return &clientSvc
 }
 
 func (v *ClientSvc) LookupFromPayload(tx *db.Tx, m *model.Client, payload model.LookupClientRequest) (err error) {
