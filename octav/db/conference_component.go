@@ -8,8 +8,8 @@ import (
 )
 
 func DeleteConferenceComponentsByIDAndName(tx *Tx, conferenceID string, names ...string) error {
-	stmt := getStmtBuf()
-	defer releaseStmtBuf(stmt)
+	stmt := tools.GetBuffer()
+	defer tools.ReleaseBuffer(stmt)
 
 	l := len(names)
 	if l == 0 {
@@ -40,8 +40,8 @@ func DeleteConferenceComponentsByIDAndName(tx *Tx, conferenceID string, names ..
 }
 
 func UpsertConferenceComponentsByIDAndName(tx *Tx, conferenceID string, values map[string]string) error {
-	stmt := getStmtBuf()
-	defer releaseStmtBuf(stmt)
+	stmt := tools.GetBuffer()
+	defer tools.ReleaseBuffer(stmt)
 
 	l := len(values)
 	if l == 0 {
@@ -73,8 +73,8 @@ func UpsertConferenceComponentsByIDAndName(tx *Tx, conferenceID string, values m
 }
 
 func (ccl *ConferenceComponentList) LoadByConferenceID(tx *Tx, cid string) error {
-	stmt := getStmtBuf()
-	defer releaseStmtBuf(stmt)
+	stmt := tools.GetBuffer()
+	defer tools.ReleaseBuffer(stmt)
 
 	stmt.WriteString(`SELECT `)
 	stmt.WriteString(ConferenceComponentStdSelectColumns)

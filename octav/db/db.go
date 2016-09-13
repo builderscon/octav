@@ -1,15 +1,13 @@
 package db
 
 import (
-	"bytes"
 	"database/sql"
-	"errors"
 	"os"
 	"strconv"
-	"sync"
 
 	"github.com/lestrrat/go-pdebug"
 	"github.com/lestrrat/go-tx-guard"
+	"github.com/pkg/errors"
 )
 
 type DB struct {
@@ -23,21 +21,6 @@ type Tx struct {
 var _db *DB // global database connection
 var ErrNoTLSRequested = errors.New("TLS environment variables not set")
 var Trace bool
-
-var stmtBufPool = sync.Pool{
-	New: func() interface{} {
-		return &bytes.Buffer{}
-	},
-}
-
-func getStmtBuf() *bytes.Buffer {
-	return stmtBufPool.Get().(*bytes.Buffer)
-}
-func releaseStmtBuf(buf *bytes.Buffer) {
-	buf.Reset()
-	buf.Grow(0)
-	stmtBufPool.Put(buf)
-}
 
 func init() {
 	if f := os.Getenv("OCTAV_TRACE_DB"); f != "" {

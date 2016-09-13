@@ -8,6 +8,7 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/builderscon/octav/octav/tools"
 	"github.com/lestrrat/go-pdebug"
 	"github.com/pkg/errors"
 )
@@ -23,8 +24,62 @@ func (c *ConferenceComponent) Scan(scanner interface {
 	return scanner.Scan(&c.OID, &c.EID, &c.ConferenceID, &c.Name, &c.Value, &c.CreatedOn, &c.ModifiedOn)
 }
 
+var sqlConferenceComponentUpdateByOIDKey StmtKey
+var sqlConferenceComponentDeleteByOIDKey StmtKey
+var sqlConferenceComponentLoadByEIDKey StmtKey
+var sqlConferenceComponentUpdateByEIDKey StmtKey
+var sqlConferenceComponentDeleteByEIDKey StmtKey
+
+func init() {
+	stmt := tools.GetBuffer()
+	defer tools.ReleaseBuffer(stmt)
+
+	stmt.Reset()
+	stmt.WriteString(`DELETE FROM `)
+	stmt.WriteString(ConferenceComponentTable)
+	stmt.WriteString(` WHERE oid = ?`)
+	sqlConferenceComponentDeleteByOIDKey = makeStmtKey(stmt.Bytes())
+	stmtPool.Register(sqlConferenceComponentDeleteByOIDKey, stmt.String())
+
+	stmt.Reset()
+	stmt.WriteString(`UPDATE `)
+	stmt.WriteString(ConferenceComponentTable)
+	stmt.WriteString(` SET eid = ?, conference_id = ?, name = ?, value = ? WHERE oid = ?`)
+	sqlConferenceComponentUpdateByOIDKey = makeStmtKey(stmt.Bytes())
+	stmtPool.Register(sqlConferenceComponentUpdateByOIDKey, stmt.String())
+
+	stmt.Reset()
+	stmt.WriteString(`SELECT `)
+	stmt.WriteString(ConferenceComponentStdSelectColumns)
+	stmt.WriteString(` FROM `)
+	stmt.WriteString(ConferenceComponentTable)
+	stmt.WriteString(` WHERE `)
+	stmt.WriteString(ConferenceComponentTable)
+	stmt.WriteString(`.eid = ?`)
+	sqlConferenceComponentLoadByEIDKey = makeStmtKey(stmt.Bytes())
+	stmtPool.Register(sqlConferenceComponentLoadByEIDKey, stmt.String())
+
+	stmt.Reset()
+	stmt.WriteString(`DELETE FROM `)
+	stmt.WriteString(ConferenceComponentTable)
+	stmt.WriteString(` WHERE eid = ?`)
+	sqlConferenceComponentDeleteByEIDKey = makeStmtKey(stmt.Bytes())
+	stmtPool.Register(sqlConferenceComponentDeleteByEIDKey, stmt.String())
+
+	stmt.Reset()
+	stmt.WriteString(`UPDATE `)
+	stmt.WriteString(ConferenceComponentTable)
+	stmt.WriteString(` SET eid = ?, conference_id = ?, name = ?, value = ? WHERE eid = ?`)
+	sqlConferenceComponentUpdateByEIDKey = makeStmtKey(stmt.Bytes())
+	stmtPool.Register(sqlConferenceComponentUpdateByEIDKey, stmt.String())
+}
+
 func (c *ConferenceComponent) LoadByEID(tx *Tx, eid string) error {
-	row := tx.QueryRow(`SELECT `+ConferenceComponentStdSelectColumns+` FROM `+ConferenceComponentTable+` WHERE conference_components.eid = ?`, eid)
+	stmt, err := stmtPool.Get(sqlConferenceComponentLoadByEIDKey)
+	if err != nil {
+		return errors.Wrap(err, `failed to get statement`)
+	}
+	row := tx.Stmt(stmt).QueryRow(eid)
 	if err := c.Scan(row); err != nil {
 		return err
 	}
@@ -74,11 +129,19 @@ func (c *ConferenceComponent) Create(tx *Tx, opts ...InsertOption) (err error) {
 
 func (c ConferenceComponent) Update(tx *Tx) error {
 	if c.OID != 0 {
-		_, err := tx.Exec(`UPDATE `+ConferenceComponentTable+` SET eid = ?, conference_id = ?, name = ?, value = ? WHERE oid = ?`, c.EID, c.ConferenceID, c.Name, c.Value, c.OID)
+		stmt, err := stmtPool.Get(sqlConferenceComponentUpdateByOIDKey)
+		if err != nil {
+			return errors.Wrap(err, `failed to get statement`)
+		}
+		_, err = tx.Stmt(stmt).Exec(c.EID, c.ConferenceID, c.Name, c.Value, c.OID)
 		return err
 	}
 	if c.EID != "" {
-		_, err := tx.Exec(`UPDATE `+ConferenceComponentTable+` SET conference_id = ?, name = ?, value = ? WHERE eid = ?`, c.ConferenceID, c.Name, c.Value, c.EID)
+		stmt, err := stmtPool.Get(sqlConferenceComponentUpdateByEIDKey)
+		if err != nil {
+			return errors.Wrap(err, `failed to get statement`)
+		}
+		_, err = tx.Stmt(stmt).Exec(c.EID, c.ConferenceID, c.Name, c.Value, c.EID)
 		return err
 	}
 	return errors.New("either OID/EID must be filled")
@@ -86,12 +149,20 @@ func (c ConferenceComponent) Update(tx *Tx) error {
 
 func (c ConferenceComponent) Delete(tx *Tx) error {
 	if c.OID != 0 {
-		_, err := tx.Exec(`DELETE FROM `+ConferenceComponentTable+` WHERE oid = ?`, c.OID)
+		stmt, err := stmtPool.Get(sqlConferenceComponentDeleteByOIDKey)
+		if err != nil {
+			return errors.Wrap(err, `failed to get statement`)
+		}
+		_, err = tx.Stmt(stmt).Exec(c.OID)
 		return err
 	}
 
 	if c.EID != "" {
-		_, err := tx.Exec(`DELETE FROM `+ConferenceComponentTable+` WHERE eid = ?`, c.EID)
+		stmt, err := stmtPool.Get(sqlConferenceComponentDeleteByEIDKey)
+		if err != nil {
+			return errors.Wrap(err, `failed to get statement`)
+		}
+		_, err = tx.Stmt(stmt).Exec(c.EID)
 		return err
 	}
 

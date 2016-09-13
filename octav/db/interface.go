@@ -1,12 +1,26 @@
 package db
 
 import (
+	"crypto/sha512"
 	"database/sql"
+	"sync"
 	"time"
 )
 
 type Config struct {
 	DSN string // DSN, can be a template string
+}
+
+type StmtKey [sha512.Size]byte
+type StmtItem struct {
+	Text  string
+	Stmt  *sql.Stmt
+	mutex sync.Mutex
+}
+
+type StmtPool struct {
+	pool  map[StmtKey]*StmtItem
+	mutex sync.RWMutex
 }
 
 type InsertOption interface{}

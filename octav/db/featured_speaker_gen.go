@@ -8,6 +8,7 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/builderscon/octav/octav/tools"
 	"github.com/lestrrat/go-pdebug"
 	"github.com/pkg/errors"
 )
@@ -23,8 +24,62 @@ func (f *FeaturedSpeaker) Scan(scanner interface {
 	return scanner.Scan(&f.OID, &f.EID, &f.ConferenceID, &f.SpeakerID, &f.AvatarURL, &f.DisplayName, &f.Description, &f.CreatedOn, &f.ModifiedOn)
 }
 
+var sqlFeaturedSpeakerUpdateByOIDKey StmtKey
+var sqlFeaturedSpeakerDeleteByOIDKey StmtKey
+var sqlFeaturedSpeakerLoadByEIDKey StmtKey
+var sqlFeaturedSpeakerUpdateByEIDKey StmtKey
+var sqlFeaturedSpeakerDeleteByEIDKey StmtKey
+
+func init() {
+	stmt := tools.GetBuffer()
+	defer tools.ReleaseBuffer(stmt)
+
+	stmt.Reset()
+	stmt.WriteString(`DELETE FROM `)
+	stmt.WriteString(FeaturedSpeakerTable)
+	stmt.WriteString(` WHERE oid = ?`)
+	sqlFeaturedSpeakerDeleteByOIDKey = makeStmtKey(stmt.Bytes())
+	stmtPool.Register(sqlFeaturedSpeakerDeleteByOIDKey, stmt.String())
+
+	stmt.Reset()
+	stmt.WriteString(`UPDATE `)
+	stmt.WriteString(FeaturedSpeakerTable)
+	stmt.WriteString(` SET eid = ?, conference_id = ?, speaker_id = ?, avatar_url = ?, display_name = ?, description = ? WHERE oid = ?`)
+	sqlFeaturedSpeakerUpdateByOIDKey = makeStmtKey(stmt.Bytes())
+	stmtPool.Register(sqlFeaturedSpeakerUpdateByOIDKey, stmt.String())
+
+	stmt.Reset()
+	stmt.WriteString(`SELECT `)
+	stmt.WriteString(FeaturedSpeakerStdSelectColumns)
+	stmt.WriteString(` FROM `)
+	stmt.WriteString(FeaturedSpeakerTable)
+	stmt.WriteString(` WHERE `)
+	stmt.WriteString(FeaturedSpeakerTable)
+	stmt.WriteString(`.eid = ?`)
+	sqlFeaturedSpeakerLoadByEIDKey = makeStmtKey(stmt.Bytes())
+	stmtPool.Register(sqlFeaturedSpeakerLoadByEIDKey, stmt.String())
+
+	stmt.Reset()
+	stmt.WriteString(`DELETE FROM `)
+	stmt.WriteString(FeaturedSpeakerTable)
+	stmt.WriteString(` WHERE eid = ?`)
+	sqlFeaturedSpeakerDeleteByEIDKey = makeStmtKey(stmt.Bytes())
+	stmtPool.Register(sqlFeaturedSpeakerDeleteByEIDKey, stmt.String())
+
+	stmt.Reset()
+	stmt.WriteString(`UPDATE `)
+	stmt.WriteString(FeaturedSpeakerTable)
+	stmt.WriteString(` SET eid = ?, conference_id = ?, speaker_id = ?, avatar_url = ?, display_name = ?, description = ? WHERE eid = ?`)
+	sqlFeaturedSpeakerUpdateByEIDKey = makeStmtKey(stmt.Bytes())
+	stmtPool.Register(sqlFeaturedSpeakerUpdateByEIDKey, stmt.String())
+}
+
 func (f *FeaturedSpeaker) LoadByEID(tx *Tx, eid string) error {
-	row := tx.QueryRow(`SELECT `+FeaturedSpeakerStdSelectColumns+` FROM `+FeaturedSpeakerTable+` WHERE featured_speakers.eid = ?`, eid)
+	stmt, err := stmtPool.Get(sqlFeaturedSpeakerLoadByEIDKey)
+	if err != nil {
+		return errors.Wrap(err, `failed to get statement`)
+	}
+	row := tx.Stmt(stmt).QueryRow(eid)
 	if err := f.Scan(row); err != nil {
 		return err
 	}
@@ -74,11 +129,19 @@ func (f *FeaturedSpeaker) Create(tx *Tx, opts ...InsertOption) (err error) {
 
 func (f FeaturedSpeaker) Update(tx *Tx) error {
 	if f.OID != 0 {
-		_, err := tx.Exec(`UPDATE `+FeaturedSpeakerTable+` SET eid = ?, conference_id = ?, speaker_id = ?, avatar_url = ?, display_name = ?, description = ? WHERE oid = ?`, f.EID, f.ConferenceID, f.SpeakerID, f.AvatarURL, f.DisplayName, f.Description, f.OID)
+		stmt, err := stmtPool.Get(sqlFeaturedSpeakerUpdateByOIDKey)
+		if err != nil {
+			return errors.Wrap(err, `failed to get statement`)
+		}
+		_, err = tx.Stmt(stmt).Exec(f.EID, f.ConferenceID, f.SpeakerID, f.AvatarURL, f.DisplayName, f.Description, f.OID)
 		return err
 	}
 	if f.EID != "" {
-		_, err := tx.Exec(`UPDATE `+FeaturedSpeakerTable+` SET conference_id = ?, speaker_id = ?, avatar_url = ?, display_name = ?, description = ? WHERE eid = ?`, f.ConferenceID, f.SpeakerID, f.AvatarURL, f.DisplayName, f.Description, f.EID)
+		stmt, err := stmtPool.Get(sqlFeaturedSpeakerUpdateByEIDKey)
+		if err != nil {
+			return errors.Wrap(err, `failed to get statement`)
+		}
+		_, err = tx.Stmt(stmt).Exec(f.EID, f.ConferenceID, f.SpeakerID, f.AvatarURL, f.DisplayName, f.Description, f.EID)
 		return err
 	}
 	return errors.New("either OID/EID must be filled")
@@ -86,12 +149,20 @@ func (f FeaturedSpeaker) Update(tx *Tx) error {
 
 func (f FeaturedSpeaker) Delete(tx *Tx) error {
 	if f.OID != 0 {
-		_, err := tx.Exec(`DELETE FROM `+FeaturedSpeakerTable+` WHERE oid = ?`, f.OID)
+		stmt, err := stmtPool.Get(sqlFeaturedSpeakerDeleteByOIDKey)
+		if err != nil {
+			return errors.Wrap(err, `failed to get statement`)
+		}
+		_, err = tx.Stmt(stmt).Exec(f.OID)
 		return err
 	}
 
 	if f.EID != "" {
-		_, err := tx.Exec(`DELETE FROM `+FeaturedSpeakerTable+` WHERE eid = ?`, f.EID)
+		stmt, err := stmtPool.Get(sqlFeaturedSpeakerDeleteByEIDKey)
+		if err != nil {
+			return errors.Wrap(err, `failed to get statement`)
+		}
+		_, err = tx.Stmt(stmt).Exec(f.EID)
 		return err
 	}
 

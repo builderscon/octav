@@ -8,6 +8,7 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/builderscon/octav/octav/tools"
 	"github.com/lestrrat/go-pdebug"
 	"github.com/pkg/errors"
 )
@@ -23,8 +24,62 @@ func (s *Session) Scan(scanner interface {
 	return scanner.Scan(&s.OID, &s.EID, &s.ConferenceID, &s.RoomID, &s.SpeakerID, &s.SessionTypeID, &s.Title, &s.Abstract, &s.Memo, &s.StartsOn, &s.Duration, &s.MaterialLevel, &s.Tags, &s.Category, &s.SpokenLanguage, &s.SlideLanguage, &s.SlideSubtitles, &s.SlideURL, &s.VideoURL, &s.PhotoRelease, &s.RecordingRelease, &s.MaterialsRelease, &s.HasInterpretation, &s.Status, &s.SortOrder, &s.Confirmed, &s.CreatedOn, &s.ModifiedOn)
 }
 
+var sqlSessionUpdateByOIDKey StmtKey
+var sqlSessionDeleteByOIDKey StmtKey
+var sqlSessionLoadByEIDKey StmtKey
+var sqlSessionUpdateByEIDKey StmtKey
+var sqlSessionDeleteByEIDKey StmtKey
+
+func init() {
+	stmt := tools.GetBuffer()
+	defer tools.ReleaseBuffer(stmt)
+
+	stmt.Reset()
+	stmt.WriteString(`DELETE FROM `)
+	stmt.WriteString(SessionTable)
+	stmt.WriteString(` WHERE oid = ?`)
+	sqlSessionDeleteByOIDKey = makeStmtKey(stmt.Bytes())
+	stmtPool.Register(sqlSessionDeleteByOIDKey, stmt.String())
+
+	stmt.Reset()
+	stmt.WriteString(`UPDATE `)
+	stmt.WriteString(SessionTable)
+	stmt.WriteString(` SET eid = ?, conference_id = ?, room_id = ?, speaker_id = ?, session_type_id = ?, title = ?, abstract = ?, memo = ?, starts_on = ?, duration = ?, material_level = ?, tags = ?, category = ?, spoken_language = ?, slide_language = ?, slide_subtitles = ?, slide_url = ?, video_url = ?, photo_release = ?, recording_release = ?, materials_release = ?, has_interpretation = ?, status = ?, sort_order = ?, confirmed = ? WHERE oid = ?`)
+	sqlSessionUpdateByOIDKey = makeStmtKey(stmt.Bytes())
+	stmtPool.Register(sqlSessionUpdateByOIDKey, stmt.String())
+
+	stmt.Reset()
+	stmt.WriteString(`SELECT `)
+	stmt.WriteString(SessionStdSelectColumns)
+	stmt.WriteString(` FROM `)
+	stmt.WriteString(SessionTable)
+	stmt.WriteString(` WHERE `)
+	stmt.WriteString(SessionTable)
+	stmt.WriteString(`.eid = ?`)
+	sqlSessionLoadByEIDKey = makeStmtKey(stmt.Bytes())
+	stmtPool.Register(sqlSessionLoadByEIDKey, stmt.String())
+
+	stmt.Reset()
+	stmt.WriteString(`DELETE FROM `)
+	stmt.WriteString(SessionTable)
+	stmt.WriteString(` WHERE eid = ?`)
+	sqlSessionDeleteByEIDKey = makeStmtKey(stmt.Bytes())
+	stmtPool.Register(sqlSessionDeleteByEIDKey, stmt.String())
+
+	stmt.Reset()
+	stmt.WriteString(`UPDATE `)
+	stmt.WriteString(SessionTable)
+	stmt.WriteString(` SET eid = ?, conference_id = ?, room_id = ?, speaker_id = ?, session_type_id = ?, title = ?, abstract = ?, memo = ?, starts_on = ?, duration = ?, material_level = ?, tags = ?, category = ?, spoken_language = ?, slide_language = ?, slide_subtitles = ?, slide_url = ?, video_url = ?, photo_release = ?, recording_release = ?, materials_release = ?, has_interpretation = ?, status = ?, sort_order = ?, confirmed = ? WHERE eid = ?`)
+	sqlSessionUpdateByEIDKey = makeStmtKey(stmt.Bytes())
+	stmtPool.Register(sqlSessionUpdateByEIDKey, stmt.String())
+}
+
 func (s *Session) LoadByEID(tx *Tx, eid string) error {
-	row := tx.QueryRow(`SELECT `+SessionStdSelectColumns+` FROM `+SessionTable+` WHERE sessions.eid = ?`, eid)
+	stmt, err := stmtPool.Get(sqlSessionLoadByEIDKey)
+	if err != nil {
+		return errors.Wrap(err, `failed to get statement`)
+	}
+	row := tx.Stmt(stmt).QueryRow(eid)
 	if err := s.Scan(row); err != nil {
 		return err
 	}
@@ -74,11 +129,19 @@ func (s *Session) Create(tx *Tx, opts ...InsertOption) (err error) {
 
 func (s Session) Update(tx *Tx) error {
 	if s.OID != 0 {
-		_, err := tx.Exec(`UPDATE `+SessionTable+` SET eid = ?, conference_id = ?, room_id = ?, speaker_id = ?, session_type_id = ?, title = ?, abstract = ?, memo = ?, starts_on = ?, duration = ?, material_level = ?, tags = ?, category = ?, spoken_language = ?, slide_language = ?, slide_subtitles = ?, slide_url = ?, video_url = ?, photo_release = ?, recording_release = ?, materials_release = ?, has_interpretation = ?, status = ?, sort_order = ?, confirmed = ? WHERE oid = ?`, s.EID, s.ConferenceID, s.RoomID, s.SpeakerID, s.SessionTypeID, s.Title, s.Abstract, s.Memo, s.StartsOn, s.Duration, s.MaterialLevel, s.Tags, s.Category, s.SpokenLanguage, s.SlideLanguage, s.SlideSubtitles, s.SlideURL, s.VideoURL, s.PhotoRelease, s.RecordingRelease, s.MaterialsRelease, s.HasInterpretation, s.Status, s.SortOrder, s.Confirmed, s.OID)
+		stmt, err := stmtPool.Get(sqlSessionUpdateByOIDKey)
+		if err != nil {
+			return errors.Wrap(err, `failed to get statement`)
+		}
+		_, err = tx.Stmt(stmt).Exec(s.EID, s.ConferenceID, s.RoomID, s.SpeakerID, s.SessionTypeID, s.Title, s.Abstract, s.Memo, s.StartsOn, s.Duration, s.MaterialLevel, s.Tags, s.Category, s.SpokenLanguage, s.SlideLanguage, s.SlideSubtitles, s.SlideURL, s.VideoURL, s.PhotoRelease, s.RecordingRelease, s.MaterialsRelease, s.HasInterpretation, s.Status, s.SortOrder, s.Confirmed, s.OID)
 		return err
 	}
 	if s.EID != "" {
-		_, err := tx.Exec(`UPDATE `+SessionTable+` SET conference_id = ?, room_id = ?, speaker_id = ?, session_type_id = ?, title = ?, abstract = ?, memo = ?, starts_on = ?, duration = ?, material_level = ?, tags = ?, category = ?, spoken_language = ?, slide_language = ?, slide_subtitles = ?, slide_url = ?, video_url = ?, photo_release = ?, recording_release = ?, materials_release = ?, has_interpretation = ?, status = ?, sort_order = ?, confirmed = ? WHERE eid = ?`, s.ConferenceID, s.RoomID, s.SpeakerID, s.SessionTypeID, s.Title, s.Abstract, s.Memo, s.StartsOn, s.Duration, s.MaterialLevel, s.Tags, s.Category, s.SpokenLanguage, s.SlideLanguage, s.SlideSubtitles, s.SlideURL, s.VideoURL, s.PhotoRelease, s.RecordingRelease, s.MaterialsRelease, s.HasInterpretation, s.Status, s.SortOrder, s.Confirmed, s.EID)
+		stmt, err := stmtPool.Get(sqlSessionUpdateByEIDKey)
+		if err != nil {
+			return errors.Wrap(err, `failed to get statement`)
+		}
+		_, err = tx.Stmt(stmt).Exec(s.EID, s.ConferenceID, s.RoomID, s.SpeakerID, s.SessionTypeID, s.Title, s.Abstract, s.Memo, s.StartsOn, s.Duration, s.MaterialLevel, s.Tags, s.Category, s.SpokenLanguage, s.SlideLanguage, s.SlideSubtitles, s.SlideURL, s.VideoURL, s.PhotoRelease, s.RecordingRelease, s.MaterialsRelease, s.HasInterpretation, s.Status, s.SortOrder, s.Confirmed, s.EID)
 		return err
 	}
 	return errors.New("either OID/EID must be filled")
@@ -86,12 +149,20 @@ func (s Session) Update(tx *Tx) error {
 
 func (s Session) Delete(tx *Tx) error {
 	if s.OID != 0 {
-		_, err := tx.Exec(`DELETE FROM `+SessionTable+` WHERE oid = ?`, s.OID)
+		stmt, err := stmtPool.Get(sqlSessionDeleteByOIDKey)
+		if err != nil {
+			return errors.Wrap(err, `failed to get statement`)
+		}
+		_, err = tx.Stmt(stmt).Exec(s.OID)
 		return err
 	}
 
 	if s.EID != "" {
-		_, err := tx.Exec(`DELETE FROM `+SessionTable+` WHERE eid = ?`, s.EID)
+		stmt, err := stmtPool.Get(sqlSessionDeleteByEIDKey)
+		if err != nil {
+			return errors.Wrap(err, `failed to get statement`)
+		}
+		_, err = tx.Stmt(stmt).Exec(s.EID)
 		return err
 	}
 

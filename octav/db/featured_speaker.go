@@ -1,6 +1,10 @@
 package db
 
-import "strconv"
+import (
+	"strconv"
+
+	"github.com/builderscon/octav/octav/tools"
+)
 
 func (v *FeaturedSpeakerList) LoadByConferenceSinceEID(tx *Tx, confID, since string, limit int) error {
 	var s int64
@@ -28,8 +32,8 @@ func (v *FeaturedSpeakerList) LoadByConferenceSince(tx *Tx, confID string, since
 }
 
 func LoadFeaturedSpeakers(tx *Tx, venues *FeaturedSpeakerList, cid string) error {
-	stmt := getStmtBuf()
-	defer releaseStmtBuf(stmt)
+	stmt := tools.GetBuffer()
+	defer tools.ReleaseBuffer(stmt)
 
 	stmt.WriteString(`SELECT `)
 	stmt.WriteString(FeaturedSpeakerStdSelectColumns)

@@ -8,6 +8,7 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/builderscon/octav/octav/tools"
 	"github.com/lestrrat/go-pdebug"
 	"github.com/pkg/errors"
 )
@@ -23,8 +24,62 @@ func (c *ConferenceSeries) Scan(scanner interface {
 	return scanner.Scan(&c.OID, &c.EID, &c.Slug, &c.Title, &c.CreatedOn, &c.ModifiedOn)
 }
 
+var sqlConferenceSeriesUpdateByOIDKey StmtKey
+var sqlConferenceSeriesDeleteByOIDKey StmtKey
+var sqlConferenceSeriesLoadByEIDKey StmtKey
+var sqlConferenceSeriesUpdateByEIDKey StmtKey
+var sqlConferenceSeriesDeleteByEIDKey StmtKey
+
+func init() {
+	stmt := tools.GetBuffer()
+	defer tools.ReleaseBuffer(stmt)
+
+	stmt.Reset()
+	stmt.WriteString(`DELETE FROM `)
+	stmt.WriteString(ConferenceSeriesTable)
+	stmt.WriteString(` WHERE oid = ?`)
+	sqlConferenceSeriesDeleteByOIDKey = makeStmtKey(stmt.Bytes())
+	stmtPool.Register(sqlConferenceSeriesDeleteByOIDKey, stmt.String())
+
+	stmt.Reset()
+	stmt.WriteString(`UPDATE `)
+	stmt.WriteString(ConferenceSeriesTable)
+	stmt.WriteString(` SET eid = ?, slug = ?, title = ? WHERE oid = ?`)
+	sqlConferenceSeriesUpdateByOIDKey = makeStmtKey(stmt.Bytes())
+	stmtPool.Register(sqlConferenceSeriesUpdateByOIDKey, stmt.String())
+
+	stmt.Reset()
+	stmt.WriteString(`SELECT `)
+	stmt.WriteString(ConferenceSeriesStdSelectColumns)
+	stmt.WriteString(` FROM `)
+	stmt.WriteString(ConferenceSeriesTable)
+	stmt.WriteString(` WHERE `)
+	stmt.WriteString(ConferenceSeriesTable)
+	stmt.WriteString(`.eid = ?`)
+	sqlConferenceSeriesLoadByEIDKey = makeStmtKey(stmt.Bytes())
+	stmtPool.Register(sqlConferenceSeriesLoadByEIDKey, stmt.String())
+
+	stmt.Reset()
+	stmt.WriteString(`DELETE FROM `)
+	stmt.WriteString(ConferenceSeriesTable)
+	stmt.WriteString(` WHERE eid = ?`)
+	sqlConferenceSeriesDeleteByEIDKey = makeStmtKey(stmt.Bytes())
+	stmtPool.Register(sqlConferenceSeriesDeleteByEIDKey, stmt.String())
+
+	stmt.Reset()
+	stmt.WriteString(`UPDATE `)
+	stmt.WriteString(ConferenceSeriesTable)
+	stmt.WriteString(` SET eid = ?, slug = ?, title = ? WHERE eid = ?`)
+	sqlConferenceSeriesUpdateByEIDKey = makeStmtKey(stmt.Bytes())
+	stmtPool.Register(sqlConferenceSeriesUpdateByEIDKey, stmt.String())
+}
+
 func (c *ConferenceSeries) LoadByEID(tx *Tx, eid string) error {
-	row := tx.QueryRow(`SELECT `+ConferenceSeriesStdSelectColumns+` FROM `+ConferenceSeriesTable+` WHERE conference_series.eid = ?`, eid)
+	stmt, err := stmtPool.Get(sqlConferenceSeriesLoadByEIDKey)
+	if err != nil {
+		return errors.Wrap(err, `failed to get statement`)
+	}
+	row := tx.Stmt(stmt).QueryRow(eid)
 	if err := c.Scan(row); err != nil {
 		return err
 	}
@@ -74,11 +129,19 @@ func (c *ConferenceSeries) Create(tx *Tx, opts ...InsertOption) (err error) {
 
 func (c ConferenceSeries) Update(tx *Tx) error {
 	if c.OID != 0 {
-		_, err := tx.Exec(`UPDATE `+ConferenceSeriesTable+` SET eid = ?, slug = ?, title = ? WHERE oid = ?`, c.EID, c.Slug, c.Title, c.OID)
+		stmt, err := stmtPool.Get(sqlConferenceSeriesUpdateByOIDKey)
+		if err != nil {
+			return errors.Wrap(err, `failed to get statement`)
+		}
+		_, err = tx.Stmt(stmt).Exec(c.EID, c.Slug, c.Title, c.OID)
 		return err
 	}
 	if c.EID != "" {
-		_, err := tx.Exec(`UPDATE `+ConferenceSeriesTable+` SET slug = ?, title = ? WHERE eid = ?`, c.Slug, c.Title, c.EID)
+		stmt, err := stmtPool.Get(sqlConferenceSeriesUpdateByEIDKey)
+		if err != nil {
+			return errors.Wrap(err, `failed to get statement`)
+		}
+		_, err = tx.Stmt(stmt).Exec(c.EID, c.Slug, c.Title, c.EID)
 		return err
 	}
 	return errors.New("either OID/EID must be filled")
@@ -86,12 +149,20 @@ func (c ConferenceSeries) Update(tx *Tx) error {
 
 func (c ConferenceSeries) Delete(tx *Tx) error {
 	if c.OID != 0 {
-		_, err := tx.Exec(`DELETE FROM `+ConferenceSeriesTable+` WHERE oid = ?`, c.OID)
+		stmt, err := stmtPool.Get(sqlConferenceSeriesDeleteByOIDKey)
+		if err != nil {
+			return errors.Wrap(err, `failed to get statement`)
+		}
+		_, err = tx.Stmt(stmt).Exec(c.OID)
 		return err
 	}
 
 	if c.EID != "" {
-		_, err := tx.Exec(`DELETE FROM `+ConferenceSeriesTable+` WHERE eid = ?`, c.EID)
+		stmt, err := stmtPool.Get(sqlConferenceSeriesDeleteByEIDKey)
+		if err != nil {
+			return errors.Wrap(err, `failed to get statement`)
+		}
+		_, err = tx.Stmt(stmt).Exec(c.EID)
 		return err
 	}
 
