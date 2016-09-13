@@ -15,7 +15,9 @@ import (
 	pdebug "github.com/lestrrat/go-pdebug"
 )
 
-func (v *UserSvc) Init() {}
+func (v *UserSvc) Init() {
+	v.EnableVerify = true
+}
 
 func (v *UserSvc) populateRowForCreate(vdb *db.User, payload model.CreateUserRequest) error {
 	vdb.EID = tools.UUID()
@@ -347,7 +349,10 @@ func (v *UserSvc) ConfirmTemporaryEmailFromPayload(tx *db.Tx, payload model.Conf
 }
 
 func (v *UserSvc) ShouldVerify(_ *model.User) bool {
-	return tools.RandFloat64() < 0.1
+	if v.EnableVerify {
+		return tools.RandFloat64() < 0.1
+	}
+	return false
 }
 
 func (v *UserSvc) Verify(m *model.User) (err error) {

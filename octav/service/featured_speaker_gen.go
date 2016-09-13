@@ -14,12 +14,12 @@ import (
 
 var _ = time.Time{}
 
-var featuredSpeakerSvc *FeaturedSpeakerSvc
+var featuredSpeakerSvc FeaturedSpeakerSvc
 var featuredSpeakerOnce sync.Once
 
 func FeaturedSpeaker() *FeaturedSpeakerSvc {
 	featuredSpeakerOnce.Do(featuredSpeakerSvc.Init)
-	return featuredSpeakerSvc
+	return &featuredSpeakerSvc
 }
 
 func (v *FeaturedSpeakerSvc) LookupFromPayload(tx *db.Tx, m *model.FeaturedSpeaker, payload model.LookupFeaturedSpeakerRequest) (err error) {

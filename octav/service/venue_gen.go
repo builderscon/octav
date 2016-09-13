@@ -14,12 +14,12 @@ import (
 
 var _ = time.Time{}
 
-var venueSvc *VenueSvc
+var venueSvc VenueSvc
 var venueOnce sync.Once
 
 func Venue() *VenueSvc {
 	venueOnce.Do(venueSvc.Init)
-	return venueSvc
+	return &venueSvc
 }
 
 func (v *VenueSvc) LookupFromPayload(tx *db.Tx, m *model.Venue, payload model.LookupVenueRequest) (err error) {

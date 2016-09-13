@@ -818,11 +818,11 @@ func generateServiceFile(ctx *genctx, m Model) error {
 
 	svcvarname := lowerFirst(svcname)
 	oncename := lowerFirst(m.Name + "Once")
-	fmt.Fprintf(&buf, "\n\nvar %s *%s", svcvarname, svcname)
+	fmt.Fprintf(&buf, "\n\nvar %s %s", svcvarname, svcname)
 	fmt.Fprintf(&buf, "\nvar %s sync.Once", oncename)
 	fmt.Fprintf(&buf, "\nfunc %s() *%s {", m.Name, svcname)
 	fmt.Fprintf(&buf, "\n%s.Do(%s.Init)", oncename, svcvarname)
-	fmt.Fprintf(&buf, "\nreturn %s", svcvarname)
+	fmt.Fprintf(&buf, "\nreturn &%s", svcvarname)
 	buf.WriteString("\n}")
 
 	fmt.Fprintf(&buf, "\n\nfunc (v *%s) LookupFromPayload(tx *db.Tx, m *model.%s, payload model.Lookup%sRequest) (err error) {", svcname, m.Name, m.Name)

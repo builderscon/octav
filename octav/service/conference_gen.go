@@ -14,12 +14,12 @@ import (
 
 var _ = time.Time{}
 
-var conferenceSvc *ConferenceSvc
+var conferenceSvc ConferenceSvc
 var conferenceOnce sync.Once
 
 func Conference() *ConferenceSvc {
 	conferenceOnce.Do(conferenceSvc.Init)
-	return conferenceSvc
+	return &conferenceSvc
 }
 
 func (v *ConferenceSvc) LookupFromPayload(tx *db.Tx, m *model.Conference, payload model.LookupConferenceRequest) (err error) {
