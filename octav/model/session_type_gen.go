@@ -20,6 +20,7 @@ type rawSessionType struct {
 	Duration              int        `json:"duration"`
 	SubmissionStart       *time.Time `json:"submission_start,omitempty"`
 	SubmissionEnd         *time.Time `json:"submission_end,omitempty"`
+	IsDefault             bool       `json:"is_default"`
 	IsAcceptingSubmission bool       `json:"is_accepting_submission"`
 }
 
@@ -36,6 +37,7 @@ func (v SessionType) MarshalJSON() ([]byte, error) {
 	if !v.SubmissionEnd.IsZero() {
 		raw.SubmissionEnd = &v.SubmissionEnd
 	}
+	raw.IsDefault = v.IsDefault
 	raw.IsAcceptingSubmission = v.IsAcceptingSubmission
 	buf, err := json.Marshal(raw)
 	if err != nil {
@@ -72,6 +74,7 @@ func (v *SessionType) FromRow(vdb db.SessionType) error {
 	if vdb.SubmissionEnd.Valid {
 		v.SubmissionEnd = vdb.SubmissionEnd.Time
 	}
+	v.IsDefault = vdb.IsDefault
 	return nil
 }
 
@@ -85,5 +88,6 @@ func (v *SessionType) ToRow(vdb *db.SessionType) error {
 	vdb.SubmissionStart.Time = v.SubmissionStart
 	vdb.SubmissionEnd.Valid = true
 	vdb.SubmissionEnd.Time = v.SubmissionEnd
+	vdb.IsDefault = v.IsDefault
 	return nil
 }

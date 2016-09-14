@@ -13,7 +13,7 @@ import (
 	"github.com/pkg/errors"
 )
 
-const SessionTypeStdSelectColumns = "session_types.oid, session_types.eid, session_types.conference_id, session_types.name, session_types.abstract, session_types.duration, session_types.submission_start, session_types.submission_end, session_types.created_on, session_types.modified_on"
+const SessionTypeStdSelectColumns = "session_types.oid, session_types.eid, session_types.conference_id, session_types.name, session_types.abstract, session_types.duration, session_types.is_default, session_types.submission_start, session_types.submission_end, session_types.created_on, session_types.modified_on"
 const SessionTypeTable = "session_types"
 
 type SessionTypeList []SessionType
@@ -21,7 +21,7 @@ type SessionTypeList []SessionType
 func (s *SessionType) Scan(scanner interface {
 	Scan(...interface{}) error
 }) error {
-	return scanner.Scan(&s.OID, &s.EID, &s.ConferenceID, &s.Name, &s.Abstract, &s.Duration, &s.SubmissionStart, &s.SubmissionEnd, &s.CreatedOn, &s.ModifiedOn)
+	return scanner.Scan(&s.OID, &s.EID, &s.ConferenceID, &s.Name, &s.Abstract, &s.Duration, &s.IsDefault, &s.SubmissionStart, &s.SubmissionEnd, &s.CreatedOn, &s.ModifiedOn)
 }
 
 func init() {
@@ -38,7 +38,7 @@ func init() {
 		stmt.Reset()
 		stmt.WriteString(`UPDATE `)
 		stmt.WriteString(SessionTypeTable)
-		stmt.WriteString(` SET eid = ?, conference_id = ?, name = ?, abstract = ?, duration = ?, submission_start = ?, submission_end = ? WHERE oid = ?`)
+		stmt.WriteString(` SET eid = ?, conference_id = ?, name = ?, abstract = ?, duration = ?, is_default = ?, submission_start = ?, submission_end = ? WHERE oid = ?`)
 		library.Register("sqlSessionTypeUpdateByOIDKey", stmt.String())
 
 		stmt.Reset()
@@ -60,7 +60,7 @@ func init() {
 		stmt.Reset()
 		stmt.WriteString(`UPDATE `)
 		stmt.WriteString(SessionTypeTable)
-		stmt.WriteString(` SET eid = ?, conference_id = ?, name = ?, abstract = ?, duration = ?, submission_start = ?, submission_end = ? WHERE eid = ?`)
+		stmt.WriteString(` SET eid = ?, conference_id = ?, name = ?, abstract = ?, duration = ?, is_default = ?, submission_start = ?, submission_end = ? WHERE eid = ?`)
 		library.Register("sqlSessionTypeUpdateByEIDKey", stmt.String())
 	})
 }
@@ -103,8 +103,8 @@ func (s *SessionType) Create(tx *Tx, opts ...InsertOption) (err error) {
 	}
 	stmt.WriteString("INTO ")
 	stmt.WriteString(SessionTypeTable)
-	stmt.WriteString(` (eid, conference_id, name, abstract, duration, submission_start, submission_end, created_on, modified_on) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`)
-	result, err := tx.Exec(stmt.String(), s.EID, s.ConferenceID, s.Name, s.Abstract, s.Duration, s.SubmissionStart, s.SubmissionEnd, s.CreatedOn, s.ModifiedOn)
+	stmt.WriteString(` (eid, conference_id, name, abstract, duration, is_default, submission_start, submission_end, created_on, modified_on) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`)
+	result, err := tx.Exec(stmt.String(), s.EID, s.ConferenceID, s.Name, s.Abstract, s.Duration, s.IsDefault, s.SubmissionStart, s.SubmissionEnd, s.CreatedOn, s.ModifiedOn)
 	if err != nil {
 		return err
 	}
@@ -124,7 +124,7 @@ func (s SessionType) Update(tx *Tx) error {
 		if err != nil {
 			return errors.Wrap(err, `failed to get statement`)
 		}
-		_, err = tx.Stmt(stmt).Exec(s.EID, s.ConferenceID, s.Name, s.Abstract, s.Duration, s.SubmissionStart, s.SubmissionEnd, s.OID)
+		_, err = tx.Stmt(stmt).Exec(s.EID, s.ConferenceID, s.Name, s.Abstract, s.Duration, s.IsDefault, s.SubmissionStart, s.SubmissionEnd, s.OID)
 		return err
 	}
 	if s.EID != "" {
@@ -132,7 +132,7 @@ func (s SessionType) Update(tx *Tx) error {
 		if err != nil {
 			return errors.Wrap(err, `failed to get statement`)
 		}
-		_, err = tx.Stmt(stmt).Exec(s.EID, s.ConferenceID, s.Name, s.Abstract, s.Duration, s.SubmissionStart, s.SubmissionEnd, s.EID)
+		_, err = tx.Stmt(stmt).Exec(s.EID, s.ConferenceID, s.Name, s.Abstract, s.Duration, s.IsDefault, s.SubmissionStart, s.SubmissionEnd, s.EID)
 		return err
 	}
 	return errors.New("either OID/EID must be filled")

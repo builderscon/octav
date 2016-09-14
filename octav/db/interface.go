@@ -117,6 +117,7 @@ type SessionType struct {
 	Name            string
 	Abstract        string
 	Duration        int
+	IsDefault       bool
 	SubmissionStart NullTime
 	SubmissionEnd   NullTime
 	CreatedOn       time.Time
