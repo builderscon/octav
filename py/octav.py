@@ -1,5 +1,5 @@
 """OCTAV Client Library"""
-"""DO NOT EDIT: This file was generated from ../spec/v1/api.json on Tue Aug 30 14:14:47 2016"""
+"""DO NOT EDIT: This file was generated from ../spec/v1/api.json on Wed Sep 14 09:22:19 2016"""
 
 import json
 import os
@@ -1199,7 +1199,7 @@ class Octav(object):
         self.error = repr(e)
         return None
 
-  def list_session_types_by_conference (self, conference_id=None, lang=None, limit=None, since=None):
+  def list_session_types_by_conference (self, conference_id=None, lang=None):
     try:
         payload = {}
         hdrs = {}
@@ -1207,10 +1207,6 @@ class Octav(object):
             payload['conference_id'] = conference_id
         if lang is not None:
             payload['lang'] = lang
-        if limit is not None:
-            payload['limit'] = limit
-        if since is not None:
-            payload['since'] = since
         uri = '%s/session_type/list' % self.endpoint
         hdrs = urllib3.util.make_headers(
             basic_auth='%s:%s' % (self.key, self.secret),
