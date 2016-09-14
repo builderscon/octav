@@ -135,6 +135,7 @@ CREATE TABLE session_types (
     name             TEXT NOT NULL, -- "Lightning Talk"
     abstract         TEXT NOT NULL, -- "5 minute talks about anything you want"
     duration         INTEGER UNSIGNED NOT NULL,
+    is_default       TINYINT(1) NOT NULL DEFAULT 0,
     sort_order       INTEGER DEFAULT 0,
     submission_start DATETIME,
     submission_end   DATETIME,
