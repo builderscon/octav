@@ -1037,9 +1037,7 @@
       "schema": {
         "type": "object",
         "properties": {
-          "limit": {"$ref": "#/definitions/positiveIntegerDefault10"},
           "conference_id": {"$ref": "#/definitions/uuid"},
-          "since": {"$ref": "#/definitions/uuid"},
           "lang": { "$ref": "#/definitions/language" }
         }
       },

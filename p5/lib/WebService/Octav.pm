@@ -1036,7 +1036,7 @@ sub confirm_temporary_email {
             die qq|property "$required" must be provided|;
         }
     }
-    my $uri = URI->new($self->{endpoint} . qq|/v1/email/create|);
+    my $uri = URI->new($self->{endpoint} . qq|/v1/email/confirm|);
     my @request_args;
     push @request_args, (Content_Type => "application/json", Content => JSON::encode_json($payload));
     my $res = $self->{user_agent}->post($uri, @request_args);

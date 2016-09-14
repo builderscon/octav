@@ -135,11 +135,13 @@ CREATE TABLE session_types (
     name             TEXT NOT NULL, -- "Lightning Talk"
     abstract         TEXT NOT NULL, -- "5 minute talks about anything you want"
     duration         INTEGER UNSIGNED NOT NULL,
+    sort_order       INTEGER DEFAULT 0,
     submission_start DATETIME,
     submission_end   DATETIME,
     created_on       DATETIME NOT NULL,
     modified_on      TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     KEY (eid),
+    KEY (sort_order),
     FOREIGN KEY (conference_id) REFERENCES conferences(eid) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
