@@ -81,7 +81,7 @@ func (v *SessionTypeList) LoadByConferenceSince(tx *Tx, confID string, since int
 	return nil
 }
 
-func LoadSessionTypes(tx *Tx, venues *SessionTypeList, cid string) error {
+func LoadSessionTypes(tx *Tx, list *SessionTypeList, cid string) error {
 	stmt := tools.GetBuffer()
 	defer tools.ReleaseBuffer(stmt)
 
@@ -92,7 +92,7 @@ func LoadSessionTypes(tx *Tx, venues *SessionTypeList, cid string) error {
 	stmt.WriteString(` WHERE `)
 	stmt.WriteString(SessionTypeTable)
 	stmt.WriteString(`.conference_id = ?`)
-	stmt.WriteString(` ORDER BY sort_order ASC, group_name ASC`)
+	stmt.WriteString(` ORDER BY sort_order ASC, oid ASC`)
 
 	rows, err := tx.Query(stmt.String(), cid)
 	if err != nil {
@@ -109,6 +109,6 @@ func LoadSessionTypes(tx *Tx, venues *SessionTypeList, cid string) error {
 		res = append(res, u)
 	}
 
-	*venues = res
+	*list = res
 	return nil
 }

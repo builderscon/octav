@@ -157,7 +157,7 @@ func (v *SessionTypeSvc) ListFromPayload(tx *db.Tx, result *model.SessionTypeLis
 	}
 
 	var vdbl db.SessionTypeList
-	if err := vdbl.LoadByConferenceSinceEID(tx, payload.ConferenceID, payload.Since.String, int(payload.Limit.Int)); err != nil {
+	if err := db.LoadSessionTypes(tx, &vdbl, payload.ConferenceID); err != nil {
 		return errors.Wrap(err, "failed to load session type from database")
 	}
 
