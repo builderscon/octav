@@ -2,12 +2,8 @@ package db
 
 import (
 	"github.com/builderscon/octav/octav/tools"
-	sqllib "github.com/lestrrat/go-sqllib"
 	"github.com/pkg/errors"
 )
-
-var userLoadByAuthUserIDKey sqllib.Key
-var userIsAdministratorKey sqllib.Key
 
 func init() {
 	hooks = append(hooks, func() {
@@ -30,7 +26,7 @@ func init() {
 		stmt.WriteString(ConferenceSeriesAdministratorTable)
 		stmt.WriteString(`.user_id = ?`)
 
-		userIsAdministratorKey = library.Register(stmt.String())
+		library.Register("userIsAdministratorKey", stmt.String())
 
 		stmt.Reset()
 		stmt.WriteString(`SELECT `)
@@ -39,12 +35,12 @@ func init() {
 		stmt.WriteString(UserTable)
 		stmt.WriteString(` WHERE users.auth_via = ? AND users.auth_user_id = ?`)
 
-		userLoadByAuthUserIDKey = library.Register(stmt.String())
+		library.Register("userLoadByAuthUserIDKey", stmt.String())
 	})
 }
 
 func (vdb *User) LoadByAuthUserID(tx *Tx, via, id string) error {
-	stmt, err := library.GetStmt(userLoadByAuthUserIDKey)
+	stmt, err := library.GetStmt("userLoadByAuthUserIDKey")
 	if err != nil {
 		return errors.Wrap(err, "failed to get statement")
 	}
@@ -57,7 +53,7 @@ func (vdb *User) LoadByAuthUserID(tx *Tx, via, id string) error {
 }
 
 func IsAdministrator(tx *Tx, userID string) error {
-	stmt, err := library.GetStmt(userIsAdministratorKey)
+	stmt, err := library.GetStmt("userIsAdministratorKey")
 	if err != nil {
 		return errors.Wrap(err, "failed to get statement")
 	}

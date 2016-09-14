@@ -8,7 +8,6 @@ import (
 
 	"github.com/builderscon/octav/octav/tools"
 	"github.com/lestrrat/go-pdebug"
-	"github.com/lestrrat/go-sqllib"
 	"github.com/pkg/errors"
 )
 
@@ -23,9 +22,6 @@ func (c *ConferenceDate) Scan(scanner interface {
 	return scanner.Scan(&c.OID, &c.ConferenceID, &c.Date, &c.Open, &c.Close)
 }
 
-var sqlConferenceDateUpdateByOIDKey sqllib.Key
-var sqlConferenceDateDeleteByOIDKey sqllib.Key
-
 func init() {
 	hooks = append(hooks, func() {
 		stmt := tools.GetBuffer()
@@ -35,13 +31,13 @@ func init() {
 		stmt.WriteString(`DELETE FROM `)
 		stmt.WriteString(ConferenceDateTable)
 		stmt.WriteString(` WHERE oid = ?`)
-		sqlConferenceDateDeleteByOIDKey = library.Register(stmt.String())
+		library.Register("sqlConferenceDateDeleteByOIDKey", stmt.String())
 
 		stmt.Reset()
 		stmt.WriteString(`UPDATE `)
 		stmt.WriteString(ConferenceDateTable)
 		stmt.WriteString(` SET conference_id = ?, date = ?, open = ?, close = ? WHERE oid = ?`)
-		sqlConferenceDateUpdateByOIDKey = library.Register(stmt.String())
+		library.Register("sqlConferenceDateUpdateByOIDKey", stmt.String())
 	})
 }
 
@@ -83,7 +79,7 @@ func (c *ConferenceDate) Create(tx *Tx, opts ...InsertOption) (err error) {
 
 func (c ConferenceDate) Update(tx *Tx) error {
 	if c.OID != 0 {
-		stmt, err := library.GetStmt(sqlConferenceDateUpdateByOIDKey)
+		stmt, err := library.GetStmt("sqlConferenceDateUpdateByOIDKey")
 		if err != nil {
 			return errors.Wrap(err, `failed to get statement`)
 		}
@@ -95,7 +91,7 @@ func (c ConferenceDate) Update(tx *Tx) error {
 
 func (c ConferenceDate) Delete(tx *Tx) error {
 	if c.OID != 0 {
-		stmt, err := library.GetStmt(sqlConferenceDateDeleteByOIDKey)
+		stmt, err := library.GetStmt("sqlConferenceDateDeleteByOIDKey")
 		if err != nil {
 			return errors.Wrap(err, `failed to get statement`)
 		}

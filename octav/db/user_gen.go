@@ -10,7 +10,6 @@ import (
 
 	"github.com/builderscon/octav/octav/tools"
 	"github.com/lestrrat/go-pdebug"
-	"github.com/lestrrat/go-sqllib"
 	"github.com/pkg/errors"
 )
 
@@ -25,12 +24,6 @@ func (u *User) Scan(scanner interface {
 	return scanner.Scan(&u.OID, &u.EID, &u.AuthVia, &u.AuthUserID, &u.AvatarURL, &u.FirstName, &u.LastName, &u.Nickname, &u.Email, &u.TshirtSize, &u.IsAdmin, &u.CreatedOn, &u.ModifiedOn)
 }
 
-var sqlUserUpdateByOIDKey sqllib.Key
-var sqlUserDeleteByOIDKey sqllib.Key
-var sqlUserLoadByEIDKey sqllib.Key
-var sqlUserUpdateByEIDKey sqllib.Key
-var sqlUserDeleteByEIDKey sqllib.Key
-
 func init() {
 	hooks = append(hooks, func() {
 		stmt := tools.GetBuffer()
@@ -40,13 +33,13 @@ func init() {
 		stmt.WriteString(`DELETE FROM `)
 		stmt.WriteString(UserTable)
 		stmt.WriteString(` WHERE oid = ?`)
-		sqlUserDeleteByOIDKey = library.Register(stmt.String())
+		library.Register("sqlUserDeleteByOIDKey", stmt.String())
 
 		stmt.Reset()
 		stmt.WriteString(`UPDATE `)
 		stmt.WriteString(UserTable)
 		stmt.WriteString(` SET eid = ?, auth_via = ?, auth_user_id = ?, avatar_url = ?, first_name = ?, last_name = ?, nickname = ?, email = ?, tshirt_size = ?, is_admin = ? WHERE oid = ?`)
-		sqlUserUpdateByOIDKey = library.Register(stmt.String())
+		library.Register("sqlUserUpdateByOIDKey", stmt.String())
 
 		stmt.Reset()
 		stmt.WriteString(`SELECT `)
@@ -56,24 +49,24 @@ func init() {
 		stmt.WriteString(` WHERE `)
 		stmt.WriteString(UserTable)
 		stmt.WriteString(`.eid = ?`)
-		sqlUserLoadByEIDKey = library.Register(stmt.String())
+		library.Register("sqlUserLoadByEIDKey", stmt.String())
 
 		stmt.Reset()
 		stmt.WriteString(`DELETE FROM `)
 		stmt.WriteString(UserTable)
 		stmt.WriteString(` WHERE eid = ?`)
-		sqlUserDeleteByEIDKey = library.Register(stmt.String())
+		library.Register("sqlUserDeleteByEIDKey", stmt.String())
 
 		stmt.Reset()
 		stmt.WriteString(`UPDATE `)
 		stmt.WriteString(UserTable)
 		stmt.WriteString(` SET eid = ?, auth_via = ?, auth_user_id = ?, avatar_url = ?, first_name = ?, last_name = ?, nickname = ?, email = ?, tshirt_size = ?, is_admin = ? WHERE eid = ?`)
-		sqlUserUpdateByEIDKey = library.Register(stmt.String())
+		library.Register("sqlUserUpdateByEIDKey", stmt.String())
 	})
 }
 
 func (u *User) LoadByEID(tx *Tx, eid string) error {
-	stmt, err := library.GetStmt(sqlUserLoadByEIDKey)
+	stmt, err := library.GetStmt("sqlUserLoadByEIDKey")
 	if err != nil {
 		return errors.Wrap(err, `failed to get statement`)
 	}
@@ -127,7 +120,7 @@ func (u *User) Create(tx *Tx, opts ...InsertOption) (err error) {
 
 func (u User) Update(tx *Tx) error {
 	if u.OID != 0 {
-		stmt, err := library.GetStmt(sqlUserUpdateByOIDKey)
+		stmt, err := library.GetStmt("sqlUserUpdateByOIDKey")
 		if err != nil {
 			return errors.Wrap(err, `failed to get statement`)
 		}
@@ -135,7 +128,7 @@ func (u User) Update(tx *Tx) error {
 		return err
 	}
 	if u.EID != "" {
-		stmt, err := library.GetStmt(sqlUserUpdateByEIDKey)
+		stmt, err := library.GetStmt("sqlUserUpdateByEIDKey")
 		if err != nil {
 			return errors.Wrap(err, `failed to get statement`)
 		}
@@ -147,7 +140,7 @@ func (u User) Update(tx *Tx) error {
 
 func (u User) Delete(tx *Tx) error {
 	if u.OID != 0 {
-		stmt, err := library.GetStmt(sqlUserDeleteByOIDKey)
+		stmt, err := library.GetStmt("sqlUserDeleteByOIDKey")
 		if err != nil {
 			return errors.Wrap(err, `failed to get statement`)
 		}
@@ -156,7 +149,7 @@ func (u User) Delete(tx *Tx) error {
 	}
 
 	if u.EID != "" {
-		stmt, err := library.GetStmt(sqlUserDeleteByEIDKey)
+		stmt, err := library.GetStmt("sqlUserDeleteByEIDKey")
 		if err != nil {
 			return errors.Wrap(err, `failed to get statement`)
 		}

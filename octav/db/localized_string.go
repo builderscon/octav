@@ -3,14 +3,8 @@ package db
 import (
 	"github.com/builderscon/octav/octav/tools"
 	"github.com/lestrrat/go-pdebug"
-	sqllib "github.com/lestrrat/go-sqllib"
 	"github.com/pkg/errors"
 )
-
-var sqlLocalizedStringLoadByLangKeyKey sqllib.Key
-var sqlLocalizedStringUpsertKey sqllib.Key
-var sqlLocalizedStringLoadLocalizedStringsForParentKey sqllib.Key
-var sqlLocalizedStringDeleteLocalizedStringsForParentKey sqllib.Key
 
 func init() {
 	hooks = append(hooks, func() {
@@ -21,30 +15,30 @@ func init() {
 		buf.WriteString(LocalizedStringTable)
 		buf.WriteString(` WHERE parent_type = ? AND parent_id = ? AND name = ? AND language = ?`)
 
-		sqlLocalizedStringLoadByLangKeyKey = library.Register(buf.String())
+		library.Register("sqlLocalizedStringLoadByLangKeyKey", buf.String())
 
 		buf.Reset()
 		buf.WriteString(`INSERT INTO `)
 		buf.WriteString(LocalizedStringTable)
 		buf.WriteString(`(parent_id, parent_type, name, language, localized) VALUES (?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE localized = VALUES(localized)`)
-		sqlLocalizedStringUpsertKey = library.Register(buf.String())
+		library.Register("sqlLocalizedStringUpsertKey", buf.String())
 
 		buf.Reset()
 		buf.WriteString(`SELECT oid, parent_id, parent_type, name, language, localized FROM `)
 		buf.WriteString(LocalizedStringTable)
 		buf.WriteString(` WHERE parent_id = ? AND parent_type = ?`)
-		sqlLocalizedStringLoadLocalizedStringsForParentKey = library.Register(buf.String())
+		library.Register("sqlLocalizedStringLoadLocalizedStringsForParentKey", buf.String())
 
 		buf.Reset()
 		buf.WriteString(`DELETE FROM `)
 		buf.WriteString(LocalizedStringTable)
 		buf.WriteString(` WHERE parent_id = ? AND parent_type = ?`)
-		sqlLocalizedStringDeleteLocalizedStringsForParentKey = library.Register(buf.String())
+		library.Register("sqlLocalizedStringDeleteLocalizedStringsForParentKey", buf.String())
 	})
 }
 
 func (l *LocalizedString) LoadByLangKey(tx *Tx, language, name, parentType, parentID string) error {
-	stmt, err := library.GetStmt(sqlLocalizedStringLoadByLangKeyKey)
+	stmt, err := library.GetStmt("sqlLocalizedStringLoadByLangKeyKey")
 	if err != nil {
 		return errors.Wrap(err, "failed to get statement")
 	}
@@ -62,7 +56,7 @@ func (l *LocalizedString) Upsert(tx *Tx) (err error) {
 		defer g.End()
 	}
 
-	stmt, err := library.GetStmt(sqlLocalizedStringUpsertKey)
+	stmt, err := library.GetStmt("sqlLocalizedStringUpsertKey")
 	if err != nil {
 		return errors.Wrap(err, "failed to get statement")
 	}
@@ -82,7 +76,7 @@ func (l *LocalizedString) Upsert(tx *Tx) (err error) {
 }
 
 func LoadLocalizedStringsForParent(tx *Tx, parentID, parentType string) (LocalizedStringList, error) {
-	stmt, err := library.GetStmt(sqlLocalizedStringLoadLocalizedStringsForParentKey)
+	stmt, err := library.GetStmt("sqlLocalizedStringLoadLocalizedStringsForParentKey")
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to get statement")
 	}
@@ -105,7 +99,7 @@ func LoadLocalizedStringsForParent(tx *Tx, parentID, parentType string) (Localiz
 }
 
 func DeleteLocalizedStringsForParent(tx *Tx, parentID, parentType string) error {
-	stmt, err := library.GetStmt(sqlLocalizedStringDeleteLocalizedStringsForParentKey)
+	stmt, err := library.GetStmt("sqlLocalizedStringDeleteLocalizedStringsForParentKey")
 	if err != nil {
 		return errors.Wrap(err, "failed to get statement")
 	}

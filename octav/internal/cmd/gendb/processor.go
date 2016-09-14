@@ -182,7 +182,6 @@ func (p *Processor) ProcessStruct(s Struct) error {
 	buf.WriteString("\n\n" + `"github.com/lestrrat/go-pdebug"`)
 	buf.WriteString("\n" + `"github.com/pkg/errors"`)
 	if hasEID || hasOID {
-		buf.WriteString("\n" + `"github.com/lestrrat/go-sqllib"`)
 		buf.WriteString("\n" + `"github.com/builderscon/octav/octav/tools"`)
 	}
 	buf.WriteString("\n)")
@@ -243,18 +242,6 @@ func (p *Processor) ProcessStruct(s Struct) error {
 	fmt.Fprintf(&buf, "\nreturn scanner.Scan(%s)", sfields.String())
 	buf.WriteString("\n}\n")
 
-	if hasOID {
-		for _, n := range []string{ s.sqlKeyName("UpdateByOID"), s.sqlKeyName("DeleteByOID") } {
-			fmt.Fprintf(&buf, "\nvar %s sqllib.Key", n)
-		}
-	}
-
-	if hasEID {
-		for _, n := range []string{ s.sqlKeyName("LoadByEID"), s.sqlKeyName("UpdateByEID"), s.sqlKeyName("DeleteByEID") } {
-			fmt.Fprintf(&buf, "\nvar %s sqllib.Key", n)
-		}
-	}
-
 	buf.WriteString("\nfunc init() {")
 	buf.WriteString("\nhooks = append(hooks, func() {")
 	buf.WriteString("\nstmt := tools.GetBuffer()")
@@ -265,14 +252,13 @@ func (p *Processor) ProcessStruct(s Struct) error {
 		buf.WriteString("\nstmt.WriteString(`DELETE FROM `)")
 		fmt.Fprintf(&buf, "\nstmt.WriteString(%sTable)", s.Name)
 		buf.WriteString("\nstmt.WriteString(` WHERE oid = ?`)")
-		fmt.Fprintf(&buf, "\n%s = library.Register(stmt.String())", s.sqlKeyName("DeleteByOID"))
+		fmt.Fprintf(&buf, "\nlibrary.Register(%s, stmt.String())", strconv.Quote(s.sqlKeyName("DeleteByOID")))
 
 		buf.WriteString("\n\nstmt.Reset()")
 		buf.WriteString("\nstmt.WriteString(`UPDATE `)")
 		fmt.Fprintf(&buf, "\nstmt.WriteString(%sTable)", s.Name)
 		fmt.Fprintf(&buf, "\nstmt.WriteString(` SET %s WHERE oid = ?`)", setCols.String())
-		fmt.Fprintf(&buf, "\n%s = library.Register(stmt.String())", s.sqlKeyName("UpdateByOID"))
-
+		fmt.Fprintf(&buf, "\nlibrary.Register(%s, stmt.String())", strconv.Quote(s.sqlKeyName("UpdateByOID")))
 	}
 
 	if hasEID {
@@ -284,19 +270,19 @@ func (p *Processor) ProcessStruct(s Struct) error {
 		buf.WriteString("\nstmt.WriteString(` WHERE `)")
 		fmt.Fprintf(&buf, "\nstmt.WriteString(%sTable)", s.Name)
 		buf.WriteString("\nstmt.WriteString(`.eid = ?`)")
-		fmt.Fprintf(&buf, "\n%s = library.Register(stmt.String())", s.sqlKeyName("LoadByEID"))
+		fmt.Fprintf(&buf, "\nlibrary.Register(%s, stmt.String())", strconv.Quote(s.sqlKeyName("LoadByEID")))
 
 		buf.WriteString("\n\nstmt.Reset()")
 		buf.WriteString("\nstmt.WriteString(`DELETE FROM `)")
 		fmt.Fprintf(&buf, "\nstmt.WriteString(%sTable)", s.Name)
 		buf.WriteString("\nstmt.WriteString(` WHERE eid = ?`)")
-		fmt.Fprintf(&buf, "\n%s = library.Register(stmt.String())", s.sqlKeyName("DeleteByEID"))
+		fmt.Fprintf(&buf, "\nlibrary.Register(%s, stmt.String())", strconv.Quote(s.sqlKeyName("DeleteByEID")))
 
 		buf.WriteString("\n\nstmt.Reset()")
 		buf.WriteString("\nstmt.WriteString(`UPDATE `)")
 		fmt.Fprintf(&buf, "\nstmt.WriteString(%sTable)", s.Name)
 		fmt.Fprintf(&buf, "\nstmt.WriteString(` SET %s WHERE eid = ?`)", setCols.String())
-		fmt.Fprintf(&buf, "\n%s = library.Register(stmt.String())", s.sqlKeyName("UpdateByEID"))
+		fmt.Fprintf(&buf, "\nlibrary.Register(%s, stmt.String())", strconv.Quote(s.sqlKeyName("UpdateByEID")))
 	}
 
 	buf.WriteString("\n})")
@@ -304,7 +290,7 @@ func (p *Processor) ProcessStruct(s Struct) error {
 
 	if hasEID {
 		fmt.Fprintf(&buf, "\n\nfunc (%c *%s) LoadByEID(tx *Tx, eid string) error {", varname, s.Name)
-		fmt.Fprintf(&buf, "\nstmt, err := library.GetStmt(%s)", s.sqlKeyName("LoadByEID"))
+		fmt.Fprintf(&buf, "\nstmt, err := library.GetStmt(%s)", strconv.Quote(s.sqlKeyName("LoadByEID")))
 		buf.WriteString("\nif err != nil {\nreturn errors.Wrap(err, `failed to get statement`)\n}")
 		buf.WriteString("\nrow := tx.Stmt(stmt).QueryRow(eid)")
 		fmt.Fprintf(&buf, "\nif err := %c.Scan(row); err != nil {", varname)
@@ -360,14 +346,14 @@ func (p *Processor) ProcessStruct(s Struct) error {
 	// This is very inefficient, but it's the best we can do for now
 	fmt.Fprintf(&buf, "\n\nfunc (%c %s) Update(tx *Tx) error {", varname, s.Name)
 	fmt.Fprintf(&buf, "\nif %c.OID != 0 {", varname)
-	fmt.Fprintf(&buf, "\nstmt, err := library.GetStmt(%s)", s.sqlKeyName("UpdateByOID"))
+	fmt.Fprintf(&buf, "\nstmt, err := library.GetStmt(%s)", strconv.Quote(s.sqlKeyName("UpdateByOID")))
 	buf.WriteString("\nif err != nil {\nreturn errors.Wrap(err, `failed to get statement`)\n}")
 	fmt.Fprintf(&buf, "\n_, err = tx.Stmt(stmt).Exec(%s, %c.OID)", setParams.String(), varname)
 	buf.WriteString("\nreturn err")
 	buf.WriteString("\n}")
 	if hasEID {
 		fmt.Fprintf(&buf, "\n"+`if %c.EID != "" {`, varname)
-		fmt.Fprintf(&buf, "\nstmt, err := library.GetStmt(%s)", s.sqlKeyName("UpdateByEID"))
+		fmt.Fprintf(&buf, "\nstmt, err := library.GetStmt(%s)", strconv.Quote(s.sqlKeyName("UpdateByEID")))
 		buf.WriteString("\nif err != nil {\nreturn errors.Wrap(err, `failed to get statement`)\n}")
 		fmt.Fprintf(&buf, "\n_, err = tx.Stmt(stmt).Exec(%s, %c.EID)", setParams.String(), varname)
 		buf.WriteString("\nreturn err")
@@ -378,14 +364,14 @@ func (p *Processor) ProcessStruct(s Struct) error {
 
 	fmt.Fprintf(&buf, "\n\nfunc (%c %s) Delete(tx *Tx) error {", varname, s.Name)
 	fmt.Fprintf(&buf, "\nif %c.OID != 0 {", varname)
-	fmt.Fprintf(&buf, "\nstmt, err := library.GetStmt(%s)", s.sqlKeyName("DeleteByOID"))
+	fmt.Fprintf(&buf, "\nstmt, err := library.GetStmt(%s)", strconv.Quote(s.sqlKeyName("DeleteByOID")))
 	buf.WriteString("\nif err != nil {\nreturn errors.Wrap(err, `failed to get statement`)\n}")
 	fmt.Fprintf(&buf, "\n_, err = tx.Stmt(stmt).Exec(%c.OID)", varname)
 	buf.WriteString("\nreturn err")
 	buf.WriteString("\n}\n")
 	if hasEID {
 		fmt.Fprintf(&buf, "\nif %c.EID != %s {", varname, `""`)
-		fmt.Fprintf(&buf, "\nstmt, err := library.GetStmt(%s)", s.sqlKeyName("DeleteByEID"))
+		fmt.Fprintf(&buf, "\nstmt, err := library.GetStmt(%s)", strconv.Quote(s.sqlKeyName("DeleteByEID")))
 		buf.WriteString("\nif err != nil {\nreturn errors.Wrap(err, `failed to get statement`)\n}")
 		fmt.Fprintf(&buf, "\n_, err = tx.Stmt(stmt).Exec(%c.EID)", varname)
 		buf.WriteString("\nreturn err")

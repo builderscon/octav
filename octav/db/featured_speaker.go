@@ -4,11 +4,8 @@ import (
 	"strconv"
 
 	"github.com/builderscon/octav/octav/tools"
-	sqllib "github.com/lestrrat/go-sqllib"
 	"github.com/pkg/errors"
 )
-
-var sqlFeaturedSpeakerLoadFeaturedSpeakersKey sqllib.Key
 
 func init() {
 	hooks = append(hooks, func() {
@@ -23,7 +20,7 @@ func init() {
 		buf.WriteString(FeaturedSpeakerTable)
 		buf.WriteString(`.conference_id = ?`)
 
-		sqlFeaturedSpeakerLoadFeaturedSpeakersKey = library.Register(buf.String())
+		library.Register("sqlFeaturedSpeakerLoadFeaturedSpeakersKey", buf.String())
 	})
 }
 
@@ -53,7 +50,7 @@ func (v *FeaturedSpeakerList) LoadByConferenceSince(tx *Tx, confID string, since
 }
 
 func LoadFeaturedSpeakers(tx *Tx, venues *FeaturedSpeakerList, cid string) error {
-	stmt, err := library.GetStmt(sqlFeaturedSpeakerLoadFeaturedSpeakersKey)
+	stmt, err := library.GetStmt("sqlFeaturedSpeakerLoadFeaturedSpeakersKey")
 	if err != nil {
 		return errors.Wrap(err, "failed to get statement")
 	}
