@@ -10,7 +10,6 @@ import (
 
 	"github.com/builderscon/octav/octav/tools"
 	"github.com/lestrrat/go-pdebug"
-	"github.com/lestrrat/go-sqllib"
 	"github.com/pkg/errors"
 )
 
@@ -25,12 +24,6 @@ func (f *FeaturedSpeaker) Scan(scanner interface {
 	return scanner.Scan(&f.OID, &f.EID, &f.ConferenceID, &f.SpeakerID, &f.AvatarURL, &f.DisplayName, &f.Description, &f.CreatedOn, &f.ModifiedOn)
 }
 
-var sqlFeaturedSpeakerUpdateByOIDKey sqllib.Key
-var sqlFeaturedSpeakerDeleteByOIDKey sqllib.Key
-var sqlFeaturedSpeakerLoadByEIDKey sqllib.Key
-var sqlFeaturedSpeakerUpdateByEIDKey sqllib.Key
-var sqlFeaturedSpeakerDeleteByEIDKey sqllib.Key
-
 func init() {
 	hooks = append(hooks, func() {
 		stmt := tools.GetBuffer()
@@ -40,13 +33,13 @@ func init() {
 		stmt.WriteString(`DELETE FROM `)
 		stmt.WriteString(FeaturedSpeakerTable)
 		stmt.WriteString(` WHERE oid = ?`)
-		sqlFeaturedSpeakerDeleteByOIDKey = library.Register(stmt.String())
+		library.Register("sqlFeaturedSpeakerDeleteByOIDKey", stmt.String())
 
 		stmt.Reset()
 		stmt.WriteString(`UPDATE `)
 		stmt.WriteString(FeaturedSpeakerTable)
 		stmt.WriteString(` SET eid = ?, conference_id = ?, speaker_id = ?, avatar_url = ?, display_name = ?, description = ? WHERE oid = ?`)
-		sqlFeaturedSpeakerUpdateByOIDKey = library.Register(stmt.String())
+		library.Register("sqlFeaturedSpeakerUpdateByOIDKey", stmt.String())
 
 		stmt.Reset()
 		stmt.WriteString(`SELECT `)
@@ -56,24 +49,24 @@ func init() {
 		stmt.WriteString(` WHERE `)
 		stmt.WriteString(FeaturedSpeakerTable)
 		stmt.WriteString(`.eid = ?`)
-		sqlFeaturedSpeakerLoadByEIDKey = library.Register(stmt.String())
+		library.Register("sqlFeaturedSpeakerLoadByEIDKey", stmt.String())
 
 		stmt.Reset()
 		stmt.WriteString(`DELETE FROM `)
 		stmt.WriteString(FeaturedSpeakerTable)
 		stmt.WriteString(` WHERE eid = ?`)
-		sqlFeaturedSpeakerDeleteByEIDKey = library.Register(stmt.String())
+		library.Register("sqlFeaturedSpeakerDeleteByEIDKey", stmt.String())
 
 		stmt.Reset()
 		stmt.WriteString(`UPDATE `)
 		stmt.WriteString(FeaturedSpeakerTable)
 		stmt.WriteString(` SET eid = ?, conference_id = ?, speaker_id = ?, avatar_url = ?, display_name = ?, description = ? WHERE eid = ?`)
-		sqlFeaturedSpeakerUpdateByEIDKey = library.Register(stmt.String())
+		library.Register("sqlFeaturedSpeakerUpdateByEIDKey", stmt.String())
 	})
 }
 
 func (f *FeaturedSpeaker) LoadByEID(tx *Tx, eid string) error {
-	stmt, err := library.GetStmt(sqlFeaturedSpeakerLoadByEIDKey)
+	stmt, err := library.GetStmt("sqlFeaturedSpeakerLoadByEIDKey")
 	if err != nil {
 		return errors.Wrap(err, `failed to get statement`)
 	}
@@ -127,7 +120,7 @@ func (f *FeaturedSpeaker) Create(tx *Tx, opts ...InsertOption) (err error) {
 
 func (f FeaturedSpeaker) Update(tx *Tx) error {
 	if f.OID != 0 {
-		stmt, err := library.GetStmt(sqlFeaturedSpeakerUpdateByOIDKey)
+		stmt, err := library.GetStmt("sqlFeaturedSpeakerUpdateByOIDKey")
 		if err != nil {
 			return errors.Wrap(err, `failed to get statement`)
 		}
@@ -135,7 +128,7 @@ func (f FeaturedSpeaker) Update(tx *Tx) error {
 		return err
 	}
 	if f.EID != "" {
-		stmt, err := library.GetStmt(sqlFeaturedSpeakerUpdateByEIDKey)
+		stmt, err := library.GetStmt("sqlFeaturedSpeakerUpdateByEIDKey")
 		if err != nil {
 			return errors.Wrap(err, `failed to get statement`)
 		}
@@ -147,7 +140,7 @@ func (f FeaturedSpeaker) Update(tx *Tx) error {
 
 func (f FeaturedSpeaker) Delete(tx *Tx) error {
 	if f.OID != 0 {
-		stmt, err := library.GetStmt(sqlFeaturedSpeakerDeleteByOIDKey)
+		stmt, err := library.GetStmt("sqlFeaturedSpeakerDeleteByOIDKey")
 		if err != nil {
 			return errors.Wrap(err, `failed to get statement`)
 		}
@@ -156,7 +149,7 @@ func (f FeaturedSpeaker) Delete(tx *Tx) error {
 	}
 
 	if f.EID != "" {
-		stmt, err := library.GetStmt(sqlFeaturedSpeakerDeleteByEIDKey)
+		stmt, err := library.GetStmt("sqlFeaturedSpeakerDeleteByEIDKey")
 		if err != nil {
 			return errors.Wrap(err, `failed to get statement`)
 		}

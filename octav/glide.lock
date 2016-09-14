@@ -1,5 +1,5 @@
 hash: b5b7211b3f10da55785c85788f8739e96f3704229535703a5d3bacf9a9e6b883
-updated: 2016-09-13T19:42:46.624742702+09:00
+updated: 2016-09-14T14:48:18.337684666+09:00
 imports:
 - name: cloud.google.com/go
   version: e89968106bfb1f9fe3f05a5ca644866acd15edf8
@@ -56,7 +56,7 @@ imports:
 - name: github.com/lestrrat/go-simple-guard
   version: 9558d700d27518c2737bad3d5f6c1c5e481e1a29
 - name: github.com/lestrrat/go-sqllib
-  version: 9148c9e982d1cf0028f52ad9513177943512672b
+  version: fe62aa02097e7106a51098537bf7b77e82944ce4
 - name: github.com/lestrrat/go-structinfo
   version: f74c056fe41f860aa6264478c664a6fff8a64298
 - name: github.com/lestrrat/go-tx-guard

@@ -10,7 +10,6 @@ import (
 
 	"github.com/builderscon/octav/octav/tools"
 	"github.com/lestrrat/go-pdebug"
-	"github.com/lestrrat/go-sqllib"
 	"github.com/pkg/errors"
 )
 
@@ -25,12 +24,6 @@ func (s *Sponsor) Scan(scanner interface {
 	return scanner.Scan(&s.OID, &s.EID, &s.ConferenceID, &s.Name, &s.LogoURL1, &s.LogoURL2, &s.LogoURL3, &s.URL, &s.GroupName, &s.SortOrder, &s.CreatedOn, &s.ModifiedOn)
 }
 
-var sqlSponsorUpdateByOIDKey sqllib.Key
-var sqlSponsorDeleteByOIDKey sqllib.Key
-var sqlSponsorLoadByEIDKey sqllib.Key
-var sqlSponsorUpdateByEIDKey sqllib.Key
-var sqlSponsorDeleteByEIDKey sqllib.Key
-
 func init() {
 	hooks = append(hooks, func() {
 		stmt := tools.GetBuffer()
@@ -40,13 +33,13 @@ func init() {
 		stmt.WriteString(`DELETE FROM `)
 		stmt.WriteString(SponsorTable)
 		stmt.WriteString(` WHERE oid = ?`)
-		sqlSponsorDeleteByOIDKey = library.Register(stmt.String())
+		library.Register("sqlSponsorDeleteByOIDKey", stmt.String())
 
 		stmt.Reset()
 		stmt.WriteString(`UPDATE `)
 		stmt.WriteString(SponsorTable)
 		stmt.WriteString(` SET eid = ?, conference_id = ?, name = ?, logo_url1 = ?, logo_url2 = ?, logo_url3 = ?, url = ?, group_name = ?, sort_order = ? WHERE oid = ?`)
-		sqlSponsorUpdateByOIDKey = library.Register(stmt.String())
+		library.Register("sqlSponsorUpdateByOIDKey", stmt.String())
 
 		stmt.Reset()
 		stmt.WriteString(`SELECT `)
@@ -56,24 +49,24 @@ func init() {
 		stmt.WriteString(` WHERE `)
 		stmt.WriteString(SponsorTable)
 		stmt.WriteString(`.eid = ?`)
-		sqlSponsorLoadByEIDKey = library.Register(stmt.String())
+		library.Register("sqlSponsorLoadByEIDKey", stmt.String())
 
 		stmt.Reset()
 		stmt.WriteString(`DELETE FROM `)
 		stmt.WriteString(SponsorTable)
 		stmt.WriteString(` WHERE eid = ?`)
-		sqlSponsorDeleteByEIDKey = library.Register(stmt.String())
+		library.Register("sqlSponsorDeleteByEIDKey", stmt.String())
 
 		stmt.Reset()
 		stmt.WriteString(`UPDATE `)
 		stmt.WriteString(SponsorTable)
 		stmt.WriteString(` SET eid = ?, conference_id = ?, name = ?, logo_url1 = ?, logo_url2 = ?, logo_url3 = ?, url = ?, group_name = ?, sort_order = ? WHERE eid = ?`)
-		sqlSponsorUpdateByEIDKey = library.Register(stmt.String())
+		library.Register("sqlSponsorUpdateByEIDKey", stmt.String())
 	})
 }
 
 func (s *Sponsor) LoadByEID(tx *Tx, eid string) error {
-	stmt, err := library.GetStmt(sqlSponsorLoadByEIDKey)
+	stmt, err := library.GetStmt("sqlSponsorLoadByEIDKey")
 	if err != nil {
 		return errors.Wrap(err, `failed to get statement`)
 	}
@@ -127,7 +120,7 @@ func (s *Sponsor) Create(tx *Tx, opts ...InsertOption) (err error) {
 
 func (s Sponsor) Update(tx *Tx) error {
 	if s.OID != 0 {
-		stmt, err := library.GetStmt(sqlSponsorUpdateByOIDKey)
+		stmt, err := library.GetStmt("sqlSponsorUpdateByOIDKey")
 		if err != nil {
 			return errors.Wrap(err, `failed to get statement`)
 		}
@@ -135,7 +128,7 @@ func (s Sponsor) Update(tx *Tx) error {
 		return err
 	}
 	if s.EID != "" {
-		stmt, err := library.GetStmt(sqlSponsorUpdateByEIDKey)
+		stmt, err := library.GetStmt("sqlSponsorUpdateByEIDKey")
 		if err != nil {
 			return errors.Wrap(err, `failed to get statement`)
 		}
@@ -147,7 +140,7 @@ func (s Sponsor) Update(tx *Tx) error {
 
 func (s Sponsor) Delete(tx *Tx) error {
 	if s.OID != 0 {
-		stmt, err := library.GetStmt(sqlSponsorDeleteByOIDKey)
+		stmt, err := library.GetStmt("sqlSponsorDeleteByOIDKey")
 		if err != nil {
 			return errors.Wrap(err, `failed to get statement`)
 		}
@@ -156,7 +149,7 @@ func (s Sponsor) Delete(tx *Tx) error {
 	}
 
 	if s.EID != "" {
-		stmt, err := library.GetStmt(sqlSponsorDeleteByEIDKey)
+		stmt, err := library.GetStmt("sqlSponsorDeleteByEIDKey")
 		if err != nil {
 			return errors.Wrap(err, `failed to get statement`)
 		}

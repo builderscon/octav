@@ -10,7 +10,6 @@ import (
 
 	"github.com/builderscon/octav/octav/tools"
 	"github.com/lestrrat/go-pdebug"
-	"github.com/lestrrat/go-sqllib"
 	"github.com/pkg/errors"
 )
 
@@ -25,12 +24,6 @@ func (q *Question) Scan(scanner interface {
 	return scanner.Scan(&q.OID, &q.EID, &q.SessionID, &q.UserID, &q.Body, &q.CreatedOn, &q.ModifiedOn)
 }
 
-var sqlQuestionUpdateByOIDKey sqllib.Key
-var sqlQuestionDeleteByOIDKey sqllib.Key
-var sqlQuestionLoadByEIDKey sqllib.Key
-var sqlQuestionUpdateByEIDKey sqllib.Key
-var sqlQuestionDeleteByEIDKey sqllib.Key
-
 func init() {
 	hooks = append(hooks, func() {
 		stmt := tools.GetBuffer()
@@ -40,13 +33,13 @@ func init() {
 		stmt.WriteString(`DELETE FROM `)
 		stmt.WriteString(QuestionTable)
 		stmt.WriteString(` WHERE oid = ?`)
-		sqlQuestionDeleteByOIDKey = library.Register(stmt.String())
+		library.Register("sqlQuestionDeleteByOIDKey", stmt.String())
 
 		stmt.Reset()
 		stmt.WriteString(`UPDATE `)
 		stmt.WriteString(QuestionTable)
 		stmt.WriteString(` SET eid = ?, session_id = ?, user_id = ?, body = ? WHERE oid = ?`)
-		sqlQuestionUpdateByOIDKey = library.Register(stmt.String())
+		library.Register("sqlQuestionUpdateByOIDKey", stmt.String())
 
 		stmt.Reset()
 		stmt.WriteString(`SELECT `)
@@ -56,24 +49,24 @@ func init() {
 		stmt.WriteString(` WHERE `)
 		stmt.WriteString(QuestionTable)
 		stmt.WriteString(`.eid = ?`)
-		sqlQuestionLoadByEIDKey = library.Register(stmt.String())
+		library.Register("sqlQuestionLoadByEIDKey", stmt.String())
 
 		stmt.Reset()
 		stmt.WriteString(`DELETE FROM `)
 		stmt.WriteString(QuestionTable)
 		stmt.WriteString(` WHERE eid = ?`)
-		sqlQuestionDeleteByEIDKey = library.Register(stmt.String())
+		library.Register("sqlQuestionDeleteByEIDKey", stmt.String())
 
 		stmt.Reset()
 		stmt.WriteString(`UPDATE `)
 		stmt.WriteString(QuestionTable)
 		stmt.WriteString(` SET eid = ?, session_id = ?, user_id = ?, body = ? WHERE eid = ?`)
-		sqlQuestionUpdateByEIDKey = library.Register(stmt.String())
+		library.Register("sqlQuestionUpdateByEIDKey", stmt.String())
 	})
 }
 
 func (q *Question) LoadByEID(tx *Tx, eid string) error {
-	stmt, err := library.GetStmt(sqlQuestionLoadByEIDKey)
+	stmt, err := library.GetStmt("sqlQuestionLoadByEIDKey")
 	if err != nil {
 		return errors.Wrap(err, `failed to get statement`)
 	}
@@ -127,7 +120,7 @@ func (q *Question) Create(tx *Tx, opts ...InsertOption) (err error) {
 
 func (q Question) Update(tx *Tx) error {
 	if q.OID != 0 {
-		stmt, err := library.GetStmt(sqlQuestionUpdateByOIDKey)
+		stmt, err := library.GetStmt("sqlQuestionUpdateByOIDKey")
 		if err != nil {
 			return errors.Wrap(err, `failed to get statement`)
 		}
@@ -135,7 +128,7 @@ func (q Question) Update(tx *Tx) error {
 		return err
 	}
 	if q.EID != "" {
-		stmt, err := library.GetStmt(sqlQuestionUpdateByEIDKey)
+		stmt, err := library.GetStmt("sqlQuestionUpdateByEIDKey")
 		if err != nil {
 			return errors.Wrap(err, `failed to get statement`)
 		}
@@ -147,7 +140,7 @@ func (q Question) Update(tx *Tx) error {
 
 func (q Question) Delete(tx *Tx) error {
 	if q.OID != 0 {
-		stmt, err := library.GetStmt(sqlQuestionDeleteByOIDKey)
+		stmt, err := library.GetStmt("sqlQuestionDeleteByOIDKey")
 		if err != nil {
 			return errors.Wrap(err, `failed to get statement`)
 		}
@@ -156,7 +149,7 @@ func (q Question) Delete(tx *Tx) error {
 	}
 
 	if q.EID != "" {
-		stmt, err := library.GetStmt(sqlQuestionDeleteByEIDKey)
+		stmt, err := library.GetStmt("sqlQuestionDeleteByEIDKey")
 		if err != nil {
 			return errors.Wrap(err, `failed to get statement`)
 		}

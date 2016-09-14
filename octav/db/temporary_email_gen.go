@@ -8,7 +8,6 @@ import (
 
 	"github.com/builderscon/octav/octav/tools"
 	"github.com/lestrrat/go-pdebug"
-	"github.com/lestrrat/go-sqllib"
 	"github.com/pkg/errors"
 )
 
@@ -23,9 +22,6 @@ func (t *TemporaryEmail) Scan(scanner interface {
 	return scanner.Scan(&t.OID, &t.UserID, &t.ConfirmationKey, &t.Email, &t.ExpiresOn)
 }
 
-var sqlTemporaryEmailUpdateByOIDKey sqllib.Key
-var sqlTemporaryEmailDeleteByOIDKey sqllib.Key
-
 func init() {
 	hooks = append(hooks, func() {
 		stmt := tools.GetBuffer()
@@ -35,13 +31,13 @@ func init() {
 		stmt.WriteString(`DELETE FROM `)
 		stmt.WriteString(TemporaryEmailTable)
 		stmt.WriteString(` WHERE oid = ?`)
-		sqlTemporaryEmailDeleteByOIDKey = library.Register(stmt.String())
+		library.Register("sqlTemporaryEmailDeleteByOIDKey", stmt.String())
 
 		stmt.Reset()
 		stmt.WriteString(`UPDATE `)
 		stmt.WriteString(TemporaryEmailTable)
 		stmt.WriteString(` SET user_id = ?, confirmation_key = ?, email = ?, expires_on = ? WHERE oid = ?`)
-		sqlTemporaryEmailUpdateByOIDKey = library.Register(stmt.String())
+		library.Register("sqlTemporaryEmailUpdateByOIDKey", stmt.String())
 	})
 }
 
@@ -83,7 +79,7 @@ func (t *TemporaryEmail) Create(tx *Tx, opts ...InsertOption) (err error) {
 
 func (t TemporaryEmail) Update(tx *Tx) error {
 	if t.OID != 0 {
-		stmt, err := library.GetStmt(sqlTemporaryEmailUpdateByOIDKey)
+		stmt, err := library.GetStmt("sqlTemporaryEmailUpdateByOIDKey")
 		if err != nil {
 			return errors.Wrap(err, `failed to get statement`)
 		}
@@ -95,7 +91,7 @@ func (t TemporaryEmail) Update(tx *Tx) error {
 
 func (t TemporaryEmail) Delete(tx *Tx) error {
 	if t.OID != 0 {
-		stmt, err := library.GetStmt(sqlTemporaryEmailDeleteByOIDKey)
+		stmt, err := library.GetStmt("sqlTemporaryEmailDeleteByOIDKey")
 		if err != nil {
 			return errors.Wrap(err, `failed to get statement`)
 		}

@@ -10,7 +10,6 @@ import (
 
 	"github.com/builderscon/octav/octav/tools"
 	"github.com/lestrrat/go-pdebug"
-	"github.com/lestrrat/go-sqllib"
 	"github.com/pkg/errors"
 )
 
@@ -25,12 +24,6 @@ func (c *Client) Scan(scanner interface {
 	return scanner.Scan(&c.OID, &c.EID, &c.Secret, &c.Name, &c.CreatedOn, &c.ModifiedOn)
 }
 
-var sqlClientUpdateByOIDKey sqllib.Key
-var sqlClientDeleteByOIDKey sqllib.Key
-var sqlClientLoadByEIDKey sqllib.Key
-var sqlClientUpdateByEIDKey sqllib.Key
-var sqlClientDeleteByEIDKey sqllib.Key
-
 func init() {
 	hooks = append(hooks, func() {
 		stmt := tools.GetBuffer()
@@ -40,13 +33,13 @@ func init() {
 		stmt.WriteString(`DELETE FROM `)
 		stmt.WriteString(ClientTable)
 		stmt.WriteString(` WHERE oid = ?`)
-		sqlClientDeleteByOIDKey = library.Register(stmt.String())
+		library.Register("sqlClientDeleteByOIDKey", stmt.String())
 
 		stmt.Reset()
 		stmt.WriteString(`UPDATE `)
 		stmt.WriteString(ClientTable)
 		stmt.WriteString(` SET eid = ?, secret = ?, name = ? WHERE oid = ?`)
-		sqlClientUpdateByOIDKey = library.Register(stmt.String())
+		library.Register("sqlClientUpdateByOIDKey", stmt.String())
 
 		stmt.Reset()
 		stmt.WriteString(`SELECT `)
@@ -56,24 +49,24 @@ func init() {
 		stmt.WriteString(` WHERE `)
 		stmt.WriteString(ClientTable)
 		stmt.WriteString(`.eid = ?`)
-		sqlClientLoadByEIDKey = library.Register(stmt.String())
+		library.Register("sqlClientLoadByEIDKey", stmt.String())
 
 		stmt.Reset()
 		stmt.WriteString(`DELETE FROM `)
 		stmt.WriteString(ClientTable)
 		stmt.WriteString(` WHERE eid = ?`)
-		sqlClientDeleteByEIDKey = library.Register(stmt.String())
+		library.Register("sqlClientDeleteByEIDKey", stmt.String())
 
 		stmt.Reset()
 		stmt.WriteString(`UPDATE `)
 		stmt.WriteString(ClientTable)
 		stmt.WriteString(` SET eid = ?, secret = ?, name = ? WHERE eid = ?`)
-		sqlClientUpdateByEIDKey = library.Register(stmt.String())
+		library.Register("sqlClientUpdateByEIDKey", stmt.String())
 	})
 }
 
 func (c *Client) LoadByEID(tx *Tx, eid string) error {
-	stmt, err := library.GetStmt(sqlClientLoadByEIDKey)
+	stmt, err := library.GetStmt("sqlClientLoadByEIDKey")
 	if err != nil {
 		return errors.Wrap(err, `failed to get statement`)
 	}
@@ -127,7 +120,7 @@ func (c *Client) Create(tx *Tx, opts ...InsertOption) (err error) {
 
 func (c Client) Update(tx *Tx) error {
 	if c.OID != 0 {
-		stmt, err := library.GetStmt(sqlClientUpdateByOIDKey)
+		stmt, err := library.GetStmt("sqlClientUpdateByOIDKey")
 		if err != nil {
 			return errors.Wrap(err, `failed to get statement`)
 		}
@@ -135,7 +128,7 @@ func (c Client) Update(tx *Tx) error {
 		return err
 	}
 	if c.EID != "" {
-		stmt, err := library.GetStmt(sqlClientUpdateByEIDKey)
+		stmt, err := library.GetStmt("sqlClientUpdateByEIDKey")
 		if err != nil {
 			return errors.Wrap(err, `failed to get statement`)
 		}
@@ -147,7 +140,7 @@ func (c Client) Update(tx *Tx) error {
 
 func (c Client) Delete(tx *Tx) error {
 	if c.OID != 0 {
-		stmt, err := library.GetStmt(sqlClientDeleteByOIDKey)
+		stmt, err := library.GetStmt("sqlClientDeleteByOIDKey")
 		if err != nil {
 			return errors.Wrap(err, `failed to get statement`)
 		}
@@ -156,7 +149,7 @@ func (c Client) Delete(tx *Tx) error {
 	}
 
 	if c.EID != "" {
-		stmt, err := library.GetStmt(sqlClientDeleteByEIDKey)
+		stmt, err := library.GetStmt("sqlClientDeleteByEIDKey")
 		if err != nil {
 			return errors.Wrap(err, `failed to get statement`)
 		}
