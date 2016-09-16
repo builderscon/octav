@@ -129,6 +129,12 @@ func httpJSON(w http.ResponseWriter, v interface{}) {
 	httpJSONWithStatus(w, v, http.StatusOK)
 }
 
+func doHealthCheck(ctx context.Context, w http.ResponseWriter, r *http.Request) {
+	httpJSON(w, map[string]interface{}{
+		"message": "Hello, World!",
+	})
+}
+
 func doCreateConferenceSeries(ctx context.Context, w http.ResponseWriter, r *http.Request, payload model.CreateConferenceSeriesRequest) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("doCreateConferenceSeries")
