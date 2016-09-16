@@ -479,7 +479,6 @@
       ]
     }
   },
-  "pathStart": "/v1",
   "links": [
     {
       "title": "Health check",
@@ -491,7 +490,7 @@
       "description": "A user can be a staff/organizer, speaker, or a regular attendee. Information should be obtained from facebook/twitter/github",
       "hsup.wrapper": "httpWithBasicAuth",
       "rel": "create",
-      "href": "/user/create",
+      "href": "/v1/user/create",
       "method": "POST",
       "encType": "application/json",
       "schema": {
@@ -517,7 +516,7 @@
     {
       "title": "Lookup user",
       "rel": "lookup",
-      "href": "/user/lookup",
+      "href": "/v1/user/lookup",
       "hsup.wrapper": "httpWithOptionalBasicAuth",
       "method": "GET",
       "schema": {
@@ -533,7 +532,7 @@
       "title": "Lookup user by auth user ID",
       "hsup.wrapper": "httpWithOptionalBasicAuth",
       "rel": "lookup",
-      "href": "/user/lookup_user_by_auth_user_id",
+      "href": "/v1/user/lookup_user_by_auth_user_id",
       "method": "GET",
       "schema": {
         "type": "object",
@@ -550,7 +549,7 @@
       "hsup.wrapper": "httpWithBasicAuth",
       "description": "A user can be a staff/organizer, speaker, or a regular attendee. Information should be obtained from facebook/twitter/github",
       "rel": "create",
-      "href": "/user/update",
+      "href": "/v1/user/update",
       "method": "POST",
       "encType": "application/json",
       "schema": {
@@ -575,7 +574,7 @@
       "title": "Delete user",
       "hsup.wrapper": "httpWithBasicAuth",
       "rel": "delete",
-      "href": "/user/delete",
+      "href": "/v1/user/delete",
       "method": "POST",
       "encType": "application/json",
       "schema": {
@@ -590,7 +589,7 @@
     {
       "title": "List user",
       "rel": "list",
-      "href": "/user/list",
+      "href": "/v1/user/list",
       "hsup.wrapper": "httpWithOptionalBasicAuth",
       "schema": {
         "type": "object",
@@ -610,7 +609,7 @@
       "description": "venue describes the establishment in which the conference takes place. a venue contains multiple rooms",
       "hsup.wrapper": "httpWithBasicAuth",
       "rel": "create",
-      "href": "/venue/create",
+      "href": "/v1/venue/create",
       "method": "POST",
       "encType": "application/json",
       "schema": {
@@ -632,7 +631,7 @@
     {
       "title": "List venue",
       "rel": "list",
-      "href": "/venue/list",
+      "href": "/v1/venue/list",
       "hsup.wrapper": "httpWithOptionalBasicAuth",
       "schema": {
         "type": "object",
@@ -650,7 +649,7 @@
     {
       "title": "Lookup venue",
       "rel": "lookup",
-      "href": "/venue/lookup",
+      "href": "/v1/venue/lookup",
       "method": "GET",
       "schema": {
         "type": "object",
@@ -665,7 +664,7 @@
       "title": "Update venue",
       "rel": "update",
       "hsup.wrapper": "httpWithBasicAuth",
-      "href": "/venue/update",
+      "href": "/v1/venue/update",
       "method": "POST",
       "encType": "application/json",
       "schema": {
@@ -681,7 +680,7 @@
       "title": "Delete venue",
       "rel": "delete",
       "hsup.wrapper": "httpWithBasicAuth",
-      "href": "/venue/delete",
+      "href": "/v1/venue/delete",
       "method": "POST",
       "encType": "application/json",
       "schema": {
@@ -697,7 +696,7 @@
       "title": "Create room",
       "rel": "create",
       "hsup.wrapper": "httpWithBasicAuth",
-      "href": "/room/create",
+      "href": "/v1/room/create",
       "method": "POST",
       "encType": "application/json",
       "schema": {
@@ -719,7 +718,7 @@
       "title": "Update room",
       "rel": "update",
       "hsup.wrapper": "httpWithBasicAuth",
-      "href": "/room/update",
+      "href": "/v1/room/update",
       "method": "POST",
       "encType": "application/json",
       "schema": {
@@ -740,7 +739,7 @@
     {
       "title": "Lookup room",
       "rel": "lookup",
-      "href": "/room/lookup",
+      "href": "/v1/room/lookup",
       "method": "GET",
       "schema": {
         "type": "object",
@@ -755,7 +754,7 @@
       "title": "Delete room",
       "rel": "delete",
       "hsup.wrapper": "httpWithBasicAuth",
-      "href": "/room/delete",
+      "href": "/v1/room/delete",
       "method": "POST",
       "encType": "application/json",
       "schema": {
@@ -770,7 +769,7 @@
     {
       "title": "List room",
       "rel": "list",
-      "href": "/room/list",
+      "href": "/v1/room/list",
       "method": "GET",
       "hsup.wrapper": "httpWithOptionalBasicAuth",
       "encType": "application/x-www-form-urlencoded",
@@ -789,7 +788,7 @@
       "rel": "create",
       "hsup.wrapper": "httpWithBasicAuth",
       "method": "POST",
-      "href": "/conference_series/create",
+      "href": "/v1/conference_series/create",
       "encType": "application/json",
       "schema": {
         "properties": {
@@ -805,7 +804,7 @@
     {
       "title": "List conference series",
       "rel": "list",
-      "href": "/conference_series/list",
+      "href": "/v1/conference_series/list",
       "hsup.wrapper": "httpWithOptionalBasicAuth",
       "method": "GET",
       "encType": "application/x-www-form-urlencoded",
@@ -822,7 +821,7 @@
       "rel": "update",
       "hsup.wrapper": "httpWithBasicAuth",
       "method": "POST",
-      "href": "/conference_series/admin/add",
+      "href": "/v1/conference_series/admin/add",
       "ecnType": "application/json",
       "schema": {
         "properties": {
@@ -838,7 +837,7 @@
       "rel": "create",
       "hsup.wrapper": "httpWithBasicAuth",
       "method": "POST",
-      "href": "/conference/create",
+      "href": "/v1/conference/create",
       "encType": "application/json",
       "schema": {
         "properties": {
@@ -861,7 +860,7 @@
       "hsup.wrapper": "httpWithBasicAuth",
       "rel": "update",
       "method": "POST",
-      "href": "/conference/dates/add",
+      "href": "/v1/conference/dates/add",
       "encType": "application/json",
       "schema": {
         "properties": {
@@ -876,7 +875,7 @@
       "title": "Delete conference dates",
       "rel": "delete",
       "method": "POST",
-      "href": "/conference/dates/delete",
+      "href": "/v1/conference/dates/delete",
       "ecnType": "application/json",
       "schema": {
         "properties": {
@@ -897,7 +896,7 @@
       "rel": "update",
       "hsup.wrapper": "httpWithBasicAuth",
       "method": "POST",
-      "href": "/conference/admin/add",
+      "href": "/v1/conference/admin/add",
       "ecnType": "application/json",
       "schema": {
         "properties": {
@@ -913,7 +912,7 @@
       "rel": "delete",
       "hsup.wrapper": "httpWithBasicAuth",
       "method": "POST",
-      "href": "/conference/admin/delete",
+      "href": "/v1/conference/admin/delete",
       "ecnType": "application/json",
       "schema": {
         "properties": {
@@ -929,7 +928,7 @@
       "rel": "update",
       "hsup.wrapper": "httpWithBasicAuth",
       "method": "POST",
-      "href": "/conference/venue/add",
+      "href": "/v1/conference/venue/add",
       "ecnType": "application/json",
       "schema": {
         "properties": {
@@ -945,7 +944,7 @@
       "rel": "delete",
       "hsup.wrapper": "httpWithBasicAuth",
       "method": "POST",
-      "href": "/conference/venue/delete",
+      "href": "/v1/conference/venue/delete",
       "ecnType": "application/json",
       "schema": {
         "properties": {
@@ -961,7 +960,7 @@
       "rel": "update",
       "hsup.wrapper": "httpWithBasicAuth",
       "method": "POST",
-      "href": "/conference/session_type/add",
+      "href": "/v1/conference/session_type/add",
       "ecnType": "application/json",
       "schema": {
         "required": ["user_id","conference_id","name","abstract", "duration"],
@@ -985,7 +984,7 @@
       "rel": "delete",
       "hsup.wrapper": "httpWithBasicAuth",
       "method": "POST",
-      "href": "/session_type/delete",
+      "href": "/v1/session_type/delete",
       "ecnType": "application/json",
       "schema": {
         "properties": {
@@ -997,7 +996,7 @@
     },
     {
       "title": "Lookup session type",
-      "href": "/session_type/lookup",
+      "href": "/v1/session_type/lookup",
       "hsup.wrapper": "httpWithOptionalBasicAuth",
       "rel": "update",
       "schema": {
@@ -1011,7 +1010,7 @@
     },
     {
       "title": "Update session type",
-      "href": "/session_type/update",
+      "href": "/v1/session_type/update",
       "encType": "application/json",
       "hsup.wrapper": "httpWithBasicAuth",
       "method": "POST",
@@ -1036,7 +1035,7 @@
     },
     {
       "title": "List session types by conference",
-      "href": "/session_type/list",
+      "href": "/v1/session_type/list",
       "hsup.wrapper": "httpWithOptionalBasicAuth",
       "rel": "list",
       "schema": {
@@ -1050,7 +1049,7 @@
     },
     {
       "title": "Lookup conference",
-      "href": "/conference/lookup",
+      "href": "/v1/conference/lookup",
       "rel": "lookup",
       "schema": {
         "required": ["id"],
@@ -1063,7 +1062,7 @@
     },
     {
       "title": "Lookup conference by slug",
-      "href": "/conference/lookup_by_slug",
+      "href": "/v1/conference/lookup_by_slug",
       "rel": "lookup",
       "schema": {
         "required": ["slug"],
@@ -1076,7 +1075,7 @@
     },
     {
       "title": "List conferences by organizer",
-      "href": "/conference/list_by_organizer",
+      "href": "/v1/conference/list_by_organizer",
       "rel": "list",
       "hsup.wrapper": "httpWithOptionalBasicAuth",
       "schema": {
@@ -1091,7 +1090,7 @@
     },
     {
       "title": "List conference",
-      "href": "/conference/list",
+      "href": "/v1/conference/list",
       "rel": "list",
       "hsup.wrapper": "httpWithOptionalBasicAuth",
       "schema": {
@@ -1121,7 +1120,7 @@
       "rel": "update",
       "hsup.wrapper": "httpWithBasicAuth",
       "method": "POST",
-      "href": "/conference/update",
+      "href": "/v1/conference/update",
       "encType": "multipart/form-data",
       "hsup.multipartFiles": ["cover"],
       "schema": {
@@ -1151,7 +1150,7 @@
       "title": "Delete conference series",
       "rel": "delete",
       "hsup.wrapper": "httpWithBasicAuth",
-      "href": "/conference_series/delete",
+      "href": "/v1/conference_series/delete",
       "method": "POST",
       "encType": "application/json",
       "schema": {
@@ -1167,7 +1166,7 @@
       "title": "Delete conference",
       "rel": "delete",
       "hsup.wrapper": "httpWithBasicAuth",
-      "href": "/conference/delete",
+      "href": "/v1/conference/delete",
       "method": "POST",
       "encType": "application/json",
       "schema": {
@@ -1183,7 +1182,7 @@
       "rel": "create",
       "hsup.wrapper": "httpWithBasicAuth",
       "method": "POST",
-      "href": "/session/create",
+      "href": "/v1/session/create",
       "schema": {
         "type": "object",
         "required": ["conference_id", "speaker_id", "session_type_id", "user_id"],
@@ -1216,7 +1215,7 @@
     },
     {
       "title": "Lookup session",
-      "href": "/session/lookup",
+      "href": "/v1/session/lookup",
       "rel": "lookup",
       "hsup.wrapper": "httpWithOptionalBasicAuth",
       "schema": {
@@ -1230,7 +1229,7 @@
     },
     {
       "title": "Delete session",
-      "href": "/session/delete",
+      "href": "/v1/session/delete",
       "hsup.wrapper": "httpWithBasicAuth",
       "method": "POST",
       "rel": "lookup",
@@ -1248,7 +1247,7 @@
       "rel": "update",
       "hsup.wrapper": "httpWithBasicAuth",
       "method": "POST",
-      "href": "/session/update",
+      "href": "/v1/session/update",
       "schema": {
         "type": "object",
         "required": ["id", "user_id"],
@@ -1286,7 +1285,7 @@
     },
     {
       "title": "List sessions",
-      "href": "/session/list",
+      "href": "/v1/session/list",
       "hsup.wrapper": "httpWithOptionalBasicAuth",
       "rel": "list",
       "schema": {
@@ -1314,7 +1313,7 @@
     {
       "title": "Create question",
       "hsup.wrapper": "httpWithBasicAuth",
-      "href": "/question/create",
+      "href": "/v1/question/create",
       "rel": "create",
       "schema": {
         "type": "object",
@@ -1330,7 +1329,7 @@
     {
       "title": "Delete question",
       "hsup.wrapper": "httpWithBasicAuth",
-      "href": "/question/delete",
+      "href": "/v1/question/delete",
       "method": "POST",
       "rel": "delete",
       "schema": {
@@ -1343,7 +1342,7 @@
     },
     {
       "title": "List question",
-      "href": "/question/list",
+      "href": "/v1/question/list",
       "hsup.wrapper": "httpWithOptionalBasicAuth",
       "rel": "list",
       "schema": {
@@ -1360,7 +1359,7 @@
     {
       "title": "Create session survey response",
       "hsup.wrapper": "httpWithBasicAuth",
-      "href": "/survey_session_response/create",
+      "href": "/v1/survey_session_response/create",
       "rel": "create",
       "schema": {
         "type": "object",
@@ -1381,7 +1380,7 @@
     },
     {
       "title": "Add featured speaker",
-      "href": "/featured_speaker/add",
+      "href": "/v1/featured_speaker/add",
       "hsup.wrapper": "httpWithBasicAuth",
       "method": "POST",
       "rel": "create",
@@ -1405,7 +1404,7 @@
     },
     {
       "title": "Lookup featured speaker",
-      "href": "/featured_speaker/lookup",
+      "href": "/v1/featured_speaker/lookup",
       "hsup.wrapper": "httpWithBasicAuth",
       "rel": "update",
       "schema": {
@@ -1420,7 +1419,7 @@
     },
     {
       "title": "List featured speakers",
-      "href": "/featured_speaker/list",
+      "href": "/v1/featured_speaker/list",
       "hsup.wrapper": "httpWithOptionalBasicAuth",
       "rel": "list",
       "schema": {
@@ -1436,7 +1435,7 @@
     },
     {
       "title": "Update featured speaker",
-      "href": "/featured_speaker/update",
+      "href": "/v1/featured_speaker/update",
       "hsup.wrapper": "httpWithBasicAuth",
       "method": "POST",
       "rel": "update",
@@ -1459,7 +1458,7 @@
     },
     {
       "title": "Delete featured speaker",
-      "href": "/featured_speaker/delete",
+      "href": "/v1/featured_speaker/delete",
       "hsup.wrapper": "httpWithBasicAuth",
       "method": "POST",
       "rel": "delete",
@@ -1474,7 +1473,7 @@
     },
     {
       "title": "Add sponsor",
-      "href": "/sponsor/add",
+      "href": "/v1/sponsor/add",
       "hsup.wrapper": "httpWithBasicAuth",
       "method": "POST",
       "rel": "create",
@@ -1497,7 +1496,7 @@
     },
     {
       "title": "Lookup sponsor",
-      "href": "/sponsor/lookup",
+      "href": "/v1/sponsor/lookup",
       "hsup.wrapper": "httpWithOptionalBasicAuth",
       "rel": "update",
       "schema": {
@@ -1512,7 +1511,7 @@
     },
     {
       "title": "List sponsors",
-      "href": "/sponsor/list",
+      "href": "/v1/sponsor/list",
       "hsup.wrapper": "httpWithOptionalBasicAuth",
       "rel": "list",
       "schema": {
@@ -1528,7 +1527,7 @@
     },
     {
       "title": "Update sponsor",
-      "href": "/sponsor/update",
+      "href": "/v1/sponsor/update",
       "encType": "multipart/form-data",
       "hsup.multipartFiles": ["logo1", "logo2", "logo3"],
       "hsup.wrapper": "httpWithBasicAuth",
@@ -1552,7 +1551,7 @@
     },
     {
       "title": "Delete sponsor",
-      "href": "/sponsor/delete",
+      "href": "/v1/sponsor/delete",
       "hsup.wrapper": "httpWithBasicAuth",
       "method": "POST",
       "rel": "delete",
@@ -1567,7 +1566,7 @@
     },
     {
       "title": "Create temporary email",
-      "href": "/email/create",
+      "href": "/v1/email/create",
       "hsup.wrapper": "httpWithBasicAuth",
       "method": "POST",
       "rel": "create",
@@ -1589,7 +1588,7 @@
     },
     {
       "title": "Confirm temporary email",
-      "href": "/email/confirm",
+      "href": "/v1/email/confirm",
       "hsup.wrapper": "httpWithBasicAuth",
       "method": "POST",
       "rel": "update",

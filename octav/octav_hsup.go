@@ -2181,7 +2181,7 @@ func httpUpdateVenue(ctx context.Context, w http.ResponseWriter, r *http.Request
 
 func (s *Server) SetupRoutes() {
 	r := s.Router
-	r.HandleFunc(`/v1/`, httpWithContext(httpHealthCheck))
+	r.HandleFunc(`/`, httpWithContext(httpHealthCheck))
 	r.HandleFunc(`/v1/conference/admin/add`, httpWithContext(httpWithBasicAuth(httpAddConferenceAdmin)))
 	r.HandleFunc(`/v1/conference/admin/delete`, httpWithContext(httpWithBasicAuth(httpDeleteConferenceAdmin)))
 	r.HandleFunc(`/v1/conference/create`, httpWithContext(httpWithBasicAuth(httpCreateConference)))

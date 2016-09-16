@@ -1634,7 +1634,7 @@ func (c *Client) HealthCheck() (err error) {
 		g := pdebug.Marker("client.HealthCheck").BindError(&err)
 		defer g.End()
 	}
-	u, err := url.Parse(c.Endpoint + "/v1/")
+	u, err := url.Parse(c.Endpoint + "/")
 	if err != nil {
 		return err
 	}
