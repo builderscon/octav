@@ -1629,6 +1629,44 @@ func (c *Client) DeleteVenue(in *model.DeleteVenueRequest) (err error) {
 	return nil
 }
 
+func (c *Client) HealthCheck() (err error) {
+	if pdebug.Enabled {
+		g := pdebug.Marker("client.HealthCheck").BindError(&err)
+		defer g.End()
+	}
+	u, err := url.Parse(c.Endpoint + "/v1/")
+	if err != nil {
+		return err
+	}
+	if pdebug.Enabled {
+		pdebug.Printf("GET to %s", u.String())
+	}
+	req, err := http.NewRequest("GET", u.String(), nil)
+	if err != nil {
+		return err
+	}
+	if c.BasicAuth.Username != "" && c.BasicAuth.Password != "" {
+		req.SetBasicAuth(c.BasicAuth.Username, c.BasicAuth.Password)
+	}
+	res, err := c.Client.Do(req)
+	if err != nil {
+		return err
+	}
+	if res.StatusCode != http.StatusOK {
+		if strings.HasPrefix(strings.ToLower(res.Header.Get(`Content-Type`)), `application/json`) {
+			var errjson ErrJSON
+			if err := json.NewDecoder(res.Body).Decode(&errjson); err != nil {
+				return errors.Errorf(`Invalid response: '%s'`, res.Status)
+			}
+			if len(errjson.Error) > 0 {
+				return errors.New(errjson.Error)
+			}
+		}
+		return errors.Errorf(`Invalid response: '%s'`, res.Status)
+	}
+	return nil
+}
+
 func (c *Client) ListConference(in *model.ListConferenceRequest) (ret []model.Conference, err error) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("client.ListConference").BindError(&err)

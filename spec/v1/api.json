@@ -482,6 +482,11 @@
   "pathStart": "/v1",
   "links": [
     {
+      "title": "Health check",
+      "href": "/",
+      "rel": "index"
+    },
+    {
       "title": "Create user",
       "description": "A user can be a staff/organizer, speaker, or a regular attendee. Information should be obtained from facebook/twitter/github",
       "hsup.wrapper": "httpWithBasicAuth",

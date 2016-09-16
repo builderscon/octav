@@ -1307,6 +1307,20 @@ func httpDeleteVenue(ctx context.Context, w http.ResponseWriter, r *http.Request
 	doDeleteVenue(ctx, w, r, payload)
 }
 
+func httpHealthCheck(ctx context.Context, w http.ResponseWriter, r *http.Request) {
+	if pdebug.Enabled {
+		g := pdebug.Marker("httpHealthCheck")
+		defer g.End()
+	}
+	if strings.ToLower(r.Method) != `get` {
+		w.Header().Set("Allow", "get")
+		httpError(w, `Method was `+r.Method+`, expected get`, http.StatusNotFound, nil)
+		return
+	}
+
+	doHealthCheck(ctx, w, r)
+}
+
 func httpListConference(ctx context.Context, w http.ResponseWriter, r *http.Request) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("httpListConference")
@@ -2167,6 +2181,7 @@ func httpUpdateVenue(ctx context.Context, w http.ResponseWriter, r *http.Request
 
 func (s *Server) SetupRoutes() {
 	r := s.Router
+	r.HandleFunc(`/v1/`, httpWithContext(httpHealthCheck))
 	r.HandleFunc(`/v1/conference/admin/add`, httpWithContext(httpWithBasicAuth(httpAddConferenceAdmin)))
 	r.HandleFunc(`/v1/conference/admin/delete`, httpWithContext(httpWithBasicAuth(httpDeleteConferenceAdmin)))
 	r.HandleFunc(`/v1/conference/create`, httpWithContext(httpWithBasicAuth(httpCreateConference)))
