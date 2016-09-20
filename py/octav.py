@@ -1,6 +1,7 @@
 """OCTAV Client Library"""
-"""DO NOT EDIT: This file was generated from ../spec/v1/api.json on Wed Sep 14 09:22:19 2016"""
+"""DO NOT EDIT: This file was generated from ../spec/v1/api.json on Fri Sep 16 15:34:03 2016"""
 
+import certifi
 import json
 import os
 import re
@@ -31,7 +32,7 @@ class Octav(object):
     self.debug = debug
     self.endpoint = endpoint
     self.error = None
-    self.http = PoolManager()
+    self.http = PoolManager(cert_reqs='CERT_REQUIRED', ca_certs=certifi.where())
     self.key = key
     self.secret = secret
 
@@ -47,6 +48,27 @@ class Octav(object):
 
   def last_error(self):
     return self.error
+
+  def health_check (self):
+    try:
+        payload = {}
+        hdrs = {}
+        uri = '%s/' % self.endpoint
+        qs = urlencode(payload, True)
+        if self.debug:
+            print('GET %s?%s' % (uri, qs))
+        res = self.http.request('GET', '%s?%s' % (uri, qs), headers=hdrs)
+        if self.debug:
+            print(res)
+        if res.status != 200:
+            self.extract_error(res)
+            return None
+        return True
+    except BaseException, e:
+        if self.debug:
+            print("error during http access: " + repr(e))
+        self.error = repr(e)
+        return None
 
   def create_user (self, auth_user_id, auth_via, nickname, avatar_url=None, email=None, first_name=None, last_name=None, tshirt_size=None, **args):
     try:
@@ -82,7 +104,7 @@ class Octav(object):
             for p in patterns:
                 if p.match(key):
                     payload[key] = args[key]
-        uri = '%s/user/create' % self.endpoint
+        uri = '%s/v1/user/create' % self.endpoint
         hdrs = urllib3.util.make_headers(
             basic_auth='%s:%s' % (self.key, self.secret),
         )
@@ -111,7 +133,7 @@ class Octav(object):
         payload['id'] = id
         if id is not None:
             payload['id'] = id
-        uri = '%s/user/lookup' % self.endpoint
+        uri = '%s/v1/user/lookup' % self.endpoint
         hdrs = urllib3.util.make_headers(
             basic_auth='%s:%s' % (self.key, self.secret),
         )
@@ -145,7 +167,7 @@ class Octav(object):
             payload['auth_user_id'] = auth_user_id
         if auth_via is not None:
             payload['auth_via'] = auth_via
-        uri = '%s/user/lookup_user_by_auth_user_id' % self.endpoint
+        uri = '%s/v1/user/lookup_user_by_auth_user_id' % self.endpoint
         hdrs = urllib3.util.make_headers(
             basic_auth='%s:%s' % (self.key, self.secret),
         )
@@ -194,7 +216,7 @@ class Octav(object):
             for p in patterns:
                 if p.match(key):
                     payload[key] = args[key]
-        uri = '%s/user/update' % self.endpoint
+        uri = '%s/v1/user/update' % self.endpoint
         hdrs = urllib3.util.make_headers(
             basic_auth='%s:%s' % (self.key, self.secret),
         )
@@ -228,7 +250,7 @@ class Octav(object):
             payload['id'] = id
         if user_id is not None:
             payload['user_id'] = user_id
-        uri = '%s/user/delete' % self.endpoint
+        uri = '%s/v1/user/delete' % self.endpoint
         hdrs = urllib3.util.make_headers(
             basic_auth='%s:%s' % (self.key, self.secret),
         )
@@ -258,7 +280,7 @@ class Octav(object):
             payload['limit'] = limit
         if since is not None:
             payload['since'] = since
-        uri = '%s/user/list' % self.endpoint
+        uri = '%s/v1/user/list' % self.endpoint
         hdrs = urllib3.util.make_headers(
             basic_auth='%s:%s' % (self.key, self.secret),
         )
@@ -306,7 +328,7 @@ class Octav(object):
             for p in patterns:
                 if p.match(key):
                     payload[key] = args[key]
-        uri = '%s/venue/create' % self.endpoint
+        uri = '%s/v1/venue/create' % self.endpoint
         hdrs = urllib3.util.make_headers(
             basic_auth='%s:%s' % (self.key, self.secret),
         )
@@ -336,7 +358,7 @@ class Octav(object):
             payload['limit'] = limit
         if since is not None:
             payload['since'] = since
-        uri = '%s/venue/list' % self.endpoint
+        uri = '%s/v1/venue/list' % self.endpoint
         hdrs = urllib3.util.make_headers(
             basic_auth='%s:%s' % (self.key, self.secret),
         )
@@ -365,7 +387,7 @@ class Octav(object):
         payload['id'] = id
         if id is not None:
             payload['id'] = id
-        uri = '%s/venue/lookup' % self.endpoint
+        uri = '%s/v1/venue/lookup' % self.endpoint
         qs = urlencode(payload, True)
         if self.debug:
             print('GET %s?%s' % (uri, qs))
@@ -396,7 +418,7 @@ class Octav(object):
             payload['id'] = id
         if user_id is not None:
             payload['user_id'] = user_id
-        uri = '%s/venue/update' % self.endpoint
+        uri = '%s/v1/venue/update' % self.endpoint
         hdrs = urllib3.util.make_headers(
             basic_auth='%s:%s' % (self.key, self.secret),
         )
@@ -430,7 +452,7 @@ class Octav(object):
             payload['id'] = id
         if user_id is not None:
             payload['user_id'] = user_id
-        uri = '%s/venue/delete' % self.endpoint
+        uri = '%s/v1/venue/delete' % self.endpoint
         hdrs = urllib3.util.make_headers(
             basic_auth='%s:%s' % (self.key, self.secret),
         )
@@ -476,7 +498,7 @@ class Octav(object):
             for p in patterns:
                 if p.match(key):
                     payload[key] = args[key]
-        uri = '%s/room/create' % self.endpoint
+        uri = '%s/v1/room/create' % self.endpoint
         hdrs = urllib3.util.make_headers(
             basic_auth='%s:%s' % (self.key, self.secret),
         )
@@ -521,7 +543,7 @@ class Octav(object):
             for p in patterns:
                 if p.match(key):
                     payload[key] = args[key]
-        uri = '%s/room/update' % self.endpoint
+        uri = '%s/v1/room/update' % self.endpoint
         hdrs = urllib3.util.make_headers(
             basic_auth='%s:%s' % (self.key, self.secret),
         )
@@ -550,7 +572,7 @@ class Octav(object):
         payload['id'] = id
         if id is not None:
             payload['id'] = id
-        uri = '%s/room/lookup' % self.endpoint
+        uri = '%s/v1/room/lookup' % self.endpoint
         qs = urlencode(payload, True)
         if self.debug:
             print('GET %s?%s' % (uri, qs))
@@ -581,7 +603,7 @@ class Octav(object):
             payload['id'] = id
         if user_id is not None:
             payload['user_id'] = user_id
-        uri = '%s/room/delete' % self.endpoint
+        uri = '%s/v1/room/delete' % self.endpoint
         hdrs = urllib3.util.make_headers(
             basic_auth='%s:%s' % (self.key, self.secret),
         )
@@ -614,7 +636,7 @@ class Octav(object):
             payload['limit'] = limit
         if venue_id is not None:
             payload['venue_id'] = venue_id
-        uri = '%s/room/list' % self.endpoint
+        uri = '%s/v1/room/list' % self.endpoint
         hdrs = urllib3.util.make_headers(
             basic_auth='%s:%s' % (self.key, self.secret),
         )
@@ -655,7 +677,7 @@ class Octav(object):
             payload['title'] = title
         if user_id is not None:
             payload['user_id'] = user_id
-        uri = '%s/conference_series/create' % self.endpoint
+        uri = '%s/v1/conference_series/create' % self.endpoint
         hdrs = urllib3.util.make_headers(
             basic_auth='%s:%s' % (self.key, self.secret),
         )
@@ -683,7 +705,7 @@ class Octav(object):
             payload['limit'] = limit
         if since is not None:
             payload['since'] = since
-        uri = '%s/conference_series/list' % self.endpoint
+        uri = '%s/v1/conference_series/list' % self.endpoint
         hdrs = urllib3.util.make_headers(
             basic_auth='%s:%s' % (self.key, self.secret),
         )
@@ -722,7 +744,7 @@ class Octav(object):
             payload['series_id'] = series_id
         if user_id is not None:
             payload['user_id'] = user_id
-        uri = '%s/conference_series/admin/add' % self.endpoint
+        uri = '%s/v1/conference_series/admin/add' % self.endpoint
         hdrs = urllib3.util.make_headers(
             basic_auth='%s:%s' % (self.key, self.secret),
         )
@@ -776,7 +798,7 @@ class Octav(object):
             payload['title'] = title
         if user_id is not None:
             payload['user_id'] = user_id
-        uri = '%s/conference/create' % self.endpoint
+        uri = '%s/v1/conference/create' % self.endpoint
         hdrs = urllib3.util.make_headers(
             basic_auth='%s:%s' % (self.key, self.secret),
         )
@@ -815,7 +837,7 @@ class Octav(object):
             payload['dates'] = dates
         if user_id is not None:
             payload['user_id'] = user_id
-        uri = '%s/conference/dates/add' % self.endpoint
+        uri = '%s/v1/conference/dates/add' % self.endpoint
         hdrs = urllib3.util.make_headers(
             basic_auth='%s:%s' % (self.key, self.secret),
         )
@@ -854,7 +876,7 @@ class Octav(object):
             payload['dates'] = dates
         if user_id is not None:
             payload['user_id'] = user_id
-        uri = '%s/conference/dates/delete' % self.endpoint
+        uri = '%s/v1/conference/dates/delete' % self.endpoint
         if self.debug:
             print('POST %s' % uri)
         hdrs['Content-Type']= 'application/json'
@@ -890,7 +912,7 @@ class Octav(object):
             payload['conference_id'] = conference_id
         if user_id is not None:
             payload['user_id'] = user_id
-        uri = '%s/conference/admin/add' % self.endpoint
+        uri = '%s/v1/conference/admin/add' % self.endpoint
         hdrs = urllib3.util.make_headers(
             basic_auth='%s:%s' % (self.key, self.secret),
         )
@@ -929,7 +951,7 @@ class Octav(object):
             payload['conference_id'] = conference_id
         if user_id is not None:
             payload['user_id'] = user_id
-        uri = '%s/conference/admin/delete' % self.endpoint
+        uri = '%s/v1/conference/admin/delete' % self.endpoint
         hdrs = urllib3.util.make_headers(
             basic_auth='%s:%s' % (self.key, self.secret),
         )
@@ -968,7 +990,7 @@ class Octav(object):
             payload['user_id'] = user_id
         if venue_id is not None:
             payload['venue_id'] = venue_id
-        uri = '%s/conference/venue/add' % self.endpoint
+        uri = '%s/v1/conference/venue/add' % self.endpoint
         hdrs = urllib3.util.make_headers(
             basic_auth='%s:%s' % (self.key, self.secret),
         )
@@ -1007,7 +1029,7 @@ class Octav(object):
             payload['user_id'] = user_id
         if venue_id is not None:
             payload['venue_id'] = venue_id
-        uri = '%s/conference/venue/delete' % self.endpoint
+        uri = '%s/v1/conference/venue/delete' % self.endpoint
         hdrs = urllib3.util.make_headers(
             basic_auth='%s:%s' % (self.key, self.secret),
         )
@@ -1065,7 +1087,7 @@ class Octav(object):
             for p in patterns:
                 if p.match(key):
                     payload[key] = args[key]
-        uri = '%s/conference/session_type/add' % self.endpoint
+        uri = '%s/v1/conference/session_type/add' % self.endpoint
         hdrs = urllib3.util.make_headers(
             basic_auth='%s:%s' % (self.key, self.secret),
         )
@@ -1099,7 +1121,7 @@ class Octav(object):
             payload['id'] = id
         if user_id is not None:
             payload['user_id'] = user_id
-        uri = '%s/session_type/delete' % self.endpoint
+        uri = '%s/v1/session_type/delete' % self.endpoint
         hdrs = urllib3.util.make_headers(
             basic_auth='%s:%s' % (self.key, self.secret),
         )
@@ -1130,7 +1152,7 @@ class Octav(object):
             payload['id'] = id
         if lang is not None:
             payload['lang'] = lang
-        uri = '%s/session_type/lookup' % self.endpoint
+        uri = '%s/v1/session_type/lookup' % self.endpoint
         hdrs = urllib3.util.make_headers(
             basic_auth='%s:%s' % (self.key, self.secret),
         )
@@ -1179,7 +1201,7 @@ class Octav(object):
             for p in patterns:
                 if p.match(key):
                     payload[key] = args[key]
-        uri = '%s/session_type/update' % self.endpoint
+        uri = '%s/v1/session_type/update' % self.endpoint
         hdrs = urllib3.util.make_headers(
             basic_auth='%s:%s' % (self.key, self.secret),
         )
@@ -1207,7 +1229,7 @@ class Octav(object):
             payload['conference_id'] = conference_id
         if lang is not None:
             payload['lang'] = lang
-        uri = '%s/session_type/list' % self.endpoint
+        uri = '%s/v1/session_type/list' % self.endpoint
         hdrs = urllib3.util.make_headers(
             basic_auth='%s:%s' % (self.key, self.secret),
         )
@@ -1238,7 +1260,7 @@ class Octav(object):
             payload['id'] = id
         if lang is not None:
             payload['lang'] = lang
-        uri = '%s/conference/lookup' % self.endpoint
+        uri = '%s/v1/conference/lookup' % self.endpoint
         qs = urlencode(payload, True)
         if self.debug:
             print('GET %s?%s' % (uri, qs))
@@ -1266,7 +1288,7 @@ class Octav(object):
             payload['lang'] = lang
         if slug is not None:
             payload['slug'] = slug
-        uri = '%s/conference/lookup_by_slug' % self.endpoint
+        uri = '%s/v1/conference/lookup_by_slug' % self.endpoint
         qs = urlencode(payload, True)
         if self.debug:
             print('GET %s?%s' % (uri, qs))
@@ -1295,7 +1317,7 @@ class Octav(object):
             payload['organizer_id'] = organizer_id
         if since is not None:
             payload['since'] = since
-        uri = '%s/conference/list_by_organizer' % self.endpoint
+        uri = '%s/v1/conference/list_by_organizer' % self.endpoint
         hdrs = urllib3.util.make_headers(
             basic_auth='%s:%s' % (self.key, self.secret),
         )
@@ -1331,7 +1353,7 @@ class Octav(object):
             payload['since'] = since
         if status is not None:
             payload['status'] = status
-        uri = '%s/conference/list' % self.endpoint
+        uri = '%s/v1/conference/list' % self.endpoint
         hdrs = urllib3.util.make_headers(
             basic_auth='%s:%s' % (self.key, self.secret),
         )
@@ -1386,7 +1408,7 @@ class Octav(object):
             for p in patterns:
                 if p.match(key):
                     payload[key] = args[key]
-        uri = '%s/conference/update' % self.endpoint
+        uri = '%s/v1/conference/update' % self.endpoint
         hdrs = urllib3.util.make_headers(
             basic_auth='%s:%s' % (self.key, self.secret),
         )
@@ -1420,7 +1442,7 @@ class Octav(object):
             payload['id'] = id
         if user_id is not None:
             payload['user_id'] = user_id
-        uri = '%s/conference_series/delete' % self.endpoint
+        uri = '%s/v1/conference_series/delete' % self.endpoint
         hdrs = urllib3.util.make_headers(
             basic_auth='%s:%s' % (self.key, self.secret),
         )
@@ -1449,7 +1471,7 @@ class Octav(object):
         payload['id'] = id
         if id is not None:
             payload['id'] = id
-        uri = '%s/conference/delete' % self.endpoint
+        uri = '%s/v1/conference/delete' % self.endpoint
         hdrs = urllib3.util.make_headers(
             basic_auth='%s:%s' % (self.key, self.secret),
         )
@@ -1526,7 +1548,7 @@ class Octav(object):
             for p in patterns:
                 if p.match(key):
                     payload[key] = args[key]
-        uri = '%s/session/create' % self.endpoint
+        uri = '%s/v1/session/create' % self.endpoint
         hdrs = urllib3.util.make_headers(
             basic_auth='%s:%s' % (self.key, self.secret),
         )
@@ -1557,7 +1579,7 @@ class Octav(object):
             payload['id'] = id
         if lang is not None:
             payload['lang'] = lang
-        uri = '%s/session/lookup' % self.endpoint
+        uri = '%s/v1/session/lookup' % self.endpoint
         hdrs = urllib3.util.make_headers(
             basic_auth='%s:%s' % (self.key, self.secret),
         )
@@ -1591,7 +1613,7 @@ class Octav(object):
             payload['id'] = id
         if user_id is not None:
             payload['user_id'] = user_id
-        uri = '%s/session/delete' % self.endpoint
+        uri = '%s/v1/session/delete' % self.endpoint
         hdrs = urllib3.util.make_headers(
             basic_auth='%s:%s' % (self.key, self.secret),
         )
@@ -1674,7 +1696,7 @@ class Octav(object):
             for p in patterns:
                 if p.match(key):
                     payload[key] = args[key]
-        uri = '%s/session/update' % self.endpoint
+        uri = '%s/v1/session/update' % self.endpoint
         hdrs = urllib3.util.make_headers(
             basic_auth='%s:%s' % (self.key, self.secret),
         )
@@ -1712,7 +1734,7 @@ class Octav(object):
             payload['speaker_id'] = speaker_id
         if status is not None:
             payload['status'] = status
-        uri = '%s/session/list' % self.endpoint
+        uri = '%s/v1/session/list' % self.endpoint
         hdrs = urllib3.util.make_headers(
             basic_auth='%s:%s' % (self.key, self.secret),
         )
@@ -1751,7 +1773,7 @@ class Octav(object):
             payload['session_id'] = session_id
         if user_id is not None:
             payload['user_id'] = user_id
-        uri = '%s/question/create' % self.endpoint
+        uri = '%s/v1/question/create' % self.endpoint
         hdrs = urllib3.util.make_headers(
             basic_auth='%s:%s' % (self.key, self.secret),
         )
@@ -1780,7 +1802,7 @@ class Octav(object):
         payload['id'] = id
         if id is not None:
             payload['id'] = id
-        uri = '%s/question/delete' % self.endpoint
+        uri = '%s/v1/question/delete' % self.endpoint
         hdrs = urllib3.util.make_headers(
             basic_auth='%s:%s' % (self.key, self.secret),
         )
@@ -1813,7 +1835,7 @@ class Octav(object):
             payload['session_id'] = session_id
         if since is not None:
             payload['since'] = since
-        uri = '%s/question/list' % self.endpoint
+        uri = '%s/v1/question/list' % self.endpoint
         hdrs = urllib3.util.make_headers(
             basic_auth='%s:%s' % (self.key, self.secret),
         )
@@ -1876,7 +1898,7 @@ class Octav(object):
             payload['user_id'] = user_id
         if user_prior_knowledge is not None:
             payload['user_prior_knowledge'] = user_prior_knowledge
-        uri = '%s/survey_session_response/create' % self.endpoint
+        uri = '%s/v1/survey_session_response/create' % self.endpoint
         hdrs = urllib3.util.make_headers(
             basic_auth='%s:%s' % (self.key, self.secret),
         )
@@ -1926,7 +1948,7 @@ class Octav(object):
             for p in patterns:
                 if p.match(key):
                     payload[key] = args[key]
-        uri = '%s/featured_speaker/add' % self.endpoint
+        uri = '%s/v1/featured_speaker/add' % self.endpoint
         hdrs = urllib3.util.make_headers(
             basic_auth='%s:%s' % (self.key, self.secret),
         )
@@ -1957,7 +1979,7 @@ class Octav(object):
             payload['id'] = id
         if lang is not None:
             payload['lang'] = lang
-        uri = '%s/featured_speaker/lookup' % self.endpoint
+        uri = '%s/v1/featured_speaker/lookup' % self.endpoint
         hdrs = urllib3.util.make_headers(
             basic_auth='%s:%s' % (self.key, self.secret),
         )
@@ -1989,7 +2011,7 @@ class Octav(object):
             payload['limit'] = limit
         if since is not None:
             payload['since'] = since
-        uri = '%s/featured_speaker/list' % self.endpoint
+        uri = '%s/v1/featured_speaker/list' % self.endpoint
         hdrs = urllib3.util.make_headers(
             basic_auth='%s:%s' % (self.key, self.secret),
         )
@@ -2036,7 +2058,7 @@ class Octav(object):
             for p in patterns:
                 if p.match(key):
                     payload[key] = args[key]
-        uri = '%s/featured_speaker/update' % self.endpoint
+        uri = '%s/v1/featured_speaker/update' % self.endpoint
         hdrs = urllib3.util.make_headers(
             basic_auth='%s:%s' % (self.key, self.secret),
         )
@@ -2070,7 +2092,7 @@ class Octav(object):
             payload['id'] = id
         if user_id is not None:
             payload['user_id'] = user_id
-        uri = '%s/featured_speaker/delete' % self.endpoint
+        uri = '%s/v1/featured_speaker/delete' % self.endpoint
         hdrs = urllib3.util.make_headers(
             basic_auth='%s:%s' % (self.key, self.secret),
         )
@@ -2126,7 +2148,7 @@ class Octav(object):
             for p in patterns:
                 if p.match(key):
                     payload[key] = args[key]
-        uri = '%s/sponsor/add' % self.endpoint
+        uri = '%s/v1/sponsor/add' % self.endpoint
         hdrs = urllib3.util.make_headers(
             basic_auth='%s:%s' % (self.key, self.secret),
         )
@@ -2157,7 +2179,7 @@ class Octav(object):
             payload['id'] = id
         if lang is not None:
             payload['lang'] = lang
-        uri = '%s/sponsor/lookup' % self.endpoint
+        uri = '%s/v1/sponsor/lookup' % self.endpoint
         hdrs = urllib3.util.make_headers(
             basic_auth='%s:%s' % (self.key, self.secret),
         )
@@ -2189,7 +2211,7 @@ class Octav(object):
             payload['limit'] = limit
         if since is not None:
             payload['since'] = since
-        uri = '%s/sponsor/list' % self.endpoint
+        uri = '%s/v1/sponsor/list' % self.endpoint
         hdrs = urllib3.util.make_headers(
             basic_auth='%s:%s' % (self.key, self.secret),
         )
@@ -2236,7 +2258,7 @@ class Octav(object):
             for p in patterns:
                 if p.match(key):
                     payload[key] = args[key]
-        uri = '%s/sponsor/update' % self.endpoint
+        uri = '%s/v1/sponsor/update' % self.endpoint
         hdrs = urllib3.util.make_headers(
             basic_auth='%s:%s' % (self.key, self.secret),
         )
@@ -2270,7 +2292,7 @@ class Octav(object):
             payload['id'] = id
         if user_id is not None:
             payload['user_id'] = user_id
-        uri = '%s/sponsor/delete' % self.endpoint
+        uri = '%s/v1/sponsor/delete' % self.endpoint
         hdrs = urllib3.util.make_headers(
             basic_auth='%s:%s' % (self.key, self.secret),
         )
@@ -2309,7 +2331,7 @@ class Octav(object):
             payload['target_id'] = target_id
         if user_id is not None:
             payload['user_id'] = user_id
-        uri = '%s/email/create' % self.endpoint
+        uri = '%s/v1/email/create' % self.endpoint
         hdrs = urllib3.util.make_headers(
             basic_auth='%s:%s' % (self.key, self.secret),
         )
@@ -2348,7 +2370,7 @@ class Octav(object):
             payload['target_id'] = target_id
         if user_id is not None:
             payload['user_id'] = user_id
-        uri = '%s/email/confirm' % self.endpoint
+        uri = '%s/v1/email/confirm' % self.endpoint
         hdrs = urllib3.util.make_headers(
             basic_auth='%s:%s' % (self.key, self.secret),
         )
