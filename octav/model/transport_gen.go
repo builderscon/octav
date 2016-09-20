@@ -139,7 +139,7 @@ func (r AddSessionTypeRequest) MarshalJSON() ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-	return MarshalJSONWithL10N(buf, r.L10N)
+	return buf, nil
 }
 
 func (r AddSessionTypeRequest) MarshalURL() ([]byte, error) {
@@ -148,7 +148,7 @@ func (r AddSessionTypeRequest) MarshalURL() ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-	return MarshalURLWithL10N(buf, r.L10N)
+	return buf, nil
 }
 
 func (r *AddSessionTypeRequest) UnmarshalJSON(data []byte) error {
@@ -217,52 +217,7 @@ func (r *AddSessionTypeRequest) Populate(m map[string]interface{}) error {
 			return ErrInvalidJSONFieldType{Field: "user_id"}
 		}
 	}
-	if err := ExtractL10NFields(m, &r.L10N, []string{"conference_id", "name", "abstract", "duration", "submission_start", "submission_end", "user_id"}); err != nil {
-		return err
-	}
 	return nil
-}
-
-func (r *AddSessionTypeRequest) GetPropNames() ([]string, error) {
-	l, _ := r.L10N.GetPropNames()
-	return append(l, "conference_id", "name", "abstract", "duration", "submission_start", "submission_end", "user_id"), nil
-}
-
-func (r *AddSessionTypeRequest) SetPropValue(s string, v interface{}) error {
-	switch s {
-	case "conference_id":
-		if jv, ok := v.(string); ok {
-			r.ConferenceID = jv
-			return nil
-		}
-	case "name":
-		if jv, ok := v.(string); ok {
-			r.Name = jv
-			return nil
-		}
-	case "abstract":
-		if jv, ok := v.(string); ok {
-			r.Abstract = jv
-			return nil
-		}
-	case "duration":
-		if jv, ok := v.(int); ok {
-			r.Duration = jv
-			return nil
-		}
-	case "submission_start":
-		return r.SubmissionStart.Set(v)
-	case "submission_end":
-		return r.SubmissionEnd.Set(v)
-	case "user_id":
-		if jv, ok := v.(string); ok {
-			r.UserID = jv
-			return nil
-		}
-	default:
-		return errors.New("unknown column '" + s + "'")
-	}
-	return ErrInvalidFieldType{Field: s}
 }
 
 func (r DeleteSessionTypeRequest) collectMarshalData() map[string]interface{} {
@@ -420,7 +375,7 @@ func (r UpdateSessionTypeRequest) MarshalJSON() ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-	return MarshalJSONWithL10N(buf, r.L10N)
+	return buf, nil
 }
 
 func (r UpdateSessionTypeRequest) MarshalURL() ([]byte, error) {
@@ -429,7 +384,7 @@ func (r UpdateSessionTypeRequest) MarshalURL() ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-	return MarshalURLWithL10N(buf, r.L10N)
+	return buf, nil
 }
 
 func (r *UpdateSessionTypeRequest) UnmarshalJSON(data []byte) error {
@@ -489,43 +444,7 @@ func (r *UpdateSessionTypeRequest) Populate(m map[string]interface{}) error {
 			return ErrInvalidJSONFieldType{Field: "user_id"}
 		}
 	}
-	if err := ExtractL10NFields(m, &r.L10N, []string{"id", "name", "abstract", "duration", "submission_start", "submission_end", "user_id"}); err != nil {
-		return err
-	}
 	return nil
-}
-
-func (r *UpdateSessionTypeRequest) GetPropNames() ([]string, error) {
-	l, _ := r.L10N.GetPropNames()
-	return append(l, "id", "name", "abstract", "duration", "submission_start", "submission_end", "user_id"), nil
-}
-
-func (r *UpdateSessionTypeRequest) SetPropValue(s string, v interface{}) error {
-	switch s {
-	case "id":
-		if jv, ok := v.(string); ok {
-			r.ID = jv
-			return nil
-		}
-	case "name":
-		return r.Name.Set(v)
-	case "abstract":
-		return r.Abstract.Set(v)
-	case "duration":
-		return r.Duration.Set(v)
-	case "submission_start":
-		return r.SubmissionStart.Set(v)
-	case "submission_end":
-		return r.SubmissionEnd.Set(v)
-	case "user_id":
-		if jv, ok := v.(string); ok {
-			r.UserID = jv
-			return nil
-		}
-	default:
-		return errors.New("unknown column '" + s + "'")
-	}
-	return ErrInvalidFieldType{Field: s}
 }
 
 func (r LookupConferenceSeriesRequest) collectMarshalData() map[string]interface{} {
@@ -596,7 +515,7 @@ func (r CreateConferenceSeriesRequest) MarshalJSON() ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-	return MarshalJSONWithL10N(buf, r.L10N)
+	return buf, nil
 }
 
 func (r CreateConferenceSeriesRequest) MarshalURL() ([]byte, error) {
@@ -605,7 +524,7 @@ func (r CreateConferenceSeriesRequest) MarshalURL() ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-	return MarshalURLWithL10N(buf, r.L10N)
+	return buf, nil
 }
 
 func (r *CreateConferenceSeriesRequest) UnmarshalJSON(data []byte) error {
@@ -644,38 +563,7 @@ func (r *CreateConferenceSeriesRequest) Populate(m map[string]interface{}) error
 			return ErrInvalidJSONFieldType{Field: "title"}
 		}
 	}
-	if err := ExtractL10NFields(m, &r.L10N, []string{"user_id", "slug", "title"}); err != nil {
-		return err
-	}
 	return nil
-}
-
-func (r *CreateConferenceSeriesRequest) GetPropNames() ([]string, error) {
-	l, _ := r.L10N.GetPropNames()
-	return append(l, "user_id", "slug", "title"), nil
-}
-
-func (r *CreateConferenceSeriesRequest) SetPropValue(s string, v interface{}) error {
-	switch s {
-	case "user_id":
-		if jv, ok := v.(string); ok {
-			r.UserID = jv
-			return nil
-		}
-	case "slug":
-		if jv, ok := v.(string); ok {
-			r.Slug = jv
-			return nil
-		}
-	case "title":
-		if jv, ok := v.(string); ok {
-			r.Title = jv
-			return nil
-		}
-	default:
-		return errors.New("unknown column '" + s + "'")
-	}
-	return ErrInvalidFieldType{Field: s}
 }
 
 func (r UpdateConferenceSeriesRequest) collectMarshalData() map[string]interface{} {
@@ -696,7 +584,7 @@ func (r UpdateConferenceSeriesRequest) MarshalJSON() ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-	return MarshalJSONWithL10N(buf, r.L10N)
+	return buf, nil
 }
 
 func (r UpdateConferenceSeriesRequest) MarshalURL() ([]byte, error) {
@@ -705,7 +593,7 @@ func (r UpdateConferenceSeriesRequest) MarshalURL() ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-	return MarshalURLWithL10N(buf, r.L10N)
+	return buf, nil
 }
 
 func (r *UpdateConferenceSeriesRequest) UnmarshalJSON(data []byte) error {
@@ -738,32 +626,7 @@ func (r *UpdateConferenceSeriesRequest) Populate(m map[string]interface{}) error
 		}
 		delete(m, "title")
 	}
-	if err := ExtractL10NFields(m, &r.L10N, []string{"id", "slug", "title"}); err != nil {
-		return err
-	}
 	return nil
-}
-
-func (r *UpdateConferenceSeriesRequest) GetPropNames() ([]string, error) {
-	l, _ := r.L10N.GetPropNames()
-	return append(l, "id", "slug", "title"), nil
-}
-
-func (r *UpdateConferenceSeriesRequest) SetPropValue(s string, v interface{}) error {
-	switch s {
-	case "id":
-		if jv, ok := v.(string); ok {
-			r.ID = jv
-			return nil
-		}
-	case "slug":
-		return r.Slug.Set(v)
-	case "title":
-		return r.Title.Set(v)
-	default:
-		return errors.New("unknown column '" + s + "'")
-	}
-	return ErrInvalidFieldType{Field: s}
 }
 
 func (r DeleteConferenceSeriesRequest) collectMarshalData() map[string]interface{} {
@@ -978,7 +841,7 @@ func (r CreateConferenceRequest) MarshalJSON() ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-	return MarshalJSONWithL10N(buf, r.L10N)
+	return MarshalJSONWithL10N(buf, r.LocalizedFields)
 }
 
 func (r CreateConferenceRequest) MarshalURL() ([]byte, error) {
@@ -987,7 +850,7 @@ func (r CreateConferenceRequest) MarshalURL() ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-	return MarshalURLWithL10N(buf, r.L10N)
+	return MarshalURLWithL10N(buf, r.LocalizedFields)
 }
 
 func (r *CreateConferenceRequest) UnmarshalJSON(data []byte) error {
@@ -1065,14 +928,14 @@ func (r *CreateConferenceRequest) Populate(m map[string]interface{}) error {
 			return ErrInvalidJSONFieldType{Field: "user_id"}
 		}
 	}
-	if err := ExtractL10NFields(m, &r.L10N, []string{"title", "cfp_lead_text", "cfp_pre_submit_instructions", "cfp_post_submit_instructions", "description", "series_id", "sub_title", "slug", "user_id"}); err != nil {
+	if err := ExtractL10NFields(m, &r.LocalizedFields, []string{"title", "cfp_lead_text", "cfp_pre_submit_instructions", "cfp_post_submit_instructions", "description", "sub_title"}); err != nil {
 		return err
 	}
 	return nil
 }
 
 func (r *CreateConferenceRequest) GetPropNames() ([]string, error) {
-	l, _ := r.L10N.GetPropNames()
+	l, _ := r.LocalizedFields.GetPropNames()
 	return append(l, "title", "cfp_lead_text", "cfp_pre_submit_instructions", "cfp_post_submit_instructions", "description", "series_id", "sub_title", "slug", "user_id"), nil
 }
 
@@ -1262,7 +1125,7 @@ func (r UpdateConferenceRequest) MarshalJSON() ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-	return MarshalJSONWithL10N(buf, r.L10N)
+	return MarshalJSONWithL10N(buf, r.LocalizedFields)
 }
 
 func (r UpdateConferenceRequest) MarshalURL() ([]byte, error) {
@@ -1271,7 +1134,7 @@ func (r UpdateConferenceRequest) MarshalURL() ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-	return MarshalURLWithL10N(buf, r.L10N)
+	return MarshalURLWithL10N(buf, r.LocalizedFields)
 }
 
 func (r *UpdateConferenceRequest) UnmarshalJSON(data []byte) error {
@@ -1355,14 +1218,14 @@ func (r *UpdateConferenceRequest) Populate(m map[string]interface{}) error {
 			return ErrInvalidJSONFieldType{Field: "user_id"}
 		}
 	}
-	if err := ExtractL10NFields(m, &r.L10N, []string{"id", "title", "description", "cfp_lead_text", "cfp_pre_submit_instructions", "cfp_post_submit_instructions", "series_id", "slug", "sub_title", "status", "user_id"}); err != nil {
+	if err := ExtractL10NFields(m, &r.LocalizedFields, []string{"title", "description", "cfp_lead_text", "cfp_pre_submit_instructions", "cfp_post_submit_instructions", "sub_title"}); err != nil {
 		return err
 	}
 	return nil
 }
 
 func (r *UpdateConferenceRequest) GetPropNames() ([]string, error) {
-	l, _ := r.L10N.GetPropNames()
+	l, _ := r.LocalizedFields.GetPropNames()
 	return append(l, "id", "title", "description", "cfp_lead_text", "cfp_pre_submit_instructions", "cfp_post_submit_instructions", "series_id", "slug", "sub_title", "status", "user_id"), nil
 }
 
@@ -2061,7 +1924,7 @@ func (r CreateRoomRequest) MarshalJSON() ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-	return MarshalJSONWithL10N(buf, r.L10N)
+	return MarshalJSONWithL10N(buf, r.LocalizedFields)
 }
 
 func (r CreateRoomRequest) MarshalURL() ([]byte, error) {
@@ -2070,7 +1933,7 @@ func (r CreateRoomRequest) MarshalURL() ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-	return MarshalURLWithL10N(buf, r.L10N)
+	return MarshalURLWithL10N(buf, r.LocalizedFields)
 }
 
 func (r *CreateRoomRequest) UnmarshalJSON(data []byte) error {
@@ -2109,14 +1972,14 @@ func (r *CreateRoomRequest) Populate(m map[string]interface{}) error {
 			return ErrInvalidJSONFieldType{Field: "user_id"}
 		}
 	}
-	if err := ExtractL10NFields(m, &r.L10N, []string{"venue_id", "name", "capacity", "user_id"}); err != nil {
+	if err := ExtractL10NFields(m, &r.LocalizedFields, []string{"name"}); err != nil {
 		return err
 	}
 	return nil
 }
 
 func (r *CreateRoomRequest) GetPropNames() ([]string, error) {
-	l, _ := r.L10N.GetPropNames()
+	l, _ := r.LocalizedFields.GetPropNames()
 	return append(l, "venue_id", "name", "capacity", "user_id"), nil
 }
 
@@ -2215,7 +2078,7 @@ func (r UpdateRoomRequest) MarshalJSON() ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-	return MarshalJSONWithL10N(buf, r.L10N)
+	return MarshalJSONWithL10N(buf, r.LocalizedFields)
 }
 
 func (r UpdateRoomRequest) MarshalURL() ([]byte, error) {
@@ -2224,7 +2087,7 @@ func (r UpdateRoomRequest) MarshalURL() ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-	return MarshalURLWithL10N(buf, r.L10N)
+	return MarshalURLWithL10N(buf, r.LocalizedFields)
 }
 
 func (r *UpdateRoomRequest) UnmarshalJSON(data []byte) error {
@@ -2272,14 +2135,14 @@ func (r *UpdateRoomRequest) Populate(m map[string]interface{}) error {
 			return ErrInvalidJSONFieldType{Field: "user_id"}
 		}
 	}
-	if err := ExtractL10NFields(m, &r.L10N, []string{"id", "venue_id", "name", "capacity", "user_id"}); err != nil {
+	if err := ExtractL10NFields(m, &r.LocalizedFields, []string{"name"}); err != nil {
 		return err
 	}
 	return nil
 }
 
 func (r *UpdateRoomRequest) GetPropNames() ([]string, error) {
-	l, _ := r.L10N.GetPropNames()
+	l, _ := r.LocalizedFields.GetPropNames()
 	return append(l, "id", "venue_id", "name", "capacity", "user_id"), nil
 }
 
@@ -2493,7 +2356,7 @@ func (r CreateSessionRequest) MarshalJSON() ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-	return MarshalJSONWithL10N(buf, r.L10N)
+	return MarshalJSONWithL10N(buf, r.LocalizedFields)
 }
 
 func (r CreateSessionRequest) MarshalURL() ([]byte, error) {
@@ -2502,7 +2365,7 @@ func (r CreateSessionRequest) MarshalURL() ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-	return MarshalURLWithL10N(buf, r.L10N)
+	return MarshalURLWithL10N(buf, r.LocalizedFields)
 }
 
 func (r *CreateSessionRequest) UnmarshalJSON(data []byte) error {
@@ -2631,14 +2494,14 @@ func (r *CreateSessionRequest) Populate(m map[string]interface{}) error {
 			return ErrInvalidJSONFieldType{Field: "user_id"}
 		}
 	}
-	if err := ExtractL10NFields(m, &r.L10N, []string{"conference_id", "speaker_id", "session_type_id", "title", "abstract", "memo", "material_level", "tags", "category", "spoken_language", "slide_language", "slide_subtitles", "slide_url", "video_url", "photo_release", "recording_release", "materials_release", "user_id"}); err != nil {
+	if err := ExtractL10NFields(m, &r.LocalizedFields, []string{"title", "abstract"}); err != nil {
 		return err
 	}
 	return nil
 }
 
 func (r *CreateSessionRequest) GetPropNames() ([]string, error) {
-	l, _ := r.L10N.GetPropNames()
+	l, _ := r.LocalizedFields.GetPropNames()
 	return append(l, "conference_id", "speaker_id", "session_type_id", "title", "abstract", "memo", "material_level", "tags", "category", "spoken_language", "slide_language", "slide_subtitles", "slide_url", "video_url", "photo_release", "recording_release", "materials_release", "user_id"), nil
 }
 
@@ -2761,6 +2624,9 @@ func (r UpdateSessionRequest) collectMarshalData() map[string]interface{} {
 	if r.SessionTypeID.Valid() {
 		m["session_type_id"] = r.SessionTypeID.Value()
 	}
+	if r.RoomID.Valid() {
+		m["room_id"] = r.RoomID.Value()
+	}
 	if r.Title.Valid() {
 		m["title"] = r.Title.Value()
 	}
@@ -2828,7 +2694,7 @@ func (r UpdateSessionRequest) MarshalJSON() ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-	return MarshalJSONWithL10N(buf, r.L10N)
+	return MarshalJSONWithL10N(buf, r.LocalizedFields)
 }
 
 func (r UpdateSessionRequest) MarshalURL() ([]byte, error) {
@@ -2837,7 +2703,7 @@ func (r UpdateSessionRequest) MarshalURL() ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-	return MarshalURLWithL10N(buf, r.L10N)
+	return MarshalURLWithL10N(buf, r.LocalizedFields)
 }
 
 func (r *UpdateSessionRequest) UnmarshalJSON(data []byte) error {
@@ -2875,6 +2741,12 @@ func (r *UpdateSessionRequest) Populate(m map[string]interface{}) error {
 			return errors.New("set field SessionTypeID failed: " + err.Error())
 		}
 		delete(m, "session_type_id")
+	}
+	if jv, ok := m["room_id"]; ok {
+		if err := r.RoomID.Set(jv); err != nil {
+			return errors.New("set field RoomID failed: " + err.Error())
+		}
+		delete(m, "room_id")
 	}
 	if jv, ok := m["title"]; ok {
 		if err := r.Title.Set(jv); err != nil {
@@ -2999,15 +2871,15 @@ func (r *UpdateSessionRequest) Populate(m map[string]interface{}) error {
 			return ErrInvalidJSONFieldType{Field: "user_id"}
 		}
 	}
-	if err := ExtractL10NFields(m, &r.L10N, []string{"id", "conference_id", "speaker_id", "session_type_id", "title", "abstract", "memo", "duration", "material_level", "tags", "category", "spoken_language", "slide_language", "slide_subtitles", "slide_url", "video_url", "photo_release", "recording_release", "materials_release", "sort_order", "has_interpretation", "status", "confirmed", "user_id"}); err != nil {
+	if err := ExtractL10NFields(m, &r.LocalizedFields, []string{"title", "abstract"}); err != nil {
 		return err
 	}
 	return nil
 }
 
 func (r *UpdateSessionRequest) GetPropNames() ([]string, error) {
-	l, _ := r.L10N.GetPropNames()
-	return append(l, "id", "conference_id", "speaker_id", "session_type_id", "title", "abstract", "memo", "duration", "material_level", "tags", "category", "spoken_language", "slide_language", "slide_subtitles", "slide_url", "video_url", "photo_release", "recording_release", "materials_release", "sort_order", "has_interpretation", "status", "confirmed", "user_id"), nil
+	l, _ := r.LocalizedFields.GetPropNames()
+	return append(l, "id", "conference_id", "speaker_id", "session_type_id", "room_id", "title", "abstract", "memo", "duration", "material_level", "tags", "category", "spoken_language", "slide_language", "slide_subtitles", "slide_url", "video_url", "photo_release", "recording_release", "materials_release", "sort_order", "has_interpretation", "status", "confirmed", "user_id"), nil
 }
 
 func (r *UpdateSessionRequest) SetPropValue(s string, v interface{}) error {
@@ -3023,6 +2895,8 @@ func (r *UpdateSessionRequest) SetPropValue(s string, v interface{}) error {
 		return r.SpeakerID.Set(v)
 	case "session_type_id":
 		return r.SessionTypeID.Set(v)
+	case "room_id":
+		return r.RoomID.Set(v)
 	case "title":
 		return r.Title.Set(v)
 	case "abstract":
@@ -3156,7 +3030,7 @@ func (r CreateUserRequest) MarshalJSON() ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-	return MarshalJSONWithL10N(buf, r.L10N)
+	return MarshalJSONWithL10N(buf, r.LocalizedFields)
 }
 
 func (r CreateUserRequest) MarshalURL() ([]byte, error) {
@@ -3165,7 +3039,7 @@ func (r CreateUserRequest) MarshalURL() ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-	return MarshalURLWithL10N(buf, r.L10N)
+	return MarshalURLWithL10N(buf, r.LocalizedFields)
 }
 
 func (r *CreateUserRequest) UnmarshalJSON(data []byte) error {
@@ -3234,14 +3108,14 @@ func (r *CreateUserRequest) Populate(m map[string]interface{}) error {
 		}
 		delete(m, "tshirt_size")
 	}
-	if err := ExtractL10NFields(m, &r.L10N, []string{"first_name", "last_name", "nickname", "email", "auth_via", "auth_user_id", "avatar_url", "tshirt_size"}); err != nil {
+	if err := ExtractL10NFields(m, &r.LocalizedFields, []string{"first_name", "last_name"}); err != nil {
 		return err
 	}
 	return nil
 }
 
 func (r *CreateUserRequest) GetPropNames() ([]string, error) {
-	l, _ := r.L10N.GetPropNames()
+	l, _ := r.LocalizedFields.GetPropNames()
 	return append(l, "first_name", "last_name", "nickname", "email", "auth_via", "auth_user_id", "avatar_url", "tshirt_size"), nil
 }
 
@@ -3315,7 +3189,7 @@ func (r UpdateUserRequest) MarshalJSON() ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-	return MarshalJSONWithL10N(buf, r.L10N)
+	return MarshalJSONWithL10N(buf, r.LocalizedFields)
 }
 
 func (r UpdateUserRequest) MarshalURL() ([]byte, error) {
@@ -3324,7 +3198,7 @@ func (r UpdateUserRequest) MarshalURL() ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-	return MarshalURLWithL10N(buf, r.L10N)
+	return MarshalURLWithL10N(buf, r.LocalizedFields)
 }
 
 func (r *UpdateUserRequest) UnmarshalJSON(data []byte) error {
@@ -3402,14 +3276,14 @@ func (r *UpdateUserRequest) Populate(m map[string]interface{}) error {
 			return ErrInvalidJSONFieldType{Field: "user_id"}
 		}
 	}
-	if err := ExtractL10NFields(m, &r.L10N, []string{"id", "first_name", "last_name", "nickname", "email", "auth_via", "auth_user_id", "avatar_url", "tshirt_size", "user_id"}); err != nil {
+	if err := ExtractL10NFields(m, &r.LocalizedFields, []string{"first_name", "last_name"}); err != nil {
 		return err
 	}
 	return nil
 }
 
 func (r *UpdateUserRequest) GetPropNames() ([]string, error) {
-	l, _ := r.L10N.GetPropNames()
+	l, _ := r.LocalizedFields.GetPropNames()
 	return append(l, "id", "first_name", "last_name", "nickname", "email", "auth_via", "auth_user_id", "avatar_url", "tshirt_size", "user_id"), nil
 }
 
@@ -3706,7 +3580,7 @@ func (r CreateVenueRequest) MarshalJSON() ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-	return MarshalJSONWithL10N(buf, r.L10N)
+	return MarshalJSONWithL10N(buf, r.LocalizedFields)
 }
 
 func (r CreateVenueRequest) MarshalURL() ([]byte, error) {
@@ -3715,7 +3589,7 @@ func (r CreateVenueRequest) MarshalURL() ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-	return MarshalURLWithL10N(buf, r.L10N)
+	return MarshalURLWithL10N(buf, r.LocalizedFields)
 }
 
 func (r *CreateVenueRequest) UnmarshalJSON(data []byte) error {
@@ -3760,14 +3634,14 @@ func (r *CreateVenueRequest) Populate(m map[string]interface{}) error {
 			return ErrInvalidJSONFieldType{Field: "user_id"}
 		}
 	}
-	if err := ExtractL10NFields(m, &r.L10N, []string{"name", "address", "longitude", "latitude", "user_id"}); err != nil {
+	if err := ExtractL10NFields(m, &r.LocalizedFields, []string{"name", "address"}); err != nil {
 		return err
 	}
 	return nil
 }
 
 func (r *CreateVenueRequest) GetPropNames() ([]string, error) {
-	l, _ := r.L10N.GetPropNames()
+	l, _ := r.LocalizedFields.GetPropNames()
 	return append(l, "name", "address", "longitude", "latitude", "user_id"), nil
 }
 
@@ -3817,7 +3691,7 @@ func (r UpdateVenueRequest) MarshalJSON() ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-	return MarshalJSONWithL10N(buf, r.L10N)
+	return MarshalJSONWithL10N(buf, r.LocalizedFields)
 }
 
 func (r UpdateVenueRequest) MarshalURL() ([]byte, error) {
@@ -3826,7 +3700,7 @@ func (r UpdateVenueRequest) MarshalURL() ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-	return MarshalURLWithL10N(buf, r.L10N)
+	return MarshalURLWithL10N(buf, r.LocalizedFields)
 }
 
 func (r *UpdateVenueRequest) UnmarshalJSON(data []byte) error {
@@ -3880,14 +3754,14 @@ func (r *UpdateVenueRequest) Populate(m map[string]interface{}) error {
 			return ErrInvalidJSONFieldType{Field: "user_id"}
 		}
 	}
-	if err := ExtractL10NFields(m, &r.L10N, []string{"id", "name", "address", "longitude", "latitude", "user_id"}); err != nil {
+	if err := ExtractL10NFields(m, &r.LocalizedFields, []string{"name", "address"}); err != nil {
 		return err
 	}
 	return nil
 }
 
 func (r *UpdateVenueRequest) GetPropNames() ([]string, error) {
-	l, _ := r.L10N.GetPropNames()
+	l, _ := r.LocalizedFields.GetPropNames()
 	return append(l, "id", "name", "address", "longitude", "latitude", "user_id"), nil
 }
 
@@ -4890,7 +4764,7 @@ func (r AddFeaturedSpeakerRequest) MarshalJSON() ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-	return MarshalJSONWithL10N(buf, r.L10N)
+	return MarshalJSONWithL10N(buf, r.LocalizedFields)
 }
 
 func (r AddFeaturedSpeakerRequest) MarshalURL() ([]byte, error) {
@@ -4899,7 +4773,7 @@ func (r AddFeaturedSpeakerRequest) MarshalURL() ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-	return MarshalURLWithL10N(buf, r.L10N)
+	return MarshalURLWithL10N(buf, r.LocalizedFields)
 }
 
 func (r *AddFeaturedSpeakerRequest) UnmarshalJSON(data []byte) error {
@@ -4959,14 +4833,14 @@ func (r *AddFeaturedSpeakerRequest) Populate(m map[string]interface{}) error {
 			return ErrInvalidJSONFieldType{Field: "user_id"}
 		}
 	}
-	if err := ExtractL10NFields(m, &r.L10N, []string{"conference_id", "speaker_id", "avatar_url", "display_name", "description", "user_id"}); err != nil {
+	if err := ExtractL10NFields(m, &r.LocalizedFields, []string{"display_name"}); err != nil {
 		return err
 	}
 	return nil
 }
 
 func (r *AddFeaturedSpeakerRequest) GetPropNames() ([]string, error) {
-	l, _ := r.L10N.GetPropNames()
+	l, _ := r.LocalizedFields.GetPropNames()
 	return append(l, "conference_id", "speaker_id", "avatar_url", "display_name", "description", "user_id"), nil
 }
 
@@ -5027,7 +4901,7 @@ func (r UpdateFeaturedSpeakerRequest) MarshalJSON() ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-	return MarshalJSONWithL10N(buf, r.L10N)
+	return MarshalJSONWithL10N(buf, r.LocalizedFields)
 }
 
 func (r UpdateFeaturedSpeakerRequest) MarshalURL() ([]byte, error) {
@@ -5036,7 +4910,7 @@ func (r UpdateFeaturedSpeakerRequest) MarshalURL() ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-	return MarshalURLWithL10N(buf, r.L10N)
+	return MarshalURLWithL10N(buf, r.LocalizedFields)
 }
 
 func (r *UpdateFeaturedSpeakerRequest) UnmarshalJSON(data []byte) error {
@@ -5090,14 +4964,14 @@ func (r *UpdateFeaturedSpeakerRequest) Populate(m map[string]interface{}) error 
 			return ErrInvalidJSONFieldType{Field: "user_id"}
 		}
 	}
-	if err := ExtractL10NFields(m, &r.L10N, []string{"id", "speaker_id", "avatar_url", "display_name", "description", "user_id"}); err != nil {
+	if err := ExtractL10NFields(m, &r.LocalizedFields, []string{"display_name"}); err != nil {
 		return err
 	}
 	return nil
 }
 
 func (r *UpdateFeaturedSpeakerRequest) GetPropNames() ([]string, error) {
-	l, _ := r.L10N.GetPropNames()
+	l, _ := r.LocalizedFields.GetPropNames()
 	return append(l, "id", "speaker_id", "avatar_url", "display_name", "description", "user_id"), nil
 }
 
@@ -5334,7 +5208,7 @@ func (r AddSponsorRequest) MarshalJSON() ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-	return MarshalJSONWithL10N(buf, r.L10N)
+	return buf, nil
 }
 
 func (r AddSponsorRequest) MarshalURL() ([]byte, error) {
@@ -5343,7 +5217,7 @@ func (r AddSponsorRequest) MarshalURL() ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-	return MarshalURLWithL10N(buf, r.L10N)
+	return buf, nil
 }
 
 func (r *AddSponsorRequest) UnmarshalJSON(data []byte) error {
@@ -5409,53 +5283,7 @@ func (r *AddSponsorRequest) Populate(m map[string]interface{}) error {
 			return ErrInvalidJSONFieldType{Field: "user_id"}
 		}
 	}
-	if err := ExtractL10NFields(m, &r.L10N, []string{"conference_id", "name", "url", "group_name", "sort_order", "user_id"}); err != nil {
-		return err
-	}
 	return nil
-}
-
-func (r *AddSponsorRequest) GetPropNames() ([]string, error) {
-	l, _ := r.L10N.GetPropNames()
-	return append(l, "conference_id", "name", "url", "group_name", "sort_order", "user_id"), nil
-}
-
-func (r *AddSponsorRequest) SetPropValue(s string, v interface{}) error {
-	switch s {
-	case "conference_id":
-		if jv, ok := v.(string); ok {
-			r.ConferenceID = jv
-			return nil
-		}
-	case "name":
-		if jv, ok := v.(string); ok {
-			r.Name = jv
-			return nil
-		}
-	case "url":
-		if jv, ok := v.(string); ok {
-			r.URL = jv
-			return nil
-		}
-	case "group_name":
-		if jv, ok := v.(string); ok {
-			r.GroupName = jv
-			return nil
-		}
-	case "sort_order":
-		if jv, ok := v.(int); ok {
-			r.SortOrder = jv
-			return nil
-		}
-	case "user_id":
-		if jv, ok := v.(string); ok {
-			r.UserID = jv
-			return nil
-		}
-	default:
-		return errors.New("unknown column '" + s + "'")
-	}
-	return ErrInvalidFieldType{Field: s}
 }
 
 func (r UpdateSponsorRequest) collectMarshalData() map[string]interface{} {
@@ -5483,7 +5311,7 @@ func (r UpdateSponsorRequest) MarshalJSON() ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-	return MarshalJSONWithL10N(buf, r.L10N)
+	return buf, nil
 }
 
 func (r UpdateSponsorRequest) MarshalURL() ([]byte, error) {
@@ -5492,7 +5320,7 @@ func (r UpdateSponsorRequest) MarshalURL() ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-	return MarshalURLWithL10N(buf, r.L10N)
+	return buf, nil
 }
 
 func (r *UpdateSponsorRequest) UnmarshalJSON(data []byte) error {
@@ -5546,41 +5374,7 @@ func (r *UpdateSponsorRequest) Populate(m map[string]interface{}) error {
 			return ErrInvalidJSONFieldType{Field: "user_id"}
 		}
 	}
-	if err := ExtractL10NFields(m, &r.L10N, []string{"id", "name", "url", "group_name", "sort_order", "user_id"}); err != nil {
-		return err
-	}
 	return nil
-}
-
-func (r *UpdateSponsorRequest) GetPropNames() ([]string, error) {
-	l, _ := r.L10N.GetPropNames()
-	return append(l, "id", "name", "url", "group_name", "sort_order", "user_id"), nil
-}
-
-func (r *UpdateSponsorRequest) SetPropValue(s string, v interface{}) error {
-	switch s {
-	case "id":
-		if jv, ok := v.(string); ok {
-			r.ID = jv
-			return nil
-		}
-	case "name":
-		return r.Name.Set(v)
-	case "url":
-		return r.URL.Set(v)
-	case "group_name":
-		return r.GroupName.Set(v)
-	case "sort_order":
-		return r.SortOrder.Set(v)
-	case "user_id":
-		if jv, ok := v.(string); ok {
-			r.UserID = jv
-			return nil
-		}
-	default:
-		return errors.New("unknown column '" + s + "'")
-	}
-	return ErrInvalidFieldType{Field: s}
 }
 
 func (r DeleteSponsorRequest) collectMarshalData() map[string]interface{} {

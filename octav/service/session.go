@@ -30,7 +30,7 @@ func (v *SessionSvc) populateRowForCreate(vdb *db.Session, payload model.CreateS
 		vdb.Title.String = payload.Title.String
 	}
 
-	if s, ok := payload.L10N.Get("ja", "title"); ok && s != ""  {
+	if s, ok := payload.LocalizedFields.Get("ja", "title"); ok && s != ""  {
 		hasTitle = true
 	}
 
@@ -47,7 +47,7 @@ func (v *SessionSvc) populateRowForCreate(vdb *db.Session, payload model.CreateS
 		vdb.Abstract.String = payload.Abstract.String
 	}
 
-	if s, ok := payload.L10N.Get("ja", "abstract"); ok && s != ""  {
+	if s, ok := payload.LocalizedFields.Get("ja", "abstract"); ok && s != ""  {
 		hasAbstract = true
 	}
 
@@ -121,6 +121,11 @@ func (v *SessionSvc) populateRowForCreate(vdb *db.Session, payload model.CreateS
 func (v *SessionSvc) populateRowForUpdate(vdb *db.Session, payload model.UpdateSessionRequest) error {
 	if payload.ConferenceID.Valid() {
 		vdb.ConferenceID = payload.ConferenceID.String
+	}
+
+	if payload.RoomID.Valid() {
+		vdb.RoomID.Valid = true
+		vdb.RoomID.String = payload.RoomID.String
 	}
 
 	if payload.SpeakerID.Valid() {

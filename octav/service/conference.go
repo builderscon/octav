@@ -81,7 +81,7 @@ func (v *ConferenceSvc) CreateDefaultSessionTypes(tx *db.Tx, c *model.Conference
 			Abstract: fmt.Sprintf("%d minute session", dur/60),
 			Duration: dur,
 		}
-		r.L10N.Set("ja", "abstract", fmt.Sprintf("%d分枠", dur/60))
+		r.LocalizedFields.Set("ja", "abstract", fmt.Sprintf("%d分枠", dur/60))
 		stocktypes = append(stocktypes, r)
 	}
 	r := model.AddSessionTypeRequest{
@@ -89,7 +89,7 @@ func (v *ConferenceSvc) CreateDefaultSessionTypes(tx *db.Tx, c *model.Conference
 		Abstract: "5 minute session about anything you want",
 		Duration: 300,
 	}
-	r.L10N.Set("ja", "abstract", "5分間で強制終了、初心者も安心枠")
+	r.LocalizedFields.Set("ja", "abstract", "5分間で強制終了、初心者も安心枠")
 	stocktypes = append(stocktypes, r)
 
 	for _, r := range stocktypes {

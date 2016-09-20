@@ -134,8 +134,8 @@ type AddSessionTypeRequest struct {
 	Duration        int               `json:"duration"`
 	SubmissionStart jsval.MaybeString `json:"submission_start,omitempty"`
 	SubmissionEnd   jsval.MaybeString `json:"submission_end,omitempty"`
-	L10N            LocalizedFields   `json:"-"`
-	UserID          string            `json:"user_id"`
+	LocalizedFields `json:"-"`
+	UserID          string `json:"user_id"`
 }
 type CreateSessionTypeRequest struct {
 	AddSessionTypeRequest
@@ -165,8 +165,8 @@ type UpdateSessionTypeRequest struct {
 	Duration        jsval.MaybeInt    `json:"duration,omitempty"`
 	SubmissionStart jsval.MaybeString `json:"submission_start,omitempty"`
 	SubmissionEnd   jsval.MaybeString `json:"submission_end,omitempty"`
-	L10N            LocalizedFields   `json:"-"`
-	UserID          string            `json:"user_id"`
+	LocalizedFields `json:"-"`
+	UserID          string `json:"user_id"`
 }
 
 // +model
@@ -244,18 +244,18 @@ type LookupConferenceSeriesRequest struct {
 
 // +transport
 type CreateConferenceSeriesRequest struct {
-	UserID string          `json:"user_id"`
-	Slug   string          `json:"slug"`
-	Title  string          `json:"title"`
-	L10N   LocalizedFields `json:"-"`
+	UserID          string `json:"user_id"`
+	Slug            string `json:"slug"`
+	Title           string `json:"title"`
+	LocalizedFields `json:"-"`
 }
 
 // +transport
 type UpdateConferenceSeriesRequest struct {
-	ID    string            `json:"id"`
-	Slug  jsval.MaybeString `json:"slug"`
-	Title jsval.MaybeString `json:"title"`
-	L10N  LocalizedFields   `json:"-"`
+	ID              string            `json:"id"`
+	Slug            jsval.MaybeString `json:"slug"`
+	Title           jsval.MaybeString `json:"title"`
+	LocalizedFields `json:"-"`
 }
 
 // +transport
@@ -292,7 +292,7 @@ type CreateConferenceRequest struct {
 	SubTitle                  jsval.MaybeString `json:"sub_title" l10n:"true"`
 	Slug                      string            `json:"slug"`
 	UserID                    string            `json:"user_id"`
-	L10N                      LocalizedFields   `json:"-"`
+	LocalizedFields           `json:"-"`
 }
 
 // +transport
@@ -325,7 +325,7 @@ type UpdateConferenceRequest struct {
 	SubTitle                  jsval.MaybeString `json:"sub_title,omitempty" l10n:"true"`
 	Status                    jsval.MaybeString `json:"status,omitempty"`
 	UserID                    string            `json:"user_id"`
-	L10N                      LocalizedFields   `json:"-"`
+	LocalizedFields           `json:"-"`
 
 	// These fields are only used internally
 	CoverURL jsval.MaybeString `json:"-"`
@@ -429,11 +429,11 @@ type ListConferenceReponse []Conference
 
 // +transport
 type CreateRoomRequest struct {
-	VenueID  jsval.MaybeString `json:"venue_id"`
-	Name     jsval.MaybeString `json:"name" l10n:"true"`
-	Capacity jsval.MaybeUint   `json:"capacity"`
-	L10N     LocalizedFields   `json:"-"`
-	UserID   string            `json:"user_id"`
+	VenueID         jsval.MaybeString `json:"venue_id"`
+	Name            jsval.MaybeString `json:"name" l10n:"true"`
+	Capacity        jsval.MaybeUint   `json:"capacity"`
+	LocalizedFields `json:"-"`
+	UserID          string `json:"user_id"`
 }
 
 // +transport
@@ -446,12 +446,12 @@ type LookupRoomRequest struct {
 
 // +transport
 type UpdateRoomRequest struct {
-	ID       string            `json:"id"`
-	VenueID  jsval.MaybeString `json:"venue_id,omitempty"`
-	Name     jsval.MaybeString `json:"name,omitempty" l10n:"true"`
-	Capacity jsval.MaybeUint   `json:"capacity,omitempty"`
-	L10N     LocalizedFields   `json:"-"`
-	UserID   string            `json:"user_id"`
+	ID              string            `json:"id"`
+	VenueID         jsval.MaybeString `json:"venue_id,omitempty"`
+	Name            jsval.MaybeString `json:"name,omitempty" l10n:"true"`
+	Capacity        jsval.MaybeUint   `json:"capacity,omitempty"`
+	LocalizedFields `json:"-"`
+	UserID          string `json:"user_id"`
 }
 
 // +transport
@@ -475,8 +475,8 @@ type CreateSessionRequest struct {
 	ConferenceID     string            `json:"conference_id"`
 	SpeakerID        jsval.MaybeString `json:"speaker_id,omitempty"`
 	SessionTypeID    string            `json:"session_type_id"`
-	Title            jsval.MaybeString `json:"title,omitempty"`
-	Abstract         jsval.MaybeString `json:"abstract,omitempty"`
+	Title            jsval.MaybeString `json:"title,omitempty" l10n:"true"`
+	Abstract         jsval.MaybeString `json:"abstract,omitempty" l10n:"true"`
 	Memo             jsval.MaybeString `json:"memo,omitempty"`
 	MaterialLevel    jsval.MaybeString `json:"material_level,omitempty"`
 	Tags             jsval.MaybeString `json:"tags,omitempty"`
@@ -489,9 +489,9 @@ type CreateSessionRequest struct {
 	PhotoRelease     jsval.MaybeString `json:"photo_release,omitempty"`
 	RecordingRelease jsval.MaybeString `json:"recording_release,omitempty"`
 	MaterialsRelease jsval.MaybeString `json:"materials_release,omitempty"`
-	L10N             LocalizedFields   `json:"-"`
-	UserID           string            `json:"user_id"`
-	Duration         int               `json:"-"` // This is not sent from the client, but is used internally
+	LocalizedFields  `json:"-"`
+	UserID           string `json:"user_id"`
+	Duration         int    `json:"-"` // This is not sent from the client, but is used internally
 }
 
 // +transport
@@ -508,8 +508,9 @@ type UpdateSessionRequest struct {
 	ConferenceID      jsval.MaybeString `json:"conference_id,omitempty"`
 	SpeakerID         jsval.MaybeString `json:"speaker_id,omitempty"`
 	SessionTypeID     jsval.MaybeString `json:"session_type_id,omitempty"`
-	Title             jsval.MaybeString `json:"title,omitempty"`
-	Abstract          jsval.MaybeString `json:"abstract,omitempty"`
+	RoomID            jsval.MaybeString `json:"room_id,omitempty"`
+	Title             jsval.MaybeString `json:"title,omitempty" l10n:"true"`
+	Abstract          jsval.MaybeString `json:"abstract,omitempty" l10n:"true"`
 	Memo              jsval.MaybeString `json:"memo,omitempty"`
 	Duration          jsval.MaybeInt    `json:"duration,omitempty"`
 	MaterialLevel     jsval.MaybeString `json:"material_level,omitempty"`
@@ -527,8 +528,8 @@ type UpdateSessionRequest struct {
 	HasInterpretation jsval.MaybeBool   `json:"has_interpretation,omitempty"`
 	Status            jsval.MaybeString `json:"status,omitempty"`
 	Confirmed         jsval.MaybeBool   `json:"confirmed,omitempty"`
-	L10N              LocalizedFields   `json:"-"`
-	UserID            string            `json:"user_id"`
+	LocalizedFields   `json:"-"`
+	UserID            string `json:"user_id"`
 }
 
 // +transport
@@ -539,30 +540,30 @@ type DeleteSessionRequest struct {
 
 // +transport
 type CreateUserRequest struct {
-	FirstName  jsval.MaybeString `json:"first_name,omitempty" l18n:"true"`
-	LastName   jsval.MaybeString `json:"last_name,omitempty" l18n:"true"`
-	Nickname   string            `json:"nickname"`
-	Email      jsval.MaybeString `json:"email,omitempty"`
-	AuthVia    string            `json:"auth_via"`
-	AuthUserID string            `json:"auth_user_id"`
-	AvatarURL  jsval.MaybeString `json:"avatar_url,omitempty"`
-	TshirtSize jsval.MaybeString `json:"tshirt_size,omitempty"`
-	L10N       LocalizedFields   `json:"-"`
+	FirstName       jsval.MaybeString `json:"first_name,omitempty" l10n:"true"`
+	LastName        jsval.MaybeString `json:"last_name,omitempty" l10n:"true"`
+	Nickname        string            `json:"nickname"`
+	Email           jsval.MaybeString `json:"email,omitempty"`
+	AuthVia         string            `json:"auth_via"`
+	AuthUserID      string            `json:"auth_user_id"`
+	AvatarURL       jsval.MaybeString `json:"avatar_url,omitempty"`
+	TshirtSize      jsval.MaybeString `json:"tshirt_size,omitempty"`
+	LocalizedFields `json:"-"`
 }
 
 // +transport
 type UpdateUserRequest struct {
-	ID         string            `json:"id"`
-	FirstName  jsval.MaybeString `json:"first_name,omitempty"`
-	LastName   jsval.MaybeString `json:"last_name,omitempty"`
-	Nickname   jsval.MaybeString `json:"nickname,omitempty"`
-	Email      jsval.MaybeString `json:"email,omitempty"`
-	AuthVia    jsval.MaybeString `json:"auth_via,omitempty"`
-	AuthUserID jsval.MaybeString `json:"auth_user_id,omitempty"`
-	AvatarURL  jsval.MaybeString `json:"avatar_url,omitempty"`
-	TshirtSize jsval.MaybeString `json:"tshirt_size,omitempty"`
-	UserID     string            `json:"user_id"`
-	L10N       LocalizedFields   `json:"-"`
+	ID              string            `json:"id"`
+	FirstName       jsval.MaybeString `json:"first_name,omitempty" l10n:"true"`
+	LastName        jsval.MaybeString `json:"last_name,omitempty" l10n:"true"`
+	Nickname        jsval.MaybeString `json:"nickname,omitempty"`
+	Email           jsval.MaybeString `json:"email,omitempty"`
+	AuthVia         jsval.MaybeString `json:"auth_via,omitempty"`
+	AuthUserID      jsval.MaybeString `json:"auth_user_id,omitempty"`
+	AvatarURL       jsval.MaybeString `json:"avatar_url,omitempty"`
+	TshirtSize      jsval.MaybeString `json:"tshirt_size,omitempty"`
+	UserID          string            `json:"user_id"`
+	LocalizedFields `json:"-"`
 }
 
 // +transport
@@ -599,23 +600,23 @@ type ListUserRequest struct {
 
 // +transport
 type CreateVenueRequest struct {
-	Name      jsval.MaybeString `json:"name"`
-	Address   jsval.MaybeString `json:"address"`
-	Longitude jsval.MaybeFloat  `json:"longitude,omitempty"`
-	Latitude  jsval.MaybeFloat  `json:"latitude,omitempty"`
-	L10N      LocalizedFields   `json:"-"`
-	UserID    string            `json:"user_id"`
+	Name            jsval.MaybeString `json:"name" l10n:"true"`
+	Address         jsval.MaybeString `json:"address" l10n:"true"`
+	Longitude       jsval.MaybeFloat  `json:"longitude,omitempty"`
+	Latitude        jsval.MaybeFloat  `json:"latitude,omitempty"`
+	LocalizedFields `json:"-"`
+	UserID          string `json:"user_id"`
 }
 
 // +transport
 type UpdateVenueRequest struct {
-	ID        string            `json:"id"`
-	Name      jsval.MaybeString `json:"name,omitempty"`
-	Address   jsval.MaybeString `json:"address,omitempty"`
-	Longitude jsval.MaybeFloat  `json:"longitude,omitempty"`
-	Latitude  jsval.MaybeFloat  `json:"latitude,omitempty"`
-	L10N      LocalizedFields   `json:"-"`
-	UserID    string            `json:"user_id"`
+	ID              string            `json:"id"`
+	Name            jsval.MaybeString `json:"name,omitempty" l10n:"true"`
+	Address         jsval.MaybeString `json:"address,omitempty" l10n:"true"`
+	Longitude       jsval.MaybeFloat  `json:"longitude,omitempty"`
+	Latitude        jsval.MaybeFloat  `json:"latitude,omitempty"`
+	LocalizedFields `json:"-"`
+	UserID          string `json:"user_id"`
 }
 
 // +transport
@@ -765,13 +766,13 @@ type ListFeaturedSpeakersRequest struct {
 
 // +transport
 type AddFeaturedSpeakerRequest struct {
-	ConferenceID string            `json:"conference_id"`
-	SpeakerID    jsval.MaybeString `json:"speaker_id"`
-	AvatarURL    jsval.MaybeString `json:"avatar_url"`
-	DisplayName  string            `json:"display_name" l18n:"true"`
-	Description  string            `json:"description" l18n":"true"`
-	L10N         LocalizedFields   `json:"-"`
-	UserID       string            `json:"user_id"`
+	ConferenceID    string            `json:"conference_id"`
+	SpeakerID       jsval.MaybeString `json:"speaker_id"`
+	AvatarURL       jsval.MaybeString `json:"avatar_url"`
+	DisplayName     string            `json:"display_name" l10n:"true"`
+	Description     string            `json:"description" l10n":"true"`
+	LocalizedFields `json:"-"`
+	UserID          string `json:"user_id"`
 }
 type CreateFeaturedSpeakerRequest struct {
 	AddFeaturedSpeakerRequest
@@ -779,13 +780,13 @@ type CreateFeaturedSpeakerRequest struct {
 
 // +transport
 type UpdateFeaturedSpeakerRequest struct {
-	ID          string            `json:"id"`
-	SpeakerID   jsval.MaybeString `json:"speaker_id,omitempty"`
-	AvatarURL   jsval.MaybeString `json:"avatar_url,omitempty"`
-	DisplayName jsval.MaybeString `json:"display_name,omitempty" l18n:"true"`
-	Description jsval.MaybeString `json:"description,omitempty" l18n":"true"`
-	L10N        LocalizedFields   `json:"-"`
-	UserID      string            `json:"user_id"`
+	ID              string            `json:"id"`
+	SpeakerID       jsval.MaybeString `json:"speaker_id,omitempty"`
+	AvatarURL       jsval.MaybeString `json:"avatar_url,omitempty"`
+	DisplayName     jsval.MaybeString `json:"display_name,omitempty" l10n:"true"`
+	Description     jsval.MaybeString `json:"description,omitempty" l10n":"true"`
+	LocalizedFields `json:"-"`
+	UserID          string `json:"user_id"`
 }
 
 // +transport
@@ -830,13 +831,13 @@ type ListSponsorsRequest struct {
 
 // +transport
 type AddSponsorRequest struct {
-	ConferenceID string          `json:"conference_id"`
-	Name         string          `json:"name"`
-	URL          string          `json:"url"`
-	GroupName    string          `json:"group_name"`
-	SortOrder    int             `json:"sort_order"`
-	L10N         LocalizedFields `json:"-"`
-	UserID       string          `json:"user_id"`
+	ConferenceID    string `json:"conference_id"`
+	Name            string `json:"name"`
+	URL             string `json:"url"`
+	GroupName       string `json:"group_name"`
+	SortOrder       int    `json:"sort_order"`
+	LocalizedFields `json:"-"`
+	UserID          string `json:"user_id"`
 }
 type CreateSponsorRequest struct {
 	AddSponsorRequest
@@ -846,14 +847,14 @@ type CreateSponsorRequest struct {
 type UpdateSponsorRequest struct {
 	// Note: Logos can be uploaded as multipart/form-data messages, but is not
 	// part of this request payload.
-	ID            string            `json:"id"`
-	Name          jsval.MaybeString `json:"name,omitempty"`
-	URL           jsval.MaybeString `json:"url,omitempty"`
-	GroupName     jsval.MaybeString `json:"group_name,omitempty"`
-	MultipartForm *multipart.Form   `json:"-"`
-	SortOrder     jsval.MaybeInt    `json:"sort_order,omitempty"`
-	L10N          LocalizedFields   `json:"-"`
-	UserID        string            `json:"user_id"`
+	ID              string            `json:"id"`
+	Name            jsval.MaybeString `json:"name,omitempty"`
+	URL             jsval.MaybeString `json:"url,omitempty"`
+	GroupName       jsval.MaybeString `json:"group_name,omitempty"`
+	MultipartForm   *multipart.Form   `json:"-"`
+	SortOrder       jsval.MaybeInt    `json:"sort_order,omitempty"`
+	LocalizedFields `json:"-"`
+	UserID          string `json:"user_id"`
 
 	// These fields are only used internally
 	LogoURL1 jsval.MaybeString `json:"-"`

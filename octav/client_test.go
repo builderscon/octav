@@ -116,7 +116,7 @@ func bigsight(userID string) *model.CreateVenueRequest {
 	lf.Set("ja", "address", `〒135-0063 東京都江東区有明３丁目１０−１`)
 
 	r := model.CreateVenueRequest{}
-	r.L10N = lf
+	r.LocalizedFields = lf
 	r.Name.Set("Tokyo Bigsight")
 	r.Address.Set("Ariake 3-10-1, Koto-ku, Tokyo")
 	r.Longitude.Set(35.6320326)
@@ -131,7 +131,7 @@ func intlConferenceRoom(venueID, userID string) *model.CreateRoomRequest {
 	lf.Set("ja", "name", `国際会議場`)
 
 	r := model.CreateRoomRequest{}
-	r.L10N = lf
+	r.LocalizedFields = lf
 	r.Capacity.Set(1000)
 	r.Name.Set("International Conference Hall")
 	r.VenueID.Set(venueID)
@@ -283,12 +283,12 @@ func yapcasia(uid string) *model.CreateConferenceSeriesRequest {
 
 func yapcasiaTokyo(seriesID, userID string) *model.CreateConferenceRequest {
 	r := &model.CreateConferenceRequest{
-		Title:       "YAPC::Asia Tokyo",
-		SeriesID:    seriesID,
-		Slug:        "2015",
-		UserID:      userID,
+		Title:    "YAPC::Asia Tokyo",
+		SeriesID: seriesID,
+		Slug:     "2015",
+		UserID:   userID,
 	}
-	r.L10N.Set("ja", "description", "最後のYAPC::Asia Tokyo")
+	r.LocalizedFields.Set("ja", "description", "最後のYAPC::Asia Tokyo")
 	r.Description.Set("The last YAPC::Asia Tokyo")
 	return r
 }
@@ -466,10 +466,10 @@ func TestConferenceCRUD(t *testing.T) {
 
 	in := model.UpdateConferenceRequest{ID: res.ID, UserID: user.ID}
 	in.SubTitle.Set("Big Bang!")
-	in.L10N.Set("ja", "title", "ヤップシー エイジア")
-	in.L10N.Set("ja", "cfp_lead_text", "ばっちこい！")
-	in.L10N.Set("ja", "cfp_pre_submit_instructions", "事前にこれを読んでね")
-	in.L10N.Set("ja", "cfp_post_submit_instructions", "応募したらこれを読んでね")
+	in.LocalizedFields.Set("ja", "title", "ヤップシー エイジア")
+	in.LocalizedFields.Set("ja", "cfp_lead_text", "ばっちこい！")
+	in.LocalizedFields.Set("ja", "cfp_pre_submit_instructions", "事前にこれを読んでね")
+	in.LocalizedFields.Set("ja", "cfp_post_submit_instructions", "応募したらこれを読んでね")
 	if err := testUpdateConference(ctx, &in); err != nil {
 		return
 	}
@@ -567,7 +567,7 @@ func TestRoomCRUD(t *testing.T) {
 	}
 
 	in := model.UpdateRoomRequest{ID: res.ID, UserID: ctx.Superuser.EID}
-	in.L10N.Set("ja", "name", "国際会議場")
+	in.LocalizedFields.Set("ja", "name", "国際会議場")
 	if err := testUpdateRoom(ctx, &in); err != nil {
 		return
 	}
@@ -716,7 +716,7 @@ func TestSessionCRUD(t *testing.T) {
 	}
 
 	in := model.UpdateSessionRequest{ID: res.ID, UserID: user.ID}
-	in.L10N.Set("ja", "title", "カンファレンス用ソフトウェアの作り方")
+	in.LocalizedFields.Set("ja", "title", "カンファレンス用ソフトウェアの作り方")
 	if err := testUpdateSession(ctx, &in); err != nil {
 		return
 	}
@@ -737,7 +737,7 @@ func TestSessionCRUD(t *testing.T) {
 		}
 
 		in := model.UpdateSessionRequest{
-			ID: res.ID,
+			ID:     res.ID,
 			UserID: ctx.Superuser.EID,
 		}
 		in.Status.Set(model.StatusAccepted)
@@ -785,7 +785,7 @@ func johndoe() *model.CreateUserRequest {
 	r.LastName.Set("Doe")
 	r.Email.Set("john.doe@example.com")
 	r.TshirtSize.Set("XL")
-	r.L10N = lf
+	r.LocalizedFields = lf
 	return r
 }
 
@@ -912,7 +912,7 @@ func TestVenueCRUD(t *testing.T) {
 	}
 
 	in := model.UpdateVenueRequest{ID: res.ID, UserID: ctx.Superuser.EID}
-	in.L10N.Set("ja", "name", "東京ビッグサイト")
+	in.LocalizedFields.Set("ja", "name", "東京ビッグサイト")
 	if err := testUpdateVenue(ctx, &in); err != nil {
 		return
 	}
@@ -1121,11 +1121,11 @@ func TestListConference(t *testing.T) {
 		lf.Set("ja", "title", `リストカンファレンステスト`)
 
 		conf, err := testCreateConferencePass(ctx, &model.CreateConferenceRequest{
-			L10N:     lf,
-			SeriesID: series.ID,
-			Slug:     tools.RandomString(8),
-			Title:    "ListConference Test",
-			UserID:   user.ID,
+			LocalizedFields: lf,
+			SeriesID:        series.ID,
+			Slug:            tools.RandomString(8),
+			Title:           "ListConference Test",
+			UserID:          user.ID,
 		})
 		if err != nil {
 			return

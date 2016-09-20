@@ -206,7 +206,7 @@ func (p *Processor) ProcessStruct(buf *bytes.Buffer, s Struct) error {
 		if !s.HasL10N {
 			buf.WriteString("\nreturn buf, nil")
 		} else {
-			fmt.Fprintf(buf, "\nreturn Marshal%sWithL10N(buf, r.L10N)", method)
+			fmt.Fprintf(buf, "\nreturn Marshal%sWithL10N(buf, r.LocalizedFields)", method)
 		}
 		buf.WriteString("\n}")
 	}
@@ -274,9 +274,13 @@ func (p *Processor) ProcessStruct(buf *bytes.Buffer, s Struct) error {
 		}
 		buf.WriteString("\n}")
 	}
-	if s.HasL10N {
-		buf.WriteString("\nif err := ExtractL10NFields(m, &r.L10N, []string{")
+	if s.HasL10N && len(s.L10NFields) > 0 {
+		buf.WriteString("\nif err := ExtractL10NFields(m, &r.LocalizedFields, []string{")
 		for i, f := range s.Fields {
+			if _, ok := s.L10NFields[f.Name]; !ok {
+				continue
+			}
+
 			buf.WriteString(strconv.Quote(f.JSONName))
 			if i != len(s.Fields)-1 {
 				buf.WriteString(", ")
@@ -291,7 +295,7 @@ func (p *Processor) ProcessStruct(buf *bytes.Buffer, s Struct) error {
 
 	if s.HasL10N {
 		fmt.Fprintf(buf, "\n\nfunc (r *%s) GetPropNames() ([]string, error) {", s.Name)
-		buf.WriteString("\nl, _ := r.L10N.GetPropNames()")
+		buf.WriteString("\nl, _ := r.LocalizedFields.GetPropNames()")
 		buf.WriteString("\nreturn append(l, ")
 		for i, f := range s.Fields {
 			buf.WriteString(strconv.Quote(f.JSONName))
@@ -388,6 +392,7 @@ func (ctx *InspectionCtx) ExtractStructsFromDecl(decl *ast.GenDecl) error {
 			Fields:      make([]StructField, 0, len(s.Fields.List)),
 			Name:        t.Name.Name,
 			HasL10N:     false,
+			L10NFields: make(map[string]struct{}),
 		}
 
 		for _, f := range s.Fields.List {
@@ -441,6 +446,7 @@ func (ctx *InspectionCtx) ExtractStructsFromDecl(decl *ast.GenDecl) error {
 				if tag := sf.Get("l10n"); tag != "" {
 					if b, err := strconv.ParseBool(tag); err == nil && b {
 						st.HasL10N = true
+						st.L10NFields[f.Names[0].Name] = struct{}{}
 						l10n = true
 					}
 				}

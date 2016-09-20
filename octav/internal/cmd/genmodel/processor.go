@@ -876,7 +876,7 @@ func generateServiceFile(ctx *genctx, m Model) error {
 	buf.WriteString("\nreturn err")
 	buf.WriteString("\n}\n")
 	if hasL10N {
-		fmt.Fprintf(&buf, "\nif err := payload.L10N.CreateLocalizedStrings(tx, %s, vdb.EID); err != nil {", strconv.Quote(m.Name))
+		fmt.Fprintf(&buf, "\nif err := payload.LocalizedFields.CreateLocalizedStrings(tx, %s, vdb.EID); err != nil {", strconv.Quote(m.Name))
 		buf.WriteString("\nreturn err")
 		buf.WriteString("\n}")
 	}
@@ -902,7 +902,7 @@ func generateServiceFile(ctx *genctx, m Model) error {
 	buf.WriteString("\nreturn err")
 	buf.WriteString("\n}")
 	if hasL10N {
-		buf.WriteString("\n\nreturn payload.L10N.Foreach(func(l, k, x string) error {")
+		buf.WriteString("\n\nreturn payload.LocalizedFields.Foreach(func(l, k, x string) error {")
 		buf.WriteString("\nif pdebug.Enabled {")
 		buf.WriteString("\n" + `pdebug.Printf("Updating l10n string for '%s' (%s)", k, l)`)
 		buf.WriteString("\n}")

@@ -15,6 +15,7 @@ type Struct struct {
 	Name        string
 	PackageName string
 	HasL10N     bool
+	L10NFields  map[string]struct{}
 }
 
 type InspectionCtx struct {
