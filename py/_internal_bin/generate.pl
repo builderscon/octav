@@ -22,6 +22,7 @@ say $tmpout <<EOM;
 EOM
 
 say $tmpout <<'EOM';
+import certifi
 import json
 import os
 import re
@@ -52,7 +53,7 @@ class Octav(object):
     self.debug = debug
     self.endpoint = endpoint
     self.error = None
-    self.http = PoolManager()
+    self.http = PoolManager(cert_reqs='CERT_REQUIRED', ca_certs=certifi.where())
     self.key = key
     self.secret = secret
 
@@ -75,7 +76,7 @@ for my $link (@{$schema->{links}}) {
 
     my $path = $link->{href};
     my $link_schema = $link->{schema};
-    my $required = $link_schema && ($link_schema->{required} || []);
+    my $required = ($link_schema && $link_schema->{required}) || [];
     my $props = $link_schema->{properties} || {};
     my $patternProperties = $link_schema->{patternProperties} || {};
     my @keys = keys %$props;
