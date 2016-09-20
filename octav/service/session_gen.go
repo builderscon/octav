@@ -67,7 +67,7 @@ func (v *SessionSvc) Create(tx *db.Tx, vdb *db.Session, payload model.CreateSess
 		return err
 	}
 
-	if err := payload.L10N.CreateLocalizedStrings(tx, "Session", vdb.EID); err != nil {
+	if err := payload.LocalizedFields.CreateLocalizedStrings(tx, "Session", vdb.EID); err != nil {
 		return err
 	}
 	return nil
@@ -91,7 +91,7 @@ func (v *SessionSvc) Update(tx *db.Tx, vdb *db.Session, payload model.UpdateSess
 		return err
 	}
 
-	return payload.L10N.Foreach(func(l, k, x string) error {
+	return payload.LocalizedFields.Foreach(func(l, k, x string) error {
 		if pdebug.Enabled {
 			pdebug.Printf("Updating l10n string for '%s' (%s)", k, l)
 		}

@@ -372,6 +372,7 @@ func (v *UserSvc) Verify(m *model.User) (err error) {
 			if pdebug.Enabled {
 				pdebug.Printf("AvatarURL verified")
 			}
+
 			return nil
 		}
 	}
