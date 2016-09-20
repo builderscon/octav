@@ -1,5 +1,5 @@
 hash: b5b7211b3f10da55785c85788f8739e96f3704229535703a5d3bacf9a9e6b883
-updated: 2016-09-14T14:48:18.337684666+09:00
+updated: 2016-09-20T10:49:51.236958705+09:00
 imports:
 - name: cloud.google.com/go
   version: e89968106bfb1f9fe3f05a5ca644866acd15edf8
@@ -54,13 +54,13 @@ imports:
 - name: github.com/lestrrat/go-pdebug
   version: 2e6eaaa5717f81bda41d27070d3c966f40a1e75f
 - name: github.com/lestrrat/go-simple-guard
-  version: 9558d700d27518c2737bad3d5f6c1c5e481e1a29
+  version: 8c74d84425fd27440cbc31bd91cf518cfb3cd4d3
 - name: github.com/lestrrat/go-sqllib
-  version: fe62aa02097e7106a51098537bf7b77e82944ce4
+  version: fdcdef92120d53b8f79aa2ec59d0b247f0c0660d
 - name: github.com/lestrrat/go-structinfo
   version: f74c056fe41f860aa6264478c664a6fff8a64298
 - name: github.com/lestrrat/go-tx-guard
-  version: 40dc337a64f229bb420dc224b6f2981115d686fa
+  version: f922362dce0d717f2035e3c446974d6aa64f466b
 - name: github.com/lestrrat/go-urlenc
   version: c952b9a8b42e2b36637e0c5acee8a0f0898b8d80
 - name: github.com/mattn/anko
@@ -99,7 +99,7 @@ imports:
   subpackages:
   - errgroup
 - name: golang.org/x/text
-  version: 1e65e9bf72c307081cea196f47ef37aed17eb316
+  version: 04b8648d973c126ae60143b3e1473bc1576c7597
   subpackages:
   - internal/tag
   - language
