@@ -7,16 +7,18 @@ import (
 	"context"
 )
 
-var DefaultStorage StorageClient
-
 func init() {
 	switch os.Getenv("OCTAV_STORAGE_TYPE") {
 	case "GoogleStorage":
-		DefaultStorage = &GoogleStorageClient{
+		MediaStorage = &GoogleStorageClient{
 			BucketName: os.Getenv("GOOGLE_STORAGE_MEDIA_BUCKET"),
 		}
+		CredentialStorage = &GoogleStorageClient{
+			BucketName: os.Getenv("GOOGLE_STORAGE_CREDENTIAL_BUCKET"),
+		}
 	default:
-		DefaultStorage = &NullStorage{}
+		MediaStorage = &NullStorage{}
+		CredentialStorage = &NullStorage{}
 	}
 }
 
@@ -38,6 +40,10 @@ func (s *NullStorage) Move(_ context.Context, _, _ string, _ ...CallOption) erro
 }
 
 func (c *NullStorage) Upload(_ context.Context, _ string, _ io.Reader, _ ...CallOption) error {
+	return nil
+}
+
+func (c *NullStorage) Download(_ context.Context, _ string, _ io.Writer) error {
 	return nil
 }
 

@@ -17,11 +17,15 @@ func Twitter() *TwitterSvc {
 }
 
 func (v *TwitterSvc) Init() {
+	twitterSvc.Client = NewTwitterClientFromToken(os.Getenv("TWITTER_OAUTH2_ACCESS_TOKEN"))
+}
+
+func NewTwitterClientFromToken(s string) *twitter.Client {
 	var config oauth2.Config
 	var token oauth2.Token
 
-	token.AccessToken = os.Getenv("TWITTER_OAUTH2_ACCESS_TOKEN")
+	token.AccessToken = s
 	httpClient := config.Client(oauth2.NoContext, &token)
-
-	twitterSvc.Client = twitter.NewClient(httpClient)
+	return twitter.NewClient(httpClient)
 }
+

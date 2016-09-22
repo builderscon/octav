@@ -5687,3 +5687,78 @@ func (r *ConfirmTemporaryEmailRequest) Populate(m map[string]interface{}) error 
 	}
 	return nil
 }
+
+func (r AddConferenceCredentialRequest) collectMarshalData() map[string]interface{} {
+	m := make(map[string]interface{})
+	m["conference_id"] = r.ConferenceID
+	m["user_id"] = r.UserID
+	m["type"] = r.Type
+	m["data"] = r.Data
+	return m
+}
+
+func (r AddConferenceCredentialRequest) MarshalJSON() ([]byte, error) {
+	m := r.collectMarshalData()
+	buf, err := json.Marshal(m)
+	if err != nil {
+		return nil, err
+	}
+	return buf, nil
+}
+
+func (r AddConferenceCredentialRequest) MarshalURL() ([]byte, error) {
+	m := r.collectMarshalData()
+	buf, err := urlenc.Marshal(m)
+	if err != nil {
+		return nil, err
+	}
+	return buf, nil
+}
+
+func (r *AddConferenceCredentialRequest) UnmarshalJSON(data []byte) error {
+	m := make(map[string]interface{})
+	if err := json.Unmarshal(data, &m); err != nil {
+		return err
+	}
+	return r.Populate(m)
+}
+
+func (r *AddConferenceCredentialRequest) Populate(m map[string]interface{}) error {
+	if jv, ok := m["conference_id"]; ok {
+		switch jv.(type) {
+		case string:
+			r.ConferenceID = jv.(string)
+			delete(m, "conference_id")
+		default:
+			return ErrInvalidJSONFieldType{Field: "conference_id"}
+		}
+	}
+	if jv, ok := m["user_id"]; ok {
+		switch jv.(type) {
+		case string:
+			r.UserID = jv.(string)
+			delete(m, "user_id")
+		default:
+			return ErrInvalidJSONFieldType{Field: "user_id"}
+		}
+	}
+	if jv, ok := m["type"]; ok {
+		switch jv.(type) {
+		case string:
+			r.Type = jv.(string)
+			delete(m, "type")
+		default:
+			return ErrInvalidJSONFieldType{Field: "type"}
+		}
+	}
+	if jv, ok := m["data"]; ok {
+		switch jv.(type) {
+		case string:
+			r.Data = jv.(string)
+			delete(m, "data")
+		default:
+			return ErrInvalidJSONFieldType{Field: "data"}
+		}
+	}
+	return nil
+}

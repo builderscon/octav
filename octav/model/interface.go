@@ -901,3 +901,18 @@ type ConfirmTemporaryEmailRequest struct {
 	UserID          string `json:"user_id"`   // ID of the user making this request
 	ConfirmationKey string `json:"confirmation_key"`
 }
+
+// +transport
+type AddConferenceCredentialRequest struct {
+	ConferenceID string `json:"conference_id"`
+	UserID       string `json:"user_id"` // ID of the user making this request
+	Type         string `json:"type"`
+	Data         string `json:"data"`
+}
+
+// +transport
+type TweetAsConferenceRequest struct {
+	ConferenceID string `json:"conference_id"`
+	UserID       string `json:"user_id"` // ID of the user making this request
+	Tweet        string `json:"tweet"`
+}

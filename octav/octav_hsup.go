@@ -152,6 +152,47 @@ func httpAddConferenceAdmin(ctx context.Context, w http.ResponseWriter, r *http.
 	doAddConferenceAdmin(ctx, w, r, payload)
 }
 
+func httpAddConferenceCredential(ctx context.Context, w http.ResponseWriter, r *http.Request) {
+	if pdebug.Enabled {
+		g := pdebug.Marker("httpAddConferenceCredential")
+		defer g.End()
+	}
+	if strings.ToLower(r.Method) != `post` {
+		w.Header().Set("Allow", "post")
+		httpError(w, `Method was `+r.Method+`, expected post`, http.StatusNotFound, nil)
+		return
+	}
+
+	var payload model.AddConferenceCredentialRequest
+	jsonbuf := getTransportJSONBuffer()
+	defer releaseTransportJSONBuffer(jsonbuf)
+
+	switch ct := r.Header.Get("Content-Type"); {
+	case ct == "application/json":
+		if _, err := io.Copy(jsonbuf, io.LimitReader(r.Body, MaxPostSize)); err != nil {
+			httpError(w, `Failed to read request body`, http.StatusInternalServerError, err)
+			return
+		}
+		defer r.Body.Close()
+	default:
+		httpError(w, `Invalid content-type`, http.StatusInternalServerError, nil)
+		return
+	}
+	if pdebug.Enabled {
+		pdebug.Printf(`-----> %s`, jsonbuf.Bytes())
+	}
+	if err := json.Unmarshal(jsonbuf.Bytes(), &payload); err != nil {
+		httpError(w, `Invalid JSON input`, http.StatusInternalServerError, err)
+		return
+	}
+
+	if err := validator.HTTPAddConferenceCredentialRequest.Validate(&payload); err != nil {
+		httpError(w, `Invalid input (validation failed)`, http.StatusInternalServerError, err)
+		return
+	}
+	doAddConferenceCredential(ctx, w, r, payload)
+}
+
 func httpAddConferenceDates(ctx context.Context, w http.ResponseWriter, r *http.Request) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("httpAddConferenceDates")
@@ -1825,6 +1866,47 @@ func httpLookupVenue(ctx context.Context, w http.ResponseWriter, r *http.Request
 	doLookupVenue(ctx, w, r, payload)
 }
 
+func httpTweetAsConference(ctx context.Context, w http.ResponseWriter, r *http.Request) {
+	if pdebug.Enabled {
+		g := pdebug.Marker("httpTweetAsConference")
+		defer g.End()
+	}
+	if strings.ToLower(r.Method) != `post` {
+		w.Header().Set("Allow", "post")
+		httpError(w, `Method was `+r.Method+`, expected post`, http.StatusNotFound, nil)
+		return
+	}
+
+	var payload model.TweetAsConferenceRequest
+	jsonbuf := getTransportJSONBuffer()
+	defer releaseTransportJSONBuffer(jsonbuf)
+
+	switch ct := r.Header.Get("Content-Type"); {
+	case ct == "application/json":
+		if _, err := io.Copy(jsonbuf, io.LimitReader(r.Body, MaxPostSize)); err != nil {
+			httpError(w, `Failed to read request body`, http.StatusInternalServerError, err)
+			return
+		}
+		defer r.Body.Close()
+	default:
+		httpError(w, `Invalid content-type`, http.StatusInternalServerError, nil)
+		return
+	}
+	if pdebug.Enabled {
+		pdebug.Printf(`-----> %s`, jsonbuf.Bytes())
+	}
+	if err := json.Unmarshal(jsonbuf.Bytes(), &payload); err != nil {
+		httpError(w, `Invalid JSON input`, http.StatusInternalServerError, err)
+		return
+	}
+
+	if err := validator.HTTPTweetAsConferenceRequest.Validate(&payload); err != nil {
+		httpError(w, `Invalid input (validation failed)`, http.StatusInternalServerError, err)
+		return
+	}
+	doTweetAsConference(ctx, w, r, payload)
+}
+
 func httpUpdateConference(ctx context.Context, w http.ResponseWriter, r *http.Request) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("httpUpdateConference")
@@ -2185,6 +2267,7 @@ func (s *Server) SetupRoutes() {
 	r.HandleFunc(`/v1/conference/admin/add`, httpWithContext(httpWithBasicAuth(httpAddConferenceAdmin)))
 	r.HandleFunc(`/v1/conference/admin/delete`, httpWithContext(httpWithBasicAuth(httpDeleteConferenceAdmin)))
 	r.HandleFunc(`/v1/conference/create`, httpWithContext(httpWithBasicAuth(httpCreateConference)))
+	r.HandleFunc(`/v1/conference/credentials/add`, httpWithContext(httpWithBasicAuth(httpAddConferenceCredential)))
 	r.HandleFunc(`/v1/conference/dates/add`, httpWithContext(httpWithBasicAuth(httpAddConferenceDates)))
 	r.HandleFunc(`/v1/conference/dates/delete`, httpWithContext(httpDeleteConferenceDates))
 	r.HandleFunc(`/v1/conference/delete`, httpWithContext(httpWithBasicAuth(httpDeleteConference)))
@@ -2193,6 +2276,7 @@ func (s *Server) SetupRoutes() {
 	r.HandleFunc(`/v1/conference/lookup`, httpWithContext(httpLookupConference))
 	r.HandleFunc(`/v1/conference/lookup_by_slug`, httpWithContext(httpLookupConferenceBySlug))
 	r.HandleFunc(`/v1/conference/session_type/add`, httpWithContext(httpWithBasicAuth(httpAddSessionType)))
+	r.HandleFunc(`/v1/conference/tweet`, httpWithContext(httpWithBasicAuth(httpTweetAsConference)))
 	r.HandleFunc(`/v1/conference/update`, httpWithContext(httpWithBasicAuth(httpUpdateConference)))
 	r.HandleFunc(`/v1/conference/venue/add`, httpWithContext(httpWithBasicAuth(httpAddConferenceVenue)))
 	r.HandleFunc(`/v1/conference/venue/delete`, httpWithContext(httpWithBasicAuth(httpDeleteConferenceVenue)))

@@ -17,7 +17,9 @@ import (
 	"cloud.google.com/go/storage"
 )
 
-func (v *SponsorSvc) Init() {}
+func (v *SponsorSvc) Init() {
+	v.mediaStorage = MediaStorage
+}
 
 func (v *SponsorSvc) populateRowForCreate(vdb *db.Sponsor, payload model.CreateSponsorRequest) error {
 	vdb.EID = tools.UUID()
@@ -82,13 +84,6 @@ func (ff finalizeFunc) Error() string {
 	return "operation needs finalization"
 }
 
-func (v *SponsorSvc) GetStorage() StorageClient {
-	if cl := v.Storage; cl != nil {
-		return cl
-	}
-	return DefaultStorage
-}
-
 func (v *SponsorSvc) UploadImagesFromPayload(ctx context.Context, tx *db.Tx, row *db.Sponsor, payload *model.UpdateSponsorRequest) (err error) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("service.Sponsor.UploadImagesFromPayload").BindError(&err)
@@ -100,7 +95,7 @@ func (v *SponsorSvc) UploadImagesFromPayload(ctx context.Context, tx *db.Tx, row
 		return nil
 	}
 
-	cl := v.GetStorage()
+	cl := v.mediaStorage
 	finalizers := make([]func() error, 0, 3)
 	for _, field := range []string{"logo1", "logo2", "logo3"} {
 		fhs := payload.MultipartForm.File[field]
@@ -275,7 +270,7 @@ func (v *SponsorSvc) DeleteFromPayload(ctx context.Context, tx *db.Tx, payload m
 			pdebug.Printf("Listing objects that match query '%s'", prefix)
 		}
 
-		cl := v.GetStorage()
+		cl := v.mediaStorage
 		list, err := cl.List(ctx, WithQueryPrefix(prefix))
 		if err != nil {
 			if pdebug.Enabled {

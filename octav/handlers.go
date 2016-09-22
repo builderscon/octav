@@ -1429,3 +1429,43 @@ func doConfirmTemporaryEmail(ctx context.Context, w http.ResponseWriter, r *http
 		return
 	}
 }
+
+func doAddConferenceCredential(ctx context.Context, w http.ResponseWriter, r *http.Request, payload model.AddConferenceCredentialRequest) {
+	tx, err := db.Begin()
+	if err != nil {
+		httpError(w, `doAddConferenceCredential`, http.StatusInternalServerError, err)
+		return
+	}
+	defer tx.AutoRollback()
+
+	s := service.Conference()
+	if err := s.AddCredentialFromPayload(ctx, tx, payload); err != nil {
+		httpError(w, `doAddConferenceCredential`, http.StatusInternalServerError, err)
+		return
+	}
+
+	if err := tx.Commit(); err != nil {
+		httpError(w, `Failed to commit data`, http.StatusInternalServerError, err)
+		return
+	}
+}
+
+func doTweetAsConference(ctx context.Context, w http.ResponseWriter, r *http.Request, payload model.TweetAsConferenceRequest) {
+	tx, err := db.Begin()
+	if err != nil {
+		httpError(w, `doTweetAsConference`, http.StatusInternalServerError, err)
+		return
+	}
+	defer tx.AutoRollback()
+
+	s := service.Conference()
+	if err := s.TweetFromPayload(ctx, tx, payload); err != nil {
+		httpError(w, `doTweetAsConference`, http.StatusInternalServerError, err)
+		return
+	}
+
+	if err := tx.Commit(); err != nil {
+		httpError(w, `Failed to commit data`, http.StatusInternalServerError, err)
+		return
+	}
+}

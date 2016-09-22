@@ -6,6 +6,7 @@ import (
 )
 
 var HTTPAddConferenceAdminRequest *jsval.JSVal
+var HTTPAddConferenceCredentialRequest *jsval.JSVal
 var HTTPAddConferenceDatesRequest *jsval.JSVal
 var HTTPAddConferenceSeriesAdminRequest *jsval.JSVal
 var HTTPAddConferenceVenueRequest *jsval.JSVal
@@ -88,6 +89,7 @@ var HTTPLookupUserRequest *jsval.JSVal
 var HTTPLookupUserResponse *jsval.JSVal
 var HTTPLookupVenueRequest *jsval.JSVal
 var HTTPLookupVenueResponse *jsval.JSVal
+var HTTPTweetAsConferenceRequest *jsval.JSVal
 var HTTPUpdateConferenceRequest *jsval.JSVal
 var HTTPUpdateFeaturedSpeakerRequest *jsval.JSVal
 var HTTPUpdateRoomRequest *jsval.JSVal
@@ -825,6 +827,33 @@ func init() {
 				AddProp(
 					"conference_id",
 					jsval.Reference(M).RefersTo("#/definitions/uuid"),
+				).
+				AddProp(
+					"user_id",
+					jsval.Reference(M).RefersTo("#/definitions/uuid"),
+				),
+		)
+
+	HTTPAddConferenceCredentialRequest = jsval.New().
+		SetName("HTTPAddConferenceCredentialRequest").
+		SetConstraintMap(M).
+		SetRoot(
+			jsval.Object().
+				Required("conference_id", "data", "type", "user_id").
+				AdditionalProperties(
+					jsval.EmptyConstraint,
+				).
+				AddProp(
+					"conference_id",
+					jsval.Reference(M).RefersTo("#/definitions/uuid"),
+				).
+				AddProp(
+					"data",
+					jsval.String(),
+				).
+				AddProp(
+					"type",
+					jsval.String(),
 				).
 				AddProp(
 					"user_id",
@@ -3144,6 +3173,29 @@ func init() {
 				AddProp(
 					"rooms",
 					jsval.Reference(M).RefersTo("#/definitions/room_array"),
+				),
+		)
+
+	HTTPTweetAsConferenceRequest = jsval.New().
+		SetName("HTTPTweetAsConferenceRequest").
+		SetConstraintMap(M).
+		SetRoot(
+			jsval.Object().
+				Required("conference_id", "tweet", "user_id").
+				AdditionalProperties(
+					jsval.EmptyConstraint,
+				).
+				AddProp(
+					"conference_id",
+					jsval.Reference(M).RefersTo("#/definitions/uuid"),
+				).
+				AddProp(
+					"tweet",
+					jsval.String(),
+				).
+				AddProp(
+					"user_id",
+					jsval.Reference(M).RefersTo("#/definitions/uuid"),
 				),
 		)
 
