@@ -12,6 +12,7 @@ import (
 	"time"
 
 	"context"
+
 	"cloud.google.com/go/storage"
 
 	"github.com/builderscon/octav/octav/db"
@@ -21,7 +22,10 @@ import (
 	"github.com/lestrrat/go-pdebug"
 )
 
-func (v *ConferenceSvc) Init() {}
+func (v *ConferenceSvc) Init() {
+	v.mediaStorage = MediaStorage
+	v.credentialStorage = CredentialStorage
+}
 
 func (v *ConferenceSvc) populateRowForCreate(vdb *db.Conference, payload model.CreateConferenceRequest) error {
 	vdb.EID = tools.UUID()
@@ -117,7 +121,7 @@ func (v *ConferenceSvc) CreateFromPayload(tx *db.Tx, payload model.CreateConfere
 	// must be created
 	cc := db.ConferenceComponent{
 		ConferenceID: vdb.EID,
-		CreatedOn: time.Now(),
+		CreatedOn:    time.Now(),
 	}
 	if payload.Description.Valid() && payload.Description.String != "" {
 		cc.EID = tools.UUID()
@@ -510,13 +514,6 @@ func (v *ConferenceSvc) Decorate(tx *db.Tx, c *model.Conference, trustedCall boo
 	return nil
 }
 
-func (v *ConferenceSvc) GetStorage() StorageClient {
-	if cl := v.Storage; cl != nil {
-		return cl
-	}
-	return DefaultStorage
-}
-
 func (v *ConferenceSvc) UploadImagesFromPayload(ctx context.Context, tx *db.Tx, row *db.Conference, payload *model.UpdateConferenceRequest) (err error) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("service.Conference.UploadImagesFromPayload").BindError(&err)
@@ -562,7 +559,7 @@ func (v *ConferenceSvc) UploadImagesFromPayload(ctx context.Context, tx *db.Tx, 
 	// Upload this to a temporary location, then upon successful write to DB
 	// rename it to $conference_id/$sponsor_id
 	tmpname := time.Now().UTC().Format("2006-01-02") + "/" + tools.RandomString(64) + "." + suffix
-	cl := v.GetStorage()
+	cl := MediaStorage
 	err = cl.Upload(ctx, tmpname, &imgbuf, WithObjectAttrs(storage.ObjectAttrs{
 		ContentType: ct,
 		ACL: []storage.ACLRule{
@@ -778,3 +775,54 @@ func (v *ConferenceSvc) ListByOrganizerFromPayload(tx *db.Tx, l *model.Conferenc
 
 }
 
+func (v *ConferenceSvc) TweetFromPayload(ctx context.Context, tx *db.Tx, payload model.TweetAsConferenceRequest) (err error) {
+	if pdebug.Enabled {
+		g := pdebug.Marker("service.Conference.Tweet").BindError(&err)
+		defer g.End()
+	}
+
+	// You have to be conference admin to do this
+	su := User()
+	if err := su.IsConferenceAdministrator(tx, payload.ConferenceID, payload.UserID); err != nil {
+		return errors.Wrap(err, "adding a conference credentials requires conference administrator privilege")
+	}
+
+	// This should be refreshed from time to time instead of
+	// fetching it for every call
+	var buf bytes.Buffer
+	err = v.credentialStorage.Download(ctx, "conferences/"+payload.ConferenceID+"/credentials/twitter", &buf)
+	if err != nil {
+		return errors.Wrap(err, "failed to read twitter credentials")
+	}
+
+	tw := NewTwitterClientFromToken(buf.String())
+	if _, _, err := tw.Statuses.Update(payload.Tweet, nil); err != nil {
+		return errors.Wrap(err, "failed to tweet")
+	}
+
+	return nil
+}
+
+func (v *ConferenceSvc) AddCredentialFromPayload(ctx context.Context, tx *db.Tx, payload model.AddConferenceCredentialRequest) (err error) {
+	if pdebug.Enabled {
+		g := pdebug.Marker("service.Conference.AddCredentialFromPayload").BindError(&err)
+		defer g.End()
+	}
+
+	// You have to be conference admin to do this
+	su := User()
+	if err := su.IsConferenceAdministrator(tx, payload.ConferenceID, payload.UserID); err != nil {
+		return errors.Wrap(err, "adding a conference credentials requires conference administrator privilege")
+	}
+
+	cl := v.credentialStorage
+	name := "conferences/" + payload.ConferenceID + "/credentials/" + payload.Type
+	err = cl.Upload(ctx, name, bytes.NewBufferString(payload.Data), WithObjectAttrs(storage.ObjectAttrs{
+		ContentType: "text/plain",
+	}))
+	if err != nil {
+		return errors.Wrap(err, "failed to upload file")
+	}
+
+	return nil
+}

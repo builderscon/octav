@@ -2,15 +2,14 @@ package service
 
 import (
 	"io"
-	"os"
-	"sync"
 
+	"context"
+
+	"cloud.google.com/go/storage"
 	pdebug "github.com/lestrrat/go-pdebug"
 	"github.com/pkg/errors"
-	"context"
 	"golang.org/x/oauth2/google"
 	"google.golang.org/api/option"
-	"cloud.google.com/go/storage"
 )
 
 func defaultGoogleStorageClient(ctx context.Context) (*storage.Client, error) {
@@ -26,49 +25,12 @@ func defaultGoogleStorageClient(ctx context.Context) (*storage.Client, error) {
 	return client, nil
 }
 
-type CallOption interface {
-	Get() interface{}
-}
-
-type WithObjectAttrs storage.ObjectAttrs
-type WithQueryPrefix string
-
 func (attr WithObjectAttrs) Get() interface{} {
 	return storage.ObjectAttrs(attr)
 }
 
 func (p WithQueryPrefix) Get() interface{} {
 	return string(p)
-}
-
-type ObjectList interface {
-	Next() bool
-	Object() interface{}
-	Error() error
-}
-
-type StorageClient interface {
-	URLFor(string) string
-	List(ctx context.Context, options ...CallOption) (ObjectList, error)
-	Move(ctx context.Context, src, dst string, options ...CallOption) error
-	Upload(ctx context.Context, name string, src io.Reader, options ...CallOption) error
-	DeleteObjects(ctx context.Context, list ObjectList) error
-}
-
-type GoogleStorageClient struct {
-	bucketOnce sync.Once
-	clientOnce sync.Once
-	BucketName string
-	Client     *storage.Client
-}
-
-func (c *GoogleStorageClient) GetBucketName() string {
-	c.bucketOnce.Do(func() {
-		if c.BucketName == "" {
-			c.BucketName = os.Getenv("GOOGLE_STORAGE_MEDIA_BUCKET")
-		}
-	})
-	return c.BucketName
 }
 
 func (c *GoogleStorageClient) GetClient(ctx context.Context) *storage.Client {
@@ -85,7 +47,7 @@ func (c *GoogleStorageClient) GetClient(ctx context.Context) *storage.Client {
 }
 
 func (c *GoogleStorageClient) URLFor(fragment string) string {
-	bucketName := c.GetBucketName()
+	bucketName := c.bucketName
 	return "https://storage.googleapis.com/" + bucketName + "/" + fragment
 }
 
@@ -95,7 +57,7 @@ func (c *GoogleStorageClient) Move(ctx context.Context, srcName, dstName string,
 		defer g.End()
 	}
 	storagecl := c.GetClient(ctx)
-	bucketName := c.GetBucketName()
+	bucketName := c.bucketName
 	src := storagecl.Bucket(bucketName).Object(srcName)
 	dst := storagecl.Bucket(bucketName).Object(dstName)
 
@@ -135,7 +97,7 @@ func (c *GoogleStorageClient) Upload(ctx context.Context, name string, src io.Re
 	}
 
 	storagecl := c.GetClient(ctx)
-	wc := storagecl.Bucket(c.GetBucketName()).Object(name).NewWriter(ctx)
+	wc := storagecl.Bucket(c.bucketName).Object(name).NewWriter(ctx)
 
 	// Only respect a few fields for now...
 	if attrs.ContentType != "" && wc.ContentType != attrs.ContentType {
@@ -159,13 +121,6 @@ func (c *GoogleStorageClient) Upload(ctx context.Context, name string, src io.Re
 	}
 
 	return nil
-}
-
-type GoogleStorageObjectList struct {
-	elements <-chan interface{}
-	err      error
-	mu       sync.Mutex
-	next     interface{}
 }
 
 func (l *GoogleStorageObjectList) Object() interface{} {
@@ -202,6 +157,20 @@ func (l *GoogleStorageObjectList) Next() bool {
 	}
 }
 
+func (c *GoogleStorageClient) Download(ctx context.Context, name string, dst io.Writer) error {
+	storagecl := c.GetClient(ctx)
+	rdr, err := storagecl.Bucket(c.bucketName).Object(name).NewReader(ctx)
+	if err != nil {
+		return errors.Wrap(err, "failed to create reader for object")
+	}
+
+	if _, err := io.Copy(dst, rdr); err != nil {
+		return errors.Wrap(err, "failed to read from remote object")
+	}
+
+	return nil
+}
+
 func (c *GoogleStorageClient) List(ctx context.Context, options ...CallOption) (ObjectList, error) {
 	var q *storage.Query
 	if len(options) > 0 {
@@ -219,7 +188,7 @@ func (c *GoogleStorageClient) List(ctx context.Context, options ...CallOption) (
 	go func() {
 		defer close(out)
 		storagecl := c.GetClient(ctx)
-		b := storagecl.Bucket(c.GetBucketName())
+		b := storagecl.Bucket(c.bucketName)
 		for q != nil {
 			objects, err := b.List(ctx, q)
 			if err != nil {

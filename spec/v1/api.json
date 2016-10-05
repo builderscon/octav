@@ -856,6 +856,39 @@
       "targetSchema": {"$ref": "#/definitions/object_id"}
     },
     {
+      "title": "Add conference credential",
+      "hsup.wrapper": "httpWithBasicAuth",
+      "rel": "update",
+      "method": "POST",
+      "href": "/v1/conference/credentials/add",
+      "encType": "application/json",
+      "schema": {
+        "required": ["conference_id", "user_id", "type", "data"],
+        "properties": {
+          "conference_id": {"$ref": "#/definitions/uuid"},
+          "user_id": {"$ref": "#/definitions/uuid"},
+          "type": {"type":"string"},
+          "data": {"type":"string"}
+        }
+      }
+    },
+    {
+      "title": "Tweet as conference",
+      "hsup.wrapper": "httpWithBasicAuth",
+      "rel": "create",
+      "method": "POST",
+      "href": "/v1/conference/tweet",
+      "encType": "application/json",
+      "schema": {
+        "required": ["conference_id", "user_id", "tweet"],
+        "properties": {
+          "conference_id": {"$ref": "#/definitions/uuid"},
+          "user_id": {"$ref": "#/definitions/uuid"},
+          "tweet": {"type":"string"}
+        }
+      }
+    },
+    {
       "title": "Add conference dates",
       "hsup.wrapper": "httpWithBasicAuth",
       "rel": "update",
