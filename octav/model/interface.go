@@ -848,7 +848,7 @@ type UpdateSponsorRequest struct {
 	// Note: Logos can be uploaded as multipart/form-data messages, but is not
 	// part of this request payload.
 	ID              string            `json:"id"`
-	Name            jsval.MaybeString `json:"name,omitempty"`
+	Name            jsval.MaybeString `json:"name,omitempty" l10n:"true"`
 	URL             jsval.MaybeString `json:"url,omitempty"`
 	GroupName       jsval.MaybeString `json:"group_name,omitempty"`
 	MultipartForm   *multipart.Form   `json:"-"`
