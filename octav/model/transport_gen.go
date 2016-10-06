@@ -5311,7 +5311,7 @@ func (r UpdateSponsorRequest) MarshalJSON() ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-	return buf, nil
+	return MarshalJSONWithL10N(buf, r.LocalizedFields)
 }
 
 func (r UpdateSponsorRequest) MarshalURL() ([]byte, error) {
@@ -5320,7 +5320,7 @@ func (r UpdateSponsorRequest) MarshalURL() ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-	return buf, nil
+	return MarshalURLWithL10N(buf, r.LocalizedFields)
 }
 
 func (r *UpdateSponsorRequest) UnmarshalJSON(data []byte) error {
@@ -5374,7 +5374,41 @@ func (r *UpdateSponsorRequest) Populate(m map[string]interface{}) error {
 			return ErrInvalidJSONFieldType{Field: "user_id"}
 		}
 	}
+	if err := ExtractL10NFields(m, &r.LocalizedFields, []string{"name"}); err != nil {
+		return err
+	}
 	return nil
+}
+
+func (r *UpdateSponsorRequest) GetPropNames() ([]string, error) {
+	l, _ := r.LocalizedFields.GetPropNames()
+	return append(l, "id", "name", "url", "group_name", "sort_order", "user_id"), nil
+}
+
+func (r *UpdateSponsorRequest) SetPropValue(s string, v interface{}) error {
+	switch s {
+	case "id":
+		if jv, ok := v.(string); ok {
+			r.ID = jv
+			return nil
+		}
+	case "name":
+		return r.Name.Set(v)
+	case "url":
+		return r.URL.Set(v)
+	case "group_name":
+		return r.GroupName.Set(v)
+	case "sort_order":
+		return r.SortOrder.Set(v)
+	case "user_id":
+		if jv, ok := v.(string); ok {
+			r.UserID = jv
+			return nil
+		}
+	default:
+		return errors.New("unknown column '" + s + "'")
+	}
+	return ErrInvalidFieldType{Field: s}
 }
 
 func (r DeleteSponsorRequest) collectMarshalData() map[string]interface{} {
