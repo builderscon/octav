@@ -33,6 +33,18 @@ sub credentials {
 
 
 
+sub health_check {
+    my ($self, $payload) = @_;
+    my $uri = URI->new($self->{endpoint} . qq|/|);
+    $uri->query_form($payload);
+    my $res = $self->{user_agent}->get($uri);
+    if (!$res->is_success) {
+        $self->{last_error} = $res->status_line;
+        return;
+    }
+    return 1
+}
+
 sub create_user {
     my ($self, $payload) = @_;
     for my $required (qw(nickname auth_via auth_user_id)) {
@@ -368,6 +380,42 @@ sub create_conference {
         return;
     }
     return JSON::decode_json($res->decoded_content);
+}
+
+sub add_conference_credential {
+    my ($self, $payload) = @_;
+    for my $required (qw(conference_id user_id type data)) {
+        if (!$payload->{$required}) {
+            die qq|property "$required" must be provided|;
+        }
+    }
+    my $uri = URI->new($self->{endpoint} . qq|/v1/conference/credentials/add|);
+    my @request_args;
+    push @request_args, (Content_Type => "application/json", Content => JSON::encode_json($payload));
+    my $res = $self->{user_agent}->post($uri, @request_args);
+    if (!$res->is_success) {
+        $self->{last_error} = $res->status_line;
+        return;
+    }
+    return 1
+}
+
+sub tweet_as_conference {
+    my ($self, $payload) = @_;
+    for my $required (qw(conference_id user_id tweet)) {
+        if (!$payload->{$required}) {
+            die qq|property "$required" must be provided|;
+        }
+    }
+    my $uri = URI->new($self->{endpoint} . qq|/v1/conference/tweet|);
+    my @request_args;
+    push @request_args, (Content_Type => "application/json", Content => JSON::encode_json($payload));
+    my $res = $self->{user_agent}->post($uri, @request_args);
+    if (!$res->is_success) {
+        $self->{last_error} = $res->status_line;
+        return;
+    }
+    return 1
 }
 
 sub add_conference_dates {
