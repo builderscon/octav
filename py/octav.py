@@ -1,5 +1,5 @@
 """OCTAV Client Library"""
-"""DO NOT EDIT: This file was generated from ../spec/v1/api.json on Fri Sep 16 15:34:03 2016"""
+"""DO NOT EDIT: This file was generated from ../spec/v1/api.json on Fri Oct  7 14:47:13 2016"""
 
 import certifi
 import json
@@ -812,6 +812,89 @@ class Octav(object):
             self.extract_error(res)
             return None
         return json.loads(res.data)
+    except BaseException, e:
+        if self.debug:
+            print("error during http access: " + repr(e))
+        self.error = repr(e)
+        return None
+
+  def add_conference_credential (self, conference_id, data, type, user_id):
+    try:
+        payload = {}
+        hdrs = {}
+        if conference_id is None:
+            raise MissingRequiredArgument('property conference_id must be provided')
+        payload['conference_id'] = conference_id
+        if data is None:
+            raise MissingRequiredArgument('property data must be provided')
+        payload['data'] = data
+        if type is None:
+            raise MissingRequiredArgument('property type must be provided')
+        payload['type'] = type
+        if user_id is None:
+            raise MissingRequiredArgument('property user_id must be provided')
+        payload['user_id'] = user_id
+        if conference_id is not None:
+            payload['conference_id'] = conference_id
+        if data is not None:
+            payload['data'] = data
+        if type is not None:
+            payload['type'] = type
+        if user_id is not None:
+            payload['user_id'] = user_id
+        uri = '%s/v1/conference/credentials/add' % self.endpoint
+        hdrs = urllib3.util.make_headers(
+            basic_auth='%s:%s' % (self.key, self.secret),
+        )
+        if self.debug:
+            print('POST %s' % uri)
+        hdrs['Content-Type']= 'application/json'
+        res = self.http.request('POST', uri, headers=hdrs, body=json.dumps(payload))
+        if self.debug:
+            print(res)
+        if res.status != 200:
+            self.extract_error(res)
+            return None
+        return True
+    except BaseException, e:
+        if self.debug:
+            print("error during http access: " + repr(e))
+        self.error = repr(e)
+        return None
+
+  def tweet_as_conference (self, conference_id, tweet, user_id):
+    try:
+        payload = {}
+        hdrs = {}
+        if conference_id is None:
+            raise MissingRequiredArgument('property conference_id must be provided')
+        payload['conference_id'] = conference_id
+        if tweet is None:
+            raise MissingRequiredArgument('property tweet must be provided')
+        payload['tweet'] = tweet
+        if user_id is None:
+            raise MissingRequiredArgument('property user_id must be provided')
+        payload['user_id'] = user_id
+        if conference_id is not None:
+            payload['conference_id'] = conference_id
+        if tweet is not None:
+            payload['tweet'] = tweet
+        if user_id is not None:
+            payload['user_id'] = user_id
+        uri = '%s/v1/conference/tweet' % self.endpoint
+        hdrs = urllib3.util.make_headers(
+            basic_auth='%s:%s' % (self.key, self.secret),
+        )
+        if self.debug:
+            print('POST %s' % uri)
+        hdrs['Content-Type']= 'application/json'
+        res = self.http.request('POST', uri, headers=hdrs, body=json.dumps(payload))
+        if self.debug:
+            print(res)
+        if res.status != 200:
+            self.extract_error(res)
+            return None
+        return True
     except BaseException, e:
         if self.debug:
             print("error during http access: " + repr(e))
