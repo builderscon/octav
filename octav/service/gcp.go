@@ -70,6 +70,10 @@ func (c *GoogleStorageClient) Move(ctx context.Context, srcName, dstName string,
 		return errors.Wrapf(err, "failed to fetch object attrs for '%s'", srcName)
 	}
 
+	if pdebug.Enabled {
+		pdebug.Printf("attrs = %#v", attrs)
+	}
+
 	if _, err = src.CopyTo(ctx, dst, attrs); err != nil {
 		return errors.Wrapf(err, "failed to copy from '%s' to '%s'", srcName, dstName)
 	}
@@ -108,7 +112,7 @@ func (c *GoogleStorageClient) Upload(ctx context.Context, name string, src io.Re
 	}
 
 	if pdebug.Enabled {
-		pdebug.Printf("Writing to %s", name)
+		pdebug.Printf("Writing to %s/%s", c.bucketName, name)
 	}
 
 	if _, err := io.Copy(wc, src); err != nil {
