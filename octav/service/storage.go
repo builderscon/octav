@@ -11,10 +11,10 @@ func init() {
 	switch os.Getenv("OCTAV_STORAGE_TYPE") {
 	case "GoogleStorage":
 		MediaStorage = &GoogleStorageClient{
-			BucketName: os.Getenv("GOOGLE_STORAGE_MEDIA_BUCKET"),
+			bucketName: os.Getenv("GOOGLE_STORAGE_MEDIA_BUCKET"),
 		}
 		CredentialStorage = &GoogleStorageClient{
-			BucketName: os.Getenv("GOOGLE_STORAGE_CREDENTIAL_BUCKET"),
+			bucketName: os.Getenv("GOOGLE_STORAGE_CREDENTIAL_BUCKET"),
 		}
 	default:
 		MediaStorage = &NullStorage{}

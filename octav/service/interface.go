@@ -50,7 +50,6 @@ type StorageClient interface {
 type GoogleStorageClient struct {
 	bucketName string
 	clientOnce sync.Once
-	BucketName string
 	Client     *storage.Client
 }
 
