@@ -116,7 +116,7 @@ func (c *GoogleStorageClient) Upload(ctx context.Context, name string, src io.Re
 	}
 
 	if _, err := io.Copy(wc, src); err != nil {
-		return errors.Wrap(err, "failed to write data to temporary location")
+		return errors.Wrapf(err, "failed to write data to location %s/%s", c.bucketName, name)
 	}
 	// Note: DO NOT defer wc.Close(), as it's part of the write operation.
 	// If wc.Close() does not complete w/o errors. the write failed

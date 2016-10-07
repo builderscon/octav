@@ -3,6 +3,7 @@ package service
 import (
 	"bytes"
 	"database/sql"
+	"encoding/base64"
 	"fmt"
 	"io"
 	"mime/multipart"
@@ -815,10 +816,17 @@ func (v *ConferenceSvc) AddCredentialFromPayload(ctx context.Context, tx *db.Tx,
 		return errors.Wrap(err, "adding a conference credentials requires conference administrator privilege")
 	}
 
+	// Data is in text, and it must be base64
+	decoded, err := base64.StdEncoding.DecodeString(payload.Data)
+	if err != nil {
+		return errors.Wrap(err, "failed to decode payload.Data with base64")
+	}
+
 	cl := v.credentialStorage
 	name := "conferences/" + payload.ConferenceID + "/credentials/" + payload.Type
-	err = cl.Upload(ctx, name, bytes.NewBufferString(payload.Data), WithObjectAttrs(storage.ObjectAttrs{
+	err = cl.Upload(ctx, name, bytes.NewBuffer(decoded), WithObjectAttrs(storage.ObjectAttrs{
 		ContentType: "text/plain",
+		// Note: DO NOT ADD PERMISSIVE ACLS HERE!
 	}))
 	if err != nil {
 		return errors.Wrap(err, "failed to upload file")
