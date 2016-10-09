@@ -574,6 +574,8 @@ func doCreateSession(ctx context.Context, w http.ResponseWriter, r *http.Request
 	}
 
 	httpJSON(w, v)
+
+	go s.PostSocialServices(v)
 }
 
 func doUpdateSession(ctx context.Context, w http.ResponseWriter, r *http.Request, payload model.UpdateSessionRequest) {

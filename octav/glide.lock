@@ -1,5 +1,5 @@
-hash: b5b7211b3f10da55785c85788f8739e96f3704229535703a5d3bacf9a9e6b883
-updated: 2016-09-20T10:49:51.236958705+09:00
+hash: cc816deb6743b6d7c2693f9ebe9f2d01b6adfe87942233e87a9bfc1f7edbcfc3
+updated: 2016-10-10T07:56:42.689006396+09:00
 imports:
 - name: cloud.google.com/go
   version: e89968106bfb1f9fe3f05a5ca644866acd15edf8
@@ -14,9 +14,11 @@ imports:
   subpackages:
   - spew
 - name: github.com/dghubble/go-twitter
-  version: 536f41ba9ebcee721411517767a6f56b54b4ab65
+  version: 12e5387804e84bf20dc60ba964f59437553e16a6
   subpackages:
   - twitter
+- name: github.com/dghubble/oauth1
+  version: 70562a5920ad9b6ff03ef697c0f90ae569abbd2b
 - name: github.com/dghubble/sling
   version: 52e88a7b75a5db3b49f8911f16d49d9b7b67adc5
 - name: github.com/go-sql-driver/mysql
@@ -95,11 +97,11 @@ imports:
   - jws
   - jwt
 - name: golang.org/x/sync
-  version: 316e794f7b5e3df4e95175a45a5fb8b12f85cb4f
+  version: 1ae7c7b29e06598039be46c5083819ba6fd7a97e
   subpackages:
   - errgroup
 - name: golang.org/x/text
-  version: 04b8648d973c126ae60143b3e1473bc1576c7597
+  version: ede1cb9f9f2f84c3bace9ca113fd740fc916cdd0
   subpackages:
   - internal/tag
   - language
