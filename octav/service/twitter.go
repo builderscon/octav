@@ -61,7 +61,7 @@ func (v *TwitterSvc) TweetAsConference(confID, tweet string) (err error) {
 	// ...and they are in JSON
 	var creds struct {
 		AccessToken  string `json:"access_token"`
-		AccessSecret string `json:"access_scret"`
+		AccessSecret string `json:"access_token_secret"`
 	}
 
 	if err := json.Unmarshal(credentialsBuf.Bytes(), &creds); err != nil {
