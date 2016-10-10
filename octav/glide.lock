@@ -1,5 +1,5 @@
-hash: 4023d72d77e622a1dc4151d3c533b471a3fae2bb935c8294f5abb84c98c1d02a
-updated: 2016-10-10T21:03:16.956375158+09:00
+hash: bb04864eaf09e0d5060679ac683973cee46933812a7d6fd8c200443978502294
+updated: 2016-10-10T22:00:39.054909804+09:00
 imports:
 - name: cloud.google.com/go
   version: e89968106bfb1f9fe3f05a5ca644866acd15edf8
@@ -8,7 +8,7 @@ imports:
   - internal
   - storage
 - name: github.com/cenkalti/backoff
-  version: 8edc80b07f38c27352fb186d971c628a6c32552b
+  version: 32cd0c5b3aef12c76ed64aaf678f6c79736be7dc
 - name: github.com/davecgh/go-spew
   version: 6cf5744a041a0022271cefed95ba843f6d87fd51
   subpackages:

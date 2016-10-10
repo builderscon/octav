@@ -6,10 +6,6 @@ import (
 	"strconv"
 	"unicode/utf8"
 
-	"golang.org/x/oauth2"
-	"golang.org/x/oauth2/google"
-	urlshortener "google.golang.org/api/urlshortener/v1"
-
 	"github.com/builderscon/octav/octav/db"
 	"github.com/builderscon/octav/octav/model"
 	"github.com/builderscon/octav/octav/tools"
@@ -518,25 +514,8 @@ func (s *SessionSvc) PostSocialServices(v model.Session) (err error) {
 		})
 	}
 
-	httpClient, err := google.DefaultClient(oauth2.NoContext, urlshortener.UrlshortenerScope)
-	if err != nil {
-		return errors.Wrap(err, "failed to get oauth2 client")
-	}
-
-	// shorten the url
-	svc, err := urlshortener.New(httpClient)
-	if err != nil {
-		return errors.Wrap(err, "failed to create new url shortener client")
-	}
-
-	u, err := svc.Url.Insert(&urlshortener.Url{
-		LongUrl: "https://builderscon.io/" + series.Slug + "/" + conf.Slug + "/session/" + v.ID,
-	}).Do()
-	if err != nil {
-		return errors.Wrap(err, "failed to shorten url")
-	}
-
-	tweetLen = tweetLen + len(u.Id)
+	u := "https://builderscon.io/" + series.Slug + "/" + conf.Slug + "/session/" + v.ID
+	tweetLen = tweetLen + 23 // will be shortened
 
 	if remain := 140 - tweetLen; utf8.RuneCountInString(title) > remain {
 		var truncated bytes.Buffer
