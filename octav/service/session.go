@@ -1,6 +1,11 @@
 package service
 
 import (
+	"bytes"
+	"fmt"
+	"strconv"
+	"unicode/utf8"
+
 	"github.com/builderscon/octav/octav/db"
 	"github.com/builderscon/octav/octav/model"
 	"github.com/builderscon/octav/octav/tools"
@@ -30,7 +35,7 @@ func (v *SessionSvc) populateRowForCreate(vdb *db.Session, payload model.CreateS
 		vdb.Title.String = payload.Title.String
 	}
 
-	if s, ok := payload.LocalizedFields.Get("ja", "title"); ok && s != ""  {
+	if s, ok := payload.LocalizedFields.Get("ja", "title"); ok && s != "" {
 		hasTitle = true
 	}
 
@@ -47,7 +52,7 @@ func (v *SessionSvc) populateRowForCreate(vdb *db.Session, payload model.CreateS
 		vdb.Abstract.String = payload.Abstract.String
 	}
 
-	if s, ok := payload.LocalizedFields.Get("ja", "abstract"); ok && s != ""  {
+	if s, ok := payload.LocalizedFields.Get("ja", "abstract"); ok && s != "" {
 		hasAbstract = true
 	}
 
@@ -464,3 +469,82 @@ func (v *SessionSvc) DeleteFromPayload(tx *db.Tx, payload model.DeleteSessionReq
 	return nil
 }
 
+func (v *SessionSvc) PostSocialServices(session model.Session) (err error) {
+	if pdebug.Enabled {
+		g := pdebug.Marker("SessionSvc.PostSocialServices %s", session.ID).BindError(&err)
+		defer g.End()
+	}
+
+	if InTesting {
+		return errors.New("skipped during testing")
+	}
+
+	var speaker model.User
+	tx, err := db.Begin()
+	if err != nil {
+		return errors.Wrap(err, "failed to start database transaction")
+	}
+	defer tx.AutoRollback()
+	if err := speaker.Load(tx, session.SpeakerID); err != nil {
+		return errors.Wrap(err, "failed to load speaker")
+	}
+
+	var conf model.Conference
+	if err := conf.Load(tx, session.ConferenceID); err != nil {
+		return errors.Wrap(err, "failed to load conference")
+	}
+
+	var series model.ConferenceSeries
+	if err := series.Load(tx, conf.SeriesID); err != nil {
+		return errors.Wrap(err, "failed to load conference series")
+	}
+
+	if err := v.ReplaceL10NStrings(tx, &session, "all"); err != nil {
+		return errors.Wrap(err, "failed to replace localized strings")
+	}
+
+	prefix := "New submission "
+	tweetLen := len(prefix) + 2 + 1 // prefix + 2 quotes + 1 space
+
+	// we can post at most 140 - tweetLen
+	var title string
+	session.LocalizedFields.Foreach(func(lang, lk, lv string) error {
+		if lk == "title" {
+			title = lv
+			return errors.New("stop")
+		}
+		return nil
+	})
+	if title == "" {
+		title = session.Title
+	}
+	if title == "" {
+		title = "(null)"
+	}
+
+	u := "https://builderscon.io/" + series.Slug + "/" + conf.Slug + "/session/" + session.ID
+	tweetLen = tweetLen + 23 // will be shortened
+
+	if remain := 140 - tweetLen; utf8.RuneCountInString(title) > remain {
+		var truncated bytes.Buffer
+		for len(title) > 0 && remain > 1 {
+			r, n := utf8.DecodeRuneInString(title)
+			if r == utf8.RuneError {
+				break
+			}
+			remain = remain - 1
+			title = title[n:]
+			truncated.WriteRune(r)
+		}
+		truncated.WriteRune('…')
+		title = truncated.String()
+	}
+
+	return Twitter().TweetAsConference(
+		session.ConferenceID,
+		fmt.Sprintf("New submission %s %s",
+			strconv.Quote(title),
+			u,
+		),
+	)
+}

@@ -1,5 +1,5 @@
-hash: b5b7211b3f10da55785c85788f8739e96f3704229535703a5d3bacf9a9e6b883
-updated: 2016-09-20T10:49:51.236958705+09:00
+hash: bb04864eaf09e0d5060679ac683973cee46933812a7d6fd8c200443978502294
+updated: 2016-10-10T22:00:39.054909804+09:00
 imports:
 - name: cloud.google.com/go
   version: e89968106bfb1f9fe3f05a5ca644866acd15edf8
@@ -8,15 +8,17 @@ imports:
   - internal
   - storage
 - name: github.com/cenkalti/backoff
-  version: 8edc80b07f38c27352fb186d971c628a6c32552b
+  version: 32cd0c5b3aef12c76ed64aaf678f6c79736be7dc
 - name: github.com/davecgh/go-spew
   version: 6cf5744a041a0022271cefed95ba843f6d87fd51
   subpackages:
   - spew
 - name: github.com/dghubble/go-twitter
-  version: 536f41ba9ebcee721411517767a6f56b54b4ab65
+  version: 12e5387804e84bf20dc60ba964f59437553e16a6
   subpackages:
   - twitter
+- name: github.com/dghubble/oauth1
+  version: 70562a5920ad9b6ff03ef697c0f90ae569abbd2b
 - name: github.com/dghubble/sling
   version: 52e88a7b75a5db3b49f8911f16d49d9b7b67adc5
 - name: github.com/go-sql-driver/mysql
@@ -95,11 +97,11 @@ imports:
   - jws
   - jwt
 - name: golang.org/x/sync
-  version: 316e794f7b5e3df4e95175a45a5fb8b12f85cb4f
+  version: 1ae7c7b29e06598039be46c5083819ba6fd7a97e
   subpackages:
   - errgroup
 - name: golang.org/x/text
-  version: 04b8648d973c126ae60143b3e1473bc1576c7597
+  version: ede1cb9f9f2f84c3bace9ca113fd740fc916cdd0
   subpackages:
   - internal/tag
   - language
@@ -114,6 +116,7 @@ imports:
   - option
   - storage/v1
   - transport
+  - urlshortener/v1
 - name: google.golang.org/appengine
   version: 4f7eeb5305a4ba1966344836ba4af9996b7b4e05
   subpackages:

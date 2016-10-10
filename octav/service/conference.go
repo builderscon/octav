@@ -788,20 +788,7 @@ func (v *ConferenceSvc) TweetFromPayload(ctx context.Context, tx *db.Tx, payload
 		return errors.Wrap(err, "adding a conference credentials requires conference administrator privilege")
 	}
 
-	// This should be refreshed from time to time instead of
-	// fetching it for every call
-	var buf bytes.Buffer
-	err = v.credentialStorage.Download(ctx, "conferences/"+payload.ConferenceID+"/credentials/twitter", &buf)
-	if err != nil {
-		return errors.Wrap(err, "failed to read twitter credentials")
-	}
-
-	tw := NewTwitterClientFromToken(buf.String())
-	if _, _, err := tw.Statuses.Update(payload.Tweet, nil); err != nil {
-		return errors.Wrap(err, "failed to tweet")
-	}
-
-	return nil
+	return Twitter().TweetAsConference(payload.ConferenceID, payload.Tweet)
 }
 
 func (v *ConferenceSvc) AddCredentialFromPayload(ctx context.Context, tx *db.Tx, payload model.AddConferenceCredentialRequest) (err error) {

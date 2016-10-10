@@ -23,6 +23,8 @@ import:
   - google
 - package: cloud.google.com/go
 - package: google.golang.org/api
+  subpackages:
+  - urlshortener/v1
 - package: golang.org/x/sync
   subpackages:
   - errgroup
@@ -30,4 +32,10 @@ import:
 - package: gopkg.in/mailgun/mailgun-go.v1
 - package: github.com/lestrrat/go-bindata
 - package: github.com/dghubble/go-twitter
+  subpackages:
+  - twitter
 - package: github.com/lestrrat/go-sqllib
+- package: github.com/dghubble/oauth1
+  version: v0.4.0
+- package: github.com/cenkalti/backoff
+  version: v1.0.0
