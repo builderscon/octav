@@ -1,5 +1,5 @@
-hash: cc816deb6743b6d7c2693f9ebe9f2d01b6adfe87942233e87a9bfc1f7edbcfc3
-updated: 2016-10-10T07:56:42.689006396+09:00
+hash: 4023d72d77e622a1dc4151d3c533b471a3fae2bb935c8294f5abb84c98c1d02a
+updated: 2016-10-10T21:03:16.956375158+09:00
 imports:
 - name: cloud.google.com/go
   version: e89968106bfb1f9fe3f05a5ca644866acd15edf8
@@ -116,6 +116,7 @@ imports:
   - option
   - storage/v1
   - transport
+  - urlshortener/v1
 - name: google.golang.org/appengine
   version: 4f7eeb5305a4ba1966344836ba4af9996b7b4e05
   subpackages:

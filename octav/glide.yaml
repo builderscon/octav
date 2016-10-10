@@ -23,6 +23,8 @@ import:
   - google
 - package: cloud.google.com/go
 - package: google.golang.org/api
+  subpackages:
+  - urlshortener/v1
 - package: golang.org/x/sync
   subpackages:
   - errgroup

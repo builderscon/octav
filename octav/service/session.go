@@ -6,6 +6,10 @@ import (
 	"strconv"
 	"unicode/utf8"
 
+	"golang.org/x/oauth2"
+	"golang.org/x/oauth2/google"
+	urlshortener "google.golang.org/api/urlshortener/v1"
+
 	"github.com/builderscon/octav/octav/db"
 	"github.com/builderscon/octav/octav/model"
 	"github.com/builderscon/octav/octav/tools"
@@ -484,11 +488,19 @@ func (s *SessionSvc) PostSocialServices(v model.Session) error {
 		return errors.Wrap(err, "failed to load speaker")
 	}
 
-	prefix := "New submission by "
-	fixedLen := len(prefix) + 2 + 1 // prefix + 2 quotes + 1 space
+	var conf model.Conference
+	if err := conf.Load(tx, v.ConferenceID); err != nil {
+		return errors.Wrap(err, "failed to load conference")
+	}
 
-	// Hey hey, watch out because who knows, v.Nickname could be in UTF-8
-	tweetLen := fixedLen + utf8.RuneCountInString(speaker.Nickname)
+	var series model.ConferenceSeries
+	if err := series.Load(tx, conf.SeriesID); err != nil {
+		return errors.Wrap(err, "failed to load conference series")
+	}
+
+	prefix := "New submission "
+	tweetLen := len(prefix) + 2 + 1 // prefix + 2 quotes + 1 space
+
 	// we can post at most 140 - tweetLen
 	title := "(null)"
 	if v.Title == "" {
@@ -500,6 +512,26 @@ func (s *SessionSvc) PostSocialServices(v model.Session) error {
 			return nil
 		})
 	}
+
+	httpClient, err := google.DefaultClient(oauth2.NoContext, urlshortener.UrlshortenerScope)
+	if err != nil {
+		return errors.Wrap(err, "failed to get oauth2 client")
+	}
+
+	// shorten the url
+	svc, err := urlshortener.New(httpClient)
+	if err != nil {
+		return errors.Wrap(err, "failed to create new url shortener client")
+	}
+
+	u, err := svc.Url.Insert(&urlshortener.Url{
+		LongUrl: "https://builderscon.io/" + series.Slug + "/" + conf.Slug + "/session/" + v.ID,
+	}).Do()
+	if err != nil {
+		return errors.Wrap(err, "failed to shorten url")
+	}
+
+	tweetLen = tweetLen + len(u.Id)
 
 	if remain := 140 - tweetLen; utf8.RuneCountInString(title) > remain {
 		var truncated bytes.Buffer
@@ -518,9 +550,9 @@ func (s *SessionSvc) PostSocialServices(v model.Session) error {
 
 	return Twitter().TweetAsConference(
 		v.ConferenceID,
-		fmt.Sprintf("New submission by %s %s",
-			speaker.Nickname,
+		fmt.Sprintf("New submission %s %s",
 			strconv.Quote(title),
+			u,
 		),
 	)
 }
