@@ -54,10 +54,6 @@ func (v *TwitterSvc) TweetAsConference(confID, tweet string) (err error) {
 		return errors.Wrap(err, "failed to download twitter credentials")
 	}
 
-	if pdebug.Enabled {
-		pdebug.Printf(credentialsBuf.String())
-	}
-
 	// ...and they are in JSON
 	var creds struct {
 		AccessToken  string `json:"access_token"`
