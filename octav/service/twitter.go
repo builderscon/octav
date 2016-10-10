@@ -10,6 +10,7 @@ import (
 
 	"github.com/dghubble/go-twitter/twitter"
 	"github.com/dghubble/oauth1"
+	pdebug "github.com/lestrrat/go-pdebug"
 	"github.com/pkg/errors"
 	"golang.org/x/oauth2"
 )
@@ -35,7 +36,12 @@ func NewTwitterClientFromToken(s string) *twitter.Client {
 	return twitter.NewClient(httpClient)
 }
 
-func (v *TwitterSvc) TweetAsConference(confID, tweet string) error {
+func (v *TwitterSvc) TweetAsConference(confID, tweet string) (err error) {
+	if pdebug.Enabled {
+		g := pdebug.Marker("TwitterSvc.TweetAsConference %s", confID).BindError(&err)
+		defer g.End()
+	}
+
 	// Post to twitter, but we can only do so if we have a valid
 	// credential information. This is stored in Google storage
 	ctx, cancel := context.WithCancel(context.Background())
@@ -46,6 +52,10 @@ func (v *TwitterSvc) TweetAsConference(confID, tweet string) error {
 	var credentialsBuf bytes.Buffer
 	if err := CredentialStorage.Download(ctx, credentialsKey, &credentialsBuf); err != nil {
 		return errors.Wrap(err, "failed to download twitter credentials")
+	}
+
+	if pdebug.Enabled {
+		pdebug.Printf(credentialsBuf.String())
 	}
 
 	// ...and they are in JSON
@@ -83,6 +93,6 @@ func (v *TwitterSvc) TweetAsConference(confID, tweet string) error {
 		tweet = truncated.String()
 	}
 
-	_, _, err := client.Statuses.Update(tweet, nil)
+	_, _, err = client.Statuses.Update(tweet, nil)
 	return err
 }
