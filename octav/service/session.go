@@ -2,18 +2,13 @@ package service
 
 import (
 	"bytes"
-	"context"
-	"encoding/json"
 	"fmt"
-	"os"
 	"strconv"
 	"unicode/utf8"
 
 	"github.com/builderscon/octav/octav/db"
 	"github.com/builderscon/octav/octav/model"
 	"github.com/builderscon/octav/octav/tools"
-	"github.com/dghubble/go-twitter/twitter"
-	"github.com/dghubble/oauth1"
 	"github.com/lestrrat/go-pdebug"
 	"github.com/pkg/errors"
 )
@@ -479,42 +474,6 @@ func (s *SessionSvc) PostSocialServices(v model.Session) error {
 		return nil
 	}
 
-	// Post to twitter, but we can only do so if we have a valid
-	// credential information. This is stored in Google storage
-	ctx, cancel := context.WithCancel(context.Background())
-	defer cancel()
-
-	// twitter credentials
-	credentialsKey := "conferences/" + v.ConferenceID + "/credentials/twitter"
-	var credentialsBuf bytes.Buffer
-	if err := CredentialStorage.Download(ctx, credentialsKey, &credentialsBuf); err != nil {
-		return errors.Wrap(err, "failed to download twitter credentials")
-	}
-
-	// ...and they are in JSON
-	var creds struct {
-		AccessToken  string `json:"access_token"`
-		AccessSecret string `json:"access_scret"`
-	}
-
-	if err := json.Unmarshal(credentialsBuf.Bytes(), &creds); err != nil {
-		return errors.Wrap(err, "failed to unmarshal twitter credentials")
-	}
-
-	// Consumer key and secret are from env vars
-	consumerKey := os.Getenv("TWITTER_OAUTH1_CONSUMER_KEY")
-	consumerSecret := os.Getenv("TWITTER_OAUTH1_CONSUMER_SECRET")
-
-	config := oauth1.NewConfig(consumerKey, consumerSecret)
-	token := oauth1.NewToken(creds.AccessToken, creds.AccessSecret)
-
-	httpClient := config.Client(oauth1.NoContext, token)
-
-	client := twitter.NewClient(httpClient)
-
-	prefix := "New submission by "
-	fixedLen := len(prefix) + 2 + 1 // prefix + 2 quotes + 1 space
-
 	var speaker model.User
 	tx, err := db.Begin()
 	if err != nil {
@@ -524,6 +483,9 @@ func (s *SessionSvc) PostSocialServices(v model.Session) error {
 	if err := speaker.Load(tx, v.SpeakerID); err != nil {
 		return errors.Wrap(err, "failed to load speaker")
 	}
+
+	prefix := "New submission by "
+	fixedLen := len(prefix) + 2 + 1 // prefix + 2 quotes + 1 space
 
 	// Hey hey, watch out because who knows, v.Nickname could be in UTF-8
 	tweetLen := fixedLen + utf8.RuneCountInString(speaker.Nickname)
@@ -554,12 +516,11 @@ func (s *SessionSvc) PostSocialServices(v model.Session) error {
 		title = truncated.String()
 	}
 
-	client.Statuses.Update(
+	return Twitter().TweetAsConference(
+		v.ConferenceID,
 		fmt.Sprintf("New submission by %s %s",
 			speaker.Nickname,
 			strconv.Quote(title),
 		),
-		nil,
 	)
-	return nil
 }
