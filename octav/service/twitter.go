@@ -83,6 +83,6 @@ func (v *TwitterSvc) TweetAsConference(confID, tweet string) error {
 		tweet = truncated.String()
 	}
 
-	client.Statuses.Update(tweet, nil)
-	return nil
+	_, _, err := client.Statuses.Update(tweet, nil)
+	return err
 }
