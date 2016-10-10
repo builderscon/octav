@@ -469,9 +469,9 @@ func (v *SessionSvc) DeleteFromPayload(tx *db.Tx, payload model.DeleteSessionReq
 	return nil
 }
 
-func (s *SessionSvc) PostSocialServices(v model.Session) (err error) {
+func (v *SessionSvc) PostSocialServices(session model.Session) (err error) {
 	if pdebug.Enabled {
-		g := pdebug.Marker("SessionSvc.PostSocialServices %s", v.ID).BindError(&err)
+		g := pdebug.Marker("SessionSvc.PostSocialServices %s", session.ID).BindError(&err)
 		defer g.End()
 	}
 
@@ -485,12 +485,12 @@ func (s *SessionSvc) PostSocialServices(v model.Session) (err error) {
 		return errors.Wrap(err, "failed to start database transaction")
 	}
 	defer tx.AutoRollback()
-	if err := speaker.Load(tx, v.SpeakerID); err != nil {
+	if err := speaker.Load(tx, session.SpeakerID); err != nil {
 		return errors.Wrap(err, "failed to load speaker")
 	}
 
 	var conf model.Conference
-	if err := conf.Load(tx, v.ConferenceID); err != nil {
+	if err := conf.Load(tx, session.ConferenceID); err != nil {
 		return errors.Wrap(err, "failed to load conference")
 	}
 
@@ -499,22 +499,30 @@ func (s *SessionSvc) PostSocialServices(v model.Session) (err error) {
 		return errors.Wrap(err, "failed to load conference series")
 	}
 
+	if err := v.ReplaceL10NStrings(tx, &session, "all"); err != nil {
+		return errors.Wrap(err, "failed to replace localized strings")
+	}
+
 	prefix := "New submission "
 	tweetLen := len(prefix) + 2 + 1 // prefix + 2 quotes + 1 space
 
 	// we can post at most 140 - tweetLen
-	title := "(null)"
-	if v.Title == "" {
-		v.LocalizedFields.Foreach(func(lang, k, v string) error {
-			if k == "title" {
-				title = v
-				return errors.New("stop")
-			}
-			return nil
-		})
+	var title string
+	session.LocalizedFields.Foreach(func(lang, lk, lv string) error {
+		if lk == "title" {
+			title = lv
+			return errors.New("stop")
+		}
+		return nil
+	})
+	if title == "" {
+		title = session.Title
+	}
+	if title == "" {
+		title = "(null)"
 	}
 
-	u := "https://builderscon.io/" + series.Slug + "/" + conf.Slug + "/session/" + v.ID
+	u := "https://builderscon.io/" + series.Slug + "/" + conf.Slug + "/session/" + session.ID
 	tweetLen = tweetLen + 23 // will be shortened
 
 	if remain := 140 - tweetLen; utf8.RuneCountInString(title) > remain {
@@ -533,7 +541,7 @@ func (s *SessionSvc) PostSocialServices(v model.Session) (err error) {
 	}
 
 	return Twitter().TweetAsConference(
-		v.ConferenceID,
+		session.ConferenceID,
 		fmt.Sprintf("New submission %s %s",
 			strconv.Quote(title),
 			u,
