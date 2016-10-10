@@ -473,9 +473,14 @@ func (v *SessionSvc) DeleteFromPayload(tx *db.Tx, payload model.DeleteSessionReq
 	return nil
 }
 
-func (s *SessionSvc) PostSocialServices(v model.Session) error {
+func (s *SessionSvc) PostSocialServices(v model.Session) (err error) {
+	if pdebug.Enabled {
+		g := pdebug.Marker("SessionSvc.PostSocialServices %s", v.ID).BindError(&err)
+		defer g.End()
+	}
+
 	if InTesting {
-		return nil
+		return errors.New("skipped during testing")
 	}
 
 	var speaker model.User
