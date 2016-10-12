@@ -483,6 +483,10 @@ func (v *ConferenceSvc) Decorate(tx *db.Tx, c *model.Conference, trustedCall boo
 		return errors.Wrapf(err, "failed to load sponsors for '%s'", c.ID)
 	}
 
+	if err := v.LoadSessionTypes(tx, &c.SessionTypes, c.ID); err != nil {
+		return errors.Wrapf(err, "failed to load session types for '%s'", c.ID)
+	}
+
 	sv := Venue()
 	for i := range c.Venues {
 		if err := sv.Decorate(tx, &c.Venues[i], trustedCall, lang); err != nil {
@@ -501,6 +505,13 @@ func (v *ConferenceSvc) Decorate(tx *db.Tx, c *model.Conference, trustedCall boo
 	for i := range c.Sponsors {
 		if err := sps.Decorate(tx, &c.Sponsors[i], trustedCall, lang); err != nil {
 			return errors.Wrap(err, "failed to decorate sponsors with associated data")
+		}
+	}
+
+	sts := SessionType()
+	for i := range c.SessionTypes {
+		if err := sts.Decorate(tx, &c.SessionTypes[i], trustedCall, lang); err != nil {
+			return errors.Wrap(err, "failed to decorate session types with associated data")
 		}
 	}
 
@@ -747,6 +758,24 @@ func (v *ConferenceSvc) LoadSponsors(tx *db.Tx, cdl *model.SponsorList, cid stri
 	res := make(model.SponsorList, len(vdbl))
 	for i, vdb := range vdbl {
 		var u model.Sponsor
+		if err := u.FromRow(vdb); err != nil {
+			return err
+		}
+		res[i] = u
+	}
+	*cdl = res
+	return nil
+}
+
+func (v *ConferenceSvc) LoadSessionTypes(tx *db.Tx, cdl *model.SessionTypeList, cid string) error {
+	var vdbl db.SessionTypeList
+	if err := db.LoadSessionTypes(tx, &vdbl, cid); err != nil {
+		return err
+	}
+
+	res := make(model.SessionTypeList, len(vdbl))
+	for i, vdb := range vdbl {
+		var u model.SessionType
 		if err := u.FromRow(vdb); err != nil {
 			return err
 		}

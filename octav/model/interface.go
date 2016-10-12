@@ -53,6 +53,7 @@ type Conference struct {
 	Venues                    VenueList           `json:"venues,omitempty" decorate:"true"`
 	FeaturedSpeakers          FeaturedSpeakerList `json:"featured_speakers,omitempty" decorate:"true"`
 	Sponsors                  SponsorList         `json:"sponsors,omitempty" decorate:"true"`
+	SessionTypes              SessionTypeList     `json:"session_types,omitempty" decorate:"true"`
 }
 type ConferenceList []Conference
 
