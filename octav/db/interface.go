@@ -169,6 +169,7 @@ type User struct {
 	Email      sql.NullString
 	TshirtSize sql.NullString
 	IsAdmin    bool
+	Timezone   string
 	CreatedOn  time.Time
 	ModifiedOn NullTime
 }

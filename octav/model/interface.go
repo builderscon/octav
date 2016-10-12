@@ -220,6 +220,7 @@ type User struct {
 	Email           string `json:"email,omitempty"`
 	TshirtSize      string `json:"tshirt_size,omitempty"`
 	IsAdmin         bool   `json:"is_admin"`
+	Timezone        string `json:"timezone"`
 }
 type UserList []User
 

@@ -10,6 +10,7 @@ CREATE TABLE users (
     avatar_url TEXT,
     is_admin TINYINT(1) NOT NULL DEFAULT 0,
     tshirt_size CHAR(4) CHARACTER SET latin1,
+    timezone CHAR(32) NOT NULL DEFAULT 'UTC',
     created_on DATETIME NOT NULL,
     modified_on TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     UNIQUE KEY(eid),
