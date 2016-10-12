@@ -48,6 +48,7 @@ type Conference struct {
 	Slug                      string              `json:"slug"`
 	FullSlug                  string              `json:"full_slug,omitempty"` // Only populated when decorated
 	Status                    string              `json:"status"`
+	Timezone                  string              `json:"timezone"`
 	Dates                     ConferenceDateList  `json:"dates,omitempty"`
 	Administrators            UserList            `json:"administrators,omitempty" decorate:"true"`
 	Venues                    VenueList           `json:"venues,omitempty" decorate:"true"`

@@ -72,6 +72,7 @@ CREATE TABLE conferences (
     sub_title TEXT,
     cover_url TEXT,
     status CHAR(64) CHARACTER SET latin1 NOT NULL default "private",
+    timezone CHAR(32) NOT NULL DEFAULT 'UTC',
     created_by CHAR(64) CHARACTER SET latin1 NOT NULL,
     created_on DATETIME NOT NULL,
     modified_on TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,

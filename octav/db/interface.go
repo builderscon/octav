@@ -46,6 +46,7 @@ type Conference struct {
 	Status     string
 	SubTitle   sql.NullString
 	Title      string
+	Timezone   string
 	CreatedBy  string // User ID that creates this conference
 	CreatedOn  time.Time
 	ModifiedOn NullTime
