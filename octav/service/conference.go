@@ -2,14 +2,12 @@ package service
 
 import (
 	"bytes"
-	"database/sql"
 	"encoding/base64"
 	"fmt"
 	"io"
 	"mime/multipart"
 	"net/http"
 	"regexp"
-	"strings"
 	"time"
 
 	"context"
@@ -244,7 +242,7 @@ func (v *ConferenceSvc) LoadByRange(tx *db.Tx, vdbl *db.ConferenceList, since, r
 	return nil
 }
 
-func (v *ConferenceSvc) AddDatesFromPayload(tx *db.Tx, payload model.AddConferenceDatesRequest) (err error) {
+func (v *ConferenceSvc) AddDatesFromPayload(tx *db.Tx, payload model.CreateConferenceDateRequest) (err error) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("service.Conference.AddDatesFromPayload").BindError(&err)
 		defer g.End()
@@ -255,72 +253,48 @@ func (v *ConferenceSvc) AddDatesFromPayload(tx *db.Tx, payload model.AddConferen
 		return errors.Wrap(err, "adding conference dates requires conference administrator privilege")
 	}
 
-	for _, date := range payload.Dates {
-		if pdebug.Enabled {
-			pdebug.Printf("Adding conference date %s", date)
-		}
-		cd := db.ConferenceDate{
-			ConferenceID: payload.ConferenceID,
-			Date:         date.Date.String(),
-			Open:         sql.NullString{String: date.Open.String(), Valid: true},
-			Close:        sql.NullString{String: date.Close.String(), Valid: true},
-		}
-		if err := cd.Create(tx, db.WithInsertIgnore(true)); err != nil {
-			return err
-		}
+	var vdb db.ConferenceDate
+	s := ConferenceDate()
+	if err := s.Create(tx, &vdb, payload); err != nil {
+		return errors.Wrap(err, "failed to insert into database")
 	}
 
 	return nil
 }
 
-func (v *ConferenceSvc) DeleteDatesFromPayload(tx *db.Tx, payload model.DeleteConferenceDatesRequest) error {
+func (v *ConferenceSvc) DeleteDateFromPayload(tx *db.Tx, payload model.DeleteConferenceDateRequest) error {
 	su := User()
 	if err := su.IsConferenceAdministrator(tx, payload.ConferenceID, payload.UserID); err != nil {
 		return errors.Wrap(err, "deleting conference dates requires conference administrator privilege")
 	}
 
 	var vdb db.ConferenceDate
-	sdatelist := make([]string, len(payload.Dates))
-	for i, dt := range payload.Dates {
-		sdatelist[i] = dt.String()
-	}
-	return vdb.DeleteDates(tx, payload.ConferenceID, sdatelist...)
+	return vdb.DeleteDate(tx, payload.ConferenceID, payload.Date)
 }
 
-func (v *ConferenceSvc) LoadDates(tx *db.Tx, cdl *model.ConferenceDateList, cid string) error {
+func (v *ConferenceSvc) LoadDates(tx *db.Tx, cdl *model.ConferenceDateList, cid string) (err error) {
+	if pdebug.Enabled {
+		g := pdebug.Marker("service.Conference.LoadDates").BindError(&err)
+		defer g.End()
+	}
+
 	var vdbl db.ConferenceDateList
 	if err := vdbl.LoadByConferenceID(tx, cid); err != nil {
 		return err
 	}
 
+	if pdebug.Enabled {
+		pdebug.Printf("Loaded %d dates", len(vdbl))
+	}
+
 	res := make(model.ConferenceDateList, len(vdbl))
 	for i, vdb := range vdbl {
-		dt := vdb.Date
-		if i := strings.IndexByte(dt, 'T'); i > -1 { // Cheat. Loading from DB contains time....!!!!
-			dt = dt[:i]
-		}
-		if err := res[i].Date.Parse(dt); err != nil {
-			return err
-		}
-
 		if vdb.Open.Valid {
-			t := vdb.Open.String
-			if len(t) > 5 {
-				t = t[:5]
-			}
-			if err := res[i].Open.Parse(t); err != nil {
-				return err
-			}
+			res[i].Open = vdb.Open.Time
 		}
 
 		if vdb.Close.Valid {
-			t := vdb.Close.String
-			if len(t) > 5 {
-				t = t[:5]
-			}
-			if err := res[i].Close.Parse(t); err != nil {
-				return err
-			}
+			res[i].Close = vdb.Close.Time
 		}
 	}
 	*cdl = res

@@ -349,19 +349,19 @@ type WallClock struct {
 	Valid  bool // True if set
 }
 
-// YYYY-MM-DD[HH:MM-HH:MM]
+// +model `LookupRequest:"false" UpdateRequest:"false"`
 type ConferenceDate struct {
-	Date  Date
-	Open  WallClock
-	Close WallClock
+	ID    string
+	Open  time.Time
+	Close time.Time
 }
 type ConferenceDateList []ConferenceDate
 
 // +transport
-type AddConferenceDatesRequest struct {
-	ConferenceID string             `json:"conference_id"`
-	Dates        ConferenceDateList `json:"dates" extract:"true"`
-	UserID       string             `json:"user_id"`
+type CreateConferenceDateRequest struct {
+	ConferenceID string         `json:"conference_id"`
+	Date         ConferenceDate `json:"date" extract:"true"`
+	UserID       string         `json:"user_id"`
 }
 
 // +transport
@@ -379,10 +379,10 @@ type AddConferenceVenueRequest struct {
 }
 
 // +transport
-type DeleteConferenceDatesRequest struct {
-	ConferenceID string   `json:"conference_id"`
-	Dates        DateList `json:"dates" extract:"true"`
-	UserID       string   `json:"user_id"`
+type DeleteConferenceDateRequest struct {
+	ConferenceID string `json:"conference_id"`
+	Date         string `json:"date"`
+	UserID       string `json:"user_id"`
 }
 
 // +transport
@@ -919,3 +919,6 @@ type TweetAsConferenceRequest struct {
 	UserID       string `json:"user_id"` // ID of the user making this request
 	Tweet        string `json:"tweet"`
 }
+
+type JSONTime time.Time
+type JSONTimeList []JSONTime

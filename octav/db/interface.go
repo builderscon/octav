@@ -63,13 +63,13 @@ type ConferenceComponent struct {
 	ModifiedOn   NullTime
 }
 
-// +DB tablename:"conference_dates"
+// +DB tablename:"conference_dates_new"
 type ConferenceDate struct {
 	OID          int64
+	EID          string
 	ConferenceID string
-	Date         string
-	Open         sql.NullString
-	Close        sql.NullString
+	Open         NullTime
+	Close        NullTime
 }
 
 // +DB tablename:"conference_series_administrators"

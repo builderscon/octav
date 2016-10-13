@@ -465,12 +465,12 @@ func doConferenceUpdate(args cmdargs) int {
 	return 0
 }
 
-func doConferenceDatesAdd(args cmdargs) int {
-	fs := flag.NewFlagSet("octavctl conference dates add", flag.ContinueOnError)
+func doConferenceDateAdd(args cmdargs) int {
+	fs := flag.NewFlagSet("octavctl conference date add", flag.ContinueOnError)
 	var id string
 	fs.StringVar(&id, "id", "", "")
-	var dates stringList
-	fs.Var(&dates, "dates", "")
+	var date string
+	fs.StringVar(&date, "date", "", "")
 	var user_id string
 	fs.StringVar(&user_id, "user_id", "", "")
 	prepGlobalFlags(fs)
@@ -482,18 +482,18 @@ func doConferenceDatesAdd(args cmdargs) int {
 	if id != "" {
 		m["conference_id"] = id
 	}
-	if dates.Valid() {
-		m["dates"] = dates.Get()
+	if date != "" {
+		m["date"] = date
 	}
 	if user_id != "" {
 		m["user_id"] = user_id
 	}
-	r := model.AddConferenceDatesRequest{}
+	r := model.AddConferenceDateRequest{}
 	if err := r.Populate(m); err != nil {
 		return errOut(err)
 	}
 
-	if err := validator.HTTPAddConferenceDatesRequest.Validate(&r); err != nil {
+	if err := validator.HTTPAddConferenceDateRequest.Validate(&r); err != nil {
 		return errOut(err)
 	}
 
@@ -501,19 +501,23 @@ func doConferenceDatesAdd(args cmdargs) int {
 	if err != nil {
 		return errOut(err)
 	}
-	if err := cl.AddConferenceDates(&r); err != nil {
+	res, err := cl.AddConferenceDate(&r)
+	if err != nil {
+		return errOut(err)
+	}
+	if err := printJSON(res); err != nil {
 		return errOut(err)
 	}
 
 	return 0
 }
 
-func doConferenceDatesDelete(args cmdargs) int {
-	fs := flag.NewFlagSet("octavctl conference dates delete", flag.ContinueOnError)
+func doConferenceDateDelete(args cmdargs) int {
+	fs := flag.NewFlagSet("octavctl conference date delete", flag.ContinueOnError)
 	var id string
 	fs.StringVar(&id, "id", "", "")
-	var dates stringList
-	fs.Var(&dates, "dates", "")
+	var date string
+	fs.StringVar(&date, "date", "", "")
 	var user_id string
 	fs.StringVar(&user_id, "user_id", "", "")
 	prepGlobalFlags(fs)
@@ -525,18 +529,18 @@ func doConferenceDatesDelete(args cmdargs) int {
 	if id != "" {
 		m["conference_id"] = id
 	}
-	if dates.Valid() {
-		m["dates"] = dates.Get()
+	if date != "" {
+		m["date"] = date
 	}
 	if user_id != "" {
 		m["user_id"] = user_id
 	}
-	r := model.DeleteConferenceDatesRequest{}
+	r := model.DeleteConferenceDateRequest{}
 	if err := r.Populate(m); err != nil {
 		return errOut(err)
 	}
 
-	if err := validator.HTTPDeleteConferenceDatesRequest.Validate(&r); err != nil {
+	if err := validator.HTTPDeleteConferenceDateRequest.Validate(&r); err != nil {
 		return errOut(err)
 	}
 
@@ -544,19 +548,19 @@ func doConferenceDatesDelete(args cmdargs) int {
 	if err != nil {
 		return errOut(err)
 	}
-	if err := cl.DeleteConferenceDates(&r); err != nil {
+	if err := cl.DeleteConferenceDate(&r); err != nil {
 		return errOut(err)
 	}
 
 	return 0
 }
 
-func doConferenceDatesSubcmd(args cmdargs) int {
+func doConferenceDateSubcmd(args cmdargs) int {
 	switch v := args.Get(0); v {
 	case "add":
-		return doConferenceDatesAdd(args.WithFrontPopped())
+		return doConferenceDateAdd(args.WithFrontPopped())
 	case "delete":
-		return doConferenceDatesDelete(args.WithFrontPopped())
+		return doConferenceDateDelete(args.WithFrontPopped())
 	default:
 		log.Printf("unimplemented (conference): %s", v)
 		return 1
@@ -774,8 +778,8 @@ func doConferenceSubcmd(args cmdargs) int {
 		return doConferenceList(args.WithFrontPopped())
 	case "update":
 		return doConferenceUpdate(args.WithFrontPopped())
-	case "dates":
-		return doConferenceDatesSubcmd(args.WithFrontPopped())
+	case "date":
+		return doConferenceDateSubcmd(args.WithFrontPopped())
 	case "admin":
 		return doConferenceAdminSubcmd(args.WithFrontPopped())
 	case "venue":

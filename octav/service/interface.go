@@ -70,6 +70,7 @@ type ConferenceSvc struct {
 	credentialStorage StorageClient
 }
 type ConferenceComponentSvc struct{}
+type ConferenceDateSvc struct{}
 type ConferenceSeriesSvc struct{}
 type FeaturedSpeakerSvc struct{}
 type MailgunSvc struct {

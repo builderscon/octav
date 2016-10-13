@@ -22,7 +22,7 @@ func compileRangeWhere(dst io.Writer, args *[]interface{}, since int64, rangeSta
 			where.WriteString(" AND ")
 		}
 		where.WriteString(ConferenceDateTable)
-		where.WriteString(".date >= ?")
+		where.WriteString(".open >= ?")
 		*args = append(*args, rangeStart)
 	}
 
@@ -31,7 +31,7 @@ func compileRangeWhere(dst io.Writer, args *[]interface{}, since int64, rangeSta
 			where.WriteString(" AND ")
 		}
 		where.WriteString(ConferenceDateTable)
-		where.WriteString(".date <= ?")
+		where.WriteString(".open <= ?")
 		*args = append(*args, rangeEnd)
 	}
 

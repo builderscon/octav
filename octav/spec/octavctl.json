@@ -6,7 +6,7 @@
       "actions": ["create", "lookup", "delete", "list", "update"],
       "subcmds": [
         {
-          "name": "dates",
+          "name": "date",
           "actions": [
             {
               "name": "add",

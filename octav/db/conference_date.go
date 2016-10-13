@@ -1,41 +1,27 @@
 package db
 
-import "bytes"
+import "github.com/builderscon/octav/octav/tools"
 
-func (cd *ConferenceDate) DeleteDates(tx *Tx, cid string, dates ...string) error {
-	stmt := bytes.Buffer{}
+func (cd *ConferenceDate) DeleteDate(tx *Tx, cid, eid string) error {
+	stmt := tools.GetBuffer()
+	defer tools.ReleaseBuffer(stmt)
+
 	stmt.WriteString("DELETE FROM ")
 	stmt.WriteString(ConferenceDateTable)
-	stmt.WriteString(" WHERE conference_id = ?")
-	var args []interface{}
-	switch l := len(dates); l {
-	case 0:
-		args = make([]interface{}, 1)
-	default:
-		args = make([]interface{}, l+1)
-		stmt.WriteString(" AND date IN (")
-		for i := 0; i < l; i++ {
-			stmt.WriteByte('?')
-			if i < l-1 {
-				stmt.WriteString(", ")
-			}
-			args[i+1] = dates[i]
-		}
-		stmt.WriteByte(')')
-	}
-	args[0] = cid
-
-	_, err := tx.Exec(stmt.String(), args...)
+	stmt.WriteString(" WHERE conference_id = ? AND eid = ?")
+	_, err := tx.Exec(stmt.String(), cid, eid)
 	return err
 }
 
 func (cdl *ConferenceDateList) LoadByConferenceID(tx *Tx, cid string) error {
-	stmt := bytes.Buffer{}
+	stmt := tools.GetBuffer()
+	defer tools.ReleaseBuffer(stmt)
+
 	stmt.WriteString("SELECT ")
 	stmt.WriteString(ConferenceDateStdSelectColumns)
 	stmt.WriteString(" FROM ")
 	stmt.WriteString(ConferenceDateTable)
-	stmt.WriteString(" WHERE conference_id = ? ORDER BY date,open ASC")
+	stmt.WriteString(" WHERE conference_id = ? ORDER BY open ASC")
 	rows, err := tx.Query(stmt.String(), cid)
 	if err != nil {
 		return err
