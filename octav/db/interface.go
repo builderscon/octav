@@ -63,7 +63,7 @@ type ConferenceComponent struct {
 	ModifiedOn   NullTime
 }
 
-// +DB tablename:"conference_dates_new"
+// +DB tablename:"conference_dates"
 type ConferenceDate struct {
 	OID          int64
 	EID          string

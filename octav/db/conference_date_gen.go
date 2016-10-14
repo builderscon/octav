@@ -12,8 +12,8 @@ import (
 	"github.com/pkg/errors"
 )
 
-const ConferenceDateStdSelectColumns = "conference_dates_new.oid, conference_dates_new.eid, conference_dates_new.conference_id, conference_dates_new.open, conference_dates_new.close"
-const ConferenceDateTable = "conference_dates_new"
+const ConferenceDateStdSelectColumns = "conference_dates.oid, conference_dates.eid, conference_dates.conference_id, conference_dates.open, conference_dates.close"
+const ConferenceDateTable = "conference_dates"
 
 type ConferenceDateList []ConferenceDate
 
@@ -191,7 +191,7 @@ func (v *ConferenceDateList) LoadSinceEID(tx *Tx, since string, limit int) error
 }
 
 func (v *ConferenceDateList) LoadSince(tx *Tx, since int64, limit int) error {
-	rows, err := tx.Query(`SELECT `+ConferenceDateStdSelectColumns+` FROM `+ConferenceDateTable+` WHERE conference_dates_new.oid > ? ORDER BY oid ASC LIMIT `+strconv.Itoa(limit), since)
+	rows, err := tx.Query(`SELECT `+ConferenceDateStdSelectColumns+` FROM `+ConferenceDateTable+` WHERE conference_dates.oid > ? ORDER BY oid ASC LIMIT `+strconv.Itoa(limit), since)
 	if err != nil {
 		return err
 	}

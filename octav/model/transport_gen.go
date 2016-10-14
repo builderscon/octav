@@ -1115,6 +1115,9 @@ func (r UpdateConferenceRequest) collectMarshalData() map[string]interface{} {
 	if r.Status.Valid() {
 		m["status"] = r.Status.Value()
 	}
+	if r.Timezone.Valid() {
+		m["timezone"] = r.Timezone.Value()
+	}
 	m["user_id"] = r.UserID
 	return m
 }
@@ -1209,6 +1212,12 @@ func (r *UpdateConferenceRequest) Populate(m map[string]interface{}) error {
 		}
 		delete(m, "status")
 	}
+	if jv, ok := m["timezone"]; ok {
+		if err := r.Timezone.Set(jv); err != nil {
+			return errors.New("set field Timezone failed: " + err.Error())
+		}
+		delete(m, "timezone")
+	}
 	if jv, ok := m["user_id"]; ok {
 		switch jv.(type) {
 		case string:
@@ -1226,7 +1235,7 @@ func (r *UpdateConferenceRequest) Populate(m map[string]interface{}) error {
 
 func (r *UpdateConferenceRequest) GetPropNames() ([]string, error) {
 	l, _ := r.LocalizedFields.GetPropNames()
-	return append(l, "id", "title", "description", "cfp_lead_text", "cfp_pre_submit_instructions", "cfp_post_submit_instructions", "series_id", "slug", "sub_title", "status", "user_id"), nil
+	return append(l, "id", "title", "description", "cfp_lead_text", "cfp_pre_submit_instructions", "cfp_post_submit_instructions", "series_id", "slug", "sub_title", "status", "timezone", "user_id"), nil
 }
 
 func (r *UpdateConferenceRequest) SetPropValue(s string, v interface{}) error {
@@ -1254,6 +1263,8 @@ func (r *UpdateConferenceRequest) SetPropValue(s string, v interface{}) error {
 		return r.SubTitle.Set(v)
 	case "status":
 		return r.Status.Set(v)
+	case "timezone":
+		return r.Timezone.Set(v)
 	case "user_id":
 		if jv, ok := v.(string); ok {
 			r.UserID = jv
