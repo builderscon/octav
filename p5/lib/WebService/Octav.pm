@@ -418,14 +418,14 @@ sub tweet_as_conference {
     return 1
 }
 
-sub add_conference_dates {
+sub add_conference_date {
     my ($self, $payload) = @_;
-    for my $required (qw(conference_id dates user_id)) {
+    for my $required (qw(conference_id date user_id)) {
         if (!$payload->{$required}) {
             die qq|property "$required" must be provided|;
         }
     }
-    my $uri = URI->new($self->{endpoint} . qq|/v1/conference/dates/add|);
+    my $uri = URI->new($self->{endpoint} . qq|/v1/conference/date/add|);
     my @request_args;
     push @request_args, (Content_Type => "application/json", Content => JSON::encode_json($payload));
     my $res = $self->{user_agent}->post($uri, @request_args);
@@ -433,17 +433,17 @@ sub add_conference_dates {
         $self->{last_error} = $res->status_line;
         return;
     }
-    return 1
+    return JSON::decode_json($res->decoded_content);
 }
 
-sub delete_conference_dates {
+sub delete_conference_date {
     my ($self, $payload) = @_;
-    for my $required (qw(conference_id dates user_id)) {
+    for my $required (qw(conference_id date user_id)) {
         if (!$payload->{$required}) {
             die qq|property "$required" must be provided|;
         }
     }
-    my $uri = URI->new($self->{endpoint} . qq|/v1/conference/dates/delete|);
+    my $uri = URI->new($self->{endpoint} . qq|/v1/conference/date/delete|);
     my @request_args;
     push @request_args, (Content_Type => "application/json", Content => JSON::encode_json($payload));
     my $res = $self->{user_agent}->post($uri, @request_args);

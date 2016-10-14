@@ -24,16 +24,12 @@
       "default": false
     },
     "conference_date": {
+      "hsup.type": "model.ConferenceDate",
       "type": "object",
       "properties": {
-        "date": {
-          "oneOf": [
-            {"$ref": "#/definitions/date" },
-            {"$ref": "#/definitions/datestr" }
-          ]
-        },
-        "start_time": {"$ref": "#/definitions/time"},
-        "end_time": {"$ref": "#/definitions/time"}
+        "id": {"$ref": "#/definitions/uuid"},
+        "open": {"$ref": "#/definitions/rfc3339"},
+        "close": {"$ref": "#/definitions/rfc3339"}
       }
     },
     "conference_date_array": {
@@ -889,39 +885,36 @@
       }
     },
     {
-      "title": "Add conference dates",
+      "title": "Add conference date",
       "hsup.wrapper": "httpWithBasicAuth",
       "rel": "update",
       "method": "POST",
-      "href": "/v1/conference/dates/add",
+      "href": "/v1/conference/date/add",
       "encType": "application/json",
       "schema": {
+        "hsup.type": "model.CreateConferenceDateRequest",
         "properties": {
           "conference_id": {"$ref": "#/definitions/uuid"},
-          "dates": {"$ref":"#/definitions/conference_date_array"},
+          "date": {"$ref":"#/definitions/conference_date"},
           "user_id": {"$ref": "#/definitions/uuid"}
         },
-        "required": ["conference_id","dates","user_id"]
-      }
+        "required": ["conference_id","date","user_id"]
+      },
+      "targetSchema": { "$ref": "#/definitions/conference_date" }
     },
     {
-      "title": "Delete conference dates",
+      "title": "Delete conference date",
       "rel": "delete",
       "method": "POST",
-      "href": "/v1/conference/dates/delete",
+      "href": "/v1/conference/date/delete",
       "ecnType": "application/json",
       "schema": {
         "properties": {
           "conference_id": {"$ref": "#/definitions/uuid"},
-          "dates": {
-            "oneOf": [
-              {"$ref":"#/definitions/date_array"},
-              {"$ref":"#/definitions/datestr_array"}
-            ]
-          },
+          "date": {"$ref":"#/definitions/uuid"},
           "user_id": {"$ref": "#/definitions/uuid"}
         },
-        "required": ["conference_id","dates","user_id"]
+        "required": ["conference_id","date","user_id"]
       }
     },
     {
@@ -1167,6 +1160,7 @@
           "status": { "$ref": "#/definitions/conference_status" },
           "sub_title": { "$ref": "#/definitions/string_en" },
           "title": { "$ref": "#/definitions/string_en" },
+          "timezone": {"$ref": "#/definitions/string_en" },
           "user_id": { "$ref": "#/definitions/uuid" }
         },
         "patternProperties": {

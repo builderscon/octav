@@ -4,7 +4,7 @@ package model
 
 import (
 	"encoding/json"
-	"errors"
+	"github.com/pkg/errors"
 
 	"github.com/lestrrat/go-urlenc"
 )
@@ -51,7 +51,7 @@ func (r *LookupConferenceComponentRequest) Populate(m map[string]interface{}) er
 			r.ID = jv.(string)
 			delete(m, "id")
 		default:
-			return ErrInvalidJSONFieldType{Field: "id"}
+			return errors.Wrap(ErrInvalidJSONFieldType{Field: "id"}, "failed to populate fields for LookupConferenceComponentRequest")
 		}
 	}
 	if jv, ok := m["lang"]; ok {
@@ -105,7 +105,7 @@ func (r *LookupSessionTypeRequest) Populate(m map[string]interface{}) error {
 			r.ID = jv.(string)
 			delete(m, "id")
 		default:
-			return ErrInvalidJSONFieldType{Field: "id"}
+			return errors.Wrap(ErrInvalidJSONFieldType{Field: "id"}, "failed to populate fields for LookupSessionTypeRequest")
 		}
 	}
 	if jv, ok := m["lang"]; ok {
@@ -166,7 +166,7 @@ func (r *AddSessionTypeRequest) Populate(m map[string]interface{}) error {
 			r.ConferenceID = jv.(string)
 			delete(m, "conference_id")
 		default:
-			return ErrInvalidJSONFieldType{Field: "conference_id"}
+			return errors.Wrap(ErrInvalidJSONFieldType{Field: "conference_id"}, "failed to populate fields for AddSessionTypeRequest")
 		}
 	}
 	if jv, ok := m["name"]; ok {
@@ -175,7 +175,7 @@ func (r *AddSessionTypeRequest) Populate(m map[string]interface{}) error {
 			r.Name = jv.(string)
 			delete(m, "name")
 		default:
-			return ErrInvalidJSONFieldType{Field: "name"}
+			return errors.Wrap(ErrInvalidJSONFieldType{Field: "name"}, "failed to populate fields for AddSessionTypeRequest")
 		}
 	}
 	if jv, ok := m["abstract"]; ok {
@@ -184,7 +184,7 @@ func (r *AddSessionTypeRequest) Populate(m map[string]interface{}) error {
 			r.Abstract = jv.(string)
 			delete(m, "abstract")
 		default:
-			return ErrInvalidJSONFieldType{Field: "abstract"}
+			return errors.Wrap(ErrInvalidJSONFieldType{Field: "abstract"}, "failed to populate fields for AddSessionTypeRequest")
 		}
 	}
 	if jv, ok := m["duration"]; ok {
@@ -193,7 +193,7 @@ func (r *AddSessionTypeRequest) Populate(m map[string]interface{}) error {
 			r.Duration = int(jv.(float64))
 			delete(m, "duration")
 		default:
-			return ErrInvalidJSONFieldType{Field: "duration"}
+			return errors.Wrap(ErrInvalidJSONFieldType{Field: "duration"}, "failed to populate fields for AddSessionTypeRequest")
 		}
 	}
 	if jv, ok := m["submission_start"]; ok {
@@ -214,7 +214,7 @@ func (r *AddSessionTypeRequest) Populate(m map[string]interface{}) error {
 			r.UserID = jv.(string)
 			delete(m, "user_id")
 		default:
-			return ErrInvalidJSONFieldType{Field: "user_id"}
+			return errors.Wrap(ErrInvalidJSONFieldType{Field: "user_id"}, "failed to populate fields for AddSessionTypeRequest")
 		}
 	}
 	return nil
@@ -260,7 +260,7 @@ func (r *DeleteSessionTypeRequest) Populate(m map[string]interface{}) error {
 			r.ID = jv.(string)
 			delete(m, "id")
 		default:
-			return ErrInvalidJSONFieldType{Field: "id"}
+			return errors.Wrap(ErrInvalidJSONFieldType{Field: "id"}, "failed to populate fields for DeleteSessionTypeRequest")
 		}
 	}
 	if jv, ok := m["user_id"]; ok {
@@ -269,7 +269,7 @@ func (r *DeleteSessionTypeRequest) Populate(m map[string]interface{}) error {
 			r.UserID = jv.(string)
 			delete(m, "user_id")
 		default:
-			return ErrInvalidJSONFieldType{Field: "user_id"}
+			return errors.Wrap(ErrInvalidJSONFieldType{Field: "user_id"}, "failed to populate fields for DeleteSessionTypeRequest")
 		}
 	}
 	return nil
@@ -323,7 +323,7 @@ func (r *ListSessionTypesByConferenceRequest) Populate(m map[string]interface{})
 			r.ConferenceID = jv.(string)
 			delete(m, "conference_id")
 		default:
-			return ErrInvalidJSONFieldType{Field: "conference_id"}
+			return errors.Wrap(ErrInvalidJSONFieldType{Field: "conference_id"}, "failed to populate fields for ListSessionTypesByConferenceRequest")
 		}
 	}
 	if jv, ok := m["since"]; ok {
@@ -402,7 +402,7 @@ func (r *UpdateSessionTypeRequest) Populate(m map[string]interface{}) error {
 			r.ID = jv.(string)
 			delete(m, "id")
 		default:
-			return ErrInvalidJSONFieldType{Field: "id"}
+			return errors.Wrap(ErrInvalidJSONFieldType{Field: "id"}, "failed to populate fields for UpdateSessionTypeRequest")
 		}
 	}
 	if jv, ok := m["name"]; ok {
@@ -441,7 +441,7 @@ func (r *UpdateSessionTypeRequest) Populate(m map[string]interface{}) error {
 			r.UserID = jv.(string)
 			delete(m, "user_id")
 		default:
-			return ErrInvalidJSONFieldType{Field: "user_id"}
+			return errors.Wrap(ErrInvalidJSONFieldType{Field: "user_id"}, "failed to populate fields for UpdateSessionTypeRequest")
 		}
 	}
 	return nil
@@ -489,7 +489,7 @@ func (r *LookupConferenceSeriesRequest) Populate(m map[string]interface{}) error
 			r.ID = jv.(string)
 			delete(m, "id")
 		default:
-			return ErrInvalidJSONFieldType{Field: "id"}
+			return errors.Wrap(ErrInvalidJSONFieldType{Field: "id"}, "failed to populate fields for LookupConferenceSeriesRequest")
 		}
 	}
 	if jv, ok := m["lang"]; ok {
@@ -542,7 +542,7 @@ func (r *CreateConferenceSeriesRequest) Populate(m map[string]interface{}) error
 			r.UserID = jv.(string)
 			delete(m, "user_id")
 		default:
-			return ErrInvalidJSONFieldType{Field: "user_id"}
+			return errors.Wrap(ErrInvalidJSONFieldType{Field: "user_id"}, "failed to populate fields for CreateConferenceSeriesRequest")
 		}
 	}
 	if jv, ok := m["slug"]; ok {
@@ -551,7 +551,7 @@ func (r *CreateConferenceSeriesRequest) Populate(m map[string]interface{}) error
 			r.Slug = jv.(string)
 			delete(m, "slug")
 		default:
-			return ErrInvalidJSONFieldType{Field: "slug"}
+			return errors.Wrap(ErrInvalidJSONFieldType{Field: "slug"}, "failed to populate fields for CreateConferenceSeriesRequest")
 		}
 	}
 	if jv, ok := m["title"]; ok {
@@ -560,7 +560,7 @@ func (r *CreateConferenceSeriesRequest) Populate(m map[string]interface{}) error
 			r.Title = jv.(string)
 			delete(m, "title")
 		default:
-			return ErrInvalidJSONFieldType{Field: "title"}
+			return errors.Wrap(ErrInvalidJSONFieldType{Field: "title"}, "failed to populate fields for CreateConferenceSeriesRequest")
 		}
 	}
 	return nil
@@ -611,7 +611,7 @@ func (r *UpdateConferenceSeriesRequest) Populate(m map[string]interface{}) error
 			r.ID = jv.(string)
 			delete(m, "id")
 		default:
-			return ErrInvalidJSONFieldType{Field: "id"}
+			return errors.Wrap(ErrInvalidJSONFieldType{Field: "id"}, "failed to populate fields for UpdateConferenceSeriesRequest")
 		}
 	}
 	if jv, ok := m["slug"]; ok {
@@ -669,7 +669,7 @@ func (r *DeleteConferenceSeriesRequest) Populate(m map[string]interface{}) error
 			r.ID = jv.(string)
 			delete(m, "id")
 		default:
-			return ErrInvalidJSONFieldType{Field: "id"}
+			return errors.Wrap(ErrInvalidJSONFieldType{Field: "id"}, "failed to populate fields for DeleteConferenceSeriesRequest")
 		}
 	}
 	if jv, ok := m["user_id"]; ok {
@@ -678,7 +678,7 @@ func (r *DeleteConferenceSeriesRequest) Populate(m map[string]interface{}) error
 			r.UserID = jv.(string)
 			delete(m, "user_id")
 		default:
-			return ErrInvalidJSONFieldType{Field: "user_id"}
+			return errors.Wrap(ErrInvalidJSONFieldType{Field: "user_id"}, "failed to populate fields for DeleteConferenceSeriesRequest")
 		}
 	}
 	return nil
@@ -787,7 +787,7 @@ func (r *AddConferenceSeriesAdminRequest) Populate(m map[string]interface{}) err
 			r.SeriesID = jv.(string)
 			delete(m, "series_id")
 		default:
-			return ErrInvalidJSONFieldType{Field: "series_id"}
+			return errors.Wrap(ErrInvalidJSONFieldType{Field: "series_id"}, "failed to populate fields for AddConferenceSeriesAdminRequest")
 		}
 	}
 	if jv, ok := m["admin_id"]; ok {
@@ -796,7 +796,7 @@ func (r *AddConferenceSeriesAdminRequest) Populate(m map[string]interface{}) err
 			r.AdminID = jv.(string)
 			delete(m, "admin_id")
 		default:
-			return ErrInvalidJSONFieldType{Field: "admin_id"}
+			return errors.Wrap(ErrInvalidJSONFieldType{Field: "admin_id"}, "failed to populate fields for AddConferenceSeriesAdminRequest")
 		}
 	}
 	if jv, ok := m["user_id"]; ok {
@@ -805,7 +805,7 @@ func (r *AddConferenceSeriesAdminRequest) Populate(m map[string]interface{}) err
 			r.UserID = jv.(string)
 			delete(m, "user_id")
 		default:
-			return ErrInvalidJSONFieldType{Field: "user_id"}
+			return errors.Wrap(ErrInvalidJSONFieldType{Field: "user_id"}, "failed to populate fields for AddConferenceSeriesAdminRequest")
 		}
 	}
 	return nil
@@ -868,7 +868,7 @@ func (r *CreateConferenceRequest) Populate(m map[string]interface{}) error {
 			r.Title = jv.(string)
 			delete(m, "title")
 		default:
-			return ErrInvalidJSONFieldType{Field: "title"}
+			return errors.Wrap(ErrInvalidJSONFieldType{Field: "title"}, "failed to populate fields for CreateConferenceRequest")
 		}
 	}
 	if jv, ok := m["cfp_lead_text"]; ok {
@@ -901,7 +901,7 @@ func (r *CreateConferenceRequest) Populate(m map[string]interface{}) error {
 			r.SeriesID = jv.(string)
 			delete(m, "series_id")
 		default:
-			return ErrInvalidJSONFieldType{Field: "series_id"}
+			return errors.Wrap(ErrInvalidJSONFieldType{Field: "series_id"}, "failed to populate fields for CreateConferenceRequest")
 		}
 	}
 	if jv, ok := m["sub_title"]; ok {
@@ -916,7 +916,7 @@ func (r *CreateConferenceRequest) Populate(m map[string]interface{}) error {
 			r.Slug = jv.(string)
 			delete(m, "slug")
 		default:
-			return ErrInvalidJSONFieldType{Field: "slug"}
+			return errors.Wrap(ErrInvalidJSONFieldType{Field: "slug"}, "failed to populate fields for CreateConferenceRequest")
 		}
 	}
 	if jv, ok := m["user_id"]; ok {
@@ -925,7 +925,7 @@ func (r *CreateConferenceRequest) Populate(m map[string]interface{}) error {
 			r.UserID = jv.(string)
 			delete(m, "user_id")
 		default:
-			return ErrInvalidJSONFieldType{Field: "user_id"}
+			return errors.Wrap(ErrInvalidJSONFieldType{Field: "user_id"}, "failed to populate fields for CreateConferenceRequest")
 		}
 	}
 	if err := ExtractL10NFields(m, &r.LocalizedFields, []string{"title", "cfp_lead_text", "cfp_pre_submit_instructions", "cfp_post_submit_instructions", "description", "sub_title"}); err != nil {
@@ -1019,7 +1019,7 @@ func (r *LookupConferenceRequest) Populate(m map[string]interface{}) error {
 			r.ID = jv.(string)
 			delete(m, "id")
 		default:
-			return ErrInvalidJSONFieldType{Field: "id"}
+			return errors.Wrap(ErrInvalidJSONFieldType{Field: "id"}, "failed to populate fields for LookupConferenceRequest")
 		}
 	}
 	if jv, ok := m["lang"]; ok {
@@ -1073,7 +1073,7 @@ func (r *LookupConferenceBySlugRequest) Populate(m map[string]interface{}) error
 			r.Slug = jv.(string)
 			delete(m, "slug")
 		default:
-			return ErrInvalidJSONFieldType{Field: "slug"}
+			return errors.Wrap(ErrInvalidJSONFieldType{Field: "slug"}, "failed to populate fields for LookupConferenceBySlugRequest")
 		}
 	}
 	if jv, ok := m["lang"]; ok {
@@ -1115,6 +1115,9 @@ func (r UpdateConferenceRequest) collectMarshalData() map[string]interface{} {
 	if r.Status.Valid() {
 		m["status"] = r.Status.Value()
 	}
+	if r.Timezone.Valid() {
+		m["timezone"] = r.Timezone.Value()
+	}
 	m["user_id"] = r.UserID
 	return m
 }
@@ -1152,7 +1155,7 @@ func (r *UpdateConferenceRequest) Populate(m map[string]interface{}) error {
 			r.ID = jv.(string)
 			delete(m, "id")
 		default:
-			return ErrInvalidJSONFieldType{Field: "id"}
+			return errors.Wrap(ErrInvalidJSONFieldType{Field: "id"}, "failed to populate fields for UpdateConferenceRequest")
 		}
 	}
 	if jv, ok := m["title"]; ok {
@@ -1209,13 +1212,19 @@ func (r *UpdateConferenceRequest) Populate(m map[string]interface{}) error {
 		}
 		delete(m, "status")
 	}
+	if jv, ok := m["timezone"]; ok {
+		if err := r.Timezone.Set(jv); err != nil {
+			return errors.New("set field Timezone failed: " + err.Error())
+		}
+		delete(m, "timezone")
+	}
 	if jv, ok := m["user_id"]; ok {
 		switch jv.(type) {
 		case string:
 			r.UserID = jv.(string)
 			delete(m, "user_id")
 		default:
-			return ErrInvalidJSONFieldType{Field: "user_id"}
+			return errors.Wrap(ErrInvalidJSONFieldType{Field: "user_id"}, "failed to populate fields for UpdateConferenceRequest")
 		}
 	}
 	if err := ExtractL10NFields(m, &r.LocalizedFields, []string{"title", "description", "cfp_lead_text", "cfp_pre_submit_instructions", "cfp_post_submit_instructions", "sub_title"}); err != nil {
@@ -1226,7 +1235,7 @@ func (r *UpdateConferenceRequest) Populate(m map[string]interface{}) error {
 
 func (r *UpdateConferenceRequest) GetPropNames() ([]string, error) {
 	l, _ := r.LocalizedFields.GetPropNames()
-	return append(l, "id", "title", "description", "cfp_lead_text", "cfp_pre_submit_instructions", "cfp_post_submit_instructions", "series_id", "slug", "sub_title", "status", "user_id"), nil
+	return append(l, "id", "title", "description", "cfp_lead_text", "cfp_pre_submit_instructions", "cfp_post_submit_instructions", "series_id", "slug", "sub_title", "status", "timezone", "user_id"), nil
 }
 
 func (r *UpdateConferenceRequest) SetPropValue(s string, v interface{}) error {
@@ -1254,6 +1263,8 @@ func (r *UpdateConferenceRequest) SetPropValue(s string, v interface{}) error {
 		return r.SubTitle.Set(v)
 	case "status":
 		return r.Status.Set(v)
+	case "timezone":
+		return r.Timezone.Set(v)
 	case "user_id":
 		if jv, ok := v.(string); ok {
 			r.UserID = jv
@@ -1265,15 +1276,15 @@ func (r *UpdateConferenceRequest) SetPropValue(s string, v interface{}) error {
 	return ErrInvalidFieldType{Field: s}
 }
 
-func (r AddConferenceDatesRequest) collectMarshalData() map[string]interface{} {
+func (r CreateConferenceDateRequest) collectMarshalData() map[string]interface{} {
 	m := make(map[string]interface{})
 	m["conference_id"] = r.ConferenceID
-	m["dates"] = r.Dates
+	m["date"] = r.Date
 	m["user_id"] = r.UserID
 	return m
 }
 
-func (r AddConferenceDatesRequest) MarshalJSON() ([]byte, error) {
+func (r CreateConferenceDateRequest) MarshalJSON() ([]byte, error) {
 	m := r.collectMarshalData()
 	buf, err := json.Marshal(m)
 	if err != nil {
@@ -1282,7 +1293,7 @@ func (r AddConferenceDatesRequest) MarshalJSON() ([]byte, error) {
 	return buf, nil
 }
 
-func (r AddConferenceDatesRequest) MarshalURL() ([]byte, error) {
+func (r CreateConferenceDateRequest) MarshalURL() ([]byte, error) {
 	m := r.collectMarshalData()
 	buf, err := urlenc.Marshal(m)
 	if err != nil {
@@ -1291,7 +1302,7 @@ func (r AddConferenceDatesRequest) MarshalURL() ([]byte, error) {
 	return buf, nil
 }
 
-func (r *AddConferenceDatesRequest) UnmarshalJSON(data []byte) error {
+func (r *CreateConferenceDateRequest) UnmarshalJSON(data []byte) error {
 	m := make(map[string]interface{})
 	if err := json.Unmarshal(data, &m); err != nil {
 		return err
@@ -1299,21 +1310,21 @@ func (r *AddConferenceDatesRequest) UnmarshalJSON(data []byte) error {
 	return r.Populate(m)
 }
 
-func (r *AddConferenceDatesRequest) Populate(m map[string]interface{}) error {
+func (r *CreateConferenceDateRequest) Populate(m map[string]interface{}) error {
 	if jv, ok := m["conference_id"]; ok {
 		switch jv.(type) {
 		case string:
 			r.ConferenceID = jv.(string)
 			delete(m, "conference_id")
 		default:
-			return ErrInvalidJSONFieldType{Field: "conference_id"}
+			return errors.Wrap(ErrInvalidJSONFieldType{Field: "conference_id"}, "failed to populate fields for CreateConferenceDateRequest")
 		}
 	}
-	if jv, ok := m["dates"]; ok {
-		if err := r.Dates.Extract(jv); err != nil {
-			return errors.New("extract field Dates failed: " + err.Error())
+	if jv, ok := m["date"]; ok {
+		if err := r.Date.Extract(jv); err != nil {
+			return errors.New("extract field Date failed: " + err.Error())
 		}
-		delete(m, "dates")
+		delete(m, "date")
 	}
 	if jv, ok := m["user_id"]; ok {
 		switch jv.(type) {
@@ -1321,7 +1332,7 @@ func (r *AddConferenceDatesRequest) Populate(m map[string]interface{}) error {
 			r.UserID = jv.(string)
 			delete(m, "user_id")
 		default:
-			return ErrInvalidJSONFieldType{Field: "user_id"}
+			return errors.Wrap(ErrInvalidJSONFieldType{Field: "user_id"}, "failed to populate fields for CreateConferenceDateRequest")
 		}
 	}
 	return nil
@@ -1368,7 +1379,7 @@ func (r *AddConferenceAdminRequest) Populate(m map[string]interface{}) error {
 			r.ConferenceID = jv.(string)
 			delete(m, "conference_id")
 		default:
-			return ErrInvalidJSONFieldType{Field: "conference_id"}
+			return errors.Wrap(ErrInvalidJSONFieldType{Field: "conference_id"}, "failed to populate fields for AddConferenceAdminRequest")
 		}
 	}
 	if jv, ok := m["admin_id"]; ok {
@@ -1377,7 +1388,7 @@ func (r *AddConferenceAdminRequest) Populate(m map[string]interface{}) error {
 			r.AdminID = jv.(string)
 			delete(m, "admin_id")
 		default:
-			return ErrInvalidJSONFieldType{Field: "admin_id"}
+			return errors.Wrap(ErrInvalidJSONFieldType{Field: "admin_id"}, "failed to populate fields for AddConferenceAdminRequest")
 		}
 	}
 	if jv, ok := m["user_id"]; ok {
@@ -1386,7 +1397,7 @@ func (r *AddConferenceAdminRequest) Populate(m map[string]interface{}) error {
 			r.UserID = jv.(string)
 			delete(m, "user_id")
 		default:
-			return ErrInvalidJSONFieldType{Field: "user_id"}
+			return errors.Wrap(ErrInvalidJSONFieldType{Field: "user_id"}, "failed to populate fields for AddConferenceAdminRequest")
 		}
 	}
 	return nil
@@ -1433,7 +1444,7 @@ func (r *AddConferenceVenueRequest) Populate(m map[string]interface{}) error {
 			r.ConferenceID = jv.(string)
 			delete(m, "conference_id")
 		default:
-			return ErrInvalidJSONFieldType{Field: "conference_id"}
+			return errors.Wrap(ErrInvalidJSONFieldType{Field: "conference_id"}, "failed to populate fields for AddConferenceVenueRequest")
 		}
 	}
 	if jv, ok := m["venue_id"]; ok {
@@ -1442,7 +1453,7 @@ func (r *AddConferenceVenueRequest) Populate(m map[string]interface{}) error {
 			r.VenueID = jv.(string)
 			delete(m, "venue_id")
 		default:
-			return ErrInvalidJSONFieldType{Field: "venue_id"}
+			return errors.Wrap(ErrInvalidJSONFieldType{Field: "venue_id"}, "failed to populate fields for AddConferenceVenueRequest")
 		}
 	}
 	if jv, ok := m["user_id"]; ok {
@@ -1451,21 +1462,21 @@ func (r *AddConferenceVenueRequest) Populate(m map[string]interface{}) error {
 			r.UserID = jv.(string)
 			delete(m, "user_id")
 		default:
-			return ErrInvalidJSONFieldType{Field: "user_id"}
+			return errors.Wrap(ErrInvalidJSONFieldType{Field: "user_id"}, "failed to populate fields for AddConferenceVenueRequest")
 		}
 	}
 	return nil
 }
 
-func (r DeleteConferenceDatesRequest) collectMarshalData() map[string]interface{} {
+func (r DeleteConferenceDateRequest) collectMarshalData() map[string]interface{} {
 	m := make(map[string]interface{})
 	m["conference_id"] = r.ConferenceID
-	m["dates"] = r.Dates
+	m["date"] = r.Date
 	m["user_id"] = r.UserID
 	return m
 }
 
-func (r DeleteConferenceDatesRequest) MarshalJSON() ([]byte, error) {
+func (r DeleteConferenceDateRequest) MarshalJSON() ([]byte, error) {
 	m := r.collectMarshalData()
 	buf, err := json.Marshal(m)
 	if err != nil {
@@ -1474,7 +1485,7 @@ func (r DeleteConferenceDatesRequest) MarshalJSON() ([]byte, error) {
 	return buf, nil
 }
 
-func (r DeleteConferenceDatesRequest) MarshalURL() ([]byte, error) {
+func (r DeleteConferenceDateRequest) MarshalURL() ([]byte, error) {
 	m := r.collectMarshalData()
 	buf, err := urlenc.Marshal(m)
 	if err != nil {
@@ -1483,7 +1494,7 @@ func (r DeleteConferenceDatesRequest) MarshalURL() ([]byte, error) {
 	return buf, nil
 }
 
-func (r *DeleteConferenceDatesRequest) UnmarshalJSON(data []byte) error {
+func (r *DeleteConferenceDateRequest) UnmarshalJSON(data []byte) error {
 	m := make(map[string]interface{})
 	if err := json.Unmarshal(data, &m); err != nil {
 		return err
@@ -1491,21 +1502,24 @@ func (r *DeleteConferenceDatesRequest) UnmarshalJSON(data []byte) error {
 	return r.Populate(m)
 }
 
-func (r *DeleteConferenceDatesRequest) Populate(m map[string]interface{}) error {
+func (r *DeleteConferenceDateRequest) Populate(m map[string]interface{}) error {
 	if jv, ok := m["conference_id"]; ok {
 		switch jv.(type) {
 		case string:
 			r.ConferenceID = jv.(string)
 			delete(m, "conference_id")
 		default:
-			return ErrInvalidJSONFieldType{Field: "conference_id"}
+			return errors.Wrap(ErrInvalidJSONFieldType{Field: "conference_id"}, "failed to populate fields for DeleteConferenceDateRequest")
 		}
 	}
-	if jv, ok := m["dates"]; ok {
-		if err := r.Dates.Extract(jv); err != nil {
-			return errors.New("extract field Dates failed: " + err.Error())
+	if jv, ok := m["date"]; ok {
+		switch jv.(type) {
+		case string:
+			r.Date = jv.(string)
+			delete(m, "date")
+		default:
+			return errors.Wrap(ErrInvalidJSONFieldType{Field: "date"}, "failed to populate fields for DeleteConferenceDateRequest")
 		}
-		delete(m, "dates")
 	}
 	if jv, ok := m["user_id"]; ok {
 		switch jv.(type) {
@@ -1513,7 +1527,7 @@ func (r *DeleteConferenceDatesRequest) Populate(m map[string]interface{}) error 
 			r.UserID = jv.(string)
 			delete(m, "user_id")
 		default:
-			return ErrInvalidJSONFieldType{Field: "user_id"}
+			return errors.Wrap(ErrInvalidJSONFieldType{Field: "user_id"}, "failed to populate fields for DeleteConferenceDateRequest")
 		}
 	}
 	return nil
@@ -1560,7 +1574,7 @@ func (r *DeleteConferenceAdminRequest) Populate(m map[string]interface{}) error 
 			r.ConferenceID = jv.(string)
 			delete(m, "conference_id")
 		default:
-			return ErrInvalidJSONFieldType{Field: "conference_id"}
+			return errors.Wrap(ErrInvalidJSONFieldType{Field: "conference_id"}, "failed to populate fields for DeleteConferenceAdminRequest")
 		}
 	}
 	if jv, ok := m["admin_id"]; ok {
@@ -1569,7 +1583,7 @@ func (r *DeleteConferenceAdminRequest) Populate(m map[string]interface{}) error 
 			r.AdminID = jv.(string)
 			delete(m, "admin_id")
 		default:
-			return ErrInvalidJSONFieldType{Field: "admin_id"}
+			return errors.Wrap(ErrInvalidJSONFieldType{Field: "admin_id"}, "failed to populate fields for DeleteConferenceAdminRequest")
 		}
 	}
 	if jv, ok := m["user_id"]; ok {
@@ -1578,7 +1592,7 @@ func (r *DeleteConferenceAdminRequest) Populate(m map[string]interface{}) error 
 			r.UserID = jv.(string)
 			delete(m, "user_id")
 		default:
-			return ErrInvalidJSONFieldType{Field: "user_id"}
+			return errors.Wrap(ErrInvalidJSONFieldType{Field: "user_id"}, "failed to populate fields for DeleteConferenceAdminRequest")
 		}
 	}
 	return nil
@@ -1625,7 +1639,7 @@ func (r *DeleteConferenceVenueRequest) Populate(m map[string]interface{}) error 
 			r.ConferenceID = jv.(string)
 			delete(m, "conference_id")
 		default:
-			return ErrInvalidJSONFieldType{Field: "conference_id"}
+			return errors.Wrap(ErrInvalidJSONFieldType{Field: "conference_id"}, "failed to populate fields for DeleteConferenceVenueRequest")
 		}
 	}
 	if jv, ok := m["venue_id"]; ok {
@@ -1634,7 +1648,7 @@ func (r *DeleteConferenceVenueRequest) Populate(m map[string]interface{}) error 
 			r.VenueID = jv.(string)
 			delete(m, "venue_id")
 		default:
-			return ErrInvalidJSONFieldType{Field: "venue_id"}
+			return errors.Wrap(ErrInvalidJSONFieldType{Field: "venue_id"}, "failed to populate fields for DeleteConferenceVenueRequest")
 		}
 	}
 	if jv, ok := m["user_id"]; ok {
@@ -1643,7 +1657,7 @@ func (r *DeleteConferenceVenueRequest) Populate(m map[string]interface{}) error 
 			r.UserID = jv.(string)
 			delete(m, "user_id")
 		default:
-			return ErrInvalidJSONFieldType{Field: "user_id"}
+			return errors.Wrap(ErrInvalidJSONFieldType{Field: "user_id"}, "failed to populate fields for DeleteConferenceVenueRequest")
 		}
 	}
 	return nil
@@ -1689,7 +1703,7 @@ func (r *DeleteConferenceRequest) Populate(m map[string]interface{}) error {
 			r.ID = jv.(string)
 			delete(m, "id")
 		default:
-			return ErrInvalidJSONFieldType{Field: "id"}
+			return errors.Wrap(ErrInvalidJSONFieldType{Field: "id"}, "failed to populate fields for DeleteConferenceRequest")
 		}
 	}
 	if jv, ok := m["user_id"]; ok {
@@ -1698,7 +1712,7 @@ func (r *DeleteConferenceRequest) Populate(m map[string]interface{}) error {
 			r.UserID = jv.(string)
 			delete(m, "user_id")
 		default:
-			return ErrInvalidJSONFieldType{Field: "user_id"}
+			return errors.Wrap(ErrInvalidJSONFieldType{Field: "user_id"}, "failed to populate fields for DeleteConferenceRequest")
 		}
 	}
 	return nil
@@ -1744,7 +1758,7 @@ func (r *AddVenueRoomRequest) Populate(m map[string]interface{}) error {
 			r.VenueID = jv.(string)
 			delete(m, "venue_id")
 		default:
-			return ErrInvalidJSONFieldType{Field: "venue_id"}
+			return errors.Wrap(ErrInvalidJSONFieldType{Field: "venue_id"}, "failed to populate fields for AddVenueRoomRequest")
 		}
 	}
 	if jv, ok := m["room_id"]; ok {
@@ -1753,7 +1767,7 @@ func (r *AddVenueRoomRequest) Populate(m map[string]interface{}) error {
 			r.RoomID = jv.(string)
 			delete(m, "room_id")
 		default:
-			return ErrInvalidJSONFieldType{Field: "room_id"}
+			return errors.Wrap(ErrInvalidJSONFieldType{Field: "room_id"}, "failed to populate fields for AddVenueRoomRequest")
 		}
 	}
 	return nil
@@ -1799,7 +1813,7 @@ func (r *DeleteVenueRoomRequest) Populate(m map[string]interface{}) error {
 			r.VenueID = jv.(string)
 			delete(m, "venue_id")
 		default:
-			return ErrInvalidJSONFieldType{Field: "venue_id"}
+			return errors.Wrap(ErrInvalidJSONFieldType{Field: "venue_id"}, "failed to populate fields for DeleteVenueRoomRequest")
 		}
 	}
 	if jv, ok := m["room_id"]; ok {
@@ -1808,7 +1822,7 @@ func (r *DeleteVenueRoomRequest) Populate(m map[string]interface{}) error {
 			r.RoomID = jv.(string)
 			delete(m, "room_id")
 		default:
-			return ErrInvalidJSONFieldType{Field: "room_id"}
+			return errors.Wrap(ErrInvalidJSONFieldType{Field: "room_id"}, "failed to populate fields for DeleteVenueRoomRequest")
 		}
 	}
 	return nil
@@ -1969,7 +1983,7 @@ func (r *CreateRoomRequest) Populate(m map[string]interface{}) error {
 			r.UserID = jv.(string)
 			delete(m, "user_id")
 		default:
-			return ErrInvalidJSONFieldType{Field: "user_id"}
+			return errors.Wrap(ErrInvalidJSONFieldType{Field: "user_id"}, "failed to populate fields for CreateRoomRequest")
 		}
 	}
 	if err := ExtractL10NFields(m, &r.LocalizedFields, []string{"name"}); err != nil {
@@ -2044,7 +2058,7 @@ func (r *LookupRoomRequest) Populate(m map[string]interface{}) error {
 			r.ID = jv.(string)
 			delete(m, "id")
 		default:
-			return ErrInvalidJSONFieldType{Field: "id"}
+			return errors.Wrap(ErrInvalidJSONFieldType{Field: "id"}, "failed to populate fields for LookupRoomRequest")
 		}
 	}
 	if jv, ok := m["lang"]; ok {
@@ -2105,7 +2119,7 @@ func (r *UpdateRoomRequest) Populate(m map[string]interface{}) error {
 			r.ID = jv.(string)
 			delete(m, "id")
 		default:
-			return ErrInvalidJSONFieldType{Field: "id"}
+			return errors.Wrap(ErrInvalidJSONFieldType{Field: "id"}, "failed to populate fields for UpdateRoomRequest")
 		}
 	}
 	if jv, ok := m["venue_id"]; ok {
@@ -2132,7 +2146,7 @@ func (r *UpdateRoomRequest) Populate(m map[string]interface{}) error {
 			r.UserID = jv.(string)
 			delete(m, "user_id")
 		default:
-			return ErrInvalidJSONFieldType{Field: "user_id"}
+			return errors.Wrap(ErrInvalidJSONFieldType{Field: "user_id"}, "failed to populate fields for UpdateRoomRequest")
 		}
 	}
 	if err := ExtractL10NFields(m, &r.LocalizedFields, []string{"name"}); err != nil {
@@ -2210,7 +2224,7 @@ func (r *DeleteRoomRequest) Populate(m map[string]interface{}) error {
 			r.ID = jv.(string)
 			delete(m, "id")
 		default:
-			return ErrInvalidJSONFieldType{Field: "id"}
+			return errors.Wrap(ErrInvalidJSONFieldType{Field: "id"}, "failed to populate fields for DeleteRoomRequest")
 		}
 	}
 	if jv, ok := m["user_id"]; ok {
@@ -2219,7 +2233,7 @@ func (r *DeleteRoomRequest) Populate(m map[string]interface{}) error {
 			r.UserID = jv.(string)
 			delete(m, "user_id")
 		default:
-			return ErrInvalidJSONFieldType{Field: "user_id"}
+			return errors.Wrap(ErrInvalidJSONFieldType{Field: "user_id"}, "failed to populate fields for DeleteRoomRequest")
 		}
 	}
 	return nil
@@ -2273,7 +2287,7 @@ func (r *ListRoomRequest) Populate(m map[string]interface{}) error {
 			r.VenueID = jv.(string)
 			delete(m, "venue_id")
 		default:
-			return ErrInvalidJSONFieldType{Field: "venue_id"}
+			return errors.Wrap(ErrInvalidJSONFieldType{Field: "venue_id"}, "failed to populate fields for ListRoomRequest")
 		}
 	}
 	if jv, ok := m["since"]; ok {
@@ -2383,7 +2397,7 @@ func (r *CreateSessionRequest) Populate(m map[string]interface{}) error {
 			r.ConferenceID = jv.(string)
 			delete(m, "conference_id")
 		default:
-			return ErrInvalidJSONFieldType{Field: "conference_id"}
+			return errors.Wrap(ErrInvalidJSONFieldType{Field: "conference_id"}, "failed to populate fields for CreateSessionRequest")
 		}
 	}
 	if jv, ok := m["speaker_id"]; ok {
@@ -2398,7 +2412,7 @@ func (r *CreateSessionRequest) Populate(m map[string]interface{}) error {
 			r.SessionTypeID = jv.(string)
 			delete(m, "session_type_id")
 		default:
-			return ErrInvalidJSONFieldType{Field: "session_type_id"}
+			return errors.Wrap(ErrInvalidJSONFieldType{Field: "session_type_id"}, "failed to populate fields for CreateSessionRequest")
 		}
 	}
 	if jv, ok := m["title"]; ok {
@@ -2491,7 +2505,7 @@ func (r *CreateSessionRequest) Populate(m map[string]interface{}) error {
 			r.UserID = jv.(string)
 			delete(m, "user_id")
 		default:
-			return ErrInvalidJSONFieldType{Field: "user_id"}
+			return errors.Wrap(ErrInvalidJSONFieldType{Field: "user_id"}, "failed to populate fields for CreateSessionRequest")
 		}
 	}
 	if err := ExtractL10NFields(m, &r.LocalizedFields, []string{"title", "abstract"}); err != nil {
@@ -2600,7 +2614,7 @@ func (r *LookupSessionRequest) Populate(m map[string]interface{}) error {
 			r.ID = jv.(string)
 			delete(m, "id")
 		default:
-			return ErrInvalidJSONFieldType{Field: "id"}
+			return errors.Wrap(ErrInvalidJSONFieldType{Field: "id"}, "failed to populate fields for LookupSessionRequest")
 		}
 	}
 	if jv, ok := m["lang"]; ok {
@@ -2721,7 +2735,7 @@ func (r *UpdateSessionRequest) Populate(m map[string]interface{}) error {
 			r.ID = jv.(string)
 			delete(m, "id")
 		default:
-			return ErrInvalidJSONFieldType{Field: "id"}
+			return errors.Wrap(ErrInvalidJSONFieldType{Field: "id"}, "failed to populate fields for UpdateSessionRequest")
 		}
 	}
 	if jv, ok := m["conference_id"]; ok {
@@ -2868,7 +2882,7 @@ func (r *UpdateSessionRequest) Populate(m map[string]interface{}) error {
 			r.UserID = jv.(string)
 			delete(m, "user_id")
 		default:
-			return ErrInvalidJSONFieldType{Field: "user_id"}
+			return errors.Wrap(ErrInvalidJSONFieldType{Field: "user_id"}, "failed to populate fields for UpdateSessionRequest")
 		}
 	}
 	if err := ExtractL10NFields(m, &r.LocalizedFields, []string{"title", "abstract"}); err != nil {
@@ -2986,7 +3000,7 @@ func (r *DeleteSessionRequest) Populate(m map[string]interface{}) error {
 			r.ID = jv.(string)
 			delete(m, "id")
 		default:
-			return ErrInvalidJSONFieldType{Field: "id"}
+			return errors.Wrap(ErrInvalidJSONFieldType{Field: "id"}, "failed to populate fields for DeleteSessionRequest")
 		}
 	}
 	if jv, ok := m["user_id"]; ok {
@@ -2995,7 +3009,7 @@ func (r *DeleteSessionRequest) Populate(m map[string]interface{}) error {
 			r.UserID = jv.(string)
 			delete(m, "user_id")
 		default:
-			return ErrInvalidJSONFieldType{Field: "user_id"}
+			return errors.Wrap(ErrInvalidJSONFieldType{Field: "user_id"}, "failed to populate fields for DeleteSessionRequest")
 		}
 	}
 	return nil
@@ -3069,7 +3083,7 @@ func (r *CreateUserRequest) Populate(m map[string]interface{}) error {
 			r.Nickname = jv.(string)
 			delete(m, "nickname")
 		default:
-			return ErrInvalidJSONFieldType{Field: "nickname"}
+			return errors.Wrap(ErrInvalidJSONFieldType{Field: "nickname"}, "failed to populate fields for CreateUserRequest")
 		}
 	}
 	if jv, ok := m["email"]; ok {
@@ -3084,7 +3098,7 @@ func (r *CreateUserRequest) Populate(m map[string]interface{}) error {
 			r.AuthVia = jv.(string)
 			delete(m, "auth_via")
 		default:
-			return ErrInvalidJSONFieldType{Field: "auth_via"}
+			return errors.Wrap(ErrInvalidJSONFieldType{Field: "auth_via"}, "failed to populate fields for CreateUserRequest")
 		}
 	}
 	if jv, ok := m["auth_user_id"]; ok {
@@ -3093,7 +3107,7 @@ func (r *CreateUserRequest) Populate(m map[string]interface{}) error {
 			r.AuthUserID = jv.(string)
 			delete(m, "auth_user_id")
 		default:
-			return ErrInvalidJSONFieldType{Field: "auth_user_id"}
+			return errors.Wrap(ErrInvalidJSONFieldType{Field: "auth_user_id"}, "failed to populate fields for CreateUserRequest")
 		}
 	}
 	if jv, ok := m["avatar_url"]; ok {
@@ -3216,7 +3230,7 @@ func (r *UpdateUserRequest) Populate(m map[string]interface{}) error {
 			r.ID = jv.(string)
 			delete(m, "id")
 		default:
-			return ErrInvalidJSONFieldType{Field: "id"}
+			return errors.Wrap(ErrInvalidJSONFieldType{Field: "id"}, "failed to populate fields for UpdateUserRequest")
 		}
 	}
 	if jv, ok := m["first_name"]; ok {
@@ -3273,7 +3287,7 @@ func (r *UpdateUserRequest) Populate(m map[string]interface{}) error {
 			r.UserID = jv.(string)
 			delete(m, "user_id")
 		default:
-			return ErrInvalidJSONFieldType{Field: "user_id"}
+			return errors.Wrap(ErrInvalidJSONFieldType{Field: "user_id"}, "failed to populate fields for UpdateUserRequest")
 		}
 	}
 	if err := ExtractL10NFields(m, &r.LocalizedFields, []string{"first_name", "last_name"}); err != nil {
@@ -3363,7 +3377,7 @@ func (r *LookupUserRequest) Populate(m map[string]interface{}) error {
 			r.ID = jv.(string)
 			delete(m, "id")
 		default:
-			return ErrInvalidJSONFieldType{Field: "id"}
+			return errors.Wrap(ErrInvalidJSONFieldType{Field: "id"}, "failed to populate fields for LookupUserRequest")
 		}
 	}
 	if jv, ok := m["lang"]; ok {
@@ -3418,7 +3432,7 @@ func (r *LookupUserByAuthUserIDRequest) Populate(m map[string]interface{}) error
 			r.AuthVia = jv.(string)
 			delete(m, "auth_via")
 		default:
-			return ErrInvalidJSONFieldType{Field: "auth_via"}
+			return errors.Wrap(ErrInvalidJSONFieldType{Field: "auth_via"}, "failed to populate fields for LookupUserByAuthUserIDRequest")
 		}
 	}
 	if jv, ok := m["auth_user_id"]; ok {
@@ -3427,7 +3441,7 @@ func (r *LookupUserByAuthUserIDRequest) Populate(m map[string]interface{}) error
 			r.AuthUserID = jv.(string)
 			delete(m, "auth_user_id")
 		default:
-			return ErrInvalidJSONFieldType{Field: "auth_user_id"}
+			return errors.Wrap(ErrInvalidJSONFieldType{Field: "auth_user_id"}, "failed to populate fields for LookupUserByAuthUserIDRequest")
 		}
 	}
 	if jv, ok := m["lang"]; ok {
@@ -3479,7 +3493,7 @@ func (r *DeleteUserRequest) Populate(m map[string]interface{}) error {
 			r.ID = jv.(string)
 			delete(m, "id")
 		default:
-			return ErrInvalidJSONFieldType{Field: "id"}
+			return errors.Wrap(ErrInvalidJSONFieldType{Field: "id"}, "failed to populate fields for DeleteUserRequest")
 		}
 	}
 	if jv, ok := m["user_id"]; ok {
@@ -3488,7 +3502,7 @@ func (r *DeleteUserRequest) Populate(m map[string]interface{}) error {
 			r.UserID = jv.(string)
 			delete(m, "user_id")
 		default:
-			return ErrInvalidJSONFieldType{Field: "user_id"}
+			return errors.Wrap(ErrInvalidJSONFieldType{Field: "user_id"}, "failed to populate fields for DeleteUserRequest")
 		}
 	}
 	return nil
@@ -3631,7 +3645,7 @@ func (r *CreateVenueRequest) Populate(m map[string]interface{}) error {
 			r.UserID = jv.(string)
 			delete(m, "user_id")
 		default:
-			return ErrInvalidJSONFieldType{Field: "user_id"}
+			return errors.Wrap(ErrInvalidJSONFieldType{Field: "user_id"}, "failed to populate fields for CreateVenueRequest")
 		}
 	}
 	if err := ExtractL10NFields(m, &r.LocalizedFields, []string{"name", "address"}); err != nil {
@@ -3718,7 +3732,7 @@ func (r *UpdateVenueRequest) Populate(m map[string]interface{}) error {
 			r.ID = jv.(string)
 			delete(m, "id")
 		default:
-			return ErrInvalidJSONFieldType{Field: "id"}
+			return errors.Wrap(ErrInvalidJSONFieldType{Field: "id"}, "failed to populate fields for UpdateVenueRequest")
 		}
 	}
 	if jv, ok := m["name"]; ok {
@@ -3751,7 +3765,7 @@ func (r *UpdateVenueRequest) Populate(m map[string]interface{}) error {
 			r.UserID = jv.(string)
 			delete(m, "user_id")
 		default:
-			return ErrInvalidJSONFieldType{Field: "user_id"}
+			return errors.Wrap(ErrInvalidJSONFieldType{Field: "user_id"}, "failed to populate fields for UpdateVenueRequest")
 		}
 	}
 	if err := ExtractL10NFields(m, &r.LocalizedFields, []string{"name", "address"}); err != nil {
@@ -3831,7 +3845,7 @@ func (r *DeleteVenueRequest) Populate(m map[string]interface{}) error {
 			r.ID = jv.(string)
 			delete(m, "id")
 		default:
-			return ErrInvalidJSONFieldType{Field: "id"}
+			return errors.Wrap(ErrInvalidJSONFieldType{Field: "id"}, "failed to populate fields for DeleteVenueRequest")
 		}
 	}
 	if jv, ok := m["user_id"]; ok {
@@ -3840,7 +3854,7 @@ func (r *DeleteVenueRequest) Populate(m map[string]interface{}) error {
 			r.UserID = jv.(string)
 			delete(m, "user_id")
 		default:
-			return ErrInvalidJSONFieldType{Field: "user_id"}
+			return errors.Wrap(ErrInvalidJSONFieldType{Field: "user_id"}, "failed to populate fields for DeleteVenueRequest")
 		}
 	}
 	return nil
@@ -3950,7 +3964,7 @@ func (r *LookupVenueRequest) Populate(m map[string]interface{}) error {
 			r.ID = jv.(string)
 			delete(m, "id")
 		default:
-			return ErrInvalidJSONFieldType{Field: "id"}
+			return errors.Wrap(ErrInvalidJSONFieldType{Field: "id"}, "failed to populate fields for LookupVenueRequest")
 		}
 	}
 	if jv, ok := m["lang"]; ok {
@@ -4029,12 +4043,12 @@ func (r *ListSessionsRequest) Populate(m map[string]interface{}) error {
 				case string:
 					list[i] = el.(string)
 				default:
-					return ErrInvalidJSONFieldType{Field: "status"}
+					return errors.Wrap(ErrInvalidJSONFieldType{Field: "status"}, "failed to populate fields for ListSessionsRequest")
 				}
 			}
 			r.Status = list
 		default:
-			return ErrInvalidJSONFieldType{Field: "status"}
+			return errors.Wrap(ErrInvalidJSONFieldType{Field: "status"}, "failed to populate fields for ListSessionsRequest")
 		}
 	}
 	if jv, ok := m["date"]; ok {
@@ -4091,7 +4105,7 @@ func (r *LookupQuestionRequest) Populate(m map[string]interface{}) error {
 			r.ID = jv.(string)
 			delete(m, "id")
 		default:
-			return ErrInvalidJSONFieldType{Field: "id"}
+			return errors.Wrap(ErrInvalidJSONFieldType{Field: "id"}, "failed to populate fields for LookupQuestionRequest")
 		}
 	}
 	return nil
@@ -4138,7 +4152,7 @@ func (r *CreateQuestionRequest) Populate(m map[string]interface{}) error {
 			r.SessionID = jv.(string)
 			delete(m, "session_id")
 		default:
-			return ErrInvalidJSONFieldType{Field: "session_id"}
+			return errors.Wrap(ErrInvalidJSONFieldType{Field: "session_id"}, "failed to populate fields for CreateQuestionRequest")
 		}
 	}
 	if jv, ok := m["user_id"]; ok {
@@ -4147,7 +4161,7 @@ func (r *CreateQuestionRequest) Populate(m map[string]interface{}) error {
 			r.UserID = jv.(string)
 			delete(m, "user_id")
 		default:
-			return ErrInvalidJSONFieldType{Field: "user_id"}
+			return errors.Wrap(ErrInvalidJSONFieldType{Field: "user_id"}, "failed to populate fields for CreateQuestionRequest")
 		}
 	}
 	if jv, ok := m["body"]; ok {
@@ -4156,7 +4170,7 @@ func (r *CreateQuestionRequest) Populate(m map[string]interface{}) error {
 			r.Body = jv.(string)
 			delete(m, "body")
 		default:
-			return ErrInvalidJSONFieldType{Field: "body"}
+			return errors.Wrap(ErrInvalidJSONFieldType{Field: "body"}, "failed to populate fields for CreateQuestionRequest")
 		}
 	}
 	return nil
@@ -4210,7 +4224,7 @@ func (r *UpdateQuestionRequest) Populate(m map[string]interface{}) error {
 			r.ID = jv.(string)
 			delete(m, "id")
 		default:
-			return ErrInvalidJSONFieldType{Field: "id"}
+			return errors.Wrap(ErrInvalidJSONFieldType{Field: "id"}, "failed to populate fields for UpdateQuestionRequest")
 		}
 	}
 	if jv, ok := m["session_id"]; ok {
@@ -4273,7 +4287,7 @@ func (r *DeleteQuestionRequest) Populate(m map[string]interface{}) error {
 			r.ID = jv.(string)
 			delete(m, "id")
 		default:
-			return ErrInvalidJSONFieldType{Field: "id"}
+			return errors.Wrap(ErrInvalidJSONFieldType{Field: "id"}, "failed to populate fields for DeleteQuestionRequest")
 		}
 	}
 	return nil
@@ -4407,7 +4421,7 @@ func (r *CreateSessionSurveyResponseRequest) Populate(m map[string]interface{}) 
 			r.UserPriorKnowledge = int(jv.(float64))
 			delete(m, "user_prior_knowledge")
 		default:
-			return ErrInvalidJSONFieldType{Field: "user_prior_knowledge"}
+			return errors.Wrap(ErrInvalidJSONFieldType{Field: "user_prior_knowledge"}, "failed to populate fields for CreateSessionSurveyResponseRequest")
 		}
 	}
 	if jv, ok := m["speaker_knowledge"]; ok {
@@ -4416,7 +4430,7 @@ func (r *CreateSessionSurveyResponseRequest) Populate(m map[string]interface{}) 
 			r.SpeakerKnowledge = int(jv.(float64))
 			delete(m, "speaker_knowledge")
 		default:
-			return ErrInvalidJSONFieldType{Field: "speaker_knowledge"}
+			return errors.Wrap(ErrInvalidJSONFieldType{Field: "speaker_knowledge"}, "failed to populate fields for CreateSessionSurveyResponseRequest")
 		}
 	}
 	if jv, ok := m["material_quality"]; ok {
@@ -4425,7 +4439,7 @@ func (r *CreateSessionSurveyResponseRequest) Populate(m map[string]interface{}) 
 			r.MaterialQuality = int(jv.(float64))
 			delete(m, "material_quality")
 		default:
-			return ErrInvalidJSONFieldType{Field: "material_quality"}
+			return errors.Wrap(ErrInvalidJSONFieldType{Field: "material_quality"}, "failed to populate fields for CreateSessionSurveyResponseRequest")
 		}
 	}
 	if jv, ok := m["overall_rating"]; ok {
@@ -4434,7 +4448,7 @@ func (r *CreateSessionSurveyResponseRequest) Populate(m map[string]interface{}) 
 			r.OverallRating = int(jv.(float64))
 			delete(m, "overall_rating")
 		default:
-			return ErrInvalidJSONFieldType{Field: "overall_rating"}
+			return errors.Wrap(ErrInvalidJSONFieldType{Field: "overall_rating"}, "failed to populate fields for CreateSessionSurveyResponseRequest")
 		}
 	}
 	if jv, ok := m["comment_good"]; ok {
@@ -4492,7 +4506,7 @@ func (r *CreateClientRequest) Populate(m map[string]interface{}) error {
 			r.ID = jv.(string)
 			delete(m, "id")
 		default:
-			return ErrInvalidJSONFieldType{Field: "id"}
+			return errors.Wrap(ErrInvalidJSONFieldType{Field: "id"}, "failed to populate fields for CreateClientRequest")
 		}
 	}
 	if jv, ok := m["name"]; ok {
@@ -4501,7 +4515,7 @@ func (r *CreateClientRequest) Populate(m map[string]interface{}) error {
 			r.Name = jv.(string)
 			delete(m, "name")
 		default:
-			return ErrInvalidJSONFieldType{Field: "name"}
+			return errors.Wrap(ErrInvalidJSONFieldType{Field: "name"}, "failed to populate fields for CreateClientRequest")
 		}
 	}
 	return nil
@@ -4546,7 +4560,7 @@ func (r *LookupClientRequest) Populate(m map[string]interface{}) error {
 			r.ID = jv.(string)
 			delete(m, "id")
 		default:
-			return ErrInvalidJSONFieldType{Field: "id"}
+			return errors.Wrap(ErrInvalidJSONFieldType{Field: "id"}, "failed to populate fields for LookupClientRequest")
 		}
 	}
 	return nil
@@ -4593,7 +4607,7 @@ func (r *UpdateClientRequest) Populate(m map[string]interface{}) error {
 			r.ID = jv.(string)
 			delete(m, "id")
 		default:
-			return ErrInvalidJSONFieldType{Field: "id"}
+			return errors.Wrap(ErrInvalidJSONFieldType{Field: "id"}, "failed to populate fields for UpdateClientRequest")
 		}
 	}
 	if jv, ok := m["secret"]; ok {
@@ -4602,7 +4616,7 @@ func (r *UpdateClientRequest) Populate(m map[string]interface{}) error {
 			r.Secret = jv.(string)
 			delete(m, "secret")
 		default:
-			return ErrInvalidJSONFieldType{Field: "secret"}
+			return errors.Wrap(ErrInvalidJSONFieldType{Field: "secret"}, "failed to populate fields for UpdateClientRequest")
 		}
 	}
 	if jv, ok := m["name"]; ok {
@@ -4611,7 +4625,7 @@ func (r *UpdateClientRequest) Populate(m map[string]interface{}) error {
 			r.Name = jv.(string)
 			delete(m, "name")
 		default:
-			return ErrInvalidJSONFieldType{Field: "name"}
+			return errors.Wrap(ErrInvalidJSONFieldType{Field: "name"}, "failed to populate fields for UpdateClientRequest")
 		}
 	}
 	return nil
@@ -4659,7 +4673,7 @@ func (r *LookupFeaturedSpeakerRequest) Populate(m map[string]interface{}) error 
 			r.ID = jv.(string)
 			delete(m, "id")
 		default:
-			return ErrInvalidJSONFieldType{Field: "id"}
+			return errors.Wrap(ErrInvalidJSONFieldType{Field: "id"}, "failed to populate fields for LookupFeaturedSpeakerRequest")
 		}
 	}
 	if jv, ok := m["lang"]; ok {
@@ -4719,7 +4733,7 @@ func (r *ListFeaturedSpeakersRequest) Populate(m map[string]interface{}) error {
 			r.ConferenceID = jv.(string)
 			delete(m, "conference_id")
 		default:
-			return ErrInvalidJSONFieldType{Field: "conference_id"}
+			return errors.Wrap(ErrInvalidJSONFieldType{Field: "conference_id"}, "failed to populate fields for ListFeaturedSpeakersRequest")
 		}
 	}
 	if jv, ok := m["since"]; ok {
@@ -4791,7 +4805,7 @@ func (r *AddFeaturedSpeakerRequest) Populate(m map[string]interface{}) error {
 			r.ConferenceID = jv.(string)
 			delete(m, "conference_id")
 		default:
-			return ErrInvalidJSONFieldType{Field: "conference_id"}
+			return errors.Wrap(ErrInvalidJSONFieldType{Field: "conference_id"}, "failed to populate fields for AddFeaturedSpeakerRequest")
 		}
 	}
 	if jv, ok := m["speaker_id"]; ok {
@@ -4812,7 +4826,7 @@ func (r *AddFeaturedSpeakerRequest) Populate(m map[string]interface{}) error {
 			r.DisplayName = jv.(string)
 			delete(m, "display_name")
 		default:
-			return ErrInvalidJSONFieldType{Field: "display_name"}
+			return errors.Wrap(ErrInvalidJSONFieldType{Field: "display_name"}, "failed to populate fields for AddFeaturedSpeakerRequest")
 		}
 	}
 	if jv, ok := m["description"]; ok {
@@ -4821,7 +4835,7 @@ func (r *AddFeaturedSpeakerRequest) Populate(m map[string]interface{}) error {
 			r.Description = jv.(string)
 			delete(m, "description")
 		default:
-			return ErrInvalidJSONFieldType{Field: "description"}
+			return errors.Wrap(ErrInvalidJSONFieldType{Field: "description"}, "failed to populate fields for AddFeaturedSpeakerRequest")
 		}
 	}
 	if jv, ok := m["user_id"]; ok {
@@ -4830,7 +4844,7 @@ func (r *AddFeaturedSpeakerRequest) Populate(m map[string]interface{}) error {
 			r.UserID = jv.(string)
 			delete(m, "user_id")
 		default:
-			return ErrInvalidJSONFieldType{Field: "user_id"}
+			return errors.Wrap(ErrInvalidJSONFieldType{Field: "user_id"}, "failed to populate fields for AddFeaturedSpeakerRequest")
 		}
 	}
 	if err := ExtractL10NFields(m, &r.LocalizedFields, []string{"display_name"}); err != nil {
@@ -4928,7 +4942,7 @@ func (r *UpdateFeaturedSpeakerRequest) Populate(m map[string]interface{}) error 
 			r.ID = jv.(string)
 			delete(m, "id")
 		default:
-			return ErrInvalidJSONFieldType{Field: "id"}
+			return errors.Wrap(ErrInvalidJSONFieldType{Field: "id"}, "failed to populate fields for UpdateFeaturedSpeakerRequest")
 		}
 	}
 	if jv, ok := m["speaker_id"]; ok {
@@ -4961,7 +4975,7 @@ func (r *UpdateFeaturedSpeakerRequest) Populate(m map[string]interface{}) error 
 			r.UserID = jv.(string)
 			delete(m, "user_id")
 		default:
-			return ErrInvalidJSONFieldType{Field: "user_id"}
+			return errors.Wrap(ErrInvalidJSONFieldType{Field: "user_id"}, "failed to populate fields for UpdateFeaturedSpeakerRequest")
 		}
 	}
 	if err := ExtractL10NFields(m, &r.LocalizedFields, []string{"display_name"}); err != nil {
@@ -5041,7 +5055,7 @@ func (r *DeleteFeaturedSpeakerRequest) Populate(m map[string]interface{}) error 
 			r.ID = jv.(string)
 			delete(m, "id")
 		default:
-			return ErrInvalidJSONFieldType{Field: "id"}
+			return errors.Wrap(ErrInvalidJSONFieldType{Field: "id"}, "failed to populate fields for DeleteFeaturedSpeakerRequest")
 		}
 	}
 	if jv, ok := m["user_id"]; ok {
@@ -5050,7 +5064,7 @@ func (r *DeleteFeaturedSpeakerRequest) Populate(m map[string]interface{}) error 
 			r.UserID = jv.(string)
 			delete(m, "user_id")
 		default:
-			return ErrInvalidJSONFieldType{Field: "user_id"}
+			return errors.Wrap(ErrInvalidJSONFieldType{Field: "user_id"}, "failed to populate fields for DeleteFeaturedSpeakerRequest")
 		}
 	}
 	return nil
@@ -5098,7 +5112,7 @@ func (r *LookupSponsorRequest) Populate(m map[string]interface{}) error {
 			r.ID = jv.(string)
 			delete(m, "id")
 		default:
-			return ErrInvalidJSONFieldType{Field: "id"}
+			return errors.Wrap(ErrInvalidJSONFieldType{Field: "id"}, "failed to populate fields for LookupSponsorRequest")
 		}
 	}
 	if jv, ok := m["lang"]; ok {
@@ -5161,7 +5175,7 @@ func (r *ListSponsorsRequest) Populate(m map[string]interface{}) error {
 			r.ConferenceID = jv.(string)
 			delete(m, "conference_id")
 		default:
-			return ErrInvalidJSONFieldType{Field: "conference_id"}
+			return errors.Wrap(ErrInvalidJSONFieldType{Field: "conference_id"}, "failed to populate fields for ListSponsorsRequest")
 		}
 	}
 	if jv, ok := m["group_name"]; ok {
@@ -5235,7 +5249,7 @@ func (r *AddSponsorRequest) Populate(m map[string]interface{}) error {
 			r.ConferenceID = jv.(string)
 			delete(m, "conference_id")
 		default:
-			return ErrInvalidJSONFieldType{Field: "conference_id"}
+			return errors.Wrap(ErrInvalidJSONFieldType{Field: "conference_id"}, "failed to populate fields for AddSponsorRequest")
 		}
 	}
 	if jv, ok := m["name"]; ok {
@@ -5244,7 +5258,7 @@ func (r *AddSponsorRequest) Populate(m map[string]interface{}) error {
 			r.Name = jv.(string)
 			delete(m, "name")
 		default:
-			return ErrInvalidJSONFieldType{Field: "name"}
+			return errors.Wrap(ErrInvalidJSONFieldType{Field: "name"}, "failed to populate fields for AddSponsorRequest")
 		}
 	}
 	if jv, ok := m["url"]; ok {
@@ -5253,7 +5267,7 @@ func (r *AddSponsorRequest) Populate(m map[string]interface{}) error {
 			r.URL = jv.(string)
 			delete(m, "url")
 		default:
-			return ErrInvalidJSONFieldType{Field: "url"}
+			return errors.Wrap(ErrInvalidJSONFieldType{Field: "url"}, "failed to populate fields for AddSponsorRequest")
 		}
 	}
 	if jv, ok := m["group_name"]; ok {
@@ -5262,7 +5276,7 @@ func (r *AddSponsorRequest) Populate(m map[string]interface{}) error {
 			r.GroupName = jv.(string)
 			delete(m, "group_name")
 		default:
-			return ErrInvalidJSONFieldType{Field: "group_name"}
+			return errors.Wrap(ErrInvalidJSONFieldType{Field: "group_name"}, "failed to populate fields for AddSponsorRequest")
 		}
 	}
 	if jv, ok := m["sort_order"]; ok {
@@ -5271,7 +5285,7 @@ func (r *AddSponsorRequest) Populate(m map[string]interface{}) error {
 			r.SortOrder = int(jv.(float64))
 			delete(m, "sort_order")
 		default:
-			return ErrInvalidJSONFieldType{Field: "sort_order"}
+			return errors.Wrap(ErrInvalidJSONFieldType{Field: "sort_order"}, "failed to populate fields for AddSponsorRequest")
 		}
 	}
 	if jv, ok := m["user_id"]; ok {
@@ -5280,7 +5294,7 @@ func (r *AddSponsorRequest) Populate(m map[string]interface{}) error {
 			r.UserID = jv.(string)
 			delete(m, "user_id")
 		default:
-			return ErrInvalidJSONFieldType{Field: "user_id"}
+			return errors.Wrap(ErrInvalidJSONFieldType{Field: "user_id"}, "failed to populate fields for AddSponsorRequest")
 		}
 	}
 	return nil
@@ -5338,7 +5352,7 @@ func (r *UpdateSponsorRequest) Populate(m map[string]interface{}) error {
 			r.ID = jv.(string)
 			delete(m, "id")
 		default:
-			return ErrInvalidJSONFieldType{Field: "id"}
+			return errors.Wrap(ErrInvalidJSONFieldType{Field: "id"}, "failed to populate fields for UpdateSponsorRequest")
 		}
 	}
 	if jv, ok := m["name"]; ok {
@@ -5371,7 +5385,7 @@ func (r *UpdateSponsorRequest) Populate(m map[string]interface{}) error {
 			r.UserID = jv.(string)
 			delete(m, "user_id")
 		default:
-			return ErrInvalidJSONFieldType{Field: "user_id"}
+			return errors.Wrap(ErrInvalidJSONFieldType{Field: "user_id"}, "failed to populate fields for UpdateSponsorRequest")
 		}
 	}
 	if err := ExtractL10NFields(m, &r.LocalizedFields, []string{"name"}); err != nil {
@@ -5451,7 +5465,7 @@ func (r *DeleteSponsorRequest) Populate(m map[string]interface{}) error {
 			r.ID = jv.(string)
 			delete(m, "id")
 		default:
-			return ErrInvalidJSONFieldType{Field: "id"}
+			return errors.Wrap(ErrInvalidJSONFieldType{Field: "id"}, "failed to populate fields for DeleteSponsorRequest")
 		}
 	}
 	if jv, ok := m["user_id"]; ok {
@@ -5460,7 +5474,7 @@ func (r *DeleteSponsorRequest) Populate(m map[string]interface{}) error {
 			r.UserID = jv.(string)
 			delete(m, "user_id")
 		default:
-			return ErrInvalidJSONFieldType{Field: "user_id"}
+			return errors.Wrap(ErrInvalidJSONFieldType{Field: "user_id"}, "failed to populate fields for DeleteSponsorRequest")
 		}
 	}
 	return nil
@@ -5514,7 +5528,7 @@ func (r *ListConferencesByOrganizerRequest) Populate(m map[string]interface{}) e
 			r.OrganizerID = jv.(string)
 			delete(m, "organizer_id")
 		default:
-			return ErrInvalidJSONFieldType{Field: "organizer_id"}
+			return errors.Wrap(ErrInvalidJSONFieldType{Field: "organizer_id"}, "failed to populate fields for ListConferencesByOrganizerRequest")
 		}
 	}
 	if jv, ok := m["since"]; ok {
@@ -5582,7 +5596,7 @@ func (r *CreateTemporaryEmailRequest) Populate(m map[string]interface{}) error {
 			r.TargetID = jv.(string)
 			delete(m, "target_id")
 		default:
-			return ErrInvalidJSONFieldType{Field: "target_id"}
+			return errors.Wrap(ErrInvalidJSONFieldType{Field: "target_id"}, "failed to populate fields for CreateTemporaryEmailRequest")
 		}
 	}
 	if jv, ok := m["user_id"]; ok {
@@ -5591,7 +5605,7 @@ func (r *CreateTemporaryEmailRequest) Populate(m map[string]interface{}) error {
 			r.UserID = jv.(string)
 			delete(m, "user_id")
 		default:
-			return ErrInvalidJSONFieldType{Field: "user_id"}
+			return errors.Wrap(ErrInvalidJSONFieldType{Field: "user_id"}, "failed to populate fields for CreateTemporaryEmailRequest")
 		}
 	}
 	if jv, ok := m["email"]; ok {
@@ -5600,7 +5614,7 @@ func (r *CreateTemporaryEmailRequest) Populate(m map[string]interface{}) error {
 			r.Email = jv.(string)
 			delete(m, "email")
 		default:
-			return ErrInvalidJSONFieldType{Field: "email"}
+			return errors.Wrap(ErrInvalidJSONFieldType{Field: "email"}, "failed to populate fields for CreateTemporaryEmailRequest")
 		}
 	}
 	if jv, ok := m["lang"]; ok {
@@ -5651,7 +5665,7 @@ func (r *CreateTemporaryEmailResponse) Populate(m map[string]interface{}) error 
 			r.ConfirmationKey = jv.(string)
 			delete(m, "confirmation_key")
 		default:
-			return ErrInvalidJSONFieldType{Field: "confirmation_key"}
+			return errors.Wrap(ErrInvalidJSONFieldType{Field: "confirmation_key"}, "failed to populate fields for CreateTemporaryEmailResponse")
 		}
 	}
 	return nil
@@ -5698,7 +5712,7 @@ func (r *ConfirmTemporaryEmailRequest) Populate(m map[string]interface{}) error 
 			r.TargetID = jv.(string)
 			delete(m, "target_id")
 		default:
-			return ErrInvalidJSONFieldType{Field: "target_id"}
+			return errors.Wrap(ErrInvalidJSONFieldType{Field: "target_id"}, "failed to populate fields for ConfirmTemporaryEmailRequest")
 		}
 	}
 	if jv, ok := m["user_id"]; ok {
@@ -5707,7 +5721,7 @@ func (r *ConfirmTemporaryEmailRequest) Populate(m map[string]interface{}) error 
 			r.UserID = jv.(string)
 			delete(m, "user_id")
 		default:
-			return ErrInvalidJSONFieldType{Field: "user_id"}
+			return errors.Wrap(ErrInvalidJSONFieldType{Field: "user_id"}, "failed to populate fields for ConfirmTemporaryEmailRequest")
 		}
 	}
 	if jv, ok := m["confirmation_key"]; ok {
@@ -5716,7 +5730,7 @@ func (r *ConfirmTemporaryEmailRequest) Populate(m map[string]interface{}) error 
 			r.ConfirmationKey = jv.(string)
 			delete(m, "confirmation_key")
 		default:
-			return ErrInvalidJSONFieldType{Field: "confirmation_key"}
+			return errors.Wrap(ErrInvalidJSONFieldType{Field: "confirmation_key"}, "failed to populate fields for ConfirmTemporaryEmailRequest")
 		}
 	}
 	return nil
@@ -5764,7 +5778,7 @@ func (r *AddConferenceCredentialRequest) Populate(m map[string]interface{}) erro
 			r.ConferenceID = jv.(string)
 			delete(m, "conference_id")
 		default:
-			return ErrInvalidJSONFieldType{Field: "conference_id"}
+			return errors.Wrap(ErrInvalidJSONFieldType{Field: "conference_id"}, "failed to populate fields for AddConferenceCredentialRequest")
 		}
 	}
 	if jv, ok := m["user_id"]; ok {
@@ -5773,7 +5787,7 @@ func (r *AddConferenceCredentialRequest) Populate(m map[string]interface{}) erro
 			r.UserID = jv.(string)
 			delete(m, "user_id")
 		default:
-			return ErrInvalidJSONFieldType{Field: "user_id"}
+			return errors.Wrap(ErrInvalidJSONFieldType{Field: "user_id"}, "failed to populate fields for AddConferenceCredentialRequest")
 		}
 	}
 	if jv, ok := m["type"]; ok {
@@ -5782,7 +5796,7 @@ func (r *AddConferenceCredentialRequest) Populate(m map[string]interface{}) erro
 			r.Type = jv.(string)
 			delete(m, "type")
 		default:
-			return ErrInvalidJSONFieldType{Field: "type"}
+			return errors.Wrap(ErrInvalidJSONFieldType{Field: "type"}, "failed to populate fields for AddConferenceCredentialRequest")
 		}
 	}
 	if jv, ok := m["data"]; ok {
@@ -5791,7 +5805,7 @@ func (r *AddConferenceCredentialRequest) Populate(m map[string]interface{}) erro
 			r.Data = jv.(string)
 			delete(m, "data")
 		default:
-			return ErrInvalidJSONFieldType{Field: "data"}
+			return errors.Wrap(ErrInvalidJSONFieldType{Field: "data"}, "failed to populate fields for AddConferenceCredentialRequest")
 		}
 	}
 	return nil
@@ -5838,7 +5852,7 @@ func (r *TweetAsConferenceRequest) Populate(m map[string]interface{}) error {
 			r.ConferenceID = jv.(string)
 			delete(m, "conference_id")
 		default:
-			return ErrInvalidJSONFieldType{Field: "conference_id"}
+			return errors.Wrap(ErrInvalidJSONFieldType{Field: "conference_id"}, "failed to populate fields for TweetAsConferenceRequest")
 		}
 	}
 	if jv, ok := m["user_id"]; ok {
@@ -5847,7 +5861,7 @@ func (r *TweetAsConferenceRequest) Populate(m map[string]interface{}) error {
 			r.UserID = jv.(string)
 			delete(m, "user_id")
 		default:
-			return ErrInvalidJSONFieldType{Field: "user_id"}
+			return errors.Wrap(ErrInvalidJSONFieldType{Field: "user_id"}, "failed to populate fields for TweetAsConferenceRequest")
 		}
 	}
 	if jv, ok := m["tweet"]; ok {
@@ -5856,7 +5870,7 @@ func (r *TweetAsConferenceRequest) Populate(m map[string]interface{}) error {
 			r.Tweet = jv.(string)
 			delete(m, "tweet")
 		default:
-			return ErrInvalidJSONFieldType{Field: "tweet"}
+			return errors.Wrap(ErrInvalidJSONFieldType{Field: "tweet"}, "failed to populate fields for TweetAsConferenceRequest")
 		}
 	}
 	return nil

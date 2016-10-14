@@ -10,6 +10,7 @@ CREATE TABLE users (
     avatar_url TEXT,
     is_admin TINYINT(1) NOT NULL DEFAULT 0,
     tshirt_size CHAR(4) CHARACTER SET latin1,
+    timezone CHAR(32) NOT NULL DEFAULT 'UTC',
     created_on DATETIME NOT NULL,
     modified_on TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     UNIQUE KEY(eid),
@@ -71,6 +72,7 @@ CREATE TABLE conferences (
     sub_title TEXT,
     cover_url TEXT,
     status CHAR(64) CHARACTER SET latin1 NOT NULL default "private",
+    timezone CHAR(32) NOT NULL DEFAULT 'UTC',
     created_by CHAR(64) CHARACTER SET latin1 NOT NULL,
     created_on DATETIME NOT NULL,
     modified_on TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
@@ -96,11 +98,11 @@ CREATE TABLE conference_components (
 
 CREATE TABLE conference_dates (
     oid INTEGER UNSIGNED NOT NULL PRIMARY KEY AUTO_INCREMENT,
+    eid           CHAR(64) CHARACTER SET latin1 NOT NULL,
     conference_id CHAR(64) CHARACTER SET latin1 NOT NULL,
-    date DATE NOT NULL,
-    open TIME,
-    close TIME,
-    KEY(date),
+    open DATETIME,
+    close DATETIME,
+    KEY(open),
     FOREIGN KEY (conference_id) REFERENCES conferences(eid) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 

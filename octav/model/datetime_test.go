@@ -3,6 +3,7 @@ package model_test
 import (
 	"encoding/json"
 	"testing"
+	"time"
 
 	"github.com/builderscon/octav/octav/model"
 	"github.com/stretchr/testify/assert"
@@ -44,17 +45,15 @@ func TestWallClockJSON(t *testing.T) {
 
 func TestConferenceDateJSON(t *testing.T) {
 	in := map[string]model.ConferenceDate{
-		`"2016-03-18"`: model.ConferenceDate{
-			Date: model.NewDate(2016, 3, 18),
+		`{"open": "2016-03-18T00:00:00Z"}`: model.ConferenceDate{
+			Open: time.Date(2016, 3, 18, 0, 0, 0, 0, time.UTC),
 		},
-		`"2016-03-18[14:42]"`: model.ConferenceDate{
-			Date: model.NewDate(2016, 3, 18),
-			Open: model.NewWallClock(14, 42),
+		`{"open": "2016-03-18T14:42:00Z"}`: model.ConferenceDate{
+			Open: time.Date(2016, 3, 18, 14, 42, 0, 0, time.UTC),
 		},
-		`"2016-03-18[14:42-15:19]"`: model.ConferenceDate{
-			Date:  model.NewDate(2016, 3, 18),
-			Open:  model.NewWallClock(14, 42),
-			Close: model.NewWallClock(15, 19),
+		`{"open":"2016-03-18T14:42:00Z","close":"2016-03-18T15:19:00Z"}`: model.ConferenceDate{
+			Open:  time.Date(2016, 3, 18, 14, 42, 0, 0, time.UTC),
+			Close: time.Date(2016, 3, 18, 15, 19, 0, 0, time.UTC),
 		},
 	}
 
@@ -70,6 +69,7 @@ func TestConferenceDateJSON(t *testing.T) {
 		}
 
 		buf, err := json.Marshal(dt)
+t.Logf("%s", buf)
 		if !assert.NoError(t, err, "JSON marshal of model.ConferenceDate should succeed") {
 			return
 		}

@@ -48,11 +48,13 @@ type Conference struct {
 	Slug                      string              `json:"slug"`
 	FullSlug                  string              `json:"full_slug,omitempty"` // Only populated when decorated
 	Status                    string              `json:"status"`
+	Timezone                  string              `json:"timezone"`
 	Dates                     ConferenceDateList  `json:"dates,omitempty"`
 	Administrators            UserList            `json:"administrators,omitempty" decorate:"true"`
 	Venues                    VenueList           `json:"venues,omitempty" decorate:"true"`
 	FeaturedSpeakers          FeaturedSpeakerList `json:"featured_speakers,omitempty" decorate:"true"`
 	Sponsors                  SponsorList         `json:"sponsors,omitempty" decorate:"true"`
+	SessionTypes              SessionTypeList     `json:"session_types,omitempty" decorate:"true"`
 }
 type ConferenceList []Conference
 
@@ -219,6 +221,7 @@ type User struct {
 	Email           string `json:"email,omitempty"`
 	TshirtSize      string `json:"tshirt_size,omitempty"`
 	IsAdmin         bool   `json:"is_admin"`
+	Timezone        string `json:"timezone"`
 }
 type UserList []User
 
@@ -324,6 +327,7 @@ type UpdateConferenceRequest struct {
 	Slug                      jsval.MaybeString `json:"slug,omitempty"`
 	SubTitle                  jsval.MaybeString `json:"sub_title,omitempty" l10n:"true"`
 	Status                    jsval.MaybeString `json:"status,omitempty"`
+	Timezone                  jsval.MaybeString `json:"timezone,omitempty"`
 	UserID                    string            `json:"user_id"`
 	LocalizedFields           `json:"-"`
 
@@ -346,19 +350,19 @@ type WallClock struct {
 	Valid  bool // True if set
 }
 
-// YYYY-MM-DD[HH:MM-HH:MM]
+// +model `LookupRequest:"false" UpdateRequest:"false"`
 type ConferenceDate struct {
-	Date  Date
-	Open  WallClock
-	Close WallClock
+	ID    string
+	Open  time.Time
+	Close time.Time
 }
 type ConferenceDateList []ConferenceDate
 
 // +transport
-type AddConferenceDatesRequest struct {
-	ConferenceID string             `json:"conference_id"`
-	Dates        ConferenceDateList `json:"dates" extract:"true"`
-	UserID       string             `json:"user_id"`
+type CreateConferenceDateRequest struct {
+	ConferenceID string         `json:"conference_id"`
+	Date         ConferenceDate `json:"date" extract:"true"`
+	UserID       string         `json:"user_id"`
 }
 
 // +transport
@@ -376,10 +380,10 @@ type AddConferenceVenueRequest struct {
 }
 
 // +transport
-type DeleteConferenceDatesRequest struct {
-	ConferenceID string   `json:"conference_id"`
-	Dates        DateList `json:"dates" extract:"true"`
-	UserID       string   `json:"user_id"`
+type DeleteConferenceDateRequest struct {
+	ConferenceID string `json:"conference_id"`
+	Date         string `json:"date"`
+	UserID       string `json:"user_id"`
 }
 
 // +transport
@@ -916,3 +920,6 @@ type TweetAsConferenceRequest struct {
 	UserID       string `json:"user_id"` // ID of the user making this request
 	Tweet        string `json:"tweet"`
 }
+
+type JSONTime time.Time
+type JSONTimeList []JSONTime

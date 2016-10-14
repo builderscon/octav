@@ -46,6 +46,7 @@ type Conference struct {
 	Status     string
 	SubTitle   sql.NullString
 	Title      string
+	Timezone   string
 	CreatedBy  string // User ID that creates this conference
 	CreatedOn  time.Time
 	ModifiedOn NullTime
@@ -65,10 +66,10 @@ type ConferenceComponent struct {
 // +DB tablename:"conference_dates"
 type ConferenceDate struct {
 	OID          int64
+	EID          string
 	ConferenceID string
-	Date         string
-	Open         sql.NullString
-	Close        sql.NullString
+	Open         NullTime
+	Close        NullTime
 }
 
 // +DB tablename:"conference_series_administrators"
@@ -169,6 +170,7 @@ type User struct {
 	Email      sql.NullString
 	TshirtSize sql.NullString
 	IsAdmin    bool
+	Timezone   string
 	CreatedOn  time.Time
 	ModifiedOn NullTime
 }

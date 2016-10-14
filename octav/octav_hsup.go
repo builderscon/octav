@@ -193,9 +193,9 @@ func httpAddConferenceCredential(ctx context.Context, w http.ResponseWriter, r *
 	doAddConferenceCredential(ctx, w, r, payload)
 }
 
-func httpAddConferenceDates(ctx context.Context, w http.ResponseWriter, r *http.Request) {
+func httpAddConferenceDate(ctx context.Context, w http.ResponseWriter, r *http.Request) {
 	if pdebug.Enabled {
-		g := pdebug.Marker("httpAddConferenceDates")
+		g := pdebug.Marker("httpAddConferenceDate")
 		defer g.End()
 	}
 	if strings.ToLower(r.Method) != `post` {
@@ -204,7 +204,7 @@ func httpAddConferenceDates(ctx context.Context, w http.ResponseWriter, r *http.
 		return
 	}
 
-	var payload model.AddConferenceDatesRequest
+	var payload model.CreateConferenceDateRequest
 	jsonbuf := getTransportJSONBuffer()
 	defer releaseTransportJSONBuffer(jsonbuf)
 
@@ -227,11 +227,11 @@ func httpAddConferenceDates(ctx context.Context, w http.ResponseWriter, r *http.
 		return
 	}
 
-	if err := validator.HTTPAddConferenceDatesRequest.Validate(&payload); err != nil {
+	if err := validator.HTTPAddConferenceDateRequest.Validate(&payload); err != nil {
 		httpError(w, `Invalid input (validation failed)`, http.StatusInternalServerError, err)
 		return
 	}
-	doAddConferenceDates(ctx, w, r, payload)
+	doAddConferenceDate(ctx, w, r, payload)
 }
 
 func httpAddConferenceSeriesAdmin(ctx context.Context, w http.ResponseWriter, r *http.Request) {
@@ -897,9 +897,9 @@ func httpDeleteConferenceAdmin(ctx context.Context, w http.ResponseWriter, r *ht
 	doDeleteConferenceAdmin(ctx, w, r, payload)
 }
 
-func httpDeleteConferenceDates(ctx context.Context, w http.ResponseWriter, r *http.Request) {
+func httpDeleteConferenceDate(ctx context.Context, w http.ResponseWriter, r *http.Request) {
 	if pdebug.Enabled {
-		g := pdebug.Marker("httpDeleteConferenceDates")
+		g := pdebug.Marker("httpDeleteConferenceDate")
 		defer g.End()
 	}
 	if strings.ToLower(r.Method) != `post` {
@@ -908,7 +908,7 @@ func httpDeleteConferenceDates(ctx context.Context, w http.ResponseWriter, r *ht
 		return
 	}
 
-	var payload model.DeleteConferenceDatesRequest
+	var payload model.DeleteConferenceDateRequest
 	jsonbuf := getTransportJSONBuffer()
 	defer releaseTransportJSONBuffer(jsonbuf)
 
@@ -931,11 +931,11 @@ func httpDeleteConferenceDates(ctx context.Context, w http.ResponseWriter, r *ht
 		return
 	}
 
-	if err := validator.HTTPDeleteConferenceDatesRequest.Validate(&payload); err != nil {
+	if err := validator.HTTPDeleteConferenceDateRequest.Validate(&payload); err != nil {
 		httpError(w, `Invalid input (validation failed)`, http.StatusInternalServerError, err)
 		return
 	}
-	doDeleteConferenceDates(ctx, w, r, payload)
+	doDeleteConferenceDate(ctx, w, r, payload)
 }
 
 func httpDeleteConferenceSeries(ctx context.Context, w http.ResponseWriter, r *http.Request) {
@@ -2268,8 +2268,8 @@ func (s *Server) SetupRoutes() {
 	r.HandleFunc(`/v1/conference/admin/delete`, httpWithContext(httpWithBasicAuth(httpDeleteConferenceAdmin)))
 	r.HandleFunc(`/v1/conference/create`, httpWithContext(httpWithBasicAuth(httpCreateConference)))
 	r.HandleFunc(`/v1/conference/credentials/add`, httpWithContext(httpWithBasicAuth(httpAddConferenceCredential)))
-	r.HandleFunc(`/v1/conference/dates/add`, httpWithContext(httpWithBasicAuth(httpAddConferenceDates)))
-	r.HandleFunc(`/v1/conference/dates/delete`, httpWithContext(httpDeleteConferenceDates))
+	r.HandleFunc(`/v1/conference/date/add`, httpWithContext(httpWithBasicAuth(httpAddConferenceDate)))
+	r.HandleFunc(`/v1/conference/date/delete`, httpWithContext(httpDeleteConferenceDate))
 	r.HandleFunc(`/v1/conference/delete`, httpWithContext(httpWithBasicAuth(httpDeleteConference)))
 	r.HandleFunc(`/v1/conference/list`, httpWithContext(httpWithOptionalBasicAuth(httpListConference)))
 	r.HandleFunc(`/v1/conference/list_by_organizer`, httpWithContext(httpWithOptionalBasicAuth(httpListConferencesByOrganizer)))

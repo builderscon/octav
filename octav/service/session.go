@@ -124,6 +124,10 @@ func (v *SessionSvc) populateRowForCreate(vdb *db.Session, payload model.CreateS
 }
 
 func (v *SessionSvc) populateRowForUpdate(vdb *db.Session, payload model.UpdateSessionRequest) error {
+	if vdb.EID != payload.ID {
+		return errors.New("ID mismatched for Session.populdateRowForUpdate")
+	}
+
 	if payload.ConferenceID.Valid() {
 		vdb.ConferenceID = payload.ConferenceID.String
 	}

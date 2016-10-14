@@ -359,16 +359,16 @@ func doDeleteConference(ctx context.Context, w http.ResponseWriter, r *http.Requ
 	httpJSON(w, map[string]string{"status": "success"})
 }
 
-func doDeleteConferenceDates(ctx context.Context, w http.ResponseWriter, r *http.Request, payload model.DeleteConferenceDatesRequest) {
+func doDeleteConferenceDate(ctx context.Context, w http.ResponseWriter, r *http.Request, payload model.DeleteConferenceDateRequest) {
 	tx, err := db.Begin()
 	if err != nil {
-		httpError(w, `DeleteConferenceDates`, http.StatusInternalServerError, err)
+		httpError(w, `DeleteConferenceDate`, http.StatusInternalServerError, err)
 		return
 	}
 	defer tx.AutoRollback()
 
 	s := service.Conference()
-	if err := s.DeleteDatesFromPayload(tx, payload); err != nil {
+	if err := s.DeleteDateFromPayload(tx, payload); err != nil {
 		httpError(w, `DeleteConferenceDates`, http.StatusInternalServerError, err)
 		return
 	}
@@ -380,7 +380,7 @@ func doDeleteConferenceDates(ctx context.Context, w http.ResponseWriter, r *http
 	httpJSON(w, map[string]string{"status": "success"})
 }
 
-func doAddConferenceDates(ctx context.Context, w http.ResponseWriter, r *http.Request, payload model.AddConferenceDatesRequest) {
+func doAddConferenceDate(ctx context.Context, w http.ResponseWriter, r *http.Request, payload model.CreateConferenceDateRequest) {
 	tx, err := db.Begin()
 	if err != nil {
 		httpError(w, `AddConferenceDates`, http.StatusInternalServerError, err)
@@ -388,8 +388,9 @@ func doAddConferenceDates(ctx context.Context, w http.ResponseWriter, r *http.Re
 	}
 	defer tx.AutoRollback()
 
-	s := service.Conference()
-	if err := s.AddDatesFromPayload(tx, payload); err != nil {
+	var v model.ConferenceDate
+	s := service.ConferenceDate()
+	if err := s.CreateFromPayload(tx, payload, &v); err != nil {
 		httpError(w, `AddConferenceDates`, http.StatusInternalServerError, err)
 		return
 	}
@@ -398,7 +399,8 @@ func doAddConferenceDates(ctx context.Context, w http.ResponseWriter, r *http.Re
 		httpError(w, `AddConferenceDates`, http.StatusInternalServerError, err)
 		return
 	}
-	httpJSON(w, map[string]string{"status": "success"})
+
+	httpJSON(w, v)
 }
 
 func doDeleteConferenceAdmin(ctx context.Context, w http.ResponseWriter, r *http.Request, payload model.DeleteConferenceAdminRequest) {

@@ -23,6 +23,7 @@ type rawUser struct {
 	Email      string `json:"email,omitempty"`
 	TshirtSize string `json:"tshirt_size,omitempty"`
 	IsAdmin    bool   `json:"is_admin"`
+	Timezone   string `json:"timezone"`
 }
 
 func (v User) MarshalJSON() ([]byte, error) {
@@ -37,6 +38,7 @@ func (v User) MarshalJSON() ([]byte, error) {
 	raw.Email = v.Email
 	raw.TshirtSize = v.TshirtSize
 	raw.IsAdmin = v.IsAdmin
+	raw.Timezone = v.Timezone
 	buf, err := json.Marshal(raw)
 	if err != nil {
 		return nil, err
@@ -81,6 +83,7 @@ func (v *User) FromRow(vdb db.User) error {
 		v.TshirtSize = vdb.TshirtSize.String
 	}
 	v.IsAdmin = vdb.IsAdmin
+	v.Timezone = vdb.Timezone
 	return nil
 }
 
@@ -100,5 +103,6 @@ func (v *User) ToRow(vdb *db.User) error {
 	vdb.TshirtSize.Valid = true
 	vdb.TshirtSize.String = v.TshirtSize
 	vdb.IsAdmin = v.IsAdmin
+	vdb.Timezone = v.Timezone
 	return nil
 }

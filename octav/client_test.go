@@ -931,7 +931,7 @@ func TestVenueCRUD(t *testing.T) {
 	}
 }
 
-func TestDeleteConferenceDates(t *testing.T) {
+func TestDeleteConferenceDate(t *testing.T) {
 	ctx, err := NewTestCtx(t)
 	if !assert.NoError(t, err, "failed to create test ctx") {
 		return
@@ -972,27 +972,26 @@ func TestDeleteConferenceDates(t *testing.T) {
 	}
 	defer testDeleteConference(ctx, conf.ID)
 
-	err = ctx.HTTPClient.AddConferenceDates(&model.AddConferenceDatesRequest{
+	d, err := ctx.HTTPClient.AddConferenceDate(&model.CreateConferenceDateRequest{
 		ConferenceID: conf.ID,
 		UserID:       user.ID,
-		Dates: []model.ConferenceDate{
-			model.ConferenceDate{
-				Date:  model.NewDate(2016, 3, 22),
-				Open:  model.NewWallClock(10, 0),
-				Close: model.NewWallClock(19, 0),
-			},
+		Date: model.ConferenceDate{
+			Open:  time.Date(2016, 3, 22, 10, 0, 0, 0, time.UTC),
+			Close: time.Date(2016, 3, 22, 19, 0, 0, 0, time.UTC),
 		},
 	})
-	if !assert.NoError(ctx.T, err, "AddConferenceDates works") {
+	if !assert.NoError(ctx.T, err, "AddConferenceDate works") {
 		return
 	}
 
-	err = ctx.HTTPClient.DeleteConferenceDates(&model.DeleteConferenceDatesRequest{
+	t.Logf("%#v", d)
+
+	err = ctx.HTTPClient.DeleteConferenceDate(&model.DeleteConferenceDateRequest{
 		ConferenceID: conf.ID,
-		Dates:        []model.Date{model.NewDate(2016, 3, 22)},
+		Date:         d.ID,
 		UserID:       user.ID,
 	})
-	if !assert.NoError(ctx.T, err, "DeleteConferenceDates works") {
+	if !assert.NoError(ctx.T, err, "DeleteConferenceDate works") {
 		return
 	}
 
@@ -1001,6 +1000,7 @@ func TestDeleteConferenceDates(t *testing.T) {
 		return
 	}
 
+	t.Logf("%#v", conf2.Dates)
 	if !assert.Len(ctx.T, conf2.Dates, 0, "There should be no dates set") {
 		return
 	}
@@ -1132,18 +1132,15 @@ func TestListConference(t *testing.T) {
 		}
 		confs[i] = conf
 
-		err = ctx.HTTPClient.AddConferenceDates(&model.AddConferenceDatesRequest{
+		_, err = ctx.HTTPClient.AddConferenceDate(&model.CreateConferenceDateRequest{
 			ConferenceID: conf.ID,
 			UserID:       user.ID,
-			Dates: []model.ConferenceDate{
-				model.ConferenceDate{
-					Date:  model.NewDate(2016, 3, 22),
-					Open:  model.NewWallClock(10, 0),
-					Close: model.NewWallClock(19, 0),
-				},
+			Date: model.ConferenceDate{
+				Open:  time.Date(2016, 3, 22, 10, 0, 0, 0, time.UTC),
+				Close: time.Date(2016, 3, 22, 19, 0, 0, 0, time.UTC),
 			},
 		})
-		if !assert.NoError(ctx.T, err, "AddConferenceDates works") {
+		if !assert.NoError(ctx.T, err, "AddConferenceDate works") {
 			return
 		}
 

@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"reflect"
 	"time"
-	"unicode"
 
 	"github.com/pkg/errors"
 )
@@ -132,47 +131,40 @@ func (w *WallClock) Parse(s string) error {
 
 func (cd ConferenceDate) String() string {
 	buf := bytes.Buffer{}
-	buf.WriteString(cd.Date.String())
-	if cd.Open.Valid {
-		buf.WriteByte('[')
-		buf.WriteString(cd.Open.String())
-		if cd.Close.Valid {
-			buf.WriteByte('-')
-			buf.WriteString(cd.Close.String())
-		}
-		buf.WriteByte(']')
+	if !cd.Open.IsZero() {
+		buf.WriteString(cd.Open.Format(time.RFC3339))
+	}
+	buf.WriteByte('-')
+	if !cd.Close.IsZero() {
+		buf.WriteString(cd.Close.Format(time.RFC3339))
 	}
 	return buf.String()
 }
 
 func (cd ConferenceDate) MarshalJSON() ([]byte, error) {
 	// conference dates are represented as:
-	// { date: "YYYY-MM-DD", open: "HH:MM", close: "HH:MM" }
-	m := map[string]string{
-		"encoded": cd.String(),
-		"date":    cd.Date.String(),
+	// { open: "rfc3339", close: "rfc3339" }
+	m := map[string]string{}
+	if len(cd.ID) > 0 {
+		m["id"] = cd.ID
 	}
-	if s := cd.Open.String(); len(s) > 0 {
-		m["open"] = cd.Open.String()
+
+	if !cd.Open.IsZero() {
+		m["open"] = cd.Open.Format(time.RFC3339)
 	}
-	if s := cd.Close.String(); len(s) > 0 {
-		m["close"] = cd.Close.String()
+	if !cd.Close.IsZero() {
+		m["close"] = cd.Close.Format(time.RFC3339)
 	}
 	return json.Marshal(m)
 }
 
 func (cd *ConferenceDate) extractMap(m map[string]interface{}) error {
-	di, ok := m["date"]
-	if !ok {
-		return errors.New("missing required field 'date'")
-	}
-	ds, ok := di.(string)
-	if !ok {
-		return errors.New("invalid type for field 'date'")
-	}
-
-	if err := cd.Date.Parse(ds); err != nil {
-		return err
+	if v, ok := m["id"]; ok {
+		s, ok := v.(string)
+		if !ok {
+			return errors.New("invalid type for field 'id'")
+		}
+		cd.ID = s
 	}
 
 	if v, ok := m["open"]; ok {
@@ -180,9 +172,11 @@ func (cd *ConferenceDate) extractMap(m map[string]interface{}) error {
 		if !ok {
 			return errors.New("invalid type for field 'open'")
 		}
-		if err := cd.Open.Parse(s); err != nil {
+		t, err := time.Parse(time.RFC3339, s)
+		if err != nil {
 			return err
 		}
+		cd.Open = t
 	}
 
 	if v, ok := m["close"]; ok {
@@ -190,166 +184,69 @@ func (cd *ConferenceDate) extractMap(m map[string]interface{}) error {
 		if !ok {
 			return errors.New("invalid type for field 'close'")
 		}
-		if err := cd.Close.Parse(s); err != nil {
+		t, err := time.Parse(time.RFC3339, s)
+		if err != nil {
 			return err
 		}
+		cd.Close = t
 	}
 	return nil
 }
 
 func (cd *ConferenceDate) UnmarshalJSON(data []byte) error {
-	var isHash bool
-	for i := 0; i < len(data); i++ {
-		if unicode.IsSpace(rune(data[i])) {
-			continue
-		}
-		if data[i] == '{' {
-			isHash = true
-		}
-	}
-
-	if isHash {
-		m := map[string]interface{}{}
-		if err := json.Unmarshal(data, &m); err != nil {
-			return err
-		}
-		if err := cd.extractMap(m); err != nil {
-			return err
-		}
-		return nil
-	}
-
-	var s string
-	if err := json.Unmarshal(data, &s); err != nil {
+	m := map[string]interface{}{}
+	if err := json.Unmarshal(data, &m); err != nil {
 		return err
 	}
-
-	return cd.Parse(s)
-}
-
-func (cd *ConferenceDate) Parse(s string) error {
-	// YYYY-MM-DD
-	if len(s) < 10 {
-		return errors.New("invalid conference date string")
-	}
-
-	if err := cd.Date.Parse(s[:10]); err != nil {
+	if err := cd.extractMap(m); err != nil {
 		return err
 	}
-
-	s = s[10:]
-	switch remain := len(s); remain {
-	case 0:
-		return nil
-	default:
-		if remain < 7 { // "[HH:MM-" or "[HH:MM]"
-			return ErrInvalidConferenceHour
-		}
-	}
-
-	if s[0] != '[' {
-		return ErrInvalidConferenceHour
-	}
-	s = s[1:]
-	if err := cd.Open.Parse(s[:5]); err != nil {
-		return err
-	}
-
-	switch s[5] {
-	case '-':
-		// continue to parse closing hour
-	case ']':
-		// done parsing
-		return nil
-	default:
-		return ErrInvalidConferenceHour
-	}
-
-	s = s[6:]
-
-	if remain := len(s); remain < 6 { // "HH:MM]"
-		return ErrInvalidConferenceHour
-	}
-
-	if err := cd.Close.Parse(s[:5]); err != nil {
-		return err
-	}
-
-	if s[5] != ']' {
-		return ErrInvalidConferenceHour
-	}
-
 	return nil
 }
-
-type ErrInvalidConferenceDateType struct {
-	Type reflect.Type
-}
-
-func (e ErrInvalidConferenceDateType) Error() string {
-	buf := bytes.Buffer{}
-	buf.WriteString("invalid value type to parse for conference date: ")
-
-	var ts string
-	if e.Type == nil {
-		ts = "(nil)"
-	} else {
-		ts = e.Type.String()
-	}
-	buf.WriteString(ts)
-	return buf.String()
-}
-
-func (cdl *ConferenceDateList) Extract(v interface{}) error {
-	var ret []ConferenceDate
-	switch v.(type) {
-	case []string:
-		ret = make([]ConferenceDate, len(v.([]string)))
-		for i, s := range v.([]string) {
-			var dt ConferenceDate
-			if err := dt.Parse(s); err != nil {
-				return err
-			}
-			ret[i] = dt
-		}
-	case []interface{}:
-		vl := v.([]interface{})
-		ret = make([]ConferenceDate, len(vl))
-		for i, s := range vl {
-			switch s.(type) {
-			case string:
-				if err := ret[i].Parse(s.(string)); err != nil {
-					return err
-				}
-			case map[string]interface{}:
-				if err := ret[i].extractMap(s.(map[string]interface{})); err != nil {
-					return err
-				}
-			default:
-				return ErrInvalidConferenceDateType{Type: reflect.TypeOf(s)}
-			}
-
-		}
-	default:
-		return ErrInvalidConferenceDateType{Type: reflect.TypeOf(v)}
-	}
-
-	*cdl = ret
-	return nil
-}
-
-type JSONTime time.Time
 
 func (t JSONTime) MarshalJSON() ([]byte, error) {
 	return json.Marshal(time.Time(t).Format(time.RFC3339))
 }
 
-func (t *JSONTime) UnmarshalJSON(buf []byte) error {
-	x, err := time.Parse(time.RFC3339, string(buf))
+func (t *JSONTime) parse(s string) error {
+	x, err := time.Parse(time.RFC3339, s)
 	if err != nil {
 		return errors.Wrap(err, "failed to parse time using RFC3339")
 	}
 	*t = JSONTime(x)
+	return nil
+}
+func (t *JSONTime) UnmarshalJSON(buf []byte) error {
+	var s string
+	if err := json.Unmarshal(buf, &s); err != nil {
+		return err
+	}
+
+	return t.parse(s)
+}
+
+func (tl *JSONTimeList) Extract(v interface{}) error {
+	var ret []JSONTime
+	switch v.(type) {
+	case []interface{}:
+	default:
+		return errors.New("invalid value for JSONTimeList")
+	}
+
+	vl := v.([]interface{})
+	ret = make([]JSONTime, len(vl))
+	for i, s := range vl {
+		switch s.(type) {
+		case string:
+			if err := ret[i].parse(s.(string)); err != nil {
+				return err
+			}
+		default:
+			return errors.New("invalid value for JSONTime")
+		}
+	}
+
+	*tl = ret
 	return nil
 }
 
@@ -397,5 +294,19 @@ func (t *MaybeJSONTime) UnmarshalJSON(buf []byte) error {
 		return errors.Wrap(err, "failed to unmarshal JSONTime")
 	}
 	t.ValidFlag = true
+	return nil
+}
+
+func (cdl *ConferenceDate) Extract(v interface{}) error {
+	switch v.(type) {
+	case map[string]interface{}:
+		var cd ConferenceDate
+		if err := cd.extractMap(v.(map[string]interface{})); err != nil {
+			return err
+		}
+		*cdl = cd
+	default:
+		return errors.Errorf("Invalid conference date type: %s", reflect.TypeOf(v).Name)
+	}
 	return nil
 }

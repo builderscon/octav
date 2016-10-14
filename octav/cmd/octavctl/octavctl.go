@@ -405,6 +405,8 @@ func doConferenceUpdate(args cmdargs) int {
 	fs.StringVar(&status, "status", "", "")
 	var sub_title string
 	fs.StringVar(&sub_title, "sub_title", "", "")
+	var timezone string
+	fs.StringVar(&timezone, "timezone", "", "")
 	var title string
 	fs.StringVar(&title, "title", "", "")
 	var user_id string
@@ -439,6 +441,9 @@ func doConferenceUpdate(args cmdargs) int {
 	if sub_title != "" {
 		m["sub_title"] = sub_title
 	}
+	if timezone != "" {
+		m["timezone"] = timezone
+	}
 	if title != "" {
 		m["title"] = title
 	}
@@ -462,105 +467,6 @@ func doConferenceUpdate(args cmdargs) int {
 		return errOut(err)
 	}
 
-	return 0
-}
-
-func doConferenceDatesAdd(args cmdargs) int {
-	fs := flag.NewFlagSet("octavctl conference dates add", flag.ContinueOnError)
-	var id string
-	fs.StringVar(&id, "id", "", "")
-	var dates stringList
-	fs.Var(&dates, "dates", "")
-	var user_id string
-	fs.StringVar(&user_id, "user_id", "", "")
-	prepGlobalFlags(fs)
-	if err := fs.Parse([]string(args)); err != nil {
-		return errOut(err)
-	}
-
-	m := make(map[string]interface{})
-	if id != "" {
-		m["conference_id"] = id
-	}
-	if dates.Valid() {
-		m["dates"] = dates.Get()
-	}
-	if user_id != "" {
-		m["user_id"] = user_id
-	}
-	r := model.AddConferenceDatesRequest{}
-	if err := r.Populate(m); err != nil {
-		return errOut(err)
-	}
-
-	if err := validator.HTTPAddConferenceDatesRequest.Validate(&r); err != nil {
-		return errOut(err)
-	}
-
-	cl, err := newClient()
-	if err != nil {
-		return errOut(err)
-	}
-	if err := cl.AddConferenceDates(&r); err != nil {
-		return errOut(err)
-	}
-
-	return 0
-}
-
-func doConferenceDatesDelete(args cmdargs) int {
-	fs := flag.NewFlagSet("octavctl conference dates delete", flag.ContinueOnError)
-	var id string
-	fs.StringVar(&id, "id", "", "")
-	var dates stringList
-	fs.Var(&dates, "dates", "")
-	var user_id string
-	fs.StringVar(&user_id, "user_id", "", "")
-	prepGlobalFlags(fs)
-	if err := fs.Parse([]string(args)); err != nil {
-		return errOut(err)
-	}
-
-	m := make(map[string]interface{})
-	if id != "" {
-		m["conference_id"] = id
-	}
-	if dates.Valid() {
-		m["dates"] = dates.Get()
-	}
-	if user_id != "" {
-		m["user_id"] = user_id
-	}
-	r := model.DeleteConferenceDatesRequest{}
-	if err := r.Populate(m); err != nil {
-		return errOut(err)
-	}
-
-	if err := validator.HTTPDeleteConferenceDatesRequest.Validate(&r); err != nil {
-		return errOut(err)
-	}
-
-	cl, err := newClient()
-	if err != nil {
-		return errOut(err)
-	}
-	if err := cl.DeleteConferenceDates(&r); err != nil {
-		return errOut(err)
-	}
-
-	return 0
-}
-
-func doConferenceDatesSubcmd(args cmdargs) int {
-	switch v := args.Get(0); v {
-	case "add":
-		return doConferenceDatesAdd(args.WithFrontPopped())
-	case "delete":
-		return doConferenceDatesDelete(args.WithFrontPopped())
-	default:
-		log.Printf("unimplemented (conference): %s", v)
-		return 1
-	}
 	return 0
 }
 
@@ -774,8 +680,6 @@ func doConferenceSubcmd(args cmdargs) int {
 		return doConferenceList(args.WithFrontPopped())
 	case "update":
 		return doConferenceUpdate(args.WithFrontPopped())
-	case "dates":
-		return doConferenceDatesSubcmd(args.WithFrontPopped())
 	case "admin":
 		return doConferenceAdminSubcmd(args.WithFrontPopped())
 	case "venue":

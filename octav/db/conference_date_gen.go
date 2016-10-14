@@ -5,13 +5,14 @@ package db
 import (
 	"bytes"
 	"database/sql"
+	"strconv"
 
 	"github.com/builderscon/octav/octav/tools"
 	"github.com/lestrrat/go-pdebug"
 	"github.com/pkg/errors"
 )
 
-const ConferenceDateStdSelectColumns = "conference_dates.oid, conference_dates.conference_id, conference_dates.date, conference_dates.open, conference_dates.close"
+const ConferenceDateStdSelectColumns = "conference_dates.oid, conference_dates.eid, conference_dates.conference_id, conference_dates.open, conference_dates.close"
 const ConferenceDateTable = "conference_dates"
 
 type ConferenceDateList []ConferenceDate
@@ -19,7 +20,7 @@ type ConferenceDateList []ConferenceDate
 func (c *ConferenceDate) Scan(scanner interface {
 	Scan(...interface{}) error
 }) error {
-	return scanner.Scan(&c.OID, &c.ConferenceID, &c.Date, &c.Open, &c.Close)
+	return scanner.Scan(&c.OID, &c.EID, &c.ConferenceID, &c.Open, &c.Close)
 }
 
 func init() {
@@ -36,9 +37,43 @@ func init() {
 		stmt.Reset()
 		stmt.WriteString(`UPDATE `)
 		stmt.WriteString(ConferenceDateTable)
-		stmt.WriteString(` SET conference_id = ?, date = ?, open = ?, close = ? WHERE oid = ?`)
+		stmt.WriteString(` SET eid = ?, conference_id = ?, open = ?, close = ? WHERE oid = ?`)
 		library.Register("sqlConferenceDateUpdateByOIDKey", stmt.String())
+
+		stmt.Reset()
+		stmt.WriteString(`SELECT `)
+		stmt.WriteString(ConferenceDateStdSelectColumns)
+		stmt.WriteString(` FROM `)
+		stmt.WriteString(ConferenceDateTable)
+		stmt.WriteString(` WHERE `)
+		stmt.WriteString(ConferenceDateTable)
+		stmt.WriteString(`.eid = ?`)
+		library.Register("sqlConferenceDateLoadByEIDKey", stmt.String())
+
+		stmt.Reset()
+		stmt.WriteString(`DELETE FROM `)
+		stmt.WriteString(ConferenceDateTable)
+		stmt.WriteString(` WHERE eid = ?`)
+		library.Register("sqlConferenceDateDeleteByEIDKey", stmt.String())
+
+		stmt.Reset()
+		stmt.WriteString(`UPDATE `)
+		stmt.WriteString(ConferenceDateTable)
+		stmt.WriteString(` SET eid = ?, conference_id = ?, open = ?, close = ? WHERE eid = ?`)
+		library.Register("sqlConferenceDateUpdateByEIDKey", stmt.String())
 	})
+}
+
+func (c *ConferenceDate) LoadByEID(tx *Tx, eid string) error {
+	stmt, err := library.GetStmt("sqlConferenceDateLoadByEIDKey")
+	if err != nil {
+		return errors.Wrap(err, `failed to get statement`)
+	}
+	row := tx.Stmt(stmt).QueryRow(eid)
+	if err := c.Scan(row); err != nil {
+		return err
+	}
+	return nil
 }
 
 func (c *ConferenceDate) Create(tx *Tx, opts ...InsertOption) (err error) {
@@ -47,6 +82,10 @@ func (c *ConferenceDate) Create(tx *Tx, opts ...InsertOption) (err error) {
 		defer g.End()
 		pdebug.Printf("%#v", c)
 	}
+	if c.EID == "" {
+		return errors.New("create: non-empty EID required")
+	}
+
 	doIgnore := false
 	for _, opt := range opts {
 		switch opt.(type) {
@@ -62,8 +101,8 @@ func (c *ConferenceDate) Create(tx *Tx, opts ...InsertOption) (err error) {
 	}
 	stmt.WriteString("INTO ")
 	stmt.WriteString(ConferenceDateTable)
-	stmt.WriteString(` (conference_id, date, open, close) VALUES (?, ?, ?, ?)`)
-	result, err := tx.Exec(stmt.String(), c.ConferenceID, c.Date, c.Open, c.Close)
+	stmt.WriteString(` (eid, conference_id, open, close) VALUES (?, ?, ?, ?)`)
+	result, err := tx.Exec(stmt.String(), c.EID, c.ConferenceID, c.Open, c.Close)
 	if err != nil {
 		return err
 	}
@@ -83,7 +122,15 @@ func (c ConferenceDate) Update(tx *Tx) error {
 		if err != nil {
 			return errors.Wrap(err, `failed to get statement`)
 		}
-		_, err = tx.Stmt(stmt).Exec(c.ConferenceID, c.Date, c.Open, c.Close, c.OID)
+		_, err = tx.Stmt(stmt).Exec(c.EID, c.ConferenceID, c.Open, c.Close, c.OID)
+		return err
+	}
+	if c.EID != "" {
+		stmt, err := library.GetStmt("sqlConferenceDateUpdateByEIDKey")
+		if err != nil {
+			return errors.Wrap(err, `failed to get statement`)
+		}
+		_, err = tx.Stmt(stmt).Exec(c.EID, c.ConferenceID, c.Open, c.Close, c.EID)
 		return err
 	}
 	return errors.New("either OID/EID must be filled")
@@ -99,7 +146,16 @@ func (c ConferenceDate) Delete(tx *Tx) error {
 		return err
 	}
 
-	return errors.New("column OID must be filled")
+	if c.EID != "" {
+		stmt, err := library.GetStmt("sqlConferenceDateDeleteByEIDKey")
+		if err != nil {
+			return errors.Wrap(err, `failed to get statement`)
+		}
+		_, err = tx.Stmt(stmt).Exec(c.EID)
+		return err
+	}
+
+	return errors.New("either OID/EID must be filled")
 }
 
 func (v *ConferenceDateList) FromRows(rows *sql.Rows, capacity int) error {
@@ -118,5 +174,30 @@ func (v *ConferenceDateList) FromRows(rows *sql.Rows, capacity int) error {
 		res = append(res, vdb)
 	}
 	*v = res
+	return nil
+}
+
+func (v *ConferenceDateList) LoadSinceEID(tx *Tx, since string, limit int) error {
+	var s int64
+	if id := since; id != "" {
+		vdb := ConferenceDate{}
+		if err := vdb.LoadByEID(tx, id); err != nil {
+			return err
+		}
+
+		s = vdb.OID
+	}
+	return v.LoadSince(tx, s, limit)
+}
+
+func (v *ConferenceDateList) LoadSince(tx *Tx, since int64, limit int) error {
+	rows, err := tx.Query(`SELECT `+ConferenceDateStdSelectColumns+` FROM `+ConferenceDateTable+` WHERE conference_dates.oid > ? ORDER BY oid ASC LIMIT `+strconv.Itoa(limit), since)
+	if err != nil {
+		return err
+	}
+
+	if err := v.FromRows(rows, limit); err != nil {
+		return err
+	}
 	return nil
 }

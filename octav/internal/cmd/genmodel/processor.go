@@ -92,11 +92,14 @@ type Field struct {
 }
 
 type Model struct {
-	Fields  []Field
-	HasEID  bool
-	HasL10N bool
-	Name    string
-	PkgName string
+	Fields        []Field
+	HasEID        bool
+	HasL10N       bool
+	Name          string
+	PkgName       string
+	LookupRequest bool
+	CreateRequest bool
+	UpdateRequest bool
 }
 
 type DBColumn struct {
@@ -273,20 +276,55 @@ func (ctx *genctx) extractModelStructs(n ast.Node) bool {
 			continue
 		}
 		ismodel := false
+		var tags string
 		for _, c := range cgroup.List {
 			if strings.HasPrefix(strings.TrimSpace(strings.TrimPrefix(c.Text, "//")), "+model") {
 				ismodel = true
+				tags = c.Text
 				break
 			}
 		}
 		if !ismodel {
+			if pdebug.Enabled {
+				pdebug.Printf("%s is NOT a valid model", t.Name.Name)
+			}
 			continue
 		}
 
 		st := Model{
-			Fields:  make([]Field, 0, len(s.Fields.List)),
-			Name:    t.Name.Name,
-			PkgName: ctx.PkgName,
+			Fields:        make([]Field, 0, len(s.Fields.List)),
+			LookupRequest: true,
+			UpdateRequest: true,
+			CreateRequest: true,
+			Name:          t.Name.Name,
+			PkgName:       ctx.PkgName,
+		}
+
+		if i := strings.IndexByte(tags, '`'); i > 0 {
+			if len(tags) > i {
+				tags = tags[i+1:]
+			}
+		}
+		if i := strings.IndexByte(tags, '`'); i > 0 {
+			tags = tags[:i]
+		}
+
+		tag := reflect.StructTag(tags)
+
+		if b, ok := tag.Lookup("LookupRequest"); ok {
+			if ok, err := strconv.ParseBool(b); err == nil {
+				st.LookupRequest = ok
+			}
+		}
+		if b, ok := tag.Lookup("UpdateRequest"); ok {
+			if ok, err := strconv.ParseBool(b); err == nil {
+				st.UpdateRequest = ok
+			}
+		}
+		if b, ok := tag.Lookup("CreateRequest"); ok {
+			if ok, err := strconv.ParseBool(b); err == nil {
+				st.CreateRequest = ok
+			}
 		}
 
 	LoopFields:
@@ -825,21 +863,23 @@ func generateServiceFile(ctx *genctx, m Model) error {
 	fmt.Fprintf(&buf, "\nreturn &%s", svcvarname)
 	buf.WriteString("\n}")
 
-	fmt.Fprintf(&buf, "\n\nfunc (v *%s) LookupFromPayload(tx *db.Tx, m *model.%s, payload model.Lookup%sRequest) (err error) {", svcname, m.Name, m.Name)
-	buf.WriteString("\nif pdebug.Enabled {")
-	fmt.Fprintf(&buf, "\n"+`g := pdebug.Marker("service.%s.LookupFromPayload").BindError(&err)`, m.Name)
-	buf.WriteString("\ndefer g.End()")
-	buf.WriteString("\n}")
-	buf.WriteString("\nif err = v.Lookup(tx, m, payload.ID); err != nil {")
-	fmt.Fprintf(&buf, "\n"+`return errors.Wrap(err, "failed to load model.%s from database")`, m.Name)
-	buf.WriteString("\n}")
-	if hasL10N || hasDecorate {
-		buf.WriteString("\nif err := v.Decorate(tx, m, payload.TrustedCall, payload.Lang.String); err != nil {")
-		fmt.Fprintf(&buf, "\n"+`return errors.Wrap(err, "failed to load associated data for model.%s from database")`, m.Name)
+	if m.LookupRequest {
+		fmt.Fprintf(&buf, "\n\nfunc (v *%s) LookupFromPayload(tx *db.Tx, m *model.%s, payload model.Lookup%sRequest) (err error) {", svcname, m.Name, m.Name)
+		buf.WriteString("\nif pdebug.Enabled {")
+		fmt.Fprintf(&buf, "\n"+`g := pdebug.Marker("service.%s.LookupFromPayload").BindError(&err)`, m.Name)
+		buf.WriteString("\ndefer g.End()")
+		buf.WriteString("\n}")
+		buf.WriteString("\nif err = v.Lookup(tx, m, payload.ID); err != nil {")
+		fmt.Fprintf(&buf, "\n"+`return errors.Wrap(err, "failed to load model.%s from database")`, m.Name)
+		buf.WriteString("\n}")
+		if hasL10N || hasDecorate {
+			buf.WriteString("\nif err := v.Decorate(tx, m, payload.TrustedCall, payload.Lang.String); err != nil {")
+			fmt.Fprintf(&buf, "\n"+`return errors.Wrap(err, "failed to load associated data for model.%s from database")`, m.Name)
+			buf.WriteString("\n}")
+		}
+		buf.WriteString("\nreturn nil")
 		buf.WriteString("\n}")
 	}
-	buf.WriteString("\nreturn nil")
-	buf.WriteString("\n}")
 
 	fmt.Fprintf(&buf, "\n\nfunc (v *%s) Lookup(tx *db.Tx, m *model.%s, id string) (err error) {", svcname, m.Name)
 	buf.WriteString("\nif pdebug.Enabled {")
@@ -883,42 +923,44 @@ func generateServiceFile(ctx *genctx, m Model) error {
 	buf.WriteString("\nreturn nil")
 	buf.WriteString("\n}")
 
-	fmt.Fprintf(&buf, "\n\nfunc (v *%s) Update(tx *db.Tx, vdb *db.%s, payload model.Update%sRequest) (err error) {", svcname, m.Name, m.Name)
-	buf.WriteString("\nif pdebug.Enabled {")
-	fmt.Fprintf(&buf, "\n"+`g := pdebug.Marker("service.%s.Update (%%s)", vdb.EID).BindError(&err)`, m.Name)
-	buf.WriteString("\ndefer g.End()")
-	buf.WriteString("\n}")
-	buf.WriteString("\n\nif vdb.EID == " + `""` + " {")
-	fmt.Fprintf(
-		&buf,
-		"\nreturn errors.New(%s)",
-		strconv.Quote("vdb.EID is required (did you forget to call vdb.Load(tx) before hand?)"),
-	)
-	buf.WriteString("\n}")
-	buf.WriteString("\n\nif err := v.populateRowForUpdate(vdb, payload); err != nil {")
-	buf.WriteString("\nreturn err")
-	buf.WriteString("\n}")
-	buf.WriteString("\n\nif err := vdb.Update(tx); err != nil {")
-	buf.WriteString("\nreturn err")
-	buf.WriteString("\n}")
-	if hasL10N {
-		buf.WriteString("\n\nreturn payload.LocalizedFields.Foreach(func(l, k, x string) error {")
+	if m.UpdateRequest {
+		fmt.Fprintf(&buf, "\n\nfunc (v *%s) Update(tx *db.Tx, vdb *db.%s, payload model.Update%sRequest) (err error) {", svcname, m.Name, m.Name)
 		buf.WriteString("\nif pdebug.Enabled {")
-		buf.WriteString("\n" + `pdebug.Printf("Updating l10n string for '%s' (%s)", k, l)`)
+		fmt.Fprintf(&buf, "\n"+`g := pdebug.Marker("service.%s.Update (%%s)", vdb.EID).BindError(&err)`, m.Name)
+		buf.WriteString("\ndefer g.End()")
 		buf.WriteString("\n}")
-		buf.WriteString("\nls := db.LocalizedString{")
-		fmt.Fprintf(&buf, "\nParentType: %s,", strconv.Quote(m.Name))
-		buf.WriteString("\nParentID: vdb.EID,")
-		buf.WriteString("\nLanguage: l,")
-		buf.WriteString("\nName: k,")
-		buf.WriteString("\nLocalized: x,")
+		buf.WriteString("\n\nif vdb.EID == " + `""` + " {")
+		fmt.Fprintf(
+			&buf,
+			"\nreturn errors.New(%s)",
+			strconv.Quote("vdb.EID is required (did you forget to call vdb.Load(tx) before hand?)"),
+		)
 		buf.WriteString("\n}")
-		buf.WriteString("\nreturn ls.Upsert(tx)")
-		buf.WriteString("\n})")
-	} else {
-		buf.WriteString("\nreturn nil")
+		buf.WriteString("\n\nif err := v.populateRowForUpdate(vdb, payload); err != nil {")
+		buf.WriteString("\nreturn err")
+		buf.WriteString("\n}")
+		buf.WriteString("\n\nif err := vdb.Update(tx); err != nil {")
+		buf.WriteString("\nreturn err")
+		buf.WriteString("\n}")
+		if hasL10N {
+			buf.WriteString("\n\nreturn payload.LocalizedFields.Foreach(func(l, k, x string) error {")
+			buf.WriteString("\nif pdebug.Enabled {")
+			buf.WriteString("\n" + `pdebug.Printf("Updating l10n string for '%s' (%s)", k, l)`)
+			buf.WriteString("\n}")
+			buf.WriteString("\nls := db.LocalizedString{")
+			fmt.Fprintf(&buf, "\nParentType: %s,", strconv.Quote(m.Name))
+			buf.WriteString("\nParentID: vdb.EID,")
+			buf.WriteString("\nLanguage: l,")
+			buf.WriteString("\nName: k,")
+			buf.WriteString("\nLocalized: x,")
+			buf.WriteString("\n}")
+			buf.WriteString("\nreturn ls.Upsert(tx)")
+			buf.WriteString("\n})")
+		} else {
+			buf.WriteString("\nreturn nil")
+		}
+		buf.WriteString("\n}")
 	}
-	buf.WriteString("\n}")
 
 	if hasL10N {
 		fmt.Fprintf(&buf, "\n\nfunc (v *%s) ReplaceL10NStrings(tx *db.Tx, m *model.%s, lang string) error {", svcname, m.Name)

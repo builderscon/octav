@@ -2,14 +2,12 @@ package service
 
 import (
 	"bytes"
-	"database/sql"
 	"encoding/base64"
 	"fmt"
 	"io"
 	"mime/multipart"
 	"net/http"
 	"regexp"
-	"strings"
 	"time"
 
 	"context"
@@ -67,6 +65,12 @@ func (v *ConferenceSvc) populateRowForUpdate(vdb *db.Conference, payload model.U
 	if payload.SubTitle.Valid() {
 		vdb.SubTitle.Valid = true
 		vdb.SubTitle.String = payload.SubTitle.String
+	}
+
+	if payload.Timezone.Valid() {
+		if _, err := time.LoadLocation(payload.Timezone.String); err == nil {
+			vdb.Timezone = payload.Timezone.String
+		}
 	}
 	return nil
 }
@@ -244,7 +248,7 @@ func (v *ConferenceSvc) LoadByRange(tx *db.Tx, vdbl *db.ConferenceList, since, r
 	return nil
 }
 
-func (v *ConferenceSvc) AddDatesFromPayload(tx *db.Tx, payload model.AddConferenceDatesRequest) (err error) {
+func (v *ConferenceSvc) AddDatesFromPayload(tx *db.Tx, payload model.CreateConferenceDateRequest) (err error) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("service.Conference.AddDatesFromPayload").BindError(&err)
 		defer g.End()
@@ -255,72 +259,48 @@ func (v *ConferenceSvc) AddDatesFromPayload(tx *db.Tx, payload model.AddConferen
 		return errors.Wrap(err, "adding conference dates requires conference administrator privilege")
 	}
 
-	for _, date := range payload.Dates {
-		if pdebug.Enabled {
-			pdebug.Printf("Adding conference date %s", date)
-		}
-		cd := db.ConferenceDate{
-			ConferenceID: payload.ConferenceID,
-			Date:         date.Date.String(),
-			Open:         sql.NullString{String: date.Open.String(), Valid: true},
-			Close:        sql.NullString{String: date.Close.String(), Valid: true},
-		}
-		if err := cd.Create(tx, db.WithInsertIgnore(true)); err != nil {
-			return err
-		}
+	var vdb db.ConferenceDate
+	s := ConferenceDate()
+	if err := s.Create(tx, &vdb, payload); err != nil {
+		return errors.Wrap(err, "failed to insert into database")
 	}
 
 	return nil
 }
 
-func (v *ConferenceSvc) DeleteDatesFromPayload(tx *db.Tx, payload model.DeleteConferenceDatesRequest) error {
+func (v *ConferenceSvc) DeleteDateFromPayload(tx *db.Tx, payload model.DeleteConferenceDateRequest) error {
 	su := User()
 	if err := su.IsConferenceAdministrator(tx, payload.ConferenceID, payload.UserID); err != nil {
 		return errors.Wrap(err, "deleting conference dates requires conference administrator privilege")
 	}
 
 	var vdb db.ConferenceDate
-	sdatelist := make([]string, len(payload.Dates))
-	for i, dt := range payload.Dates {
-		sdatelist[i] = dt.String()
-	}
-	return vdb.DeleteDates(tx, payload.ConferenceID, sdatelist...)
+	return vdb.DeleteDate(tx, payload.ConferenceID, payload.Date)
 }
 
-func (v *ConferenceSvc) LoadDates(tx *db.Tx, cdl *model.ConferenceDateList, cid string) error {
+func (v *ConferenceSvc) LoadDates(tx *db.Tx, cdl *model.ConferenceDateList, cid string) (err error) {
+	if pdebug.Enabled {
+		g := pdebug.Marker("service.Conference.LoadDates").BindError(&err)
+		defer g.End()
+	}
+
 	var vdbl db.ConferenceDateList
 	if err := vdbl.LoadByConferenceID(tx, cid); err != nil {
 		return err
 	}
 
+	if pdebug.Enabled {
+		pdebug.Printf("Loaded %d dates", len(vdbl))
+	}
+
 	res := make(model.ConferenceDateList, len(vdbl))
 	for i, vdb := range vdbl {
-		dt := vdb.Date
-		if i := strings.IndexByte(dt, 'T'); i > -1 { // Cheat. Loading from DB contains time....!!!!
-			dt = dt[:i]
-		}
-		if err := res[i].Date.Parse(dt); err != nil {
-			return err
-		}
-
 		if vdb.Open.Valid {
-			t := vdb.Open.String
-			if len(t) > 5 {
-				t = t[:5]
-			}
-			if err := res[i].Open.Parse(t); err != nil {
-				return err
-			}
+			res[i].Open = vdb.Open.Time
 		}
 
 		if vdb.Close.Valid {
-			t := vdb.Close.String
-			if len(t) > 5 {
-				t = t[:5]
-			}
-			if err := res[i].Close.Parse(t); err != nil {
-				return err
-			}
+			res[i].Close = vdb.Close.Time
 		}
 	}
 	*cdl = res
@@ -483,6 +463,10 @@ func (v *ConferenceSvc) Decorate(tx *db.Tx, c *model.Conference, trustedCall boo
 		return errors.Wrapf(err, "failed to load sponsors for '%s'", c.ID)
 	}
 
+	if err := v.LoadSessionTypes(tx, &c.SessionTypes, c.ID); err != nil {
+		return errors.Wrapf(err, "failed to load session types for '%s'", c.ID)
+	}
+
 	sv := Venue()
 	for i := range c.Venues {
 		if err := sv.Decorate(tx, &c.Venues[i], trustedCall, lang); err != nil {
@@ -501,6 +485,13 @@ func (v *ConferenceSvc) Decorate(tx *db.Tx, c *model.Conference, trustedCall boo
 	for i := range c.Sponsors {
 		if err := sps.Decorate(tx, &c.Sponsors[i], trustedCall, lang); err != nil {
 			return errors.Wrap(err, "failed to decorate sponsors with associated data")
+		}
+	}
+
+	sts := SessionType()
+	for i := range c.SessionTypes {
+		if err := sts.Decorate(tx, &c.SessionTypes[i], trustedCall, lang); err != nil {
+			return errors.Wrap(err, "failed to decorate session types with associated data")
 		}
 	}
 
@@ -747,6 +738,24 @@ func (v *ConferenceSvc) LoadSponsors(tx *db.Tx, cdl *model.SponsorList, cid stri
 	res := make(model.SponsorList, len(vdbl))
 	for i, vdb := range vdbl {
 		var u model.Sponsor
+		if err := u.FromRow(vdb); err != nil {
+			return err
+		}
+		res[i] = u
+	}
+	*cdl = res
+	return nil
+}
+
+func (v *ConferenceSvc) LoadSessionTypes(tx *db.Tx, cdl *model.SessionTypeList, cid string) error {
+	var vdbl db.SessionTypeList
+	if err := db.LoadSessionTypes(tx, &vdbl, cid); err != nil {
+		return err
+	}
+
+	res := make(model.SessionTypeList, len(vdbl))
+	for i, vdb := range vdbl {
+		var u model.SessionType
 		if err := u.FromRow(vdb); err != nil {
 			return err
 		}
