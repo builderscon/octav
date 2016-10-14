@@ -98,16 +98,6 @@ CREATE TABLE conference_components (
 
 CREATE TABLE conference_dates (
     oid INTEGER UNSIGNED NOT NULL PRIMARY KEY AUTO_INCREMENT,
-    conference_id CHAR(64) CHARACTER SET latin1 NOT NULL,
-    date DATE NOT NULL,
-    open TIME,
-    close TIME,
-    KEY(date),
-    FOREIGN KEY (conference_id) REFERENCES conferences(eid) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-
-CREATE TABLE conference_dates_new (
-    oid INTEGER UNSIGNED NOT NULL PRIMARY KEY AUTO_INCREMENT,
     eid           CHAR(64) CHARACTER SET latin1 NOT NULL,
     conference_id CHAR(64) CHARACTER SET latin1 NOT NULL,
     open DATETIME,
