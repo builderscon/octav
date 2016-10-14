@@ -1160,6 +1160,7 @@
           "status": { "$ref": "#/definitions/conference_status" },
           "sub_title": { "$ref": "#/definitions/string_en" },
           "title": { "$ref": "#/definitions/string_en" },
+          "timezone": {"$ref": "#/definitions/string_en" },
           "user_id": { "$ref": "#/definitions/uuid" }
         },
         "patternProperties": {

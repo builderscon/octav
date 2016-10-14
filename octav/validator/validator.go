@@ -3231,6 +3231,10 @@ func init() {
 					jsval.Reference(M).RefersTo("#/definitions/string_en"),
 				).
 				AddProp(
+					"timezone",
+					jsval.Reference(M).RefersTo("#/definitions/string_en"),
+				).
+				AddProp(
 					"title",
 					jsval.Reference(M).RefersTo("#/definitions/string_en"),
 				).

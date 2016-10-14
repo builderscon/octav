@@ -327,6 +327,7 @@ type UpdateConferenceRequest struct {
 	Slug                      jsval.MaybeString `json:"slug,omitempty"`
 	SubTitle                  jsval.MaybeString `json:"sub_title,omitempty" l10n:"true"`
 	Status                    jsval.MaybeString `json:"status,omitempty"`
+	Timezone                  jsval.MaybeString `json:"timezone,omitempty"`
 	UserID                    string            `json:"user_id"`
 	LocalizedFields           `json:"-"`
 
