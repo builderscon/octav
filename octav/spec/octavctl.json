@@ -6,23 +6,6 @@
       "actions": ["create", "lookup", "delete", "list", "update"],
       "subcmds": [
         {
-          "name": "date",
-          "actions": [
-            {
-              "name": "add",
-              "args_hint": {
-                "dates": { "type": "stringList" }
-              }
-            },
-            {
-              "name": "delete",
-              "args_hint": {
-                "dates": { "type": "stringList" }
-              }
-            }
-          ]
-        },
-        {
           "name": "admin",
           "actions": ["add", "delete"]
         },

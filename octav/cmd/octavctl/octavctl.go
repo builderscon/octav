@@ -470,109 +470,6 @@ func doConferenceUpdate(args cmdargs) int {
 	return 0
 }
 
-func doConferenceDateAdd(args cmdargs) int {
-	fs := flag.NewFlagSet("octavctl conference date add", flag.ContinueOnError)
-	var id string
-	fs.StringVar(&id, "id", "", "")
-	var date string
-	fs.StringVar(&date, "date", "", "")
-	var user_id string
-	fs.StringVar(&user_id, "user_id", "", "")
-	prepGlobalFlags(fs)
-	if err := fs.Parse([]string(args)); err != nil {
-		return errOut(err)
-	}
-
-	m := make(map[string]interface{})
-	if id != "" {
-		m["conference_id"] = id
-	}
-	if date != "" {
-		m["date"] = date
-	}
-	if user_id != "" {
-		m["user_id"] = user_id
-	}
-	r := model.AddConferenceDateRequest{}
-	if err := r.Populate(m); err != nil {
-		return errOut(err)
-	}
-
-	if err := validator.HTTPAddConferenceDateRequest.Validate(&r); err != nil {
-		return errOut(err)
-	}
-
-	cl, err := newClient()
-	if err != nil {
-		return errOut(err)
-	}
-	res, err := cl.AddConferenceDate(&r)
-	if err != nil {
-		return errOut(err)
-	}
-	if err := printJSON(res); err != nil {
-		return errOut(err)
-	}
-
-	return 0
-}
-
-func doConferenceDateDelete(args cmdargs) int {
-	fs := flag.NewFlagSet("octavctl conference date delete", flag.ContinueOnError)
-	var id string
-	fs.StringVar(&id, "id", "", "")
-	var date string
-	fs.StringVar(&date, "date", "", "")
-	var user_id string
-	fs.StringVar(&user_id, "user_id", "", "")
-	prepGlobalFlags(fs)
-	if err := fs.Parse([]string(args)); err != nil {
-		return errOut(err)
-	}
-
-	m := make(map[string]interface{})
-	if id != "" {
-		m["conference_id"] = id
-	}
-	if date != "" {
-		m["date"] = date
-	}
-	if user_id != "" {
-		m["user_id"] = user_id
-	}
-	r := model.DeleteConferenceDateRequest{}
-	if err := r.Populate(m); err != nil {
-		return errOut(err)
-	}
-
-	if err := validator.HTTPDeleteConferenceDateRequest.Validate(&r); err != nil {
-		return errOut(err)
-	}
-
-	cl, err := newClient()
-	if err != nil {
-		return errOut(err)
-	}
-	if err := cl.DeleteConferenceDate(&r); err != nil {
-		return errOut(err)
-	}
-
-	return 0
-}
-
-func doConferenceDateSubcmd(args cmdargs) int {
-	switch v := args.Get(0); v {
-	case "add":
-		return doConferenceDateAdd(args.WithFrontPopped())
-	case "delete":
-		return doConferenceDateDelete(args.WithFrontPopped())
-	default:
-		log.Printf("unimplemented (conference): %s", v)
-		return 1
-	}
-	return 0
-}
-
 func doConferenceAdminAdd(args cmdargs) int {
 	fs := flag.NewFlagSet("octavctl conference admin add", flag.ContinueOnError)
 	var admin_id string
@@ -783,8 +680,6 @@ func doConferenceSubcmd(args cmdargs) int {
 		return doConferenceList(args.WithFrontPopped())
 	case "update":
 		return doConferenceUpdate(args.WithFrontPopped())
-	case "date":
-		return doConferenceDateSubcmd(args.WithFrontPopped())
 	case "admin":
 		return doConferenceAdminSubcmd(args.WithFrontPopped())
 	case "venue":
