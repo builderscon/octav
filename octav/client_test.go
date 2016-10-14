@@ -2,6 +2,7 @@ package octav_test
 
 import (
 	"fmt"
+	"net/http"
 	"net/http/httptest"
 	"strconv"
 	"sync"
@@ -393,6 +394,21 @@ func buildersconinc(confID, userID string) *model.AddSponsorRequest {
 		UserID:       userID,
 	}
 	return r
+}
+
+func TestSanity(t *testing.T) {
+	ctx, err := NewTestCtx(t)
+	if !assert.NoError(t, err, "failed to create test ctx") {
+		return
+	}
+	defer ctx.Close()
+
+	ts := httptest.NewServer(octav.New())
+	defer ts.Close()
+
+	ctx.SetAPIServer(ts)
+
+	http.Head(ts.URL)
 }
 
 func TestConferenceCRUD(t *testing.T) {
