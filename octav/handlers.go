@@ -163,6 +163,28 @@ func doCreateConferenceSeries(ctx context.Context, w http.ResponseWriter, r *htt
 	httpJSON(w, c)
 }
 
+func doLookupConferenceSeries(ctx context.Context, w http.ResponseWriter, r *http.Request, payload model.LookupConferenceSeriesRequest) {
+	if pdebug.Enabled {
+		g := pdebug.Marker("doLookupConferenceSeries")
+		defer g.End()
+	}
+	tx, err := db.Begin()
+	if err != nil {
+		httpError(w, `LookupConferenceSeries`, http.StatusInternalServerError, err)
+		return
+	}
+	defer tx.AutoRollback()
+
+	s := service.ConferenceSeries()
+	var c model.ConferenceSeries
+	if err := s.LookupFromPayload(tx, &c, payload); err != nil {
+		httpError(w, `LookupConferenceSeries`, http.StatusInternalServerError, err)
+		return
+	}
+
+	httpJSON(w, c)
+}
+
 func doDeleteConferenceSeries(ctx context.Context, w http.ResponseWriter, r *http.Request, payload model.DeleteConferenceSeriesRequest) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("doDeleteConferenceSeries")
