@@ -473,7 +473,7 @@ func (v *SessionSvc) DeleteFromPayload(tx *db.Tx, payload model.DeleteSessionReq
 	return nil
 }
 
-func (v *SessionSvc) PostSocialServices(session model.Session) (err error) {
+func (v *SessionSvc) PostSocialServices(session *model.Session) (err error) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("SessionSvc.PostSocialServices %s", session.ID).BindError(&err)
 		defer g.End()
@@ -483,15 +483,11 @@ func (v *SessionSvc) PostSocialServices(session model.Session) (err error) {
 		return errors.New("skipped during testing")
 	}
 
-	var speaker model.User
 	tx, err := db.Begin()
 	if err != nil {
 		return errors.Wrap(err, "failed to start database transaction")
 	}
 	defer tx.AutoRollback()
-	if err := speaker.Load(tx, session.SpeakerID); err != nil {
-		return errors.Wrap(err, "failed to load speaker")
-	}
 
 	var conf model.Conference
 	if err := conf.Load(tx, session.ConferenceID); err != nil {
@@ -503,10 +499,19 @@ func (v *SessionSvc) PostSocialServices(session model.Session) (err error) {
 		return errors.Wrap(err, "failed to load conference series")
 	}
 
-	if err := v.ReplaceL10NStrings(tx, &session, "all"); err != nil {
+	if err := v.ReplaceL10NStrings(tx, session, "all"); err != nil {
 		return errors.Wrap(err, "failed to replace localized strings")
 	}
 
+	tweet, err := formatSessionTweet(session, &conf, &series)
+	if err != nil {
+		return errors.Wrap(err, "failed to format session before tweeting")
+	}
+
+	return Twitter().TweetAsConference(session.ConferenceID, tweet)
+}
+
+func formatSessionTweet(session *model.Session, conf *model.Conference, series *model.ConferenceSeries) (string, error) {
 	prefix := "New submission "
 	tweetLen := len(prefix) + 2 + 1 // prefix + 2 quotes + 1 space
 
@@ -526,6 +531,7 @@ func (v *SessionSvc) PostSocialServices(session model.Session) (err error) {
 		title = "(null)"
 	}
 
+	// XXX https://builderscon.io should probably be configurable
 	u := "https://builderscon.io/" + series.Slug + "/" + conf.Slug + "/session/" + session.ID
 	tweetLen = tweetLen + 23 // will be shortened
 
@@ -544,11 +550,8 @@ func (v *SessionSvc) PostSocialServices(session model.Session) (err error) {
 		title = truncated.String()
 	}
 
-	return Twitter().TweetAsConference(
-		session.ConferenceID,
-		fmt.Sprintf("New submission %s %s",
-			strconv.Quote(title),
-			u,
-		),
-	)
+	return fmt.Sprintf("New submission %s %s",
+		strconv.Quote(title),
+		u,
+	), nil
 }
