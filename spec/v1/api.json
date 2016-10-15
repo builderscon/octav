@@ -798,6 +798,19 @@
       "targetSchema": {"$ref": "#/definitions/object_id"}
     },
     {
+      "title": "Lookup conference series",
+      "href": "/v1/conference_series/lookup",
+      "rel": "lookup",
+      "schema": {
+        "required": ["id"],
+        "properties": {
+          "id": { "$ref": "#/definitions/uuid" },
+          "lang": { "$ref": "#/definitions/language" }
+        }
+      },
+      "targetSchema": { "$ref": "#/definitions/conference_series" }
+    },
+    {
       "title": "List conference series",
       "rel": "list",
       "href": "/v1/conference_series/list",

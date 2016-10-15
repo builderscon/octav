@@ -1,5 +1,5 @@
 """OCTAV Client Library"""
-"""DO NOT EDIT: This file was generated from ../spec/v1/api.json on Fri Oct 14 09:53:56 2016"""
+"""DO NOT EDIT: This file was generated from ../spec/v1/api.json on Sun Oct 16 07:24:32 2016"""
 
 import certifi
 import json
@@ -685,6 +685,34 @@ class Octav(object):
             print('POST %s' % uri)
         hdrs['Content-Type']= 'application/json'
         res = self.http.request('POST', uri, headers=hdrs, body=json.dumps(payload))
+        if self.debug:
+            print(res)
+        if res.status != 200:
+            self.extract_error(res)
+            return None
+        return json.loads(res.data)
+    except BaseException, e:
+        if self.debug:
+            print("error during http access: " + repr(e))
+        self.error = repr(e)
+        return None
+
+  def lookup_conference_series (self, id, lang=None):
+    try:
+        payload = {}
+        hdrs = {}
+        if id is None:
+            raise MissingRequiredArgument('property id must be provided')
+        payload['id'] = id
+        if id is not None:
+            payload['id'] = id
+        if lang is not None:
+            payload['lang'] = lang
+        uri = '%s/v1/conference_series/lookup' % self.endpoint
+        qs = urlencode(payload, True)
+        if self.debug:
+            print('GET %s?%s' % (uri, qs))
+        res = self.http.request('GET', '%s?%s' % (uri, qs), headers=hdrs)
         if self.debug:
             print(res)
         if res.status != 200:

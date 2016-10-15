@@ -1917,6 +1917,38 @@ func httpLookupConferenceBySlug(ctx context.Context, w http.ResponseWriter, r *h
 	doLookupConferenceBySlug(ctx, w, r, payload)
 }
 
+func httpLookupConferenceSeries(ctx context.Context, w http.ResponseWriter, r *http.Request) {
+	if pdebug.Enabled {
+		g := pdebug.Marker("httpLookupConferenceSeries")
+		defer g.End()
+	}
+	if strings.ToLower(r.Method) != `get` {
+		w.Header().Set("Allow", "get")
+		msgbuf := getBytesBuffer()
+		defer releaseBytesBuffer(msgbuf)
+		msgbuf.WriteString(`Method was `)
+		msgbuf.WriteString(r.Method)
+		msgbuf.WriteString(`, expected 'get'`)
+		httpError(w, msgbuf.String(), http.StatusNotFound, nil)
+		return
+	}
+
+	var payload model.LookupConferenceSeriesRequest
+	qbuf := getBytesBuffer()
+	defer releaseBytesBuffer(qbuf)
+	qbuf.WriteString(r.URL.RawQuery)
+	if err := urlenc.Unmarshal(qbuf.Bytes(), &payload); err != nil {
+		httpError(w, `Failed to parse url query string`, http.StatusInternalServerError, err)
+		return
+	}
+
+	if err := validator.HTTPLookupConferenceSeriesRequest.Validate(&payload); err != nil {
+		httpError(w, `Invalid input (validation failed)`, http.StatusInternalServerError, err)
+		return
+	}
+	doLookupConferenceSeries(ctx, w, r, payload)
+}
+
 func httpLookupFeaturedSpeaker(ctx context.Context, w http.ResponseWriter, r *http.Request) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("httpLookupFeaturedSpeaker")
@@ -2627,6 +2659,7 @@ func (s *Server) SetupRoutes() {
 	r.HandleFunc(`/v1/conference_series/create`, httpWithContext(httpWithBasicAuth(httpCreateConferenceSeries)))
 	r.HandleFunc(`/v1/conference_series/delete`, httpWithContext(httpWithBasicAuth(httpDeleteConferenceSeries)))
 	r.HandleFunc(`/v1/conference_series/list`, httpWithContext(httpWithOptionalBasicAuth(httpListConferenceSeries)))
+	r.HandleFunc(`/v1/conference_series/lookup`, httpWithContext(httpLookupConferenceSeries))
 	r.HandleFunc(`/v1/email/confirm`, httpWithContext(httpWithBasicAuth(httpConfirmTemporaryEmail)))
 	r.HandleFunc(`/v1/email/create`, httpWithContext(httpWithBasicAuth(httpCreateTemporaryEmail)))
 	r.HandleFunc(`/v1/featured_speaker/add`, httpWithContext(httpWithBasicAuth(httpAddFeaturedSpeaker)))

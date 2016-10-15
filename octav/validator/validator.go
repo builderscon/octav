@@ -74,6 +74,8 @@ var HTTPLookupConferenceBySlugRequest *jsval.JSVal
 var HTTPLookupConferenceBySlugResponse *jsval.JSVal
 var HTTPLookupConferenceRequest *jsval.JSVal
 var HTTPLookupConferenceResponse *jsval.JSVal
+var HTTPLookupConferenceSeriesRequest *jsval.JSVal
+var HTTPLookupConferenceSeriesResponse *jsval.JSVal
 var HTTPLookupFeaturedSpeakerRequest *jsval.JSVal
 var HTTPLookupFeaturedSpeakerResponse *jsval.JSVal
 var HTTPLookupRoomRequest *jsval.JSVal
@@ -2581,6 +2583,47 @@ func init() {
 				PatternPropertiesString(
 					"title#[a-z]+",
 					jsval.Reference(M).RefersTo("#/definitions/string_i18n"),
+				),
+		)
+
+	HTTPLookupConferenceSeriesRequest = jsval.New().
+		SetName("HTTPLookupConferenceSeriesRequest").
+		SetConstraintMap(M).
+		SetRoot(
+			jsval.Object().
+				Required("id").
+				AdditionalProperties(
+					jsval.EmptyConstraint,
+				).
+				AddProp(
+					"id",
+					jsval.Reference(M).RefersTo("#/definitions/uuid"),
+				).
+				AddProp(
+					"lang",
+					jsval.Reference(M).RefersTo("#/definitions/language"),
+				),
+		)
+
+	HTTPLookupConferenceSeriesResponse = jsval.New().
+		SetName("HTTPLookupConferenceSeriesResponse").
+		SetConstraintMap(M).
+		SetRoot(
+			jsval.Object().
+				AdditionalProperties(
+					jsval.EmptyConstraint,
+				).
+				AddProp(
+					"id",
+					jsval.Reference(M).RefersTo("#/definitions/uuid"),
+				).
+				AddProp(
+					"slug",
+					jsval.Reference(M).RefersTo("#/definitions/slug_top"),
+				).
+				AddProp(
+					"title",
+					jsval.String(),
 				),
 		)
 
