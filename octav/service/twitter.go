@@ -6,7 +6,6 @@ import (
 	"encoding/json"
 	"os"
 	"sync"
-	"unicode/utf8"
 
 	"github.com/dghubble/go-twitter/twitter"
 	"github.com/dghubble/oauth1"
@@ -74,21 +73,6 @@ func (v *TwitterSvc) TweetAsConference(confID, tweet string) (err error) {
 	httpClient := config.Client(oauth1.NoContext, token)
 
 	client := twitter.NewClient(httpClient)
-
-	if utf8.RuneCountInString(tweet) > 140 {
-		var truncated bytes.Buffer
-		for i := 1; i < 140; i++ { // 139 runes
-			r, n := utf8.DecodeRuneInString(tweet)
-			if r == utf8.RuneError {
-				break
-			}
-			tweet = tweet[n:]
-			truncated.WriteRune(r)
-		}
-		truncated.WriteRune('…')
-		tweet = truncated.String()
-	}
-
 	_, _, err = client.Statuses.Update(tweet, nil)
 	return err
 }
