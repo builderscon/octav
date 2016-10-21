@@ -74,7 +74,7 @@ func (c *GoogleStorageClient) Move(ctx context.Context, srcName, dstName string,
 		pdebug.Printf("attrs = %#v", attrs)
 	}
 
-	if _, err = src.CopyTo(ctx, dst, attrs); err != nil {
+	if _, err = dst.CopierFrom(src).Run(ctx); err != nil {
 		return errors.Wrapf(err, "failed to copy from '%s' to '%s'", srcName, dstName)
 	}
 
@@ -193,17 +193,12 @@ func (c *GoogleStorageClient) List(ctx context.Context, options ...CallOption) (
 		defer close(out)
 		storagecl := c.GetClient(ctx)
 		b := storagecl.Bucket(c.bucketName)
-		for q != nil {
-			objects, err := b.List(ctx, q)
+		for objects := b.Objects(ctx, q); ; {
+			object, err := objects.Next()
 			if err != nil {
 				return
 			}
-
-			for _, object := range objects.Results {
-				out <- object
-			}
-
-			q = objects.Next
+			out <- object
 		}
 	}()
 
