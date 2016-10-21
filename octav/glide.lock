@@ -1,5 +1,5 @@
 hash: a1e9b03b5720f4521f9ba4897f74af2216da9e5367732f732c153914e588ceb2
-updated: 2016-10-21T15:19:41.428304171+09:00
+updated: 2016-10-21T16:01:21.726567014+09:00
 imports:
 - name: cloud.google.com/go
   version: 7450882a75c8d2600748666d1ed16e0a5afa532d
@@ -59,7 +59,7 @@ imports:
 - name: github.com/lestrrat/go-jsschema
   version: a6a42341b50d8d7e2a733db922eefaa756321021
 - name: github.com/lestrrat/go-jsval
-  version: 766365e571c7a4ee1f2c00284acf6156e59b76cd
+  version: cf70aae60f5b41a32922066c41287b0168e55904
 - name: github.com/lestrrat/go-pdebug
   version: 2e6eaaa5717f81bda41d27070d3c966f40a1e75f
 - name: github.com/lestrrat/go-simple-guard
