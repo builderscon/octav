@@ -189,6 +189,8 @@ func doConferenceCreate(args cmdargs) int {
 	fs.StringVar(&slug, "slug", "", "")
 	var sub_title string
 	fs.StringVar(&sub_title, "sub_title", "", "")
+	var timezone string
+	fs.StringVar(&timezone, "timezone", "", "")
 	var title string
 	fs.StringVar(&title, "title", "", "")
 	var user_id string
@@ -219,6 +221,9 @@ func doConferenceCreate(args cmdargs) int {
 	}
 	if sub_title != "" {
 		m["sub_title"] = sub_title
+	}
+	if timezone != "" {
+		m["timezone"] = timezone
 	}
 	if title != "" {
 		m["title"] = title

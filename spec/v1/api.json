@@ -1324,6 +1324,7 @@
           "slide_language": { "$ref": "#/definitions/language" },
           "slide_subtitles": { "$ref": "#/definitions/language" },
           "slide_url": { "$ref": "#/definitions/url" },
+          "starts_on": { "$ref": "#/definitions/datetime" },
           "video_url": { "$ref": "#/definitions/url" },
           "photo_release": { "$ref": "#/definitions/binary_permission_default_allow" },
           "recording_release": { "$ref": "#/definitions/binary_permission_default_allow" },

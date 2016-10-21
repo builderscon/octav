@@ -3494,6 +3494,10 @@ func init() {
 					jsval.Reference(M).RefersTo("#/definitions/language"),
 				).
 				AddProp(
+					"starts_on",
+					jsval.Reference(M).RefersTo("#/definitions/datetime"),
+				).
+				AddProp(
 					"status",
 					jsval.Reference(M).RefersTo("#/definitions/acceptance_status"),
 				).

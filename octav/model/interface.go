@@ -532,6 +532,7 @@ type UpdateSessionRequest struct {
 	SortOrder         jsval.MaybeInt    `json:"sort_order,omitempty"`
 	HasInterpretation jsval.MaybeBool   `json:"has_interpretation,omitempty"`
 	Status            jsval.MaybeString `json:"status,omitempty"`
+	StartsOn          jsval.MaybeTime   `json:"starts_on,omitempty"`
 	Confirmed         jsval.MaybeBool   `json:"confirmed,omitempty"`
 	LocalizedFields   `json:"-"`
 	UserID            string `json:"user_id"`
