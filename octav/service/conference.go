@@ -37,6 +37,14 @@ func (v *ConferenceSvc) populateRowForCreate(vdb *db.Conference, payload model.C
 		vdb.SubTitle.Valid = true
 		vdb.SubTitle.String = payload.SubTitle.String
 	}
+
+	if payload.Timezone.Valid() {
+		if _, err := time.LoadLocation(payload.Timezone.String); err == nil {
+			vdb.Timezone = payload.Timezone.String
+		}
+	} else {
+		vdb.Timezone = "UTC"
+	}
 	return nil
 }
 

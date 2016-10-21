@@ -294,6 +294,7 @@ type CreateConferenceRequest struct {
 	SeriesID                  string            `json:"series_id"`
 	SubTitle                  jsval.MaybeString `json:"sub_title" l10n:"true"`
 	Slug                      string            `json:"slug"`
+	Timezone                  jsval.MaybeString `json:"timezone"`
 	UserID                    string            `json:"user_id"`
 	LocalizedFields           `json:"-"`
 }
