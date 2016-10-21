@@ -69,6 +69,9 @@ class Octav(object):
 
   def last_error(self):
     return self.error
+
+  def last_response(self):
+    return self.res
 EOM
 
 for my $link (@{$schema->{links}}) {
@@ -146,6 +149,7 @@ for my $link (@{$schema->{links}}) {
 
     say $tmpout '        if self.debug:';
     say $tmpout '            print(res)';
+    say $tmpout '        self.res = res';
     say $tmpout '        if res.status != 200:';
     say $tmpout '            self.extract_error(res)';
     say $tmpout '            return None';
