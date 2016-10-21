@@ -1535,6 +1535,7 @@ func doGetConferenceSchedule(ctx context.Context, w http.ResponseWriter, r *http
 	for _, session := range v {
 		e := ical.NewEvent()
 		e.AddProperty("url", fmt.Sprintf("https://builderscon.io/%s/%s/session/%s", series.Slug, conf.Slug, session.ID))
+		c.AddEntry(e)
 	}
 
 	w.Header().Set("Content-Type", "text/calendar")
