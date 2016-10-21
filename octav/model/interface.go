@@ -923,3 +923,9 @@ type TweetAsConferenceRequest struct {
 
 type JSONTime time.Time
 type JSONTimeList []JSONTime
+
+// +transport
+type GetConferenceScheduleRequest struct {
+	ConferenceID string `json:"conference_id"`
+}
+

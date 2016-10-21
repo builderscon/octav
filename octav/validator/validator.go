@@ -48,6 +48,7 @@ var HTTPDeleteSessionTypeRequest *jsval.JSVal
 var HTTPDeleteSponsorRequest *jsval.JSVal
 var HTTPDeleteUserRequest *jsval.JSVal
 var HTTPDeleteVenueRequest *jsval.JSVal
+var HTTPGetConferenceScheduleRequest *jsval.JSVal
 var HTTPListConferenceRequest *jsval.JSVal
 var HTTPListConferenceResponse *jsval.JSVal
 var HTTPListConferenceSeriesRequest *jsval.JSVal
@@ -1993,6 +1994,21 @@ func init() {
 				).
 				AddProp(
 					"user_id",
+					jsval.Reference(M).RefersTo("#/definitions/uuid"),
+				),
+		)
+
+	HTTPGetConferenceScheduleRequest = jsval.New().
+		SetName("HTTPGetConferenceScheduleRequest").
+		SetConstraintMap(M).
+		SetRoot(
+			jsval.Object().
+				Required("conference_id").
+				AdditionalProperties(
+					jsval.EmptyConstraint,
+				).
+				AddProp(
+					"conference_id",
 					jsval.Reference(M).RefersTo("#/definitions/uuid"),
 				),
 		)

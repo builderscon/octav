@@ -865,6 +865,18 @@
       "targetSchema": {"$ref": "#/definitions/object_id"}
     },
     {
+      "title": "Get conference schedule",
+      "rel": "list",
+      "method": "GET",
+      "href": "/v1/conference/schedule.ics",
+      "schema": {
+        "required": ["conference_id"],
+        "properties": {
+          "conference_id": {"$ref": "#/definitions/uuid"}
+        }
+      }
+    },
+    {
       "title": "Add conference credential",
       "hsup.wrapper": "httpWithBasicAuth",
       "rel": "update",

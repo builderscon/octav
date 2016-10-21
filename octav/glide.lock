@@ -1,5 +1,5 @@
-hash: bb04864eaf09e0d5060679ac683973cee46933812a7d6fd8c200443978502294
-updated: 2016-10-10T22:00:39.054909804+09:00
+hash: a1e9b03b5720f4521f9ba4897f74af2216da9e5367732f732c153914e588ceb2
+updated: 2016-10-21T10:51:14.411472272+09:00
 imports:
 - name: cloud.google.com/go
   version: e89968106bfb1f9fe3f05a5ca644866acd15edf8
@@ -41,6 +41,10 @@ imports:
   version: 0f5817c5c9e626d408c4d68e3d90fd7697e97d5f
 - name: github.com/lestrrat/go-bindata
   version: b9f2acfb40bc204a6e6c1a94547e128554650f95
+- name: github.com/lestrrat/go-bufferpool
+  version: a1a4a9cf09b4f3e6d263ba25cf09de3276e1d589
+- name: github.com/lestrrat/go-ical
+  version: 93ce43f05307927c3904b5b863f722e87702b86a
 - name: github.com/lestrrat/go-jshschema
   version: 4514acd168a63041862eb3d223a09a789cae6b3b
 - name: github.com/lestrrat/go-jspointer
@@ -80,7 +84,7 @@ imports:
   subpackages:
   - assert
 - name: golang.org/x/net
-  version: 1358eff22f0dd0c54fc521042cc607f6ff4b531a
+  version: 6250b412798208e6c90b03b7c4f226de5aa299e2
   subpackages:
   - context
   - context/ctxhttp

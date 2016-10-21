@@ -2,23 +2,16 @@ package tools
 
 import (
 	"bytes"
-	"sync"
+
+	bufferpool "github.com/lestrrat/go-bufferpool"
 )
 
-var bufPool = sync.Pool{
-	New: allocBuffer,
-}
-
-func allocBuffer() interface{} {
-	return &bytes.Buffer{}
-}
+var bufPool = bufferpool.New()
 
 func GetBuffer() *bytes.Buffer {
-	return bufPool.Get().(*bytes.Buffer)
+	return bufPool.Get()
 }
 
 func ReleaseBuffer(buf *bytes.Buffer) {
-	buf.Reset()
-	buf.Grow(0)
-	bufPool.Put(buf)
+	bufPool.Release(buf)
 }

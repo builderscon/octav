@@ -1,5 +1,5 @@
 """OCTAV Client Library"""
-"""DO NOT EDIT: This file was generated from ../spec/v1/api.json on Sun Oct 16 07:24:32 2016"""
+"""DO NOT EDIT: This file was generated from ../spec/v1/api.json on Fri Oct 21 10:55:56 2016"""
 
 import certifi
 import json
@@ -840,6 +840,32 @@ class Octav(object):
             self.extract_error(res)
             return None
         return json.loads(res.data)
+    except BaseException as e:
+        if self.debug:
+            print("error during http access: " + repr(e))
+        self.error = repr(e)
+        return None
+
+  def get_conference_schedule (self, conference_id):
+    try:
+        payload = {}
+        hdrs = {}
+        if conference_id is None:
+            raise MissingRequiredArgument('property conference_id must be provided')
+        payload['conference_id'] = conference_id
+        if conference_id is not None:
+            payload['conference_id'] = conference_id
+        uri = '%s/v1/conference/schedule.ics' % self.endpoint
+        qs = urlencode(payload, True)
+        if self.debug:
+            print('GET %s?%s' % (uri, qs))
+        res = self.http.request('GET', '%s?%s' % (uri, qs), headers=hdrs)
+        if self.debug:
+            print(res)
+        if res.status != 200:
+            self.extract_error(res)
+            return None
+        return True
     except BaseException as e:
         if self.debug:
             print("error during http access: " + repr(e))
