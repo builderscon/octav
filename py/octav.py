@@ -1,5 +1,5 @@
 """OCTAV Client Library"""
-"""DO NOT EDIT: This file was generated from ../spec/v1/api.json on Sun Oct 16 07:24:32 2016"""
+"""DO NOT EDIT: This file was generated from ../spec/v1/api.json on Fri Oct 21 17:15:56 2016"""
 
 import certifi
 import json
@@ -49,6 +49,9 @@ class Octav(object):
   def last_error(self):
     return self.error
 
+  def last_response(self):
+    return self.res
+
   def health_check (self):
     try:
         payload = {}
@@ -60,11 +63,12 @@ class Octav(object):
         res = self.http.request('GET', '%s?%s' % (uri, qs), headers=hdrs)
         if self.debug:
             print(res)
+        self.res = res
         if res.status != 200:
             self.extract_error(res)
             return None
         return True
-    except BaseException, e:
+    except BaseException as e:
         if self.debug:
             print("error during http access: " + repr(e))
         self.error = repr(e)
@@ -114,11 +118,12 @@ class Octav(object):
         res = self.http.request('POST', uri, headers=hdrs, body=json.dumps(payload))
         if self.debug:
             print(res)
+        self.res = res
         if res.status != 200:
             self.extract_error(res)
             return None
         return json.loads(res.data)
-    except BaseException, e:
+    except BaseException as e:
         if self.debug:
             print("error during http access: " + repr(e))
         self.error = repr(e)
@@ -143,11 +148,12 @@ class Octav(object):
         res = self.http.request('GET', '%s?%s' % (uri, qs), headers=hdrs)
         if self.debug:
             print(res)
+        self.res = res
         if res.status != 200:
             self.extract_error(res)
             return None
         return json.loads(res.data)
-    except BaseException, e:
+    except BaseException as e:
         if self.debug:
             print("error during http access: " + repr(e))
         self.error = repr(e)
@@ -177,11 +183,12 @@ class Octav(object):
         res = self.http.request('GET', '%s?%s' % (uri, qs), headers=hdrs)
         if self.debug:
             print(res)
+        self.res = res
         if res.status != 200:
             self.extract_error(res)
             return None
         return json.loads(res.data)
-    except BaseException, e:
+    except BaseException as e:
         if self.debug:
             print("error during http access: " + repr(e))
         self.error = repr(e)
@@ -226,11 +233,12 @@ class Octav(object):
         res = self.http.request('POST', uri, headers=hdrs, body=json.dumps(payload))
         if self.debug:
             print(res)
+        self.res = res
         if res.status != 200:
             self.extract_error(res)
             return None
         return True
-    except BaseException, e:
+    except BaseException as e:
         if self.debug:
             print("error during http access: " + repr(e))
         self.error = repr(e)
@@ -260,11 +268,12 @@ class Octav(object):
         res = self.http.request('POST', uri, headers=hdrs, body=json.dumps(payload))
         if self.debug:
             print(res)
+        self.res = res
         if res.status != 200:
             self.extract_error(res)
             return None
         return True
-    except BaseException, e:
+    except BaseException as e:
         if self.debug:
             print("error during http access: " + repr(e))
         self.error = repr(e)
@@ -290,11 +299,12 @@ class Octav(object):
         res = self.http.request('GET', '%s?%s' % (uri, qs), headers=hdrs)
         if self.debug:
             print(res)
+        self.res = res
         if res.status != 200:
             self.extract_error(res)
             return None
         return json.loads(res.data)
-    except BaseException, e:
+    except BaseException as e:
         if self.debug:
             print("error during http access: " + repr(e))
         self.error = repr(e)
@@ -338,11 +348,12 @@ class Octav(object):
         res = self.http.request('POST', uri, headers=hdrs, body=json.dumps(payload))
         if self.debug:
             print(res)
+        self.res = res
         if res.status != 200:
             self.extract_error(res)
             return None
         return json.loads(res.data)
-    except BaseException, e:
+    except BaseException as e:
         if self.debug:
             print("error during http access: " + repr(e))
         self.error = repr(e)
@@ -368,11 +379,12 @@ class Octav(object):
         res = self.http.request('GET', '%s?%s' % (uri, qs), headers=hdrs)
         if self.debug:
             print(res)
+        self.res = res
         if res.status != 200:
             self.extract_error(res)
             return None
         return json.loads(res.data)
-    except BaseException, e:
+    except BaseException as e:
         if self.debug:
             print("error during http access: " + repr(e))
         self.error = repr(e)
@@ -394,11 +406,12 @@ class Octav(object):
         res = self.http.request('GET', '%s?%s' % (uri, qs), headers=hdrs)
         if self.debug:
             print(res)
+        self.res = res
         if res.status != 200:
             self.extract_error(res)
             return None
         return json.loads(res.data)
-    except BaseException, e:
+    except BaseException as e:
         if self.debug:
             print("error during http access: " + repr(e))
         self.error = repr(e)
@@ -428,11 +441,12 @@ class Octav(object):
         res = self.http.request('POST', uri, headers=hdrs, body=json.dumps(payload))
         if self.debug:
             print(res)
+        self.res = res
         if res.status != 200:
             self.extract_error(res)
             return None
         return True
-    except BaseException, e:
+    except BaseException as e:
         if self.debug:
             print("error during http access: " + repr(e))
         self.error = repr(e)
@@ -462,11 +476,12 @@ class Octav(object):
         res = self.http.request('POST', uri, headers=hdrs, body=json.dumps(payload))
         if self.debug:
             print(res)
+        self.res = res
         if res.status != 200:
             self.extract_error(res)
             return None
         return True
-    except BaseException, e:
+    except BaseException as e:
         if self.debug:
             print("error during http access: " + repr(e))
         self.error = repr(e)
@@ -508,11 +523,12 @@ class Octav(object):
         res = self.http.request('POST', uri, headers=hdrs, body=json.dumps(payload))
         if self.debug:
             print(res)
+        self.res = res
         if res.status != 200:
             self.extract_error(res)
             return None
         return json.loads(res.data)
-    except BaseException, e:
+    except BaseException as e:
         if self.debug:
             print("error during http access: " + repr(e))
         self.error = repr(e)
@@ -553,11 +569,12 @@ class Octav(object):
         res = self.http.request('POST', uri, headers=hdrs, body=json.dumps(payload))
         if self.debug:
             print(res)
+        self.res = res
         if res.status != 200:
             self.extract_error(res)
             return None
         return True
-    except BaseException, e:
+    except BaseException as e:
         if self.debug:
             print("error during http access: " + repr(e))
         self.error = repr(e)
@@ -579,11 +596,12 @@ class Octav(object):
         res = self.http.request('GET', '%s?%s' % (uri, qs), headers=hdrs)
         if self.debug:
             print(res)
+        self.res = res
         if res.status != 200:
             self.extract_error(res)
             return None
         return json.loads(res.data)
-    except BaseException, e:
+    except BaseException as e:
         if self.debug:
             print("error during http access: " + repr(e))
         self.error = repr(e)
@@ -613,11 +631,12 @@ class Octav(object):
         res = self.http.request('POST', uri, headers=hdrs, body=json.dumps(payload))
         if self.debug:
             print(res)
+        self.res = res
         if res.status != 200:
             self.extract_error(res)
             return None
         return True
-    except BaseException, e:
+    except BaseException as e:
         if self.debug:
             print("error during http access: " + repr(e))
         self.error = repr(e)
@@ -646,11 +665,12 @@ class Octav(object):
         res = self.http.request('GET', '%s?%s' % (uri, qs), headers=hdrs)
         if self.debug:
             print(res)
+        self.res = res
         if res.status != 200:
             self.extract_error(res)
             return None
         return json.loads(res.data)
-    except BaseException, e:
+    except BaseException as e:
         if self.debug:
             print("error during http access: " + repr(e))
         self.error = repr(e)
@@ -687,11 +707,12 @@ class Octav(object):
         res = self.http.request('POST', uri, headers=hdrs, body=json.dumps(payload))
         if self.debug:
             print(res)
+        self.res = res
         if res.status != 200:
             self.extract_error(res)
             return None
         return json.loads(res.data)
-    except BaseException, e:
+    except BaseException as e:
         if self.debug:
             print("error during http access: " + repr(e))
         self.error = repr(e)
@@ -715,11 +736,12 @@ class Octav(object):
         res = self.http.request('GET', '%s?%s' % (uri, qs), headers=hdrs)
         if self.debug:
             print(res)
+        self.res = res
         if res.status != 200:
             self.extract_error(res)
             return None
         return json.loads(res.data)
-    except BaseException, e:
+    except BaseException as e:
         if self.debug:
             print("error during http access: " + repr(e))
         self.error = repr(e)
@@ -743,11 +765,12 @@ class Octav(object):
         res = self.http.request('GET', '%s?%s' % (uri, qs), headers=hdrs)
         if self.debug:
             print(res)
+        self.res = res
         if res.status != 200:
             self.extract_error(res)
             return None
         return json.loads(res.data)
-    except BaseException, e:
+    except BaseException as e:
         if self.debug:
             print("error during http access: " + repr(e))
         self.error = repr(e)
@@ -782,17 +805,18 @@ class Octav(object):
         res = self.http.request('POST', uri, headers=hdrs, body=json.dumps(payload))
         if self.debug:
             print(res)
+        self.res = res
         if res.status != 200:
             self.extract_error(res)
             return None
         return True
-    except BaseException, e:
+    except BaseException as e:
         if self.debug:
             print("error during http access: " + repr(e))
         self.error = repr(e)
         return None
 
-  def create_conference (self, series_id, slug, title, user_id, cfp_lead_text=None, cfp_post_submit_instructions=None, cfp_pre_submit_instructions=None, description=None, sub_title=None):
+  def create_conference (self, series_id, slug, title, user_id, cfp_lead_text=None, cfp_post_submit_instructions=None, cfp_pre_submit_instructions=None, description=None, sub_title=None, timezone=None):
     try:
         payload = {}
         hdrs = {}
@@ -822,6 +846,8 @@ class Octav(object):
             payload['slug'] = slug
         if sub_title is not None:
             payload['sub_title'] = sub_title
+        if timezone is not None:
+            payload['timezone'] = timezone
         if title is not None:
             payload['title'] = title
         if user_id is not None:
@@ -836,11 +862,39 @@ class Octav(object):
         res = self.http.request('POST', uri, headers=hdrs, body=json.dumps(payload))
         if self.debug:
             print(res)
+        self.res = res
         if res.status != 200:
             self.extract_error(res)
             return None
         return json.loads(res.data)
-    except BaseException, e:
+    except BaseException as e:
+        if self.debug:
+            print("error during http access: " + repr(e))
+        self.error = repr(e)
+        return None
+
+  def get_conference_schedule (self, conference_id):
+    try:
+        payload = {}
+        hdrs = {}
+        if conference_id is None:
+            raise MissingRequiredArgument('property conference_id must be provided')
+        payload['conference_id'] = conference_id
+        if conference_id is not None:
+            payload['conference_id'] = conference_id
+        uri = '%s/v1/conference/schedule.ics' % self.endpoint
+        qs = urlencode(payload, True)
+        if self.debug:
+            print('GET %s?%s' % (uri, qs))
+        res = self.http.request('GET', '%s?%s' % (uri, qs), headers=hdrs)
+        if self.debug:
+            print(res)
+        self.res = res
+        if res.status != 200:
+            self.extract_error(res)
+            return None
+        return True
+    except BaseException as e:
         if self.debug:
             print("error during http access: " + repr(e))
         self.error = repr(e)
@@ -880,11 +934,12 @@ class Octav(object):
         res = self.http.request('POST', uri, headers=hdrs, body=json.dumps(payload))
         if self.debug:
             print(res)
+        self.res = res
         if res.status != 200:
             self.extract_error(res)
             return None
         return True
-    except BaseException, e:
+    except BaseException as e:
         if self.debug:
             print("error during http access: " + repr(e))
         self.error = repr(e)
@@ -919,11 +974,12 @@ class Octav(object):
         res = self.http.request('POST', uri, headers=hdrs, body=json.dumps(payload))
         if self.debug:
             print(res)
+        self.res = res
         if res.status != 200:
             self.extract_error(res)
             return None
         return True
-    except BaseException, e:
+    except BaseException as e:
         if self.debug:
             print("error during http access: " + repr(e))
         self.error = repr(e)
@@ -958,11 +1014,12 @@ class Octav(object):
         res = self.http.request('POST', uri, headers=hdrs, body=json.dumps(payload))
         if self.debug:
             print(res)
+        self.res = res
         if res.status != 200:
             self.extract_error(res)
             return None
         return json.loads(res.data)
-    except BaseException, e:
+    except BaseException as e:
         if self.debug:
             print("error during http access: " + repr(e))
         self.error = repr(e)
@@ -994,11 +1051,12 @@ class Octav(object):
         res = self.http.request('POST', uri, headers=hdrs, body=json.dumps(payload))
         if self.debug:
             print(res)
+        self.res = res
         if res.status != 200:
             self.extract_error(res)
             return None
         return True
-    except BaseException, e:
+    except BaseException as e:
         if self.debug:
             print("error during http access: " + repr(e))
         self.error = repr(e)
@@ -1033,11 +1091,12 @@ class Octav(object):
         res = self.http.request('POST', uri, headers=hdrs, body=json.dumps(payload))
         if self.debug:
             print(res)
+        self.res = res
         if res.status != 200:
             self.extract_error(res)
             return None
         return True
-    except BaseException, e:
+    except BaseException as e:
         if self.debug:
             print("error during http access: " + repr(e))
         self.error = repr(e)
@@ -1072,11 +1131,12 @@ class Octav(object):
         res = self.http.request('POST', uri, headers=hdrs, body=json.dumps(payload))
         if self.debug:
             print(res)
+        self.res = res
         if res.status != 200:
             self.extract_error(res)
             return None
         return True
-    except BaseException, e:
+    except BaseException as e:
         if self.debug:
             print("error during http access: " + repr(e))
         self.error = repr(e)
@@ -1111,11 +1171,12 @@ class Octav(object):
         res = self.http.request('POST', uri, headers=hdrs, body=json.dumps(payload))
         if self.debug:
             print(res)
+        self.res = res
         if res.status != 200:
             self.extract_error(res)
             return None
         return True
-    except BaseException, e:
+    except BaseException as e:
         if self.debug:
             print("error during http access: " + repr(e))
         self.error = repr(e)
@@ -1150,11 +1211,12 @@ class Octav(object):
         res = self.http.request('POST', uri, headers=hdrs, body=json.dumps(payload))
         if self.debug:
             print(res)
+        self.res = res
         if res.status != 200:
             self.extract_error(res)
             return None
         return True
-    except BaseException, e:
+    except BaseException as e:
         if self.debug:
             print("error during http access: " + repr(e))
         self.error = repr(e)
@@ -1208,11 +1270,12 @@ class Octav(object):
         res = self.http.request('POST', uri, headers=hdrs, body=json.dumps(payload))
         if self.debug:
             print(res)
+        self.res = res
         if res.status != 200:
             self.extract_error(res)
             return None
         return True
-    except BaseException, e:
+    except BaseException as e:
         if self.debug:
             print("error during http access: " + repr(e))
         self.error = repr(e)
@@ -1242,11 +1305,12 @@ class Octav(object):
         res = self.http.request('POST', uri, headers=hdrs, body=json.dumps(payload))
         if self.debug:
             print(res)
+        self.res = res
         if res.status != 200:
             self.extract_error(res)
             return None
         return True
-    except BaseException, e:
+    except BaseException as e:
         if self.debug:
             print("error during http access: " + repr(e))
         self.error = repr(e)
@@ -1273,11 +1337,12 @@ class Octav(object):
         res = self.http.request('GET', '%s?%s' % (uri, qs), headers=hdrs)
         if self.debug:
             print(res)
+        self.res = res
         if res.status != 200:
             self.extract_error(res)
             return None
         return json.loads(res.data)
-    except BaseException, e:
+    except BaseException as e:
         if self.debug:
             print("error during http access: " + repr(e))
         self.error = repr(e)
@@ -1322,11 +1387,12 @@ class Octav(object):
         res = self.http.request('POST', uri, headers=hdrs, body=json.dumps(payload))
         if self.debug:
             print(res)
+        self.res = res
         if res.status != 200:
             self.extract_error(res)
             return None
         return True
-    except BaseException, e:
+    except BaseException as e:
         if self.debug:
             print("error during http access: " + repr(e))
         self.error = repr(e)
@@ -1350,11 +1416,12 @@ class Octav(object):
         res = self.http.request('GET', '%s?%s' % (uri, qs), headers=hdrs)
         if self.debug:
             print(res)
+        self.res = res
         if res.status != 200:
             self.extract_error(res)
             return None
         return json.loads(res.data)
-    except BaseException, e:
+    except BaseException as e:
         if self.debug:
             print("error during http access: " + repr(e))
         self.error = repr(e)
@@ -1378,11 +1445,12 @@ class Octav(object):
         res = self.http.request('GET', '%s?%s' % (uri, qs), headers=hdrs)
         if self.debug:
             print(res)
+        self.res = res
         if res.status != 200:
             self.extract_error(res)
             return None
         return json.loads(res.data)
-    except BaseException, e:
+    except BaseException as e:
         if self.debug:
             print("error during http access: " + repr(e))
         self.error = repr(e)
@@ -1406,11 +1474,12 @@ class Octav(object):
         res = self.http.request('GET', '%s?%s' % (uri, qs), headers=hdrs)
         if self.debug:
             print(res)
+        self.res = res
         if res.status != 200:
             self.extract_error(res)
             return None
         return json.loads(res.data)
-    except BaseException, e:
+    except BaseException as e:
         if self.debug:
             print("error during http access: " + repr(e))
         self.error = repr(e)
@@ -1438,11 +1507,12 @@ class Octav(object):
         res = self.http.request('GET', '%s?%s' % (uri, qs), headers=hdrs)
         if self.debug:
             print(res)
+        self.res = res
         if res.status != 200:
             self.extract_error(res)
             return None
         return json.loads(res.data)
-    except BaseException, e:
+    except BaseException as e:
         if self.debug:
             print("error during http access: " + repr(e))
         self.error = repr(e)
@@ -1474,11 +1544,12 @@ class Octav(object):
         res = self.http.request('GET', '%s?%s' % (uri, qs), headers=hdrs)
         if self.debug:
             print(res)
+        self.res = res
         if res.status != 200:
             self.extract_error(res)
             return None
         return json.loads(res.data)
-    except BaseException, e:
+    except BaseException as e:
         if self.debug:
             print("error during http access: " + repr(e))
         self.error = repr(e)
@@ -1531,11 +1602,12 @@ class Octav(object):
         res = self.http.request('POST', uri, headers=hdrs, body=json.dumps(payload))
         if self.debug:
             print(res)
+        self.res = res
         if res.status != 200:
             self.extract_error(res)
             return None
         return True
-    except BaseException, e:
+    except BaseException as e:
         if self.debug:
             print("error during http access: " + repr(e))
         self.error = repr(e)
@@ -1565,11 +1637,12 @@ class Octav(object):
         res = self.http.request('POST', uri, headers=hdrs, body=json.dumps(payload))
         if self.debug:
             print(res)
+        self.res = res
         if res.status != 200:
             self.extract_error(res)
             return None
         return True
-    except BaseException, e:
+    except BaseException as e:
         if self.debug:
             print("error during http access: " + repr(e))
         self.error = repr(e)
@@ -1594,11 +1667,12 @@ class Octav(object):
         res = self.http.request('POST', uri, headers=hdrs, body=json.dumps(payload))
         if self.debug:
             print(res)
+        self.res = res
         if res.status != 200:
             self.extract_error(res)
             return None
         return True
-    except BaseException, e:
+    except BaseException as e:
         if self.debug:
             print("error during http access: " + repr(e))
         self.error = repr(e)
@@ -1671,11 +1745,12 @@ class Octav(object):
         res = self.http.request('POST', uri, headers=hdrs, body=json.dumps(payload))
         if self.debug:
             print(res)
+        self.res = res
         if res.status != 200:
             self.extract_error(res)
             return None
         return json.loads(res.data)
-    except BaseException, e:
+    except BaseException as e:
         if self.debug:
             print("error during http access: " + repr(e))
         self.error = repr(e)
@@ -1702,11 +1777,12 @@ class Octav(object):
         res = self.http.request('GET', '%s?%s' % (uri, qs), headers=hdrs)
         if self.debug:
             print(res)
+        self.res = res
         if res.status != 200:
             self.extract_error(res)
             return None
         return json.loads(res.data)
-    except BaseException, e:
+    except BaseException as e:
         if self.debug:
             print("error during http access: " + repr(e))
         self.error = repr(e)
@@ -1736,17 +1812,18 @@ class Octav(object):
         res = self.http.request('POST', uri, headers=hdrs, body=json.dumps(payload))
         if self.debug:
             print(res)
+        self.res = res
         if res.status != 200:
             self.extract_error(res)
             return None
         return True
-    except BaseException, e:
+    except BaseException as e:
         if self.debug:
             print("error during http access: " + repr(e))
         self.error = repr(e)
         return None
 
-  def update_session (self, id, user_id, abstract=None, category=None, conference_id=None, confirmed=None, duration=None, has_interpretation=None, material_level=None, materials_release=None, memo=None, photo_release=None, recording_release=None, session_type_id=None, slide_language=None, slide_subtitles=None, slide_url=None, sort_order=None, speaker_id=None, spoken_language=None, status=None, tags=None, title=None, video_url=None, **args):
+  def update_session (self, id, user_id, abstract=None, category=None, conference_id=None, confirmed=None, duration=None, has_interpretation=None, material_level=None, materials_release=None, memo=None, photo_release=None, recording_release=None, session_type_id=None, slide_language=None, slide_subtitles=None, slide_url=None, sort_order=None, speaker_id=None, spoken_language=None, starts_on=None, status=None, tags=None, title=None, video_url=None, **args):
     try:
         payload = {}
         hdrs = {}
@@ -1794,6 +1871,8 @@ class Octav(object):
             payload['speaker_id'] = speaker_id
         if spoken_language is not None:
             payload['spoken_language'] = spoken_language
+        if starts_on is not None:
+            payload['starts_on'] = starts_on
         if status is not None:
             payload['status'] = status
         if tags is not None:
@@ -1819,11 +1898,12 @@ class Octav(object):
         res = self.http.request('POST', uri, headers=hdrs, body=json.dumps(payload))
         if self.debug:
             print(res)
+        self.res = res
         if res.status != 200:
             self.extract_error(res)
             return None
         return True
-    except BaseException, e:
+    except BaseException as e:
         if self.debug:
             print("error during http access: " + repr(e))
         self.error = repr(e)
@@ -1857,11 +1937,12 @@ class Octav(object):
         res = self.http.request('GET', '%s?%s' % (uri, qs), headers=hdrs)
         if self.debug:
             print(res)
+        self.res = res
         if res.status != 200:
             self.extract_error(res)
             return None
         return json.loads(res.data)
-    except BaseException, e:
+    except BaseException as e:
         if self.debug:
             print("error during http access: " + repr(e))
         self.error = repr(e)
@@ -1896,11 +1977,12 @@ class Octav(object):
         res = self.http.request('GET', '%s?%s' % (uri, qs), headers=hdrs)
         if self.debug:
             print(res)
+        self.res = res
         if res.status != 200:
             self.extract_error(res)
             return None
         return json.loads(res.data)
-    except BaseException, e:
+    except BaseException as e:
         if self.debug:
             print("error during http access: " + repr(e))
         self.error = repr(e)
@@ -1925,11 +2007,12 @@ class Octav(object):
         res = self.http.request('POST', uri, headers=hdrs, body=json.dumps(payload))
         if self.debug:
             print(res)
+        self.res = res
         if res.status != 200:
             self.extract_error(res)
             return None
         return True
-    except BaseException, e:
+    except BaseException as e:
         if self.debug:
             print("error during http access: " + repr(e))
         self.error = repr(e)
@@ -1958,11 +2041,12 @@ class Octav(object):
         res = self.http.request('GET', '%s?%s' % (uri, qs), headers=hdrs)
         if self.debug:
             print(res)
+        self.res = res
         if res.status != 200:
             self.extract_error(res)
             return None
         return json.loads(res.data)
-    except BaseException, e:
+    except BaseException as e:
         if self.debug:
             print("error during http access: " + repr(e))
         self.error = repr(e)
@@ -2021,11 +2105,12 @@ class Octav(object):
         res = self.http.request('GET', '%s?%s' % (uri, qs), headers=hdrs)
         if self.debug:
             print(res)
+        self.res = res
         if res.status != 200:
             self.extract_error(res)
             return None
         return json.loads(res.data)
-    except BaseException, e:
+    except BaseException as e:
         if self.debug:
             print("error during http access: " + repr(e))
         self.error = repr(e)
@@ -2071,11 +2156,12 @@ class Octav(object):
         res = self.http.request('POST', uri, headers=hdrs, body=json.dumps(payload))
         if self.debug:
             print(res)
+        self.res = res
         if res.status != 200:
             self.extract_error(res)
             return None
         return json.loads(res.data)
-    except BaseException, e:
+    except BaseException as e:
         if self.debug:
             print("error during http access: " + repr(e))
         self.error = repr(e)
@@ -2102,11 +2188,12 @@ class Octav(object):
         res = self.http.request('GET', '%s?%s' % (uri, qs), headers=hdrs)
         if self.debug:
             print(res)
+        self.res = res
         if res.status != 200:
             self.extract_error(res)
             return None
         return json.loads(res.data)
-    except BaseException, e:
+    except BaseException as e:
         if self.debug:
             print("error during http access: " + repr(e))
         self.error = repr(e)
@@ -2134,11 +2221,12 @@ class Octav(object):
         res = self.http.request('GET', '%s?%s' % (uri, qs), headers=hdrs)
         if self.debug:
             print(res)
+        self.res = res
         if res.status != 200:
             self.extract_error(res)
             return None
         return json.loads(res.data)
-    except BaseException, e:
+    except BaseException as e:
         if self.debug:
             print("error during http access: " + repr(e))
         self.error = repr(e)
@@ -2181,11 +2269,12 @@ class Octav(object):
         res = self.http.request('POST', uri, headers=hdrs, body=json.dumps(payload))
         if self.debug:
             print(res)
+        self.res = res
         if res.status != 200:
             self.extract_error(res)
             return None
         return True
-    except BaseException, e:
+    except BaseException as e:
         if self.debug:
             print("error during http access: " + repr(e))
         self.error = repr(e)
@@ -2215,11 +2304,12 @@ class Octav(object):
         res = self.http.request('POST', uri, headers=hdrs, body=json.dumps(payload))
         if self.debug:
             print(res)
+        self.res = res
         if res.status != 200:
             self.extract_error(res)
             return None
         return True
-    except BaseException, e:
+    except BaseException as e:
         if self.debug:
             print("error during http access: " + repr(e))
         self.error = repr(e)
@@ -2271,11 +2361,12 @@ class Octav(object):
         res = self.http.request('POST', uri, headers=hdrs, body=json.dumps(payload))
         if self.debug:
             print(res)
+        self.res = res
         if res.status != 200:
             self.extract_error(res)
             return None
         return json.loads(res.data)
-    except BaseException, e:
+    except BaseException as e:
         if self.debug:
             print("error during http access: " + repr(e))
         self.error = repr(e)
@@ -2302,11 +2393,12 @@ class Octav(object):
         res = self.http.request('GET', '%s?%s' % (uri, qs), headers=hdrs)
         if self.debug:
             print(res)
+        self.res = res
         if res.status != 200:
             self.extract_error(res)
             return None
         return json.loads(res.data)
-    except BaseException, e:
+    except BaseException as e:
         if self.debug:
             print("error during http access: " + repr(e))
         self.error = repr(e)
@@ -2334,11 +2426,12 @@ class Octav(object):
         res = self.http.request('GET', '%s?%s' % (uri, qs), headers=hdrs)
         if self.debug:
             print(res)
+        self.res = res
         if res.status != 200:
             self.extract_error(res)
             return None
         return json.loads(res.data)
-    except BaseException, e:
+    except BaseException as e:
         if self.debug:
             print("error during http access: " + repr(e))
         self.error = repr(e)
@@ -2381,11 +2474,12 @@ class Octav(object):
         res = self.http.request('POST', uri, headers=hdrs, body=json.dumps(payload))
         if self.debug:
             print(res)
+        self.res = res
         if res.status != 200:
             self.extract_error(res)
             return None
         return True
-    except BaseException, e:
+    except BaseException as e:
         if self.debug:
             print("error during http access: " + repr(e))
         self.error = repr(e)
@@ -2415,11 +2509,12 @@ class Octav(object):
         res = self.http.request('POST', uri, headers=hdrs, body=json.dumps(payload))
         if self.debug:
             print(res)
+        self.res = res
         if res.status != 200:
             self.extract_error(res)
             return None
         return True
-    except BaseException, e:
+    except BaseException as e:
         if self.debug:
             print("error during http access: " + repr(e))
         self.error = repr(e)
@@ -2454,11 +2549,12 @@ class Octav(object):
         res = self.http.request('POST', uri, headers=hdrs, body=json.dumps(payload))
         if self.debug:
             print(res)
+        self.res = res
         if res.status != 200:
             self.extract_error(res)
             return None
         return json.loads(res.data)
-    except BaseException, e:
+    except BaseException as e:
         if self.debug:
             print("error during http access: " + repr(e))
         self.error = repr(e)
@@ -2493,11 +2589,12 @@ class Octav(object):
         res = self.http.request('POST', uri, headers=hdrs, body=json.dumps(payload))
         if self.debug:
             print(res)
+        self.res = res
         if res.status != 200:
             self.extract_error(res)
             return None
         return True
-    except BaseException, e:
+    except BaseException as e:
         if self.debug:
             print("error during http access: " + repr(e))
         self.error = repr(e)

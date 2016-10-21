@@ -138,6 +138,10 @@
       "type": "string",
       "pattern": "^\\d\\d:\\d\\d$"
     },
+    "timezone_default_utc": {
+      "type": "string",
+      "default": "UTC"
+    },
     "email": {
       "type": "string",
       "format": "email"
@@ -858,11 +862,24 @@
           "cfp_lead_text": { "$ref": "#/definitions/string_en" },
           "cfp_pre_submit_instructions": { "$ref": "#/definitions/string_en" },
           "cfp_post_submit_instructions": { "$ref": "#/definitions/string_en" },
+          "timezone": {"$ref": "#/definitions/timezone_default_utc" },
           "user_id": { "$ref": "#/definitions/uuid"}
         },
         "required": ["series_id", "title", "slug", "user_id"]
       },
       "targetSchema": {"$ref": "#/definitions/object_id"}
+    },
+    {
+      "title": "Get conference schedule",
+      "rel": "list",
+      "method": "GET",
+      "href": "/v1/conference/schedule.ics",
+      "schema": {
+        "required": ["conference_id"],
+        "properties": {
+          "conference_id": {"$ref": "#/definitions/uuid"}
+        }
+      }
     },
     {
       "title": "Add conference credential",
@@ -1307,6 +1324,7 @@
           "slide_language": { "$ref": "#/definitions/language" },
           "slide_subtitles": { "$ref": "#/definitions/language" },
           "slide_url": { "$ref": "#/definitions/url" },
+          "starts_on": { "$ref": "#/definitions/datetime" },
           "video_url": { "$ref": "#/definitions/url" },
           "photo_release": { "$ref": "#/definitions/binary_permission_default_allow" },
           "recording_release": { "$ref": "#/definitions/binary_permission_default_allow" },

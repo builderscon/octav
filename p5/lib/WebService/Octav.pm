@@ -399,6 +399,23 @@ sub create_conference {
     return JSON::decode_json($res->decoded_content);
 }
 
+sub get_conference_schedule {
+    my ($self, $payload) = @_;
+    for my $required (qw(conference_id)) {
+        if (!$payload->{$required}) {
+            die qq|property "$required" must be provided|;
+        }
+    }
+    my $uri = URI->new($self->{endpoint} . qq|/v1/conference/schedule.ics|);
+    $uri->query_form($payload);
+    my $res = $self->{user_agent}->get($uri);
+    if (!$res->is_success) {
+        $self->{last_error} = $res->status_line;
+        return;
+    }
+    return 1
+}
+
 sub add_conference_credential {
     my ($self, $payload) = @_;
     for my $required (qw(conference_id user_id type data)) {

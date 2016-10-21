@@ -294,6 +294,7 @@ type CreateConferenceRequest struct {
 	SeriesID                  string            `json:"series_id"`
 	SubTitle                  jsval.MaybeString `json:"sub_title" l10n:"true"`
 	Slug                      string            `json:"slug"`
+	Timezone                  jsval.MaybeString `json:"timezone"`
 	UserID                    string            `json:"user_id"`
 	LocalizedFields           `json:"-"`
 }
@@ -531,6 +532,7 @@ type UpdateSessionRequest struct {
 	SortOrder         jsval.MaybeInt    `json:"sort_order,omitempty"`
 	HasInterpretation jsval.MaybeBool   `json:"has_interpretation,omitempty"`
 	Status            jsval.MaybeString `json:"status,omitempty"`
+	StartsOn          jsval.MaybeTime   `json:"starts_on,omitempty"`
 	Confirmed         jsval.MaybeBool   `json:"confirmed,omitempty"`
 	LocalizedFields   `json:"-"`
 	UserID            string `json:"user_id"`
@@ -923,3 +925,9 @@ type TweetAsConferenceRequest struct {
 
 type JSONTime time.Time
 type JSONTimeList []JSONTime
+
+// +transport
+type GetConferenceScheduleRequest struct {
+	ConferenceID string `json:"conference_id"`
+}
+

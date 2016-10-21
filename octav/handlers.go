@@ -3,8 +3,11 @@ package octav
 import (
 	"bytes"
 	"encoding/json"
+	"fmt"
+	"math"
 	"net/http"
 	"os"
+	"strconv"
 
 	"context"
 
@@ -13,6 +16,7 @@ import (
 	"github.com/builderscon/octav/octav/model"
 	"github.com/builderscon/octav/octav/service"
 	"github.com/lestrrat/go-apache-logformat"
+	ical "github.com/lestrrat/go-ical"
 	"github.com/lestrrat/go-pdebug"
 )
 
@@ -1494,4 +1498,85 @@ func doTweetAsConference(ctx context.Context, w http.ResponseWriter, r *http.Req
 		httpError(w, `Failed to commit data`, http.StatusInternalServerError, err)
 		return
 	}
+}
+
+func doGetConferenceSchedule(ctx context.Context, w http.ResponseWriter, r *http.Request, payload model.GetConferenceScheduleRequest) {
+	tx, err := db.Begin()
+	if err != nil {
+		httpError(w, `GetConferenceSchedule`, http.StatusInternalServerError, err)
+		return
+	}
+	defer tx.AutoRollback()
+
+	var conf model.Conference
+	sc := service.Conference()
+	if err := sc.Lookup(tx, &conf, payload.ConferenceID); err != nil {
+		httpError(w, `GetConferenceSchedule`, http.StatusInternalServerError, err)
+		return
+	}
+
+	var series model.ConferenceSeries
+	ss := service.ConferenceSeries()
+	if err := ss.Lookup(tx, &series, conf.SeriesID); err != nil {
+		httpError(w, `GetConferenceSchedule`, http.StatusInternalServerError, err)
+		return
+	}
+
+	// Create a fake payload
+	var lp model.ListSessionsRequest
+	lp.ConferenceID.Set(payload.ConferenceID)
+	lp.Status = []string{"accepted"}
+	s := service.Session()
+	var v model.SessionList
+	if err := s.ListFromPayload(tx, &v, lp); err != nil {
+		httpError(w, `GetConferenceSchedule`, http.StatusInternalServerError, err)
+		return
+	}
+
+	sts := service.SessionType()
+	stm := map[string]model.SessionType{}
+	c, _ := ical.New()
+	for _, session := range v {
+		e := ical.NewEvent()
+		e.AddProperty("url", fmt.Sprintf("https://builderscon.io/%s/%s/session/%s", series.Slug, conf.Slug, session.ID))
+		if !session.StartsOn.IsZero() {
+			e.AddProperty("dtstart", session.StartsOn.UTC().Format("20060102T150405Z"))
+			// Grr, this is silly. We should implement this in go-ics
+			st, ok := stm[session.SessionTypeID]
+			if !ok {
+				if err := sts.Lookup(tx, &st, session.SessionTypeID); err == nil {
+					ok = true
+					stm[session.SessionTypeID] = st
+				}
+			}
+
+			if ok {
+				dur := st.Duration
+				var durbuf bytes.Buffer
+				durbuf.WriteByte('P')
+				if hour := int(math.Floor(float64(dur) / 3600.0)); hour > 0 {
+					durbuf.WriteString(strconv.Itoa(hour))
+					durbuf.WriteByte('H')
+					dur = dur - 3600*hour
+				}
+
+				if min := int(math.Floor(float64(dur) / 60.0)); min > 0 {
+					durbuf.WriteString(strconv.Itoa(min))
+					durbuf.WriteByte('M')
+					dur = dur - 60*min
+				}
+
+				if dur > 0 {
+					durbuf.WriteString(strconv.Itoa(dur))
+					durbuf.WriteByte('S')
+				}
+				e.AddProperty("duration", durbuf.String())
+			}
+		}
+		c.AddEntry(e)
+	}
+
+	w.Header().Set("Content-Type", "text/calendar")
+	w.WriteHeader(http.StatusOK)
+	c.WriteTo(w)
 }

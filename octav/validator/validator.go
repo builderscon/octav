@@ -48,6 +48,7 @@ var HTTPDeleteSessionTypeRequest *jsval.JSVal
 var HTTPDeleteSponsorRequest *jsval.JSVal
 var HTTPDeleteUserRequest *jsval.JSVal
 var HTTPDeleteVenueRequest *jsval.JSVal
+var HTTPGetConferenceScheduleRequest *jsval.JSVal
 var HTTPListConferenceRequest *jsval.JSVal
 var HTTPListConferenceResponse *jsval.JSVal
 var HTTPListConferenceSeriesRequest *jsval.JSVal
@@ -149,6 +150,7 @@ var R43 jsval.Constraint
 var R44 jsval.Constraint
 var R45 jsval.Constraint
 var R46 jsval.Constraint
+var R47 jsval.Constraint
 
 func init() {
 	M = &jsval.ConstraintMap{}
@@ -656,7 +658,8 @@ func init() {
 		AdditionalItems(
 			jsval.EmptyConstraint,
 		)
-	R41 = jsval.OneOf().
+	R41 = jsval.String().Default("UTC")
+	R42 = jsval.OneOf().
 		Add(
 			jsval.String().Enum("XXXL", "XXL", "XL", "L", "M", "S", "XS"),
 		).
@@ -666,8 +669,8 @@ func init() {
 		Add(
 			jsval.String().MaxLength(0),
 		)
-	R42 = jsval.String().Format("uri")
-	R43 = jsval.Object().
+	R43 = jsval.String().Format("uri")
+	R44 = jsval.Object().
 		AdditionalProperties(
 			jsval.EmptyConstraint,
 		).
@@ -716,15 +719,15 @@ func init() {
 			"last_name#[a-z]+",
 			jsval.Reference(M).RefersTo("#/definitions/string_i18n"),
 		)
-	R44 = jsval.Array().
+	R45 = jsval.Array().
 		Items(
 			jsval.Reference(M).RefersTo("#/definitions/user"),
 		).
 		AdditionalItems(
 			jsval.EmptyConstraint,
 		)
-	R45 = jsval.String().RegexpString("^[a-fA-F0-9-]+$")
-	R46 = jsval.Object().
+	R46 = jsval.String().RegexpString("^[a-fA-F0-9-]+$")
+	R47 = jsval.Object().
 		AdditionalProperties(
 			jsval.EmptyConstraint,
 		).
@@ -781,12 +784,13 @@ func init() {
 	M.SetReference("#/definitions/string_i18n", R38)
 	M.SetReference("#/definitions/tag", R39)
 	M.SetReference("#/definitions/tag_array", R40)
-	M.SetReference("#/definitions/tshirt_size", R41)
-	M.SetReference("#/definitions/url", R42)
-	M.SetReference("#/definitions/user", R43)
-	M.SetReference("#/definitions/user_array", R44)
-	M.SetReference("#/definitions/uuid", R45)
-	M.SetReference("#/definitions/venue", R46)
+	M.SetReference("#/definitions/timezone_default_utc", R41)
+	M.SetReference("#/definitions/tshirt_size", R42)
+	M.SetReference("#/definitions/url", R43)
+	M.SetReference("#/definitions/user", R44)
+	M.SetReference("#/definitions/user_array", R45)
+	M.SetReference("#/definitions/uuid", R46)
+	M.SetReference("#/definitions/venue", R47)
 	HTTPAddConferenceAdminRequest = jsval.New().
 		SetName("HTTPAddConferenceAdminRequest").
 		SetConstraintMap(M).
@@ -1208,6 +1212,10 @@ func init() {
 				AddProp(
 					"sub_title",
 					jsval.Reference(M).RefersTo("#/definitions/string_en"),
+				).
+				AddProp(
+					"timezone",
+					jsval.Reference(M).RefersTo("#/definitions/timezone_default_utc"),
 				).
 				AddProp(
 					"title",
@@ -1993,6 +2001,21 @@ func init() {
 				).
 				AddProp(
 					"user_id",
+					jsval.Reference(M).RefersTo("#/definitions/uuid"),
+				),
+		)
+
+	HTTPGetConferenceScheduleRequest = jsval.New().
+		SetName("HTTPGetConferenceScheduleRequest").
+		SetConstraintMap(M).
+		SetRoot(
+			jsval.Object().
+				Required("conference_id").
+				AdditionalProperties(
+					jsval.EmptyConstraint,
+				).
+				AddProp(
+					"conference_id",
 					jsval.Reference(M).RefersTo("#/definitions/uuid"),
 				),
 		)
@@ -3469,6 +3492,10 @@ func init() {
 				AddProp(
 					"spoken_language",
 					jsval.Reference(M).RefersTo("#/definitions/language"),
+				).
+				AddProp(
+					"starts_on",
+					jsval.Reference(M).RefersTo("#/definitions/datetime"),
 				).
 				AddProp(
 					"status",

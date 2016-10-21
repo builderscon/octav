@@ -1,16 +1,17 @@
-hash: bb04864eaf09e0d5060679ac683973cee46933812a7d6fd8c200443978502294
-updated: 2016-10-10T22:00:39.054909804+09:00
+hash: a1e9b03b5720f4521f9ba4897f74af2216da9e5367732f732c153914e588ceb2
+updated: 2016-10-21T16:01:21.726567014+09:00
 imports:
 - name: cloud.google.com/go
-  version: e89968106bfb1f9fe3f05a5ca644866acd15edf8
+  version: 7450882a75c8d2600748666d1ed16e0a5afa532d
   subpackages:
   - compute/metadata
   - internal
+  - internal/optional
   - storage
 - name: github.com/cenkalti/backoff
   version: 32cd0c5b3aef12c76ed64aaf678f6c79736be7dc
 - name: github.com/davecgh/go-spew
-  version: 6cf5744a041a0022271cefed95ba843f6d87fd51
+  version: 6d212800a42e8ab5c146b8ace3490ee17e5225f9
   subpackages:
   - spew
 - name: github.com/dghubble/go-twitter
@@ -20,27 +21,33 @@ imports:
 - name: github.com/dghubble/oauth1
   version: 70562a5920ad9b6ff03ef697c0f90ae569abbd2b
 - name: github.com/dghubble/sling
-  version: 52e88a7b75a5db3b49f8911f16d49d9b7b67adc5
+  version: c961a4334054e64299d16f8a31bd686ee2565ae4
 - name: github.com/go-sql-driver/mysql
-  version: 0b58b37b664c21f3010e836f1b931e1d0b0b0685
+  version: dbc3fe23a4aced10a53834106e288b155d17e2ee
 - name: github.com/golang/protobuf
-  version: 1f49d83d9aa00e6ce4fc8258c71cc7786aec968a
+  version: 98fa357170587e470c5f27d3c3ea0947b71eb455
   subpackages:
   - proto
 - name: github.com/google/go-querystring
   version: 9235644dd9e52eeae6fa48efd539fdc351a0af53
   subpackages:
   - query
+- name: github.com/googleapis/gax-go
+  version: 4f7da601ca02aa546c5ef911a0b6595fdadf4e18
 - name: github.com/gorilla/context
   version: 08b5f424b9271eedf6f9f0ce86cb9396ed337a42
 - name: github.com/gorilla/mux
-  version: 0b13a922203ebdbfd236c818efcd5ed46097d690
+  version: 757bef944d0f21880861c2dd9c871ca543023cba
 - name: github.com/jessevdk/go-flags
-  version: a8cab0163d48558ffd77076c9c99388529766f63
+  version: 4cc2832a6e6d1d3b815e2b9d544b2a4dfb3ce8fa
 - name: github.com/lestrrat/go-apache-logformat
   version: 0f5817c5c9e626d408c4d68e3d90fd7697e97d5f
 - name: github.com/lestrrat/go-bindata
   version: b9f2acfb40bc204a6e6c1a94547e128554650f95
+- name: github.com/lestrrat/go-bufferpool
+  version: a1a4a9cf09b4f3e6d263ba25cf09de3276e1d589
+- name: github.com/lestrrat/go-ical
+  version: 93ce43f05307927c3904b5b863f722e87702b86a
 - name: github.com/lestrrat/go-jshschema
   version: 4514acd168a63041862eb3d223a09a789cae6b3b
 - name: github.com/lestrrat/go-jspointer
@@ -50,9 +57,9 @@ imports:
   subpackages:
   - provider
 - name: github.com/lestrrat/go-jsschema
-  version: 134ddb70a4100eb4bf3c673cc42e8435d23302c3
+  version: a6a42341b50d8d7e2a733db922eefaa756321021
 - name: github.com/lestrrat/go-jsval
-  version: 96d0f5c4ce78f95b22f2d5f9171e845deb54a7bf
+  version: cf70aae60f5b41a32922066c41287b0168e55904
 - name: github.com/lestrrat/go-pdebug
   version: 2e6eaaa5717f81bda41d27070d3c966f40a1e75f
 - name: github.com/lestrrat/go-simple-guard
@@ -72,25 +79,26 @@ imports:
   - parser
   - vm
 - name: github.com/pkg/errors
-  version: 17b591df37844cde689f4d5813e5cea0927d8dd2
+  version: 839d9e913e063e28dfd0e6c7b7512793e0a48be9
 - name: github.com/shogo82148/go-sql-proxy
   version: 0ff9659b5642274097d62b43b2d754b001ed4f4d
 - name: github.com/stretchr/testify
-  version: d77da356e56a7428ad25149ca77381849a6a5232
+  version: 976c720a22c8eb4eb6a0b4348ad85ad12491a506
   subpackages:
   - assert
 - name: golang.org/x/net
-  version: 1358eff22f0dd0c54fc521042cc607f6ff4b531a
+  version: daba796358cd2742b75aae05761f1b898c9f6a5c
   subpackages:
   - context
   - context/ctxhttp
   - http2
   - http2/hpack
+  - idna
   - internal/timeseries
   - lex/httplex
   - trace
 - name: golang.org/x/oauth2
-  version: 4d549c893be7d4011bab739cc585d091a7188d27
+  version: 1e695b1c8febf17aad3bfa7bf0a819ef94b98ad5
   subpackages:
   - google
   - internal
@@ -101,12 +109,12 @@ imports:
   subpackages:
   - errgroup
 - name: golang.org/x/text
-  version: ede1cb9f9f2f84c3bace9ca113fd740fc916cdd0
+  version: 5a42fa2464759cbb7ee0af9de00b54d69f09a29c
   subpackages:
   - internal/tag
   - language
 - name: google.golang.org/api
-  version: 5310de6094f77748865537eae0700eba04acde45
+  version: 45c1c8fbb52e06888fad4b269d9e1c280d638f42
   subpackages:
   - gensupport
   - googleapi
@@ -118,7 +126,7 @@ imports:
   - transport
   - urlshortener/v1
 - name: google.golang.org/appengine
-  version: 4f7eeb5305a4ba1966344836ba4af9996b7b4e05
+  version: 5b8c3b819891014a2d12354528f7d046dd53c89e
   subpackages:
   - internal
   - internal/app_identity
@@ -132,7 +140,7 @@ imports:
   - socket
   - urlfetch
 - name: google.golang.org/grpc
-  version: 79b7c349179cdd6efd8bac4a1ce7f01b98c16e9b
+  version: 2b7e876a2eb64e93cb8140f497d3ea9d8882279c
   subpackages:
   - codes
   - credentials

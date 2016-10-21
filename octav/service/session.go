@@ -145,6 +145,11 @@ func (v *SessionSvc) populateRowForUpdate(vdb *db.Session, payload model.UpdateS
 		vdb.SessionTypeID = payload.SessionTypeID.String
 	}
 
+	if payload.StartsOn.Valid() {
+		vdb.StartsOn.Valid = true
+		vdb.StartsOn.Time = payload.StartsOn.Time
+	}
+
 	if payload.Duration.Valid() {
 		vdb.Duration = int(payload.Duration.Int)
 	}
