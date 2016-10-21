@@ -64,7 +64,7 @@ class Octav(object):
             self.extract_error(res)
             return None
         return True
-    except BaseException, e:
+    except BaseException as e:
         if self.debug:
             print("error during http access: " + repr(e))
         self.error = repr(e)
@@ -118,7 +118,7 @@ class Octav(object):
             self.extract_error(res)
             return None
         return json.loads(res.data)
-    except BaseException, e:
+    except BaseException as e:
         if self.debug:
             print("error during http access: " + repr(e))
         self.error = repr(e)
@@ -147,7 +147,7 @@ class Octav(object):
             self.extract_error(res)
             return None
         return json.loads(res.data)
-    except BaseException, e:
+    except BaseException as e:
         if self.debug:
             print("error during http access: " + repr(e))
         self.error = repr(e)
@@ -181,7 +181,7 @@ class Octav(object):
             self.extract_error(res)
             return None
         return json.loads(res.data)
-    except BaseException, e:
+    except BaseException as e:
         if self.debug:
             print("error during http access: " + repr(e))
         self.error = repr(e)
@@ -230,7 +230,7 @@ class Octav(object):
             self.extract_error(res)
             return None
         return True
-    except BaseException, e:
+    except BaseException as e:
         if self.debug:
             print("error during http access: " + repr(e))
         self.error = repr(e)
@@ -264,7 +264,7 @@ class Octav(object):
             self.extract_error(res)
             return None
         return True
-    except BaseException, e:
+    except BaseException as e:
         if self.debug:
             print("error during http access: " + repr(e))
         self.error = repr(e)
@@ -294,7 +294,7 @@ class Octav(object):
             self.extract_error(res)
             return None
         return json.loads(res.data)
-    except BaseException, e:
+    except BaseException as e:
         if self.debug:
             print("error during http access: " + repr(e))
         self.error = repr(e)
@@ -342,7 +342,7 @@ class Octav(object):
             self.extract_error(res)
             return None
         return json.loads(res.data)
-    except BaseException, e:
+    except BaseException as e:
         if self.debug:
             print("error during http access: " + repr(e))
         self.error = repr(e)
@@ -372,7 +372,7 @@ class Octav(object):
             self.extract_error(res)
             return None
         return json.loads(res.data)
-    except BaseException, e:
+    except BaseException as e:
         if self.debug:
             print("error during http access: " + repr(e))
         self.error = repr(e)
@@ -398,7 +398,7 @@ class Octav(object):
             self.extract_error(res)
             return None
         return json.loads(res.data)
-    except BaseException, e:
+    except BaseException as e:
         if self.debug:
             print("error during http access: " + repr(e))
         self.error = repr(e)
@@ -432,7 +432,7 @@ class Octav(object):
             self.extract_error(res)
             return None
         return True
-    except BaseException, e:
+    except BaseException as e:
         if self.debug:
             print("error during http access: " + repr(e))
         self.error = repr(e)
@@ -466,7 +466,7 @@ class Octav(object):
             self.extract_error(res)
             return None
         return True
-    except BaseException, e:
+    except BaseException as e:
         if self.debug:
             print("error during http access: " + repr(e))
         self.error = repr(e)
@@ -512,7 +512,7 @@ class Octav(object):
             self.extract_error(res)
             return None
         return json.loads(res.data)
-    except BaseException, e:
+    except BaseException as e:
         if self.debug:
             print("error during http access: " + repr(e))
         self.error = repr(e)
@@ -557,7 +557,7 @@ class Octav(object):
             self.extract_error(res)
             return None
         return True
-    except BaseException, e:
+    except BaseException as e:
         if self.debug:
             print("error during http access: " + repr(e))
         self.error = repr(e)
@@ -583,7 +583,7 @@ class Octav(object):
             self.extract_error(res)
             return None
         return json.loads(res.data)
-    except BaseException, e:
+    except BaseException as e:
         if self.debug:
             print("error during http access: " + repr(e))
         self.error = repr(e)
@@ -617,7 +617,7 @@ class Octav(object):
             self.extract_error(res)
             return None
         return True
-    except BaseException, e:
+    except BaseException as e:
         if self.debug:
             print("error during http access: " + repr(e))
         self.error = repr(e)
@@ -650,7 +650,7 @@ class Octav(object):
             self.extract_error(res)
             return None
         return json.loads(res.data)
-    except BaseException, e:
+    except BaseException as e:
         if self.debug:
             print("error during http access: " + repr(e))
         self.error = repr(e)
@@ -691,7 +691,7 @@ class Octav(object):
             self.extract_error(res)
             return None
         return json.loads(res.data)
-    except BaseException, e:
+    except BaseException as e:
         if self.debug:
             print("error during http access: " + repr(e))
         self.error = repr(e)
@@ -719,7 +719,7 @@ class Octav(object):
             self.extract_error(res)
             return None
         return json.loads(res.data)
-    except BaseException, e:
+    except BaseException as e:
         if self.debug:
             print("error during http access: " + repr(e))
         self.error = repr(e)
@@ -747,7 +747,7 @@ class Octav(object):
             self.extract_error(res)
             return None
         return json.loads(res.data)
-    except BaseException, e:
+    except BaseException as e:
         if self.debug:
             print("error during http access: " + repr(e))
         self.error = repr(e)
@@ -786,7 +786,7 @@ class Octav(object):
             self.extract_error(res)
             return None
         return True
-    except BaseException, e:
+    except BaseException as e:
         if self.debug:
             print("error during http access: " + repr(e))
         self.error = repr(e)
@@ -840,7 +840,7 @@ class Octav(object):
             self.extract_error(res)
             return None
         return json.loads(res.data)
-    except BaseException, e:
+    except BaseException as e:
         if self.debug:
             print("error during http access: " + repr(e))
         self.error = repr(e)
@@ -884,7 +884,7 @@ class Octav(object):
             self.extract_error(res)
             return None
         return True
-    except BaseException, e:
+    except BaseException as e:
         if self.debug:
             print("error during http access: " + repr(e))
         self.error = repr(e)
@@ -923,7 +923,7 @@ class Octav(object):
             self.extract_error(res)
             return None
         return True
-    except BaseException, e:
+    except BaseException as e:
         if self.debug:
             print("error during http access: " + repr(e))
         self.error = repr(e)
@@ -962,7 +962,7 @@ class Octav(object):
             self.extract_error(res)
             return None
         return json.loads(res.data)
-    except BaseException, e:
+    except BaseException as e:
         if self.debug:
             print("error during http access: " + repr(e))
         self.error = repr(e)
@@ -998,7 +998,7 @@ class Octav(object):
             self.extract_error(res)
             return None
         return True
-    except BaseException, e:
+    except BaseException as e:
         if self.debug:
             print("error during http access: " + repr(e))
         self.error = repr(e)
@@ -1037,7 +1037,7 @@ class Octav(object):
             self.extract_error(res)
             return None
         return True
-    except BaseException, e:
+    except BaseException as e:
         if self.debug:
             print("error during http access: " + repr(e))
         self.error = repr(e)
@@ -1076,7 +1076,7 @@ class Octav(object):
             self.extract_error(res)
             return None
         return True
-    except BaseException, e:
+    except BaseException as e:
         if self.debug:
             print("error during http access: " + repr(e))
         self.error = repr(e)
@@ -1115,7 +1115,7 @@ class Octav(object):
             self.extract_error(res)
             return None
         return True
-    except BaseException, e:
+    except BaseException as e:
         if self.debug:
             print("error during http access: " + repr(e))
         self.error = repr(e)
@@ -1154,7 +1154,7 @@ class Octav(object):
             self.extract_error(res)
             return None
         return True
-    except BaseException, e:
+    except BaseException as e:
         if self.debug:
             print("error during http access: " + repr(e))
         self.error = repr(e)
@@ -1212,7 +1212,7 @@ class Octav(object):
             self.extract_error(res)
             return None
         return True
-    except BaseException, e:
+    except BaseException as e:
         if self.debug:
             print("error during http access: " + repr(e))
         self.error = repr(e)
@@ -1246,7 +1246,7 @@ class Octav(object):
             self.extract_error(res)
             return None
         return True
-    except BaseException, e:
+    except BaseException as e:
         if self.debug:
             print("error during http access: " + repr(e))
         self.error = repr(e)
@@ -1277,7 +1277,7 @@ class Octav(object):
             self.extract_error(res)
             return None
         return json.loads(res.data)
-    except BaseException, e:
+    except BaseException as e:
         if self.debug:
             print("error during http access: " + repr(e))
         self.error = repr(e)
@@ -1326,7 +1326,7 @@ class Octav(object):
             self.extract_error(res)
             return None
         return True
-    except BaseException, e:
+    except BaseException as e:
         if self.debug:
             print("error during http access: " + repr(e))
         self.error = repr(e)
@@ -1354,7 +1354,7 @@ class Octav(object):
             self.extract_error(res)
             return None
         return json.loads(res.data)
-    except BaseException, e:
+    except BaseException as e:
         if self.debug:
             print("error during http access: " + repr(e))
         self.error = repr(e)
@@ -1382,7 +1382,7 @@ class Octav(object):
             self.extract_error(res)
             return None
         return json.loads(res.data)
-    except BaseException, e:
+    except BaseException as e:
         if self.debug:
             print("error during http access: " + repr(e))
         self.error = repr(e)
@@ -1410,7 +1410,7 @@ class Octav(object):
             self.extract_error(res)
             return None
         return json.loads(res.data)
-    except BaseException, e:
+    except BaseException as e:
         if self.debug:
             print("error during http access: " + repr(e))
         self.error = repr(e)
@@ -1442,7 +1442,7 @@ class Octav(object):
             self.extract_error(res)
             return None
         return json.loads(res.data)
-    except BaseException, e:
+    except BaseException as e:
         if self.debug:
             print("error during http access: " + repr(e))
         self.error = repr(e)
@@ -1478,7 +1478,7 @@ class Octav(object):
             self.extract_error(res)
             return None
         return json.loads(res.data)
-    except BaseException, e:
+    except BaseException as e:
         if self.debug:
             print("error during http access: " + repr(e))
         self.error = repr(e)
@@ -1535,7 +1535,7 @@ class Octav(object):
             self.extract_error(res)
             return None
         return True
-    except BaseException, e:
+    except BaseException as e:
         if self.debug:
             print("error during http access: " + repr(e))
         self.error = repr(e)
@@ -1569,7 +1569,7 @@ class Octav(object):
             self.extract_error(res)
             return None
         return True
-    except BaseException, e:
+    except BaseException as e:
         if self.debug:
             print("error during http access: " + repr(e))
         self.error = repr(e)
@@ -1598,7 +1598,7 @@ class Octav(object):
             self.extract_error(res)
             return None
         return True
-    except BaseException, e:
+    except BaseException as e:
         if self.debug:
             print("error during http access: " + repr(e))
         self.error = repr(e)
@@ -1675,7 +1675,7 @@ class Octav(object):
             self.extract_error(res)
             return None
         return json.loads(res.data)
-    except BaseException, e:
+    except BaseException as e:
         if self.debug:
             print("error during http access: " + repr(e))
         self.error = repr(e)
@@ -1706,7 +1706,7 @@ class Octav(object):
             self.extract_error(res)
             return None
         return json.loads(res.data)
-    except BaseException, e:
+    except BaseException as e:
         if self.debug:
             print("error during http access: " + repr(e))
         self.error = repr(e)
@@ -1740,7 +1740,7 @@ class Octav(object):
             self.extract_error(res)
             return None
         return True
-    except BaseException, e:
+    except BaseException as e:
         if self.debug:
             print("error during http access: " + repr(e))
         self.error = repr(e)
@@ -1823,7 +1823,7 @@ class Octav(object):
             self.extract_error(res)
             return None
         return True
-    except BaseException, e:
+    except BaseException as e:
         if self.debug:
             print("error during http access: " + repr(e))
         self.error = repr(e)
@@ -1861,7 +1861,7 @@ class Octav(object):
             self.extract_error(res)
             return None
         return json.loads(res.data)
-    except BaseException, e:
+    except BaseException as e:
         if self.debug:
             print("error during http access: " + repr(e))
         self.error = repr(e)
@@ -1900,7 +1900,7 @@ class Octav(object):
             self.extract_error(res)
             return None
         return json.loads(res.data)
-    except BaseException, e:
+    except BaseException as e:
         if self.debug:
             print("error during http access: " + repr(e))
         self.error = repr(e)
@@ -1929,7 +1929,7 @@ class Octav(object):
             self.extract_error(res)
             return None
         return True
-    except BaseException, e:
+    except BaseException as e:
         if self.debug:
             print("error during http access: " + repr(e))
         self.error = repr(e)
@@ -1962,7 +1962,7 @@ class Octav(object):
             self.extract_error(res)
             return None
         return json.loads(res.data)
-    except BaseException, e:
+    except BaseException as e:
         if self.debug:
             print("error during http access: " + repr(e))
         self.error = repr(e)
@@ -2025,7 +2025,7 @@ class Octav(object):
             self.extract_error(res)
             return None
         return json.loads(res.data)
-    except BaseException, e:
+    except BaseException as e:
         if self.debug:
             print("error during http access: " + repr(e))
         self.error = repr(e)
@@ -2075,7 +2075,7 @@ class Octav(object):
             self.extract_error(res)
             return None
         return json.loads(res.data)
-    except BaseException, e:
+    except BaseException as e:
         if self.debug:
             print("error during http access: " + repr(e))
         self.error = repr(e)
@@ -2106,7 +2106,7 @@ class Octav(object):
             self.extract_error(res)
             return None
         return json.loads(res.data)
-    except BaseException, e:
+    except BaseException as e:
         if self.debug:
             print("error during http access: " + repr(e))
         self.error = repr(e)
@@ -2138,7 +2138,7 @@ class Octav(object):
             self.extract_error(res)
             return None
         return json.loads(res.data)
-    except BaseException, e:
+    except BaseException as e:
         if self.debug:
             print("error during http access: " + repr(e))
         self.error = repr(e)
@@ -2185,7 +2185,7 @@ class Octav(object):
             self.extract_error(res)
             return None
         return True
-    except BaseException, e:
+    except BaseException as e:
         if self.debug:
             print("error during http access: " + repr(e))
         self.error = repr(e)
@@ -2219,7 +2219,7 @@ class Octav(object):
             self.extract_error(res)
             return None
         return True
-    except BaseException, e:
+    except BaseException as e:
         if self.debug:
             print("error during http access: " + repr(e))
         self.error = repr(e)
@@ -2275,7 +2275,7 @@ class Octav(object):
             self.extract_error(res)
             return None
         return json.loads(res.data)
-    except BaseException, e:
+    except BaseException as e:
         if self.debug:
             print("error during http access: " + repr(e))
         self.error = repr(e)
@@ -2306,7 +2306,7 @@ class Octav(object):
             self.extract_error(res)
             return None
         return json.loads(res.data)
-    except BaseException, e:
+    except BaseException as e:
         if self.debug:
             print("error during http access: " + repr(e))
         self.error = repr(e)
@@ -2338,7 +2338,7 @@ class Octav(object):
             self.extract_error(res)
             return None
         return json.loads(res.data)
-    except BaseException, e:
+    except BaseException as e:
         if self.debug:
             print("error during http access: " + repr(e))
         self.error = repr(e)
@@ -2385,7 +2385,7 @@ class Octav(object):
             self.extract_error(res)
             return None
         return True
-    except BaseException, e:
+    except BaseException as e:
         if self.debug:
             print("error during http access: " + repr(e))
         self.error = repr(e)
@@ -2419,7 +2419,7 @@ class Octav(object):
             self.extract_error(res)
             return None
         return True
-    except BaseException, e:
+    except BaseException as e:
         if self.debug:
             print("error during http access: " + repr(e))
         self.error = repr(e)
@@ -2458,7 +2458,7 @@ class Octav(object):
             self.extract_error(res)
             return None
         return json.loads(res.data)
-    except BaseException, e:
+    except BaseException as e:
         if self.debug:
             print("error during http access: " + repr(e))
         self.error = repr(e)
@@ -2497,7 +2497,7 @@ class Octav(object):
             self.extract_error(res)
             return None
         return True
-    except BaseException, e:
+    except BaseException as e:
         if self.debug:
             print("error during http access: " + repr(e))
         self.error = repr(e)

@@ -154,7 +154,7 @@ for my $link (@{$schema->{links}}) {
     } else {
         say $tmpout '        return True';
     }
-    say $tmpout '    except BaseException, e:';
+    say $tmpout '    except BaseException as e:';
     say $tmpout '        if self.debug:';
     say $tmpout '            print("error during http access: " + repr(e))';
     say $tmpout '        self.error = repr(e)';
