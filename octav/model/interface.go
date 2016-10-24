@@ -928,6 +928,6 @@ type JSONTimeList []JSONTime
 
 // +transport
 type GetConferenceScheduleRequest struct {
-	ConferenceID string `json:"conference_id"`
+	ConferenceID string            `json:"conference_id"`
+	Lang         jsval.MaybeString `json:"lang"`
 }
-

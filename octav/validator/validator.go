@@ -2017,6 +2017,10 @@ func init() {
 				AddProp(
 					"conference_id",
 					jsval.Reference(M).RefersTo("#/definitions/uuid"),
+				).
+				AddProp(
+					"language",
+					jsval.Reference(M).RefersTo("#/definitions/language"),
 				),
 		)
 
