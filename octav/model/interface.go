@@ -929,5 +929,5 @@ type JSONTimeList []JSONTime
 // +transport
 type GetConferenceScheduleRequest struct {
 	ConferenceID string            `json:"conference_id"`
-	Lang         jsval.MaybeString `json:"lang"`
+	Lang         jsval.MaybeString `json:"lang" urlenc:"lang,omitempty,string"`
 }
