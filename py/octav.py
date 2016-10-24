@@ -1,5 +1,5 @@
 """OCTAV Client Library"""
-"""DO NOT EDIT: This file was generated from ../spec/v1/api.json on Fri Oct 21 17:15:56 2016"""
+"""DO NOT EDIT: This file was generated from ../spec/v1/api.json on Mon Oct 24 13:28:20 2016"""
 
 import certifi
 import json
@@ -43,7 +43,7 @@ class Octav(object):
         self.error = js['error']
       elif 'message' in js:
         self.error = js['message']
-    except BaseException as e:
+    except BaseException:
       self.error = r.status
 
   def last_error(self):
@@ -873,7 +873,7 @@ class Octav(object):
         self.error = repr(e)
         return None
 
-  def get_conference_schedule (self, conference_id):
+  def get_conference_schedule (self, conference_id, lang=None):
     try:
         payload = {}
         hdrs = {}
@@ -882,6 +882,8 @@ class Octav(object):
         payload['conference_id'] = conference_id
         if conference_id is not None:
             payload['conference_id'] = conference_id
+        if lang is not None:
+            payload['lang'] = lang
         uri = '%s/v1/conference/schedule.ics' % self.endpoint
         qs = urlencode(payload, True)
         if self.debug:

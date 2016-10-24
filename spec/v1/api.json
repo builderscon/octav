@@ -877,7 +877,8 @@
       "schema": {
         "required": ["conference_id"],
         "properties": {
-          "conference_id": {"$ref": "#/definitions/uuid"}
+          "conference_id": {"$ref": "#/definitions/uuid"},
+          "lang": {"$ref": "#/definitions/language"}
         }
       }
     },

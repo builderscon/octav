@@ -64,7 +64,7 @@ class Octav(object):
         self.error = js['error']
       elif 'message' in js:
         self.error = js['message']
-    except BaseException as e:
+    except BaseException:
       self.error = r.status
 
   def last_error(self):

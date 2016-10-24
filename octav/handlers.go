@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"os"
 	"strconv"
+	"time"
 
 	"context"
 
@@ -1526,6 +1527,7 @@ func doGetConferenceSchedule(ctx context.Context, w http.ResponseWriter, r *http
 	var lp model.ListSessionsRequest
 	lp.ConferenceID.Set(payload.ConferenceID)
 	lp.Status = []string{"accepted"}
+	lp.Lang.Set(payload.Lang.String)
 	s := service.Session()
 	var v model.SessionList
 	if err := s.ListFromPayload(tx, &v, lp); err != nil {
@@ -1536,11 +1538,35 @@ func doGetConferenceSchedule(ctx context.Context, w http.ResponseWriter, r *http
 	sts := service.SessionType()
 	stm := map[string]model.SessionType{}
 	c, _ := ical.New()
+	c.AddProperty("x-wr-calname", conf.Title)
+	c.AddProperty("x-wr-timezone", conf.Timezone)
+	c.AddProperty("calscale", "GREGORIAN")
+
+	c.AddEntry(ical.NewTimezone(conf.Timezone))
+
+	tz, err := time.LoadLocation(conf.Timezone)
+	if err != nil {
+		tz = time.UTC
+	}
+
 	for _, session := range v {
 		e := ical.NewEvent()
 		e.AddProperty("url", fmt.Sprintf("https://builderscon.io/%s/%s/session/%s", series.Slug, conf.Slug, session.ID))
+		e.AddProperty("description", session.Abstract, ical.WithParameters(ical.Parameters{
+			"language": []string{payload.Lang.String},
+		}))
+		e.AddProperty("summary", session.Title, ical.WithParameters(ical.Parameters{
+			"language": []string{payload.Lang.String},
+		}))
 		if !session.StartsOn.IsZero() {
-			e.AddProperty("dtstart", session.StartsOn.UTC().Format("20060102T150405Z"))
+			e.AddProperty(
+				"dtstart",
+				session.StartsOn.In(tz).Format("20060102T150405"),
+				ical.WithParameters(ical.Parameters{
+					"tzid": []string{conf.Timezone},
+				}),
+			)
+
 			// Grr, this is silly. We should implement this in go-ics
 			st, ok := stm[session.SessionTypeID]
 			if !ok {
