@@ -1,5 +1,5 @@
 hash: a1e9b03b5720f4521f9ba4897f74af2216da9e5367732f732c153914e588ceb2
-updated: 2016-10-24T12:45:21.293761306+09:00
+updated: 2016-10-24T13:19:40.820095248+09:00
 imports:
 - name: cloud.google.com/go
   version: e46f105e04cc9e1b4075aa9836989710e2153c48
@@ -47,7 +47,7 @@ imports:
 - name: github.com/lestrrat/go-bufferpool
   version: a1a4a9cf09b4f3e6d263ba25cf09de3276e1d589
 - name: github.com/lestrrat/go-ical
-  version: 47cf470f57620d833e9aaa95a39da0422fd7c393
+  version: beafb9f1e8d7f2d7f1150bf702c066f53c157d6c
 - name: github.com/lestrrat/go-jshschema
   version: 4514acd168a63041862eb3d223a09a789cae6b3b
 - name: github.com/lestrrat/go-jspointer
