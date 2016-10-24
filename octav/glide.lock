@@ -1,8 +1,8 @@
 hash: a1e9b03b5720f4521f9ba4897f74af2216da9e5367732f732c153914e588ceb2
-updated: 2016-10-21T16:01:21.726567014+09:00
+updated: 2016-10-24T11:18:56.764227787+09:00
 imports:
 - name: cloud.google.com/go
-  version: 7450882a75c8d2600748666d1ed16e0a5afa532d
+  version: e46f105e04cc9e1b4075aa9836989710e2153c48
   subpackages:
   - compute/metadata
   - internal
@@ -47,7 +47,7 @@ imports:
 - name: github.com/lestrrat/go-bufferpool
   version: a1a4a9cf09b4f3e6d263ba25cf09de3276e1d589
 - name: github.com/lestrrat/go-ical
-  version: 93ce43f05307927c3904b5b863f722e87702b86a
+  version: c9c6940ead617187c16b345246c43f490541664b
 - name: github.com/lestrrat/go-jshschema
   version: 4514acd168a63041862eb3d223a09a789cae6b3b
 - name: github.com/lestrrat/go-jspointer
@@ -87,7 +87,7 @@ imports:
   subpackages:
   - assert
 - name: golang.org/x/net
-  version: daba796358cd2742b75aae05761f1b898c9f6a5c
+  version: c33d37840d93fc75251f49ab83c5fc8b2faea5e8
   subpackages:
   - context
   - context/ctxhttp
@@ -114,7 +114,7 @@ imports:
   - internal/tag
   - language
 - name: google.golang.org/api
-  version: 45c1c8fbb52e06888fad4b269d9e1c280d638f42
+  version: 3ef9447cad8d725923ca024dab57786299cf745a
   subpackages:
   - gensupport
   - googleapi
