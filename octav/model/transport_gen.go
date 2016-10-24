@@ -5901,6 +5901,9 @@ func (r *TweetAsConferenceRequest) Populate(m map[string]interface{}) error {
 func (r GetConferenceScheduleRequest) collectMarshalData() map[string]interface{} {
 	m := make(map[string]interface{})
 	m["conference_id"] = r.ConferenceID
+	if r.Lang.Valid() {
+		m["lang"] = r.Lang.Value()
+	}
 	return m
 }
 
@@ -5939,6 +5942,12 @@ func (r *GetConferenceScheduleRequest) Populate(m map[string]interface{}) error 
 		default:
 			return errors.Wrap(ErrInvalidJSONFieldType{Field: "conference_id"}, "failed to populate fields for GetConferenceScheduleRequest")
 		}
+	}
+	if jv, ok := m["lang"]; ok {
+		if err := r.Lang.Set(jv); err != nil {
+			return errors.New("set field Lang failed: " + err.Error())
+		}
+		delete(m, "lang")
 	}
 	return nil
 }
