@@ -2019,7 +2019,7 @@ func init() {
 					jsval.Reference(M).RefersTo("#/definitions/uuid"),
 				).
 				AddProp(
-					"language",
+					"lang",
 					jsval.Reference(M).RefersTo("#/definitions/language"),
 				),
 		)
