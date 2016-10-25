@@ -651,6 +651,7 @@ type LookupVenueRequest struct {
 // +transport
 type ListSessionsRequest struct {
 	ConferenceID jsval.MaybeString `json:"conference_id" urlenc:"conference_id,omitempty,string"`
+	Confirmed    []bool            `json:"confirmed" urlenc:"confirmed,omitempty"`
 	SpeakerID    jsval.MaybeString `json:"speaker_id" urlenc:"speaker_id,omitempty,string"`
 	Status       []string          `json:"status" urlenc:"status,omitempty"`
 	Date         jsval.MaybeString `json:"date" urlenc:"date,omitempty,string"`

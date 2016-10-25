@@ -6,7 +6,7 @@ import (
 	"github.com/pkg/errors"
 )
 
-func (v *SessionList) LoadByConference(tx *Tx, conferenceID, speakerID, date string, status []string) (err error) {
+func (v *SessionList) LoadByConference(tx *Tx, conferenceID, speakerID, date string, status []string, confirmed []bool) (err error) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("db.SessionList.LoadByConference %s,%s,%s", conferenceID, speakerID, status).BindError(&err)
 		defer g.End()
@@ -59,6 +59,21 @@ func (v *SessionList) LoadByConference(tx *Tx, conferenceID, speakerID, date str
 				where.WriteString(`, `)
 			}
 			args = append(args, st)
+		}
+		where.WriteString(`)`)
+	}
+
+	if l := len(confirmed); l > 0 {
+		if where.Len() > 0 {
+			where.WriteString(` AND`)
+		}
+		where.WriteString(` confirmed IN (`)
+		for i, c := range confirmed {
+			where.WriteString(`?`)
+			if i < l-1 {
+				where.WriteString(`, `)
+			}
+			args = append(args, c)
 		}
 		where.WriteString(`)`)
 	}
