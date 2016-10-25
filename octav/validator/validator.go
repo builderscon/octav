@@ -1201,6 +1201,10 @@ func init() {
 					jsval.Reference(M).RefersTo("#/definitions/string_en"),
 				).
 				AddProp(
+					"contact_information",
+					jsval.Reference(M).RefersTo("#/definitions/string_en"),
+				).
+				AddProp(
 					"description",
 					jsval.Reference(M).RefersTo("#/definitions/string_en"),
 				).
@@ -1227,6 +1231,34 @@ func init() {
 				AddProp(
 					"user_id",
 					jsval.Reference(M).RefersTo("#/definitions/uuid"),
+				).
+				PatternPropertiesString(
+					"cfp_lead_text#[a-z]+",
+					jsval.Reference(M).RefersTo("#/definitions/string_i18n"),
+				).
+				PatternPropertiesString(
+					"cfp_post_submit_instructions#[a-z]+",
+					jsval.Reference(M).RefersTo("#/definitions/string_i18n"),
+				).
+				PatternPropertiesString(
+					"cfp_pre_submit_instructions#[a-z]+",
+					jsval.Reference(M).RefersTo("#/definitions/string_i18n"),
+				).
+				PatternPropertiesString(
+					"contact_information#[a-z]+",
+					jsval.Reference(M).RefersTo("#/definitions/string_i18n"),
+				).
+				PatternPropertiesString(
+					"description#[a-z]+",
+					jsval.Reference(M).RefersTo("#/definitions/string_i18n"),
+				).
+				PatternPropertiesString(
+					"sub_title#[a-z]+",
+					jsval.Reference(M).RefersTo("#/definitions/string_i18n"),
+				).
+				PatternPropertiesString(
+					"title#[a-z]+",
+					jsval.Reference(M).RefersTo("#/definitions/string_i18n"),
 				),
 		)
 
@@ -3294,6 +3326,10 @@ func init() {
 					jsval.Reference(M).RefersTo("#/definitions/string_en"),
 				).
 				AddProp(
+					"contact_information",
+					jsval.Reference(M).RefersTo("#/definitions/string_en"),
+				).
+				AddProp(
 					"description",
 					jsval.Reference(M).RefersTo("#/definitions/string_en"),
 				).
@@ -3338,7 +3374,15 @@ func init() {
 					jsval.Reference(M).RefersTo("#/definitions/string_i18n"),
 				).
 				PatternPropertiesString(
+					"contact_information#[a-z]+",
+					jsval.Reference(M).RefersTo("#/definitions/string_i18n"),
+				).
+				PatternPropertiesString(
 					"description#[a-z]+",
+					jsval.Reference(M).RefersTo("#/definitions/string_i18n"),
+				).
+				PatternPropertiesString(
+					"sub_title#[a-z]+",
 					jsval.Reference(M).RefersTo("#/definitions/string_i18n"),
 				).
 				PatternPropertiesString(

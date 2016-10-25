@@ -181,6 +181,8 @@ func doConferenceCreate(args cmdargs) int {
 	fs.StringVar(&cfp_post_submit_instructions, "cfp_post_submit_instructions", "", "")
 	var cfp_pre_submit_instructions string
 	fs.StringVar(&cfp_pre_submit_instructions, "cfp_pre_submit_instructions", "", "")
+	var contact_information string
+	fs.StringVar(&contact_information, "contact_information", "", "")
 	var description string
 	fs.StringVar(&description, "description", "", "")
 	var series_id string
@@ -209,6 +211,9 @@ func doConferenceCreate(args cmdargs) int {
 	}
 	if cfp_pre_submit_instructions != "" {
 		m["cfp_pre_submit_instructions"] = cfp_pre_submit_instructions
+	}
+	if contact_information != "" {
+		m["contact_information"] = contact_information
 	}
 	if description != "" {
 		m["description"] = description
@@ -400,6 +405,8 @@ func doConferenceUpdate(args cmdargs) int {
 	fs.StringVar(&cfp_post_submit_instructions, "cfp_post_submit_instructions", "", "")
 	var cfp_pre_submit_instructions string
 	fs.StringVar(&cfp_pre_submit_instructions, "cfp_pre_submit_instructions", "", "")
+	var contact_information string
+	fs.StringVar(&contact_information, "contact_information", "", "")
 	var description string
 	fs.StringVar(&description, "description", "", "")
 	var id string
@@ -430,6 +437,9 @@ func doConferenceUpdate(args cmdargs) int {
 	}
 	if cfp_pre_submit_instructions != "" {
 		m["cfp_pre_submit_instructions"] = cfp_pre_submit_instructions
+	}
+	if contact_information != "" {
+		m["contact_information"] = contact_information
 	}
 	if description != "" {
 		m["description"] = description
