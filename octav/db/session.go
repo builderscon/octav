@@ -46,7 +46,7 @@ func (v *SessionList) LoadByConference(tx *Tx, conferenceID, speakerID string, r
 		if where.Len() > 0 {
 			where.WriteString(` AND`)
 		}
-		where.WriteString(` starts_on IS BETWEEN(?, ?)`)
+		where.WriteString(` starts_on BETWEEN(?, ?)`)
 		args = append(args, rangeStart, rangeEnd)
 	}
 
