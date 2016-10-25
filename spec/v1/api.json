@@ -321,8 +321,7 @@
     },
     "acceptance_status": {
       "type": "string",
-      "enum": [ "pending", "accepted", "rejected" ],
-      "default": "pending"
+      "enum": [ "pending", "accepted", "rejected" ]
     },
     "duration": {
       "type": "integer"
@@ -1356,6 +1355,7 @@
               { "$ref": "#/definitions/datestr" }
             ]
           },
+          "confirmed": {"type": "array", "items": {"type": "boolean"} },
           "conference_id": { "$ref": "#/definitions/uuid" },
           "status": {
             "type": "array",
