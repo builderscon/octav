@@ -864,8 +864,18 @@
           "cfp_lead_text": { "$ref": "#/definitions/string_en" },
           "cfp_pre_submit_instructions": { "$ref": "#/definitions/string_en" },
           "cfp_post_submit_instructions": { "$ref": "#/definitions/string_en" },
+          "contact_information": { "$ref": "#/definitions/string_en" },
           "timezone": {"$ref": "#/definitions/timezone_default_utc" },
           "user_id": { "$ref": "#/definitions/uuid"}
+        },
+        "patternProperties":{
+          "title#[a-z]+": { "$ref": "#/definitions/string_i18n" },
+          "sub_title#[a-z]+": { "$ref": "#/definitions/string_i18n" },
+          "description#[a-z]+": { "$ref": "#/definitions/string_i18n" },
+          "cfp_lead_text#[a-z]+": { "$ref": "#/definitions/string_i18n" },
+          "cfp_pre_submit_instructions#[a-z]+": { "$ref": "#/definitions/string_i18n" },
+          "cfp_post_submit_instructions#[a-z]+": { "$ref": "#/definitions/string_i18n" },
+          "contact_information#[a-z]+": { "$ref": "#/definitions/string_i18n" }
         },
         "required": ["series_id", "title", "slug", "user_id"]
       },
@@ -1189,6 +1199,7 @@
           "cfp_lead_text": { "$ref": "#/definitions/string_en" },
           "cfp_pre_submit_instructions": { "$ref": "#/definitions/string_en" },
           "cfp_post_submit_instructions": { "$ref": "#/definitions/string_en" },
+          "contact_information": { "$ref": "#/definitions/string_en" },
           "slug": { "$ref": "#/definitions/string_en" },
           "status": { "$ref": "#/definitions/conference_status" },
           "sub_title": { "$ref": "#/definitions/string_en" },
@@ -1198,10 +1209,12 @@
         },
         "patternProperties": {
           "title#[a-z]+": { "$ref": "#/definitions/string_i18n" },
+          "sub_title#[a-z]+": { "$ref": "#/definitions/string_i18n" },
           "description#[a-z]+": { "$ref": "#/definitions/string_i18n" },
           "cfp_lead_text#[a-z]+": { "$ref": "#/definitions/string_i18n" },
           "cfp_pre_submit_instructions#[a-z]+": { "$ref": "#/definitions/string_i18n" },
-          "cfp_post_submit_instructions#[a-z]+": { "$ref": "#/definitions/string_i18n" }
+          "cfp_post_submit_instructions#[a-z]+": { "$ref": "#/definitions/string_i18n" },
+          "contact_information#[a-z]+": { "$ref": "#/definitions/string_i18n" }
         },
         "required": ["id", "user_id"]
       }
