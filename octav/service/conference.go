@@ -150,7 +150,7 @@ func (v *ConferenceSvc) CreateFromPayload(tx *db.Tx, payload model.CreateConfere
 		cc.Name = "cfp_lead_text"
 		cc.Value = payload.CFPLeadText.String
 		if err := cc.Create(tx); err != nil {
-			return errors.Wrap(err, "failed to insert description")
+			return errors.Wrap(err, "failed to cfp lead text")
 		}
 	}
 
@@ -159,7 +159,7 @@ func (v *ConferenceSvc) CreateFromPayload(tx *db.Tx, payload model.CreateConfere
 		cc.Name = "cfp_post_submit_instructions"
 		cc.Value = payload.CFPPostSubmitInstructions.String
 		if err := cc.Create(tx); err != nil {
-			return errors.Wrap(err, "failed to insert description")
+			return errors.Wrap(err, "failed to insert cfp post-sumibt instructions")
 		}
 	}
 
@@ -168,9 +168,19 @@ func (v *ConferenceSvc) CreateFromPayload(tx *db.Tx, payload model.CreateConfere
 		cc.Name = "cfp_pre_submit_instructions"
 		cc.Value = payload.CFPPreSubmitInstructions.String
 		if err := cc.Create(tx); err != nil {
-			return errors.Wrap(err, "failed to insert description")
+			return errors.Wrap(err, "failed to insert cfp pre-submit instructions")
 		}
 	}
+
+	if payload.ContactInformation.Valid() && payload.ContactInformation.String != "" {
+		cc.EID = tools.UUID()
+		cc.Name = "contact_information"
+		cc.Value = payload.ContactInformation.String
+		if err := cc.Create(tx); err != nil {
+			return errors.Wrap(err, "failed to insert contact information")
+		}
+	}
+
 
 	if err := v.AddAdministrator(tx, vdb.EID, payload.UserID); err != nil {
 		return errors.Wrap(err, "failed to associate administrators to conference")
@@ -417,6 +427,8 @@ func (v *ConferenceSvc) LoadTextComponents(tx *db.Tx, c *model.Conference) error
 			c.CFPPreSubmitInstructions = cc.Value
 		case "cfp_post_submit_instructions":
 			c.CFPPostSubmitInstructions = cc.Value
+		case "contact_information":
+			c.ContactInformation = cc.Value
 		}
 	}
 	return nil
@@ -616,37 +628,51 @@ func (v *ConferenceSvc) UpdateFromPayload(ctx context.Context, tx *db.Tx, payloa
 	addedTextComponents := map[string]string{}
 	if payload.Description.Valid() {
 		s := payload.Description.String
+		n := "description"
 		if len(s) == 0 {
-			deletedTextComponents = append(deletedTextComponents, s)
+			deletedTextComponents = append(deletedTextComponents, n)
 		} else {
-			addedTextComponents["description"] = s
+			addedTextComponents[n] = s
 		}
 	}
 
 	if payload.CFPLeadText.Valid() {
 		s := payload.CFPLeadText.String
+		n := "cfp_lead_text"
 		if len(s) == 0 {
-			deletedTextComponents = append(deletedTextComponents, s)
+			deletedTextComponents = append(deletedTextComponents, n)
 		} else {
-			addedTextComponents["cfp_lead_text"] = s
+			addedTextComponents[n] = s
 		}
 	}
 
 	if payload.CFPPreSubmitInstructions.Valid() {
 		s := payload.CFPPreSubmitInstructions.String
+		n := "cfp_pre_submit_instructions"
 		if len(s) == 0 {
-			deletedTextComponents = append(deletedTextComponents, s)
+			deletedTextComponents = append(deletedTextComponents, n)
 		} else {
-			addedTextComponents["cfp_pre_submit_instructions"] = s
+			addedTextComponents[n] = s
 		}
 	}
 
 	if payload.CFPPostSubmitInstructions.Valid() {
 		s := payload.CFPPostSubmitInstructions.String
+		n := "cfp_post_submit_instructions"
 		if len(s) == 0 {
-			deletedTextComponents = append(deletedTextComponents, s)
+			deletedTextComponents = append(deletedTextComponents, n)
 		} else {
-			addedTextComponents["cfp_post_submit_instructions"] = s
+			addedTextComponents[n] = s
+		}
+	}
+
+	if payload.ContactInformation.Valid() {
+		s := payload.ContactInformation.String
+		n := "contact_information"
+		if len(s) == 0 {
+			deletedTextComponents = append(deletedTextComponents, n)
+		} else {
+			addedTextComponents[n] = s
 		}
 	}
 

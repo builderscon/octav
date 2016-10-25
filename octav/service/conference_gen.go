@@ -113,7 +113,7 @@ func (v *ConferenceSvc) ReplaceL10NStrings(tx *db.Tx, m *model.Conference, lang 
 	}
 	switch lang {
 	case "", "en":
-		if len(m.Title) > 0 && len(m.Description) > 0 && len(m.CFPLeadText) > 0 && len(m.CFPPreSubmitInstructions) > 0 && len(m.CFPPostSubmitInstructions) > 0 && len(m.SubTitle) > 0 {
+		if len(m.Title) > 0 && len(m.Description) > 0 && len(m.CFPLeadText) > 0 && len(m.CFPPreSubmitInstructions) > 0 && len(m.CFPPostSubmitInstructions) > 0 && len(m.ContactInformation) > 0 && len(m.SubTitle) > 0 {
 			return nil
 		}
 		for _, extralang := range []string{`ja`} {
@@ -168,6 +168,13 @@ func (v *ConferenceSvc) ReplaceL10NStrings(tx *db.Tx, m *model.Conference, lang 
 							pdebug.Printf("Replacing for key 'cfp_post_submit_instructions' (fallback en -> %s", l.Language)
 						}
 						m.CFPPostSubmitInstructions = l.Localized
+					}
+				case "contact_information":
+					if len(m.ContactInformation) == 0 {
+						if pdebug.Enabled {
+							pdebug.Printf("Replacing for key 'contact_information' (fallback en -> %s", l.Language)
+						}
+						m.ContactInformation = l.Localized
 					}
 				case "sub_title":
 					if len(m.SubTitle) == 0 {
@@ -240,6 +247,11 @@ func (v *ConferenceSvc) ReplaceL10NStrings(tx *db.Tx, m *model.Conference, lang 
 					pdebug.Printf("Replacing for key 'cfp_post_submit_instructions'")
 				}
 				m.CFPPostSubmitInstructions = l.Localized
+			case "contact_information":
+				if pdebug.Enabled {
+					pdebug.Printf("Replacing for key 'contact_information'")
+				}
+				m.ContactInformation = l.Localized
 			case "sub_title":
 				if pdebug.Enabled {
 					pdebug.Printf("Replacing for key 'sub_title'")

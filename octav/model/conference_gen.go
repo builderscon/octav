@@ -19,6 +19,7 @@ type rawConference struct {
 	CFPLeadText               string              `json:"cfp_lead_text,omitempty" l10n:"true"`
 	CFPPreSubmitInstructions  string              `json:"cfp_pre_submit_instructions,omitempty" l10n:"true"`
 	CFPPostSubmitInstructions string              `json:"cfp_post_submit_instructions,omitempty" l10n:"true"`
+	ContactInformation        string              `json:"contact_information,omitempty" l10n:"true"`
 	CoverURL                  string              `json:"cover_url"`
 	SeriesID                  string              `json:"series_id,omitempty"`
 	Series                    *ConferenceSeries   `json:"series,omitempty" decorate:"true"`
@@ -43,6 +44,7 @@ func (v Conference) MarshalJSON() ([]byte, error) {
 	raw.CFPLeadText = v.CFPLeadText
 	raw.CFPPreSubmitInstructions = v.CFPPreSubmitInstructions
 	raw.CFPPostSubmitInstructions = v.CFPPostSubmitInstructions
+	raw.ContactInformation = v.ContactInformation
 	raw.CoverURL = v.CoverURL
 	raw.SeriesID = v.SeriesID
 	raw.Series = v.Series

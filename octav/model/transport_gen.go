@@ -823,6 +823,9 @@ func (r CreateConferenceRequest) collectMarshalData() map[string]interface{} {
 	if r.CFPPostSubmitInstructions.Valid() {
 		m["cfp_post_submit_instructions"] = r.CFPPostSubmitInstructions.Value()
 	}
+	if r.ContactInformation.Valid() {
+		m["contact_information"] = r.ContactInformation.Value()
+	}
 	if r.Description.Valid() {
 		m["description"] = r.Description.Value()
 	}
@@ -892,6 +895,12 @@ func (r *CreateConferenceRequest) Populate(m map[string]interface{}) error {
 		}
 		delete(m, "cfp_post_submit_instructions")
 	}
+	if jv, ok := m["contact_information"]; ok {
+		if err := r.ContactInformation.Set(jv); err != nil {
+			return errors.New("set field ContactInformation failed: " + err.Error())
+		}
+		delete(m, "contact_information")
+	}
 	if jv, ok := m["description"]; ok {
 		if err := r.Description.Set(jv); err != nil {
 			return errors.New("set field Description failed: " + err.Error())
@@ -937,7 +946,7 @@ func (r *CreateConferenceRequest) Populate(m map[string]interface{}) error {
 			return errors.Wrap(ErrInvalidJSONFieldType{Field: "user_id"}, "failed to populate fields for CreateConferenceRequest")
 		}
 	}
-	if err := ExtractL10NFields(m, &r.LocalizedFields, []string{"title", "cfp_lead_text", "cfp_pre_submit_instructions", "cfp_post_submit_instructions", "description", "sub_title"}); err != nil {
+	if err := ExtractL10NFields(m, &r.LocalizedFields, []string{"title", "cfp_lead_text", "cfp_pre_submit_instructions", "cfp_post_submit_instructions", "contact_information", "description", "sub_title"}); err != nil {
 		return err
 	}
 	return nil
@@ -945,7 +954,7 @@ func (r *CreateConferenceRequest) Populate(m map[string]interface{}) error {
 
 func (r *CreateConferenceRequest) GetPropNames() ([]string, error) {
 	l, _ := r.LocalizedFields.GetPropNames()
-	return append(l, "title", "cfp_lead_text", "cfp_pre_submit_instructions", "cfp_post_submit_instructions", "description", "series_id", "sub_title", "slug", "timezone", "user_id"), nil
+	return append(l, "title", "cfp_lead_text", "cfp_pre_submit_instructions", "cfp_post_submit_instructions", "contact_information", "description", "series_id", "sub_title", "slug", "timezone", "user_id"), nil
 }
 
 func (r *CreateConferenceRequest) SetPropValue(s string, v interface{}) error {
@@ -961,6 +970,8 @@ func (r *CreateConferenceRequest) SetPropValue(s string, v interface{}) error {
 		return r.CFPPreSubmitInstructions.Set(v)
 	case "cfp_post_submit_instructions":
 		return r.CFPPostSubmitInstructions.Set(v)
+	case "contact_information":
+		return r.ContactInformation.Set(v)
 	case "description":
 		return r.Description.Set(v)
 	case "series_id":
@@ -1114,6 +1125,9 @@ func (r UpdateConferenceRequest) collectMarshalData() map[string]interface{} {
 	if r.CFPPostSubmitInstructions.Valid() {
 		m["cfp_post_submit_instructions"] = r.CFPPostSubmitInstructions.Value()
 	}
+	if r.ContactInformation.Valid() {
+		m["contact_information"] = r.ContactInformation.Value()
+	}
 	if r.SeriesID.Valid() {
 		m["series_id"] = r.SeriesID.Value()
 	}
@@ -1199,6 +1213,12 @@ func (r *UpdateConferenceRequest) Populate(m map[string]interface{}) error {
 		}
 		delete(m, "cfp_post_submit_instructions")
 	}
+	if jv, ok := m["contact_information"]; ok {
+		if err := r.ContactInformation.Set(jv); err != nil {
+			return errors.New("set field ContactInformation failed: " + err.Error())
+		}
+		delete(m, "contact_information")
+	}
 	if jv, ok := m["series_id"]; ok {
 		if err := r.SeriesID.Set(jv); err != nil {
 			return errors.New("set field SeriesID failed: " + err.Error())
@@ -1238,7 +1258,7 @@ func (r *UpdateConferenceRequest) Populate(m map[string]interface{}) error {
 			return errors.Wrap(ErrInvalidJSONFieldType{Field: "user_id"}, "failed to populate fields for UpdateConferenceRequest")
 		}
 	}
-	if err := ExtractL10NFields(m, &r.LocalizedFields, []string{"title", "description", "cfp_lead_text", "cfp_pre_submit_instructions", "cfp_post_submit_instructions", "sub_title"}); err != nil {
+	if err := ExtractL10NFields(m, &r.LocalizedFields, []string{"title", "description", "cfp_lead_text", "cfp_pre_submit_instructions", "cfp_post_submit_instructions", "contact_information", "sub_title"}); err != nil {
 		return err
 	}
 	return nil
@@ -1246,7 +1266,7 @@ func (r *UpdateConferenceRequest) Populate(m map[string]interface{}) error {
 
 func (r *UpdateConferenceRequest) GetPropNames() ([]string, error) {
 	l, _ := r.LocalizedFields.GetPropNames()
-	return append(l, "id", "title", "description", "cfp_lead_text", "cfp_pre_submit_instructions", "cfp_post_submit_instructions", "series_id", "slug", "sub_title", "status", "timezone", "user_id"), nil
+	return append(l, "id", "title", "description", "cfp_lead_text", "cfp_pre_submit_instructions", "cfp_post_submit_instructions", "contact_information", "series_id", "slug", "sub_title", "status", "timezone", "user_id"), nil
 }
 
 func (r *UpdateConferenceRequest) SetPropValue(s string, v interface{}) error {
@@ -1266,6 +1286,8 @@ func (r *UpdateConferenceRequest) SetPropValue(s string, v interface{}) error {
 		return r.CFPPreSubmitInstructions.Set(v)
 	case "cfp_post_submit_instructions":
 		return r.CFPPostSubmitInstructions.Set(v)
+	case "contact_information":
+		return r.ContactInformation.Set(v)
 	case "series_id":
 		return r.SeriesID.Set(v)
 	case "slug":

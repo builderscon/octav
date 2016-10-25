@@ -41,6 +41,7 @@ type Conference struct {
 	CFPLeadText               string              `json:"cfp_lead_text,omitempty" l10n:"true"`
 	CFPPreSubmitInstructions  string              `json:"cfp_pre_submit_instructions,omitempty" l10n:"true"`
 	CFPPostSubmitInstructions string              `json:"cfp_post_submit_instructions,omitempty" l10n:"true"`
+	ContactInformation        string              `json:"contact_information,omitempty" l10n:"true"`
 	CoverURL                  string              `json:"cover_url"`
 	SeriesID                  string              `json:"series_id,omitempty"`
 	Series                    *ConferenceSeries   `json:"series,omitempty" decorate:"true"`
@@ -290,6 +291,7 @@ type CreateConferenceRequest struct {
 	CFPLeadText               jsval.MaybeString `json:"cfp_lead_text" l10n:"true"`
 	CFPPreSubmitInstructions  jsval.MaybeString `json:"cfp_pre_submit_instructions" l10n:"true"`
 	CFPPostSubmitInstructions jsval.MaybeString `json:"cfp_post_submit_instructions" l10n:"true"`
+	ContactInformation        jsval.MaybeString `json:"contact_information" l10n:"true"`
 	Description               jsval.MaybeString `json:"description" l10n:"true"`
 	SeriesID                  string            `json:"series_id"`
 	SubTitle                  jsval.MaybeString `json:"sub_title" l10n:"true"`
@@ -323,6 +325,7 @@ type UpdateConferenceRequest struct {
 	CFPLeadText               jsval.MaybeString `json:"cfp_lead_text" l10n:"true"`
 	CFPPreSubmitInstructions  jsval.MaybeString `json:"cfp_pre_submit_instructions" l10n:"true"`
 	CFPPostSubmitInstructions jsval.MaybeString `json:"cfp_post_submit_instructions" l10n:"true"`
+	ContactInformation        jsval.MaybeString `json:"contact_information" l10n:"true"`
 	MultipartForm             *multipart.Form   `json:"-"`
 	SeriesID                  jsval.MaybeString `json:"series_id,omitempty"`
 	Slug                      jsval.MaybeString `json:"slug,omitempty"`
