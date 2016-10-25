@@ -14,6 +14,10 @@
     ]
   },
   "definitions": {
+    "binary_permission": {
+      "type": "string",
+      "enum": ["allow","disallow"]
+    },
     "binary_permission_default_allow": {
       "type": "string",
       "enum": ["allow","disallow"],
@@ -400,9 +404,9 @@
         "slide_subtitles": { "$ref": "#/definitions/language" },
         "slide_url": { "$ref": "#/definitions/url" },
         "video_url": { "$ref": "#/definitions/url" },
-        "photo_release": { "$ref": "#/definitions/binary_permission_default_allow" },
-        "recording_release": { "$ref": "#/definitions/binary_permission_default_allow" },
-        "materials_release": { "$ref": "#/definitions/binary_permission_default_allow" },
+        "photo_release": { "$ref": "#/definitions/binary_permission" },
+        "recording_release": { "$ref": "#/definitions/binary_permission" },
+        "materials_release": { "$ref": "#/definitions/binary_permission" },
         "has_interpretation": { "$ref": "#/definitions/boolean_default_false" },
         "status": { "$ref": "#/definitions/acceptance_status" },
         "confirmed": { "$ref": "#/definitions/boolean_default_false" }
@@ -443,7 +447,7 @@
           ]
         },
         "tshirt_size": { "$ref": "#/definitions/tshirt_size" },
-        "is_admin": { "$ref": "#/definitions/boolean_default_false" }
+        "is_admin": { "type": "boolean" }
       },
       "patternProperties": {
         "first_name#[a-z]+": { "$ref": "#/definitions/string_i18n" },
@@ -1325,13 +1329,13 @@
           "slide_url": { "$ref": "#/definitions/url" },
           "starts_on": { "$ref": "#/definitions/datetime" },
           "video_url": { "$ref": "#/definitions/url" },
-          "photo_release": { "$ref": "#/definitions/binary_permission_default_allow" },
-          "recording_release": { "$ref": "#/definitions/binary_permission_default_allow" },
-          "materials_release": { "$ref": "#/definitions/binary_permission_default_allow" },
-          "has_interpretation": { "$ref": "#/definitions/boolean_default_false" },
+          "photo_release": { "$ref": "#/definitions/binary_permission" },
+          "recording_release": { "$ref": "#/definitions/binary_permission" },
+          "materials_release": { "$ref": "#/definitions/binary_permission" },
+          "has_interpretation": { "type": "boolean" },
           "status": { "$ref": "#/definitions/acceptance_status" },
           "sort_order": { "$ref": "#/definitions/positiveInteger" },
-          "confirmed": { "$ref": "#/definitions/boolean_default_false" },
+          "confirmed": { "type": "boolean" },
           "user_id": { "$ref": "#/definitions/uuid" }
         },
         "patternProperties": {
