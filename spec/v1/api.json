@@ -1365,14 +1365,10 @@
       "schema": {
         "type": "object",
         "properties": {
-          "date": {
-            "oneOf": [
-              { "$ref": "#/definitions/date" },
-              { "$ref": "#/definitions/datestr" }
-            ]
-          },
           "confirmed": {"type": "array", "items": {"type": "boolean"} },
           "conference_id": { "$ref": "#/definitions/uuid" },
+          "range_start": { "$ref": "#/definitions/datestr" },
+          "range_end": { "$ref": "#/definitions/datestr" },
           "status": {
             "type": "array",
             "items": { "$ref": "#/definitions/acceptance_status" }

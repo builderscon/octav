@@ -1,12 +1,14 @@
 package db
 
 import (
+	"time"
+
 	"github.com/builderscon/octav/octav/tools"
 	pdebug "github.com/lestrrat/go-pdebug"
 	"github.com/pkg/errors"
 )
 
-func (v *SessionList) LoadByConference(tx *Tx, conferenceID, speakerID, date string, status []string, confirmed []bool) (err error) {
+func (v *SessionList) LoadByConference(tx *Tx, conferenceID, speakerID string, rangeStart, rangeEnd time.Time, status []string, confirmed []bool) (err error) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("db.SessionList.LoadByConference %s,%s,%s", conferenceID, speakerID, status).BindError(&err)
 		defer g.End()
@@ -40,12 +42,12 @@ func (v *SessionList) LoadByConference(tx *Tx, conferenceID, speakerID, date str
 		args = append(args, speakerID)
 	}
 
-	if date != "" {
+	if !rangeStart.IsZero() && !rangeEnd.IsZero() {
 		if where.Len() > 0 {
 			where.WriteString(` AND`)
 		}
-		where.WriteString(` DATE(starts_on) = ?`)
-		args = append(args, date)
+		where.WriteString(` starts_on IS BETWEEN(?, ?)`)
+		args = append(args, rangeStart, rangeEnd)
 	}
 
 	if l := len(status); l > 0 {

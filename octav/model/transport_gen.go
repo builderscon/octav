@@ -4026,13 +4026,16 @@ func (r ListSessionsRequest) collectMarshalData() map[string]interface{} {
 		m["conference_id"] = r.ConferenceID.Value()
 	}
 	m["confirmed"] = r.Confirmed
+	if r.RangeStart.Valid() {
+		m["range_start"] = r.RangeStart.Value()
+	}
+	if r.RangeEnd.Valid() {
+		m["range_end"] = r.RangeEnd.Value()
+	}
 	if r.SpeakerID.Valid() {
 		m["speaker_id"] = r.SpeakerID.Value()
 	}
 	m["status"] = r.Status
-	if r.Date.Valid() {
-		m["date"] = r.Date.Value()
-	}
 	if r.Lang.Valid() {
 		m["lang"] = r.Lang.Value()
 	}
@@ -4090,6 +4093,18 @@ func (r *ListSessionsRequest) Populate(m map[string]interface{}) error {
 			return errors.Wrap(ErrInvalidJSONFieldType{Field: "confirmed"}, "failed to populate fields for ListSessionsRequest")
 		}
 	}
+	if jv, ok := m["range_start"]; ok {
+		if err := r.RangeStart.Set(jv); err != nil {
+			return errors.New("set field RangeStart failed: " + err.Error())
+		}
+		delete(m, "range_start")
+	}
+	if jv, ok := m["range_end"]; ok {
+		if err := r.RangeEnd.Set(jv); err != nil {
+			return errors.New("set field RangeEnd failed: " + err.Error())
+		}
+		delete(m, "range_end")
+	}
 	if jv, ok := m["speaker_id"]; ok {
 		if err := r.SpeakerID.Set(jv); err != nil {
 			return errors.New("set field SpeakerID failed: " + err.Error())
@@ -4113,12 +4128,6 @@ func (r *ListSessionsRequest) Populate(m map[string]interface{}) error {
 		default:
 			return errors.Wrap(ErrInvalidJSONFieldType{Field: "status"}, "failed to populate fields for ListSessionsRequest")
 		}
-	}
-	if jv, ok := m["date"]; ok {
-		if err := r.Date.Set(jv); err != nil {
-			return errors.New("set field Date failed: " + err.Error())
-		}
-		delete(m, "date")
 	}
 	if jv, ok := m["lang"]; ok {
 		if err := r.Lang.Set(jv); err != nil {

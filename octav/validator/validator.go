@@ -2353,22 +2353,20 @@ func init() {
 						),
 				).
 				AddProp(
-					"date",
-					jsval.OneOf().
-						Add(
-							jsval.Reference(M).RefersTo("#/definitions/date"),
-						).
-						Add(
-							jsval.Reference(M).RefersTo("#/definitions/datestr"),
-						),
-				).
-				AddProp(
 					"lang",
 					jsval.Reference(M).RefersTo("#/definitions/language"),
 				).
 				AddProp(
 					"limit",
 					jsval.Reference(M).RefersTo("#/definitions/positiveInteger"),
+				).
+				AddProp(
+					"range_end",
+					jsval.Reference(M).RefersTo("#/definitions/datestr"),
+				).
+				AddProp(
+					"range_start",
+					jsval.Reference(M).RefersTo("#/definitions/datestr"),
 				).
 				AddProp(
 					"since",
