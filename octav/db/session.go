@@ -44,7 +44,7 @@ func (v *SessionList) LoadByConference(tx *Tx, conferenceID, speakerID, date str
 		if where.Len() > 0 {
 			where.WriteString(` AND`)
 		}
-		where.WriteString(` DATE(date) = ?`)
+		where.WriteString(` DATE(starts_on) = ?`)
 		args = append(args, date)
 	}
 
