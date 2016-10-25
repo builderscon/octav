@@ -244,7 +244,7 @@ func (v *SessionSvc) populateRowForUpdate(vdb *db.Session, payload model.UpdateS
 }
 
 func (v *SessionSvc) LoadByConference(tx *db.Tx, vdbl *db.SessionList, cid string, date string) error {
-	if err := vdbl.LoadByConference(tx, cid, "", date, nil); err != nil {
+	if err := vdbl.LoadByConference(tx, cid, "", date, nil, nil); err != nil {
 		return err
 	}
 	return nil
@@ -410,12 +410,14 @@ func (v *SessionSvc) ListFromPayload(tx *db.Tx, result *model.SessionList, paylo
 		status = append(status, model.StatusAccepted)
 	}
 
+	confirmed := payload.Confirmed
+
 	if !hasQuery {
 		return errors.New("no query specified (one of conference_id/speaker_id is required)")
 	}
 
 	var vdbl db.SessionList
-	if err := vdbl.LoadByConference(tx, conferenceID, speakerID, date, status); err != nil {
+	if err := vdbl.LoadByConference(tx, conferenceID, speakerID, date, status, confirmed); err != nil {
 		return errors.Wrap(err, "failed to load from database")
 	}
 

@@ -4003,6 +4003,7 @@ func (r ListSessionsRequest) collectMarshalData() map[string]interface{} {
 	if r.ConferenceID.Valid() {
 		m["conference_id"] = r.ConferenceID.Value()
 	}
+	m["confirmed"] = r.Confirmed
 	if r.SpeakerID.Valid() {
 		m["speaker_id"] = r.SpeakerID.Value()
 	}
@@ -4048,6 +4049,24 @@ func (r *ListSessionsRequest) Populate(m map[string]interface{}) error {
 			return errors.New("set field ConferenceID failed: " + err.Error())
 		}
 		delete(m, "conference_id")
+	}
+	if jv, ok := m["confirmed"]; ok {
+		switch jv.(type) {
+		case []interface{}:
+			jvl := jv.([]interface{})
+			list := make([]bool, len(jvl))
+			for i, el := range jvl {
+				switch el.(type) {
+				case bool:
+					list[i] = el.(bool)
+				default:
+					return errors.Wrap(ErrInvalidJSONFieldType{Field: "confirmed"}, "failed to populate fields for ListSessionsRequest")
+				}
+			}
+			r.Confirmed = list
+		default:
+			return errors.Wrap(ErrInvalidJSONFieldType{Field: "confirmed"}, "failed to populate fields for ListSessionsRequest")
+		}
 	}
 	if jv, ok := m["speaker_id"]; ok {
 		if err := r.SpeakerID.Set(jv); err != nil {

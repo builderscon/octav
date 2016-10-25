@@ -1,5 +1,5 @@
 """OCTAV Client Library"""
-"""DO NOT EDIT: This file was generated from ../spec/v1/api.json on Mon Oct 24 13:28:20 2016"""
+"""DO NOT EDIT: This file was generated from ../spec/v1/api.json on Tue Oct 25 10:59:15 2016"""
 
 import certifi
 import json
@@ -1911,12 +1911,14 @@ class Octav(object):
         self.error = repr(e)
         return None
 
-  def list_sessions (self, conference_id=None, date=None, lang=None, limit=None, since=None, speaker_id=None, status=None):
+  def list_sessions (self, conference_id=None, confirmed=None, date=None, lang=None, limit=None, since=None, speaker_id=None, status=None):
     try:
         payload = {}
         hdrs = {}
         if conference_id is not None:
             payload['conference_id'] = conference_id
+        if confirmed is not None:
+            payload['confirmed'] = confirmed
         if date is not None:
             payload['date'] = date
         if lang is not None:

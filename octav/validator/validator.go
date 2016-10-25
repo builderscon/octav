@@ -154,7 +154,7 @@ var R47 jsval.Constraint
 
 func init() {
 	M = &jsval.ConstraintMap{}
-	R0 = jsval.String().Enum("pending", "accepted", "rejected").Default("pending")
+	R0 = jsval.String().Enum("pending", "accepted", "rejected")
 	R1 = jsval.String().Enum("allow", "disallow").Default("allow")
 	R2 = jsval.Boolean().Default(false)
 	R3 = jsval.Object().
@@ -317,7 +317,7 @@ func init() {
 		)
 	R15 = jsval.String().Enum("github", "facebook", "twitter")
 	R16 = jsval.Integer().Minimum(0).Maximum(10)
-	R17 = jsval.String().Default("en")
+	R17 = jsval.String()
 	R18 = jsval.Number()
 	R19 = jsval.Number()
 	R20 = jsval.String()
@@ -2306,6 +2306,16 @@ func init() {
 				AddProp(
 					"conference_id",
 					jsval.Reference(M).RefersTo("#/definitions/uuid"),
+				).
+				AddProp(
+					"confirmed",
+					jsval.Array().
+						Items(
+							jsval.Boolean(),
+						).
+						AdditionalItems(
+							jsval.EmptyConstraint,
+						),
 				).
 				AddProp(
 					"date",
