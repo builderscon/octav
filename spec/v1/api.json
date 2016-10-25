@@ -210,8 +210,7 @@
     },
     "language": {
       "description": "a language tag",
-      "type": "string",
-      "default": "en"
+      "type": "string"
     },
     "latitude": {
       "description": "latitude of an object",
