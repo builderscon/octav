@@ -1367,8 +1367,8 @@
         "properties": {
           "confirmed": {"type": "array", "items": {"type": "boolean"} },
           "conference_id": { "$ref": "#/definitions/uuid" },
-          "range_start": { "$ref": "#/definitions/datestr" },
-          "range_end": { "$ref": "#/definitions/datestr" },
+          "range_start": { "$ref": "#/definitions/rfc3339" },
+          "range_end": { "$ref": "#/definitions/rfc3339" },
           "status": {
             "type": "array",
             "items": { "$ref": "#/definitions/acceptance_status" }

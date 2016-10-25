@@ -2362,11 +2362,11 @@ func init() {
 				).
 				AddProp(
 					"range_end",
-					jsval.Reference(M).RefersTo("#/definitions/datestr"),
+					jsval.Reference(M).RefersTo("#/definitions/rfc3339"),
 				).
 				AddProp(
 					"range_start",
-					jsval.Reference(M).RefersTo("#/definitions/datestr"),
+					jsval.Reference(M).RefersTo("#/definitions/rfc3339"),
 				).
 				AddProp(
 					"since",
