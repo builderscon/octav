@@ -1,5 +1,5 @@
 """OCTAV Client Library"""
-"""DO NOT EDIT: This file was generated from ../spec/v1/api.json on Tue Oct 25 10:59:15 2016"""
+"""DO NOT EDIT: This file was generated from ../spec/v1/api.json on Wed Oct 26 15:14:28 2016"""
 
 import certifi
 import json
@@ -188,6 +188,41 @@ class Octav(object):
             self.extract_error(res)
             return None
         return json.loads(res.data)
+    except BaseException as e:
+        if self.debug:
+            print("error during http access: " + repr(e))
+        self.error = repr(e)
+        return None
+
+  def verify_user (self, id, user_id):
+    try:
+        payload = {}
+        hdrs = {}
+        if id is None:
+            raise MissingRequiredArgument('property id must be provided')
+        payload['id'] = id
+        if user_id is None:
+            raise MissingRequiredArgument('property user_id must be provided')
+        payload['user_id'] = user_id
+        if id is not None:
+            payload['id'] = id
+        if user_id is not None:
+            payload['user_id'] = user_id
+        uri = '%s/v1/user/verify' % self.endpoint
+        hdrs = urllib3.util.make_headers(
+            basic_auth='%s:%s' % (self.key, self.secret),
+        )
+        if self.debug:
+            print('POST %s' % uri)
+        hdrs['Content-Type']= 'application/json'
+        res = self.http.request('POST', uri, headers=hdrs, body=json.dumps(payload))
+        if self.debug:
+            print(res)
+        self.res = res
+        if res.status != 200:
+            self.extract_error(res)
+            return None
+        return True
     except BaseException as e:
         if self.debug:
             print("error during http access: " + repr(e))
@@ -816,7 +851,7 @@ class Octav(object):
         self.error = repr(e)
         return None
 
-  def create_conference (self, series_id, slug, title, user_id, cfp_lead_text=None, cfp_post_submit_instructions=None, cfp_pre_submit_instructions=None, description=None, sub_title=None, timezone=None):
+  def create_conference (self, series_id, slug, title, user_id, cfp_lead_text=None, cfp_post_submit_instructions=None, cfp_pre_submit_instructions=None, contact_information=None, description=None, sub_title=None, timezone=None, **args):
     try:
         payload = {}
         hdrs = {}
@@ -838,6 +873,8 @@ class Octav(object):
             payload['cfp_post_submit_instructions'] = cfp_post_submit_instructions
         if cfp_pre_submit_instructions is not None:
             payload['cfp_pre_submit_instructions'] = cfp_pre_submit_instructions
+        if contact_information is not None:
+            payload['contact_information'] = contact_information
         if description is not None:
             payload['description'] = description
         if series_id is not None:
@@ -852,6 +889,11 @@ class Octav(object):
             payload['title'] = title
         if user_id is not None:
             payload['user_id'] = user_id
+        patterns = [re.compile('cfp_lead_text#[a-z]+'), re.compile('cfp_post_submit_instructions#[a-z]+'), re.compile('cfp_pre_submit_instructions#[a-z]+'), re.compile('contact_information#[a-z]+'), re.compile('description#[a-z]+'), re.compile('sub_title#[a-z]+'), re.compile('title#[a-z]+')]
+        for key in args:
+            for p in patterns:
+                if p.match(key):
+                    payload[key] = args[key]
         uri = '%s/v1/conference/create' % self.endpoint
         hdrs = urllib3.util.make_headers(
             basic_auth='%s:%s' % (self.key, self.secret),
@@ -1557,7 +1599,7 @@ class Octav(object):
         self.error = repr(e)
         return None
 
-  def update_conference (self, id, user_id, cfp_lead_text=None, cfp_post_submit_instructions=None, cfp_pre_submit_instructions=None, description=None, slug=None, status=None, sub_title=None, timezone=None, title=None, **args):
+  def update_conference (self, id, user_id, cfp_lead_text=None, cfp_post_submit_instructions=None, cfp_pre_submit_instructions=None, contact_information=None, description=None, slug=None, status=None, sub_title=None, timetable_available=None, timezone=None, title=None, **args):
     try:
         payload = {}
         hdrs = {}
@@ -1573,6 +1615,8 @@ class Octav(object):
             payload['cfp_post_submit_instructions'] = cfp_post_submit_instructions
         if cfp_pre_submit_instructions is not None:
             payload['cfp_pre_submit_instructions'] = cfp_pre_submit_instructions
+        if contact_information is not None:
+            payload['contact_information'] = contact_information
         if description is not None:
             payload['description'] = description
         if id is not None:
@@ -1583,13 +1627,15 @@ class Octav(object):
             payload['status'] = status
         if sub_title is not None:
             payload['sub_title'] = sub_title
+        if timetable_available is not None:
+            payload['timetable_available'] = timetable_available
         if timezone is not None:
             payload['timezone'] = timezone
         if title is not None:
             payload['title'] = title
         if user_id is not None:
             payload['user_id'] = user_id
-        patterns = [re.compile('cfp_lead_text#[a-z]+'), re.compile('cfp_post_submit_instructions#[a-z]+'), re.compile('cfp_pre_submit_instructions#[a-z]+'), re.compile('description#[a-z]+'), re.compile('title#[a-z]+')]
+        patterns = [re.compile('cfp_lead_text#[a-z]+'), re.compile('cfp_post_submit_instructions#[a-z]+'), re.compile('cfp_pre_submit_instructions#[a-z]+'), re.compile('contact_information#[a-z]+'), re.compile('description#[a-z]+'), re.compile('sub_title#[a-z]+'), re.compile('title#[a-z]+')]
         for key in args:
             for p in patterns:
                 if p.match(key):
@@ -1911,7 +1957,7 @@ class Octav(object):
         self.error = repr(e)
         return None
 
-  def list_sessions (self, conference_id=None, confirmed=None, date=None, lang=None, limit=None, since=None, speaker_id=None, status=None):
+  def list_sessions (self, conference_id=None, confirmed=None, lang=None, limit=None, range_end=None, range_start=None, since=None, speaker_id=None, status=None):
     try:
         payload = {}
         hdrs = {}
@@ -1919,12 +1965,14 @@ class Octav(object):
             payload['conference_id'] = conference_id
         if confirmed is not None:
             payload['confirmed'] = confirmed
-        if date is not None:
-            payload['date'] = date
         if lang is not None:
             payload['lang'] = lang
         if limit is not None:
             payload['limit'] = limit
+        if range_end is not None:
+            payload['range_end'] = range_end
+        if range_start is not None:
+            payload['range_start'] = range_start
         if since is not None:
             payload['since'] = since
         if speaker_id is not None:
