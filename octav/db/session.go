@@ -80,6 +80,10 @@ func (v *SessionList) LoadByConference(tx *Tx, conferenceID, speakerID string, r
 		where.WriteString(`)`)
 	}
 
+	if where.Len() > 0 {
+		where.WriteString(` ORDER BY starts_on ASC`)
+	}
+
 	where.WriteTo(stmt)
 
 	rows, err := tx.Query(stmt.String(), args...)
