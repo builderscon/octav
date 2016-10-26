@@ -548,6 +548,20 @@
       "targetSchema": { "$ref": "#/definitions/user" }
     },
     {
+      "title": "Verify user",
+      "hsup.wrapper": "httpWithBasicAuth",
+      "rel": "create",
+      "href": "/v1/user/verify",
+      "method": "POST",
+      "schema": {
+        "properties": {
+          "id": { "$ref": "#/definitions/uuid" },
+          "user_id": { "$ref": "#/definitions/uuid" }
+        },
+        "required": [ "id","user_id" ]
+      }
+    },
+    {
       "title": "Update user",
       "hsup.wrapper": "httpWithBasicAuth",
       "description": "A user can be a staff/organizer, speaker, or a regular attendee. Information should be obtained from facebook/twitter/github",

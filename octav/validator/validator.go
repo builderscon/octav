@@ -102,6 +102,7 @@ var HTTPUpdateSessionTypeRequest *jsval.JSVal
 var HTTPUpdateSponsorRequest *jsval.JSVal
 var HTTPUpdateUserRequest *jsval.JSVal
 var HTTPUpdateVenueRequest *jsval.JSVal
+var HTTPVerifyUserRequest *jsval.JSVal
 var M *jsval.ConstraintMap
 var R0 jsval.Constraint
 var R1 jsval.Constraint
@@ -3737,6 +3738,25 @@ func init() {
 
 	HTTPUpdateVenueRequest = jsval.New().
 		SetName("HTTPUpdateVenueRequest").
+		SetConstraintMap(M).
+		SetRoot(
+			jsval.Object().
+				Required("id", "user_id").
+				AdditionalProperties(
+					jsval.EmptyConstraint,
+				).
+				AddProp(
+					"id",
+					jsval.Reference(M).RefersTo("#/definitions/uuid"),
+				).
+				AddProp(
+					"user_id",
+					jsval.Reference(M).RefersTo("#/definitions/uuid"),
+				),
+		)
+
+	HTTPVerifyUserRequest = jsval.New().
+		SetName("HTTPVerifyUserRequest").
 		SetConstraintMap(M).
 		SetRoot(
 			jsval.Object().

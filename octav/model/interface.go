@@ -938,3 +938,9 @@ type GetConferenceScheduleRequest struct {
 	ConferenceID string            `json:"conference_id"`
 	Lang         jsval.MaybeString `json:"lang" urlenc:"lang,omitempty,string"`
 }
+
+// +transport
+type VerifyUserRequest struct {
+	ID     string `json:"id"`      // ID of the user making this request
+	UserID string `json:"user_id"` // ID of the user making this request
+}

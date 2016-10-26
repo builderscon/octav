@@ -1606,3 +1606,31 @@ func doGetConferenceSchedule(ctx context.Context, w http.ResponseWriter, r *http
 	w.WriteHeader(http.StatusOK)
 	c.WriteTo(w)
 }
+
+func doVerifyUser(ctx context.Context, w http.ResponseWriter, r *http.Request, payload model.VerifyUserRequest) {
+	tx, err := db.Begin()
+	if err != nil {
+		httpError(w, `doVerify`, http.StatusInternalServerError, err)
+		return
+	}
+	defer tx.AutoRollback()
+
+	su := service.User()
+	if err := su.IsAdministrator(tx, payload.UserID); err != nil {
+		httpError(w, `doVerify`, http.StatusInternalServerError, err)
+		return
+	}
+
+	var m model.User
+	if err = su.Lookup(tx, &m, payload.ID); err != nil {
+		httpError(w, `doVerify`, http.StatusInternalServerError, err)
+		return
+	}
+
+	go su.Verify(&m)
+
+	httpJSON(w, map[string]interface{}{
+		"message": "Verify scheduled",
+	})
+}
+
