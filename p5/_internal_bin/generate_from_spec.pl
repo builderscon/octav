@@ -1,10 +1,10 @@
 #!perl
 use strict;
 use feature 'say';
-use JSON;
 use File::Basename;
 use File::Path;
 use File::Spec;
+use JSON;
 
 my $sfile = shift @ARGV;
 open (my $fh, '<', $sfile) or die "Failed to open $sfile: $!";
@@ -21,6 +21,7 @@ package WebService::Octav;
 use strict;
 use File::Basename ();
 use File::LibMagic;
+use HTTP::Request::Common ();
 use JSON;
 use LWP::UserAgent;
 use URI;
@@ -46,8 +47,7 @@ sub last_error {
 
 sub credentials {
     my $self = shift;
-    my $uri = URI->new($self->{endpoint});
-    $self->{user_agent}->credentials($uri->host_port, "octav", @_[0], @_[1])
+    $self->{credentials} = [@_[0], @_[1]]
 }
 
 EOM
@@ -98,11 +98,15 @@ for my $link (@{$schema->{links}}) {
         } else {
             say $tmpout '    push @request_args, (Content_Type => "application/json", Content => JSON::encode_json($payload));';
         }
-        say $tmpout '    my $res = $self->{user_agent}->post($uri, @request_args);';
+        say $tmpout '    my $req = HTTP::Request::Common::POST($uri, @request_args);';
     } else {
         say $tmpout '    $uri->query_form($payload);';
-        say $tmpout '    my $res = $self->{user_agent}->get($uri);';
+        say $tmpout '    my $req = HTTP::Request::Common::GET($uri->as_string());';
     }
+    say $tmpout '    if (my($u, $p) = @{$self->{credentials} || []}) {';
+    say $tmpout '        $req->authorization_basic($u, $p);';
+    say $tmpout '    }';
+    say $tmpout '    my $res = $self->{user_agent}->request($req);';
     say $tmpout '    if (!$res->is_success) {';
     say $tmpout '        $self->{last_error} = $res->status_line;';
     say $tmpout '        return;';

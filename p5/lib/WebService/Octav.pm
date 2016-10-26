@@ -2,6 +2,7 @@ package WebService::Octav;
 use strict;
 use File::Basename ();
 use File::LibMagic;
+use HTTP::Request::Common ();
 use JSON;
 use LWP::UserAgent;
 use URI;
@@ -27,8 +28,7 @@ sub last_error {
 
 sub credentials {
     my $self = shift;
-    my $uri = URI->new($self->{endpoint});
-    $self->{user_agent}->credentials($uri->host_port, "octav", @_[0], @_[1])
+    $self->{credentials} = [@_[0], @_[1]]
 }
 
 
@@ -37,7 +37,11 @@ sub health_check {
     my ($self, $payload) = @_;
     my $uri = URI->new($self->{endpoint} . qq|/|);
     $uri->query_form($payload);
-    my $res = $self->{user_agent}->get($uri);
+    my $req = HTTP::Request::Common::GET($uri->as_string());
+    if (my($u, $p) = @{$self->{credentials} || []}) {
+        $req->authorization_basic($u, $p);
+    }
+    my $res = $self->{user_agent}->request($req);
     if (!$res->is_success) {
         $self->{last_error} = $res->status_line;
         return;
@@ -55,7 +59,11 @@ sub create_user {
     my $uri = URI->new($self->{endpoint} . qq|/v1/user/create|);
     my @request_args;
     push @request_args, (Content_Type => "application/json", Content => JSON::encode_json($payload));
-    my $res = $self->{user_agent}->post($uri, @request_args);
+    my $req = HTTP::Request::Common::POST($uri, @request_args);
+    if (my($u, $p) = @{$self->{credentials} || []}) {
+        $req->authorization_basic($u, $p);
+    }
+    my $res = $self->{user_agent}->request($req);
     if (!$res->is_success) {
         $self->{last_error} = $res->status_line;
         return;
@@ -72,7 +80,11 @@ sub lookup_user {
     }
     my $uri = URI->new($self->{endpoint} . qq|/v1/user/lookup|);
     $uri->query_form($payload);
-    my $res = $self->{user_agent}->get($uri);
+    my $req = HTTP::Request::Common::GET($uri->as_string());
+    if (my($u, $p) = @{$self->{credentials} || []}) {
+        $req->authorization_basic($u, $p);
+    }
+    my $res = $self->{user_agent}->request($req);
     if (!$res->is_success) {
         $self->{last_error} = $res->status_line;
         return;
@@ -89,12 +101,38 @@ sub lookup_user_by_auth_user_id {
     }
     my $uri = URI->new($self->{endpoint} . qq|/v1/user/lookup_user_by_auth_user_id|);
     $uri->query_form($payload);
-    my $res = $self->{user_agent}->get($uri);
+    my $req = HTTP::Request::Common::GET($uri->as_string());
+    if (my($u, $p) = @{$self->{credentials} || []}) {
+        $req->authorization_basic($u, $p);
+    }
+    my $res = $self->{user_agent}->request($req);
     if (!$res->is_success) {
         $self->{last_error} = $res->status_line;
         return;
     }
     return JSON::decode_json($res->decoded_content);
+}
+
+sub verify_user {
+    my ($self, $payload) = @_;
+    for my $required (qw(id user_id)) {
+        if (!$payload->{$required}) {
+            die qq|property "$required" must be provided|;
+        }
+    }
+    my $uri = URI->new($self->{endpoint} . qq|/v1/user/verify|);
+    my @request_args;
+    push @request_args, (Content_Type => "application/json", Content => JSON::encode_json($payload));
+    my $req = HTTP::Request::Common::POST($uri, @request_args);
+    if (my($u, $p) = @{$self->{credentials} || []}) {
+        $req->authorization_basic($u, $p);
+    }
+    my $res = $self->{user_agent}->request($req);
+    if (!$res->is_success) {
+        $self->{last_error} = $res->status_line;
+        return;
+    }
+    return 1
 }
 
 sub update_user {
@@ -107,7 +145,11 @@ sub update_user {
     my $uri = URI->new($self->{endpoint} . qq|/v1/user/update|);
     my @request_args;
     push @request_args, (Content_Type => "application/json", Content => JSON::encode_json($payload));
-    my $res = $self->{user_agent}->post($uri, @request_args);
+    my $req = HTTP::Request::Common::POST($uri, @request_args);
+    if (my($u, $p) = @{$self->{credentials} || []}) {
+        $req->authorization_basic($u, $p);
+    }
+    my $res = $self->{user_agent}->request($req);
     if (!$res->is_success) {
         $self->{last_error} = $res->status_line;
         return;
@@ -125,7 +167,11 @@ sub delete_user {
     my $uri = URI->new($self->{endpoint} . qq|/v1/user/delete|);
     my @request_args;
     push @request_args, (Content_Type => "application/json", Content => JSON::encode_json($payload));
-    my $res = $self->{user_agent}->post($uri, @request_args);
+    my $req = HTTP::Request::Common::POST($uri, @request_args);
+    if (my($u, $p) = @{$self->{credentials} || []}) {
+        $req->authorization_basic($u, $p);
+    }
+    my $res = $self->{user_agent}->request($req);
     if (!$res->is_success) {
         $self->{last_error} = $res->status_line;
         return;
@@ -137,7 +183,11 @@ sub list_user {
     my ($self, $payload) = @_;
     my $uri = URI->new($self->{endpoint} . qq|/v1/user/list|);
     $uri->query_form($payload);
-    my $res = $self->{user_agent}->get($uri);
+    my $req = HTTP::Request::Common::GET($uri->as_string());
+    if (my($u, $p) = @{$self->{credentials} || []}) {
+        $req->authorization_basic($u, $p);
+    }
+    my $res = $self->{user_agent}->request($req);
     if (!$res->is_success) {
         $self->{last_error} = $res->status_line;
         return;
@@ -155,7 +205,11 @@ sub create_venue {
     my $uri = URI->new($self->{endpoint} . qq|/v1/venue/create|);
     my @request_args;
     push @request_args, (Content_Type => "application/json", Content => JSON::encode_json($payload));
-    my $res = $self->{user_agent}->post($uri, @request_args);
+    my $req = HTTP::Request::Common::POST($uri, @request_args);
+    if (my($u, $p) = @{$self->{credentials} || []}) {
+        $req->authorization_basic($u, $p);
+    }
+    my $res = $self->{user_agent}->request($req);
     if (!$res->is_success) {
         $self->{last_error} = $res->status_line;
         return;
@@ -167,7 +221,11 @@ sub list_venue {
     my ($self, $payload) = @_;
     my $uri = URI->new($self->{endpoint} . qq|/v1/venue/list|);
     $uri->query_form($payload);
-    my $res = $self->{user_agent}->get($uri);
+    my $req = HTTP::Request::Common::GET($uri->as_string());
+    if (my($u, $p) = @{$self->{credentials} || []}) {
+        $req->authorization_basic($u, $p);
+    }
+    my $res = $self->{user_agent}->request($req);
     if (!$res->is_success) {
         $self->{last_error} = $res->status_line;
         return;
@@ -184,7 +242,11 @@ sub lookup_venue {
     }
     my $uri = URI->new($self->{endpoint} . qq|/v1/venue/lookup|);
     $uri->query_form($payload);
-    my $res = $self->{user_agent}->get($uri);
+    my $req = HTTP::Request::Common::GET($uri->as_string());
+    if (my($u, $p) = @{$self->{credentials} || []}) {
+        $req->authorization_basic($u, $p);
+    }
+    my $res = $self->{user_agent}->request($req);
     if (!$res->is_success) {
         $self->{last_error} = $res->status_line;
         return;
@@ -202,7 +264,11 @@ sub update_venue {
     my $uri = URI->new($self->{endpoint} . qq|/v1/venue/update|);
     my @request_args;
     push @request_args, (Content_Type => "application/json", Content => JSON::encode_json($payload));
-    my $res = $self->{user_agent}->post($uri, @request_args);
+    my $req = HTTP::Request::Common::POST($uri, @request_args);
+    if (my($u, $p) = @{$self->{credentials} || []}) {
+        $req->authorization_basic($u, $p);
+    }
+    my $res = $self->{user_agent}->request($req);
     if (!$res->is_success) {
         $self->{last_error} = $res->status_line;
         return;
@@ -220,7 +286,11 @@ sub delete_venue {
     my $uri = URI->new($self->{endpoint} . qq|/v1/venue/delete|);
     my @request_args;
     push @request_args, (Content_Type => "application/json", Content => JSON::encode_json($payload));
-    my $res = $self->{user_agent}->post($uri, @request_args);
+    my $req = HTTP::Request::Common::POST($uri, @request_args);
+    if (my($u, $p) = @{$self->{credentials} || []}) {
+        $req->authorization_basic($u, $p);
+    }
+    my $res = $self->{user_agent}->request($req);
     if (!$res->is_success) {
         $self->{last_error} = $res->status_line;
         return;
@@ -238,7 +308,11 @@ sub create_room {
     my $uri = URI->new($self->{endpoint} . qq|/v1/room/create|);
     my @request_args;
     push @request_args, (Content_Type => "application/json", Content => JSON::encode_json($payload));
-    my $res = $self->{user_agent}->post($uri, @request_args);
+    my $req = HTTP::Request::Common::POST($uri, @request_args);
+    if (my($u, $p) = @{$self->{credentials} || []}) {
+        $req->authorization_basic($u, $p);
+    }
+    my $res = $self->{user_agent}->request($req);
     if (!$res->is_success) {
         $self->{last_error} = $res->status_line;
         return;
@@ -256,7 +330,11 @@ sub update_room {
     my $uri = URI->new($self->{endpoint} . qq|/v1/room/update|);
     my @request_args;
     push @request_args, (Content_Type => "application/json", Content => JSON::encode_json($payload));
-    my $res = $self->{user_agent}->post($uri, @request_args);
+    my $req = HTTP::Request::Common::POST($uri, @request_args);
+    if (my($u, $p) = @{$self->{credentials} || []}) {
+        $req->authorization_basic($u, $p);
+    }
+    my $res = $self->{user_agent}->request($req);
     if (!$res->is_success) {
         $self->{last_error} = $res->status_line;
         return;
@@ -273,7 +351,11 @@ sub lookup_room {
     }
     my $uri = URI->new($self->{endpoint} . qq|/v1/room/lookup|);
     $uri->query_form($payload);
-    my $res = $self->{user_agent}->get($uri);
+    my $req = HTTP::Request::Common::GET($uri->as_string());
+    if (my($u, $p) = @{$self->{credentials} || []}) {
+        $req->authorization_basic($u, $p);
+    }
+    my $res = $self->{user_agent}->request($req);
     if (!$res->is_success) {
         $self->{last_error} = $res->status_line;
         return;
@@ -291,7 +373,11 @@ sub delete_room {
     my $uri = URI->new($self->{endpoint} . qq|/v1/room/delete|);
     my @request_args;
     push @request_args, (Content_Type => "application/json", Content => JSON::encode_json($payload));
-    my $res = $self->{user_agent}->post($uri, @request_args);
+    my $req = HTTP::Request::Common::POST($uri, @request_args);
+    if (my($u, $p) = @{$self->{credentials} || []}) {
+        $req->authorization_basic($u, $p);
+    }
+    my $res = $self->{user_agent}->request($req);
     if (!$res->is_success) {
         $self->{last_error} = $res->status_line;
         return;
@@ -308,7 +394,11 @@ sub list_room {
     }
     my $uri = URI->new($self->{endpoint} . qq|/v1/room/list|);
     $uri->query_form($payload);
-    my $res = $self->{user_agent}->get($uri);
+    my $req = HTTP::Request::Common::GET($uri->as_string());
+    if (my($u, $p) = @{$self->{credentials} || []}) {
+        $req->authorization_basic($u, $p);
+    }
+    my $res = $self->{user_agent}->request($req);
     if (!$res->is_success) {
         $self->{last_error} = $res->status_line;
         return;
@@ -326,7 +416,11 @@ sub create_conference_series {
     my $uri = URI->new($self->{endpoint} . qq|/v1/conference_series/create|);
     my @request_args;
     push @request_args, (Content_Type => "application/json", Content => JSON::encode_json($payload));
-    my $res = $self->{user_agent}->post($uri, @request_args);
+    my $req = HTTP::Request::Common::POST($uri, @request_args);
+    if (my($u, $p) = @{$self->{credentials} || []}) {
+        $req->authorization_basic($u, $p);
+    }
+    my $res = $self->{user_agent}->request($req);
     if (!$res->is_success) {
         $self->{last_error} = $res->status_line;
         return;
@@ -343,7 +437,11 @@ sub lookup_conference_series {
     }
     my $uri = URI->new($self->{endpoint} . qq|/v1/conference_series/lookup|);
     $uri->query_form($payload);
-    my $res = $self->{user_agent}->get($uri);
+    my $req = HTTP::Request::Common::GET($uri->as_string());
+    if (my($u, $p) = @{$self->{credentials} || []}) {
+        $req->authorization_basic($u, $p);
+    }
+    my $res = $self->{user_agent}->request($req);
     if (!$res->is_success) {
         $self->{last_error} = $res->status_line;
         return;
@@ -355,7 +453,11 @@ sub list_conference_series {
     my ($self, $payload) = @_;
     my $uri = URI->new($self->{endpoint} . qq|/v1/conference_series/list|);
     $uri->query_form($payload);
-    my $res = $self->{user_agent}->get($uri);
+    my $req = HTTP::Request::Common::GET($uri->as_string());
+    if (my($u, $p) = @{$self->{credentials} || []}) {
+        $req->authorization_basic($u, $p);
+    }
+    my $res = $self->{user_agent}->request($req);
     if (!$res->is_success) {
         $self->{last_error} = $res->status_line;
         return;
@@ -373,7 +475,11 @@ sub add_conference_series_admin {
     my $uri = URI->new($self->{endpoint} . qq|/v1/conference_series/admin/add|);
     my @request_args;
     push @request_args, (Content_Type => "application/json", Content => JSON::encode_json($payload));
-    my $res = $self->{user_agent}->post($uri, @request_args);
+    my $req = HTTP::Request::Common::POST($uri, @request_args);
+    if (my($u, $p) = @{$self->{credentials} || []}) {
+        $req->authorization_basic($u, $p);
+    }
+    my $res = $self->{user_agent}->request($req);
     if (!$res->is_success) {
         $self->{last_error} = $res->status_line;
         return;
@@ -391,7 +497,11 @@ sub create_conference {
     my $uri = URI->new($self->{endpoint} . qq|/v1/conference/create|);
     my @request_args;
     push @request_args, (Content_Type => "application/json", Content => JSON::encode_json($payload));
-    my $res = $self->{user_agent}->post($uri, @request_args);
+    my $req = HTTP::Request::Common::POST($uri, @request_args);
+    if (my($u, $p) = @{$self->{credentials} || []}) {
+        $req->authorization_basic($u, $p);
+    }
+    my $res = $self->{user_agent}->request($req);
     if (!$res->is_success) {
         $self->{last_error} = $res->status_line;
         return;
@@ -408,7 +518,11 @@ sub get_conference_schedule {
     }
     my $uri = URI->new($self->{endpoint} . qq|/v1/conference/schedule.ics|);
     $uri->query_form($payload);
-    my $res = $self->{user_agent}->get($uri);
+    my $req = HTTP::Request::Common::GET($uri->as_string());
+    if (my($u, $p) = @{$self->{credentials} || []}) {
+        $req->authorization_basic($u, $p);
+    }
+    my $res = $self->{user_agent}->request($req);
     if (!$res->is_success) {
         $self->{last_error} = $res->status_line;
         return;
@@ -426,7 +540,11 @@ sub add_conference_credential {
     my $uri = URI->new($self->{endpoint} . qq|/v1/conference/credentials/add|);
     my @request_args;
     push @request_args, (Content_Type => "application/json", Content => JSON::encode_json($payload));
-    my $res = $self->{user_agent}->post($uri, @request_args);
+    my $req = HTTP::Request::Common::POST($uri, @request_args);
+    if (my($u, $p) = @{$self->{credentials} || []}) {
+        $req->authorization_basic($u, $p);
+    }
+    my $res = $self->{user_agent}->request($req);
     if (!$res->is_success) {
         $self->{last_error} = $res->status_line;
         return;
@@ -444,7 +562,11 @@ sub tweet_as_conference {
     my $uri = URI->new($self->{endpoint} . qq|/v1/conference/tweet|);
     my @request_args;
     push @request_args, (Content_Type => "application/json", Content => JSON::encode_json($payload));
-    my $res = $self->{user_agent}->post($uri, @request_args);
+    my $req = HTTP::Request::Common::POST($uri, @request_args);
+    if (my($u, $p) = @{$self->{credentials} || []}) {
+        $req->authorization_basic($u, $p);
+    }
+    my $res = $self->{user_agent}->request($req);
     if (!$res->is_success) {
         $self->{last_error} = $res->status_line;
         return;
@@ -462,7 +584,11 @@ sub add_conference_date {
     my $uri = URI->new($self->{endpoint} . qq|/v1/conference/date/add|);
     my @request_args;
     push @request_args, (Content_Type => "application/json", Content => JSON::encode_json($payload));
-    my $res = $self->{user_agent}->post($uri, @request_args);
+    my $req = HTTP::Request::Common::POST($uri, @request_args);
+    if (my($u, $p) = @{$self->{credentials} || []}) {
+        $req->authorization_basic($u, $p);
+    }
+    my $res = $self->{user_agent}->request($req);
     if (!$res->is_success) {
         $self->{last_error} = $res->status_line;
         return;
@@ -480,7 +606,11 @@ sub delete_conference_date {
     my $uri = URI->new($self->{endpoint} . qq|/v1/conference/date/delete|);
     my @request_args;
     push @request_args, (Content_Type => "application/json", Content => JSON::encode_json($payload));
-    my $res = $self->{user_agent}->post($uri, @request_args);
+    my $req = HTTP::Request::Common::POST($uri, @request_args);
+    if (my($u, $p) = @{$self->{credentials} || []}) {
+        $req->authorization_basic($u, $p);
+    }
+    my $res = $self->{user_agent}->request($req);
     if (!$res->is_success) {
         $self->{last_error} = $res->status_line;
         return;
@@ -498,7 +628,11 @@ sub add_conference_admin {
     my $uri = URI->new($self->{endpoint} . qq|/v1/conference/admin/add|);
     my @request_args;
     push @request_args, (Content_Type => "application/json", Content => JSON::encode_json($payload));
-    my $res = $self->{user_agent}->post($uri, @request_args);
+    my $req = HTTP::Request::Common::POST($uri, @request_args);
+    if (my($u, $p) = @{$self->{credentials} || []}) {
+        $req->authorization_basic($u, $p);
+    }
+    my $res = $self->{user_agent}->request($req);
     if (!$res->is_success) {
         $self->{last_error} = $res->status_line;
         return;
@@ -516,7 +650,11 @@ sub delete_conference_admin {
     my $uri = URI->new($self->{endpoint} . qq|/v1/conference/admin/delete|);
     my @request_args;
     push @request_args, (Content_Type => "application/json", Content => JSON::encode_json($payload));
-    my $res = $self->{user_agent}->post($uri, @request_args);
+    my $req = HTTP::Request::Common::POST($uri, @request_args);
+    if (my($u, $p) = @{$self->{credentials} || []}) {
+        $req->authorization_basic($u, $p);
+    }
+    my $res = $self->{user_agent}->request($req);
     if (!$res->is_success) {
         $self->{last_error} = $res->status_line;
         return;
@@ -534,7 +672,11 @@ sub add_conference_venue {
     my $uri = URI->new($self->{endpoint} . qq|/v1/conference/venue/add|);
     my @request_args;
     push @request_args, (Content_Type => "application/json", Content => JSON::encode_json($payload));
-    my $res = $self->{user_agent}->post($uri, @request_args);
+    my $req = HTTP::Request::Common::POST($uri, @request_args);
+    if (my($u, $p) = @{$self->{credentials} || []}) {
+        $req->authorization_basic($u, $p);
+    }
+    my $res = $self->{user_agent}->request($req);
     if (!$res->is_success) {
         $self->{last_error} = $res->status_line;
         return;
@@ -552,7 +694,11 @@ sub delete_conference_venue {
     my $uri = URI->new($self->{endpoint} . qq|/v1/conference/venue/delete|);
     my @request_args;
     push @request_args, (Content_Type => "application/json", Content => JSON::encode_json($payload));
-    my $res = $self->{user_agent}->post($uri, @request_args);
+    my $req = HTTP::Request::Common::POST($uri, @request_args);
+    if (my($u, $p) = @{$self->{credentials} || []}) {
+        $req->authorization_basic($u, $p);
+    }
+    my $res = $self->{user_agent}->request($req);
     if (!$res->is_success) {
         $self->{last_error} = $res->status_line;
         return;
@@ -570,7 +716,11 @@ sub add_session_type {
     my $uri = URI->new($self->{endpoint} . qq|/v1/conference/session_type/add|);
     my @request_args;
     push @request_args, (Content_Type => "application/json", Content => JSON::encode_json($payload));
-    my $res = $self->{user_agent}->post($uri, @request_args);
+    my $req = HTTP::Request::Common::POST($uri, @request_args);
+    if (my($u, $p) = @{$self->{credentials} || []}) {
+        $req->authorization_basic($u, $p);
+    }
+    my $res = $self->{user_agent}->request($req);
     if (!$res->is_success) {
         $self->{last_error} = $res->status_line;
         return;
@@ -588,7 +738,11 @@ sub delete_session_type {
     my $uri = URI->new($self->{endpoint} . qq|/v1/session_type/delete|);
     my @request_args;
     push @request_args, (Content_Type => "application/json", Content => JSON::encode_json($payload));
-    my $res = $self->{user_agent}->post($uri, @request_args);
+    my $req = HTTP::Request::Common::POST($uri, @request_args);
+    if (my($u, $p) = @{$self->{credentials} || []}) {
+        $req->authorization_basic($u, $p);
+    }
+    my $res = $self->{user_agent}->request($req);
     if (!$res->is_success) {
         $self->{last_error} = $res->status_line;
         return;
@@ -605,7 +759,11 @@ sub lookup_session_type {
     }
     my $uri = URI->new($self->{endpoint} . qq|/v1/session_type/lookup|);
     $uri->query_form($payload);
-    my $res = $self->{user_agent}->get($uri);
+    my $req = HTTP::Request::Common::GET($uri->as_string());
+    if (my($u, $p) = @{$self->{credentials} || []}) {
+        $req->authorization_basic($u, $p);
+    }
+    my $res = $self->{user_agent}->request($req);
     if (!$res->is_success) {
         $self->{last_error} = $res->status_line;
         return;
@@ -623,7 +781,11 @@ sub update_session_type {
     my $uri = URI->new($self->{endpoint} . qq|/v1/session_type/update|);
     my @request_args;
     push @request_args, (Content_Type => "application/json", Content => JSON::encode_json($payload));
-    my $res = $self->{user_agent}->post($uri, @request_args);
+    my $req = HTTP::Request::Common::POST($uri, @request_args);
+    if (my($u, $p) = @{$self->{credentials} || []}) {
+        $req->authorization_basic($u, $p);
+    }
+    my $res = $self->{user_agent}->request($req);
     if (!$res->is_success) {
         $self->{last_error} = $res->status_line;
         return;
@@ -635,7 +797,11 @@ sub list_session_types_by_conference {
     my ($self, $payload) = @_;
     my $uri = URI->new($self->{endpoint} . qq|/v1/session_type/list|);
     $uri->query_form($payload);
-    my $res = $self->{user_agent}->get($uri);
+    my $req = HTTP::Request::Common::GET($uri->as_string());
+    if (my($u, $p) = @{$self->{credentials} || []}) {
+        $req->authorization_basic($u, $p);
+    }
+    my $res = $self->{user_agent}->request($req);
     if (!$res->is_success) {
         $self->{last_error} = $res->status_line;
         return;
@@ -652,7 +818,11 @@ sub lookup_conference {
     }
     my $uri = URI->new($self->{endpoint} . qq|/v1/conference/lookup|);
     $uri->query_form($payload);
-    my $res = $self->{user_agent}->get($uri);
+    my $req = HTTP::Request::Common::GET($uri->as_string());
+    if (my($u, $p) = @{$self->{credentials} || []}) {
+        $req->authorization_basic($u, $p);
+    }
+    my $res = $self->{user_agent}->request($req);
     if (!$res->is_success) {
         $self->{last_error} = $res->status_line;
         return;
@@ -669,7 +839,11 @@ sub lookup_conference_by_slug {
     }
     my $uri = URI->new($self->{endpoint} . qq|/v1/conference/lookup_by_slug|);
     $uri->query_form($payload);
-    my $res = $self->{user_agent}->get($uri);
+    my $req = HTTP::Request::Common::GET($uri->as_string());
+    if (my($u, $p) = @{$self->{credentials} || []}) {
+        $req->authorization_basic($u, $p);
+    }
+    my $res = $self->{user_agent}->request($req);
     if (!$res->is_success) {
         $self->{last_error} = $res->status_line;
         return;
@@ -681,7 +855,11 @@ sub list_conferences_by_organizer {
     my ($self, $payload) = @_;
     my $uri = URI->new($self->{endpoint} . qq|/v1/conference/list_by_organizer|);
     $uri->query_form($payload);
-    my $res = $self->{user_agent}->get($uri);
+    my $req = HTTP::Request::Common::GET($uri->as_string());
+    if (my($u, $p) = @{$self->{credentials} || []}) {
+        $req->authorization_basic($u, $p);
+    }
+    my $res = $self->{user_agent}->request($req);
     if (!$res->is_success) {
         $self->{last_error} = $res->status_line;
         return;
@@ -693,7 +871,11 @@ sub list_conference {
     my ($self, $payload) = @_;
     my $uri = URI->new($self->{endpoint} . qq|/v1/conference/list|);
     $uri->query_form($payload);
-    my $res = $self->{user_agent}->get($uri);
+    my $req = HTTP::Request::Common::GET($uri->as_string());
+    if (my($u, $p) = @{$self->{credentials} || []}) {
+        $req->authorization_basic($u, $p);
+    }
+    my $res = $self->{user_agent}->request($req);
     if (!$res->is_success) {
         $self->{last_error} = $res->status_line;
         return;
@@ -721,7 +903,11 @@ sub update_conference {
     push @content, (payload => JSON::encode_json($payload));
     push @request_args, (Content_Type => "form-data");
     push @request_args, (Content => \@content);
-    my $res = $self->{user_agent}->post($uri, @request_args);
+    my $req = HTTP::Request::Common::POST($uri, @request_args);
+    if (my($u, $p) = @{$self->{credentials} || []}) {
+        $req->authorization_basic($u, $p);
+    }
+    my $res = $self->{user_agent}->request($req);
     if (!$res->is_success) {
         $self->{last_error} = $res->status_line;
         return;
@@ -739,7 +925,11 @@ sub delete_conference_series {
     my $uri = URI->new($self->{endpoint} . qq|/v1/conference_series/delete|);
     my @request_args;
     push @request_args, (Content_Type => "application/json", Content => JSON::encode_json($payload));
-    my $res = $self->{user_agent}->post($uri, @request_args);
+    my $req = HTTP::Request::Common::POST($uri, @request_args);
+    if (my($u, $p) = @{$self->{credentials} || []}) {
+        $req->authorization_basic($u, $p);
+    }
+    my $res = $self->{user_agent}->request($req);
     if (!$res->is_success) {
         $self->{last_error} = $res->status_line;
         return;
@@ -757,7 +947,11 @@ sub delete_conference {
     my $uri = URI->new($self->{endpoint} . qq|/v1/conference/delete|);
     my @request_args;
     push @request_args, (Content_Type => "application/json", Content => JSON::encode_json($payload));
-    my $res = $self->{user_agent}->post($uri, @request_args);
+    my $req = HTTP::Request::Common::POST($uri, @request_args);
+    if (my($u, $p) = @{$self->{credentials} || []}) {
+        $req->authorization_basic($u, $p);
+    }
+    my $res = $self->{user_agent}->request($req);
     if (!$res->is_success) {
         $self->{last_error} = $res->status_line;
         return;
@@ -775,7 +969,11 @@ sub create_session {
     my $uri = URI->new($self->{endpoint} . qq|/v1/session/create|);
     my @request_args;
     push @request_args, (Content_Type => "application/json", Content => JSON::encode_json($payload));
-    my $res = $self->{user_agent}->post($uri, @request_args);
+    my $req = HTTP::Request::Common::POST($uri, @request_args);
+    if (my($u, $p) = @{$self->{credentials} || []}) {
+        $req->authorization_basic($u, $p);
+    }
+    my $res = $self->{user_agent}->request($req);
     if (!$res->is_success) {
         $self->{last_error} = $res->status_line;
         return;
@@ -792,7 +990,11 @@ sub lookup_session {
     }
     my $uri = URI->new($self->{endpoint} . qq|/v1/session/lookup|);
     $uri->query_form($payload);
-    my $res = $self->{user_agent}->get($uri);
+    my $req = HTTP::Request::Common::GET($uri->as_string());
+    if (my($u, $p) = @{$self->{credentials} || []}) {
+        $req->authorization_basic($u, $p);
+    }
+    my $res = $self->{user_agent}->request($req);
     if (!$res->is_success) {
         $self->{last_error} = $res->status_line;
         return;
@@ -810,7 +1012,11 @@ sub delete_session {
     my $uri = URI->new($self->{endpoint} . qq|/v1/session/delete|);
     my @request_args;
     push @request_args, (Content_Type => "application/json", Content => JSON::encode_json($payload));
-    my $res = $self->{user_agent}->post($uri, @request_args);
+    my $req = HTTP::Request::Common::POST($uri, @request_args);
+    if (my($u, $p) = @{$self->{credentials} || []}) {
+        $req->authorization_basic($u, $p);
+    }
+    my $res = $self->{user_agent}->request($req);
     if (!$res->is_success) {
         $self->{last_error} = $res->status_line;
         return;
@@ -828,7 +1034,11 @@ sub update_session {
     my $uri = URI->new($self->{endpoint} . qq|/v1/session/update|);
     my @request_args;
     push @request_args, (Content_Type => "application/json", Content => JSON::encode_json($payload));
-    my $res = $self->{user_agent}->post($uri, @request_args);
+    my $req = HTTP::Request::Common::POST($uri, @request_args);
+    if (my($u, $p) = @{$self->{credentials} || []}) {
+        $req->authorization_basic($u, $p);
+    }
+    my $res = $self->{user_agent}->request($req);
     if (!$res->is_success) {
         $self->{last_error} = $res->status_line;
         return;
@@ -840,7 +1050,11 @@ sub list_sessions {
     my ($self, $payload) = @_;
     my $uri = URI->new($self->{endpoint} . qq|/v1/session/list|);
     $uri->query_form($payload);
-    my $res = $self->{user_agent}->get($uri);
+    my $req = HTTP::Request::Common::GET($uri->as_string());
+    if (my($u, $p) = @{$self->{credentials} || []}) {
+        $req->authorization_basic($u, $p);
+    }
+    my $res = $self->{user_agent}->request($req);
     if (!$res->is_success) {
         $self->{last_error} = $res->status_line;
         return;
@@ -857,7 +1071,11 @@ sub create_question {
     }
     my $uri = URI->new($self->{endpoint} . qq|/v1/question/create|);
     $uri->query_form($payload);
-    my $res = $self->{user_agent}->get($uri);
+    my $req = HTTP::Request::Common::GET($uri->as_string());
+    if (my($u, $p) = @{$self->{credentials} || []}) {
+        $req->authorization_basic($u, $p);
+    }
+    my $res = $self->{user_agent}->request($req);
     if (!$res->is_success) {
         $self->{last_error} = $res->status_line;
         return;
@@ -875,7 +1093,11 @@ sub delete_question {
     my $uri = URI->new($self->{endpoint} . qq|/v1/question/delete|);
     my @request_args;
     push @request_args, (Content_Type => "application/json", Content => JSON::encode_json($payload));
-    my $res = $self->{user_agent}->post($uri, @request_args);
+    my $req = HTTP::Request::Common::POST($uri, @request_args);
+    if (my($u, $p) = @{$self->{credentials} || []}) {
+        $req->authorization_basic($u, $p);
+    }
+    my $res = $self->{user_agent}->request($req);
     if (!$res->is_success) {
         $self->{last_error} = $res->status_line;
         return;
@@ -892,7 +1114,11 @@ sub list_question {
     }
     my $uri = URI->new($self->{endpoint} . qq|/v1/question/list|);
     $uri->query_form($payload);
-    my $res = $self->{user_agent}->get($uri);
+    my $req = HTTP::Request::Common::GET($uri->as_string());
+    if (my($u, $p) = @{$self->{credentials} || []}) {
+        $req->authorization_basic($u, $p);
+    }
+    my $res = $self->{user_agent}->request($req);
     if (!$res->is_success) {
         $self->{last_error} = $res->status_line;
         return;
@@ -909,7 +1135,11 @@ sub create_session_survey_response {
     }
     my $uri = URI->new($self->{endpoint} . qq|/v1/survey_session_response/create|);
     $uri->query_form($payload);
-    my $res = $self->{user_agent}->get($uri);
+    my $req = HTTP::Request::Common::GET($uri->as_string());
+    if (my($u, $p) = @{$self->{credentials} || []}) {
+        $req->authorization_basic($u, $p);
+    }
+    my $res = $self->{user_agent}->request($req);
     if (!$res->is_success) {
         $self->{last_error} = $res->status_line;
         return;
@@ -927,7 +1157,11 @@ sub add_featured_speaker {
     my $uri = URI->new($self->{endpoint} . qq|/v1/featured_speaker/add|);
     my @request_args;
     push @request_args, (Content_Type => "application/json", Content => JSON::encode_json($payload));
-    my $res = $self->{user_agent}->post($uri, @request_args);
+    my $req = HTTP::Request::Common::POST($uri, @request_args);
+    if (my($u, $p) = @{$self->{credentials} || []}) {
+        $req->authorization_basic($u, $p);
+    }
+    my $res = $self->{user_agent}->request($req);
     if (!$res->is_success) {
         $self->{last_error} = $res->status_line;
         return;
@@ -944,7 +1178,11 @@ sub lookup_featured_speaker {
     }
     my $uri = URI->new($self->{endpoint} . qq|/v1/featured_speaker/lookup|);
     $uri->query_form($payload);
-    my $res = $self->{user_agent}->get($uri);
+    my $req = HTTP::Request::Common::GET($uri->as_string());
+    if (my($u, $p) = @{$self->{credentials} || []}) {
+        $req->authorization_basic($u, $p);
+    }
+    my $res = $self->{user_agent}->request($req);
     if (!$res->is_success) {
         $self->{last_error} = $res->status_line;
         return;
@@ -956,7 +1194,11 @@ sub list_featured_speakers {
     my ($self, $payload) = @_;
     my $uri = URI->new($self->{endpoint} . qq|/v1/featured_speaker/list|);
     $uri->query_form($payload);
-    my $res = $self->{user_agent}->get($uri);
+    my $req = HTTP::Request::Common::GET($uri->as_string());
+    if (my($u, $p) = @{$self->{credentials} || []}) {
+        $req->authorization_basic($u, $p);
+    }
+    my $res = $self->{user_agent}->request($req);
     if (!$res->is_success) {
         $self->{last_error} = $res->status_line;
         return;
@@ -974,7 +1216,11 @@ sub update_featured_speaker {
     my $uri = URI->new($self->{endpoint} . qq|/v1/featured_speaker/update|);
     my @request_args;
     push @request_args, (Content_Type => "application/json", Content => JSON::encode_json($payload));
-    my $res = $self->{user_agent}->post($uri, @request_args);
+    my $req = HTTP::Request::Common::POST($uri, @request_args);
+    if (my($u, $p) = @{$self->{credentials} || []}) {
+        $req->authorization_basic($u, $p);
+    }
+    my $res = $self->{user_agent}->request($req);
     if (!$res->is_success) {
         $self->{last_error} = $res->status_line;
         return;
@@ -992,7 +1238,11 @@ sub delete_featured_speaker {
     my $uri = URI->new($self->{endpoint} . qq|/v1/featured_speaker/delete|);
     my @request_args;
     push @request_args, (Content_Type => "application/json", Content => JSON::encode_json($payload));
-    my $res = $self->{user_agent}->post($uri, @request_args);
+    my $req = HTTP::Request::Common::POST($uri, @request_args);
+    if (my($u, $p) = @{$self->{credentials} || []}) {
+        $req->authorization_basic($u, $p);
+    }
+    my $res = $self->{user_agent}->request($req);
     if (!$res->is_success) {
         $self->{last_error} = $res->status_line;
         return;
@@ -1010,7 +1260,11 @@ sub add_sponsor {
     my $uri = URI->new($self->{endpoint} . qq|/v1/sponsor/add|);
     my @request_args;
     push @request_args, (Content_Type => "application/json", Content => JSON::encode_json($payload));
-    my $res = $self->{user_agent}->post($uri, @request_args);
+    my $req = HTTP::Request::Common::POST($uri, @request_args);
+    if (my($u, $p) = @{$self->{credentials} || []}) {
+        $req->authorization_basic($u, $p);
+    }
+    my $res = $self->{user_agent}->request($req);
     if (!$res->is_success) {
         $self->{last_error} = $res->status_line;
         return;
@@ -1027,7 +1281,11 @@ sub lookup_sponsor {
     }
     my $uri = URI->new($self->{endpoint} . qq|/v1/sponsor/lookup|);
     $uri->query_form($payload);
-    my $res = $self->{user_agent}->get($uri);
+    my $req = HTTP::Request::Common::GET($uri->as_string());
+    if (my($u, $p) = @{$self->{credentials} || []}) {
+        $req->authorization_basic($u, $p);
+    }
+    my $res = $self->{user_agent}->request($req);
     if (!$res->is_success) {
         $self->{last_error} = $res->status_line;
         return;
@@ -1039,7 +1297,11 @@ sub list_sponsors {
     my ($self, $payload) = @_;
     my $uri = URI->new($self->{endpoint} . qq|/v1/sponsor/list|);
     $uri->query_form($payload);
-    my $res = $self->{user_agent}->get($uri);
+    my $req = HTTP::Request::Common::GET($uri->as_string());
+    if (my($u, $p) = @{$self->{credentials} || []}) {
+        $req->authorization_basic($u, $p);
+    }
+    my $res = $self->{user_agent}->request($req);
     if (!$res->is_success) {
         $self->{last_error} = $res->status_line;
         return;
@@ -1067,7 +1329,11 @@ sub update_sponsor {
     push @content, (payload => JSON::encode_json($payload));
     push @request_args, (Content_Type => "form-data");
     push @request_args, (Content => \@content);
-    my $res = $self->{user_agent}->post($uri, @request_args);
+    my $req = HTTP::Request::Common::POST($uri, @request_args);
+    if (my($u, $p) = @{$self->{credentials} || []}) {
+        $req->authorization_basic($u, $p);
+    }
+    my $res = $self->{user_agent}->request($req);
     if (!$res->is_success) {
         $self->{last_error} = $res->status_line;
         return;
@@ -1085,7 +1351,11 @@ sub delete_sponsor {
     my $uri = URI->new($self->{endpoint} . qq|/v1/sponsor/delete|);
     my @request_args;
     push @request_args, (Content_Type => "application/json", Content => JSON::encode_json($payload));
-    my $res = $self->{user_agent}->post($uri, @request_args);
+    my $req = HTTP::Request::Common::POST($uri, @request_args);
+    if (my($u, $p) = @{$self->{credentials} || []}) {
+        $req->authorization_basic($u, $p);
+    }
+    my $res = $self->{user_agent}->request($req);
     if (!$res->is_success) {
         $self->{last_error} = $res->status_line;
         return;
@@ -1103,7 +1373,11 @@ sub create_temporary_email {
     my $uri = URI->new($self->{endpoint} . qq|/v1/email/create|);
     my @request_args;
     push @request_args, (Content_Type => "application/json", Content => JSON::encode_json($payload));
-    my $res = $self->{user_agent}->post($uri, @request_args);
+    my $req = HTTP::Request::Common::POST($uri, @request_args);
+    if (my($u, $p) = @{$self->{credentials} || []}) {
+        $req->authorization_basic($u, $p);
+    }
+    my $res = $self->{user_agent}->request($req);
     if (!$res->is_success) {
         $self->{last_error} = $res->status_line;
         return;
@@ -1121,7 +1395,11 @@ sub confirm_temporary_email {
     my $uri = URI->new($self->{endpoint} . qq|/v1/email/confirm|);
     my @request_args;
     push @request_args, (Content_Type => "application/json", Content => JSON::encode_json($payload));
-    my $res = $self->{user_agent}->post($uri, @request_args);
+    my $req = HTTP::Request::Common::POST($uri, @request_args);
+    if (my($u, $p) = @{$self->{credentials} || []}) {
+        $req->authorization_basic($u, $p);
+    }
+    my $res = $self->{user_agent}->request($req);
     if (!$res->is_success) {
         $self->{last_error} = $res->status_line;
         return;
