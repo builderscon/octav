@@ -178,6 +178,7 @@ CREATE TABLE sessions (
     created_on DATETIME NOT NULL,
     modified_on TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     KEY (session_type_id),
+    KEY (starts_on),
     FOREIGN KEY (session_type_id) REFERENCES session_types(eid),
     FOREIGN KEY (speaker_id) REFERENCES users(eid) ON DELETE SET NULL,
     FOREIGN KEY (conference_id) REFERENCES conferences(eid) ON DELETE SET NULL,
