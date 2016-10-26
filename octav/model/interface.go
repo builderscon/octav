@@ -49,6 +49,7 @@ type Conference struct {
 	Slug                      string              `json:"slug"`
 	FullSlug                  string              `json:"full_slug,omitempty"` // Only populated when decorated
 	Status                    string              `json:"status"`
+	TimetableAvailable        bool                `json:"timetable_available"`
 	Timezone                  string              `json:"timezone"`
 	Dates                     ConferenceDateList  `json:"dates,omitempty"`
 	Administrators            UserList            `json:"administrators,omitempty" decorate:"true"`
@@ -331,6 +332,7 @@ type UpdateConferenceRequest struct {
 	Slug                      jsval.MaybeString `json:"slug,omitempty"`
 	SubTitle                  jsval.MaybeString `json:"sub_title,omitempty" l10n:"true"`
 	Status                    jsval.MaybeString `json:"status,omitempty"`
+	TimetableAvailable        jsval.MaybeBool   `json:"timetable_available,omitempty"`
 	Timezone                  jsval.MaybeString `json:"timezone,omitempty"`
 	UserID                    string            `json:"user_id"`
 	LocalizedFields           `json:"-"`
@@ -655,9 +657,10 @@ type LookupVenueRequest struct {
 type ListSessionsRequest struct {
 	ConferenceID jsval.MaybeString `json:"conference_id" urlenc:"conference_id,omitempty,string"`
 	Confirmed    []bool            `json:"confirmed" urlenc:"confirmed,omitempty"`
+	RangeStart   jsval.MaybeString `json:"range_start" urlenc:"range_start,omitempty,string"`
+	RangeEnd     jsval.MaybeString `json:"range_end" urlenc:"range_end,omitempty,string"`
 	SpeakerID    jsval.MaybeString `json:"speaker_id" urlenc:"speaker_id,omitempty,string"`
 	Status       []string          `json:"status" urlenc:"status,omitempty"`
-	Date         jsval.MaybeString `json:"date" urlenc:"date,omitempty,string"`
 	Lang         jsval.MaybeString `json:"lang,omitempty" urlenc:"lang,omitempty,string"`
 
 	TrustedCall bool `json:"-"`

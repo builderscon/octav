@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"fmt"
 	"strconv"
+	"time"
 	"unicode/utf8"
 
 	"github.com/builderscon/octav/octav/db"
@@ -243,12 +244,14 @@ func (v *SessionSvc) populateRowForUpdate(vdb *db.Session, payload model.UpdateS
 	return nil
 }
 
+/*
 func (v *SessionSvc) LoadByConference(tx *db.Tx, vdbl *db.SessionList, cid string, date string) error {
 	if err := vdbl.LoadByConference(tx, cid, "", date, nil, nil); err != nil {
 		return err
 	}
 	return nil
 }
+*/
 
 func (v *SessionSvc) Decorate(tx *db.Tx, session *model.Session, trustedCall bool, lang string) error {
 	if pdebug.Enabled {
@@ -388,7 +391,7 @@ func (v *SessionSvc) ListFromPayload(tx *db.Tx, result *model.SessionList, paylo
 	}
 
 	// Make sure that we have at least one of the arguments
-	var conferenceID, speakerID, date string
+	var conferenceID, speakerID string
 	var hasQuery bool
 	if payload.ConferenceID.Valid() {
 		conferenceID = payload.ConferenceID.String
@@ -400,8 +403,19 @@ func (v *SessionSvc) ListFromPayload(tx *db.Tx, result *model.SessionList, paylo
 		hasQuery = true
 	}
 
-	if payload.Date.Valid() {
-		date = payload.Date.String
+	var rangeStart, rangeEnd time.Time
+	if payload.RangeStart.Valid() {
+		dt, err := time.Parse(time.RFC3339, payload.RangeStart.String)
+		if err == nil {
+			rangeStart = dt.UTC()
+		}
+		// Don't set the hasQuery flag, as this alone doesn't work
+	}
+	if payload.RangeEnd.Valid() {
+		dt, err := time.Parse(time.RFC3339, payload.RangeEnd.String)
+		if err == nil {
+			rangeEnd = dt.UTC()
+		}
 		// Don't set the hasQuery flag, as this alone doesn't work
 	}
 
@@ -417,7 +431,7 @@ func (v *SessionSvc) ListFromPayload(tx *db.Tx, result *model.SessionList, paylo
 	}
 
 	var vdbl db.SessionList
-	if err := vdbl.LoadByConference(tx, conferenceID, speakerID, date, status, confirmed); err != nil {
+	if err := vdbl.LoadByConference(tx, conferenceID, speakerID, rangeStart, rangeEnd, status, confirmed); err != nil {
 		return errors.Wrap(err, "failed to load from database")
 	}
 

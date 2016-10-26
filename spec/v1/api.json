@@ -256,6 +256,7 @@
         "slug": { "$ref": "#/definitions/string_en" },
         "description": { "$ref": "#/definitions/string_en" },
         "status": { "$ref": "#/definitions/conference_status" },
+        "timetable_available": { "type": "boolean" },
         "venue": { "$ref": "#/definitions/venue" },
         "dates": { "$ref": "#/definitions/conference_date_array" },
         "administrators": { "$ref": "#/definitions/user_array" },
@@ -1204,6 +1205,7 @@
           "status": { "$ref": "#/definitions/conference_status" },
           "sub_title": { "$ref": "#/definitions/string_en" },
           "title": { "$ref": "#/definitions/string_en" },
+          "timetable_available": { "type": "boolean" },
           "timezone": {"$ref": "#/definitions/string_en" },
           "user_id": { "$ref": "#/definitions/uuid" }
         },
@@ -1365,14 +1367,10 @@
       "schema": {
         "type": "object",
         "properties": {
-          "date": {
-            "oneOf": [
-              { "$ref": "#/definitions/date" },
-              { "$ref": "#/definitions/datestr" }
-            ]
-          },
           "confirmed": {"type": "array", "items": {"type": "boolean"} },
           "conference_id": { "$ref": "#/definitions/uuid" },
+          "range_start": { "$ref": "#/definitions/rfc3339" },
+          "range_end": { "$ref": "#/definitions/rfc3339" },
           "status": {
             "type": "array",
             "items": { "$ref": "#/definitions/acceptance_status" }
