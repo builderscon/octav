@@ -1616,9 +1616,11 @@ func doVerifyUser(ctx context.Context, w http.ResponseWriter, r *http.Request, p
 	defer tx.AutoRollback()
 
 	su := service.User()
-	if err := su.IsAdministrator(tx, payload.UserID); err != nil {
-		httpError(w, `doVerify`, http.StatusInternalServerError, err)
-		return
+	if payload.UserID != payload.ID {
+		if err := su.IsAdministrator(tx, payload.UserID); err != nil {
+			httpError(w, `doVerify`, http.StatusInternalServerError, err)
+			return
+		}
 	}
 
 	var m model.User
