@@ -196,6 +196,10 @@ func init() {
 			jsval.Reference(M).RefersTo("#/definitions/conference_status"),
 		).
 		AddProp(
+			"timetable_available",
+			jsval.Boolean(),
+		).
+		AddProp(
 			"venue",
 			jsval.Reference(M).RefersTo("#/definitions/venue"),
 		).
@@ -2570,6 +2574,10 @@ func init() {
 					jsval.Reference(M).RefersTo("#/definitions/conference_status"),
 				).
 				AddProp(
+					"timetable_available",
+					jsval.Boolean(),
+				).
+				AddProp(
 					"venue",
 					jsval.Reference(M).RefersTo("#/definitions/venue"),
 				).
@@ -2641,6 +2649,10 @@ func init() {
 				AddProp(
 					"status",
 					jsval.Reference(M).RefersTo("#/definitions/conference_status"),
+				).
+				AddProp(
+					"timetable_available",
+					jsval.Boolean(),
 				).
 				AddProp(
 					"venue",
@@ -3346,6 +3358,10 @@ func init() {
 				AddProp(
 					"sub_title",
 					jsval.Reference(M).RefersTo("#/definitions/string_en"),
+				).
+				AddProp(
+					"timetable_available",
+					jsval.Boolean(),
 				).
 				AddProp(
 					"timezone",

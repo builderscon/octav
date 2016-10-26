@@ -1140,6 +1140,9 @@ func (r UpdateConferenceRequest) collectMarshalData() map[string]interface{} {
 	if r.Status.Valid() {
 		m["status"] = r.Status.Value()
 	}
+	if r.TimetableAvailable.Valid() {
+		m["timetable_available"] = r.TimetableAvailable.Value()
+	}
 	if r.Timezone.Valid() {
 		m["timezone"] = r.Timezone.Value()
 	}
@@ -1243,6 +1246,12 @@ func (r *UpdateConferenceRequest) Populate(m map[string]interface{}) error {
 		}
 		delete(m, "status")
 	}
+	if jv, ok := m["timetable_available"]; ok {
+		if err := r.TimetableAvailable.Set(jv); err != nil {
+			return errors.New("set field TimetableAvailable failed: " + err.Error())
+		}
+		delete(m, "timetable_available")
+	}
 	if jv, ok := m["timezone"]; ok {
 		if err := r.Timezone.Set(jv); err != nil {
 			return errors.New("set field Timezone failed: " + err.Error())
@@ -1266,7 +1275,7 @@ func (r *UpdateConferenceRequest) Populate(m map[string]interface{}) error {
 
 func (r *UpdateConferenceRequest) GetPropNames() ([]string, error) {
 	l, _ := r.LocalizedFields.GetPropNames()
-	return append(l, "id", "title", "description", "cfp_lead_text", "cfp_pre_submit_instructions", "cfp_post_submit_instructions", "contact_information", "series_id", "slug", "sub_title", "status", "timezone", "user_id"), nil
+	return append(l, "id", "title", "description", "cfp_lead_text", "cfp_pre_submit_instructions", "cfp_post_submit_instructions", "contact_information", "series_id", "slug", "sub_title", "status", "timetable_available", "timezone", "user_id"), nil
 }
 
 func (r *UpdateConferenceRequest) SetPropValue(s string, v interface{}) error {
@@ -1296,6 +1305,8 @@ func (r *UpdateConferenceRequest) SetPropValue(s string, v interface{}) error {
 		return r.SubTitle.Set(v)
 	case "status":
 		return r.Status.Set(v)
+	case "timetable_available":
+		return r.TimetableAvailable.Set(v)
 	case "timezone":
 		return r.Timezone.Set(v)
 	case "user_id":

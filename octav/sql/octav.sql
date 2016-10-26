@@ -71,6 +71,7 @@ CREATE TABLE conferences (
     title TEXT NOT NULL,
     sub_title TEXT,
     cover_url TEXT,
+    timetable_available TINYINT(1) NOT NULL DEFAULT 0,
     status CHAR(64) CHARACTER SET latin1 NOT NULL default "private",
     timezone CHAR(32) NOT NULL DEFAULT 'UTC',
     created_by CHAR(64) CHARACTER SET latin1 NOT NULL,

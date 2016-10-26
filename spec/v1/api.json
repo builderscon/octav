@@ -256,6 +256,7 @@
         "slug": { "$ref": "#/definitions/string_en" },
         "description": { "$ref": "#/definitions/string_en" },
         "status": { "$ref": "#/definitions/conference_status" },
+        "timetable_available": { "type": "boolean" },
         "venue": { "$ref": "#/definitions/venue" },
         "dates": { "$ref": "#/definitions/conference_date_array" },
         "administrators": { "$ref": "#/definitions/user_array" },
@@ -1204,6 +1205,7 @@
           "status": { "$ref": "#/definitions/conference_status" },
           "sub_title": { "$ref": "#/definitions/string_en" },
           "title": { "$ref": "#/definitions/string_en" },
+          "timetable_available": { "type": "boolean" },
           "timezone": {"$ref": "#/definitions/string_en" },
           "user_id": { "$ref": "#/definitions/uuid" }
         },
