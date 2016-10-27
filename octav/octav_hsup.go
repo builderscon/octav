@@ -2668,6 +2668,51 @@ func httpUpdateVenue(ctx context.Context, w http.ResponseWriter, r *http.Request
 	doUpdateVenue(ctx, w, r, payload)
 }
 
+func httpVerifyUser(ctx context.Context, w http.ResponseWriter, r *http.Request) {
+	if pdebug.Enabled {
+		g := pdebug.Marker("httpVerifyUser")
+		defer g.End()
+	}
+	if strings.ToLower(r.Method) != `post` {
+		w.Header().Set("Allow", "post")
+		msgbuf := getBytesBuffer()
+		defer releaseBytesBuffer(msgbuf)
+		msgbuf.WriteString(`Method was `)
+		msgbuf.WriteString(r.Method)
+		msgbuf.WriteString(`, expected 'post'`)
+		httpError(w, msgbuf.String(), http.StatusNotFound, nil)
+		return
+	}
+
+	var payload model.VerifyUserRequest
+	jsonbuf := getBytesBuffer()
+	defer releaseBytesBuffer(jsonbuf)
+
+	switch ct := r.Header.Get("Content-Type"); {
+	case ct == "application/json":
+		if _, err := io.Copy(jsonbuf, io.LimitReader(r.Body, MaxPostSize)); err != nil {
+			httpError(w, `Failed to read request body`, http.StatusInternalServerError, err)
+			return
+		}
+	default:
+		httpError(w, `Invalid content-type`, http.StatusInternalServerError, nil)
+		return
+	}
+	if pdebug.Enabled {
+		pdebug.Printf(`-----> %s`, jsonbuf.Bytes())
+	}
+	if err := json.Unmarshal(jsonbuf.Bytes(), &payload); err != nil {
+		httpError(w, `Invalid JSON input`, http.StatusInternalServerError, err)
+		return
+	}
+
+	if err := validator.HTTPVerifyUserRequest.Validate(&payload); err != nil {
+		httpError(w, `Invalid input (validation failed)`, http.StatusInternalServerError, err)
+		return
+	}
+	doVerifyUser(ctx, w, r, payload)
+}
+
 func (s *Server) SetupRoutes() {
 	r := s.Router
 	r.HandleFunc(`/`, httpWithContext(httpHealthCheck))
@@ -2729,6 +2774,7 @@ func (s *Server) SetupRoutes() {
 	r.HandleFunc(`/v1/user/lookup`, httpWithContext(httpWithOptionalBasicAuth(httpLookupUser)))
 	r.HandleFunc(`/v1/user/lookup_user_by_auth_user_id`, httpWithContext(httpWithOptionalBasicAuth(httpLookupUserByAuthUserID)))
 	r.HandleFunc(`/v1/user/update`, httpWithContext(httpWithBasicAuth(httpUpdateUser)))
+	r.HandleFunc(`/v1/user/verify`, httpWithContext(httpWithBasicAuth(httpVerifyUser)))
 	r.HandleFunc(`/v1/venue/create`, httpWithContext(httpWithBasicAuth(httpCreateVenue)))
 	r.HandleFunc(`/v1/venue/delete`, httpWithContext(httpWithBasicAuth(httpDeleteVenue)))
 	r.HandleFunc(`/v1/venue/list`, httpWithContext(httpWithOptionalBasicAuth(httpListVenue)))
