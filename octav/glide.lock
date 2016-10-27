@@ -1,8 +1,8 @@
-hash: a1e9b03b5720f4521f9ba4897f74af2216da9e5367732f732c153914e588ceb2
-updated: 2016-10-24T14:55:41.329548472+09:00
+hash: 6cf85666a77fe813b335daf48324ef76c19822bed758af173a1cb8a7b3248536
+updated: 2016-10-27T12:05:44.755547964+09:00
 imports:
 - name: cloud.google.com/go
-  version: e46f105e04cc9e1b4075aa9836989710e2153c48
+  version: 211ec57776e3b5f477dfc03c825cfc82030d6a05
   subpackages:
   - compute/metadata
   - internal
@@ -23,7 +23,7 @@ imports:
 - name: github.com/dghubble/sling
   version: c961a4334054e64299d16f8a31bd686ee2565ae4
 - name: github.com/go-sql-driver/mysql
-  version: dbc3fe23a4aced10a53834106e288b155d17e2ee
+  version: 2a6c6079c7eff49a7e9d641e109d922f124a3e4c
 - name: github.com/golang/protobuf
   version: 98fa357170587e470c5f27d3c3ea0947b71eb455
   subpackages:
@@ -68,6 +68,8 @@ imports:
   version: fdcdef92120d53b8f79aa2ec59d0b247f0c0660d
 - name: github.com/lestrrat/go-structinfo
   version: f74c056fe41f860aa6264478c664a6fff8a64298
+- name: github.com/lestrrat/go-tmplbox
+  version: aefdceeeabb1263f4bc091a2c2dd6dae65498ff1
 - name: github.com/lestrrat/go-tx-guard
   version: f922362dce0d717f2035e3c446974d6aa64f466b
 - name: github.com/lestrrat/go-urlenc
@@ -98,7 +100,7 @@ imports:
   - lex/httplex
   - trace
 - name: golang.org/x/oauth2
-  version: 1e695b1c8febf17aad3bfa7bf0a819ef94b98ad5
+  version: 25b4fb1468cb89700c7c060cb99f30581a61f5e3
   subpackages:
   - google
   - internal
@@ -109,7 +111,7 @@ imports:
   subpackages:
   - errgroup
 - name: golang.org/x/text
-  version: 5a42fa2464759cbb7ee0af9de00b54d69f09a29c
+  version: 16e1d1f27f7aba51c74c0aeb7a7ee31a75c5c63c
   subpackages:
   - internal/tag
   - language
@@ -126,7 +128,7 @@ imports:
   - transport
   - urlshortener/v1
 - name: google.golang.org/appengine
-  version: 5b8c3b819891014a2d12354528f7d046dd53c89e
+  version: 46239ca616842c00f41b8cbc6bbf2bd6ffbfcdad
   subpackages:
   - internal
   - internal/app_identity
@@ -140,7 +142,7 @@ imports:
   - socket
   - urlfetch
 - name: google.golang.org/grpc
-  version: 2b7e876a2eb64e93cb8140f497d3ea9d8882279c
+  version: 396f8ba2a6b9039070f4ff97561f5e408828fccd
   subpackages:
   - codes
   - credentials
