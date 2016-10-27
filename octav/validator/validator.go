@@ -3304,8 +3304,16 @@ func init() {
 					jsval.EmptyConstraint,
 				).
 				AddProp(
+					"force",
+					jsval.Boolean(),
+				).
+				AddProp(
 					"id",
 					jsval.Reference(M).RefersTo("#/definitions/uuid"),
+				).
+				AddProp(
+					"lang",
+					jsval.Reference(M).RefersTo("#/definitions/language"),
 				).
 				AddProp(
 					"user_id",
