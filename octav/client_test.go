@@ -791,11 +791,19 @@ func TestSessionCRUD(t *testing.T) {
 		}
 
 		for _, lang := range []string{"en", "ja"} {
+			uur := model.UpdateUserRequest{
+				ID: user.ID,
+				UserID: ctx.Superuser.EID,
+			}
+			uur.Lang.Set(lang)
+			if err := testUpdateUserPass(ctx, &uur); err != nil {
+				return
+			}
+
 			r := model.SendSelectionResultNotificationRequest{
 				ID:     res.ID,
 				UserID: ctx.Superuser.EID,
 			}
-			r.Lang.Set(lang)
 			sendres, err := ctx.HTTPClient.SendSelectionResultNotification(&r)
 			if !assert.NoError(t, err, "Send selection result notification") {
 				return

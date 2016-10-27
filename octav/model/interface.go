@@ -220,6 +220,7 @@ type User struct {
 	AvatarURL       string `json:"avatar_url,omitempty"`
 	FirstName       string `json:"first_name,omitempty" l10n:"true"`
 	LastName        string `json:"last_name,omitempty" l10n:"true"`
+	Lang            string `json:"lang"`
 	Nickname        string `json:"nickname"`
 	Email           string `json:"email,omitempty"`
 	TshirtSize      string `json:"tshirt_size,omitempty"`
@@ -569,6 +570,7 @@ type UpdateUserRequest struct {
 	FirstName       jsval.MaybeString `json:"first_name,omitempty" l10n:"true"`
 	LastName        jsval.MaybeString `json:"last_name,omitempty" l10n:"true"`
 	Nickname        jsval.MaybeString `json:"nickname,omitempty"`
+	Lang            jsval.MaybeString `json:"lang,omitempty"`
 	Email           jsval.MaybeString `json:"email,omitempty"`
 	AuthVia         jsval.MaybeString `json:"auth_via,omitempty"`
 	AuthUserID      jsval.MaybeString `json:"auth_user_id,omitempty"`
@@ -948,10 +950,9 @@ type VerifyUserRequest struct {
 
 // +transport
 type SendSelectionResultNotificationRequest struct {
-	Force  bool              `json:"force"` // true to force sending notification after we have already done so for this session
-	ID     string            `json:"id"`    // ID of the session to which we're making the notification
-	Lang   jsval.MaybeString `json:"lang" urlenc:"lang,omitempty,string"`
-	UserID string            `json:"user_id"` // ID of the user making this request
+	Force  bool   `json:"force"`   // true to force sending notification after we have already done so for this session
+	ID     string `json:"id"`      // ID of the session to which we're making the notification
+	UserID string `json:"user_id"` // ID of the user making this request
 
 	TrustedCall bool `json:"-"`
 }

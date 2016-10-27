@@ -505,6 +505,7 @@
           "first_name": { "$ref": "#/definitions/string_en_not_empty" },
           "last_name": { "$ref": "#/definitions/string_en_not_empty" },
           "nickname": { "$ref": "#/definitions/string_en_not_empty" },
+          "lang": { "$ref": "#/definitions/language" },
           "email": { "$ref": "#/definitions/email" },
           "tshirt_size": { "$ref": "#/definitions/tshirt_size" }
         },
@@ -1701,7 +1702,6 @@
         "properties": {
           "force": {"type": "boolean"},
           "id": {"$ref": "#/definitions/uuid"},
-          "lang": { "$ref": "#/definitions/language" },
           "user_id": {"$ref": "#/definitions/uuid"}
         }
       },

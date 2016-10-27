@@ -3233,6 +3233,9 @@ func (r UpdateUserRequest) collectMarshalData() map[string]interface{} {
 	if r.Nickname.Valid() {
 		m["nickname"] = r.Nickname.Value()
 	}
+	if r.Lang.Valid() {
+		m["lang"] = r.Lang.Value()
+	}
 	if r.Email.Valid() {
 		m["email"] = r.Email.Value()
 	}
@@ -3306,6 +3309,12 @@ func (r *UpdateUserRequest) Populate(m map[string]interface{}) error {
 		}
 		delete(m, "nickname")
 	}
+	if jv, ok := m["lang"]; ok {
+		if err := r.Lang.Set(jv); err != nil {
+			return errors.New("set field Lang failed: " + err.Error())
+		}
+		delete(m, "lang")
+	}
 	if jv, ok := m["email"]; ok {
 		if err := r.Email.Set(jv); err != nil {
 			return errors.New("set field Email failed: " + err.Error())
@@ -3353,7 +3362,7 @@ func (r *UpdateUserRequest) Populate(m map[string]interface{}) error {
 
 func (r *UpdateUserRequest) GetPropNames() ([]string, error) {
 	l, _ := r.LocalizedFields.GetPropNames()
-	return append(l, "id", "first_name", "last_name", "nickname", "email", "auth_via", "auth_user_id", "avatar_url", "tshirt_size", "user_id"), nil
+	return append(l, "id", "first_name", "last_name", "nickname", "lang", "email", "auth_via", "auth_user_id", "avatar_url", "tshirt_size", "user_id"), nil
 }
 
 func (r *UpdateUserRequest) SetPropValue(s string, v interface{}) error {
@@ -3369,6 +3378,8 @@ func (r *UpdateUserRequest) SetPropValue(s string, v interface{}) error {
 		return r.LastName.Set(v)
 	case "nickname":
 		return r.Nickname.Set(v)
+	case "lang":
+		return r.Lang.Set(v)
 	case "email":
 		return r.Email.Set(v)
 	case "auth_via":
@@ -6072,9 +6083,6 @@ func (r SendSelectionResultNotificationRequest) collectMarshalData() map[string]
 	m := make(map[string]interface{})
 	m["force"] = r.Force
 	m["id"] = r.ID
-	if r.Lang.Valid() {
-		m["lang"] = r.Lang.Value()
-	}
 	m["user_id"] = r.UserID
 	return m
 }
@@ -6123,12 +6131,6 @@ func (r *SendSelectionResultNotificationRequest) Populate(m map[string]interface
 		default:
 			return errors.Wrap(ErrInvalidJSONFieldType{Field: "id"}, "failed to populate fields for SendSelectionResultNotificationRequest")
 		}
-	}
-	if jv, ok := m["lang"]; ok {
-		if err := r.Lang.Set(jv); err != nil {
-			return errors.New("set field Lang failed: " + err.Error())
-		}
-		delete(m, "lang")
 	}
 	if jv, ok := m["user_id"]; ok {
 		switch jv.(type) {

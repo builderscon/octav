@@ -168,6 +168,7 @@ type User struct {
 	AvatarURL  sql.NullString
 	FirstName  sql.NullString
 	LastName   sql.NullString
+	Lang       string
 	Nickname   string
 	Email      sql.NullString
 	TshirtSize sql.NullString

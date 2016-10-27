@@ -25,6 +25,7 @@ func (v *UserSvc) populateRowForCreate(vdb *db.User, payload model.CreateUserReq
 	vdb.Nickname = payload.Nickname
 	vdb.AuthVia = payload.AuthVia
 	vdb.AuthUserID = payload.AuthUserID
+	vdb.Lang = "en"
 
 	if payload.AvatarURL.Valid() {
 		vdb.AvatarURL.Valid = true
@@ -80,6 +81,10 @@ func (v *UserSvc) populateRowForUpdate(vdb *db.User, payload model.UpdateUserReq
 	if payload.LastName.Valid() {
 		vdb.LastName.Valid = true
 		vdb.LastName.String = payload.LastName.String
+	}
+
+	if payload.Lang.Valid() {
+		vdb.Lang = payload.Lang.String
 	}
 
 	if payload.Email.Valid() {

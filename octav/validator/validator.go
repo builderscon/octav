@@ -1663,6 +1663,10 @@ func init() {
 					jsval.Reference(M).RefersTo("#/definitions/string_en_not_empty"),
 				).
 				AddProp(
+					"lang",
+					jsval.Reference(M).RefersTo("#/definitions/language"),
+				).
+				AddProp(
 					"last_name",
 					jsval.Reference(M).RefersTo("#/definitions/string_en_not_empty"),
 				).
@@ -3310,10 +3314,6 @@ func init() {
 				AddProp(
 					"id",
 					jsval.Reference(M).RefersTo("#/definitions/uuid"),
-				).
-				AddProp(
-					"lang",
-					jsval.Reference(M).RefersTo("#/definitions/language"),
 				).
 				AddProp(
 					"user_id",

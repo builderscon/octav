@@ -248,3 +248,27 @@ func testDeleteSessionFail(ctx *TestCtx, sessionID, userID string) error {
 	return testDeleteSession(ctx, sessionID, userID, true)
 }
 
+func testUpdateUser(ctx *TestCtx, r *model.UpdateUserRequest, fail bool) error {
+	err := ctx.HTTPClient.UpdateUser(r)
+	if fail {
+		if !assert.Error(ctx.T, err, "UpdateUser should fail") {
+			return errors.New("expected operation to fail, but succeeded")
+		}
+		return nil
+	}
+
+	if !assert.NoError(ctx.T, err, "UpdateUser should be successful") {
+		return err
+	}
+	return nil
+}
+
+func testUpdateUserPass(ctx *TestCtx, r *model.UpdateUserRequest) error {
+	return testUpdateUser(ctx, r, false)
+}
+
+func testUpdateUserFail(ctx *TestCtx, r *model.UpdateUserRequest) error {
+	return testUpdateUser(ctx, r, true)
+}
+
+

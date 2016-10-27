@@ -585,19 +585,21 @@ func formatSessionTweet(session *model.Session, conf *model.Conference, series *
 }
 
 func (v *SessionSvc) SendSelectionResultNotificationFromPayload(tx *db.Tx, payload model.SendSelectionResultNotificationRequest) error {
-	var lookupPayload model.LookupSessionRequest
-	lookupPayload.ID = payload.ID
-	lookupPayload.Lang = payload.Lang
-	lookupPayload.TrustedCall = payload.TrustedCall
-
 	var m model.Session
-	if err := v.LookupFromPayload(tx, &m, lookupPayload); err != nil {
-		return errors.Wrap(err, "failed to fetch session")
+	if err := v.Lookup(tx, &m, payload.ID); err != nil {
+		return errors.Wrap(err, "failed to load model.Session from database")
 	}
 
-	lang := "en"
-	if payload.Lang.Valid() {
-		lang = payload.Lang.String
+	// Load the user
+	su := User()
+	var u model.User
+	if err := su.Lookup(tx, &u, m.SpeakerID); err != nil {
+		return errors.Wrap(err, "failed to load model.User from database")
+	}
+
+	// Now, based on the user's language, decorate the session
+	if err := v.Decorate(tx, &m, payload.TrustedCall, u.Lang); err != nil {
+		return errors.Wrap(err, "failed to declorate mode.Session")
 	}
 
 	var subject string
@@ -605,10 +607,10 @@ func (v *SessionSvc) SendSelectionResultNotificationFromPayload(tx *db.Tx, paylo
 	switch m.Status {
 	case model.StatusAccepted:
 		subject = "[" + m.Conference.Title + "] Your proposal has been accepted"
-		tname = "templates/" + lang + "/eml/proposal-accepted.eml"
+		tname = "templates/" + u.Lang + "/eml/proposal-accepted.eml"
 	case model.StatusRejected:
 		subject = "[" + m.Conference.Title + "] Your proposal was not accepted"
-		tname = "templates/" + lang + "/eml/proposal-rejected.eml"
+		tname = "templates/" + u.Lang + "/eml/proposal-rejected.eml"
 	default:
 		return errors.New("can only send email for accepted/rejected sessions")
 	}

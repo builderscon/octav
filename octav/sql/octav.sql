@@ -3,6 +3,7 @@ CREATE TABLE users (
     eid CHAR(64) CHARACTER SET latin1 NOT NULL,
     first_name TEXT,
     last_name TEXT,
+    lang CHAR(16) NOT NULL DEFAULT 'en',
     nickname  CHAR(128) NOT NULL,
     email TEXT,
     auth_via CHAR(16) NOT NULL, /* github, facebook, twitter */
