@@ -284,11 +284,12 @@ func yapcasia(uid string) *model.CreateConferenceSeriesRequest {
 
 func yapcasiaTokyo(seriesID, userID string) *model.CreateConferenceRequest {
 	r := &model.CreateConferenceRequest{
-		Title:    "YAPC::Asia Tokyo",
 		SeriesID: seriesID,
 		Slug:     "2015",
+		Title:    "YAPC::Asia Tokyo",
 		UserID:   userID,
 	}
+	r.Timezone.Set("Asia/Tokyo")
 	r.LocalizedFields.Set("ja", "description", "最後のYAPC::Asia Tokyo")
 	r.Description.Set("The last YAPC::Asia Tokyo")
 	return r
@@ -765,6 +766,43 @@ func TestSessionCRUD(t *testing.T) {
 		if err := testDeleteSessionFail(ctx, res.ID, user.ID); err != nil {
 			return
 		}
+
+		if err := testDeleteSessionPass(ctx, res.ID, ctx.Superuser.EID); err != nil {
+			return
+		}
+	})
+
+	ctx.Subtest("Send notification", func(ctx *TestCtx) {
+		res, err := testCreateSessionPass(ctx, bconsession(conference.ID, user.ID, user.ID, stype.ID))
+		if err != nil {
+			return
+		}
+
+		in := model.UpdateSessionRequest{
+			ID:     res.ID,
+			UserID: ctx.Superuser.EID,
+		}
+		in.Status.Set(model.StatusAccepted)
+		loc, _ := time.LoadLocation("Asia/Tokyo")
+		in.StartsOn.Set(time.Date(2015, 8, 29, 15, 0, 0, 0, loc))
+		if err := testUpdateSession(ctx, &in); err != nil {
+			testDeleteSessionPass(ctx, res.ID, ctx.Superuser.EID)
+			return
+		}
+
+		for _, lang := range []string{"en", "ja"} {
+			r := model.SendSelectionResultNotificationRequest{
+				ID:     res.ID,
+				UserID: ctx.Superuser.EID,
+			}
+			r.Lang.Set(lang)
+			sendres, err := ctx.HTTPClient.SendSelectionResultNotification(&r)
+			if !assert.NoError(t, err, "Send selection result notification") {
+				return
+			}
+			ctx.T.Logf("%#v", sendres)
+		}
+
 
 		if err := testDeleteSessionPass(ctx, res.ID, ctx.Superuser.EID); err != nil {
 			return

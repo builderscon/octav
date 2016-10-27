@@ -164,6 +164,7 @@ CREATE TABLE sessions (
     material_level TEXT,
     tags TEXT,
     category TEXT,
+    selection_result_sent TINYINT(1) NOT NULL DEFAULT 0,
     spoken_language TEXT,
     slide_language TEXT,
     slide_subtitles TEXT,

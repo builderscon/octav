@@ -269,6 +269,13 @@ func (v *SessionSvc) Decorate(tx *db.Tx, session *model.Session, trustedCall boo
 			return errors.Wrap(err, "failed to decorate conference")
 		}
 		session.Conference = &mc
+
+		if mc.Timezone != "" && !session.StartsOn.IsZero() {
+			loc, err := time.LoadLocation(mc.Timezone)
+			if err == nil {
+				session.StartsOn = session.StartsOn.In(loc)
+			}
+		}
 	}
 
 	// ... but not necessarily with a room
@@ -575,4 +582,65 @@ func formatSessionTweet(session *model.Session, conf *model.Conference, series *
 		strconv.Quote(title),
 		u,
 	), nil
+}
+
+func (v *SessionSvc) SendSelectionResultNotificationFromPayload(tx *db.Tx, payload model.SendSelectionResultNotificationRequest) error {
+	var lookupPayload model.LookupSessionRequest
+	lookupPayload.ID = payload.ID
+	lookupPayload.Lang = payload.Lang
+	lookupPayload.TrustedCall = payload.TrustedCall
+
+	var m model.Session
+	if err := v.LookupFromPayload(tx, &m, lookupPayload); err != nil {
+		return errors.Wrap(err, "failed to fetch session")
+	}
+
+	lang := "en"
+	if payload.Lang.Valid() {
+		lang = payload.Lang.String
+	}
+
+	var subject string
+	var tname string
+	switch m.Status {
+	case model.StatusAccepted:
+		subject = "[" + m.Conference.Title + "] Your proposal has been accepted"
+		tname = "templates/" + lang + "/eml/proposal-accepted.eml"
+	case model.StatusRejected:
+		subject = "[" + m.Conference.Title + "] Your proposal was not accepted"
+		tname = "templates/" + lang + "/eml/proposal-rejected.eml"
+	default:
+		return errors.New("can only send email for accepted/rejected sessions")
+	}
+
+	// We don't send email if it has been sent before, UNLESS the force
+	// flag is specified
+	if m.SelectionResultSent && !payload.Force {
+		return errors.New("selection result has already been sent")
+	}
+
+	t, err := Template().Get(tname)
+	if err != nil {
+		return errors.Wrap(err, "failed to fetch template")
+	}
+
+	var msg bytes.Buffer
+	if err := t.Execute(&msg, m); err != nil {
+		return errors.Wrap(err, "failed to render notification template")
+	}
+
+	mm := MailMessage{
+		Recipients: []string{m.Speaker.Email},
+		Subject:    subject,
+		Text:       msg.String(),
+	}
+	pdebug.Printf("%#v", mm)
+
+	if !InTesting {
+		if err := Mailgun().Send(&mm); err != nil {
+			return errors.Wrap(err, "failed to send notification")
+		}
+	}
+
+	return nil
 }

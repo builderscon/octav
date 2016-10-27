@@ -175,36 +175,37 @@ type UpdateSessionTypeRequest struct {
 
 // +model
 type Session struct {
-	LocalizedFields   `json:"-"`
-	ID                string       `json:"id"`
-	ConferenceID      string       `json:"conference_id"`
-	RoomID            string       `json:"room_id,omitempty"`
-	SpeakerID         string       `json:"speaker_id"`
-	SessionTypeID     string       `json:"session_type_id"`
-	Title             string       `json:"title" l10n:"true"`
-	Abstract          string       `json:"abstract" l10n:"true"`
-	Memo              string       `json:"memo"`
-	StartsOn          time.Time    `json:"starts_on,omitempty"`
-	Duration          int          `json:"duration"`
-	MaterialLevel     string       `json:"material_level"`
-	Tags              TagString    `json:"tags,omitempty" assign:"convert"`
-	Category          string       `json:"category,omitempty"`
-	SpokenLanguage    string       `json:"spoken_language,omitempty"`
-	SlideLanguage     string       `json:"slide_language,omitempty"`
-	SlideSubtitles    string       `json:"slide_subtitles,omitempty"`
-	SlideURL          string       `json:"slide_url,omitempty"`
-	VideoURL          string       `json:"video_url,omitempty"`
-	PhotoRelease      string       `json:"photo_release"`
-	RecordingRelease  string       `json:"recording_release"`
-	MaterialsRelease  string       `json:"materials_release"`
-	SortOrder         int          `json:"-"`
-	HasInterpretation bool         `json:"has_interpretation"`
-	Status            string       `json:"status"`
-	Confirmed         bool         `json:"confirmed"`
-	Conference        *Conference  `json:"conference,omitempy" decorate:"true"`    // only populated for JSON response
-	Room              *Room        `json:"room,omitempty" decorate:"true"`         // only populated for JSON response
-	Speaker           *User        `json:"speaker,omitempty" decorate:"true"`      // only populated for JSON response
-	SessionType       *SessionType `json:"session_type,omitempty" decorate:"true"` // only populated for JSON response
+	LocalizedFields     `json:"-"`
+	ID                  string       `json:"id"`
+	ConferenceID        string       `json:"conference_id"`
+	RoomID              string       `json:"room_id,omitempty"`
+	SpeakerID           string       `json:"speaker_id"`
+	SessionTypeID       string       `json:"session_type_id"`
+	Title               string       `json:"title" l10n:"true"`
+	Abstract            string       `json:"abstract" l10n:"true"`
+	Memo                string       `json:"memo"`
+	StartsOn            time.Time    `json:"starts_on,omitempty"`
+	Duration            int          `json:"duration"`
+	MaterialLevel       string       `json:"material_level"`
+	Tags                TagString    `json:"tags,omitempty" assign:"convert"`
+	Category            string       `json:"category,omitempty"`
+	SelectionResultSent bool         `json:"selection_result_sent"`
+	SpokenLanguage      string       `json:"spoken_language,omitempty"`
+	SlideLanguage       string       `json:"slide_language,omitempty"`
+	SlideSubtitles      string       `json:"slide_subtitles,omitempty"`
+	SlideURL            string       `json:"slide_url,omitempty"`
+	VideoURL            string       `json:"video_url,omitempty"`
+	PhotoRelease        string       `json:"photo_release"`
+	RecordingRelease    string       `json:"recording_release"`
+	MaterialsRelease    string       `json:"materials_release"`
+	SortOrder           int          `json:"-"`
+	HasInterpretation   bool         `json:"has_interpretation"`
+	Status              string       `json:"status"`
+	Confirmed           bool         `json:"confirmed"`
+	Conference          *Conference  `json:"conference,omitempy" decorate:"true"`    // only populated for JSON response
+	Room                *Room        `json:"room,omitempty" decorate:"true"`         // only populated for JSON response
+	Speaker             *User        `json:"speaker,omitempty" decorate:"true"`      // only populated for JSON response
+	SessionType         *SessionType `json:"session_type,omitempty" decorate:"true"` // only populated for JSON response
 }
 type SessionList []Session
 
@@ -941,6 +942,21 @@ type GetConferenceScheduleRequest struct {
 
 // +transport
 type VerifyUserRequest struct {
-	ID     string `json:"id"`      // ID of the user making this request
+	ID     string `json:"id"`      // ID of the user being verified
 	UserID string `json:"user_id"` // ID of the user making this request
+}
+
+// +transport
+type SendSelectionResultNotificationRequest struct {
+	Force  bool              `json:"force"` // true to force sending notification after we have already done so for this session
+	ID     string            `json:"id"`    // ID of the session to which we're making the notification
+	Lang   jsval.MaybeString `json:"lang" urlenc:"lang,omitempty,string"`
+	UserID string            `json:"user_id"` // ID of the user making this request
+
+	TrustedCall bool `json:"-"`
+}
+
+// +transport
+type SendSelectionResultNotificationResponse struct {
+	Message string `json:"message"`
 }

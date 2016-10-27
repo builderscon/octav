@@ -94,5 +94,5 @@ initdb:
 
 assets: $(INTERNAL_BIN_DIR)/go-bindata
 	@echo "Regenerating assets"
-	@PATH=$(CURDIR)/_internal_bin:$(PATH) go-bindata -o assets/assets.go -pkg=assets -ignore=assets.go -prefix=assets assets/...
+	@cd assets; PATH=$(CURDIR)/_internal_bin:$(PATH) go-bindata -o=assets.go -pkg=assets -ignore=assets.go -ignore=\\.swp templates/...
 

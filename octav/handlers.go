@@ -1636,3 +1636,25 @@ func doVerifyUser(ctx context.Context, w http.ResponseWriter, r *http.Request, p
 	})
 }
 
+func doSendSelectionResultNotification(ctx context.Context, w http.ResponseWriter, r *http.Request, payload model.SendSelectionResultNotificationRequest) {
+	tx, err := db.Begin()
+	if err != nil {
+		httpError(w, `doSendSelectionResultNotification`, http.StatusInternalServerError, err)
+		return
+	}
+	defer tx.AutoRollback()
+
+	payload.TrustedCall = isTrustedCall(ctx)
+
+	s := service.Session()
+	if err := s.SendSelectionResultNotificationFromPayload(tx, payload); err != nil {
+		httpError(w, `doSendSelectionResultNotification`, http.StatusInternalServerError, err)
+		return
+	}
+
+	httpJSON(w, map[string]interface{}{
+		"message": "Notification scheduled",
+	})
+
+}
+

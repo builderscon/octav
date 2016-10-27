@@ -1688,6 +1688,29 @@
           "confirmation_key": { "$ref": "#/definitions/uuid" }
         }
       }
+    },
+    {
+      "title": "Send selection result notification",
+      "href": "/v1/session/send_selection_result_notification",
+      "hsup.wrapper": "httpWithBasicAuth",
+      "method": "POST",
+      "rel": "update",
+      "schema": {
+        "type": "object",
+        "required": ["id", "user_id"],
+        "properties": {
+          "force": {"type": "boolean"},
+          "id": {"$ref": "#/definitions/uuid"},
+          "lang": { "$ref": "#/definitions/language" },
+          "user_id": {"$ref": "#/definitions/uuid"}
+        }
+      },
+      "targetSchema": {
+        "type": "object",
+        "properties": {
+          "message": {"type": "string"}
+        }
+      }
     }
   ]
 }

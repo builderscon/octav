@@ -294,8 +294,13 @@ func (v *UserSvc) CreateTemporaryEmailFromPayload(tx *db.Tx, key *string, payloa
 	*key = row.ConfirmationKey
 	gettext.SetLocale(payload.Lang.String)
 
+	t, err := Template().Get("templates/en/eml/confirm_registration.eml")
+	if err != nil {
+		return errors.Wrap(err, "failed to fetch email template")
+	}
+
 	var txt bytes.Buffer
-	if err := Template().Execute(&txt, "templates/eml/confirm_registration.eml", row); err != nil {
+	if err := t.Execute(&txt, row); err != nil {
 		return errors.Wrap(err, "failed to execute template")
 	}
 

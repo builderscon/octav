@@ -128,34 +128,35 @@ type SessionType struct {
 
 // +DB tablename:"sessions"
 type Session struct {
-	OID               int64          // OID is the internal id, used for sorting and what not
-	EID               string         // EID is the ID that is visible to the outside
-	ConferenceID      string         // ConferenceID is the ID of the conference that this session belongs to
-	RoomID            sql.NullString // ID of the room where this session will be held at.
-	SpeakerID         string         // ID of the speaker that this session belongs to
-	SessionTypeID     string         // ID of the session type
-	Title             sql.NullString // Title of the session (English)
-	Abstract          sql.NullString // Abstract of the session (English)
-	Memo              sql.NullString // Correspondence between the speaker and the organizer. Should not be publicly available
-	StartsOn          NullTime       // Time that this session is scheduled to start on
-	Duration          int            // Length of this session in minutes.
-	MaterialLevel     sql.NullString
-	Tags              sql.NullString // Comma separated tags
-	Category          sql.NullString
-	SpokenLanguage    sql.NullString
-	SlideLanguage     sql.NullString
-	SlideSubtitles    sql.NullString
-	SlideURL          sql.NullString
-	VideoURL          sql.NullString
-	PhotoRelease      sql.NullString
-	RecordingRelease  sql.NullString
-	MaterialsRelease  sql.NullString
-	HasInterpretation bool
-	Status            string
-	SortOrder         int
-	Confirmed         bool
-	CreatedOn         time.Time
-	ModifiedOn        NullTime
+	OID                 int64          // OID is the internal id, used for sorting and what not
+	EID                 string         // EID is the ID that is visible to the outside
+	ConferenceID        string         // ConferenceID is the ID of the conference that this session belongs to
+	RoomID              sql.NullString // ID of the room where this session will be held at.
+	SpeakerID           string         // ID of the speaker that this session belongs to
+	SessionTypeID       string         // ID of the session type
+	Title               sql.NullString // Title of the session (English)
+	Abstract            sql.NullString // Abstract of the session (English)
+	Memo                sql.NullString // Correspondence between the speaker and the organizer. Should not be publicly available
+	StartsOn            NullTime       // Time that this session is scheduled to start on
+	Duration            int            // Length of this session in minutes.
+	MaterialLevel       sql.NullString
+	Tags                sql.NullString // Comma separated tags
+	Category            sql.NullString
+	SelectionResultSent bool
+	SpokenLanguage      sql.NullString
+	SlideLanguage       sql.NullString
+	SlideSubtitles      sql.NullString
+	SlideURL            sql.NullString
+	VideoURL            sql.NullString
+	PhotoRelease        sql.NullString
+	RecordingRelease    sql.NullString
+	MaterialsRelease    sql.NullString
+	HasInterpretation   bool
+	Status              string
+	SortOrder           int
+	Confirmed           bool
+	CreatedOn           time.Time
+	ModifiedOn          NullTime
 }
 
 // +DB tablename:"users"

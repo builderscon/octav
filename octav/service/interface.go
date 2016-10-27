@@ -4,11 +4,11 @@ import (
 	"context"
 	"io"
 	"sync"
-	"text/template"
 
 	"cloud.google.com/go/storage"
 
 	"github.com/dghubble/go-twitter/twitter"
+	tmplbox "github.com/lestrrat/go-tmplbox"
 
 	mailgun "gopkg.in/mailgun/mailgun-go.v1"
 )
@@ -33,7 +33,6 @@ type GoogleStorageObjectList struct {
 	mu       sync.Mutex
 	next     interface{}
 }
-
 
 type WithObjectAttrs storage.ObjectAttrs
 type WithQueryPrefix string
@@ -86,7 +85,7 @@ type SponsorSvc struct {
 	mediaStorage StorageClient
 }
 type TemplateSvc struct {
-	template *template.Template
+	box *tmplbox.Box
 }
 type TwitterSvc struct {
 	*twitter.Client
