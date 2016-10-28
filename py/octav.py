@@ -1,5 +1,5 @@
 """OCTAV Client Library"""
-"""DO NOT EDIT: This file was generated from ../spec/v1/api.json on Thu Oct 27 14:33:42 2016"""
+"""DO NOT EDIT: This file was generated from ../spec/v1/api.json on Fri Oct 28 21:31:26 2016"""
 
 import certifi
 import json
@@ -231,7 +231,7 @@ class Octav(object):
         self.error = repr(e)
         return None
 
-  def update_user (self, id, user_id, email=None, first_name=None, last_name=None, nickname=None, tshirt_size=None, **args):
+  def update_user (self, id, user_id, email=None, first_name=None, lang=None, last_name=None, nickname=None, tshirt_size=None, **args):
     try:
         payload = {}
         hdrs = {}
@@ -247,6 +247,8 @@ class Octav(object):
             payload['first_name'] = first_name
         if id is not None:
             payload['id'] = id
+        if lang is not None:
+            payload['lang'] = lang
         if last_name is not None:
             payload['last_name'] = last_name
         if nickname is not None:
@@ -2671,6 +2673,40 @@ class Octav(object):
         if user_id is not None:
             payload['user_id'] = user_id
         uri = '%s/v1/session/send_selection_result_notification' % self.endpoint
+        hdrs = urllib3.util.make_headers(
+            basic_auth='%s:%s' % (self.key, self.secret),
+        )
+        if self.debug:
+            print('POST %s' % uri)
+        hdrs['Content-Type']= 'application/json'
+        res = self.http.request('POST', uri, headers=hdrs, body=json.dumps(payload))
+        if self.debug:
+            print(res)
+        self.res = res
+        if res.status != 200:
+            self.extract_error(res)
+            return None
+        return json.loads(res.data)
+    except BaseException as e:
+        if self.debug:
+            print("error during http access: " + repr(e))
+        self.error = repr(e)
+        return None
+
+  def send_all_selection_result_notification (self, conference_id, force=None, user_id=None):
+    try:
+        payload = {}
+        hdrs = {}
+        if conference_id is None:
+            raise MissingRequiredArgument('property conference_id must be provided')
+        payload['conference_id'] = conference_id
+        if conference_id is not None:
+            payload['conference_id'] = conference_id
+        if force is not None:
+            payload['force'] = force
+        if user_id is not None:
+            payload['user_id'] = user_id
+        uri = '%s/v1/session/send_all_selection_result_notification' % self.endpoint
         hdrs = urllib3.util.make_headers(
             basic_auth='%s:%s' % (self.key, self.secret),
         )

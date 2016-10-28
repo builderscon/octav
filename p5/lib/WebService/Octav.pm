@@ -1407,4 +1407,48 @@ sub confirm_temporary_email {
     return 1
 }
 
+sub send_selection_result_notification {
+    my ($self, $payload) = @_;
+    for my $required (qw(id user_id)) {
+        if (!$payload->{$required}) {
+            die qq|property "$required" must be provided|;
+        }
+    }
+    my $uri = URI->new($self->{endpoint} . qq|/v1/session/send_selection_result_notification|);
+    my @request_args;
+    push @request_args, (Content_Type => "application/json", Content => JSON::encode_json($payload));
+    my $req = HTTP::Request::Common::POST($uri, @request_args);
+    if (my($u, $p) = @{$self->{credentials} || []}) {
+        $req->authorization_basic($u, $p);
+    }
+    my $res = $self->{user_agent}->request($req);
+    if (!$res->is_success) {
+        $self->{last_error} = $res->status_line;
+        return;
+    }
+    return JSON::decode_json($res->decoded_content);
+}
+
+sub send_all_selection_result_notification {
+    my ($self, $payload) = @_;
+    for my $required (qw(conference_id)) {
+        if (!$payload->{$required}) {
+            die qq|property "$required" must be provided|;
+        }
+    }
+    my $uri = URI->new($self->{endpoint} . qq|/v1/session/send_all_selection_result_notification|);
+    my @request_args;
+    push @request_args, (Content_Type => "application/json", Content => JSON::encode_json($payload));
+    my $req = HTTP::Request::Common::POST($uri, @request_args);
+    if (my($u, $p) = @{$self->{credentials} || []}) {
+        $req->authorization_basic($u, $p);
+    }
+    my $res = $self->{user_agent}->request($req);
+    if (!$res->is_success) {
+        $self->{last_error} = $res->status_line;
+        return;
+    }
+    return JSON::decode_json($res->decoded_content);
+}
+
 1;
