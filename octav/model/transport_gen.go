@@ -6155,6 +6155,71 @@ func (r *SendSelectionResultNotificationRequest) Populate(m map[string]interface
 	return nil
 }
 
+func (r SendAllSelectionResultNotificationRequest) collectMarshalData() map[string]interface{} {
+	m := make(map[string]interface{})
+	m["force"] = r.Force
+	m["id"] = r.ConferenceID
+	m["user_id"] = r.UserID
+	return m
+}
+
+func (r SendAllSelectionResultNotificationRequest) MarshalJSON() ([]byte, error) {
+	m := r.collectMarshalData()
+	buf, err := json.Marshal(m)
+	if err != nil {
+		return nil, err
+	}
+	return buf, nil
+}
+
+func (r SendAllSelectionResultNotificationRequest) MarshalURL() ([]byte, error) {
+	m := r.collectMarshalData()
+	buf, err := urlenc.Marshal(m)
+	if err != nil {
+		return nil, err
+	}
+	return buf, nil
+}
+
+func (r *SendAllSelectionResultNotificationRequest) UnmarshalJSON(data []byte) error {
+	m := make(map[string]interface{})
+	if err := json.Unmarshal(data, &m); err != nil {
+		return err
+	}
+	return r.Populate(m)
+}
+
+func (r *SendAllSelectionResultNotificationRequest) Populate(m map[string]interface{}) error {
+	if jv, ok := m["force"]; ok {
+		switch jv.(type) {
+		case bool:
+			r.Force = jv.(bool)
+			delete(m, "force")
+		default:
+			return errors.Wrap(ErrInvalidJSONFieldType{Field: "force"}, "failed to populate fields for SendAllSelectionResultNotificationRequest")
+		}
+	}
+	if jv, ok := m["id"]; ok {
+		switch jv.(type) {
+		case string:
+			r.ConferenceID = jv.(string)
+			delete(m, "id")
+		default:
+			return errors.Wrap(ErrInvalidJSONFieldType{Field: "id"}, "failed to populate fields for SendAllSelectionResultNotificationRequest")
+		}
+	}
+	if jv, ok := m["user_id"]; ok {
+		switch jv.(type) {
+		case string:
+			r.UserID = jv.(string)
+			delete(m, "user_id")
+		default:
+			return errors.Wrap(ErrInvalidJSONFieldType{Field: "user_id"}, "failed to populate fields for SendAllSelectionResultNotificationRequest")
+		}
+	}
+	return nil
+}
+
 func (r SendSelectionResultNotificationResponse) collectMarshalData() map[string]interface{} {
 	m := make(map[string]interface{})
 	m["message"] = r.Message
@@ -6195,6 +6260,51 @@ func (r *SendSelectionResultNotificationResponse) Populate(m map[string]interfac
 			delete(m, "message")
 		default:
 			return errors.Wrap(ErrInvalidJSONFieldType{Field: "message"}, "failed to populate fields for SendSelectionResultNotificationResponse")
+		}
+	}
+	return nil
+}
+
+func (r SendAllSelectionResultNotificationResponse) collectMarshalData() map[string]interface{} {
+	m := make(map[string]interface{})
+	m["message"] = r.Message
+	return m
+}
+
+func (r SendAllSelectionResultNotificationResponse) MarshalJSON() ([]byte, error) {
+	m := r.collectMarshalData()
+	buf, err := json.Marshal(m)
+	if err != nil {
+		return nil, err
+	}
+	return buf, nil
+}
+
+func (r SendAllSelectionResultNotificationResponse) MarshalURL() ([]byte, error) {
+	m := r.collectMarshalData()
+	buf, err := urlenc.Marshal(m)
+	if err != nil {
+		return nil, err
+	}
+	return buf, nil
+}
+
+func (r *SendAllSelectionResultNotificationResponse) UnmarshalJSON(data []byte) error {
+	m := make(map[string]interface{})
+	if err := json.Unmarshal(data, &m); err != nil {
+		return err
+	}
+	return r.Populate(m)
+}
+
+func (r *SendAllSelectionResultNotificationResponse) Populate(m map[string]interface{}) error {
+	if jv, ok := m["message"]; ok {
+		switch jv.(type) {
+		case string:
+			r.Message = jv.(string)
+			delete(m, "message")
+		default:
+			return errors.Wrap(ErrInvalidJSONFieldType{Field: "message"}, "failed to populate fields for SendAllSelectionResultNotificationResponse")
 		}
 	}
 	return nil

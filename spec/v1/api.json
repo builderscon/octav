@@ -1713,6 +1713,28 @@
           "message": {"type": "string"}
         }
       }
+    },
+    {
+      "title": "Send all selection result notification",
+      "href": "/v1/session/send_all_selection_result_notification",
+      "hsup.wrapper": "httpWithBasicAuth",
+      "method": "POST",
+      "rel": "update",
+      "schema": {
+        "type": "object",
+        "required": ["conference_id"],
+        "properties": {
+          "force": {"type": "boolean"},
+          "conference_id": {"$ref": "#/definitions/uuid"},
+          "user_id": {"$ref": "#/definitions/uuid"}
+        }
+      },
+      "targetSchema": {
+        "type": "object",
+        "properties": {
+          "message": {"type": "string"}
+        }
+      }
     }
   ]
 }

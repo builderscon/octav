@@ -1660,6 +1660,52 @@ func doSendSelectionResultNotification(ctx context.Context, w http.ResponseWrite
 	httpJSON(w, map[string]interface{}{
 		"message": "Notification scheduled",
 	})
-
 }
 
+func doSendAllSelectionResultNotification(ctx context.Context, w http.ResponseWriter, r *http.Request, payload model.SendAllSelectionResultNotificationRequest) {
+	tx, err := db.Begin()
+	if err != nil {
+		httpError(w, `doSendAllSelectionResultNotification`, http.StatusInternalServerError, err)
+		return
+	}
+	defer tx.AutoRollback()
+
+	var vdbl db.SessionList
+	if err := vdbl.LoadByConference(tx, payload.ConferenceID, "", time.Time{}, time.Time{}, []string{model.StatusAccepted, model.StatusRejected}, nil); err != nil {
+		httpError(w, `doSendAllSelectionResultNotification`, http.StatusInternalServerError, err)
+		return
+	}
+
+	trustedCall := isTrustedCall(ctx)
+
+	// Do this asynchronously
+	go func() {
+		s := service.Session()
+		var req model.SendSelectionResultNotificationRequest
+		for _, vdb := range vdbl {
+			tx, err := db.Begin()
+			if err != nil {
+				tx.Rollback()
+				return
+			}
+
+			req.ID = vdb.EID
+			req.Force = payload.Force
+			req.UserID = payload.UserID
+			req.TrustedCall = trustedCall
+
+			if err := s.SendSelectionResultNotificationFromPayload(tx, req); err != nil {
+				tx.Rollback()
+				continue
+			}
+
+			if err := tx.Commit(); err != nil {
+				tx.Rollback()
+			}
+		}
+	}()
+
+	httpJSON(w, map[string]interface{}{
+		"message": "Notification scheduled",
+	})
+}

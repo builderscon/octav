@@ -93,6 +93,8 @@ var HTTPLookupUserRequest *jsval.JSVal
 var HTTPLookupUserResponse *jsval.JSVal
 var HTTPLookupVenueRequest *jsval.JSVal
 var HTTPLookupVenueResponse *jsval.JSVal
+var HTTPSendAllSelectionResultNotificationRequest *jsval.JSVal
+var HTTPSendAllSelectionResultNotificationResponse *jsval.JSVal
 var HTTPSendSelectionResultNotificationRequest *jsval.JSVal
 var HTTPSendSelectionResultNotificationResponse *jsval.JSVal
 var HTTPTweetAsConferenceRequest *jsval.JSVal
@@ -3311,6 +3313,43 @@ func init() {
 				AddProp(
 					"rooms",
 					jsval.Reference(M).RefersTo("#/definitions/room_array"),
+				),
+		)
+
+	HTTPSendAllSelectionResultNotificationRequest = jsval.New().
+		SetName("HTTPSendAllSelectionResultNotificationRequest").
+		SetConstraintMap(M).
+		SetRoot(
+			jsval.Object().
+				Required("conference_id").
+				AdditionalProperties(
+					jsval.EmptyConstraint,
+				).
+				AddProp(
+					"conference_id",
+					jsval.Reference(M).RefersTo("#/definitions/uuid"),
+				).
+				AddProp(
+					"force",
+					jsval.Boolean(),
+				).
+				AddProp(
+					"user_id",
+					jsval.Reference(M).RefersTo("#/definitions/uuid"),
+				),
+		)
+
+	HTTPSendAllSelectionResultNotificationResponse = jsval.New().
+		SetName("HTTPSendAllSelectionResultNotificationResponse").
+		SetConstraintMap(M).
+		SetRoot(
+			jsval.Object().
+				AdditionalProperties(
+					jsval.EmptyConstraint,
+				).
+				AddProp(
+					"message",
+					jsval.String(),
 				),
 		)
 

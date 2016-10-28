@@ -959,6 +959,20 @@ type SendSelectionResultNotificationRequest struct {
 }
 
 // +transport
+type SendAllSelectionResultNotificationRequest struct {
+	Force        bool   `json:"force"`   // true to force sending notification after we have already done so for this session
+	ConferenceID string `json:"id"`      // ID of the conference to which we're making the notification
+	UserID       string `json:"user_id"` // ID of the user making this request
+
+	TrustedCall bool `json:"-"`
+}
+
+// +transport
 type SendSelectionResultNotificationResponse struct {
+	Message string `json:"message"`
+}
+
+// +transport
+type SendAllSelectionResultNotificationResponse struct {
 	Message string `json:"message"`
 }
