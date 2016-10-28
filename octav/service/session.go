@@ -675,6 +675,10 @@ func (v *SessionSvc) SendSelectionResultNotificationFromPayload(tx *db.Tx, paylo
 		Text:       msg.String(),
 	}
 
+	if pdebug.Enabled {
+		pdebug.Printf("%#v", mm)
+	}
+
 	if !InTesting {
 		if err := Mailgun().Send(&mm); err != nil {
 			return errors.Wrap(err, "failed to send notification")

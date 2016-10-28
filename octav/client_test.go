@@ -778,38 +778,40 @@ func TestSessionCRUD(t *testing.T) {
 			return
 		}
 
-		in := model.UpdateSessionRequest{
-			ID:     res.ID,
-			UserID: ctx.Superuser.EID,
-		}
-		in.Status.Set(model.StatusAccepted)
-		loc, _ := time.LoadLocation("Asia/Tokyo")
-		in.StartsOn.Set(time.Date(2015, 8, 29, 15, 0, 0, 0, loc))
-		if err := testUpdateSession(ctx, &in); err != nil {
-			testDeleteSessionPass(ctx, res.ID, ctx.Superuser.EID)
-			return
-		}
-
-		for _, lang := range []string{"en", "ja"} {
-			uur := model.UpdateUserRequest{
-				ID:     user.ID,
-				UserID: ctx.Superuser.EID,
-			}
-			uur.Lang.Set(lang)
-			if err := testUpdateUserPass(ctx, &uur); err != nil {
-				return
-			}
-
-			r := model.SendSelectionResultNotificationRequest{
+		for _, status := range []string{model.StatusAccepted, model.StatusRejected} {
+			in := model.UpdateSessionRequest{
 				ID:     res.ID,
 				UserID: ctx.Superuser.EID,
-				Force:  true,
 			}
-			sendres, err := ctx.HTTPClient.SendSelectionResultNotification(&r)
-			if !assert.NoError(t, err, "Send selection result notification") {
+			in.Status.Set(status)
+			loc, _ := time.LoadLocation("Asia/Tokyo")
+			in.StartsOn.Set(time.Date(2015, 8, 29, 15, 0, 0, 0, loc))
+			if err := testUpdateSession(ctx, &in); err != nil {
+				testDeleteSessionPass(ctx, res.ID, ctx.Superuser.EID)
 				return
 			}
-			ctx.T.Logf("%#v", sendres)
+
+			for _, lang := range []string{"en", "ja"} {
+				uur := model.UpdateUserRequest{
+					ID:     user.ID,
+					UserID: ctx.Superuser.EID,
+				}
+				uur.Lang.Set(lang)
+				if err := testUpdateUserPass(ctx, &uur); err != nil {
+					return
+				}
+
+				r := model.SendSelectionResultNotificationRequest{
+					ID:     res.ID,
+					UserID: ctx.Superuser.EID,
+					Force:  true,
+				}
+				sendres, err := ctx.HTTPClient.SendSelectionResultNotification(&r)
+				if !assert.NoError(t, err, "Send selection result notification") {
+					return
+				}
+				ctx.T.Logf("%#v", sendres)
+			}
 		}
 
 		if err := testDeleteSessionPass(ctx, res.ID, ctx.Superuser.EID); err != nil {
