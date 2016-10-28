@@ -516,33 +516,34 @@ type LookupSessionRequest struct {
 
 // +transport
 type UpdateSessionRequest struct {
-	ID                string            `json:"id"`
-	ConferenceID      jsval.MaybeString `json:"conference_id,omitempty"`
-	SpeakerID         jsval.MaybeString `json:"speaker_id,omitempty"`
-	SessionTypeID     jsval.MaybeString `json:"session_type_id,omitempty"`
-	RoomID            jsval.MaybeString `json:"room_id,omitempty"`
-	Title             jsval.MaybeString `json:"title,omitempty" l10n:"true"`
-	Abstract          jsval.MaybeString `json:"abstract,omitempty" l10n:"true"`
-	Memo              jsval.MaybeString `json:"memo,omitempty"`
-	Duration          jsval.MaybeInt    `json:"duration,omitempty"`
-	MaterialLevel     jsval.MaybeString `json:"material_level,omitempty"`
-	Tags              jsval.MaybeString `json:"tags,omitempty"`
-	Category          jsval.MaybeString `json:"category,omitempty"`
-	SpokenLanguage    jsval.MaybeString `json:"spoken_language,omitempty"`
-	SlideLanguage     jsval.MaybeString `json:"slide_language,omitempty"`
-	SlideSubtitles    jsval.MaybeString `json:"slide_subtitles,omitempty"`
-	SlideURL          jsval.MaybeString `json:"slide_url,omitempty"`
-	VideoURL          jsval.MaybeString `json:"video_url,omitempty"`
-	PhotoRelease      jsval.MaybeString `json:"photo_release,omitempty"`
-	RecordingRelease  jsval.MaybeString `json:"recording_release,omitempty"`
-	MaterialsRelease  jsval.MaybeString `json:"materials_release,omitempty"`
-	SortOrder         jsval.MaybeInt    `json:"sort_order,omitempty"`
-	HasInterpretation jsval.MaybeBool   `json:"has_interpretation,omitempty"`
-	Status            jsval.MaybeString `json:"status,omitempty"`
-	StartsOn          jsval.MaybeTime   `json:"starts_on,omitempty"`
-	Confirmed         jsval.MaybeBool   `json:"confirmed,omitempty"`
-	LocalizedFields   `json:"-"`
-	UserID            string `json:"user_id"`
+	ID                  string            `json:"id"`
+	ConferenceID        jsval.MaybeString `json:"conference_id,omitempty"`
+	SpeakerID           jsval.MaybeString `json:"speaker_id,omitempty"`
+	SessionTypeID       jsval.MaybeString `json:"session_type_id,omitempty"`
+	RoomID              jsval.MaybeString `json:"room_id,omitempty"`
+	Title               jsval.MaybeString `json:"title,omitempty" l10n:"true"`
+	Abstract            jsval.MaybeString `json:"abstract,omitempty" l10n:"true"`
+	Memo                jsval.MaybeString `json:"memo,omitempty"`
+	Duration            jsval.MaybeInt    `json:"duration,omitempty"`
+	MaterialLevel       jsval.MaybeString `json:"material_level,omitempty"`
+	Tags                jsval.MaybeString `json:"tags,omitempty"`
+	Category            jsval.MaybeString `json:"category,omitempty"`
+	SpokenLanguage      jsval.MaybeString `json:"spoken_language,omitempty"`
+	SlideLanguage       jsval.MaybeString `json:"slide_language,omitempty"`
+	SlideSubtitles      jsval.MaybeString `json:"slide_subtitles,omitempty"`
+	SlideURL            jsval.MaybeString `json:"slide_url,omitempty"`
+	VideoURL            jsval.MaybeString `json:"video_url,omitempty"`
+	PhotoRelease        jsval.MaybeString `json:"photo_release,omitempty"`
+	RecordingRelease    jsval.MaybeString `json:"recording_release,omitempty"`
+	MaterialsRelease    jsval.MaybeString `json:"materials_release,omitempty"`
+	SortOrder           jsval.MaybeInt    `json:"sort_order,omitempty"`
+	HasInterpretation   jsval.MaybeBool   `json:"has_interpretation,omitempty"`
+	SelectionResultSent jsval.MaybeBool   `json:"selection_result_sent,omitempty"`
+	Status              jsval.MaybeString `json:"status,omitempty"`
+	StartsOn            jsval.MaybeTime   `json:"starts_on,omitempty"`
+	Confirmed           jsval.MaybeBool   `json:"confirmed,omitempty"`
+	LocalizedFields     `json:"-"`
+	UserID              string `json:"user_id"`
 }
 
 // +transport

@@ -2736,6 +2736,9 @@ func (r UpdateSessionRequest) collectMarshalData() map[string]interface{} {
 	if r.HasInterpretation.Valid() {
 		m["has_interpretation"] = r.HasInterpretation.Value()
 	}
+	if r.SelectionResultSent.Valid() {
+		m["selection_result_sent"] = r.SelectionResultSent.Value()
+	}
 	if r.Status.Valid() {
 		m["status"] = r.Status.Value()
 	}
@@ -2911,6 +2914,12 @@ func (r *UpdateSessionRequest) Populate(m map[string]interface{}) error {
 		}
 		delete(m, "has_interpretation")
 	}
+	if jv, ok := m["selection_result_sent"]; ok {
+		if err := r.SelectionResultSent.Set(jv); err != nil {
+			return errors.New("set field SelectionResultSent failed: " + err.Error())
+		}
+		delete(m, "selection_result_sent")
+	}
 	if jv, ok := m["status"]; ok {
 		if err := r.Status.Set(jv); err != nil {
 			return errors.New("set field Status failed: " + err.Error())
@@ -2946,7 +2955,7 @@ func (r *UpdateSessionRequest) Populate(m map[string]interface{}) error {
 
 func (r *UpdateSessionRequest) GetPropNames() ([]string, error) {
 	l, _ := r.LocalizedFields.GetPropNames()
-	return append(l, "id", "conference_id", "speaker_id", "session_type_id", "room_id", "title", "abstract", "memo", "duration", "material_level", "tags", "category", "spoken_language", "slide_language", "slide_subtitles", "slide_url", "video_url", "photo_release", "recording_release", "materials_release", "sort_order", "has_interpretation", "status", "starts_on", "confirmed", "user_id"), nil
+	return append(l, "id", "conference_id", "speaker_id", "session_type_id", "room_id", "title", "abstract", "memo", "duration", "material_level", "tags", "category", "spoken_language", "slide_language", "slide_subtitles", "slide_url", "video_url", "photo_release", "recording_release", "materials_release", "sort_order", "has_interpretation", "selection_result_sent", "status", "starts_on", "confirmed", "user_id"), nil
 }
 
 func (r *UpdateSessionRequest) SetPropValue(s string, v interface{}) error {
@@ -2998,6 +3007,8 @@ func (r *UpdateSessionRequest) SetPropValue(s string, v interface{}) error {
 		return r.SortOrder.Set(v)
 	case "has_interpretation":
 		return r.HasInterpretation.Set(v)
+	case "selection_result_sent":
+		return r.SelectionResultSent.Set(v)
 	case "status":
 		return r.Status.Set(v)
 	case "starts_on":

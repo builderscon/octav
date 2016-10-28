@@ -792,7 +792,7 @@ func TestSessionCRUD(t *testing.T) {
 
 		for _, lang := range []string{"en", "ja"} {
 			uur := model.UpdateUserRequest{
-				ID: user.ID,
+				ID:     user.ID,
 				UserID: ctx.Superuser.EID,
 			}
 			uur.Lang.Set(lang)
@@ -803,6 +803,7 @@ func TestSessionCRUD(t *testing.T) {
 			r := model.SendSelectionResultNotificationRequest{
 				ID:     res.ID,
 				UserID: ctx.Superuser.EID,
+				Force:  true,
 			}
 			sendres, err := ctx.HTTPClient.SendSelectionResultNotification(&r)
 			if !assert.NoError(t, err, "Send selection result notification") {
@@ -810,7 +811,6 @@ func TestSessionCRUD(t *testing.T) {
 			}
 			ctx.T.Logf("%#v", sendres)
 		}
-
 
 		if err := testDeleteSessionPass(ctx, res.ID, ctx.Superuser.EID); err != nil {
 			return

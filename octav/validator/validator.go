@@ -709,6 +709,10 @@ func init() {
 			jsval.Boolean(),
 		).
 		AddProp(
+			"lang",
+			jsval.Reference(M).RefersTo("#/definitions/language"),
+		).
+		AddProp(
 			"last_name",
 			jsval.Reference(M).RefersTo("#/definitions/string_en"),
 		).
@@ -1720,6 +1724,10 @@ func init() {
 				AddProp(
 					"is_admin",
 					jsval.Boolean(),
+				).
+				AddProp(
+					"lang",
+					jsval.Reference(M).RefersTo("#/definitions/language"),
 				).
 				AddProp(
 					"last_name",
@@ -3170,6 +3178,10 @@ func init() {
 					jsval.Boolean(),
 				).
 				AddProp(
+					"lang",
+					jsval.Reference(M).RefersTo("#/definitions/language"),
+				).
+				AddProp(
 					"last_name",
 					jsval.Reference(M).RefersTo("#/definitions/string_en"),
 				).
@@ -3238,6 +3250,10 @@ func init() {
 				AddProp(
 					"is_admin",
 					jsval.Boolean(),
+				).
+				AddProp(
+					"lang",
+					jsval.Reference(M).RefersTo("#/definitions/language"),
 				).
 				AddProp(
 					"last_name",
@@ -3752,6 +3768,10 @@ func init() {
 				AddProp(
 					"id",
 					jsval.Reference(M).RefersTo("#/definitions/uuid"),
+				).
+				AddProp(
+					"lang",
+					jsval.Reference(M).RefersTo("#/definitions/language"),
 				).
 				AddProp(
 					"last_name",

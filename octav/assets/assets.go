@@ -85,7 +85,7 @@ func templatesEnEmlConfirm_registrationEml() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "templates/en/eml/confirm_registration.eml", size: 233, mode: os.FileMode(420), modTime: time.Unix(1472535780, 0)}
+	info := bindataFileInfo{name: "templates/en/eml/confirm_registration.eml", size: 233, mode: os.FileMode(420), modTime: time.Unix(1477537231, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -105,7 +105,7 @@ func templatesEnEmlProposalAcceptedEml() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "templates/en/eml/proposal-accepted.eml", size: 1067, mode: os.FileMode(420), modTime: time.Unix(1477536842, 0)}
+	info := bindataFileInfo{name: "templates/en/eml/proposal-accepted.eml", size: 1067, mode: os.FileMode(420), modTime: time.Unix(1477537231, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -125,7 +125,7 @@ func templatesJaEmlProposalAcceptedEml() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "templates/ja/eml/proposal-accepted.eml", size: 1130, mode: os.FileMode(420), modTime: time.Unix(1477536613, 0)}
+	info := bindataFileInfo{name: "templates/ja/eml/proposal-accepted.eml", size: 1130, mode: os.FileMode(420), modTime: time.Unix(1477537231, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }

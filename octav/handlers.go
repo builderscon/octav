@@ -1652,6 +1652,11 @@ func doSendSelectionResultNotification(ctx context.Context, w http.ResponseWrite
 		return
 	}
 
+	if err := tx.Commit(); err != nil {
+		httpError(w, `Failed to commit data`, http.StatusInternalServerError, err)
+		return
+	}
+
 	httpJSON(w, map[string]interface{}{
 		"message": "Notification scheduled",
 	})
