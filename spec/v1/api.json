@@ -447,6 +447,7 @@
             { "type": "string", "maxLength": 0 }
           ]
         },
+        "lang": {"$ref": "#/definitions/language" },
         "tshirt_size": { "$ref": "#/definitions/tshirt_size" },
         "is_admin": { "type": "boolean" }
       },
@@ -505,6 +506,7 @@
           "first_name": { "$ref": "#/definitions/string_en_not_empty" },
           "last_name": { "$ref": "#/definitions/string_en_not_empty" },
           "nickname": { "$ref": "#/definitions/string_en_not_empty" },
+          "lang": { "$ref": "#/definitions/language" },
           "email": { "$ref": "#/definitions/email" },
           "tshirt_size": { "$ref": "#/definitions/tshirt_size" }
         },
@@ -575,6 +577,7 @@
           "id": { "$ref": "#/definitions/uuid" },
           "first_name": { "$ref": "#/definitions/string_en" },
           "last_name": { "$ref": "#/definitions/string_en" },
+          "lang": { "$ref": "#/definitions/language" },
           "nickname": { "$ref": "#/definitions/string_en" },
           "email": { "$ref": "#/definitions/email" },
           "tshirt_size": { "$ref": "#/definitions/tshirt_size" },
@@ -1686,6 +1689,50 @@
           "target_id": {"$ref": "#/definitions/uuid"},
           "user_id": {"$ref": "#/definitions/uuid"},
           "confirmation_key": { "$ref": "#/definitions/uuid" }
+        }
+      }
+    },
+    {
+      "title": "Send selection result notification",
+      "href": "/v1/session/send_selection_result_notification",
+      "hsup.wrapper": "httpWithBasicAuth",
+      "method": "POST",
+      "rel": "update",
+      "schema": {
+        "type": "object",
+        "required": ["id", "user_id"],
+        "properties": {
+          "force": {"type": "boolean"},
+          "id": {"$ref": "#/definitions/uuid"},
+          "user_id": {"$ref": "#/definitions/uuid"}
+        }
+      },
+      "targetSchema": {
+        "type": "object",
+        "properties": {
+          "message": {"type": "string"}
+        }
+      }
+    },
+    {
+      "title": "Send all selection result notification",
+      "href": "/v1/session/send_all_selection_result_notification",
+      "hsup.wrapper": "httpWithBasicAuth",
+      "method": "POST",
+      "rel": "update",
+      "schema": {
+        "type": "object",
+        "required": ["conference_id"],
+        "properties": {
+          "force": {"type": "boolean"},
+          "conference_id": {"$ref": "#/definitions/uuid"},
+          "user_id": {"$ref": "#/definitions/uuid"}
+        }
+      },
+      "targetSchema": {
+        "type": "object",
+        "properties": {
+          "message": {"type": "string"}
         }
       }
     }

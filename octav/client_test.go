@@ -284,11 +284,12 @@ func yapcasia(uid string) *model.CreateConferenceSeriesRequest {
 
 func yapcasiaTokyo(seriesID, userID string) *model.CreateConferenceRequest {
 	r := &model.CreateConferenceRequest{
-		Title:    "YAPC::Asia Tokyo",
 		SeriesID: seriesID,
 		Slug:     "2015",
+		Title:    "YAPC::Asia Tokyo",
 		UserID:   userID,
 	}
+	r.Timezone.Set("Asia/Tokyo")
 	r.LocalizedFields.Set("ja", "description", "最後のYAPC::Asia Tokyo")
 	r.Description.Set("The last YAPC::Asia Tokyo")
 	return r
@@ -764,6 +765,53 @@ func TestSessionCRUD(t *testing.T) {
 
 		if err := testDeleteSessionFail(ctx, res.ID, user.ID); err != nil {
 			return
+		}
+
+		if err := testDeleteSessionPass(ctx, res.ID, ctx.Superuser.EID); err != nil {
+			return
+		}
+	})
+
+	ctx.Subtest("Send notification", func(ctx *TestCtx) {
+		res, err := testCreateSessionPass(ctx, bconsession(conference.ID, user.ID, user.ID, stype.ID))
+		if err != nil {
+			return
+		}
+
+		for _, status := range []string{model.StatusAccepted, model.StatusRejected} {
+			in := model.UpdateSessionRequest{
+				ID:     res.ID,
+				UserID: ctx.Superuser.EID,
+			}
+			in.Status.Set(status)
+			loc, _ := time.LoadLocation("Asia/Tokyo")
+			in.StartsOn.Set(time.Date(2015, 8, 29, 15, 0, 0, 0, loc))
+			if err := testUpdateSession(ctx, &in); err != nil {
+				testDeleteSessionPass(ctx, res.ID, ctx.Superuser.EID)
+				return
+			}
+
+			for _, lang := range []string{"en", "ja"} {
+				uur := model.UpdateUserRequest{
+					ID:     user.ID,
+					UserID: ctx.Superuser.EID,
+				}
+				uur.Lang.Set(lang)
+				if err := testUpdateUserPass(ctx, &uur); err != nil {
+					return
+				}
+
+				r := model.SendSelectionResultNotificationRequest{
+					ID:     res.ID,
+					UserID: ctx.Superuser.EID,
+					Force:  true,
+				}
+				sendres, err := ctx.HTTPClient.SendSelectionResultNotification(&r)
+				if !assert.NoError(t, err, "Send selection result notification") {
+					return
+				}
+				ctx.T.Logf("%#v", sendres)
+			}
 		}
 
 		if err := testDeleteSessionPass(ctx, res.ID, ctx.Superuser.EID); err != nil {

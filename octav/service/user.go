@@ -25,6 +25,7 @@ func (v *UserSvc) populateRowForCreate(vdb *db.User, payload model.CreateUserReq
 	vdb.Nickname = payload.Nickname
 	vdb.AuthVia = payload.AuthVia
 	vdb.AuthUserID = payload.AuthUserID
+	vdb.Lang = "en"
 
 	if payload.AvatarURL.Valid() {
 		vdb.AvatarURL.Valid = true
@@ -80,6 +81,10 @@ func (v *UserSvc) populateRowForUpdate(vdb *db.User, payload model.UpdateUserReq
 	if payload.LastName.Valid() {
 		vdb.LastName.Valid = true
 		vdb.LastName.String = payload.LastName.String
+	}
+
+	if payload.Lang.Valid() {
+		vdb.Lang = payload.Lang.String
 	}
 
 	if payload.Email.Valid() {
@@ -294,8 +299,13 @@ func (v *UserSvc) CreateTemporaryEmailFromPayload(tx *db.Tx, key *string, payloa
 	*key = row.ConfirmationKey
 	gettext.SetLocale(payload.Lang.String)
 
+	t, err := Template().Get("templates/en/eml/confirm_registration.eml")
+	if err != nil {
+		return errors.Wrap(err, "failed to fetch email template")
+	}
+
 	var txt bytes.Buffer
-	if err := Template().Execute(&txt, "templates/eml/confirm_registration.eml", row); err != nil {
+	if err := t.Execute(&txt, row); err != nil {
 		return errors.Wrap(err, "failed to execute template")
 	}
 

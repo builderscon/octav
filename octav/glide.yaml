@@ -40,3 +40,4 @@ import:
 - package: github.com/cenkalti/backoff
   version: v1.0.0
 - package: github.com/lestrrat/go-ical
+- package: github.com/lestrrat/go-tmplbox

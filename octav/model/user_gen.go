@@ -19,6 +19,7 @@ type rawUser struct {
 	AvatarURL  string `json:"avatar_url,omitempty"`
 	FirstName  string `json:"first_name,omitempty" l10n:"true"`
 	LastName   string `json:"last_name,omitempty" l10n:"true"`
+	Lang       string `json:"lang"`
 	Nickname   string `json:"nickname"`
 	Email      string `json:"email,omitempty"`
 	TshirtSize string `json:"tshirt_size,omitempty"`
@@ -34,6 +35,7 @@ func (v User) MarshalJSON() ([]byte, error) {
 	raw.AvatarURL = v.AvatarURL
 	raw.FirstName = v.FirstName
 	raw.LastName = v.LastName
+	raw.Lang = v.Lang
 	raw.Nickname = v.Nickname
 	raw.Email = v.Email
 	raw.TshirtSize = v.TshirtSize
@@ -75,6 +77,7 @@ func (v *User) FromRow(vdb db.User) error {
 	if vdb.LastName.Valid {
 		v.LastName = vdb.LastName.String
 	}
+	v.Lang = vdb.Lang
 	v.Nickname = vdb.Nickname
 	if vdb.Email.Valid {
 		v.Email = vdb.Email.String
@@ -97,6 +100,7 @@ func (v *User) ToRow(vdb *db.User) error {
 	vdb.FirstName.String = v.FirstName
 	vdb.LastName.Valid = true
 	vdb.LastName.String = v.LastName
+	vdb.Lang = v.Lang
 	vdb.Nickname = v.Nickname
 	vdb.Email.Valid = true
 	vdb.Email.String = v.Email

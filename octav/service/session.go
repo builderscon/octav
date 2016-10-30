@@ -171,6 +171,10 @@ func (v *SessionSvc) populateRowForUpdate(vdb *db.Session, payload model.UpdateS
 		vdb.Confirmed = payload.Confirmed.Bool
 	}
 
+	if payload.SelectionResultSent.Valid() {
+		vdb.SelectionResultSent = payload.SelectionResultSent.Bool
+	}
+
 	if payload.Title.Valid() {
 		vdb.Title.Valid = true
 		vdb.Title.String = payload.Title.String
@@ -269,6 +273,13 @@ func (v *SessionSvc) Decorate(tx *db.Tx, session *model.Session, trustedCall boo
 			return errors.Wrap(err, "failed to decorate conference")
 		}
 		session.Conference = &mc
+
+		if mc.Timezone != "" && !session.StartsOn.IsZero() {
+			loc, err := time.LoadLocation(mc.Timezone)
+			if err == nil {
+				session.StartsOn = session.StartsOn.In(loc)
+			}
+		}
 	}
 
 	// ... but not necessarily with a room
@@ -368,9 +379,17 @@ func (v *SessionSvc) UpdateFromPayload(tx *db.Tx, result *model.Session, payload
 		return errors.Wrap(err, "failed to load from database")
 	}
 
-	// TODO: We must protect the API server from changing important
+	// We must protect the API server from changing important
 	// fields like conference_id, speaker_id, room_id, etc from regular
 	// users, but allow administrators to do anything they want
+	if err := su.IsAdministrator(tx, payload.UserID); err != nil {
+		// Reset the payload, whatever it is
+		payload.ConferenceID.Set(vdb.ConferenceID)
+		payload.SpeakerID.Set(vdb.SpeakerID)
+		payload.RoomID.Set(vdb.RoomID)
+		payload.SelectionResultSent.Set(vdb.SelectionResultSent)
+	}
+
 	if err := v.Update(tx, &vdb, payload); err != nil {
 		return errors.Wrap(err, "failed to update database")
 	}
@@ -575,4 +594,96 @@ func formatSessionTweet(session *model.Session, conf *model.Conference, series *
 		strconv.Quote(title),
 		u,
 	), nil
+}
+
+func (v *SessionSvc) SendSelectionResultNotificationFromPayload(tx *db.Tx, payload model.SendSelectionResultNotificationRequest) error {
+	var m model.Session
+	if err := v.Lookup(tx, &m, payload.ID); err != nil {
+		return errors.Wrap(err, "failed to load model.Session from database")
+	}
+
+	su := User()
+
+	// We don't send email if it has been sent before, UNLESS the force
+	// flag is specified
+	if m.SelectionResultSent {
+		if payload.Force {
+			if err := su.IsAdministrator(tx, payload.UserID); err != nil {
+				return errors.New("must be administrator to force send notification")
+			}
+		} else {
+			return errors.New("selection result has already been sent")
+		}
+	}
+
+	// Load the user
+	var u model.User
+	if err := su.Lookup(tx, &u, m.SpeakerID); err != nil {
+		return errors.Wrap(err, "failed to load model.User from database")
+	}
+
+	// Now, based on the user's language, decorate the session
+	if err := v.Decorate(tx, &m, payload.TrustedCall, u.Lang); err != nil {
+		return errors.Wrap(err, "failed to declorate mode.Session")
+	}
+
+	var subject string
+	var tname string
+	switch m.Status {
+	case model.StatusAccepted:
+		subject = "[" + m.Conference.Title + "] Your proposal has been accepted"
+		tname = "templates/" + u.Lang + "/eml/proposal-accepted.eml"
+	case model.StatusRejected:
+		subject = "[" + m.Conference.Title + "] Your proposal was not accepted"
+		tname = "templates/" + u.Lang + "/eml/proposal-rejected.eml"
+	default:
+		return errors.New("can only send email for accepted/rejected sessions")
+	}
+
+	t, err := Template().Get(tname)
+	if err != nil {
+		return errors.Wrap(err, "failed to fetch template")
+	}
+
+	var msg bytes.Buffer
+	if err := t.Execute(&msg, m); err != nil {
+		return errors.Wrap(err, "failed to render notification template")
+	}
+
+	// Record that we have sent this notification
+	// We do this BEFORE we actually send the email, because
+	// we might FAIL updating the database after sending the email,
+	// and that's not cool.
+	// Changes to database is only really recorded when Commit is called
+	// in the caller
+	var req model.UpdateSessionRequest
+	req.ID = payload.ID
+	req.SelectionResultSent.Set(true)
+
+	var vdb db.Session
+	if err := vdb.LoadByEID(tx, payload.ID); err != nil {
+		return errors.Wrap(err, "failed to load from database")
+	}
+
+	if err := v.Update(tx, &vdb, req); err != nil {
+		return errors.Wrap(err, "failed to update database")
+	}
+
+	mm := MailMessage{
+		Recipients: []string{m.Speaker.Email},
+		Subject:    subject,
+		Text:       msg.String(),
+	}
+
+	if pdebug.Enabled {
+		pdebug.Printf("%#v", mm)
+	}
+
+	if !InTesting {
+		if err := Mailgun().Send(&mm); err != nil {
+			return errors.Wrap(err, "failed to send notification")
+		}
+	}
+
+	return nil
 }

@@ -93,6 +93,10 @@ var HTTPLookupUserRequest *jsval.JSVal
 var HTTPLookupUserResponse *jsval.JSVal
 var HTTPLookupVenueRequest *jsval.JSVal
 var HTTPLookupVenueResponse *jsval.JSVal
+var HTTPSendAllSelectionResultNotificationRequest *jsval.JSVal
+var HTTPSendAllSelectionResultNotificationResponse *jsval.JSVal
+var HTTPSendSelectionResultNotificationRequest *jsval.JSVal
+var HTTPSendSelectionResultNotificationResponse *jsval.JSVal
 var HTTPTweetAsConferenceRequest *jsval.JSVal
 var HTTPUpdateConferenceRequest *jsval.JSVal
 var HTTPUpdateFeaturedSpeakerRequest *jsval.JSVal
@@ -705,6 +709,10 @@ func init() {
 		AddProp(
 			"is_admin",
 			jsval.Boolean(),
+		).
+		AddProp(
+			"lang",
+			jsval.Reference(M).RefersTo("#/definitions/language"),
 		).
 		AddProp(
 			"last_name",
@@ -1661,6 +1669,10 @@ func init() {
 					jsval.Reference(M).RefersTo("#/definitions/string_en_not_empty"),
 				).
 				AddProp(
+					"lang",
+					jsval.Reference(M).RefersTo("#/definitions/language"),
+				).
+				AddProp(
 					"last_name",
 					jsval.Reference(M).RefersTo("#/definitions/string_en_not_empty"),
 				).
@@ -1714,6 +1726,10 @@ func init() {
 				AddProp(
 					"is_admin",
 					jsval.Boolean(),
+				).
+				AddProp(
+					"lang",
+					jsval.Reference(M).RefersTo("#/definitions/language"),
 				).
 				AddProp(
 					"last_name",
@@ -3164,6 +3180,10 @@ func init() {
 					jsval.Boolean(),
 				).
 				AddProp(
+					"lang",
+					jsval.Reference(M).RefersTo("#/definitions/language"),
+				).
+				AddProp(
 					"last_name",
 					jsval.Reference(M).RefersTo("#/definitions/string_en"),
 				).
@@ -3234,6 +3254,10 @@ func init() {
 					jsval.Boolean(),
 				).
 				AddProp(
+					"lang",
+					jsval.Reference(M).RefersTo("#/definitions/language"),
+				).
+				AddProp(
 					"last_name",
 					jsval.Reference(M).RefersTo("#/definitions/string_en"),
 				).
@@ -3289,6 +3313,80 @@ func init() {
 				AddProp(
 					"rooms",
 					jsval.Reference(M).RefersTo("#/definitions/room_array"),
+				),
+		)
+
+	HTTPSendAllSelectionResultNotificationRequest = jsval.New().
+		SetName("HTTPSendAllSelectionResultNotificationRequest").
+		SetConstraintMap(M).
+		SetRoot(
+			jsval.Object().
+				Required("conference_id").
+				AdditionalProperties(
+					jsval.EmptyConstraint,
+				).
+				AddProp(
+					"conference_id",
+					jsval.Reference(M).RefersTo("#/definitions/uuid"),
+				).
+				AddProp(
+					"force",
+					jsval.Boolean(),
+				).
+				AddProp(
+					"user_id",
+					jsval.Reference(M).RefersTo("#/definitions/uuid"),
+				),
+		)
+
+	HTTPSendAllSelectionResultNotificationResponse = jsval.New().
+		SetName("HTTPSendAllSelectionResultNotificationResponse").
+		SetConstraintMap(M).
+		SetRoot(
+			jsval.Object().
+				AdditionalProperties(
+					jsval.EmptyConstraint,
+				).
+				AddProp(
+					"message",
+					jsval.String(),
+				),
+		)
+
+	HTTPSendSelectionResultNotificationRequest = jsval.New().
+		SetName("HTTPSendSelectionResultNotificationRequest").
+		SetConstraintMap(M).
+		SetRoot(
+			jsval.Object().
+				Required("id", "user_id").
+				AdditionalProperties(
+					jsval.EmptyConstraint,
+				).
+				AddProp(
+					"force",
+					jsval.Boolean(),
+				).
+				AddProp(
+					"id",
+					jsval.Reference(M).RefersTo("#/definitions/uuid"),
+				).
+				AddProp(
+					"user_id",
+					jsval.Reference(M).RefersTo("#/definitions/uuid"),
+				),
+		)
+
+	HTTPSendSelectionResultNotificationResponse = jsval.New().
+		SetName("HTTPSendSelectionResultNotificationResponse").
+		SetConstraintMap(M).
+		SetRoot(
+			jsval.Object().
+				AdditionalProperties(
+					jsval.EmptyConstraint,
+				).
+				AddProp(
+					"message",
+					jsval.String(),
 				),
 		)
 
@@ -3709,6 +3807,10 @@ func init() {
 				AddProp(
 					"id",
 					jsval.Reference(M).RefersTo("#/definitions/uuid"),
+				).
+				AddProp(
+					"lang",
+					jsval.Reference(M).RefersTo("#/definitions/language"),
 				).
 				AddProp(
 					"last_name",

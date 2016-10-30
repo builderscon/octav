@@ -1110,6 +1110,8 @@ func doUserCreate(args cmdargs) int {
 	fs.StringVar(&email, "email", "", "")
 	var first_name string
 	fs.StringVar(&first_name, "first_name", "", "")
+	var lang string
+	fs.StringVar(&lang, "lang", "", "")
 	var last_name string
 	fs.StringVar(&last_name, "last_name", "", "")
 	var nickname string
@@ -1136,6 +1138,9 @@ func doUserCreate(args cmdargs) int {
 	}
 	if first_name != "" {
 		m["first_name"] = first_name
+	}
+	if lang != "" {
+		m["lang"] = lang
 	}
 	if last_name != "" {
 		m["last_name"] = last_name

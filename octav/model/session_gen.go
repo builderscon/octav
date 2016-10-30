@@ -13,34 +13,35 @@ import (
 var _ = time.Time{}
 
 type rawSession struct {
-	ID                string       `json:"id"`
-	ConferenceID      string       `json:"conference_id"`
-	RoomID            string       `json:"room_id,omitempty"`
-	SpeakerID         string       `json:"speaker_id"`
-	SessionTypeID     string       `json:"session_type_id"`
-	Title             string       `json:"title" l10n:"true"`
-	Abstract          string       `json:"abstract" l10n:"true"`
-	Memo              string       `json:"memo"`
-	StartsOn          *time.Time   `json:"starts_on,omitempty"`
-	Duration          int          `json:"duration"`
-	MaterialLevel     string       `json:"material_level"`
-	Tags              TagString    `json:"tags,omitempty" assign:"convert"`
-	Category          string       `json:"category,omitempty"`
-	SpokenLanguage    string       `json:"spoken_language,omitempty"`
-	SlideLanguage     string       `json:"slide_language,omitempty"`
-	SlideSubtitles    string       `json:"slide_subtitles,omitempty"`
-	SlideURL          string       `json:"slide_url,omitempty"`
-	VideoURL          string       `json:"video_url,omitempty"`
-	PhotoRelease      string       `json:"photo_release"`
-	RecordingRelease  string       `json:"recording_release"`
-	MaterialsRelease  string       `json:"materials_release"`
-	HasInterpretation bool         `json:"has_interpretation"`
-	Status            string       `json:"status"`
-	Confirmed         bool         `json:"confirmed"`
-	Conference        *Conference  `json:"conference,omitempy" decorate:"true"`
-	Room              *Room        `json:"room,omitempty" decorate:"true"`
-	Speaker           *User        `json:"speaker,omitempty" decorate:"true"`
-	SessionType       *SessionType `json:"session_type,omitempty" decorate:"true"`
+	ID                  string       `json:"id"`
+	ConferenceID        string       `json:"conference_id"`
+	RoomID              string       `json:"room_id,omitempty"`
+	SpeakerID           string       `json:"speaker_id"`
+	SessionTypeID       string       `json:"session_type_id"`
+	Title               string       `json:"title" l10n:"true"`
+	Abstract            string       `json:"abstract" l10n:"true"`
+	Memo                string       `json:"memo"`
+	StartsOn            *time.Time   `json:"starts_on,omitempty"`
+	Duration            int          `json:"duration"`
+	MaterialLevel       string       `json:"material_level"`
+	Tags                TagString    `json:"tags,omitempty" assign:"convert"`
+	Category            string       `json:"category,omitempty"`
+	SelectionResultSent bool         `json:"selection_result_sent"`
+	SpokenLanguage      string       `json:"spoken_language,omitempty"`
+	SlideLanguage       string       `json:"slide_language,omitempty"`
+	SlideSubtitles      string       `json:"slide_subtitles,omitempty"`
+	SlideURL            string       `json:"slide_url,omitempty"`
+	VideoURL            string       `json:"video_url,omitempty"`
+	PhotoRelease        string       `json:"photo_release"`
+	RecordingRelease    string       `json:"recording_release"`
+	MaterialsRelease    string       `json:"materials_release"`
+	HasInterpretation   bool         `json:"has_interpretation"`
+	Status              string       `json:"status"`
+	Confirmed           bool         `json:"confirmed"`
+	Conference          *Conference  `json:"conference,omitempy" decorate:"true"`
+	Room                *Room        `json:"room,omitempty" decorate:"true"`
+	Speaker             *User        `json:"speaker,omitempty" decorate:"true"`
+	SessionType         *SessionType `json:"session_type,omitempty" decorate:"true"`
 }
 
 func (v Session) MarshalJSON() ([]byte, error) {
@@ -60,6 +61,7 @@ func (v Session) MarshalJSON() ([]byte, error) {
 	raw.MaterialLevel = v.MaterialLevel
 	raw.Tags = v.Tags
 	raw.Category = v.Category
+	raw.SelectionResultSent = v.SelectionResultSent
 	raw.SpokenLanguage = v.SpokenLanguage
 	raw.SlideLanguage = v.SlideLanguage
 	raw.SlideSubtitles = v.SlideSubtitles
@@ -128,6 +130,7 @@ func (v *Session) FromRow(vdb db.Session) error {
 	if vdb.Category.Valid {
 		v.Category = vdb.Category.String
 	}
+	v.SelectionResultSent = vdb.SelectionResultSent
 	if vdb.SpokenLanguage.Valid {
 		v.SpokenLanguage = vdb.SpokenLanguage.String
 	}
@@ -180,6 +183,7 @@ func (v *Session) ToRow(vdb *db.Session) error {
 	vdb.Tags.String = string(v.Tags)
 	vdb.Category.Valid = true
 	vdb.Category.String = v.Category
+	vdb.SelectionResultSent = v.SelectionResultSent
 	vdb.SpokenLanguage.Valid = true
 	vdb.SpokenLanguage.String = v.SpokenLanguage
 	vdb.SlideLanguage.Valid = true
