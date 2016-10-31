@@ -598,7 +598,7 @@ func formatSessionTweet(session *model.Session, conf *model.Conference, series *
 
 func (v *SessionSvc) SendSelectionResultNotificationFromPayload(tx *db.Tx, payload model.SendSelectionResultNotificationRequest) error {
 	var m model.Session
-	if err := v.Lookup(tx, &m, payload.ID); err != nil {
+	if err := v.Lookup(tx, &m, payload.SessionID); err != nil {
 		return errors.Wrap(err, "failed to load model.Session from database")
 	}
 
@@ -657,11 +657,11 @@ func (v *SessionSvc) SendSelectionResultNotificationFromPayload(tx *db.Tx, paylo
 	// Changes to database is only really recorded when Commit is called
 	// in the caller
 	var req model.UpdateSessionRequest
-	req.ID = payload.ID
+	req.ID = payload.SessionID
 	req.SelectionResultSent.Set(true)
 
 	var vdb db.Session
-	if err := vdb.LoadByEID(tx, payload.ID); err != nil {
+	if err := vdb.LoadByEID(tx, payload.SessionID); err != nil {
 		return errors.Wrap(err, "failed to load from database")
 	}
 

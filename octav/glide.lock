@@ -1,12 +1,15 @@
-hash: 6cf85666a77fe813b335daf48324ef76c19822bed758af173a1cb8a7b3248536
-updated: 2016-10-27T12:05:44.755547964+09:00
+hash: 6fa4e29d004249a822c4162e188dd486a897c7e6b27c20b2cf4f1dd0604d3df5
+updated: 2016-10-31T12:43:57.338571299+09:00
 imports:
 - name: cloud.google.com/go
-  version: 211ec57776e3b5f477dfc03c825cfc82030d6a05
+  version: 7ee19e74f7fd11897ae3b7c4782d8205e810faa7
   subpackages:
   - compute/metadata
   - internal
   - internal/optional
+  - logging
+  - logging/apiv2
+  - logging/internal
   - storage
 - name: github.com/cenkalti/backoff
   version: 32cd0c5b3aef12c76ed64aaf678f6c79736be7dc
@@ -15,7 +18,7 @@ imports:
   subpackages:
   - spew
 - name: github.com/dghubble/go-twitter
-  version: 12e5387804e84bf20dc60ba964f59437553e16a6
+  version: fab2c1610270521a409d76c4a1f04c85eaa8702f
   subpackages:
   - twitter
 - name: github.com/dghubble/oauth1
@@ -28,6 +31,13 @@ imports:
   version: 98fa357170587e470c5f27d3c3ea0947b71eb455
   subpackages:
   - proto
+  - ptypes
+  - ptypes/any
+  - ptypes/duration
+  - ptypes/empty
+  - ptypes/struct
+  - ptypes/timestamp
+  - ptypes/wrappers
 - name: github.com/google/go-querystring
   version: 9235644dd9e52eeae6fa48efd539fdc351a0af53
   subpackages:
@@ -111,12 +121,12 @@ imports:
   subpackages:
   - errgroup
 - name: golang.org/x/text
-  version: 16e1d1f27f7aba51c74c0aeb7a7ee31a75c5c63c
+  version: a8b38433e35b65ba247bb267317037dee1b70cea
   subpackages:
   - internal/tag
   - language
 - name: google.golang.org/api
-  version: 3ef9447cad8d725923ca024dab57786299cf745a
+  version: 037d03010933c9fa8e57559c1b7faeec971688d1
   subpackages:
   - gensupport
   - googleapi
@@ -125,6 +135,7 @@ imports:
   - iterator
   - option
   - storage/v1
+  - support/bundler
   - transport
   - urlshortener/v1
 - name: google.golang.org/appengine
@@ -141,6 +152,17 @@ imports:
   - internal/urlfetch
   - socket
   - urlfetch
+- name: google.golang.org/genproto
+  version: 9359a8d303c45e3212571b77610f1cefb0c6f3eb
+  subpackages:
+  - googleapis/api/label
+  - googleapis/api/metric
+  - googleapis/api/monitoredres
+  - googleapis/api/serviceconfig
+  - googleapis/logging/type
+  - googleapis/logging/v2
+  - googleapis/rpc/status
+  - protobuf
 - name: google.golang.org/grpc
   version: 396f8ba2a6b9039070f4ff97561f5e408828fccd
   subpackages:

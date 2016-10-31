@@ -41,3 +41,4 @@ import:
   version: v1.0.0
 - package: github.com/lestrrat/go-ical
 - package: github.com/lestrrat/go-tmplbox
+- package: google.golang.org/genproto
