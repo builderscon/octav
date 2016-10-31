@@ -6093,7 +6093,7 @@ func (r *VerifyUserRequest) Populate(m map[string]interface{}) error {
 func (r SendSelectionResultNotificationRequest) collectMarshalData() map[string]interface{} {
 	m := make(map[string]interface{})
 	m["force"] = r.Force
-	m["conference_id"] = r.ConferenceID
+	m["session_id"] = r.SessionID
 	m["user_id"] = r.UserID
 	return m
 }
@@ -6134,13 +6134,13 @@ func (r *SendSelectionResultNotificationRequest) Populate(m map[string]interface
 			return errors.Wrap(ErrInvalidJSONFieldType{Field: "force"}, "failed to populate fields for SendSelectionResultNotificationRequest")
 		}
 	}
-	if jv, ok := m["conference_id"]; ok {
+	if jv, ok := m["session_id"]; ok {
 		switch jv.(type) {
 		case string:
-			r.ConferenceID = jv.(string)
-			delete(m, "conference_id")
+			r.SessionID = jv.(string)
+			delete(m, "session_id")
 		default:
-			return errors.Wrap(ErrInvalidJSONFieldType{Field: "conference_id"}, "failed to populate fields for SendSelectionResultNotificationRequest")
+			return errors.Wrap(ErrInvalidJSONFieldType{Field: "session_id"}, "failed to populate fields for SendSelectionResultNotificationRequest")
 		}
 	}
 	if jv, ok := m["user_id"]; ok {

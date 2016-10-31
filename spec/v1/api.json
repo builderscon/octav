@@ -1703,7 +1703,7 @@
         "required": ["id", "user_id"],
         "properties": {
           "force": {"type": "boolean"},
-          "conference_id": {"$ref": "#/definitions/uuid"},
+          "session_id": {"$ref": "#/definitions/uuid"},
           "user_id": {"$ref": "#/definitions/uuid"}
         }
       },
