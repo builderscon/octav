@@ -951,18 +951,18 @@ type VerifyUserRequest struct {
 
 // +transport
 type SendSelectionResultNotificationRequest struct {
-	Force  bool   `json:"force"`   // true to force sending notification after we have already done so for this session
-	ID     string `json:"id"`      // ID of the session to which we're making the notification
-	UserID string `json:"user_id"` // ID of the user making this request
+	Force        bool   `json:"force"`         // true to force sending notification after we have already done so for this session
+	ConferenceID string `json:"conference_id"` // ID of the session to which we're making the notification
+	UserID       string `json:"user_id"`       // ID of the user making this request
 
 	TrustedCall bool `json:"-"`
 }
 
 // +transport
 type SendAllSelectionResultNotificationRequest struct {
-	Force        bool   `json:"force"`   // true to force sending notification after we have already done so for this session
-	ConferenceID string `json:"id"`      // ID of the conference to which we're making the notification
-	UserID       string `json:"user_id"` // ID of the user making this request
+	Force        bool   `json:"force"`         // true to force sending notification after we have already done so for this session
+	ConferenceID string `json:"conference_id"` // ID of the conference to which we're making the notification
+	UserID       string `json:"user_id"`       // ID of the user making this request
 
 	TrustedCall bool `json:"-"`
 }
