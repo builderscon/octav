@@ -6093,7 +6093,7 @@ func (r *VerifyUserRequest) Populate(m map[string]interface{}) error {
 func (r SendSelectionResultNotificationRequest) collectMarshalData() map[string]interface{} {
 	m := make(map[string]interface{})
 	m["force"] = r.Force
-	m["id"] = r.ID
+	m["session_id"] = r.SessionID
 	m["user_id"] = r.UserID
 	return m
 }
@@ -6134,13 +6134,13 @@ func (r *SendSelectionResultNotificationRequest) Populate(m map[string]interface
 			return errors.Wrap(ErrInvalidJSONFieldType{Field: "force"}, "failed to populate fields for SendSelectionResultNotificationRequest")
 		}
 	}
-	if jv, ok := m["id"]; ok {
+	if jv, ok := m["session_id"]; ok {
 		switch jv.(type) {
 		case string:
-			r.ID = jv.(string)
-			delete(m, "id")
+			r.SessionID = jv.(string)
+			delete(m, "session_id")
 		default:
-			return errors.Wrap(ErrInvalidJSONFieldType{Field: "id"}, "failed to populate fields for SendSelectionResultNotificationRequest")
+			return errors.Wrap(ErrInvalidJSONFieldType{Field: "session_id"}, "failed to populate fields for SendSelectionResultNotificationRequest")
 		}
 	}
 	if jv, ok := m["user_id"]; ok {
@@ -6158,7 +6158,7 @@ func (r *SendSelectionResultNotificationRequest) Populate(m map[string]interface
 func (r SendAllSelectionResultNotificationRequest) collectMarshalData() map[string]interface{} {
 	m := make(map[string]interface{})
 	m["force"] = r.Force
-	m["id"] = r.ConferenceID
+	m["conference_id"] = r.ConferenceID
 	m["user_id"] = r.UserID
 	return m
 }
@@ -6199,13 +6199,13 @@ func (r *SendAllSelectionResultNotificationRequest) Populate(m map[string]interf
 			return errors.Wrap(ErrInvalidJSONFieldType{Field: "force"}, "failed to populate fields for SendAllSelectionResultNotificationRequest")
 		}
 	}
-	if jv, ok := m["id"]; ok {
+	if jv, ok := m["conference_id"]; ok {
 		switch jv.(type) {
 		case string:
 			r.ConferenceID = jv.(string)
-			delete(m, "id")
+			delete(m, "conference_id")
 		default:
-			return errors.Wrap(ErrInvalidJSONFieldType{Field: "id"}, "failed to populate fields for SendAllSelectionResultNotificationRequest")
+			return errors.Wrap(ErrInvalidJSONFieldType{Field: "conference_id"}, "failed to populate fields for SendAllSelectionResultNotificationRequest")
 		}
 	}
 	if jv, ok := m["user_id"]; ok {

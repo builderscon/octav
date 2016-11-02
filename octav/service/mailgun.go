@@ -5,6 +5,7 @@ import (
 	"strings"
 	"sync"
 
+	"github.com/builderscon/octav/octav/log"
 	pdebug "github.com/lestrrat/go-pdebug"
 	"github.com/pkg/errors"
 	mailgun "gopkg.in/mailgun/mailgun-go.v1"
@@ -12,6 +13,15 @@ import (
 
 var mailgunSvc MailgunSvc
 var mailgunOnce sync.Once
+
+type MailLog struct {
+	MessageID      string   `json:"message_id"`
+	ServerResponse string   `json:"server_response"`
+	From           string   `json:"from"`
+	Recipients     []string `json:"recipients"`
+	Subject        string   `json:"subject"`
+	Text           string   `json:"text"`
+}
 
 func Mailgun() *MailgunSvc {
 	mailgunOnce.Do(mailgunSvc.Init)
@@ -73,9 +83,18 @@ func (v *MailgunSvc) Send(mm *MailMessage) (err error) {
 	m := mailgun.NewMessage(mm.From, mm.Subject, mm.Text, mm.Recipients...)
 
 	mg := v.client
-	_, _, err = mg.Send(m)
+	msg, id, err := mg.Send(m)
 	if err != nil {
 		return errors.Wrap(err, "failed to send message")
 	}
+
+	log.Notice(interface{}(&MailLog{
+		MessageID:      id,
+		ServerResponse: msg,
+		From:           mm.From,
+		Recipients:     mm.Recipients,
+		Subject:        mm.Subject,
+		Text:           mm.Text,
+	}))
 	return nil
 }

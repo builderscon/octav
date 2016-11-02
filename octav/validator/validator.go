@@ -3367,7 +3367,7 @@ func init() {
 					jsval.Boolean(),
 				).
 				AddProp(
-					"id",
+					"session_id",
 					jsval.Reference(M).RefersTo("#/definitions/uuid"),
 				).
 				AddProp(

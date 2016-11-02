@@ -1689,7 +1689,7 @@ func doSendAllSelectionResultNotification(ctx context.Context, w http.ResponseWr
 				return
 			}
 
-			req.ID = vdb.EID
+			req.SessionID = vdb.EID
 			req.Force = payload.Force
 			req.UserID = payload.UserID
 			req.TrustedCall = trustedCall

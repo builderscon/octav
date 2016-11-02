@@ -802,9 +802,9 @@ func TestSessionCRUD(t *testing.T) {
 				}
 
 				r := model.SendSelectionResultNotificationRequest{
-					ID:     res.ID,
-					UserID: ctx.Superuser.EID,
-					Force:  true,
+					SessionID: res.ID,
+					UserID:    ctx.Superuser.EID,
+					Force:     true,
 				}
 				sendres, err := ctx.HTTPClient.SendSelectionResultNotification(&r)
 				if !assert.NoError(t, err, "Send selection result notification") {
