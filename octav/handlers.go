@@ -25,8 +25,9 @@ var mwset middlewareSet
 
 type middlewareSet struct{}
 
+var CombinedLog *apachelog.ApacheLog
 func (m middlewareSet) Wrap(h http.Handler) http.Handler {
-	return apachelog.CombinedLog.Wrap(h, os.Stdout)
+	return CombinedLog.Wrap(h, os.Stdout)
 }
 
 const trustedCall = "octav.api.trustedCall"
@@ -39,6 +40,11 @@ func isTrustedCall(ctx context.Context) bool {
 func init() {
 	httpError = httpErrorAsJSON
 	mwset = middlewareSet{}
+	var err error
+	CombinedLog, err = apachelog.New(`%h %l %u %t "%r" %>s %b "%{Referer}i" "%{User-agent}i" %T`)
+	if err != nil {
+		panic(err.Error())
+	}
 }
 
 type httpCoder interface {
