@@ -41,7 +41,7 @@ func init() {
 	httpError = httpErrorAsJSON
 	mwset = middlewareSet{}
 	var err error
-	CombinedLog, err = apachelog.New(`%h %l %u %t "%r" %>s %b "%{Referer}i" "%{User-agent}i" %T`)
+	CombinedLog, err = apachelog.New(`%h %l %u %t "%r" %>s %b "%{Referer}i" "%{User-agent}i" %D`)
 	if err != nil {
 		panic(err.Error())
 	}
