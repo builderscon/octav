@@ -3616,6 +3616,9 @@ func (r *DeleteUserRequest) Populate(m map[string]interface{}) error {
 
 func (r ListUserRequest) collectMarshalData() map[string]interface{} {
 	m := make(map[string]interface{})
+	if r.Pattern.Valid() {
+		m["pattern"] = r.Pattern.Value()
+	}
 	if r.Since.Valid() {
 		m["since"] = r.Since.Value()
 	}
@@ -3655,6 +3658,12 @@ func (r *ListUserRequest) UnmarshalJSON(data []byte) error {
 }
 
 func (r *ListUserRequest) Populate(m map[string]interface{}) error {
+	if jv, ok := m["pattern"]; ok {
+		if err := r.Pattern.Set(jv); err != nil {
+			return errors.New("set field Pattern failed: " + err.Error())
+		}
+		delete(m, "pattern")
+	}
 	if jv, ok := m["since"]; ok {
 		if err := r.Since.Set(jv); err != nil {
 			return errors.New("set field Since failed: " + err.Error())

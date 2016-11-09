@@ -159,7 +159,7 @@ func (v *UserSvc) IsOwnerUser(tx *db.Tx, targetID, userID string) error {
 
 func (v *UserSvc) ListFromPayload(tx *db.Tx, result *model.UserList, payload model.ListUserRequest) error {
 	var vdbl db.UserList
-	if err := vdbl.LoadSinceEID(tx, payload.Since.String, int(payload.Limit.Int)); err != nil {
+	if err := vdbl.LoadFromQuery(tx, payload.Pattern.String, payload.Since.String, int(payload.Limit.Int)); err != nil {
 		return errors.Wrap(err, "failed to load from database")
 	}
 

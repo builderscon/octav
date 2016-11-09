@@ -614,6 +614,7 @@
       "schema": {
         "type": "object",
         "properties": {
+          "pattern": { "type": "string" },
           "lang": { "$ref": "#/definitions/language" },
           "limit": { "$ref": "#/definitions/positiveIntegerDefault10" },
           "since": { "$ref": "#/definitions/uuid" }

@@ -2510,6 +2510,10 @@ func init() {
 					jsval.Reference(M).RefersTo("#/definitions/positiveIntegerDefault10"),
 				).
 				AddProp(
+					"pattern",
+					jsval.String(),
+				).
+				AddProp(
 					"since",
 					jsval.Reference(M).RefersTo("#/definitions/uuid"),
 				),

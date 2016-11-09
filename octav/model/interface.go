@@ -607,9 +607,10 @@ type DeleteUserRequest struct {
 
 // +transport
 type ListUserRequest struct {
-	Since jsval.MaybeString `json:"since" urlenc:"since,omitempty,string"`
-	Lang  jsval.MaybeString `json:"lang" urlenc:"lang,omitempty,string"`
-	Limit jsval.MaybeInt    `json:"limit" urlenc:"limit,omitempty,int64"`
+	Pattern jsval.MaybeString `json:"pattern" urlenc:"pattern,omitempty,string"`
+	Since   jsval.MaybeString `json:"since" urlenc:"since,omitempty,string"`
+	Lang    jsval.MaybeString `json:"lang" urlenc:"lang,omitempty,string"`
+	Limit   jsval.MaybeInt    `json:"limit" urlenc:"limit,omitempty,int64"`
 
 	TrustedCall bool `json:"-"`
 }
