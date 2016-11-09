@@ -93,12 +93,23 @@ func (vdbl *UserList) LoadFromQuery(tx *Tx, pattern, since string, limit int) er
     s = vdb.OID
   }
 
+	patbuf := tools.GetBuffer()
+	defer tools.ReleaseBuffer(patbuf)
+
+	for _, r := range pattern {
+		if r == '%' {
+			patbuf.WriteByte('\\')
+		}
+		patbuf.WriteRune(r)
+	}
+	patbuf.WriteByte('%')
+
 	stmt, err := library.GetStmt("userListLoadFromQuery")
 	if err != nil {
 		return errors.Wrap(err, "failed to get statement")
 	}
 
-	rows, err := tx.Stmt(stmt).Query(pattern, s, limit)
+	rows, err := tx.Stmt(stmt).Query(patbuf.String(), s, limit)
 	if err := vdbl.FromRows(rows, limit); err != nil {
 		return errors.Wrap(err, "failed to scan results")
 	}
