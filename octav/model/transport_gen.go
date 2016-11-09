@@ -1874,6 +1874,7 @@ func (r *DeleteVenueRoomRequest) Populate(m map[string]interface{}) error {
 
 func (r ListConferenceRequest) collectMarshalData() map[string]interface{} {
 	m := make(map[string]interface{})
+	m["organizers"] = r.Organizers
 	if r.RangeEnd.Valid() {
 		m["range_end"] = r.RangeEnd.Value()
 	}
@@ -1883,9 +1884,7 @@ func (r ListConferenceRequest) collectMarshalData() map[string]interface{} {
 	if r.Since.Valid() {
 		m["since"] = r.Since.Value()
 	}
-	if r.Status.Valid() {
-		m["status"] = r.Status.Value()
-	}
+	m["status"] = r.Status
 	if r.Lang.Valid() {
 		m["lang"] = r.Lang.Value()
 	}
@@ -1922,6 +1921,24 @@ func (r *ListConferenceRequest) UnmarshalJSON(data []byte) error {
 }
 
 func (r *ListConferenceRequest) Populate(m map[string]interface{}) error {
+	if jv, ok := m["organizers"]; ok {
+		switch jv.(type) {
+		case []interface{}:
+			jvl := jv.([]interface{})
+			list := make([]string, len(jvl))
+			for i, el := range jvl {
+				switch el.(type) {
+				case string:
+					list[i] = el.(string)
+				default:
+					return errors.Wrap(ErrInvalidJSONFieldType{Field: "organizers"}, "failed to populate fields for ListConferenceRequest")
+				}
+			}
+			r.Organizers = list
+		default:
+			return errors.Wrap(ErrInvalidJSONFieldType{Field: "organizers"}, "failed to populate fields for ListConferenceRequest")
+		}
+	}
 	if jv, ok := m["range_end"]; ok {
 		if err := r.RangeEnd.Set(jv); err != nil {
 			return errors.New("set field RangeEnd failed: " + err.Error())
@@ -1941,10 +1958,22 @@ func (r *ListConferenceRequest) Populate(m map[string]interface{}) error {
 		delete(m, "since")
 	}
 	if jv, ok := m["status"]; ok {
-		if err := r.Status.Set(jv); err != nil {
-			return errors.New("set field Status failed: " + err.Error())
+		switch jv.(type) {
+		case []interface{}:
+			jvl := jv.([]interface{})
+			list := make([]string, len(jvl))
+			for i, el := range jvl {
+				switch el.(type) {
+				case string:
+					list[i] = el.(string)
+				default:
+					return errors.Wrap(ErrInvalidJSONFieldType{Field: "status"}, "failed to populate fields for ListConferenceRequest")
+				}
+			}
+			r.Status = list
+		default:
+			return errors.Wrap(ErrInvalidJSONFieldType{Field: "status"}, "failed to populate fields for ListConferenceRequest")
 		}
-		delete(m, "status")
 	}
 	if jv, ok := m["lang"]; ok {
 		if err := r.Lang.Set(jv); err != nil {
@@ -5591,6 +5620,7 @@ func (r ListConferencesByOrganizerRequest) collectMarshalData() map[string]inter
 	if r.Since.Valid() {
 		m["since"] = r.Since.Value()
 	}
+	m["status"] = r.Status
 	if r.Lang.Valid() {
 		m["lang"] = r.Lang.Value()
 	}
@@ -5629,9 +5659,18 @@ func (r *ListConferencesByOrganizerRequest) UnmarshalJSON(data []byte) error {
 func (r *ListConferencesByOrganizerRequest) Populate(m map[string]interface{}) error {
 	if jv, ok := m["organizer_id"]; ok {
 		switch jv.(type) {
-		case string:
-			r.OrganizerID = jv.(string)
-			delete(m, "organizer_id")
+		case []interface{}:
+			jvl := jv.([]interface{})
+			list := make([]string, len(jvl))
+			for i, el := range jvl {
+				switch el.(type) {
+				case string:
+					list[i] = el.(string)
+				default:
+					return errors.Wrap(ErrInvalidJSONFieldType{Field: "organizer_id"}, "failed to populate fields for ListConferencesByOrganizerRequest")
+				}
+			}
+			r.OrganizerID = list
 		default:
 			return errors.Wrap(ErrInvalidJSONFieldType{Field: "organizer_id"}, "failed to populate fields for ListConferencesByOrganizerRequest")
 		}
@@ -5641,6 +5680,24 @@ func (r *ListConferencesByOrganizerRequest) Populate(m map[string]interface{}) e
 			return errors.New("set field Since failed: " + err.Error())
 		}
 		delete(m, "since")
+	}
+	if jv, ok := m["status"]; ok {
+		switch jv.(type) {
+		case []interface{}:
+			jvl := jv.([]interface{})
+			list := make([]string, len(jvl))
+			for i, el := range jvl {
+				switch el.(type) {
+				case string:
+					list[i] = el.(string)
+				default:
+					return errors.Wrap(ErrInvalidJSONFieldType{Field: "status"}, "failed to populate fields for ListConferencesByOrganizerRequest")
+				}
+			}
+			r.Status = list
+		default:
+			return errors.Wrap(ErrInvalidJSONFieldType{Field: "status"}, "failed to populate fields for ListConferencesByOrganizerRequest")
+		}
 	}
 	if jv, ok := m["lang"]; ok {
 		if err := r.Lang.Set(jv); err != nil {

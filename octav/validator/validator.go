@@ -2122,7 +2122,13 @@ func init() {
 				).
 				AddProp(
 					"status",
-					jsval.String(),
+					jsval.Array().
+						Items(
+							jsval.String(),
+						).
+						AdditionalItems(
+							jsval.EmptyConstraint,
+						),
 				),
 		)
 
@@ -2188,11 +2194,27 @@ func init() {
 				).
 				AddProp(
 					"organizer_id",
-					jsval.Reference(M).RefersTo("#/definitions/uuid"),
+					jsval.Array().
+						Items(
+							jsval.Reference(M).RefersTo("#/definitions/uuid"),
+						).
+						AdditionalItems(
+							jsval.EmptyConstraint,
+						),
 				).
 				AddProp(
 					"since",
 					jsval.Reference(M).RefersTo("#/definitions/uuid"),
+				).
+				AddProp(
+					"status",
+					jsval.Array().
+						Items(
+							jsval.String(),
+						).
+						AdditionalItems(
+							jsval.EmptyConstraint,
+						),
 				),
 		)
 

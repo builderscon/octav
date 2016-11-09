@@ -428,10 +428,11 @@ type DeleteVenueRoomRequest struct {
 
 // +transport
 type ListConferenceRequest struct {
+	Organizers []string          `json:"organizers" urlenc:"organizers,omitempty"`
 	RangeEnd   jsval.MaybeString `json:"range_end,omitempty" urlenc:"range_end,omitempty,string"`
 	RangeStart jsval.MaybeString `json:"range_start,omitempty" urlenc:"range_start,omitempty,string"`
 	Since      jsval.MaybeString `json:"since,omitempty" urlenc:"since,omitempty,string"`
-	Status     jsval.MaybeString `json:"status,omitempty" urlenc:"status,omitempty,string"`
+	Status     []string          `json:"status" urlenc:"status,omitempty"`
 	Lang       jsval.MaybeString `json:"lang,omitempty" urlenc:"lang,omitempty,string"`
 	Limit      jsval.MaybeInt    `json:"limit,omitempty" urlenc:"limit,omitempty,int64"`
 }
@@ -887,8 +888,9 @@ type DeleteSponsorRequest struct {
 
 // +transport
 type ListConferencesByOrganizerRequest struct {
-	OrganizerID string            `json:"organizer_id"`
+	OrganizerID []string          `json:"organizer_id" urlenc:"organizer_id,omitempty"`
 	Since       jsval.MaybeString `json:"since" urlenc:"since,omitempty,string"`
+	Status      []string          `json:"status" urlenc:"status,omitempty"`
 	Lang        jsval.MaybeString `json:"lang" urlenc:"lang,omitempty,string"`
 	Limit       jsval.MaybeInt    `json:"limit" urlenc:"limit,omitempty,int64"`
 }

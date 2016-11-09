@@ -46,7 +46,7 @@ func compileRangeWhere(dst io.Writer, args *[]interface{}, since int64, rangeSta
 	return nil
 }
 
-func (v *ConferenceList) LoadByStatusAndRange(tx *Tx, status string, since string, rangeStart, rangeEnd time.Time, limit int) error {
+func (v *ConferenceList) LoadFromQuery(tx *Tx, status, organizerID []string, rangeStart, rangeEnd time.Time, since string, limit int) error {
 	// We need the oid of "since"
 	var sinceOID int64
 	if since != "" {
@@ -78,17 +78,61 @@ func (v *ConferenceList) LoadByStatusAndRange(tx *Tx, status string, since strin
 		qbuf.WriteString(ConferenceDateTable)
 		qbuf.WriteString(`.conference_id `)
 	}
+	if len(organizerID) > 0 {
+		qbuf.WriteString(` JOIN `)
+		qbuf.WriteString(ConferenceAdministratorTable)
+		qbuf.WriteString(` ON `)
+		qbuf.WriteString(ConferenceTable)
+		qbuf.WriteString(`.eid = `)
+		qbuf.WriteString(ConferenceAdministratorTable)
+		qbuf.WriteString(`.conference_id `)
+	}
 
-	qbuf.WriteString(` WHERE `)
+	wherebuf := tools.GetBuffer()
+	defer tools.ReleaseBuffer(wherebuf)
 
 	var args []interface{}
-	if err := compileRangeWhere(qbuf, &args, sinceOID, rangeStart, rangeEnd); err != nil {
-		return errors.Wrap(err, "failed to compile range where clause")
+
+	if !rangeStart.IsZero() || !rangeEnd.IsZero() {
+		if err := compileRangeWhere(wherebuf, &args, sinceOID, rangeStart, rangeEnd); err != nil {
+			return errors.Wrap(err, "failed to compile range where clause")
+		}
 	}
-	qbuf.WriteString(` AND `)
-	qbuf.WriteString(ConferenceTable)
-	qbuf.WriteString(`.status = ?`)
-	args = append(args, status)
+
+	if len(organizerID) > 0 {
+		if wherebuf.Len() > 0 {
+			wherebuf.WriteString(` AND `)
+		}
+		wherebuf.WriteString(ConferenceAdministratorTable)
+		wherebuf.WriteString(`.user_id IN (`)
+		for _, id := range organizerID {
+			args = append(args, id)
+		}
+		wherebuf.WriteByte(')')
+	}
+
+	if len(status) > 0 {
+		if wherebuf.Len() > 0 {
+			wherebuf.WriteString(` AND `)
+		}
+		wherebuf.WriteString(ConferenceTable)
+		wherebuf.WriteString(`.status IN (`)
+		for i := range status {
+			wherebuf.WriteByte('?')
+			if i < len(status) - 1 {
+				wherebuf.WriteByte(',')
+			}
+		}
+		wherebuf.WriteByte(')')
+		for _, st := range status {
+			args = append(args, st)
+		}
+	}
+
+	if wherebuf.Len() > 0 {
+		qbuf.WriteString(` WHERE `)
+		wherebuf.WriteTo(qbuf)
+	}
 
 	qbuf.WriteString(` ORDER BY oid DESC`)
 	fmt.Fprintf(qbuf, " LIMIT %d", limit)
@@ -166,7 +210,7 @@ func (v *ConferenceList) execSQLAndExtract(tx *Tx, sql string, limit int, args .
 	return nil
 }
 
-func ListConferencesByOrganizer(tx *Tx, l *ConferenceList, orgID, since string, limit int) error {
+func ListConferencesByOrganizer(tx *Tx, l *ConferenceList, orgID string, statuses []string, since string, limit int) error {
 	stmt := tools.GetBuffer()
 	defer tools.ReleaseBuffer(stmt)
 
@@ -182,7 +226,18 @@ func ListConferencesByOrganizer(tx *Tx, l *ConferenceList, orgID, since string, 
 	stmt.WriteString(ConferenceAdministratorTable)
 	stmt.WriteString(`.conference_id WHERE `)
 	stmt.WriteString(ConferenceTable)
-	stmt.WriteString(`.status != "private" AND `)
+
+	if len(statuses) == 0 {
+		statuses = []string{"public"}
+	}
+	stmt.WriteString(`.status IN (`)
+	for i := range statuses {
+		stmt.WriteByte('?')
+		if i != len(statuses) - 1 {
+			stmt.WriteByte(',')
+		}
+	}
+	stmt.WriteString(`) AND `)
 	stmt.WriteString(ConferenceAdministratorTable)
 	stmt.WriteString(`.user_id = ? `)
 	if since != "" {
