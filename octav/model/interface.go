@@ -374,6 +374,13 @@ type CreateConferenceDateRequest struct {
 }
 
 // +transport
+type ListConferenceAdminRequest struct {
+	ConferenceID string            `json:"conference_id"`
+	UserID       string            `json:"user_id"`
+	Lang         jsval.MaybeString `json:"lang,omitempty" urlenc:"lang,omitempty,string"`
+}
+
+// +transport
 type AddConferenceAdminRequest struct {
 	ConferenceID string `json:"conference_id"`
 	AdminID      string `json:"admin_id"`

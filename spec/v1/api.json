@@ -856,7 +856,7 @@
       "hsup.wrapper": "httpWithBasicAuth",
       "method": "POST",
       "href": "/v1/conference_series/admin/add",
-      "ecnType": "application/json",
+      "encType": "application/json",
       "schema": {
         "properties": {
           "series_id": {"$ref": "#/definitions/uuid"},
@@ -969,7 +969,7 @@
       "rel": "delete",
       "method": "POST",
       "href": "/v1/conference/date/delete",
-      "ecnType": "application/json",
+      "encType": "application/json",
       "schema": {
         "properties": {
           "conference_id": {"$ref": "#/definitions/uuid"},
@@ -980,12 +980,32 @@
       }
     },
     {
+      "title": "List conference admin",
+      "rel": "list",
+      "hsup.wrapper": "httpWithBasicAuth",
+      "method": "GET",
+      "href": "/v1/conference/admin/list",
+      "encType": "application/json",
+      "schema": {
+        "properties": {
+          "conference_id": {"$ref": "#/definitions/uuid"},
+          "user_id": {"$ref":"#/definitions/uuid"}
+        },
+        "required": ["conference_id","user_id"]
+      },
+      "targetSchema": {
+        "type": "array",
+        "hsup.type": "[]model.User",
+        "items": { "$ref": "#/definitions/user" }
+      }
+    },
+    {
       "title": "Add conference admin",
       "rel": "update",
       "hsup.wrapper": "httpWithBasicAuth",
       "method": "POST",
       "href": "/v1/conference/admin/add",
-      "ecnType": "application/json",
+      "encType": "application/json",
       "schema": {
         "properties": {
           "conference_id": {"$ref": "#/definitions/uuid"},
@@ -1001,7 +1021,7 @@
       "hsup.wrapper": "httpWithBasicAuth",
       "method": "POST",
       "href": "/v1/conference/admin/delete",
-      "ecnType": "application/json",
+      "encType": "application/json",
       "schema": {
         "properties": {
           "conference_id": {"$ref": "#/definitions/uuid"},
@@ -1017,7 +1037,7 @@
       "hsup.wrapper": "httpWithBasicAuth",
       "method": "POST",
       "href": "/v1/conference/venue/add",
-      "ecnType": "application/json",
+      "encType": "application/json",
       "schema": {
         "properties": {
           "conference_id": {"$ref": "#/definitions/uuid"},
@@ -1033,7 +1053,7 @@
       "hsup.wrapper": "httpWithBasicAuth",
       "method": "POST",
       "href": "/v1/conference/venue/delete",
-      "ecnType": "application/json",
+      "encType": "application/json",
       "schema": {
         "properties": {
           "conference_id": {"$ref": "#/definitions/uuid"},
@@ -1049,7 +1069,7 @@
       "hsup.wrapper": "httpWithBasicAuth",
       "method": "POST",
       "href": "/v1/conference/session_type/add",
-      "ecnType": "application/json",
+      "encType": "application/json",
       "schema": {
         "required": ["user_id","conference_id","name","abstract", "duration"],
         "properties": {
@@ -1073,7 +1093,7 @@
       "hsup.wrapper": "httpWithBasicAuth",
       "method": "POST",
       "href": "/v1/session_type/delete",
-      "ecnType": "application/json",
+      "encType": "application/json",
       "schema": {
         "properties": {
           "id": {"$ref": "#/definitions/uuid"},

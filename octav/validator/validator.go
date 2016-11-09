@@ -49,6 +49,8 @@ var HTTPDeleteSponsorRequest *jsval.JSVal
 var HTTPDeleteUserRequest *jsval.JSVal
 var HTTPDeleteVenueRequest *jsval.JSVal
 var HTTPGetConferenceScheduleRequest *jsval.JSVal
+var HTTPListConferenceAdminRequest *jsval.JSVal
+var HTTPListConferenceAdminResponse *jsval.JSVal
 var HTTPListConferenceRequest *jsval.JSVal
 var HTTPListConferenceResponse *jsval.JSVal
 var HTTPListConferenceSeriesRequest *jsval.JSVal
@@ -2077,6 +2079,38 @@ func init() {
 				AddProp(
 					"lang",
 					jsval.Reference(M).RefersTo("#/definitions/language"),
+				),
+		)
+
+	HTTPListConferenceAdminRequest = jsval.New().
+		SetName("HTTPListConferenceAdminRequest").
+		SetConstraintMap(M).
+		SetRoot(
+			jsval.Object().
+				Required("conference_id", "user_id").
+				AdditionalProperties(
+					jsval.EmptyConstraint,
+				).
+				AddProp(
+					"conference_id",
+					jsval.Reference(M).RefersTo("#/definitions/uuid"),
+				).
+				AddProp(
+					"user_id",
+					jsval.Reference(M).RefersTo("#/definitions/uuid"),
+				),
+		)
+
+	HTTPListConferenceAdminResponse = jsval.New().
+		SetName("HTTPListConferenceAdminResponse").
+		SetConstraintMap(M).
+		SetRoot(
+			jsval.Array().
+				Items(
+					jsval.Reference(M).RefersTo("#/definitions/user"),
+				).
+				AdditionalItems(
+					jsval.EmptyConstraint,
 				),
 		)
 
