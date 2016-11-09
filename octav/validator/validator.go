@@ -2097,6 +2097,16 @@ func init() {
 					jsval.Reference(M).RefersTo("#/definitions/positiveIntegerDefault10"),
 				).
 				AddProp(
+					"organizers",
+					jsval.Array().
+						Items(
+							jsval.Reference(M).RefersTo("#/definitions/uuid"),
+						).
+						AdditionalItems(
+							jsval.EmptyConstraint,
+						),
+				).
+				AddProp(
 					"range_end",
 					jsval.OneOf().
 						Add(

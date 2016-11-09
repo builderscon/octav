@@ -105,7 +105,11 @@ func (v *ConferenceList) LoadFromQuery(tx *Tx, status, organizerID []string, ran
 		}
 		wherebuf.WriteString(ConferenceAdministratorTable)
 		wherebuf.WriteString(`.user_id IN (`)
-		for _, id := range organizerID {
+		for i, id := range organizerID {
+			wherebuf.WriteByte('?')
+			if i < len(organizerID) - 1 {
+				wherebuf.WriteByte(',')
+			}
 			args = append(args, id)
 		}
 		wherebuf.WriteByte(')')
@@ -117,16 +121,14 @@ func (v *ConferenceList) LoadFromQuery(tx *Tx, status, organizerID []string, ran
 		}
 		wherebuf.WriteString(ConferenceTable)
 		wherebuf.WriteString(`.status IN (`)
-		for i := range status {
+		for i, st := range status {
 			wherebuf.WriteByte('?')
 			if i < len(status) - 1 {
 				wherebuf.WriteByte(',')
 			}
-		}
-		wherebuf.WriteByte(')')
-		for _, st := range status {
 			args = append(args, st)
 		}
+		wherebuf.WriteByte(')')
 	}
 
 	if wherebuf.Len() > 0 {

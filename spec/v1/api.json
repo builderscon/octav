@@ -1170,7 +1170,14 @@
           "lang": {"$ref": "#/definitions/language"},
           "limit": {"$ref": "#/definitions/positiveIntegerDefault10"},
           "since": {"$ref": "#/definitions/uuid"},
-          "organizer_id": {"$ref": "#/definitions/uuid"}
+          "status": {
+            "type": "array",
+            "items": { "type": "string" }
+          },
+          "organizer_id": {
+            "type": "array",
+            "items": {"$ref": "#/definitions/uuid"}
+          }
         }
       },
       "targetSchema": { "$ref": "#/definitions/conference_array" }
@@ -1184,6 +1191,10 @@
         "properties": {
           "lang": { "$ref": "#/definitions/language" },
           "limit": { "$ref": "#/definitions/positiveIntegerDefault10" },
+          "organizers": {
+            "type": "array",
+            "items": {"$ref": "#/definitions/uuid"}
+          },
           "range_end": {
             "oneOf": [
               {"$ref": "#/definitions/date" },
@@ -1197,7 +1208,10 @@
             ]
           },
           "since": { "$ref": "#/definitions/uuid" },
-          "status": { "type": "string" }
+          "status": {
+            "type": "array",
+            "items": { "type": "string" }
+          }
         }
       },
       "targetSchema": { "$ref": "#/definitions/conference_array" }
