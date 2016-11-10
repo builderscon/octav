@@ -1,12 +1,12 @@
-{{ .Speaker.Nickname }}様
+{{ .Session.Speaker.Nickname }}様
 
-応募いただいていたプロポーザル "{{ .Title }}" が採用されたことをお知らせいたします。
+応募いただいていたプロポーザル "{{ .Session.Title }}" が採用されたことをお知らせいたします。
 
 審査プロセスを完了するには *** 登壇確認を行っていただく必要があります ***。
 指定された日時に本イベントにご来場いただき登壇いただける場合は下記の
 フォームより登壇確認を行ってください。
 
-  https://builderscon.io/{{ .Conference.Series.Slug }}/{{ .Conference.Slug }}/session/confirm
+  https://builderscon.io/{{ .Session.Conference.Series.Slug }}/{{ .Session.Conference.Slug }}/session/confirm
 
 登壇確認が1週間以内になされない場合、プロポーザルの採用が取り消される可能性が
 ありますのであしからずご了承下さい。
@@ -14,9 +14,9 @@
 今回提示させていただいたスケジュールに問題がある場合は速やかにカンファレンス
 主催者にご連絡ください。可能であればスケジュールの調整をさせていただきます。
 
-  URL: https://builderscon.io/{{ .Conference.Series.Slug }}/{{ .Conference.Slug }}/session/{{ .ID }}
-  Title: {{ .Title }}
-  Date/Time: {{ .StartsOn.Format "2006-01-02 15:04" }}
+  URL: https://builderscon.io/{{ .Session.Conference.Series.Slug }}/{{ .Session.Conference.Slug }}/session/{{ .Session.ID }}
+  Title: {{ .Session.Title }}
+  Date/Time: {{ with .Session.StartsOn.In .Timezone }}{{ .Format "2006-01-02 15:04" }}{{ end }}
 
 ---
-{{ .Conference.Title }} チーム
+{{ .Session.Conference.Title }} チーム
