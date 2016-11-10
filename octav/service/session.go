@@ -645,8 +645,21 @@ func (v *SessionSvc) SendSelectionResultNotificationFromPayload(tx *db.Tx, paylo
 		return errors.Wrap(err, "failed to fetch template")
 	}
 
+	tz := time.UTC
+	if xtz, err := time.LoadLocation(m.Conference.Timezone); err != nil {
+		tz = xtz
+	}
+
+	vars := struct {
+		Session *model.Session
+		Timezone *time.Location
+	} {
+		Session: &m,
+		Timezone: tz,
+	}
+
 	var msg bytes.Buffer
-	if err := t.Execute(&msg, m); err != nil {
+	if err := t.Execute(&msg, &vars); err != nil {
 		return errors.Wrap(err, "failed to render notification template")
 	}
 

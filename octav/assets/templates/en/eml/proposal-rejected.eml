@@ -1,10 +1,10 @@
-Thank you for taking the time to respond to the {{ .Conference.Title }}
+Thank you for taking the time to respond to the {{ .Session.Conference.Title }}
 Call for Proposals.
 
-Unfortunately, we were not able to accept your proposal, "{{ .Title }}".
+Unfortunately, we were not able to accept your proposal, "{{ .Session.Title }}".
 
 Once again, thanks for your proposal, and we hope that you remain interested
-in presenting at {{ .Conference.Series.Title }} in the future.
+in presenting at {{ .Session.Conference.Series.Title }} in the future.
 
 Regards,
-{{ .Conference.Title }} Team
+{{ .Session.Conference.Title }} Team
