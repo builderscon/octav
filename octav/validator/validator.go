@@ -51,6 +51,8 @@ var HTTPDeleteVenueRequest *jsval.JSVal
 var HTTPGetConferenceScheduleRequest *jsval.JSVal
 var HTTPListConferenceAdminRequest *jsval.JSVal
 var HTTPListConferenceAdminResponse *jsval.JSVal
+var HTTPListConferenceDateRequest *jsval.JSVal
+var HTTPListConferenceDateResponse *jsval.JSVal
 var HTTPListConferenceRequest *jsval.JSVal
 var HTTPListConferenceResponse *jsval.JSVal
 var HTTPListConferenceSeriesRequest *jsval.JSVal
@@ -2108,6 +2110,38 @@ func init() {
 			jsval.Array().
 				Items(
 					jsval.Reference(M).RefersTo("#/definitions/user"),
+				).
+				AdditionalItems(
+					jsval.EmptyConstraint,
+				),
+		)
+
+	HTTPListConferenceDateRequest = jsval.New().
+		SetName("HTTPListConferenceDateRequest").
+		SetConstraintMap(M).
+		SetRoot(
+			jsval.Object().
+				Required("conference_id", "user_id").
+				AdditionalProperties(
+					jsval.EmptyConstraint,
+				).
+				AddProp(
+					"conference_id",
+					jsval.Reference(M).RefersTo("#/definitions/uuid"),
+				).
+				AddProp(
+					"user_id",
+					jsval.Reference(M).RefersTo("#/definitions/uuid"),
+				),
+		)
+
+	HTTPListConferenceDateResponse = jsval.New().
+		SetName("HTTPListConferenceDateResponse").
+		SetConstraintMap(M).
+		SetRoot(
+			jsval.Array().
+				Items(
+					jsval.Reference(M).RefersTo("#/definitions/conference_date"),
 				).
 				AdditionalItems(
 					jsval.EmptyConstraint,

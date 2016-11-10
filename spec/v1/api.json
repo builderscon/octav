@@ -947,6 +947,26 @@
       }
     },
     {
+      "title": "List conference date",
+      "rel": "list",
+      "hsup.wrapper": "httpWithBasicAuth",
+      "method": "GET",
+      "href": "/v1/conference/date/list",
+      "encType": "application/json",
+      "schema": {
+        "properties": {
+          "conference_id": {"$ref": "#/definitions/uuid"},
+          "user_id": {"$ref":"#/definitions/uuid"}
+        },
+        "required": ["conference_id","user_id"]
+      },
+      "targetSchema": {
+        "type": "array",
+        "hsup.type": "[]model.ConferenceDate",
+        "items": { "$ref": "#/definitions/conference_date" }
+      }
+    },
+    {
       "title": "Add conference date",
       "hsup.wrapper": "httpWithBasicAuth",
       "rel": "update",

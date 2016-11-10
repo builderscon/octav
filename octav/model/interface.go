@@ -367,6 +367,12 @@ type ConferenceDate struct {
 type ConferenceDateList []ConferenceDate
 
 // +transport
+type ListConferenceDateRequest struct {
+	ConferenceID string `json:"conference_id"`
+	UserID       string `json:"user_id"`
+}
+
+// +transport
 type CreateConferenceDateRequest struct {
 	ConferenceID string         `json:"conference_id"`
 	Date         ConferenceDate `json:"date" extract:"true"`

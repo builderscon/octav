@@ -1597,6 +1597,38 @@ func httpListConferenceAdmin(ctx context.Context, w http.ResponseWriter, r *http
 	doListConferenceAdmin(ctx, w, r, payload)
 }
 
+func httpListConferenceDate(ctx context.Context, w http.ResponseWriter, r *http.Request) {
+	if pdebug.Enabled {
+		g := pdebug.Marker("httpListConferenceDate")
+		defer g.End()
+	}
+	if strings.ToLower(r.Method) != `get` {
+		w.Header().Set("Allow", "get")
+		msgbuf := getBytesBuffer()
+		defer releaseBytesBuffer(msgbuf)
+		msgbuf.WriteString(`Method was `)
+		msgbuf.WriteString(r.Method)
+		msgbuf.WriteString(`, expected 'get'`)
+		httpError(w, msgbuf.String(), http.StatusNotFound, nil)
+		return
+	}
+
+	var payload model.ListConferenceDateRequest
+	qbuf := getBytesBuffer()
+	defer releaseBytesBuffer(qbuf)
+	qbuf.WriteString(r.URL.RawQuery)
+	if err := urlenc.Unmarshal(qbuf.Bytes(), &payload); err != nil {
+		httpError(w, `Failed to parse url query string`, http.StatusInternalServerError, err)
+		return
+	}
+
+	if err := validator.HTTPListConferenceDateRequest.Validate(&payload); err != nil {
+		httpError(w, `Invalid input (validation failed)`, http.StatusInternalServerError, err)
+		return
+	}
+	doListConferenceDate(ctx, w, r, payload)
+}
+
 func httpListConferenceSeries(ctx context.Context, w http.ResponseWriter, r *http.Request) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("httpListConferenceSeries")
@@ -2845,6 +2877,7 @@ func (s *Server) SetupRoutes() {
 	r.HandleFunc(`/v1/conference/credentials/add`, httpWithContext(httpWithBasicAuth(httpAddConferenceCredential)))
 	r.HandleFunc(`/v1/conference/date/add`, httpWithContext(httpWithBasicAuth(httpAddConferenceDate)))
 	r.HandleFunc(`/v1/conference/date/delete`, httpWithContext(httpDeleteConferenceDate))
+	r.HandleFunc(`/v1/conference/date/list`, httpWithContext(httpWithBasicAuth(httpListConferenceDate)))
 	r.HandleFunc(`/v1/conference/delete`, httpWithContext(httpWithBasicAuth(httpDeleteConference)))
 	r.HandleFunc(`/v1/conference/list`, httpWithContext(httpWithOptionalBasicAuth(httpListConference)))
 	r.HandleFunc(`/v1/conference/list_by_organizer`, httpWithContext(httpWithOptionalBasicAuth(httpListConferencesByOrganizer)))
