@@ -574,6 +574,27 @@ sub tweet_as_conference {
     return 1
 }
 
+sub list_conference_date {
+    my ($self, $payload) = @_;
+    for my $required (qw(conference_id user_id)) {
+        if (!$payload->{$required}) {
+            die qq|property "$required" must be provided|;
+        }
+    }
+    my $uri = URI->new($self->{endpoint} . qq|/v1/conference/date/list|);
+    $uri->query_form($payload);
+    my $req = HTTP::Request::Common::GET($uri->as_string());
+    if (my($u, $p) = @{$self->{credentials} || []}) {
+        $req->authorization_basic($u, $p);
+    }
+    my $res = $self->{user_agent}->request($req);
+    if (!$res->is_success) {
+        $self->{last_error} = $res->status_line;
+        return;
+    }
+    return JSON::decode_json($res->decoded_content);
+}
+
 sub add_conference_date {
     my ($self, $payload) = @_;
     for my $required (qw(conference_id date user_id)) {
@@ -616,6 +637,27 @@ sub delete_conference_date {
         return;
     }
     return 1
+}
+
+sub list_conference_admin {
+    my ($self, $payload) = @_;
+    for my $required (qw(conference_id user_id)) {
+        if (!$payload->{$required}) {
+            die qq|property "$required" must be provided|;
+        }
+    }
+    my $uri = URI->new($self->{endpoint} . qq|/v1/conference/admin/list|);
+    $uri->query_form($payload);
+    my $req = HTTP::Request::Common::GET($uri->as_string());
+    if (my($u, $p) = @{$self->{credentials} || []}) {
+        $req->authorization_basic($u, $p);
+    }
+    my $res = $self->{user_agent}->request($req);
+    if (!$res->is_success) {
+        $self->{last_error} = $res->status_line;
+        return;
+    }
+    return JSON::decode_json($res->decoded_content);
 }
 
 sub add_conference_admin {
