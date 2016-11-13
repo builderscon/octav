@@ -49,6 +49,10 @@ var HTTPDeleteSponsorRequest *jsval.JSVal
 var HTTPDeleteUserRequest *jsval.JSVal
 var HTTPDeleteVenueRequest *jsval.JSVal
 var HTTPGetConferenceScheduleRequest *jsval.JSVal
+var HTTPListConferenceAdminRequest *jsval.JSVal
+var HTTPListConferenceAdminResponse *jsval.JSVal
+var HTTPListConferenceDateRequest *jsval.JSVal
+var HTTPListConferenceDateResponse *jsval.JSVal
 var HTTPListConferenceRequest *jsval.JSVal
 var HTTPListConferenceResponse *jsval.JSVal
 var HTTPListConferenceSeriesRequest *jsval.JSVal
@@ -2080,6 +2084,70 @@ func init() {
 				),
 		)
 
+	HTTPListConferenceAdminRequest = jsval.New().
+		SetName("HTTPListConferenceAdminRequest").
+		SetConstraintMap(M).
+		SetRoot(
+			jsval.Object().
+				Required("conference_id", "user_id").
+				AdditionalProperties(
+					jsval.EmptyConstraint,
+				).
+				AddProp(
+					"conference_id",
+					jsval.Reference(M).RefersTo("#/definitions/uuid"),
+				).
+				AddProp(
+					"user_id",
+					jsval.Reference(M).RefersTo("#/definitions/uuid"),
+				),
+		)
+
+	HTTPListConferenceAdminResponse = jsval.New().
+		SetName("HTTPListConferenceAdminResponse").
+		SetConstraintMap(M).
+		SetRoot(
+			jsval.Array().
+				Items(
+					jsval.Reference(M).RefersTo("#/definitions/user"),
+				).
+				AdditionalItems(
+					jsval.EmptyConstraint,
+				),
+		)
+
+	HTTPListConferenceDateRequest = jsval.New().
+		SetName("HTTPListConferenceDateRequest").
+		SetConstraintMap(M).
+		SetRoot(
+			jsval.Object().
+				Required("conference_id", "user_id").
+				AdditionalProperties(
+					jsval.EmptyConstraint,
+				).
+				AddProp(
+					"conference_id",
+					jsval.Reference(M).RefersTo("#/definitions/uuid"),
+				).
+				AddProp(
+					"user_id",
+					jsval.Reference(M).RefersTo("#/definitions/uuid"),
+				),
+		)
+
+	HTTPListConferenceDateResponse = jsval.New().
+		SetName("HTTPListConferenceDateResponse").
+		SetConstraintMap(M).
+		SetRoot(
+			jsval.Array().
+				Items(
+					jsval.Reference(M).RefersTo("#/definitions/conference_date"),
+				).
+				AdditionalItems(
+					jsval.EmptyConstraint,
+				),
+		)
+
 	HTTPListConferenceRequest = jsval.New().
 		SetName("HTTPListConferenceRequest").
 		SetConstraintMap(M).
@@ -2095,6 +2163,16 @@ func init() {
 				AddProp(
 					"limit",
 					jsval.Reference(M).RefersTo("#/definitions/positiveIntegerDefault10"),
+				).
+				AddProp(
+					"organizers",
+					jsval.Array().
+						Items(
+							jsval.Reference(M).RefersTo("#/definitions/uuid"),
+						).
+						AdditionalItems(
+							jsval.EmptyConstraint,
+						),
 				).
 				AddProp(
 					"range_end",
@@ -2122,7 +2200,13 @@ func init() {
 				).
 				AddProp(
 					"status",
-					jsval.String(),
+					jsval.Array().
+						Items(
+							jsval.String(),
+						).
+						AdditionalItems(
+							jsval.EmptyConstraint,
+						),
 				),
 		)
 
@@ -2188,11 +2272,27 @@ func init() {
 				).
 				AddProp(
 					"organizer_id",
-					jsval.Reference(M).RefersTo("#/definitions/uuid"),
+					jsval.Array().
+						Items(
+							jsval.Reference(M).RefersTo("#/definitions/uuid"),
+						).
+						AdditionalItems(
+							jsval.EmptyConstraint,
+						),
 				).
 				AddProp(
 					"since",
 					jsval.Reference(M).RefersTo("#/definitions/uuid"),
+				).
+				AddProp(
+					"status",
+					jsval.Array().
+						Items(
+							jsval.String(),
+						).
+						AdditionalItems(
+							jsval.EmptyConstraint,
+						),
 				),
 		)
 
@@ -2476,6 +2576,10 @@ func init() {
 				AddProp(
 					"limit",
 					jsval.Reference(M).RefersTo("#/definitions/positiveIntegerDefault10"),
+				).
+				AddProp(
+					"pattern",
+					jsval.String(),
 				).
 				AddProp(
 					"since",

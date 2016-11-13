@@ -36,6 +36,14 @@ func init() {
 		stmt.WriteString(` WHERE users.auth_via = ? AND users.auth_user_id = ?`)
 
 		library.Register("userLoadByAuthUserIDKey", stmt.String())
+
+		stmt.Reset()
+		stmt.WriteString(`SELECT `)
+		stmt.WriteString(UserStdSelectColumns)
+		stmt.WriteString(` FROM `)
+		stmt.WriteString(UserTable)
+		stmt.WriteString(` WHERE nickname LIKE ? AND oid > ? ORDER BY nickname ASC LIMIT ?`)
+		library.Register("userListLoadFromQuery", stmt.String())
 	})
 }
 
@@ -66,6 +74,44 @@ func IsAdministrator(tx *Tx, userID string) error {
 
 	if v == 0 {
 		return errors.Errorf("user %s is not an administrator", userID)
+	}
+	return nil
+}
+
+func (vdbl *UserList) LoadFromQuery(tx *Tx, pattern, since string, limit int) error {
+	if pattern == "" {
+		return vdbl.LoadSinceEID(tx, since, limit)
+	}
+
+  var s int64
+  if id := since; id != "" {
+    vdb := User{}
+    if err := vdb.LoadByEID(tx, id); err != nil {
+      return err
+    }
+
+    s = vdb.OID
+  }
+
+	patbuf := tools.GetBuffer()
+	defer tools.ReleaseBuffer(patbuf)
+
+	for _, r := range pattern {
+		if r == '%' {
+			patbuf.WriteByte('\\')
+		}
+		patbuf.WriteRune(r)
+	}
+	patbuf.WriteByte('%')
+
+	stmt, err := library.GetStmt("userListLoadFromQuery")
+	if err != nil {
+		return errors.Wrap(err, "failed to get statement")
+	}
+
+	rows, err := tx.Stmt(stmt).Query(patbuf.String(), s, limit)
+	if err := vdbl.FromRows(rows, limit); err != nil {
+		return errors.Wrap(err, "failed to scan results")
 	}
 	return nil
 }

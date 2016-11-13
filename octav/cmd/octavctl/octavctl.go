@@ -341,6 +341,8 @@ func doConferenceList(args cmdargs) int {
 	fs.StringVar(&lang, "lang", "", "")
 	var limit int64
 	fs.Int64Var(&limit, "limit", 0, "")
+	var organizers string
+	fs.StringVar(&organizers, "organizers", "", "")
 	var range_end string
 	fs.StringVar(&range_end, "range_end", "", "")
 	var range_start string
@@ -360,6 +362,9 @@ func doConferenceList(args cmdargs) int {
 	}
 	if limit != 0 {
 		m["limit"] = limit
+	}
+	if organizers != "" {
+		m["organizers"] = organizers
 	}
 	if range_end != "" {
 		m["range_end"] = range_end
@@ -1181,6 +1186,8 @@ func doUserList(args cmdargs) int {
 	fs.StringVar(&lang, "lang", "", "")
 	var limit int64
 	fs.Int64Var(&limit, "limit", 0, "")
+	var pattern string
+	fs.StringVar(&pattern, "pattern", "", "")
 	var since string
 	fs.StringVar(&since, "since", "", "")
 	prepGlobalFlags(fs)
@@ -1194,6 +1201,9 @@ func doUserList(args cmdargs) int {
 	}
 	if limit != 0 {
 		m["limit"] = limit
+	}
+	if pattern != "" {
+		m["pattern"] = pattern
 	}
 	if since != "" {
 		m["since"] = since

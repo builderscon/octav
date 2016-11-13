@@ -367,10 +367,23 @@ type ConferenceDate struct {
 type ConferenceDateList []ConferenceDate
 
 // +transport
+type ListConferenceDateRequest struct {
+	ConferenceID string `json:"conference_id"`
+	UserID       string `json:"user_id"`
+}
+
+// +transport
 type CreateConferenceDateRequest struct {
 	ConferenceID string         `json:"conference_id"`
 	Date         ConferenceDate `json:"date" extract:"true"`
 	UserID       string         `json:"user_id"`
+}
+
+// +transport
+type ListConferenceAdminRequest struct {
+	ConferenceID string            `json:"conference_id"`
+	UserID       string            `json:"user_id"`
+	Lang         jsval.MaybeString `json:"lang,omitempty" urlenc:"lang,omitempty,string"`
 }
 
 // +transport
@@ -428,10 +441,11 @@ type DeleteVenueRoomRequest struct {
 
 // +transport
 type ListConferenceRequest struct {
+	Organizers []string          `json:"organizers" urlenc:"organizers,omitempty"`
 	RangeEnd   jsval.MaybeString `json:"range_end,omitempty" urlenc:"range_end,omitempty,string"`
 	RangeStart jsval.MaybeString `json:"range_start,omitempty" urlenc:"range_start,omitempty,string"`
 	Since      jsval.MaybeString `json:"since,omitempty" urlenc:"since,omitempty,string"`
-	Status     jsval.MaybeString `json:"status,omitempty" urlenc:"status,omitempty,string"`
+	Status     []string          `json:"status" urlenc:"status,omitempty"`
 	Lang       jsval.MaybeString `json:"lang,omitempty" urlenc:"lang,omitempty,string"`
 	Limit      jsval.MaybeInt    `json:"limit,omitempty" urlenc:"limit,omitempty,int64"`
 }
@@ -606,9 +620,10 @@ type DeleteUserRequest struct {
 
 // +transport
 type ListUserRequest struct {
-	Since jsval.MaybeString `json:"since" urlenc:"since,omitempty,string"`
-	Lang  jsval.MaybeString `json:"lang" urlenc:"lang,omitempty,string"`
-	Limit jsval.MaybeInt    `json:"limit" urlenc:"limit,omitempty,int64"`
+	Pattern jsval.MaybeString `json:"pattern" urlenc:"pattern,omitempty,string"`
+	Since   jsval.MaybeString `json:"since" urlenc:"since,omitempty,string"`
+	Lang    jsval.MaybeString `json:"lang" urlenc:"lang,omitempty,string"`
+	Limit   jsval.MaybeInt    `json:"limit" urlenc:"limit,omitempty,int64"`
 
 	TrustedCall bool `json:"-"`
 }
@@ -887,8 +902,9 @@ type DeleteSponsorRequest struct {
 
 // +transport
 type ListConferencesByOrganizerRequest struct {
-	OrganizerID string            `json:"organizer_id"`
+	OrganizerID []string          `json:"organizer_id" urlenc:"organizer_id,omitempty"`
 	Since       jsval.MaybeString `json:"since" urlenc:"since,omitempty,string"`
+	Status      []string          `json:"status" urlenc:"status,omitempty"`
 	Lang        jsval.MaybeString `json:"lang" urlenc:"lang,omitempty,string"`
 	Limit       jsval.MaybeInt    `json:"limit" urlenc:"limit,omitempty,int64"`
 }

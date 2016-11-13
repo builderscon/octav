@@ -1,5 +1,5 @@
 """OCTAV Client Library"""
-"""DO NOT EDIT: This file was generated from ../spec/v1/api.json on Fri Oct 28 21:31:26 2016"""
+"""DO NOT EDIT: This file was generated from ../spec/v1/api.json on Thu Nov 10 15:15:42 2016"""
 
 import certifi
 import json
@@ -318,7 +318,7 @@ class Octav(object):
         self.error = repr(e)
         return None
 
-  def list_user (self, lang=None, limit=None, since=None):
+  def list_user (self, lang=None, limit=None, pattern=None, since=None):
     try:
         payload = {}
         hdrs = {}
@@ -326,6 +326,8 @@ class Octav(object):
             payload['lang'] = lang
         if limit is not None:
             payload['limit'] = limit
+        if pattern is not None:
+            payload['pattern'] = pattern
         if since is not None:
             payload['since'] = since
         uri = '%s/v1/user/list' % self.endpoint
@@ -1033,6 +1035,41 @@ class Octav(object):
         self.error = repr(e)
         return None
 
+  def list_conference_date (self, conference_id, user_id):
+    try:
+        payload = {}
+        hdrs = {}
+        if conference_id is None:
+            raise MissingRequiredArgument('property conference_id must be provided')
+        payload['conference_id'] = conference_id
+        if user_id is None:
+            raise MissingRequiredArgument('property user_id must be provided')
+        payload['user_id'] = user_id
+        if conference_id is not None:
+            payload['conference_id'] = conference_id
+        if user_id is not None:
+            payload['user_id'] = user_id
+        uri = '%s/v1/conference/date/list' % self.endpoint
+        hdrs = urllib3.util.make_headers(
+            basic_auth='%s:%s' % (self.key, self.secret),
+        )
+        qs = urlencode(payload, True)
+        if self.debug:
+            print('GET %s?%s' % (uri, qs))
+        res = self.http.request('GET', '%s?%s' % (uri, qs), headers=hdrs)
+        if self.debug:
+            print(res)
+        self.res = res
+        if res.status != 200:
+            self.extract_error(res)
+            return None
+        return json.loads(res.data)
+    except BaseException as e:
+        if self.debug:
+            print("error during http access: " + repr(e))
+        self.error = repr(e)
+        return None
+
   def add_conference_date (self, conference_id, date, user_id):
     try:
         payload = {}
@@ -1104,6 +1141,41 @@ class Octav(object):
             self.extract_error(res)
             return None
         return True
+    except BaseException as e:
+        if self.debug:
+            print("error during http access: " + repr(e))
+        self.error = repr(e)
+        return None
+
+  def list_conference_admin (self, conference_id, user_id):
+    try:
+        payload = {}
+        hdrs = {}
+        if conference_id is None:
+            raise MissingRequiredArgument('property conference_id must be provided')
+        payload['conference_id'] = conference_id
+        if user_id is None:
+            raise MissingRequiredArgument('property user_id must be provided')
+        payload['user_id'] = user_id
+        if conference_id is not None:
+            payload['conference_id'] = conference_id
+        if user_id is not None:
+            payload['user_id'] = user_id
+        uri = '%s/v1/conference/admin/list' % self.endpoint
+        hdrs = urllib3.util.make_headers(
+            basic_auth='%s:%s' % (self.key, self.secret),
+        )
+        qs = urlencode(payload, True)
+        if self.debug:
+            print('GET %s?%s' % (uri, qs))
+        res = self.http.request('GET', '%s?%s' % (uri, qs), headers=hdrs)
+        if self.debug:
+            print(res)
+        self.res = res
+        if res.status != 200:
+            self.extract_error(res)
+            return None
+        return json.loads(res.data)
     except BaseException as e:
         if self.debug:
             print("error during http access: " + repr(e))
@@ -1533,7 +1605,7 @@ class Octav(object):
         self.error = repr(e)
         return None
 
-  def list_conferences_by_organizer (self, lang=None, limit=None, organizer_id=None, since=None):
+  def list_conferences_by_organizer (self, lang=None, limit=None, organizer_id=None, since=None, status=None):
     try:
         payload = {}
         hdrs = {}
@@ -1545,6 +1617,8 @@ class Octav(object):
             payload['organizer_id'] = organizer_id
         if since is not None:
             payload['since'] = since
+        if status is not None:
+            payload['status'] = status
         uri = '%s/v1/conference/list_by_organizer' % self.endpoint
         hdrs = urllib3.util.make_headers(
             basic_auth='%s:%s' % (self.key, self.secret),
@@ -1566,7 +1640,7 @@ class Octav(object):
         self.error = repr(e)
         return None
 
-  def list_conference (self, lang=None, limit=None, range_end=None, range_start=None, since=None, status=None):
+  def list_conference (self, lang=None, limit=None, organizers=None, range_end=None, range_start=None, since=None, status=None):
     try:
         payload = {}
         hdrs = {}
@@ -1574,6 +1648,8 @@ class Octav(object):
             payload['lang'] = lang
         if limit is not None:
             payload['limit'] = limit
+        if organizers is not None:
+            payload['organizers'] = organizers
         if range_end is not None:
             payload['range_end'] = range_end
         if range_start is not None:
@@ -2656,7 +2732,7 @@ class Octav(object):
         self.error = repr(e)
         return None
 
-  def send_selection_result_notification (self, id, user_id, force=None):
+  def send_selection_result_notification (self, id, user_id, force=None, session_id=None):
     try:
         payload = {}
         hdrs = {}
@@ -2668,8 +2744,8 @@ class Octav(object):
         payload['user_id'] = user_id
         if force is not None:
             payload['force'] = force
-        if id is not None:
-            payload['id'] = id
+        if session_id is not None:
+            payload['session_id'] = session_id
         if user_id is not None:
             payload['user_id'] = user_id
         uri = '%s/v1/session/send_selection_result_notification' % self.endpoint

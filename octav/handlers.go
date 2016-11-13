@@ -407,6 +407,24 @@ func doDeleteConferenceDate(ctx context.Context, w http.ResponseWriter, r *http.
 	httpJSON(w, map[string]string{"status": "success"})
 }
 
+func doListConferenceDate(ctx context.Context, w http.ResponseWriter, r *http.Request, payload model.ListConferenceDateRequest) {
+	tx, err := db.Begin()
+	if err != nil {
+		httpError(w, `ListConferenceDate`, http.StatusInternalServerError, err)
+		return
+	}
+	defer tx.AutoRollback()
+
+	s := service.Conference()
+	var cdl model.ConferenceDateList
+	if err := s.LoadDates(tx, &cdl, payload.ConferenceID); err != nil {
+		httpError(w, `ListConferenceDate`, http.StatusInternalServerError, err)
+		return
+	}
+
+	httpJSON(w, cdl)
+}
+
 func doAddConferenceDate(ctx context.Context, w http.ResponseWriter, r *http.Request, payload model.CreateConferenceDateRequest) {
 	tx, err := db.Begin()
 	if err != nil {
@@ -449,6 +467,26 @@ func doDeleteConferenceAdmin(ctx context.Context, w http.ResponseWriter, r *http
 		return
 	}
 	httpJSON(w, map[string]string{"status": "success"})
+}
+
+func doListConferenceAdmin(ctx context.Context, w http.ResponseWriter, r *http.Request, payload model.ListConferenceAdminRequest) {
+	trustedCall := isTrustedCall(ctx)
+
+	tx, err := db.Begin()
+	if err != nil {
+		httpError(w, `ListConferenceAdmin`, http.StatusInternalServerError, err)
+		return
+	}
+	defer tx.AutoRollback()
+
+	s := service.Conference()
+	var cdl model.UserList
+	if err := s.LoadAdmins(tx, &cdl, trustedCall, payload.ConferenceID, payload.Lang.String); err != nil {
+		httpError(w, `ListConferenceAdmin`, http.StatusInternalServerError, err)
+		return
+	}
+
+	httpJSON(w, cdl)
 }
 
 func doAddConferenceAdmin(ctx context.Context, w http.ResponseWriter, r *http.Request, payload model.AddConferenceAdminRequest) {

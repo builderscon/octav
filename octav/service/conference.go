@@ -715,20 +715,19 @@ func (v *ConferenceSvc) ListFromPayload(tx *db.Tx, l *model.ConferenceList, payl
 		}
 	}
 
-	status := "public"
-	if payload.Status.Valid() {
-		status = payload.Status.String
+	status := payload.Status
+	switch len(status) {
+	case 0:
+		status = []string{"public"}
+	case 1:
+		if status[0] == "any" {
+			status = []string{"public", "private"}
+		}
 	}
 
 	var vdbl db.ConferenceList
-	if status == "any" {
-		if err := vdbl.LoadByRange(tx, payload.Since.String, rs, re, int(payload.Limit.Int)); err != nil {
-			return errors.Wrap(err, "failed to load list from database")
-		}
-	} else {
-		if err := vdbl.LoadByStatusAndRange(tx, status, payload.Since.String, rs, re, int(payload.Limit.Int)); err != nil {
-			return errors.Wrap(err, "failed to load list from database")
-		}
+	if err := vdbl.LoadFromQuery(tx, status, payload.Organizers, rs, re, payload.Since.String, int(payload.Limit.Int)); err != nil {
+		return errors.Wrap(err, "failed to load list from database")
 	}
 
 	r := make(model.ConferenceList, len(vdbl))
@@ -801,7 +800,7 @@ func (v *ConferenceSvc) LoadSessionTypes(tx *db.Tx, cdl *model.SessionTypeList, 
 
 func (v *ConferenceSvc) ListByOrganizerFromPayload(tx *db.Tx, l *model.ConferenceList, payload model.ListConferencesByOrganizerRequest) (err error) {
 	var vdbl db.ConferenceList
-	if err := db.ListConferencesByOrganizer(tx, &vdbl, payload.OrganizerID, payload.Since.String, int(payload.Limit.Int)); err != nil {
+	if err := vdbl.LoadFromQuery(tx, payload.Status, payload.OrganizerID, time.Time{}, time.Time{}, payload.Since.String, int(payload.Limit.Int)); err != nil {
 		return err
 	}
 
