@@ -59,7 +59,7 @@ cloudsql_files: $(CLOUDSQL_ADDRESS_FILE) $(CLOUDSQL_SSL_FILES)
 
 cloudsql: cloudsql_files
 	@echo "Connecting to mysql..."
-	mysql -uroot -h $(CLOUDSQL_ADDRESS) -p --ssl-ca=$(GCLOUD_CONFIG_DIR)/sql/server-ca.pem --ssl-cert=$(GCLOUD_CONFIG_DIR)/sql/client-cert.pem --ssl-key=$(GCLOUD_CONFIG_DIR)/sql/client-key.pem
+	mysql -uroot -h $(CLOUDSQL_ADDRESS) -p --ssl-ca=$(GCLOUD_CONFIG_DIR)/sql/server-ca.pem --ssl-cert=$(GCLOUD_CONFIG_DIR)/sql/client-cert.pem --ssl-key=$(GCLOUD_CONFIG_DIR)/sql/client-key.pem octav
 
 # This rule creates a secrets file so that it can be fed into kubectl.
 # We go through this hoopla to create the secret so that we don't have to
