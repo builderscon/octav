@@ -42,3 +42,4 @@ import:
 - package: github.com/lestrrat/go-ical
 - package: github.com/lestrrat/go-tmplbox
 - package: google.golang.org/genproto
+- package: gopkg.in/vmihailenco/msgpack.v2

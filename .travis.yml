@@ -3,6 +3,7 @@ go:
   - 1.7
 services:
   - mysql
+  - redis-server
 env:
   - TEST_DIR=octav
 addons:

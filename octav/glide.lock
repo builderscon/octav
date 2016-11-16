@@ -1,20 +1,20 @@
-hash: 6fa4e29d004249a822c4162e188dd486a897c7e6b27c20b2cf4f1dd0604d3df5
-updated: 2016-10-31T12:43:57.338571299+09:00
+hash: e1eb99342a2ade2c714d9b45b6b125527837a026051de91f819f7608b2c16df9
+updated: 2016-11-16T10:22:37.52129565+09:00
 imports:
 - name: cloud.google.com/go
-  version: 7ee19e74f7fd11897ae3b7c4782d8205e810faa7
+  version: 62745400f3add64573c4bf61f0be11483dd2cd4c
   subpackages:
-  - compute/metadata
-  - internal
-  - internal/optional
   - logging
+  - storage
   - logging/apiv2
   - logging/internal
-  - storage
+  - internal/optional
+  - compute/metadata
+  - internal
 - name: github.com/cenkalti/backoff
   version: 32cd0c5b3aef12c76ed64aaf678f6c79736be7dc
 - name: github.com/davecgh/go-spew
-  version: 6d212800a42e8ab5c146b8ace3490ee17e5225f9
+  version: 346938d642f2ec3594ed81d874461961cd0faa76
   subpackages:
   - spew
 - name: github.com/dghubble/go-twitter
@@ -26,30 +26,30 @@ imports:
 - name: github.com/dghubble/sling
   version: c961a4334054e64299d16f8a31bd686ee2565ae4
 - name: github.com/go-sql-driver/mysql
-  version: 2a6c6079c7eff49a7e9d641e109d922f124a3e4c
+  version: 8f6c67f0228a4a6a962008d6c3d1e694e4532e71
 - name: github.com/golang/protobuf
-  version: 98fa357170587e470c5f27d3c3ea0947b71eb455
+  version: 1bdfb324ed170f07fd36e676b0d09fd9c6ec086a
   subpackages:
   - proto
   - ptypes
+  - ptypes/struct
+  - ptypes/timestamp
   - ptypes/any
   - ptypes/duration
   - ptypes/empty
-  - ptypes/struct
-  - ptypes/timestamp
   - ptypes/wrappers
 - name: github.com/google/go-querystring
   version: 9235644dd9e52eeae6fa48efd539fdc351a0af53
   subpackages:
   - query
 - name: github.com/googleapis/gax-go
-  version: 4f7da601ca02aa546c5ef911a0b6595fdadf4e18
+  version: da06d194a00e19ce00d9011a13931c3f6f6887c7
 - name: github.com/gorilla/context
   version: 08b5f424b9271eedf6f9f0ce86cb9396ed337a42
 - name: github.com/gorilla/mux
   version: 757bef944d0f21880861c2dd9c871ca543023cba
 - name: github.com/jessevdk/go-flags
-  version: a44368c298f0906bc8509ee776b9d3eedb9b5741
+  version: 8bc97d602c3bfeb5fc6fc9b5a9c898f245495637
 - name: github.com/lestrrat/go-apache-logformat
   version: 0f5817c5c9e626d408c4d68e3d90fd7697e97d5f
 - name: github.com/lestrrat/go-bindata
@@ -91,26 +91,30 @@ imports:
   - parser
   - vm
 - name: github.com/pkg/errors
-  version: 839d9e913e063e28dfd0e6c7b7512793e0a48be9
+  version: 248dadf4e9068a0b3e79f02ed0a610d935de5302
 - name: github.com/shogo82148/go-sql-proxy
   version: 0ff9659b5642274097d62b43b2d754b001ed4f4d
 - name: github.com/stretchr/testify
   version: 976c720a22c8eb4eb6a0b4348ad85ad12491a506
   subpackages:
   - assert
+- name: go4.org
+  version: 399a9d7bfe85437346a5ec4ef0450fc2f1084e61
+  subpackages:
+  - syncutil/singleflight
 - name: golang.org/x/net
-  version: c33d37840d93fc75251f49ab83c5fc8b2faea5e8
+  version: e57319ce2bbbdc638169d4756554fbaedc805399
   subpackages:
   - context
   - context/ctxhttp
   - http2
+  - trace
   - http2/hpack
   - idna
-  - internal/timeseries
   - lex/httplex
-  - trace
+  - internal/timeseries
 - name: golang.org/x/oauth2
-  version: 25b4fb1468cb89700c7c060cb99f30581a61f5e3
+  version: d5040cddfc0da40b408c9a1da4728662435176a9
   subpackages:
   - google
   - internal
@@ -121,66 +125,84 @@ imports:
   subpackages:
   - errgroup
 - name: golang.org/x/text
-  version: a8b38433e35b65ba247bb267317037dee1b70cea
+  version: a263ba8db058568bb9beba166777d9c9dbe75d68
   subpackages:
-  - internal/tag
   - language
+  - internal/tag
 - name: google.golang.org/api
-  version: 037d03010933c9fa8e57559c1b7faeec971688d1
+  version: a53f28dc539c26b08a77fc5ae954e02917686ef4
   subpackages:
-  - gensupport
-  - googleapi
-  - googleapi/internal/uritemplates
-  - internal
-  - iterator
-  - option
-  - storage/v1
-  - support/bundler
-  - transport
   - urlshortener/v1
-- name: google.golang.org/appengine
-  version: 46239ca616842c00f41b8cbc6bbf2bd6ffbfcdad
-  subpackages:
+  - option
+  - support/bundler
+  - googleapi
+  - iterator
+  - storage/v1
+  - transport
   - internal
-  - internal/app_identity
-  - internal/base
+  - googleapi/internal/uritemplates
+  - gensupport
+  - googleapi/transport
+- name: google.golang.org/appengine
+  version: ca59ef35f409df61fa4a5f8290ff289b37eccfb8
+  subpackages:
+  - datastore
+  - urlfetch
+  - internal
   - internal/datastore
-  - internal/log
+  - socket
+  - internal/urlfetch
+  - internal/app_identity
   - internal/modules
+  - internal/base
+  - internal/log
   - internal/remote_api
   - internal/socket
-  - internal/urlfetch
-  - socket
-  - urlfetch
 - name: google.golang.org/genproto
-  version: 9359a8d303c45e3212571b77610f1cefb0c6f3eb
+  version: 08f135d1a31b6ba454287638a3ce23a55adace6f
   subpackages:
-  - googleapis/api/label
-  - googleapis/api/metric
   - googleapis/api/monitoredres
-  - googleapis/api/serviceconfig
   - googleapis/logging/type
   - googleapis/logging/v2
+  - googleapis/api/label
+  - googleapis/api/serviceconfig
   - googleapis/rpc/status
+  - googleapis/api/metric
   - protobuf
 - name: google.golang.org/grpc
-  version: 396f8ba2a6b9039070f4ff97561f5e408828fccd
+  version: 941cc894cea3c87a12943fd12b594964541b6d28
   subpackages:
   - codes
+  - metadata
   - credentials
   - credentials/oauth
+  - naming
   - grpclog
   - internal
-  - metadata
-  - naming
-  - peer
+  - stats
+  - tap
   - transport
+  - peer
+- name: gopkg.in/bsm/ratelimit.v1
+  version: db14e161995a5177acef654cb0dd785e8ee8bc22
+- name: gopkg.in/go-redis/cache.v5
+  version: a837e46393859f10514445cab55e7e76d9f0eb6e
+  subpackages:
+  - lrucache
 - name: gopkg.in/leonelquinteros/gotext.v1
   version: a735812a72672008b3902f8b2bc1302166a9a8ea
 - name: gopkg.in/mailgun/mailgun-go.v1
   version: 369a1fa57ce6fb314e627087b9fff0db5c266c0f
-testImports:
-- name: github.com/pmezard/go-difflib
-  version: 792786c7400a136282c1664665ae0a8db921c6c2
+- name: gopkg.in/redis.v5
+  version: b6bfe529a846fbb9a58c832ce71c61b6fde12c15
   subpackages:
-  - difflib
+  - internal
+  - internal/consistenthash
+  - internal/hashtag
+  - internal/pool
+  - internal/proto
+- name: gopkg.in/vmihailenco/msgpack.v2
+  version: 200315d5c8aab339f5a5cd44219f4b50ad0782df
+  subpackages:
+  - codes
+devImports: []

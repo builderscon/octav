@@ -6,6 +6,8 @@ import (
 	"sync"
 	"time"
 
+	"github.com/builderscon/octav/octav/cache"
+
 	"github.com/builderscon/octav/octav/db"
 	"github.com/builderscon/octav/octav/internal/errors"
 	"github.com/builderscon/octav/octav/model"
@@ -28,10 +30,18 @@ func (v *ConferenceDateSvc) Lookup(tx *db.Tx, m *model.ConferenceDate, id string
 		defer g.End()
 	}
 
-	r := model.ConferenceDate{}
-	if err = r.Load(tx, id); err != nil {
-		return errors.Wrap(err, "failed to load model.ConferenceDate from database")
-	}
+	var r model.ConferenceDate
+	key := `api.ConferenceDate.` + id
+	c := Cache()
+	_, err = c.GetOrSet(key, &r, func() (interface{}, error) {
+		if pdebug.Enabled {
+			pdebug.Printf(`CACHE MISS: %s`, key)
+		}
+		if err = r.Load(tx, id); err != nil {
+			return nil, errors.Wrap(err, "failed to load model.ConferenceDate from database")
+		}
+		return &r, nil
+	}, cache.WithExpires(time.Hour))
 	*m = r
 	return nil
 }
@@ -65,6 +75,12 @@ func (v *ConferenceDateSvc) Delete(tx *db.Tx, id string) error {
 	vdb := db.ConferenceDate{EID: id}
 	if err := vdb.Delete(tx); err != nil {
 		return err
+	}
+	key := `api.ConferenceDate.` + id
+	c := Cache()
+	c.Delete(key)
+	if pdebug.Enabled {
+		pdebug.Printf(`CACHE DEL %s`, key)
 	}
 	return nil
 }

@@ -6,6 +6,8 @@ import (
 	"sync"
 	"time"
 
+	"github.com/builderscon/octav/octav/cache"
+
 	"github.com/builderscon/octav/octav/db"
 	"github.com/builderscon/octav/octav/internal/errors"
 	"github.com/builderscon/octav/octav/model"
@@ -42,10 +44,18 @@ func (v *VenueSvc) Lookup(tx *db.Tx, m *model.Venue, id string) (err error) {
 		defer g.End()
 	}
 
-	r := model.Venue{}
-	if err = r.Load(tx, id); err != nil {
-		return errors.Wrap(err, "failed to load model.Venue from database")
-	}
+	var r model.Venue
+	key := `api.Venue.` + id
+	c := Cache()
+	_, err = c.GetOrSet(key, &r, func() (interface{}, error) {
+		if pdebug.Enabled {
+			pdebug.Printf(`CACHE MISS: %s`, key)
+		}
+		if err = r.Load(tx, id); err != nil {
+			return nil, errors.Wrap(err, "failed to load model.Venue from database")
+		}
+		return &r, nil
+	}, cache.WithExpires(time.Hour))
 	*m = r
 	return nil
 }
@@ -79,7 +89,7 @@ func (v *VenueSvc) Update(tx *db.Tx, vdb *db.Venue, payload model.UpdateVenueReq
 		defer g.End()
 	}
 
-	if vdb.EID == "" {
+	if vdb.EID == `` {
 		return errors.New("vdb.EID is required (did you forget to call vdb.Load(tx) before hand?)")
 	}
 
@@ -89,6 +99,12 @@ func (v *VenueSvc) Update(tx *db.Tx, vdb *db.Venue, payload model.UpdateVenueReq
 
 	if err := vdb.Update(tx); err != nil {
 		return err
+	}
+	key := `api.Venue.` + vdb.EID
+	c := Cache()
+	c.Delete(key)
+	if pdebug.Enabled {
+		pdebug.Printf(`CACHE DEL %s`, key)
 	}
 
 	return payload.LocalizedFields.Foreach(func(l, k, x string) error {
@@ -212,6 +228,12 @@ func (v *VenueSvc) Delete(tx *db.Tx, id string) error {
 	vdb := db.Venue{EID: id}
 	if err := vdb.Delete(tx); err != nil {
 		return err
+	}
+	key := `api.Venue.` + id
+	c := Cache()
+	c.Delete(key)
+	if pdebug.Enabled {
+		pdebug.Printf(`CACHE DEL %s`, key)
 	}
 	if err := db.DeleteLocalizedStringsForParent(tx, id, "Venue"); err != nil {
 		return err

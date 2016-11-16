@@ -7,10 +7,12 @@ import (
 	"time"
 	"unicode/utf8"
 
+	"github.com/builderscon/octav/octav/cache"
 	"github.com/builderscon/octav/octav/db"
 	"github.com/builderscon/octav/octav/model"
 	"github.com/builderscon/octav/octav/tools"
 	"github.com/lestrrat/go-pdebug"
+	urlenc "github.com/lestrrat/go-urlenc"
 	"github.com/pkg/errors"
 )
 
@@ -449,23 +451,42 @@ func (v *SessionSvc) ListFromPayload(tx *db.Tx, result *model.SessionList, paylo
 		return errors.New("no query specified (one of conference_id/speaker_id is required)")
 	}
 
-	var vdbl db.SessionList
-	if err := vdbl.LoadByConference(tx, conferenceID, speakerID, rangeStart, rangeEnd, status, confirmed); err != nil {
-		return errors.Wrap(err, "failed to load from database")
+	keybytes, err := urlenc.Marshal(payload)
+	if err != nil {
+		return errors.Wrap(err, "failed to marshal payload")
 	}
+	key := string(keybytes)
 
-	l := make(model.SessionList, len(vdbl))
-	for i, vdb := range vdbl {
-		if err := l[i].FromRow(vdb); err != nil {
-			return errors.Wrap(err, "failed to populate model from database")
+	c := Cache()
+	x, err := c.GetOrSet(key, result, func() (interface{}, error) {
+		if pdebug.Enabled {
+			pdebug.Printf("CACHE MISS: Re-generating")
 		}
 
-		if err := v.Decorate(tx, &l[i], payload.TrustedCall, payload.Lang.String); err != nil {
-			return errors.Wrap(err, "failed to decorate session with associated data")
+		var vdbl db.SessionList
+		if err := vdbl.LoadByConference(tx, conferenceID, speakerID, rangeStart, rangeEnd, status, confirmed); err != nil {
+			return nil, errors.Wrap(err, "failed to load from database")
 		}
+
+		l := make(model.SessionList, len(vdbl))
+		for i, vdb := range vdbl {
+			if err := l[i].FromRow(vdb); err != nil {
+				return nil, errors.Wrap(err, "failed to populate model from database")
+			}
+
+			if err := v.Decorate(tx, &l[i], payload.TrustedCall, payload.Lang.String); err != nil {
+				return nil, errors.Wrap(err, "failed to decorate session with associated data")
+			}
+		}
+
+		return &l, nil
+	}, cache.WithExpires(10*time.Minute))
+
+	if err != nil {
+		return err
 	}
 
-	*result = l
+	*result = *(x.(*model.SessionList))
 	return nil
 }
 
@@ -651,10 +672,10 @@ func (v *SessionSvc) SendSelectionResultNotificationFromPayload(tx *db.Tx, paylo
 	}
 
 	vars := struct {
-		Session *model.Session
+		Session  *model.Session
 		Timezone *time.Location
-	} {
-		Session: &m,
+	}{
+		Session:  &m,
 		Timezone: tz,
 	}
 

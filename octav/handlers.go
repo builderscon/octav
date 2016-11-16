@@ -1037,7 +1037,14 @@ func doLookupSession(ctx context.Context, w http.ResponseWriter, r *http.Request
 	httpJSON(w, v)
 }
 
+type listSessionsCacheEntry struct {
+	Expires time.Time
+	List    model.SessionList
+}
+
 func doListSessions(ctx context.Context, w http.ResponseWriter, r *http.Request, payload model.ListSessionsRequest) {
+	var v model.SessionList
+
 	tx, err := db.Begin()
 	if err != nil {
 		httpError(w, `ListSessions`, http.StatusInternalServerError, err)
@@ -1046,7 +1053,6 @@ func doListSessions(ctx context.Context, w http.ResponseWriter, r *http.Request,
 	defer tx.AutoRollback()
 
 	s := service.Session()
-	var v model.SessionList
 	if err := s.ListFromPayload(tx, &v, payload); err != nil {
 		httpError(w, `ListSessions`, http.StatusInternalServerError, err)
 		return

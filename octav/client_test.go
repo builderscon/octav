@@ -495,7 +495,7 @@ func TestConferenceCRUD(t *testing.T) {
 	if err != nil {
 		return
 	}
-	if !assert.Equal(ctx.T, conf4.SubTitle, "Big Bang!", "Conference.SubTitle is the same as the conference updated") {
+	if !assert.Equal(ctx.T, "Big Bang!", conf4.SubTitle, "Conference.SubTitle is the same as the conference updated") {
 		return
 	}
 
@@ -1379,22 +1379,25 @@ func TestListSessions(t *testing.T) {
 		defer testDeleteSessionPass(ctx, s.ID, user.ID)
 	}
 
+	// Do this twice to trigger caching behavior
+	for i := 0; i < 2; i++ {
+		in := model.ListSessionsRequest{}
+		in.Status = []string{model.StatusPending}
+		in.ConferenceID.Set(conference.ID)
+		res, err := ctx.HTTPClient.ListSessions(&in)
+		if !assert.NoError(ctx.T, err, "ListSessions should succeed") {
+			return
+		}
+		if !assert.NoError(ctx.T, validator.HTTPListSessionsResponse.Validate(res), "Validation should succeed") {
+			return
+		}
+
+		if !assert.Len(ctx.T, res, 10, "There should be 10 sessions") {
+			return
+		}
+	}
+
 	in := model.ListSessionsRequest{}
-	in.Status = []string{model.StatusPending}
-	in.ConferenceID.Set(conference.ID)
-	res, err := ctx.HTTPClient.ListSessions(&in)
-	if !assert.NoError(ctx.T, err, "ListSessions should succeed") {
-		return
-	}
-	if !assert.NoError(ctx.T, validator.HTTPListSessionsResponse.Validate(res), "Validation should succeed") {
-		return
-	}
-
-	if !assert.Len(ctx.T, res, 10, "There should be 10 sessions") {
-		return
-	}
-
-	in = model.ListSessionsRequest{}
 	_, err = ctx.HTTPClient.ListSessions(&in)
 	if !assert.Error(ctx.T, err, "Query without conference_id/speaker_id should be an error") {
 		return
