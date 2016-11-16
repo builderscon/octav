@@ -79,8 +79,15 @@ func (c *ConferenceVenue) Create(tx *Tx, opts ...InsertOption) (err error) {
 	return nil
 }
 
-func (c ConferenceVenue) Update(tx *Tx) error {
+func (c ConferenceVenue) Update(tx *Tx) (err error) {
+	if pdebug.Enabled {
+		g := pdebug.Marker(`ConferenceVenue.Update`).BindError(&err)
+		defer g.End()
+	}
 	if c.OID != 0 {
+		if pdebug.Enabled {
+			pdebug.Printf(`Using OID (%d) as key`, c.OID)
+		}
 		stmt, err := library.GetStmt("sqlConferenceVenueUpdateByOIDKey")
 		if err != nil {
 			return errors.Wrap(err, `failed to get statement`)

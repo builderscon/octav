@@ -65,7 +65,11 @@ func init() {
 	})
 }
 
-func (q *Question) LoadByEID(tx *Tx, eid string) error {
+func (q *Question) LoadByEID(tx *Tx, eid string) (err error) {
+	if pdebug.Enabled {
+		g := pdebug.Marker(`Question.LoadByEID %s`, eid).BindError(&err)
+		defer g.End()
+	}
 	stmt, err := library.GetStmt("sqlQuestionLoadByEIDKey")
 	if err != nil {
 		return errors.Wrap(err, `failed to get statement`)
@@ -118,8 +122,15 @@ func (q *Question) Create(tx *Tx, opts ...InsertOption) (err error) {
 	return nil
 }
 
-func (q Question) Update(tx *Tx) error {
+func (q Question) Update(tx *Tx) (err error) {
+	if pdebug.Enabled {
+		g := pdebug.Marker(`Question.Update`).BindError(&err)
+		defer g.End()
+	}
 	if q.OID != 0 {
+		if pdebug.Enabled {
+			pdebug.Printf(`Using OID (%d) as key`, q.OID)
+		}
 		stmt, err := library.GetStmt("sqlQuestionUpdateByOIDKey")
 		if err != nil {
 			return errors.Wrap(err, `failed to get statement`)
@@ -128,6 +139,9 @@ func (q Question) Update(tx *Tx) error {
 		return err
 	}
 	if q.EID != "" {
+		if pdebug.Enabled {
+			pdebug.Printf(`Using EID (%s) as key`, q.EID)
+		}
 		stmt, err := library.GetStmt("sqlQuestionUpdateByEIDKey")
 		if err != nil {
 			return errors.Wrap(err, `failed to get statement`)

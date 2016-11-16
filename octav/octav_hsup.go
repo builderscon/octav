@@ -155,7 +155,7 @@ func httpAddConferenceAdmin(ctx context.Context, w http.ResponseWriter, r *http.
 		httpError(w, `Invalid input (validation failed)`, http.StatusInternalServerError, err)
 		return
 	}
-	doAddConferenceAdmin(ctx, w, r, payload)
+	doAddConferenceAdmin(ctx, w, r, &payload)
 }
 
 func httpAddConferenceCredential(ctx context.Context, w http.ResponseWriter, r *http.Request) {
@@ -200,7 +200,7 @@ func httpAddConferenceCredential(ctx context.Context, w http.ResponseWriter, r *
 		httpError(w, `Invalid input (validation failed)`, http.StatusInternalServerError, err)
 		return
 	}
-	doAddConferenceCredential(ctx, w, r, payload)
+	doAddConferenceCredential(ctx, w, r, &payload)
 }
 
 func httpAddConferenceDate(ctx context.Context, w http.ResponseWriter, r *http.Request) {
@@ -245,7 +245,7 @@ func httpAddConferenceDate(ctx context.Context, w http.ResponseWriter, r *http.R
 		httpError(w, `Invalid input (validation failed)`, http.StatusInternalServerError, err)
 		return
 	}
-	doAddConferenceDate(ctx, w, r, payload)
+	doAddConferenceDate(ctx, w, r, &payload)
 }
 
 func httpAddConferenceSeriesAdmin(ctx context.Context, w http.ResponseWriter, r *http.Request) {
@@ -290,7 +290,7 @@ func httpAddConferenceSeriesAdmin(ctx context.Context, w http.ResponseWriter, r 
 		httpError(w, `Invalid input (validation failed)`, http.StatusInternalServerError, err)
 		return
 	}
-	doAddConferenceSeriesAdmin(ctx, w, r, payload)
+	doAddConferenceSeriesAdmin(ctx, w, r, &payload)
 }
 
 func httpAddConferenceVenue(ctx context.Context, w http.ResponseWriter, r *http.Request) {
@@ -335,7 +335,7 @@ func httpAddConferenceVenue(ctx context.Context, w http.ResponseWriter, r *http.
 		httpError(w, `Invalid input (validation failed)`, http.StatusInternalServerError, err)
 		return
 	}
-	doAddConferenceVenue(ctx, w, r, payload)
+	doAddConferenceVenue(ctx, w, r, &payload)
 }
 
 func httpAddFeaturedSpeaker(ctx context.Context, w http.ResponseWriter, r *http.Request) {
@@ -380,7 +380,7 @@ func httpAddFeaturedSpeaker(ctx context.Context, w http.ResponseWriter, r *http.
 		httpError(w, `Invalid input (validation failed)`, http.StatusInternalServerError, err)
 		return
 	}
-	doAddFeaturedSpeaker(ctx, w, r, payload)
+	doAddFeaturedSpeaker(ctx, w, r, &payload)
 }
 
 func httpAddSessionType(ctx context.Context, w http.ResponseWriter, r *http.Request) {
@@ -425,7 +425,7 @@ func httpAddSessionType(ctx context.Context, w http.ResponseWriter, r *http.Requ
 		httpError(w, `Invalid input (validation failed)`, http.StatusInternalServerError, err)
 		return
 	}
-	doAddSessionType(ctx, w, r, payload)
+	doAddSessionType(ctx, w, r, &payload)
 }
 
 func httpAddSponsor(ctx context.Context, w http.ResponseWriter, r *http.Request) {
@@ -470,7 +470,7 @@ func httpAddSponsor(ctx context.Context, w http.ResponseWriter, r *http.Request)
 		httpError(w, `Invalid input (validation failed)`, http.StatusInternalServerError, err)
 		return
 	}
-	doAddSponsor(ctx, w, r, payload)
+	doAddSponsor(ctx, w, r, &payload)
 }
 
 func httpConfirmTemporaryEmail(ctx context.Context, w http.ResponseWriter, r *http.Request) {
@@ -515,7 +515,7 @@ func httpConfirmTemporaryEmail(ctx context.Context, w http.ResponseWriter, r *ht
 		httpError(w, `Invalid input (validation failed)`, http.StatusInternalServerError, err)
 		return
 	}
-	doConfirmTemporaryEmail(ctx, w, r, payload)
+	doConfirmTemporaryEmail(ctx, w, r, &payload)
 }
 
 func httpCreateConference(ctx context.Context, w http.ResponseWriter, r *http.Request) {
@@ -560,7 +560,7 @@ func httpCreateConference(ctx context.Context, w http.ResponseWriter, r *http.Re
 		httpError(w, `Invalid input (validation failed)`, http.StatusInternalServerError, err)
 		return
 	}
-	doCreateConference(ctx, w, r, payload)
+	doCreateConference(ctx, w, r, &payload)
 }
 
 func httpCreateConferenceSeries(ctx context.Context, w http.ResponseWriter, r *http.Request) {
@@ -605,7 +605,7 @@ func httpCreateConferenceSeries(ctx context.Context, w http.ResponseWriter, r *h
 		httpError(w, `Invalid input (validation failed)`, http.StatusInternalServerError, err)
 		return
 	}
-	doCreateConferenceSeries(ctx, w, r, payload)
+	doCreateConferenceSeries(ctx, w, r, &payload)
 }
 
 func httpCreateQuestion(ctx context.Context, w http.ResponseWriter, r *http.Request) {
@@ -637,7 +637,7 @@ func httpCreateQuestion(ctx context.Context, w http.ResponseWriter, r *http.Requ
 		httpError(w, `Invalid input (validation failed)`, http.StatusInternalServerError, err)
 		return
 	}
-	doCreateQuestion(ctx, w, r, payload)
+	doCreateQuestion(ctx, w, r, &payload)
 }
 
 func httpCreateRoom(ctx context.Context, w http.ResponseWriter, r *http.Request) {
@@ -682,7 +682,7 @@ func httpCreateRoom(ctx context.Context, w http.ResponseWriter, r *http.Request)
 		httpError(w, `Invalid input (validation failed)`, http.StatusInternalServerError, err)
 		return
 	}
-	doCreateRoom(ctx, w, r, payload)
+	doCreateRoom(ctx, w, r, &payload)
 }
 
 func httpCreateSession(ctx context.Context, w http.ResponseWriter, r *http.Request) {
@@ -727,7 +727,7 @@ func httpCreateSession(ctx context.Context, w http.ResponseWriter, r *http.Reque
 		httpError(w, `Invalid input (validation failed)`, http.StatusInternalServerError, err)
 		return
 	}
-	doCreateSession(ctx, w, r, payload)
+	doCreateSession(ctx, w, r, &payload)
 }
 
 func httpCreateSessionSurveyResponse(ctx context.Context, w http.ResponseWriter, r *http.Request) {
@@ -759,7 +759,7 @@ func httpCreateSessionSurveyResponse(ctx context.Context, w http.ResponseWriter,
 		httpError(w, `Invalid input (validation failed)`, http.StatusInternalServerError, err)
 		return
 	}
-	doCreateSessionSurveyResponse(ctx, w, r, payload)
+	doCreateSessionSurveyResponse(ctx, w, r, &payload)
 }
 
 func httpCreateTemporaryEmail(ctx context.Context, w http.ResponseWriter, r *http.Request) {
@@ -804,7 +804,7 @@ func httpCreateTemporaryEmail(ctx context.Context, w http.ResponseWriter, r *htt
 		httpError(w, `Invalid input (validation failed)`, http.StatusInternalServerError, err)
 		return
 	}
-	doCreateTemporaryEmail(ctx, w, r, payload)
+	doCreateTemporaryEmail(ctx, w, r, &payload)
 }
 
 func httpCreateUser(ctx context.Context, w http.ResponseWriter, r *http.Request) {
@@ -849,7 +849,7 @@ func httpCreateUser(ctx context.Context, w http.ResponseWriter, r *http.Request)
 		httpError(w, `Invalid input (validation failed)`, http.StatusInternalServerError, err)
 		return
 	}
-	doCreateUser(ctx, w, r, payload)
+	doCreateUser(ctx, w, r, &payload)
 }
 
 func httpCreateVenue(ctx context.Context, w http.ResponseWriter, r *http.Request) {
@@ -894,7 +894,7 @@ func httpCreateVenue(ctx context.Context, w http.ResponseWriter, r *http.Request
 		httpError(w, `Invalid input (validation failed)`, http.StatusInternalServerError, err)
 		return
 	}
-	doCreateVenue(ctx, w, r, payload)
+	doCreateVenue(ctx, w, r, &payload)
 }
 
 func httpDeleteConference(ctx context.Context, w http.ResponseWriter, r *http.Request) {
@@ -939,7 +939,7 @@ func httpDeleteConference(ctx context.Context, w http.ResponseWriter, r *http.Re
 		httpError(w, `Invalid input (validation failed)`, http.StatusInternalServerError, err)
 		return
 	}
-	doDeleteConference(ctx, w, r, payload)
+	doDeleteConference(ctx, w, r, &payload)
 }
 
 func httpDeleteConferenceAdmin(ctx context.Context, w http.ResponseWriter, r *http.Request) {
@@ -984,7 +984,7 @@ func httpDeleteConferenceAdmin(ctx context.Context, w http.ResponseWriter, r *ht
 		httpError(w, `Invalid input (validation failed)`, http.StatusInternalServerError, err)
 		return
 	}
-	doDeleteConferenceAdmin(ctx, w, r, payload)
+	doDeleteConferenceAdmin(ctx, w, r, &payload)
 }
 
 func httpDeleteConferenceDate(ctx context.Context, w http.ResponseWriter, r *http.Request) {
@@ -1029,7 +1029,7 @@ func httpDeleteConferenceDate(ctx context.Context, w http.ResponseWriter, r *htt
 		httpError(w, `Invalid input (validation failed)`, http.StatusInternalServerError, err)
 		return
 	}
-	doDeleteConferenceDate(ctx, w, r, payload)
+	doDeleteConferenceDate(ctx, w, r, &payload)
 }
 
 func httpDeleteConferenceSeries(ctx context.Context, w http.ResponseWriter, r *http.Request) {
@@ -1074,7 +1074,7 @@ func httpDeleteConferenceSeries(ctx context.Context, w http.ResponseWriter, r *h
 		httpError(w, `Invalid input (validation failed)`, http.StatusInternalServerError, err)
 		return
 	}
-	doDeleteConferenceSeries(ctx, w, r, payload)
+	doDeleteConferenceSeries(ctx, w, r, &payload)
 }
 
 func httpDeleteConferenceVenue(ctx context.Context, w http.ResponseWriter, r *http.Request) {
@@ -1119,7 +1119,7 @@ func httpDeleteConferenceVenue(ctx context.Context, w http.ResponseWriter, r *ht
 		httpError(w, `Invalid input (validation failed)`, http.StatusInternalServerError, err)
 		return
 	}
-	doDeleteConferenceVenue(ctx, w, r, payload)
+	doDeleteConferenceVenue(ctx, w, r, &payload)
 }
 
 func httpDeleteFeaturedSpeaker(ctx context.Context, w http.ResponseWriter, r *http.Request) {
@@ -1164,7 +1164,7 @@ func httpDeleteFeaturedSpeaker(ctx context.Context, w http.ResponseWriter, r *ht
 		httpError(w, `Invalid input (validation failed)`, http.StatusInternalServerError, err)
 		return
 	}
-	doDeleteFeaturedSpeaker(ctx, w, r, payload)
+	doDeleteFeaturedSpeaker(ctx, w, r, &payload)
 }
 
 func httpDeleteQuestion(ctx context.Context, w http.ResponseWriter, r *http.Request) {
@@ -1209,7 +1209,7 @@ func httpDeleteQuestion(ctx context.Context, w http.ResponseWriter, r *http.Requ
 		httpError(w, `Invalid input (validation failed)`, http.StatusInternalServerError, err)
 		return
 	}
-	doDeleteQuestion(ctx, w, r, payload)
+	doDeleteQuestion(ctx, w, r, &payload)
 }
 
 func httpDeleteRoom(ctx context.Context, w http.ResponseWriter, r *http.Request) {
@@ -1254,7 +1254,7 @@ func httpDeleteRoom(ctx context.Context, w http.ResponseWriter, r *http.Request)
 		httpError(w, `Invalid input (validation failed)`, http.StatusInternalServerError, err)
 		return
 	}
-	doDeleteRoom(ctx, w, r, payload)
+	doDeleteRoom(ctx, w, r, &payload)
 }
 
 func httpDeleteSession(ctx context.Context, w http.ResponseWriter, r *http.Request) {
@@ -1299,7 +1299,7 @@ func httpDeleteSession(ctx context.Context, w http.ResponseWriter, r *http.Reque
 		httpError(w, `Invalid input (validation failed)`, http.StatusInternalServerError, err)
 		return
 	}
-	doDeleteSession(ctx, w, r, payload)
+	doDeleteSession(ctx, w, r, &payload)
 }
 
 func httpDeleteSessionType(ctx context.Context, w http.ResponseWriter, r *http.Request) {
@@ -1344,7 +1344,7 @@ func httpDeleteSessionType(ctx context.Context, w http.ResponseWriter, r *http.R
 		httpError(w, `Invalid input (validation failed)`, http.StatusInternalServerError, err)
 		return
 	}
-	doDeleteSessionType(ctx, w, r, payload)
+	doDeleteSessionType(ctx, w, r, &payload)
 }
 
 func httpDeleteSponsor(ctx context.Context, w http.ResponseWriter, r *http.Request) {
@@ -1389,7 +1389,7 @@ func httpDeleteSponsor(ctx context.Context, w http.ResponseWriter, r *http.Reque
 		httpError(w, `Invalid input (validation failed)`, http.StatusInternalServerError, err)
 		return
 	}
-	doDeleteSponsor(ctx, w, r, payload)
+	doDeleteSponsor(ctx, w, r, &payload)
 }
 
 func httpDeleteUser(ctx context.Context, w http.ResponseWriter, r *http.Request) {
@@ -1434,7 +1434,7 @@ func httpDeleteUser(ctx context.Context, w http.ResponseWriter, r *http.Request)
 		httpError(w, `Invalid input (validation failed)`, http.StatusInternalServerError, err)
 		return
 	}
-	doDeleteUser(ctx, w, r, payload)
+	doDeleteUser(ctx, w, r, &payload)
 }
 
 func httpDeleteVenue(ctx context.Context, w http.ResponseWriter, r *http.Request) {
@@ -1479,7 +1479,7 @@ func httpDeleteVenue(ctx context.Context, w http.ResponseWriter, r *http.Request
 		httpError(w, `Invalid input (validation failed)`, http.StatusInternalServerError, err)
 		return
 	}
-	doDeleteVenue(ctx, w, r, payload)
+	doDeleteVenue(ctx, w, r, &payload)
 }
 
 func httpGetConferenceSchedule(ctx context.Context, w http.ResponseWriter, r *http.Request) {
@@ -1511,7 +1511,7 @@ func httpGetConferenceSchedule(ctx context.Context, w http.ResponseWriter, r *ht
 		httpError(w, `Invalid input (validation failed)`, http.StatusInternalServerError, err)
 		return
 	}
-	doGetConferenceSchedule(ctx, w, r, payload)
+	doGetConferenceSchedule(ctx, w, r, &payload)
 }
 
 func httpHealthCheck(ctx context.Context, w http.ResponseWriter, r *http.Request) {
@@ -1562,7 +1562,7 @@ func httpListConference(ctx context.Context, w http.ResponseWriter, r *http.Requ
 		httpError(w, `Invalid input (validation failed)`, http.StatusInternalServerError, err)
 		return
 	}
-	doListConference(ctx, w, r, payload)
+	doListConference(ctx, w, r, &payload)
 }
 
 func httpListConferenceAdmin(ctx context.Context, w http.ResponseWriter, r *http.Request) {
@@ -1594,7 +1594,7 @@ func httpListConferenceAdmin(ctx context.Context, w http.ResponseWriter, r *http
 		httpError(w, `Invalid input (validation failed)`, http.StatusInternalServerError, err)
 		return
 	}
-	doListConferenceAdmin(ctx, w, r, payload)
+	doListConferenceAdmin(ctx, w, r, &payload)
 }
 
 func httpListConferenceDate(ctx context.Context, w http.ResponseWriter, r *http.Request) {
@@ -1626,7 +1626,7 @@ func httpListConferenceDate(ctx context.Context, w http.ResponseWriter, r *http.
 		httpError(w, `Invalid input (validation failed)`, http.StatusInternalServerError, err)
 		return
 	}
-	doListConferenceDate(ctx, w, r, payload)
+	doListConferenceDate(ctx, w, r, &payload)
 }
 
 func httpListConferenceSeries(ctx context.Context, w http.ResponseWriter, r *http.Request) {
@@ -1658,7 +1658,7 @@ func httpListConferenceSeries(ctx context.Context, w http.ResponseWriter, r *htt
 		httpError(w, `Invalid input (validation failed)`, http.StatusInternalServerError, err)
 		return
 	}
-	doListConferenceSeries(ctx, w, r, payload)
+	doListConferenceSeries(ctx, w, r, &payload)
 }
 
 func httpListConferencesByOrganizer(ctx context.Context, w http.ResponseWriter, r *http.Request) {
@@ -1690,7 +1690,7 @@ func httpListConferencesByOrganizer(ctx context.Context, w http.ResponseWriter, 
 		httpError(w, `Invalid input (validation failed)`, http.StatusInternalServerError, err)
 		return
 	}
-	doListConferencesByOrganizer(ctx, w, r, payload)
+	doListConferencesByOrganizer(ctx, w, r, &payload)
 }
 
 func httpListFeaturedSpeakers(ctx context.Context, w http.ResponseWriter, r *http.Request) {
@@ -1722,7 +1722,7 @@ func httpListFeaturedSpeakers(ctx context.Context, w http.ResponseWriter, r *htt
 		httpError(w, `Invalid input (validation failed)`, http.StatusInternalServerError, err)
 		return
 	}
-	doListFeaturedSpeakers(ctx, w, r, payload)
+	doListFeaturedSpeakers(ctx, w, r, &payload)
 }
 
 func httpListQuestion(ctx context.Context, w http.ResponseWriter, r *http.Request) {
@@ -1754,7 +1754,7 @@ func httpListQuestion(ctx context.Context, w http.ResponseWriter, r *http.Reques
 		httpError(w, `Invalid input (validation failed)`, http.StatusInternalServerError, err)
 		return
 	}
-	doListQuestion(ctx, w, r, payload)
+	doListQuestion(ctx, w, r, &payload)
 }
 
 func httpListRoom(ctx context.Context, w http.ResponseWriter, r *http.Request) {
@@ -1786,7 +1786,7 @@ func httpListRoom(ctx context.Context, w http.ResponseWriter, r *http.Request) {
 		httpError(w, `Invalid input (validation failed)`, http.StatusInternalServerError, err)
 		return
 	}
-	doListRoom(ctx, w, r, payload)
+	doListRoom(ctx, w, r, &payload)
 }
 
 func httpListSessionTypesByConference(ctx context.Context, w http.ResponseWriter, r *http.Request) {
@@ -1818,7 +1818,7 @@ func httpListSessionTypesByConference(ctx context.Context, w http.ResponseWriter
 		httpError(w, `Invalid input (validation failed)`, http.StatusInternalServerError, err)
 		return
 	}
-	doListSessionTypesByConference(ctx, w, r, payload)
+	doListSessionTypesByConference(ctx, w, r, &payload)
 }
 
 func httpListSessions(ctx context.Context, w http.ResponseWriter, r *http.Request) {
@@ -1850,7 +1850,7 @@ func httpListSessions(ctx context.Context, w http.ResponseWriter, r *http.Reques
 		httpError(w, `Invalid input (validation failed)`, http.StatusInternalServerError, err)
 		return
 	}
-	doListSessions(ctx, w, r, payload)
+	doListSessions(ctx, w, r, &payload)
 }
 
 func httpListSponsors(ctx context.Context, w http.ResponseWriter, r *http.Request) {
@@ -1882,7 +1882,7 @@ func httpListSponsors(ctx context.Context, w http.ResponseWriter, r *http.Reques
 		httpError(w, `Invalid input (validation failed)`, http.StatusInternalServerError, err)
 		return
 	}
-	doListSponsors(ctx, w, r, payload)
+	doListSponsors(ctx, w, r, &payload)
 }
 
 func httpListUser(ctx context.Context, w http.ResponseWriter, r *http.Request) {
@@ -1914,7 +1914,7 @@ func httpListUser(ctx context.Context, w http.ResponseWriter, r *http.Request) {
 		httpError(w, `Invalid input (validation failed)`, http.StatusInternalServerError, err)
 		return
 	}
-	doListUser(ctx, w, r, payload)
+	doListUser(ctx, w, r, &payload)
 }
 
 func httpListVenue(ctx context.Context, w http.ResponseWriter, r *http.Request) {
@@ -1946,7 +1946,7 @@ func httpListVenue(ctx context.Context, w http.ResponseWriter, r *http.Request) 
 		httpError(w, `Invalid input (validation failed)`, http.StatusInternalServerError, err)
 		return
 	}
-	doListVenue(ctx, w, r, payload)
+	doListVenue(ctx, w, r, &payload)
 }
 
 func httpLookupConference(ctx context.Context, w http.ResponseWriter, r *http.Request) {
@@ -1978,7 +1978,7 @@ func httpLookupConference(ctx context.Context, w http.ResponseWriter, r *http.Re
 		httpError(w, `Invalid input (validation failed)`, http.StatusInternalServerError, err)
 		return
 	}
-	doLookupConference(ctx, w, r, payload)
+	doLookupConference(ctx, w, r, &payload)
 }
 
 func httpLookupConferenceBySlug(ctx context.Context, w http.ResponseWriter, r *http.Request) {
@@ -2010,7 +2010,7 @@ func httpLookupConferenceBySlug(ctx context.Context, w http.ResponseWriter, r *h
 		httpError(w, `Invalid input (validation failed)`, http.StatusInternalServerError, err)
 		return
 	}
-	doLookupConferenceBySlug(ctx, w, r, payload)
+	doLookupConferenceBySlug(ctx, w, r, &payload)
 }
 
 func httpLookupConferenceSeries(ctx context.Context, w http.ResponseWriter, r *http.Request) {
@@ -2042,7 +2042,7 @@ func httpLookupConferenceSeries(ctx context.Context, w http.ResponseWriter, r *h
 		httpError(w, `Invalid input (validation failed)`, http.StatusInternalServerError, err)
 		return
 	}
-	doLookupConferenceSeries(ctx, w, r, payload)
+	doLookupConferenceSeries(ctx, w, r, &payload)
 }
 
 func httpLookupFeaturedSpeaker(ctx context.Context, w http.ResponseWriter, r *http.Request) {
@@ -2074,7 +2074,7 @@ func httpLookupFeaturedSpeaker(ctx context.Context, w http.ResponseWriter, r *ht
 		httpError(w, `Invalid input (validation failed)`, http.StatusInternalServerError, err)
 		return
 	}
-	doLookupFeaturedSpeaker(ctx, w, r, payload)
+	doLookupFeaturedSpeaker(ctx, w, r, &payload)
 }
 
 func httpLookupRoom(ctx context.Context, w http.ResponseWriter, r *http.Request) {
@@ -2106,7 +2106,7 @@ func httpLookupRoom(ctx context.Context, w http.ResponseWriter, r *http.Request)
 		httpError(w, `Invalid input (validation failed)`, http.StatusInternalServerError, err)
 		return
 	}
-	doLookupRoom(ctx, w, r, payload)
+	doLookupRoom(ctx, w, r, &payload)
 }
 
 func httpLookupSession(ctx context.Context, w http.ResponseWriter, r *http.Request) {
@@ -2138,7 +2138,7 @@ func httpLookupSession(ctx context.Context, w http.ResponseWriter, r *http.Reque
 		httpError(w, `Invalid input (validation failed)`, http.StatusInternalServerError, err)
 		return
 	}
-	doLookupSession(ctx, w, r, payload)
+	doLookupSession(ctx, w, r, &payload)
 }
 
 func httpLookupSessionType(ctx context.Context, w http.ResponseWriter, r *http.Request) {
@@ -2170,7 +2170,7 @@ func httpLookupSessionType(ctx context.Context, w http.ResponseWriter, r *http.R
 		httpError(w, `Invalid input (validation failed)`, http.StatusInternalServerError, err)
 		return
 	}
-	doLookupSessionType(ctx, w, r, payload)
+	doLookupSessionType(ctx, w, r, &payload)
 }
 
 func httpLookupSponsor(ctx context.Context, w http.ResponseWriter, r *http.Request) {
@@ -2202,7 +2202,7 @@ func httpLookupSponsor(ctx context.Context, w http.ResponseWriter, r *http.Reque
 		httpError(w, `Invalid input (validation failed)`, http.StatusInternalServerError, err)
 		return
 	}
-	doLookupSponsor(ctx, w, r, payload)
+	doLookupSponsor(ctx, w, r, &payload)
 }
 
 func httpLookupUser(ctx context.Context, w http.ResponseWriter, r *http.Request) {
@@ -2234,7 +2234,7 @@ func httpLookupUser(ctx context.Context, w http.ResponseWriter, r *http.Request)
 		httpError(w, `Invalid input (validation failed)`, http.StatusInternalServerError, err)
 		return
 	}
-	doLookupUser(ctx, w, r, payload)
+	doLookupUser(ctx, w, r, &payload)
 }
 
 func httpLookupUserByAuthUserID(ctx context.Context, w http.ResponseWriter, r *http.Request) {
@@ -2266,7 +2266,7 @@ func httpLookupUserByAuthUserID(ctx context.Context, w http.ResponseWriter, r *h
 		httpError(w, `Invalid input (validation failed)`, http.StatusInternalServerError, err)
 		return
 	}
-	doLookupUserByAuthUserID(ctx, w, r, payload)
+	doLookupUserByAuthUserID(ctx, w, r, &payload)
 }
 
 func httpLookupVenue(ctx context.Context, w http.ResponseWriter, r *http.Request) {
@@ -2298,7 +2298,7 @@ func httpLookupVenue(ctx context.Context, w http.ResponseWriter, r *http.Request
 		httpError(w, `Invalid input (validation failed)`, http.StatusInternalServerError, err)
 		return
 	}
-	doLookupVenue(ctx, w, r, payload)
+	doLookupVenue(ctx, w, r, &payload)
 }
 
 func httpSendAllSelectionResultNotification(ctx context.Context, w http.ResponseWriter, r *http.Request) {
@@ -2343,7 +2343,7 @@ func httpSendAllSelectionResultNotification(ctx context.Context, w http.Response
 		httpError(w, `Invalid input (validation failed)`, http.StatusInternalServerError, err)
 		return
 	}
-	doSendAllSelectionResultNotification(ctx, w, r, payload)
+	doSendAllSelectionResultNotification(ctx, w, r, &payload)
 }
 
 func httpSendSelectionResultNotification(ctx context.Context, w http.ResponseWriter, r *http.Request) {
@@ -2388,7 +2388,7 @@ func httpSendSelectionResultNotification(ctx context.Context, w http.ResponseWri
 		httpError(w, `Invalid input (validation failed)`, http.StatusInternalServerError, err)
 		return
 	}
-	doSendSelectionResultNotification(ctx, w, r, payload)
+	doSendSelectionResultNotification(ctx, w, r, &payload)
 }
 
 func httpTweetAsConference(ctx context.Context, w http.ResponseWriter, r *http.Request) {
@@ -2433,7 +2433,7 @@ func httpTweetAsConference(ctx context.Context, w http.ResponseWriter, r *http.R
 		httpError(w, `Invalid input (validation failed)`, http.StatusInternalServerError, err)
 		return
 	}
-	doTweetAsConference(ctx, w, r, payload)
+	doTweetAsConference(ctx, w, r, &payload)
 }
 
 func httpUpdateConference(ctx context.Context, w http.ResponseWriter, r *http.Request) {
@@ -2491,7 +2491,7 @@ func httpUpdateConference(ctx context.Context, w http.ResponseWriter, r *http.Re
 		httpError(w, `Invalid input (validation failed)`, http.StatusInternalServerError, err)
 		return
 	}
-	doUpdateConference(ctx, w, r, payload)
+	doUpdateConference(ctx, w, r, &payload)
 }
 
 func httpUpdateFeaturedSpeaker(ctx context.Context, w http.ResponseWriter, r *http.Request) {
@@ -2536,7 +2536,7 @@ func httpUpdateFeaturedSpeaker(ctx context.Context, w http.ResponseWriter, r *ht
 		httpError(w, `Invalid input (validation failed)`, http.StatusInternalServerError, err)
 		return
 	}
-	doUpdateFeaturedSpeaker(ctx, w, r, payload)
+	doUpdateFeaturedSpeaker(ctx, w, r, &payload)
 }
 
 func httpUpdateRoom(ctx context.Context, w http.ResponseWriter, r *http.Request) {
@@ -2581,7 +2581,7 @@ func httpUpdateRoom(ctx context.Context, w http.ResponseWriter, r *http.Request)
 		httpError(w, `Invalid input (validation failed)`, http.StatusInternalServerError, err)
 		return
 	}
-	doUpdateRoom(ctx, w, r, payload)
+	doUpdateRoom(ctx, w, r, &payload)
 }
 
 func httpUpdateSession(ctx context.Context, w http.ResponseWriter, r *http.Request) {
@@ -2626,7 +2626,7 @@ func httpUpdateSession(ctx context.Context, w http.ResponseWriter, r *http.Reque
 		httpError(w, `Invalid input (validation failed)`, http.StatusInternalServerError, err)
 		return
 	}
-	doUpdateSession(ctx, w, r, payload)
+	doUpdateSession(ctx, w, r, &payload)
 }
 
 func httpUpdateSessionType(ctx context.Context, w http.ResponseWriter, r *http.Request) {
@@ -2671,7 +2671,7 @@ func httpUpdateSessionType(ctx context.Context, w http.ResponseWriter, r *http.R
 		httpError(w, `Invalid input (validation failed)`, http.StatusInternalServerError, err)
 		return
 	}
-	doUpdateSessionType(ctx, w, r, payload)
+	doUpdateSessionType(ctx, w, r, &payload)
 }
 
 func httpUpdateSponsor(ctx context.Context, w http.ResponseWriter, r *http.Request) {
@@ -2729,7 +2729,7 @@ func httpUpdateSponsor(ctx context.Context, w http.ResponseWriter, r *http.Reque
 		httpError(w, `Invalid input (validation failed)`, http.StatusInternalServerError, err)
 		return
 	}
-	doUpdateSponsor(ctx, w, r, payload)
+	doUpdateSponsor(ctx, w, r, &payload)
 }
 
 func httpUpdateUser(ctx context.Context, w http.ResponseWriter, r *http.Request) {
@@ -2774,7 +2774,7 @@ func httpUpdateUser(ctx context.Context, w http.ResponseWriter, r *http.Request)
 		httpError(w, `Invalid input (validation failed)`, http.StatusInternalServerError, err)
 		return
 	}
-	doUpdateUser(ctx, w, r, payload)
+	doUpdateUser(ctx, w, r, &payload)
 }
 
 func httpUpdateVenue(ctx context.Context, w http.ResponseWriter, r *http.Request) {
@@ -2819,7 +2819,7 @@ func httpUpdateVenue(ctx context.Context, w http.ResponseWriter, r *http.Request
 		httpError(w, `Invalid input (validation failed)`, http.StatusInternalServerError, err)
 		return
 	}
-	doUpdateVenue(ctx, w, r, payload)
+	doUpdateVenue(ctx, w, r, &payload)
 }
 
 func httpVerifyUser(ctx context.Context, w http.ResponseWriter, r *http.Request) {
@@ -2864,7 +2864,7 @@ func httpVerifyUser(ctx context.Context, w http.ResponseWriter, r *http.Request)
 		httpError(w, `Invalid input (validation failed)`, http.StatusInternalServerError, err)
 		return
 	}
-	doVerifyUser(ctx, w, r, payload)
+	doVerifyUser(ctx, w, r, &payload)
 }
 
 func (s *Server) SetupRoutes() {

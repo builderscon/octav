@@ -8,7 +8,7 @@ import (
 
 func (v *QuestionSvc) Init() {}
 
-func (v *QuestionSvc) populateRowForCreate(vdb *db.Question, payload model.CreateQuestionRequest) error {
+func (v *QuestionSvc) populateRowForCreate(vdb *db.Question, payload *model.CreateQuestionRequest) error {
 	vdb.EID = tools.UUID()
 	vdb.SessionID = payload.SessionID
 	vdb.UserID = payload.UserID
@@ -17,7 +17,7 @@ func (v *QuestionSvc) populateRowForCreate(vdb *db.Question, payload model.Creat
 	return nil
 }
 
-func (v *QuestionSvc) populateRowForUpdate(vdb *db.Question, payload model.UpdateQuestionRequest) error {
+func (v *QuestionSvc) populateRowForUpdate(vdb *db.Question, payload *model.UpdateQuestionRequest) error {
 	if payload.SessionID.Valid() {
 		vdb.SessionID = payload.SessionID.String
 	}

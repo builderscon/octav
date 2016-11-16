@@ -65,7 +65,11 @@ func init() {
 	})
 }
 
-func (c *ConferenceComponent) LoadByEID(tx *Tx, eid string) error {
+func (c *ConferenceComponent) LoadByEID(tx *Tx, eid string) (err error) {
+	if pdebug.Enabled {
+		g := pdebug.Marker(`ConferenceComponent.LoadByEID %s`, eid).BindError(&err)
+		defer g.End()
+	}
 	stmt, err := library.GetStmt("sqlConferenceComponentLoadByEIDKey")
 	if err != nil {
 		return errors.Wrap(err, `failed to get statement`)
@@ -118,8 +122,15 @@ func (c *ConferenceComponent) Create(tx *Tx, opts ...InsertOption) (err error) {
 	return nil
 }
 
-func (c ConferenceComponent) Update(tx *Tx) error {
+func (c ConferenceComponent) Update(tx *Tx) (err error) {
+	if pdebug.Enabled {
+		g := pdebug.Marker(`ConferenceComponent.Update`).BindError(&err)
+		defer g.End()
+	}
 	if c.OID != 0 {
+		if pdebug.Enabled {
+			pdebug.Printf(`Using OID (%d) as key`, c.OID)
+		}
 		stmt, err := library.GetStmt("sqlConferenceComponentUpdateByOIDKey")
 		if err != nil {
 			return errors.Wrap(err, `failed to get statement`)
@@ -128,6 +139,9 @@ func (c ConferenceComponent) Update(tx *Tx) error {
 		return err
 	}
 	if c.EID != "" {
+		if pdebug.Enabled {
+			pdebug.Printf(`Using EID (%s) as key`, c.EID)
+		}
 		stmt, err := library.GetStmt("sqlConferenceComponentUpdateByEIDKey")
 		if err != nil {
 			return errors.Wrap(err, `failed to get statement`)

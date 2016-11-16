@@ -1,16 +1,17 @@
 package service
 
 import (
+	"context"
+
 	"github.com/builderscon/octav/octav/db"
 	"github.com/builderscon/octav/octav/model"
 	"github.com/builderscon/octav/octav/tools"
-	"github.com/lestrrat/go-pdebug"
 	"github.com/pkg/errors"
 )
 
 func (v *FeaturedSpeakerSvc) Init() {}
 
-func (v *FeaturedSpeakerSvc) populateRowForCreate(vdb *db.FeaturedSpeaker, payload model.CreateFeaturedSpeakerRequest) error {
+func (v *FeaturedSpeakerSvc) populateRowForCreate(vdb *db.FeaturedSpeaker, payload *model.CreateFeaturedSpeakerRequest) error {
 	vdb.EID = tools.UUID()
 	vdb.ConferenceID = payload.ConferenceID
 	vdb.DisplayName = payload.DisplayName
@@ -29,7 +30,7 @@ func (v *FeaturedSpeakerSvc) populateRowForCreate(vdb *db.FeaturedSpeaker, paylo
 	return nil
 }
 
-func (v *FeaturedSpeakerSvc) populateRowForUpdate(vdb *db.FeaturedSpeaker, payload model.UpdateFeaturedSpeakerRequest) error {
+func (v *FeaturedSpeakerSvc) populateRowForUpdate(vdb *db.FeaturedSpeaker, payload *model.UpdateFeaturedSpeakerRequest) error {
 	if payload.DisplayName.Valid() {
 		vdb.DisplayName = payload.DisplayName.String
 	}
@@ -51,14 +52,14 @@ func (v *FeaturedSpeakerSvc) populateRowForUpdate(vdb *db.FeaturedSpeaker, paylo
 	return nil
 }
 
-func (v *FeaturedSpeakerSvc) CreateFromPayload(tx *db.Tx, payload model.AddFeaturedSpeakerRequest, result *model.FeaturedSpeaker) error {
+func (v *FeaturedSpeakerSvc) CreateFromPayload(tx *db.Tx, payload *model.AddFeaturedSpeakerRequest, result *model.FeaturedSpeaker) error {
 	su := User()
 	if err := su.IsConferenceAdministrator(tx, payload.ConferenceID, payload.UserID); err != nil {
 		return errors.Wrap(err, "creating a featured speaker requires conference administrator privilege")
 	}
 
 	vdb := db.FeaturedSpeaker{}
-	if err := v.Create(tx, &vdb, model.CreateFeaturedSpeakerRequest{payload}); err != nil {
+	if err := v.Create(tx, &vdb, &model.CreateFeaturedSpeakerRequest{payload}); err != nil {
 		return errors.Wrap(err, "failed to store in database")
 	}
 
@@ -71,26 +72,15 @@ func (v *FeaturedSpeakerSvc) CreateFromPayload(tx *db.Tx, payload model.AddFeatu
 	return nil
 }
 
-func (v *FeaturedSpeakerSvc) UpdateFromPayload(tx *db.Tx, payload model.UpdateFeaturedSpeakerRequest) (err error) {
-	if pdebug.Enabled {
-		g := pdebug.Marker("service.FeaturedSpeaker.UpdateFromPayload").BindError(&err)
-		defer g.End()
-	}
-
-	vdb := db.FeaturedSpeaker{}
-	if err := vdb.LoadByEID(tx, payload.ID); err != nil {
-		return errors.Wrap(err, "failed to load featured speaker from database")
-	}
-
+func (v *FeaturedSpeakerSvc) PreUpdateFromPayloadHook(ctx context.Context, tx *db.Tx, vdb *db.FeaturedSpeaker, payload *model.UpdateFeaturedSpeakerRequest) (err error) {
 	su := User()
 	if err := su.IsConferenceAdministrator(tx, vdb.ConferenceID, payload.UserID); err != nil {
 		return errors.Wrap(err, "updating a featured speaker requires conference administrator privilege")
 	}
-
-	return errors.Wrap(v.Update(tx, &vdb, payload), "failed to load featured speaker from database")
+	return nil
 }
 
-func (v *FeaturedSpeakerSvc) DeleteFromPayload(tx *db.Tx, payload model.DeleteFeaturedSpeakerRequest) error {
+func (v *FeaturedSpeakerSvc) DeleteFromPayload(tx *db.Tx, payload *model.DeleteFeaturedSpeakerRequest) error {
 	var m db.FeaturedSpeaker
 	if err := m.LoadByEID(tx, payload.ID); err != nil {
 		return errors.Wrap(err, "failed to load featured speaker from database")
@@ -104,7 +94,7 @@ func (v *FeaturedSpeakerSvc) DeleteFromPayload(tx *db.Tx, payload model.DeleteFe
 	return errors.Wrap(v.Delete(tx, m.EID), "failed to delete from database")
 }
 
-func (v *FeaturedSpeakerSvc) ListFromPayload(tx *db.Tx, result *model.FeaturedSpeakerList, payload model.ListFeaturedSpeakersRequest) error {
+func (v *FeaturedSpeakerSvc) ListFromPayload(tx *db.Tx, result *model.FeaturedSpeakerList, payload *model.ListFeaturedSpeakersRequest) error {
 	var vdbl db.FeaturedSpeakerList
 	if err := vdbl.LoadByConferenceSinceEID(tx, payload.ConferenceID, payload.Since.String, int(payload.Limit.Int)); err != nil {
 		return errors.Wrap(err, "failed to load featured speakers from database")

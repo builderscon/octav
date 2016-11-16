@@ -65,7 +65,11 @@ func init() {
 	})
 }
 
-func (s *SessionType) LoadByEID(tx *Tx, eid string) error {
+func (s *SessionType) LoadByEID(tx *Tx, eid string) (err error) {
+	if pdebug.Enabled {
+		g := pdebug.Marker(`SessionType.LoadByEID %s`, eid).BindError(&err)
+		defer g.End()
+	}
 	stmt, err := library.GetStmt("sqlSessionTypeLoadByEIDKey")
 	if err != nil {
 		return errors.Wrap(err, `failed to get statement`)
@@ -118,8 +122,15 @@ func (s *SessionType) Create(tx *Tx, opts ...InsertOption) (err error) {
 	return nil
 }
 
-func (s SessionType) Update(tx *Tx) error {
+func (s SessionType) Update(tx *Tx) (err error) {
+	if pdebug.Enabled {
+		g := pdebug.Marker(`SessionType.Update`).BindError(&err)
+		defer g.End()
+	}
 	if s.OID != 0 {
+		if pdebug.Enabled {
+			pdebug.Printf(`Using OID (%d) as key`, s.OID)
+		}
 		stmt, err := library.GetStmt("sqlSessionTypeUpdateByOIDKey")
 		if err != nil {
 			return errors.Wrap(err, `failed to get statement`)
@@ -128,6 +139,9 @@ func (s SessionType) Update(tx *Tx) error {
 		return err
 	}
 	if s.EID != "" {
+		if pdebug.Enabled {
+			pdebug.Printf(`Using EID (%s) as key`, s.EID)
+		}
 		stmt, err := library.GetStmt("sqlSessionTypeUpdateByEIDKey")
 		if err != nil {
 			return errors.Wrap(err, `failed to get statement`)

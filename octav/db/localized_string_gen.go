@@ -77,8 +77,15 @@ func (l *LocalizedString) Create(tx *Tx, opts ...InsertOption) (err error) {
 	return nil
 }
 
-func (l LocalizedString) Update(tx *Tx) error {
+func (l LocalizedString) Update(tx *Tx) (err error) {
+	if pdebug.Enabled {
+		g := pdebug.Marker(`LocalizedString.Update`).BindError(&err)
+		defer g.End()
+	}
 	if l.OID != 0 {
+		if pdebug.Enabled {
+			pdebug.Printf(`Using OID (%d) as key`, l.OID)
+		}
 		stmt, err := library.GetStmt("sqlLocalizedStringUpdateByOIDKey")
 		if err != nil {
 			return errors.Wrap(err, `failed to get statement`)

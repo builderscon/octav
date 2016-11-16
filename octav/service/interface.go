@@ -71,14 +71,21 @@ type ConferenceSvc struct {
 type ConferenceComponentSvc struct{}
 type ConferenceDateSvc struct{}
 type ConferenceSeriesSvc struct{}
+
+// +PreUpdateFromPayloadHook
 type FeaturedSpeakerSvc struct{}
 type MailgunSvc struct {
 	defaultSender string
 	client        mailgun.Mailgun
 }
 
+type LocalizedStringSvc struct{}
 type QuestionSvc struct{}
+
+// +PreUpdateFromPayloadHook
 type RoomSvc struct{}
+
+// +PreUpdateFromPayloadHook
 type SessionSvc struct{}
 type SessionTypeSvc struct{}
 type SponsorSvc struct {
@@ -91,7 +98,8 @@ type TwitterSvc struct {
 	*twitter.Client
 }
 
-// +PostLookupHook
+// +PreUpdateFromPayloadHook
+// +PostLookupFromPayloadHook
 type UserSvc struct {
 	EnableVerify bool
 }

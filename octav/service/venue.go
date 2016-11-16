@@ -9,7 +9,7 @@ import (
 
 func (v *VenueSvc) Init() {}
 
-func (v *VenueSvc) populateRowForCreate(vdb *db.Venue, payload model.CreateVenueRequest) error {
+func (v *VenueSvc) populateRowForCreate(vdb *db.Venue, payload *model.CreateVenueRequest) error {
 	vdb.EID = tools.UUID()
 	vdb.Name = payload.Name.String
 	vdb.Address = payload.Address.String
@@ -18,7 +18,7 @@ func (v *VenueSvc) populateRowForCreate(vdb *db.Venue, payload model.CreateVenue
 	return nil
 }
 
-func (v *VenueSvc) populateRowForUpdate(vdb *db.Venue, payload model.UpdateVenueRequest) error {
+func (v *VenueSvc) populateRowForUpdate(vdb *db.Venue, payload *model.UpdateVenueRequest) error {
 	if payload.Name.Valid() {
 	vdb.Name = payload.Name.String
 	}
@@ -76,7 +76,7 @@ func (v *VenueSvc) Decorate(tx *db.Tx, venue *model.Venue, trustedCall bool, lan
 	return nil
 }
 
-func (v *VenueSvc) CreateFromPayload(tx *db.Tx, venue *model.Venue, payload model.CreateVenueRequest) error {
+func (v *VenueSvc) CreateFromPayload(tx *db.Tx, venue *model.Venue, payload *model.CreateVenueRequest) error {
 	su := User()
 	if err := su.IsAdministrator(tx, payload.UserID); err != nil {
 		return errors.Wrap(err, "creating venues require administrator privileges")
@@ -96,29 +96,7 @@ func (v *VenueSvc) CreateFromPayload(tx *db.Tx, venue *model.Venue, payload mode
 	return nil
 }
 
-func (v *VenueSvc) UpdateFromPayload(tx *db.Tx, venue *model.Venue, payload model.UpdateVenueRequest) error {
-	var vdb db.Venue
-	if err := vdb.LoadByEID(tx, payload.ID); err != nil {
-		return errors.Wrap(err, "failed to load from database")
-	}
-
-	// TODO: We must protect the API server from changing important
-	// fields like conference_id, speaker_id, room_id, etc from regular
-	// users, but allow administrators to do anything they want
-	if err := v.Update(tx, &vdb, payload); err != nil {
-		return errors.Wrap(err, "failed to update database")
-	}
-
-	var r model.Venue
-	if err := r.FromRow(vdb); err != nil {
-		return errors.Wrap(err, "failed to populate model from database")
-	}
-	*venue = r
-
-	return nil
-}
-
-func (v *VenueSvc) DeleteFromPayload(tx *db.Tx, payload model.DeleteVenueRequest) error {
+func (v *VenueSvc) DeleteFromPayload(tx *db.Tx, payload *model.DeleteVenueRequest) error {
 	su := User()
 	if err := su.IsAdministrator(tx, payload.UserID); err != nil {
 		return errors.Wrap(err, "deleting venues require administrator privileges")
@@ -127,7 +105,7 @@ func (v *VenueSvc) DeleteFromPayload(tx *db.Tx, payload model.DeleteVenueRequest
 	return errors.Wrap(v.Delete(tx, payload.ID), "failed to delete from database")
 }
 
-func (v *VenueSvc) ListFromPayload(tx *db.Tx, result *model.VenueList, payload model.ListVenueRequest) error {
+func (v *VenueSvc) ListFromPayload(tx *db.Tx, result *model.VenueList, payload *model.ListVenueRequest) error {
 	var vdbl db.VenueList
 	if err := vdbl.LoadSinceEID(tx, payload.Since.String, int(payload.Limit.Int)); err != nil {
 		return errors.Wrap(err, "failed to load from database")

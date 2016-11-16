@@ -64,7 +64,11 @@ func init() {
 	})
 }
 
-func (c *ConferenceDate) LoadByEID(tx *Tx, eid string) error {
+func (c *ConferenceDate) LoadByEID(tx *Tx, eid string) (err error) {
+	if pdebug.Enabled {
+		g := pdebug.Marker(`ConferenceDate.LoadByEID %s`, eid).BindError(&err)
+		defer g.End()
+	}
 	stmt, err := library.GetStmt("sqlConferenceDateLoadByEIDKey")
 	if err != nil {
 		return errors.Wrap(err, `failed to get statement`)
@@ -116,8 +120,15 @@ func (c *ConferenceDate) Create(tx *Tx, opts ...InsertOption) (err error) {
 	return nil
 }
 
-func (c ConferenceDate) Update(tx *Tx) error {
+func (c ConferenceDate) Update(tx *Tx) (err error) {
+	if pdebug.Enabled {
+		g := pdebug.Marker(`ConferenceDate.Update`).BindError(&err)
+		defer g.End()
+	}
 	if c.OID != 0 {
+		if pdebug.Enabled {
+			pdebug.Printf(`Using OID (%d) as key`, c.OID)
+		}
 		stmt, err := library.GetStmt("sqlConferenceDateUpdateByOIDKey")
 		if err != nil {
 			return errors.Wrap(err, `failed to get statement`)
@@ -126,6 +137,9 @@ func (c ConferenceDate) Update(tx *Tx) error {
 		return err
 	}
 	if c.EID != "" {
+		if pdebug.Enabled {
+			pdebug.Printf(`Using EID (%s) as key`, c.EID)
+		}
 		stmt, err := library.GetStmt("sqlConferenceDateUpdateByEIDKey")
 		if err != nil {
 			return errors.Wrap(err, `failed to get statement`)

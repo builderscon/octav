@@ -2,6 +2,7 @@ package service
 
 import (
 	"bytes"
+	"context"
 	"net/http"
 	"strconv"
 	"time"
@@ -19,7 +20,7 @@ func (v *UserSvc) Init() {
 	v.EnableVerify = true
 }
 
-func (v *UserSvc) populateRowForCreate(vdb *db.User, payload model.CreateUserRequest) error {
+func (v *UserSvc) populateRowForCreate(vdb *db.User, payload *model.CreateUserRequest) error {
 	vdb.EID = tools.UUID()
 
 	vdb.Nickname = payload.Nickname
@@ -55,7 +56,7 @@ func (v *UserSvc) populateRowForCreate(vdb *db.User, payload model.CreateUserReq
 	return nil
 }
 
-func (v *UserSvc) populateRowForUpdate(vdb *db.User, payload model.UpdateUserRequest) error {
+func (v *UserSvc) populateRowForUpdate(vdb *db.User, payload *model.UpdateUserRequest) error {
 	if payload.Nickname.Valid() {
 		vdb.Nickname = payload.Nickname.String
 	}
@@ -157,7 +158,7 @@ func (v *UserSvc) IsOwnerUser(tx *db.Tx, targetID, userID string) error {
 	return v.IsSystemAdmin(tx, userID)
 }
 
-func (v *UserSvc) ListFromPayload(tx *db.Tx, result *model.UserList, payload model.ListUserRequest) error {
+func (v *UserSvc) ListFromPayload(tx *db.Tx, result *model.UserList, payload *model.ListUserRequest) error {
 	var vdbl db.UserList
 	if err := vdbl.LoadFromQuery(tx, payload.Pattern.String, payload.Since.String, int(payload.Limit.Int)); err != nil {
 		return errors.Wrap(err, "failed to load from database")
@@ -178,7 +179,7 @@ func (v *UserSvc) ListFromPayload(tx *db.Tx, result *model.UserList, payload mod
 	return nil
 }
 
-func (v *UserSvc) CreateFromPayload(tx *db.Tx, result *model.User, payload model.CreateUserRequest) error {
+func (v *UserSvc) CreateFromPayload(tx *db.Tx, result *model.User, payload *model.CreateUserRequest) error {
 	// Normally we would like to limit who can create users, but this
 	// is done via OAuth login, so anybody must be able to do it.
 	var vdb db.User
@@ -195,7 +196,7 @@ func (v *UserSvc) CreateFromPayload(tx *db.Tx, result *model.User, payload model
 	return nil
 }
 
-func (v *UserSvc) DeleteFromPayload(tx *db.Tx, payload model.DeleteUserRequest) error {
+func (v *UserSvc) DeleteFromPayload(tx *db.Tx, payload *model.DeleteUserRequest) error {
 	if err := v.IsOwnerUser(tx, payload.ID, payload.UserID); err != nil {
 		return errors.Wrap(err, "deleting a user requires to be the user themselves, or a system administrator")
 	}
@@ -203,17 +204,11 @@ func (v *UserSvc) DeleteFromPayload(tx *db.Tx, payload model.DeleteUserRequest) 
 	return errors.Wrap(v.Delete(tx, payload.ID), "failed to delete user")
 }
 
-func (v *UserSvc) UpdateFromPayload(tx *db.Tx, payload model.UpdateUserRequest) error {
-	if err := v.IsOwnerUser(tx, payload.ID, payload.UserID); err != nil {
-		return errors.Wrap(err, "updating a user requires to be the user themselves, or a system administrator")
-	}
-
-	var vdb db.User
-	if err := vdb.LoadByEID(tx, payload.ID); err != nil {
-		return errors.Wrap(err, "failed to load from database")
-	}
-
-	return errors.Wrap(v.Update(tx, &vdb, payload), "failed to update database")
+func (v *UserSvc) PreUpdateFromPayloadHook(ctx context.Context, tx *db.Tx, _ *db.User, payload *model.UpdateUserRequest) error {
+	return errors.Wrap(
+		v.IsOwnerUser(tx, payload.ID, payload.UserID),
+		"updating a user requires to be the user themselves, or a system administrator",
+	)
 }
 
 func (v *UserSvc) IsSessionOwner(tx *db.Tx, sessionID, userID string) (err error) {
@@ -255,7 +250,7 @@ func (v *UserSvc) Decorate(tx *db.Tx, user *model.User, trustedCall bool, lang s
 	return nil
 }
 
-func (v *UserSvc) LookupUserByAuthUserIDFromPayload(tx *db.Tx, result *model.User, payload model.LookupUserByAuthUserIDRequest) error {
+func (v *UserSvc) LookupUserByAuthUserIDFromPayload(tx *db.Tx, result *model.User, payload *model.LookupUserByAuthUserIDRequest) error {
 	var vdb db.User
 	if err := vdb.LoadByAuthUserID(tx, payload.AuthVia, payload.AuthUserID); err != nil {
 		return errors.Wrap(err, "failed to load from database")
@@ -270,8 +265,8 @@ func (v *UserSvc) LookupUserByAuthUserIDFromPayload(tx *db.Tx, result *model.Use
 		return errors.Wrap(err, "failed to decorate with assocaited data")
 	}
 
-	if err := v.PostLookupHook(tx, &r); err != nil {
-		return errors.Wrap(err, "failed to execute PostLookupHook")
+	if err := v.PostLookupFromPayloadHook(tx, &r); err != nil {
+		return errors.Wrap(err, "failed to execute PostLookupFromPayloadHook")
 	}
 
 	*result = r
@@ -279,7 +274,7 @@ func (v *UserSvc) LookupUserByAuthUserIDFromPayload(tx *db.Tx, result *model.Use
 	return nil
 }
 
-func (v *UserSvc) CreateTemporaryEmailFromPayload(tx *db.Tx, key *string, payload model.CreateTemporaryEmailRequest) (err error) {
+func (v *UserSvc) CreateTemporaryEmailFromPayload(tx *db.Tx, key *string, payload *model.CreateTemporaryEmailRequest) (err error) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("service.User.CreateTemporaryEmailFromPayload").BindError(&err)
 		defer g.End()
@@ -329,7 +324,7 @@ func (v *UserSvc) CreateTemporaryEmailFromPayload(tx *db.Tx, key *string, payloa
 	return nil
 }
 
-func (v *UserSvc) ConfirmTemporaryEmailFromPayload(tx *db.Tx, payload model.ConfirmTemporaryEmailRequest) (err error) {
+func (v *UserSvc) ConfirmTemporaryEmailFromPayload(tx *db.Tx, payload *model.ConfirmTemporaryEmailRequest) (err error) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("service.User.ConfirmTemporaryEmailFromPayload").BindError(&err)
 		defer g.End()
@@ -429,7 +424,7 @@ func (v *UserSvc) Verify(m *model.User) (err error) {
 		return errors.Wrap(err, "failed to load from database")
 	}
 
-	if err := v.Update(tx, &vdb, payload); err != nil {
+	if err := v.Update(tx, &vdb); err != nil {
 		return errors.Wrap(err, "failed to update database")
 	}
 
@@ -439,7 +434,7 @@ func (v *UserSvc) Verify(m *model.User) (err error) {
 	return nil
 }
 
-func (v *UserSvc) PostLookupHook(tx *db.Tx, m *model.User) error {
+func (v *UserSvc) PostLookupFromPayloadHook(tx *db.Tx, m *model.User) error {
 	if v.ShouldVerify(m) {
 		go v.Verify(m)
 	}

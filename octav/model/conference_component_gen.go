@@ -9,6 +9,7 @@ import (
 	"github.com/lestrrat/go-pdebug"
 )
 
+var _ = pdebug.Enabled
 var _ = time.Time{}
 
 func (v *ConferenceComponent) Load(tx *db.Tx, id string) (err error) {

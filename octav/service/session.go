@@ -2,6 +2,7 @@ package service
 
 import (
 	"bytes"
+	"context"
 	"fmt"
 	"strconv"
 	"time"
@@ -18,7 +19,7 @@ import (
 
 func (v *SessionSvc) Init() {}
 
-func (v *SessionSvc) populateRowForCreate(vdb *db.Session, payload model.CreateSessionRequest) error {
+func (v *SessionSvc) populateRowForCreate(vdb *db.Session, payload *model.CreateSessionRequest) error {
 	vdb.EID = tools.UUID()
 	vdb.ConferenceID = payload.ConferenceID
 	vdb.SpeakerID = payload.SpeakerID.String
@@ -126,7 +127,7 @@ func (v *SessionSvc) populateRowForCreate(vdb *db.Session, payload model.CreateS
 	return nil
 }
 
-func (v *SessionSvc) populateRowForUpdate(vdb *db.Session, payload model.UpdateSessionRequest) error {
+func (v *SessionSvc) populateRowForUpdate(vdb *db.Session, payload *model.UpdateSessionRequest) error {
 	if vdb.EID != payload.ID {
 		return errors.New("ID mismatched for Session.populdateRowForUpdate")
 	}
@@ -330,7 +331,7 @@ func (v *SessionSvc) Decorate(tx *db.Tx, session *model.Session, trustedCall boo
 	return nil
 }
 
-func (v *SessionSvc) CreateFromPayload(tx *db.Tx, result *model.Session, payload model.CreateSessionRequest) error {
+func (v *SessionSvc) CreateFromPayload(tx *db.Tx, result *model.Session, payload *model.CreateSessionRequest) error {
 	var u model.User
 	su := User()
 	if err := su.Lookup(tx, &u, payload.UserID); err != nil {
@@ -365,20 +366,10 @@ func (v *SessionSvc) CreateFromPayload(tx *db.Tx, result *model.Session, payload
 	return nil
 }
 
-func (v *SessionSvc) UpdateFromPayload(tx *db.Tx, result *model.Session, payload model.UpdateSessionRequest) (err error) {
-	if pdebug.Enabled {
-		g := pdebug.Marker("service.Session.UpdateFromPayload %s", payload.ID).BindError(&err)
-		defer g.End()
-	}
-
+func (v *SessionSvc) PreUpdateFromPayloadHook(ctx context.Context, tx *db.Tx, vdb *db.Session, payload *model.UpdateSessionRequest) (err error) {
 	su := User()
 	if err := su.IsSessionOwner(tx, payload.ID, payload.UserID); err != nil {
 		return errors.Wrap(err, "updating sessions require session owner privileges")
-	}
-
-	var vdb db.Session
-	if err := vdb.LoadByEID(tx, payload.ID); err != nil {
-		return errors.Wrap(err, "failed to load from database")
 	}
 
 	// We must protect the API server from changing important
@@ -391,21 +382,10 @@ func (v *SessionSvc) UpdateFromPayload(tx *db.Tx, result *model.Session, payload
 		payload.RoomID.Set(vdb.RoomID)
 		payload.SelectionResultSent.Set(vdb.SelectionResultSent)
 	}
-
-	if err := v.Update(tx, &vdb, payload); err != nil {
-		return errors.Wrap(err, "failed to update database")
-	}
-
-	var m model.Session
-	if err := m.FromRow(vdb); err != nil {
-		return errors.Wrap(err, "failed to populate model from database")
-	}
-
-	*result = m
 	return nil
 }
 
-func (v *SessionSvc) ListFromPayload(tx *db.Tx, result *model.SessionList, payload model.ListSessionsRequest) (err error) {
+func (v *SessionSvc) ListFromPayload(tx *db.Tx, result *model.SessionList, payload *model.ListSessionsRequest) (err error) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("service.Session.ListFromPayload").BindError(&err)
 		defer g.End()
@@ -490,7 +470,7 @@ func (v *SessionSvc) ListFromPayload(tx *db.Tx, result *model.SessionList, paylo
 	return nil
 }
 
-func (v *SessionSvc) DeleteFromPayload(tx *db.Tx, payload model.DeleteSessionRequest) (err error) {
+func (v *SessionSvc) DeleteFromPayload(tx *db.Tx, payload *model.DeleteSessionRequest) (err error) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("service.Session.DeleteFromPayload %s", payload.ID).BindError(&err)
 		defer g.End()
@@ -617,7 +597,7 @@ func formatSessionTweet(session *model.Session, conf *model.Conference, series *
 	), nil
 }
 
-func (v *SessionSvc) SendSelectionResultNotificationFromPayload(tx *db.Tx, payload model.SendSelectionResultNotificationRequest) error {
+func (v *SessionSvc) SendSelectionResultNotificationFromPayload(ctx context.Context, tx *db.Tx, payload *model.SendSelectionResultNotificationRequest) error {
 	var m model.Session
 	if err := v.Lookup(tx, &m, payload.SessionID); err != nil {
 		return errors.Wrap(err, "failed to load model.Session from database")
@@ -692,14 +672,10 @@ func (v *SessionSvc) SendSelectionResultNotificationFromPayload(tx *db.Tx, paylo
 	// in the caller
 	var req model.UpdateSessionRequest
 	req.ID = payload.SessionID
+	req.UserID = payload.UserID
 	req.SelectionResultSent.Set(true)
 
-	var vdb db.Session
-	if err := vdb.LoadByEID(tx, payload.SessionID); err != nil {
-		return errors.Wrap(err, "failed to load from database")
-	}
-
-	if err := v.Update(tx, &vdb, req); err != nil {
+	if err := v.UpdateFromPayload(ctx, tx, &req); err != nil {
 		return errors.Wrap(err, "failed to update database")
 	}
 

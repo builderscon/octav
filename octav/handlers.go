@@ -140,7 +140,7 @@ func doHealthCheck(ctx context.Context, w http.ResponseWriter, r *http.Request) 
 	})
 }
 
-func doCreateConferenceSeries(ctx context.Context, w http.ResponseWriter, r *http.Request, payload model.CreateConferenceSeriesRequest) {
+func doCreateConferenceSeries(ctx context.Context, w http.ResponseWriter, r *http.Request, payload *model.CreateConferenceSeriesRequest) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("doCreateConferenceSeries")
 		defer g.End()
@@ -168,7 +168,7 @@ func doCreateConferenceSeries(ctx context.Context, w http.ResponseWriter, r *htt
 	httpJSON(w, c)
 }
 
-func doLookupConferenceSeries(ctx context.Context, w http.ResponseWriter, r *http.Request, payload model.LookupConferenceSeriesRequest) {
+func doLookupConferenceSeries(ctx context.Context, w http.ResponseWriter, r *http.Request, payload *model.LookupConferenceSeriesRequest) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("doLookupConferenceSeries")
 		defer g.End()
@@ -190,7 +190,7 @@ func doLookupConferenceSeries(ctx context.Context, w http.ResponseWriter, r *htt
 	httpJSON(w, c)
 }
 
-func doDeleteConferenceSeries(ctx context.Context, w http.ResponseWriter, r *http.Request, payload model.DeleteConferenceSeriesRequest) {
+func doDeleteConferenceSeries(ctx context.Context, w http.ResponseWriter, r *http.Request, payload *model.DeleteConferenceSeriesRequest) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("doDeleteConferenceSeries")
 		defer g.End()
@@ -215,7 +215,7 @@ func doDeleteConferenceSeries(ctx context.Context, w http.ResponseWriter, r *htt
 	httpJSON(w, map[string]string{"status": "success"})
 }
 
-func doListConferenceSeries(ctx context.Context, w http.ResponseWriter, r *http.Request, payload model.ListConferenceSeriesRequest) {
+func doListConferenceSeries(ctx context.Context, w http.ResponseWriter, r *http.Request, payload *model.ListConferenceSeriesRequest) {
 	tx, err := db.Begin()
 	if err != nil {
 		httpError(w, `ListConferencesSeries`, http.StatusInternalServerError, err)
@@ -233,7 +233,7 @@ func doListConferenceSeries(ctx context.Context, w http.ResponseWriter, r *http.
 	httpJSON(w, l)
 }
 
-func doAddConferenceSeriesAdmin(ctx context.Context, w http.ResponseWriter, r *http.Request, payload model.AddConferenceSeriesAdminRequest) {
+func doAddConferenceSeriesAdmin(ctx context.Context, w http.ResponseWriter, r *http.Request, payload *model.AddConferenceSeriesAdminRequest) {
 	tx, err := db.Begin()
 	if err != nil {
 		httpError(w, `AddConferenceSeriesAdmin`, http.StatusInternalServerError, err)
@@ -254,7 +254,7 @@ func doAddConferenceSeriesAdmin(ctx context.Context, w http.ResponseWriter, r *h
 	httpJSON(w, map[string]string{"status": "success"})
 }
 
-func doCreateConference(ctx context.Context, w http.ResponseWriter, r *http.Request, payload model.CreateConferenceRequest) {
+func doCreateConference(ctx context.Context, w http.ResponseWriter, r *http.Request, payload *model.CreateConferenceRequest) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("doCreateConference")
 		defer g.End()
@@ -282,7 +282,7 @@ func doCreateConference(ctx context.Context, w http.ResponseWriter, r *http.Requ
 	httpJSON(w, model.ObjectID{ID: c.ID, Type: "conference"})
 }
 
-func doLookupConferenceBySlug(ctx context.Context, w http.ResponseWriter, r *http.Request, payload model.LookupConferenceBySlugRequest) {
+func doLookupConferenceBySlug(ctx context.Context, w http.ResponseWriter, r *http.Request, payload *model.LookupConferenceBySlugRequest) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("doLookupConferenceBySlug")
 		defer g.End()
@@ -305,7 +305,7 @@ func doLookupConferenceBySlug(ctx context.Context, w http.ResponseWriter, r *htt
 	httpJSON(w, c)
 }
 
-func doLookupConference(ctx context.Context, w http.ResponseWriter, r *http.Request, payload model.LookupConferenceRequest) {
+func doLookupConference(ctx context.Context, w http.ResponseWriter, r *http.Request, payload *model.LookupConferenceRequest) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("doLookupConference")
 		defer g.End()
@@ -327,7 +327,7 @@ func doLookupConference(ctx context.Context, w http.ResponseWriter, r *http.Requ
 	httpJSON(w, c)
 }
 
-func doUpdateConference(ctx context.Context, w http.ResponseWriter, r *http.Request, payload model.UpdateConferenceRequest) {
+func doUpdateConference(ctx context.Context, w http.ResponseWriter, r *http.Request, payload *model.UpdateConferenceRequest) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("doUpdateConference")
 		defer g.End()
@@ -361,7 +361,7 @@ func doUpdateConference(ctx context.Context, w http.ResponseWriter, r *http.Requ
 	httpJSON(w, map[string]string{"status": "success"})
 }
 
-func doDeleteConference(ctx context.Context, w http.ResponseWriter, r *http.Request, payload model.DeleteConferenceRequest) {
+func doDeleteConference(ctx context.Context, w http.ResponseWriter, r *http.Request, payload *model.DeleteConferenceRequest) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("doDeleteConference")
 		defer g.End()
@@ -386,7 +386,7 @@ func doDeleteConference(ctx context.Context, w http.ResponseWriter, r *http.Requ
 	httpJSON(w, map[string]string{"status": "success"})
 }
 
-func doDeleteConferenceDate(ctx context.Context, w http.ResponseWriter, r *http.Request, payload model.DeleteConferenceDateRequest) {
+func doDeleteConferenceDate(ctx context.Context, w http.ResponseWriter, r *http.Request, payload *model.DeleteConferenceDateRequest) {
 	tx, err := db.Begin()
 	if err != nil {
 		httpError(w, `DeleteConferenceDate`, http.StatusInternalServerError, err)
@@ -407,7 +407,7 @@ func doDeleteConferenceDate(ctx context.Context, w http.ResponseWriter, r *http.
 	httpJSON(w, map[string]string{"status": "success"})
 }
 
-func doListConferenceDate(ctx context.Context, w http.ResponseWriter, r *http.Request, payload model.ListConferenceDateRequest) {
+func doListConferenceDate(ctx context.Context, w http.ResponseWriter, r *http.Request, payload *model.ListConferenceDateRequest) {
 	tx, err := db.Begin()
 	if err != nil {
 		httpError(w, `ListConferenceDate`, http.StatusInternalServerError, err)
@@ -425,7 +425,7 @@ func doListConferenceDate(ctx context.Context, w http.ResponseWriter, r *http.Re
 	httpJSON(w, cdl)
 }
 
-func doAddConferenceDate(ctx context.Context, w http.ResponseWriter, r *http.Request, payload model.CreateConferenceDateRequest) {
+func doAddConferenceDate(ctx context.Context, w http.ResponseWriter, r *http.Request, payload *model.CreateConferenceDateRequest) {
 	tx, err := db.Begin()
 	if err != nil {
 		httpError(w, `AddConferenceDates`, http.StatusInternalServerError, err)
@@ -448,7 +448,7 @@ func doAddConferenceDate(ctx context.Context, w http.ResponseWriter, r *http.Req
 	httpJSON(w, v)
 }
 
-func doDeleteConferenceAdmin(ctx context.Context, w http.ResponseWriter, r *http.Request, payload model.DeleteConferenceAdminRequest) {
+func doDeleteConferenceAdmin(ctx context.Context, w http.ResponseWriter, r *http.Request, payload *model.DeleteConferenceAdminRequest) {
 	tx, err := db.Begin()
 	if err != nil {
 		httpError(w, `DeleteConferenceAdmin`, http.StatusInternalServerError, err)
@@ -469,7 +469,7 @@ func doDeleteConferenceAdmin(ctx context.Context, w http.ResponseWriter, r *http
 	httpJSON(w, map[string]string{"status": "success"})
 }
 
-func doListConferenceAdmin(ctx context.Context, w http.ResponseWriter, r *http.Request, payload model.ListConferenceAdminRequest) {
+func doListConferenceAdmin(ctx context.Context, w http.ResponseWriter, r *http.Request, payload *model.ListConferenceAdminRequest) {
 	trustedCall := isTrustedCall(ctx)
 
 	tx, err := db.Begin()
@@ -489,7 +489,7 @@ func doListConferenceAdmin(ctx context.Context, w http.ResponseWriter, r *http.R
 	httpJSON(w, cdl)
 }
 
-func doAddConferenceAdmin(ctx context.Context, w http.ResponseWriter, r *http.Request, payload model.AddConferenceAdminRequest) {
+func doAddConferenceAdmin(ctx context.Context, w http.ResponseWriter, r *http.Request, payload *model.AddConferenceAdminRequest) {
 	tx, err := db.Begin()
 	if err != nil {
 		httpError(w, `AddConferenceAdmin`, http.StatusInternalServerError, err)
@@ -510,7 +510,7 @@ func doAddConferenceAdmin(ctx context.Context, w http.ResponseWriter, r *http.Re
 	httpJSON(w, map[string]string{"status": "success"})
 }
 
-func doDeleteConferenceVenue(ctx context.Context, w http.ResponseWriter, r *http.Request, payload model.DeleteConferenceVenueRequest) {
+func doDeleteConferenceVenue(ctx context.Context, w http.ResponseWriter, r *http.Request, payload *model.DeleteConferenceVenueRequest) {
 	tx, err := db.Begin()
 	if err != nil {
 		httpError(w, `DeleteConferenceVenue`, http.StatusInternalServerError, err)
@@ -531,7 +531,7 @@ func doDeleteConferenceVenue(ctx context.Context, w http.ResponseWriter, r *http
 	httpJSON(w, map[string]string{"status": "success"})
 }
 
-func doAddConferenceVenue(ctx context.Context, w http.ResponseWriter, r *http.Request, payload model.AddConferenceVenueRequest) {
+func doAddConferenceVenue(ctx context.Context, w http.ResponseWriter, r *http.Request, payload *model.AddConferenceVenueRequest) {
 	tx, err := db.Begin()
 	if err != nil {
 		httpError(w, `AddConferenceVenue`, http.StatusInternalServerError, err)
@@ -552,7 +552,7 @@ func doAddConferenceVenue(ctx context.Context, w http.ResponseWriter, r *http.Re
 	httpJSON(w, map[string]string{"status": "success"})
 }
 
-func doListConference(ctx context.Context, w http.ResponseWriter, r *http.Request, payload model.ListConferenceRequest) {
+func doListConference(ctx context.Context, w http.ResponseWriter, r *http.Request, payload *model.ListConferenceRequest) {
 	tx, err := db.Begin()
 	if err != nil {
 		httpError(w, `ListConferences`, http.StatusInternalServerError, err)
@@ -570,7 +570,7 @@ func doListConference(ctx context.Context, w http.ResponseWriter, r *http.Reques
 	httpJSON(w, v)
 }
 
-func doCreateRoom(ctx context.Context, w http.ResponseWriter, r *http.Request, payload model.CreateRoomRequest) {
+func doCreateRoom(ctx context.Context, w http.ResponseWriter, r *http.Request, payload *model.CreateRoomRequest) {
 	tx, err := db.Begin()
 	if err != nil {
 		httpError(w, `CreateRoom`, http.StatusInternalServerError, err)
@@ -593,7 +593,7 @@ func doCreateRoom(ctx context.Context, w http.ResponseWriter, r *http.Request, p
 	httpJSON(w, v)
 }
 
-func doUpdateRoom(ctx context.Context, w http.ResponseWriter, r *http.Request, payload model.UpdateRoomRequest) {
+func doUpdateRoom(ctx context.Context, w http.ResponseWriter, r *http.Request, payload *model.UpdateRoomRequest) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("doUpdateRoom")
 		defer g.End()
@@ -607,7 +607,7 @@ func doUpdateRoom(ctx context.Context, w http.ResponseWriter, r *http.Request, p
 	defer tx.AutoRollback()
 
 	s := service.Room()
-	if err := s.UpdateFromPayload(tx, payload); err != nil {
+	if err := s.UpdateFromPayload(ctx, tx, payload); err != nil {
 		httpError(w, `UpdateRoom`, http.StatusInternalServerError, err)
 		return
 	}
@@ -620,7 +620,7 @@ func doUpdateRoom(ctx context.Context, w http.ResponseWriter, r *http.Request, p
 	httpJSON(w, map[string]string{"status": "success"})
 }
 
-func doCreateSession(ctx context.Context, w http.ResponseWriter, r *http.Request, payload model.CreateSessionRequest) {
+func doCreateSession(ctx context.Context, w http.ResponseWriter, r *http.Request, payload *model.CreateSessionRequest) {
 	tx, err := db.Begin()
 	if err != nil {
 		httpError(w, `CreateSession`, http.StatusInternalServerError, err)
@@ -645,7 +645,7 @@ func doCreateSession(ctx context.Context, w http.ResponseWriter, r *http.Request
 	go s.PostSocialServices(&v)
 }
 
-func doUpdateSession(ctx context.Context, w http.ResponseWriter, r *http.Request, payload model.UpdateSessionRequest) {
+func doUpdateSession(ctx context.Context, w http.ResponseWriter, r *http.Request, payload *model.UpdateSessionRequest) {
 	tx, err := db.Begin()
 	if err != nil {
 		httpError(w, `UpdateSession`, http.StatusInternalServerError, err)
@@ -655,7 +655,7 @@ func doUpdateSession(ctx context.Context, w http.ResponseWriter, r *http.Request
 
 	s := service.Session()
 	var v model.Session
-	if err := s.UpdateFromPayload(tx, &v, payload); err != nil {
+	if err := s.UpdateFromPayload(ctx, tx, payload); err != nil {
 		httpError(w, `UpdateConference`, http.StatusNotFound, err)
 		return
 	}
@@ -668,7 +668,7 @@ func doUpdateSession(ctx context.Context, w http.ResponseWriter, r *http.Request
 	httpJSON(w, v)
 }
 
-func doDeleteSession(ctx context.Context, w http.ResponseWriter, r *http.Request, payload model.DeleteSessionRequest) {
+func doDeleteSession(ctx context.Context, w http.ResponseWriter, r *http.Request, payload *model.DeleteSessionRequest) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("doDeleteSession")
 		defer g.End()
@@ -693,7 +693,7 @@ func doDeleteSession(ctx context.Context, w http.ResponseWriter, r *http.Request
 	httpJSON(w, map[string]string{"status": "success"})
 }
 
-func doCreateUser(ctx context.Context, w http.ResponseWriter, r *http.Request, payload model.CreateUserRequest) {
+func doCreateUser(ctx context.Context, w http.ResponseWriter, r *http.Request, payload *model.CreateUserRequest) {
 	tx, err := db.Begin()
 	if err != nil {
 		httpError(w, `CreateUser`, http.StatusInternalServerError, err)
@@ -716,7 +716,7 @@ func doCreateUser(ctx context.Context, w http.ResponseWriter, r *http.Request, p
 	httpJSON(w, v)
 }
 
-func doDeleteUser(ctx context.Context, w http.ResponseWriter, r *http.Request, payload model.DeleteUserRequest) {
+func doDeleteUser(ctx context.Context, w http.ResponseWriter, r *http.Request, payload *model.DeleteUserRequest) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("doDeleteUser")
 		defer g.End()
@@ -741,7 +741,7 @@ func doDeleteUser(ctx context.Context, w http.ResponseWriter, r *http.Request, p
 	httpJSON(w, map[string]string{"status": "success"})
 }
 
-func doListUser(ctx context.Context, w http.ResponseWriter, r *http.Request, payload model.ListUserRequest) {
+func doListUser(ctx context.Context, w http.ResponseWriter, r *http.Request, payload *model.ListUserRequest) {
 	tx, err := db.Begin()
 	if err != nil {
 		httpError(w, `ListUsers`, http.StatusInternalServerError, err)
@@ -760,7 +760,7 @@ func doListUser(ctx context.Context, w http.ResponseWriter, r *http.Request, pay
 	httpJSON(w, v)
 }
 
-func doLookupUserByAuthUserID(ctx context.Context, w http.ResponseWriter, r *http.Request, payload model.LookupUserByAuthUserIDRequest) {
+func doLookupUserByAuthUserID(ctx context.Context, w http.ResponseWriter, r *http.Request, payload *model.LookupUserByAuthUserIDRequest) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("doLookupUserByAuthUserID")
 		defer g.End()
@@ -783,7 +783,7 @@ func doLookupUserByAuthUserID(ctx context.Context, w http.ResponseWriter, r *htt
 	httpJSON(w, v)
 }
 
-func doLookupUser(ctx context.Context, w http.ResponseWriter, r *http.Request, payload model.LookupUserRequest) {
+func doLookupUser(ctx context.Context, w http.ResponseWriter, r *http.Request, payload *model.LookupUserRequest) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("doLookupUser")
 		defer g.End()
@@ -806,7 +806,7 @@ func doLookupUser(ctx context.Context, w http.ResponseWriter, r *http.Request, p
 	httpJSON(w, v)
 }
 
-func doCreateVenue(ctx context.Context, w http.ResponseWriter, r *http.Request, payload model.CreateVenueRequest) {
+func doCreateVenue(ctx context.Context, w http.ResponseWriter, r *http.Request, payload *model.CreateVenueRequest) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("doCreateVenue")
 		defer g.End()
@@ -834,7 +834,7 @@ func doCreateVenue(ctx context.Context, w http.ResponseWriter, r *http.Request, 
 	httpJSON(w, v)
 }
 
-func doUpdateUser(ctx context.Context, w http.ResponseWriter, r *http.Request, payload model.UpdateUserRequest) {
+func doUpdateUser(ctx context.Context, w http.ResponseWriter, r *http.Request, payload *model.UpdateUserRequest) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("doUpdateUser")
 		defer g.End()
@@ -848,7 +848,7 @@ func doUpdateUser(ctx context.Context, w http.ResponseWriter, r *http.Request, p
 	defer tx.AutoRollback()
 
 	s := service.User()
-	if err := s.UpdateFromPayload(tx, payload); err != nil {
+	if err := s.UpdateFromPayload(ctx, tx, payload); err != nil {
 		httpError(w, `UpdateUser`, http.StatusInternalServerError, err)
 		return
 	}
@@ -860,7 +860,7 @@ func doUpdateUser(ctx context.Context, w http.ResponseWriter, r *http.Request, p
 	httpJSON(w, map[string]string{"status": "success"})
 }
 
-func doListRoom(ctx context.Context, w http.ResponseWriter, r *http.Request, payload model.ListRoomRequest) {
+func doListRoom(ctx context.Context, w http.ResponseWriter, r *http.Request, payload *model.ListRoomRequest) {
 	tx, err := db.Begin()
 	if err != nil {
 		httpError(w, `ListRoom`, http.StatusInternalServerError, err)
@@ -878,7 +878,7 @@ func doListRoom(ctx context.Context, w http.ResponseWriter, r *http.Request, pay
 	httpJSON(w, v)
 }
 
-func doLookupRoom(ctx context.Context, w http.ResponseWriter, r *http.Request, payload model.LookupRoomRequest) {
+func doLookupRoom(ctx context.Context, w http.ResponseWriter, r *http.Request, payload *model.LookupRoomRequest) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("doLookupRoom")
 		defer g.End()
@@ -900,7 +900,7 @@ func doLookupRoom(ctx context.Context, w http.ResponseWriter, r *http.Request, p
 	httpJSON(w, v)
 }
 
-func doDeleteRoom(ctx context.Context, w http.ResponseWriter, r *http.Request, payload model.DeleteRoomRequest) {
+func doDeleteRoom(ctx context.Context, w http.ResponseWriter, r *http.Request, payload *model.DeleteRoomRequest) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("doDeleteRoom")
 		defer g.End()
@@ -925,7 +925,7 @@ func doDeleteRoom(ctx context.Context, w http.ResponseWriter, r *http.Request, p
 	httpJSON(w, map[string]string{"status": "success"})
 }
 
-func doDeleteVenue(ctx context.Context, w http.ResponseWriter, r *http.Request, payload model.DeleteVenueRequest) {
+func doDeleteVenue(ctx context.Context, w http.ResponseWriter, r *http.Request, payload *model.DeleteVenueRequest) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("doDeleteVenue")
 		defer g.End()
@@ -950,7 +950,7 @@ func doDeleteVenue(ctx context.Context, w http.ResponseWriter, r *http.Request, 
 	httpJSON(w, map[string]string{"status": "success"})
 }
 
-func doLookupVenue(ctx context.Context, w http.ResponseWriter, r *http.Request, payload model.LookupVenueRequest) {
+func doLookupVenue(ctx context.Context, w http.ResponseWriter, r *http.Request, payload *model.LookupVenueRequest) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("doLookupVenue")
 		defer g.End()
@@ -972,7 +972,7 @@ func doLookupVenue(ctx context.Context, w http.ResponseWriter, r *http.Request, 
 	httpJSON(w, v)
 }
 
-func doUpdateVenue(ctx context.Context, w http.ResponseWriter, r *http.Request, payload model.UpdateVenueRequest) {
+func doUpdateVenue(ctx context.Context, w http.ResponseWriter, r *http.Request, payload *model.UpdateVenueRequest) {
 	tx, err := db.Begin()
 	if err != nil {
 		httpError(w, `UpdateVenue`, http.StatusInternalServerError, err)
@@ -981,8 +981,7 @@ func doUpdateVenue(ctx context.Context, w http.ResponseWriter, r *http.Request, 
 	defer tx.AutoRollback()
 
 	s := service.Venue()
-	var v model.Venue
-	if err := s.UpdateFromPayload(tx, &v, payload); err != nil {
+	if err := s.UpdateFromPayload(ctx, tx, payload); err != nil {
 		httpError(w, `UpdateVenue`, http.StatusInternalServerError, err)
 		return
 	}
@@ -992,10 +991,10 @@ func doUpdateVenue(ctx context.Context, w http.ResponseWriter, r *http.Request, 
 		return
 	}
 
-	httpJSON(w, v)
+	httpJSON(w, map[string]string{"status": "success"})
 }
 
-func doListVenue(ctx context.Context, w http.ResponseWriter, r *http.Request, payload model.ListVenueRequest) {
+func doListVenue(ctx context.Context, w http.ResponseWriter, r *http.Request, payload *model.ListVenueRequest) {
 	tx, err := db.Begin()
 	if err != nil {
 		httpError(w, `ListVenues`, http.StatusInternalServerError, err)
@@ -1013,7 +1012,7 @@ func doListVenue(ctx context.Context, w http.ResponseWriter, r *http.Request, pa
 	httpJSON(w, v)
 }
 
-func doLookupSession(ctx context.Context, w http.ResponseWriter, r *http.Request, payload model.LookupSessionRequest) {
+func doLookupSession(ctx context.Context, w http.ResponseWriter, r *http.Request, payload *model.LookupSessionRequest) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("doLookupSession")
 		defer g.End()
@@ -1042,7 +1041,7 @@ type listSessionsCacheEntry struct {
 	List    model.SessionList
 }
 
-func doListSessions(ctx context.Context, w http.ResponseWriter, r *http.Request, payload model.ListSessionsRequest) {
+func doListSessions(ctx context.Context, w http.ResponseWriter, r *http.Request, payload *model.ListSessionsRequest) {
 	var v model.SessionList
 
 	tx, err := db.Begin()
@@ -1061,20 +1060,20 @@ func doListSessions(ctx context.Context, w http.ResponseWriter, r *http.Request,
 	httpJSON(w, v)
 }
 
-func doCreateQuestion(ctx context.Context, w http.ResponseWriter, r *http.Request, payload model.CreateQuestionRequest) {
+func doCreateQuestion(ctx context.Context, w http.ResponseWriter, r *http.Request, payload *model.CreateQuestionRequest) {
 }
 
-func doDeleteQuestion(ctx context.Context, w http.ResponseWriter, r *http.Request, payload model.DeleteQuestionRequest) {
+func doDeleteQuestion(ctx context.Context, w http.ResponseWriter, r *http.Request, payload *model.DeleteQuestionRequest) {
 }
 
-func doListQuestion(ctx context.Context, w http.ResponseWriter, r *http.Request, payload model.ListQuestionRequest) {
+func doListQuestion(ctx context.Context, w http.ResponseWriter, r *http.Request, payload *model.ListQuestionRequest) {
 }
 
-func doCreateSessionSurveyResponse(ctx context.Context, w http.ResponseWriter, r *http.Request, payload model.CreateSessionSurveyResponseRequest) {
+func doCreateSessionSurveyResponse(ctx context.Context, w http.ResponseWriter, r *http.Request, payload *model.CreateSessionSurveyResponseRequest) {
 
 }
 
-func doAddFeaturedSpeaker(ctx context.Context, w http.ResponseWriter, r *http.Request, payload model.AddFeaturedSpeakerRequest) {
+func doAddFeaturedSpeaker(ctx context.Context, w http.ResponseWriter, r *http.Request, payload *model.AddFeaturedSpeakerRequest) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("doAddFeaturedSpeaker")
 		defer g.End()
@@ -1102,7 +1101,7 @@ func doAddFeaturedSpeaker(ctx context.Context, w http.ResponseWriter, r *http.Re
 	httpJSON(w, c)
 }
 
-func doDeleteFeaturedSpeaker(ctx context.Context, w http.ResponseWriter, r *http.Request, payload model.DeleteFeaturedSpeakerRequest) {
+func doDeleteFeaturedSpeaker(ctx context.Context, w http.ResponseWriter, r *http.Request, payload *model.DeleteFeaturedSpeakerRequest) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("doDeleteFeaturedSpeaker")
 		defer g.End()
@@ -1127,7 +1126,7 @@ func doDeleteFeaturedSpeaker(ctx context.Context, w http.ResponseWriter, r *http
 	httpJSON(w, map[string]string{"status": "success"})
 }
 
-func doUpdateFeaturedSpeaker(ctx context.Context, w http.ResponseWriter, r *http.Request, payload model.UpdateFeaturedSpeakerRequest) {
+func doUpdateFeaturedSpeaker(ctx context.Context, w http.ResponseWriter, r *http.Request, payload *model.UpdateFeaturedSpeakerRequest) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("doUpdateFeaturedSpeaker")
 		defer g.End()
@@ -1141,7 +1140,7 @@ func doUpdateFeaturedSpeaker(ctx context.Context, w http.ResponseWriter, r *http
 	defer tx.AutoRollback()
 
 	s := service.FeaturedSpeaker()
-	if err := s.UpdateFromPayload(tx, payload); err != nil {
+	if err := s.UpdateFromPayload(ctx, tx, payload); err != nil {
 		httpError(w, `UpdateFeaturedSpeaker`, http.StatusInternalServerError, err)
 		return
 	}
@@ -1153,7 +1152,7 @@ func doUpdateFeaturedSpeaker(ctx context.Context, w http.ResponseWriter, r *http
 	httpJSON(w, map[string]string{"status": "success"})
 }
 
-func doLookupFeaturedSpeaker(ctx context.Context, w http.ResponseWriter, r *http.Request, payload model.LookupFeaturedSpeakerRequest) {
+func doLookupFeaturedSpeaker(ctx context.Context, w http.ResponseWriter, r *http.Request, payload *model.LookupFeaturedSpeakerRequest) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("doLookupFeaturedSpeaker")
 		defer g.End()
@@ -1175,7 +1174,7 @@ func doLookupFeaturedSpeaker(ctx context.Context, w http.ResponseWriter, r *http
 	httpJSON(w, c)
 }
 
-func doListFeaturedSpeakers(ctx context.Context, w http.ResponseWriter, r *http.Request, payload model.ListFeaturedSpeakersRequest) {
+func doListFeaturedSpeakers(ctx context.Context, w http.ResponseWriter, r *http.Request, payload *model.ListFeaturedSpeakersRequest) {
 	tx, err := db.Begin()
 	if err != nil {
 		httpError(w, `ListConferencesSeries`, http.StatusInternalServerError, err)
@@ -1193,7 +1192,7 @@ func doListFeaturedSpeakers(ctx context.Context, w http.ResponseWriter, r *http.
 	httpJSON(w, l)
 }
 
-func doAddSponsor(ctx context.Context, w http.ResponseWriter, r *http.Request, payload model.AddSponsorRequest) {
+func doAddSponsor(ctx context.Context, w http.ResponseWriter, r *http.Request, payload *model.AddSponsorRequest) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("doAddSponsor")
 		defer g.End()
@@ -1222,7 +1221,7 @@ func doAddSponsor(ctx context.Context, w http.ResponseWriter, r *http.Request, p
 	httpJSON(w, c)
 }
 
-func doDeleteSponsor(ctx context.Context, w http.ResponseWriter, r *http.Request, payload model.DeleteSponsorRequest) {
+func doDeleteSponsor(ctx context.Context, w http.ResponseWriter, r *http.Request, payload *model.DeleteSponsorRequest) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("doDeleteSponsor")
 		defer g.End()
@@ -1247,7 +1246,7 @@ func doDeleteSponsor(ctx context.Context, w http.ResponseWriter, r *http.Request
 	httpJSON(w, map[string]string{"status": "success"})
 }
 
-func doUpdateSponsor(ctx context.Context, w http.ResponseWriter, r *http.Request, payload model.UpdateSponsorRequest) {
+func doUpdateSponsor(ctx context.Context, w http.ResponseWriter, r *http.Request, payload *model.UpdateSponsorRequest) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("doUpdateSponsor")
 		defer g.End()
@@ -1283,7 +1282,7 @@ func doUpdateSponsor(ctx context.Context, w http.ResponseWriter, r *http.Request
 	httpJSON(w, map[string]string{"status": "success"})
 }
 
-func doLookupSponsor(ctx context.Context, w http.ResponseWriter, r *http.Request, payload model.LookupSponsorRequest) {
+func doLookupSponsor(ctx context.Context, w http.ResponseWriter, r *http.Request, payload *model.LookupSponsorRequest) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("doLookupSponsor")
 		defer g.End()
@@ -1305,7 +1304,7 @@ func doLookupSponsor(ctx context.Context, w http.ResponseWriter, r *http.Request
 	httpJSON(w, c)
 }
 
-func doListSponsors(ctx context.Context, w http.ResponseWriter, r *http.Request, payload model.ListSponsorsRequest) {
+func doListSponsors(ctx context.Context, w http.ResponseWriter, r *http.Request, payload *model.ListSponsorsRequest) {
 	tx, err := db.Begin()
 	if err != nil {
 		httpError(w, `ListConferencesSeries`, http.StatusInternalServerError, err)
@@ -1323,7 +1322,7 @@ func doListSponsors(ctx context.Context, w http.ResponseWriter, r *http.Request,
 	httpJSON(w, l)
 }
 
-func doAddSessionType(ctx context.Context, w http.ResponseWriter, r *http.Request, payload model.AddSessionTypeRequest) {
+func doAddSessionType(ctx context.Context, w http.ResponseWriter, r *http.Request, payload *model.AddSessionTypeRequest) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("doAddSessionType")
 		defer g.End()
@@ -1352,7 +1351,7 @@ func doAddSessionType(ctx context.Context, w http.ResponseWriter, r *http.Reques
 	httpJSON(w, c)
 }
 
-func doDeleteSessionType(ctx context.Context, w http.ResponseWriter, r *http.Request, payload model.DeleteSessionTypeRequest) {
+func doDeleteSessionType(ctx context.Context, w http.ResponseWriter, r *http.Request, payload *model.DeleteSessionTypeRequest) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("doDeleteSessionType")
 		defer g.End()
@@ -1377,7 +1376,7 @@ func doDeleteSessionType(ctx context.Context, w http.ResponseWriter, r *http.Req
 	httpJSON(w, map[string]string{"status": "success"})
 }
 
-func doUpdateSessionType(ctx context.Context, w http.ResponseWriter, r *http.Request, payload model.UpdateSessionTypeRequest) {
+func doUpdateSessionType(ctx context.Context, w http.ResponseWriter, r *http.Request, payload *model.UpdateSessionTypeRequest) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("doUpdateSessionType")
 		defer g.End()
@@ -1404,7 +1403,7 @@ func doUpdateSessionType(ctx context.Context, w http.ResponseWriter, r *http.Req
 	httpJSON(w, map[string]string{"status": "success"})
 }
 
-func doLookupSessionType(ctx context.Context, w http.ResponseWriter, r *http.Request, payload model.LookupSessionTypeRequest) {
+func doLookupSessionType(ctx context.Context, w http.ResponseWriter, r *http.Request, payload *model.LookupSessionTypeRequest) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("doLookupSessionType")
 		defer g.End()
@@ -1426,7 +1425,7 @@ func doLookupSessionType(ctx context.Context, w http.ResponseWriter, r *http.Req
 	httpJSON(w, c)
 }
 
-func doListSessionTypesByConference(ctx context.Context, w http.ResponseWriter, r *http.Request, payload model.ListSessionTypesByConferenceRequest) {
+func doListSessionTypesByConference(ctx context.Context, w http.ResponseWriter, r *http.Request, payload *model.ListSessionTypesByConferenceRequest) {
 	tx, err := db.Begin()
 	if err != nil {
 		httpError(w, `doListSessionTypesbyConference`, http.StatusInternalServerError, err)
@@ -1444,7 +1443,7 @@ func doListSessionTypesByConference(ctx context.Context, w http.ResponseWriter, 
 	httpJSON(w, l)
 }
 
-func doListConferencesByOrganizer(ctx context.Context, w http.ResponseWriter, r *http.Request, payload model.ListConferencesByOrganizerRequest) {
+func doListConferencesByOrganizer(ctx context.Context, w http.ResponseWriter, r *http.Request, payload *model.ListConferencesByOrganizerRequest) {
 	tx, err := db.Begin()
 	if err != nil {
 		httpError(w, `doListConferencesByOrganizer`, http.StatusInternalServerError, err)
@@ -1462,7 +1461,7 @@ func doListConferencesByOrganizer(ctx context.Context, w http.ResponseWriter, r 
 	httpJSON(w, l)
 }
 
-func doCreateTemporaryEmail(ctx context.Context, w http.ResponseWriter, r *http.Request, payload model.CreateTemporaryEmailRequest) {
+func doCreateTemporaryEmail(ctx context.Context, w http.ResponseWriter, r *http.Request, payload *model.CreateTemporaryEmailRequest) {
 	tx, err := db.Begin()
 	if err != nil {
 		httpError(w, `doCreateTemporaryEmail`, http.StatusInternalServerError, err)
@@ -1485,7 +1484,7 @@ func doCreateTemporaryEmail(ctx context.Context, w http.ResponseWriter, r *http.
 	httpJSON(w, res)
 }
 
-func doConfirmTemporaryEmail(ctx context.Context, w http.ResponseWriter, r *http.Request, payload model.ConfirmTemporaryEmailRequest) {
+func doConfirmTemporaryEmail(ctx context.Context, w http.ResponseWriter, r *http.Request, payload *model.ConfirmTemporaryEmailRequest) {
 	tx, err := db.Begin()
 	if err != nil {
 		httpError(w, `doConfirmTemporaryEmail`, http.StatusInternalServerError, err)
@@ -1505,7 +1504,7 @@ func doConfirmTemporaryEmail(ctx context.Context, w http.ResponseWriter, r *http
 	}
 }
 
-func doAddConferenceCredential(ctx context.Context, w http.ResponseWriter, r *http.Request, payload model.AddConferenceCredentialRequest) {
+func doAddConferenceCredential(ctx context.Context, w http.ResponseWriter, r *http.Request, payload *model.AddConferenceCredentialRequest) {
 	tx, err := db.Begin()
 	if err != nil {
 		httpError(w, `doAddConferenceCredential`, http.StatusInternalServerError, err)
@@ -1525,7 +1524,7 @@ func doAddConferenceCredential(ctx context.Context, w http.ResponseWriter, r *ht
 	}
 }
 
-func doTweetAsConference(ctx context.Context, w http.ResponseWriter, r *http.Request, payload model.TweetAsConferenceRequest) {
+func doTweetAsConference(ctx context.Context, w http.ResponseWriter, r *http.Request, payload *model.TweetAsConferenceRequest) {
 	tx, err := db.Begin()
 	if err != nil {
 		httpError(w, `doTweetAsConference`, http.StatusInternalServerError, err)
@@ -1545,7 +1544,7 @@ func doTweetAsConference(ctx context.Context, w http.ResponseWriter, r *http.Req
 	}
 }
 
-func doGetConferenceSchedule(ctx context.Context, w http.ResponseWriter, r *http.Request, payload model.GetConferenceScheduleRequest) {
+func doGetConferenceSchedule(ctx context.Context, w http.ResponseWriter, r *http.Request, payload *model.GetConferenceScheduleRequest) {
 	tx, err := db.Begin()
 	if err != nil {
 		httpError(w, `GetConferenceSchedule`, http.StatusInternalServerError, err)
@@ -1574,7 +1573,7 @@ func doGetConferenceSchedule(ctx context.Context, w http.ResponseWriter, r *http
 	lp.Lang.Set(payload.Lang.String)
 	s := service.Session()
 	var v model.SessionList
-	if err := s.ListFromPayload(tx, &v, lp); err != nil {
+	if err := s.ListFromPayload(tx, &v, &lp); err != nil {
 		httpError(w, `GetConferenceSchedule`, http.StatusInternalServerError, err)
 		return
 	}
@@ -1651,7 +1650,7 @@ func doGetConferenceSchedule(ctx context.Context, w http.ResponseWriter, r *http
 	c.WriteTo(w)
 }
 
-func doVerifyUser(ctx context.Context, w http.ResponseWriter, r *http.Request, payload model.VerifyUserRequest) {
+func doVerifyUser(ctx context.Context, w http.ResponseWriter, r *http.Request, payload *model.VerifyUserRequest) {
 	tx, err := db.Begin()
 	if err != nil {
 		httpError(w, `doVerify`, http.StatusInternalServerError, err)
@@ -1680,7 +1679,7 @@ func doVerifyUser(ctx context.Context, w http.ResponseWriter, r *http.Request, p
 	})
 }
 
-func doSendSelectionResultNotification(ctx context.Context, w http.ResponseWriter, r *http.Request, payload model.SendSelectionResultNotificationRequest) {
+func doSendSelectionResultNotification(ctx context.Context, w http.ResponseWriter, r *http.Request, payload *model.SendSelectionResultNotificationRequest) {
 	tx, err := db.Begin()
 	if err != nil {
 		httpError(w, `doSendSelectionResultNotification`, http.StatusInternalServerError, err)
@@ -1691,7 +1690,7 @@ func doSendSelectionResultNotification(ctx context.Context, w http.ResponseWrite
 	payload.TrustedCall = isTrustedCall(ctx)
 
 	s := service.Session()
-	if err := s.SendSelectionResultNotificationFromPayload(tx, payload); err != nil {
+	if err := s.SendSelectionResultNotificationFromPayload(ctx, tx, payload); err != nil {
 		httpError(w, `doSendSelectionResultNotification`, http.StatusInternalServerError, err)
 		return
 	}
@@ -1706,7 +1705,7 @@ func doSendSelectionResultNotification(ctx context.Context, w http.ResponseWrite
 	})
 }
 
-func doSendAllSelectionResultNotification(ctx context.Context, w http.ResponseWriter, r *http.Request, payload model.SendAllSelectionResultNotificationRequest) {
+func doSendAllSelectionResultNotification(ctx context.Context, w http.ResponseWriter, r *http.Request, payload *model.SendAllSelectionResultNotificationRequest) {
 	tx, err := db.Begin()
 	if err != nil {
 		httpError(w, `doSendAllSelectionResultNotification`, http.StatusInternalServerError, err)
@@ -1738,7 +1737,7 @@ func doSendAllSelectionResultNotification(ctx context.Context, w http.ResponseWr
 			req.UserID = payload.UserID
 			req.TrustedCall = trustedCall
 
-			if err := s.SendSelectionResultNotificationFromPayload(tx, req); err != nil {
+			if err := s.SendSelectionResultNotificationFromPayload(ctx, tx, &req); err != nil {
 				tx.Rollback()
 				continue
 			}
