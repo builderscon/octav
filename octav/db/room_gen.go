@@ -65,7 +65,11 @@ func init() {
 	})
 }
 
-func (r *Room) LoadByEID(tx *Tx, eid string) error {
+func (r *Room) LoadByEID(tx *Tx, eid string) (err error) {
+	if pdebug.Enabled {
+		g := pdebug.Marker(`Room.LoadByEID %s`, eid).BindError(&err)
+		defer g.End()
+	}
 	stmt, err := library.GetStmt("sqlRoomLoadByEIDKey")
 	if err != nil {
 		return errors.Wrap(err, `failed to get statement`)
@@ -118,8 +122,15 @@ func (r *Room) Create(tx *Tx, opts ...InsertOption) (err error) {
 	return nil
 }
 
-func (r Room) Update(tx *Tx) error {
+func (r Room) Update(tx *Tx) (err error) {
+	if pdebug.Enabled {
+		g := pdebug.Marker(`Room.Update`).BindError(&err)
+		defer g.End()
+	}
 	if r.OID != 0 {
+		if pdebug.Enabled {
+			pdebug.Printf(`Using OID (%d) as key`, r.OID)
+		}
 		stmt, err := library.GetStmt("sqlRoomUpdateByOIDKey")
 		if err != nil {
 			return errors.Wrap(err, `failed to get statement`)
@@ -128,6 +139,9 @@ func (r Room) Update(tx *Tx) error {
 		return err
 	}
 	if r.EID != "" {
+		if pdebug.Enabled {
+			pdebug.Printf(`Using EID (%s) as key`, r.EID)
+		}
 		stmt, err := library.GetStmt("sqlRoomUpdateByEIDKey")
 		if err != nil {
 			return errors.Wrap(err, `failed to get statement`)

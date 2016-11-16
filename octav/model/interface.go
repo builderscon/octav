@@ -32,7 +32,7 @@ type ObjectID struct {
 	Type string `json:"type"`
 }
 
-// +model
+// +model `UpdateRequest:"false"`
 type Conference struct {
 	LocalizedFields           `json:"-"`
 	ID                        string              `json:"id"`
@@ -142,7 +142,7 @@ type AddSessionTypeRequest struct {
 	UserID          string `json:"user_id"`
 }
 type CreateSessionTypeRequest struct {
-	AddSessionTypeRequest
+	*AddSessionTypeRequest
 }
 
 // +transport
@@ -739,7 +739,7 @@ type CreateSessionSurveyResponseRequest struct {
 	CommentImprovement jsval.MaybeString `json:"comment_improvement" urlenc:"comment_improvement,omitempty,string"`
 }
 
-// +model
+// +model `CreateRequest:"false" UpdateRequest:"false"`
 type Client struct {
 	ID     string `json:"id"`
 	Secret string `json:"secret"`
@@ -807,7 +807,7 @@ type AddFeaturedSpeakerRequest struct {
 	UserID          string `json:"user_id"`
 }
 type CreateFeaturedSpeakerRequest struct {
-	AddFeaturedSpeakerRequest
+	*AddFeaturedSpeakerRequest
 }
 
 // +transport
@@ -827,7 +827,7 @@ type DeleteFeaturedSpeakerRequest struct {
 	UserID string `json:"user_id"`
 }
 
-// +model
+// +model `UpdateRequest:"false"`
 type Sponsor struct {
 	LocalizedFields `json:"-"`
 	ID              string `json:"id"`
@@ -872,7 +872,7 @@ type AddSponsorRequest struct {
 	UserID          string `json:"user_id"`
 }
 type CreateSponsorRequest struct {
-	AddSponsorRequest
+	*AddSponsorRequest
 }
 
 // +transport
@@ -991,4 +991,13 @@ type SendSelectionResultNotificationResponse struct {
 // +transport
 type SendAllSelectionResultNotificationResponse struct {
 	Message string `json:"message"`
+}
+
+// +model `CreateRequest:"false" UpdateRequest:"false" Update:"false" Delete:"false" Lookup:"false" LookupRequest:"false"`
+type LocalizedString struct {
+	ParentID   string // EID of the parent object
+	ParentType string // Type of the parent object
+	Name       string
+	Language   string
+	Localized  string
 }

@@ -10,6 +10,7 @@ import (
 	"github.com/lestrrat/go-pdebug"
 )
 
+var _ = pdebug.Enabled
 var _ = time.Time{}
 
 type rawVenue struct {

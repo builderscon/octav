@@ -79,8 +79,15 @@ func (c *ConferenceAdministrator) Create(tx *Tx, opts ...InsertOption) (err erro
 	return nil
 }
 
-func (c ConferenceAdministrator) Update(tx *Tx) error {
+func (c ConferenceAdministrator) Update(tx *Tx) (err error) {
+	if pdebug.Enabled {
+		g := pdebug.Marker(`ConferenceAdministrator.Update`).BindError(&err)
+		defer g.End()
+	}
 	if c.OID != 0 {
+		if pdebug.Enabled {
+			pdebug.Printf(`Using OID (%d) as key`, c.OID)
+		}
 		stmt, err := library.GetStmt("sqlConferenceAdministratorUpdateByOIDKey")
 		if err != nil {
 			return errors.Wrap(err, `failed to get statement`)

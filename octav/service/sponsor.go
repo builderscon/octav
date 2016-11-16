@@ -21,7 +21,7 @@ func (v *SponsorSvc) Init() {
 	v.mediaStorage = MediaStorage
 }
 
-func (v *SponsorSvc) populateRowForCreate(vdb *db.Sponsor, payload model.CreateSponsorRequest) error {
+func (v *SponsorSvc) populateRowForCreate(vdb *db.Sponsor, payload *model.CreateSponsorRequest) error {
 	vdb.EID = tools.UUID()
 
 	vdb.ConferenceID = payload.ConferenceID
@@ -33,7 +33,7 @@ func (v *SponsorSvc) populateRowForCreate(vdb *db.Sponsor, payload model.CreateS
 	return nil
 }
 
-func (v *SponsorSvc) populateRowForUpdate(vdb *db.Sponsor, payload model.UpdateSponsorRequest) error {
+func (v *SponsorSvc) populateRowForUpdate(vdb *db.Sponsor, payload *model.UpdateSponsorRequest) error {
 	if payload.Name.Valid() {
 		vdb.Name = payload.Name.String
 	}
@@ -175,7 +175,7 @@ func (v *SponsorSvc) UploadImagesFromPayload(ctx context.Context, tx *db.Tx, row
 	})
 }
 
-func (v *SponsorSvc) CreateFromPayload(ctx context.Context, tx *db.Tx, payload model.AddSponsorRequest, result *model.Sponsor) (err error) {
+func (v *SponsorSvc) CreateFromPayload(ctx context.Context, tx *db.Tx, payload *model.AddSponsorRequest, result *model.Sponsor) (err error) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("service.Sponsor.CreateFromPayload").BindError(&err)
 		defer g.End()
@@ -187,7 +187,7 @@ func (v *SponsorSvc) CreateFromPayload(ctx context.Context, tx *db.Tx, payload m
 	}
 
 	var vdb db.Sponsor
-	if err := v.Create(tx, &vdb, model.CreateSponsorRequest{payload}); err != nil {
+	if err := v.Create(tx, &vdb, &model.CreateSponsorRequest{payload}); err != nil {
 		return errors.Wrap(err, "failed to store in database")
 	}
 
@@ -200,7 +200,7 @@ func (v *SponsorSvc) CreateFromPayload(ctx context.Context, tx *db.Tx, payload m
 	return nil
 }
 
-func (v *SponsorSvc) UpdateFromPayload(ctx context.Context, tx *db.Tx, payload model.UpdateSponsorRequest) (err error) {
+func (v *SponsorSvc) UpdateFromPayload(ctx context.Context, tx *db.Tx, payload *model.UpdateSponsorRequest) (err error) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("service.Sponsor.UpdateFromPayload").BindError(&err)
 		defer g.End()
@@ -217,11 +217,11 @@ func (v *SponsorSvc) UpdateFromPayload(ctx context.Context, tx *db.Tx, payload m
 	}
 
 	var uploadErr error
-	if uploadErr = v.UploadImagesFromPayload(ctx, tx, &vdb, &payload); !errors.IsIgnorable(uploadErr) {
+	if uploadErr = v.UploadImagesFromPayload(ctx, tx, &vdb, payload); !errors.IsIgnorable(uploadErr) {
 		return errors.Wrap(uploadErr, "failed to process image uploads")
 	}
 
-	if err := v.Update(tx, &vdb, payload); err != nil {
+	if err := v.Update(tx, &vdb); err != nil {
 		return errors.Wrap(err, "failed to update sponsor in database")
 	}
 
@@ -232,7 +232,7 @@ func (v *SponsorSvc) UpdateFromPayload(ctx context.Context, tx *db.Tx, payload m
 
 }
 
-func (v *SponsorSvc) DeleteFromPayload(ctx context.Context, tx *db.Tx, payload model.DeleteSponsorRequest) (err error) {
+func (v *SponsorSvc) DeleteFromPayload(ctx context.Context, tx *db.Tx, payload *model.DeleteSponsorRequest) (err error) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("service.Sponsor.DeleteFromPayload").BindError(&err)
 		defer g.End()
@@ -284,7 +284,7 @@ func (v *SponsorSvc) DeleteFromPayload(ctx context.Context, tx *db.Tx, payload m
 	return nil
 }
 
-func (v *SponsorSvc) ListFromPayload(tx *db.Tx, result *model.SponsorList, payload model.ListSponsorsRequest) error {
+func (v *SponsorSvc) ListFromPayload(tx *db.Tx, result *model.SponsorList, payload *model.ListSponsorsRequest) error {
 	var vdbl db.SponsorList
 	if err := vdbl.LoadByConferenceSinceEID(tx, payload.ConferenceID, payload.Since.String, int(payload.Limit.Int)); err != nil {
 		return errors.Wrap(err, "failed to load featured sponsor from database")

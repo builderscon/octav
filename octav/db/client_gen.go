@@ -65,7 +65,11 @@ func init() {
 	})
 }
 
-func (c *Client) LoadByEID(tx *Tx, eid string) error {
+func (c *Client) LoadByEID(tx *Tx, eid string) (err error) {
+	if pdebug.Enabled {
+		g := pdebug.Marker(`Client.LoadByEID %s`, eid).BindError(&err)
+		defer g.End()
+	}
 	stmt, err := library.GetStmt("sqlClientLoadByEIDKey")
 	if err != nil {
 		return errors.Wrap(err, `failed to get statement`)
@@ -118,8 +122,15 @@ func (c *Client) Create(tx *Tx, opts ...InsertOption) (err error) {
 	return nil
 }
 
-func (c Client) Update(tx *Tx) error {
+func (c Client) Update(tx *Tx) (err error) {
+	if pdebug.Enabled {
+		g := pdebug.Marker(`Client.Update`).BindError(&err)
+		defer g.End()
+	}
 	if c.OID != 0 {
+		if pdebug.Enabled {
+			pdebug.Printf(`Using OID (%d) as key`, c.OID)
+		}
 		stmt, err := library.GetStmt("sqlClientUpdateByOIDKey")
 		if err != nil {
 			return errors.Wrap(err, `failed to get statement`)
@@ -128,6 +139,9 @@ func (c Client) Update(tx *Tx) error {
 		return err
 	}
 	if c.EID != "" {
+		if pdebug.Enabled {
+			pdebug.Printf(`Using EID (%s) as key`, c.EID)
+		}
 		stmt, err := library.GetStmt("sqlClientUpdateByEIDKey")
 		if err != nil {
 			return errors.Wrap(err, `failed to get statement`)

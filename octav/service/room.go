@@ -1,6 +1,8 @@
 package service
 
 import (
+	"context"
+
 	"github.com/builderscon/octav/octav/db"
 	"github.com/builderscon/octav/octav/model"
 	"github.com/builderscon/octav/octav/tools"
@@ -9,7 +11,7 @@ import (
 
 func (v *RoomSvc) Init() {}
 
-func (v *RoomSvc) populateRowForCreate(vdb *db.Room, payload model.CreateRoomRequest) error {
+func (v *RoomSvc) populateRowForCreate(vdb *db.Room, payload *model.CreateRoomRequest) error {
 	vdb.EID = tools.UUID()
 
 	if payload.VenueID.Valid() {
@@ -27,7 +29,7 @@ func (v *RoomSvc) populateRowForCreate(vdb *db.Room, payload model.CreateRoomReq
 	return nil
 }
 
-func (v *RoomSvc) populateRowForUpdate(vdb *db.Room, payload model.UpdateRoomRequest) error {
+func (v *RoomSvc) populateRowForUpdate(vdb *db.Room, payload *model.UpdateRoomRequest) error {
 	if payload.VenueID.Valid() {
 		vdb.VenueID = payload.VenueID.String
 	}
@@ -43,7 +45,7 @@ func (v *RoomSvc) populateRowForUpdate(vdb *db.Room, payload model.UpdateRoomReq
 	return nil
 }
 
-func (v *RoomSvc) CreateFromPayload(tx *db.Tx, result *model.Room, payload model.CreateRoomRequest) error {
+func (v *RoomSvc) CreateFromPayload(tx *db.Tx, result *model.Room, payload *model.CreateRoomRequest) error {
 	su := User()
 	if err := su.IsAdministrator(tx, payload.UserID); err != nil {
 		return errors.Wrap(err, "creating a room requires conference administrator privilege")
@@ -63,7 +65,7 @@ func (v *RoomSvc) CreateFromPayload(tx *db.Tx, result *model.Room, payload model
 	return nil
 }
 
-func (v *RoomSvc) ListFromPayload(tx *db.Tx, result *model.RoomList, payload model.ListRoomRequest) error {
+func (v *RoomSvc) ListFromPayload(tx *db.Tx, result *model.RoomList, payload *model.ListRoomRequest) error {
 	var m model.RoomList
 	if err := m.LoadForVenue(tx, payload.VenueID, payload.Since.String, int(payload.Limit.Int)); err != nil {
 		return errors.Wrap(err, "failed to load from database")
@@ -79,21 +81,15 @@ func (v *RoomSvc) ListFromPayload(tx *db.Tx, result *model.RoomList, payload mod
 	return nil
 }
 
-func (v *RoomSvc) UpdateFromPayload(tx *db.Tx, payload model.UpdateRoomRequest) error {
+func (v *RoomSvc) PreUpdateFromPayloadHook(ctx context.Context, tx *db.Tx, vdb *db.Room, payload *model.UpdateRoomRequest) error {
 	su := User()
 	if err := su.IsAdministrator(tx, payload.UserID); err != nil {
 		return errors.Wrap(err, "deleting rooms require administrator privileges")
 	}
-
-	var vdb db.Room
-	if err := vdb.LoadByEID(tx, payload.ID); err != nil {
-		return errors.Wrap(err, "failed to load from database")
-	}
-
-	return errors.Wrap(v.Update(tx, &vdb, payload), "failed to update database")
+	return nil
 }
 
-func (v *RoomSvc) DeleteFromPayload(tx *db.Tx, payload model.DeleteRoomRequest) error {
+func (v *RoomSvc) DeleteFromPayload(tx *db.Tx, payload *model.DeleteRoomRequest) error {
 	su := User()
 	if err := su.IsAdministrator(tx, payload.UserID); err != nil {
 		return errors.Wrap(err, "deleting rooms require administrator privileges")

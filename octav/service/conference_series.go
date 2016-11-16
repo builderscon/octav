@@ -10,14 +10,14 @@ import (
 
 func (v *ConferenceSeriesSvc) Init() {}
 
-func (v *ConferenceSeriesSvc) populateRowForCreate(vdb *db.ConferenceSeries, payload model.CreateConferenceSeriesRequest) error {
+func (v *ConferenceSeriesSvc) populateRowForCreate(vdb *db.ConferenceSeries, payload *model.CreateConferenceSeriesRequest) error {
 	vdb.EID = tools.UUID()
 	vdb.Slug = payload.Slug
 	vdb.Title = payload.Title
 	return nil
 }
 
-func (v *ConferenceSeriesSvc) populateRowForUpdate(vdb *db.ConferenceSeries, payload model.UpdateConferenceSeriesRequest) error {
+func (v *ConferenceSeriesSvc) populateRowForUpdate(vdb *db.ConferenceSeries, payload *model.UpdateConferenceSeriesRequest) error {
 	if payload.Slug.Valid() {
 		vdb.Slug = payload.Slug.String
 	}
@@ -29,7 +29,7 @@ func (v *ConferenceSeriesSvc) populateRowForUpdate(vdb *db.ConferenceSeries, pay
 	return nil
 }
 
-func (v *ConferenceSeriesSvc) DeleteFromPayload(tx *db.Tx, payload model.DeleteConferenceSeriesRequest) (err error) {
+func (v *ConferenceSeriesSvc) DeleteFromPayload(tx *db.Tx, payload *model.DeleteConferenceSeriesRequest) (err error) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("service.ConferenceSeries.DeleteFromPayload").BindError(&err)
 		defer g.End()
@@ -51,7 +51,7 @@ func (v *ConferenceSeriesSvc) DeleteFromPayload(tx *db.Tx, payload model.DeleteC
 
 // CreateFromPayload adds extra logic around Create to verify data
 // and create accessory data.
-func (v *ConferenceSeriesSvc) CreateFromPayload(tx *db.Tx, result *model.ConferenceSeries, payload model.CreateConferenceSeriesRequest) (err error) {
+func (v *ConferenceSeriesSvc) CreateFromPayload(tx *db.Tx, result *model.ConferenceSeries, payload *model.CreateConferenceSeriesRequest) (err error) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("service.ConferenceSeries.CreateFromPayload").BindError(&err)
 		defer g.End()
@@ -101,7 +101,7 @@ func (v *ConferenceSeriesSvc) LoadByRange(tx *db.Tx, l *[]model.ConferenceSeries
 	return nil
 }
 
-func (v *ConferenceSeriesSvc) AddAdministratorFromPayload(tx *db.Tx, payload model.AddConferenceSeriesAdminRequest) error {
+func (v *ConferenceSeriesSvc) AddAdministratorFromPayload(tx *db.Tx, payload *model.AddConferenceSeriesAdminRequest) error {
 	if err := db.IsConferenceSeriesAdministrator(tx, payload.SeriesID, payload.UserID); err != nil {
 		return errors.Wrap(err, "adding a conference series administrator requires conference series administrator privilege")
 	}

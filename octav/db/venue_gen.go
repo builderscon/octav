@@ -65,7 +65,11 @@ func init() {
 	})
 }
 
-func (v *Venue) LoadByEID(tx *Tx, eid string) error {
+func (v *Venue) LoadByEID(tx *Tx, eid string) (err error) {
+	if pdebug.Enabled {
+		g := pdebug.Marker(`Venue.LoadByEID %s`, eid).BindError(&err)
+		defer g.End()
+	}
 	stmt, err := library.GetStmt("sqlVenueLoadByEIDKey")
 	if err != nil {
 		return errors.Wrap(err, `failed to get statement`)
@@ -118,8 +122,15 @@ func (v *Venue) Create(tx *Tx, opts ...InsertOption) (err error) {
 	return nil
 }
 
-func (v Venue) Update(tx *Tx) error {
+func (v Venue) Update(tx *Tx) (err error) {
+	if pdebug.Enabled {
+		g := pdebug.Marker(`Venue.Update`).BindError(&err)
+		defer g.End()
+	}
 	if v.OID != 0 {
+		if pdebug.Enabled {
+			pdebug.Printf(`Using OID (%d) as key`, v.OID)
+		}
 		stmt, err := library.GetStmt("sqlVenueUpdateByOIDKey")
 		if err != nil {
 			return errors.Wrap(err, `failed to get statement`)
@@ -128,6 +139,9 @@ func (v Venue) Update(tx *Tx) error {
 		return err
 	}
 	if v.EID != "" {
+		if pdebug.Enabled {
+			pdebug.Printf(`Using EID (%s) as key`, v.EID)
+		}
 		stmt, err := library.GetStmt("sqlVenueUpdateByEIDKey")
 		if err != nil {
 			return errors.Wrap(err, `failed to get statement`)

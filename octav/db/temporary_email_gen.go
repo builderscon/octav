@@ -77,8 +77,15 @@ func (t *TemporaryEmail) Create(tx *Tx, opts ...InsertOption) (err error) {
 	return nil
 }
 
-func (t TemporaryEmail) Update(tx *Tx) error {
+func (t TemporaryEmail) Update(tx *Tx) (err error) {
+	if pdebug.Enabled {
+		g := pdebug.Marker(`TemporaryEmail.Update`).BindError(&err)
+		defer g.End()
+	}
 	if t.OID != 0 {
+		if pdebug.Enabled {
+			pdebug.Printf(`Using OID (%d) as key`, t.OID)
+		}
 		stmt, err := library.GetStmt("sqlTemporaryEmailUpdateByOIDKey")
 		if err != nil {
 			return errors.Wrap(err, `failed to get statement`)

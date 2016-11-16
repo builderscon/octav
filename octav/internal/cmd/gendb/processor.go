@@ -289,7 +289,11 @@ func (p *Processor) ProcessStruct(s Struct) error {
 	buf.WriteString("\n}")
 
 	if hasEID {
-		fmt.Fprintf(&buf, "\n\nfunc (%c *%s) LoadByEID(tx *Tx, eid string) error {", varname, s.Name)
+		fmt.Fprintf(&buf, "\n\nfunc (%c *%s) LoadByEID(tx *Tx, eid string) (err error) {", varname, s.Name)
+		buf.WriteString("\nif pdebug.Enabled {")
+		fmt.Fprintf(&buf, "\ng := pdebug.Marker(`%s.LoadByEID %%s`, eid).BindError(&err)", s.Name)
+		buf.WriteString("\ndefer g.End()")
+		buf.WriteString("\n}")
 		fmt.Fprintf(&buf, "\nstmt, err := library.GetStmt(%s)", strconv.Quote(s.sqlKeyName("LoadByEID")))
 		buf.WriteString("\nif err != nil {\nreturn errors.Wrap(err, `failed to get statement`)\n}")
 		buf.WriteString("\nrow := tx.Stmt(stmt).QueryRow(eid)")
@@ -302,9 +306,9 @@ func (p *Processor) ProcessStruct(s Struct) error {
 
 	fmt.Fprintf(&buf, "\n\nfunc (%c *%s) Create(tx *Tx, opts ...InsertOption) (err error) {", varname, s.Name)
 	buf.WriteString("\nif pdebug.Enabled {")
-	fmt.Fprintf(&buf, "\n" + `g := pdebug.Marker("db.%s.Create").BindError(&err)`, s.Name)
+	fmt.Fprintf(&buf, "\n"+`g := pdebug.Marker("db.%s.Create").BindError(&err)`, s.Name)
 	buf.WriteString("\ndefer g.End()")
-	fmt.Fprintf(&buf, "\n" + `pdebug.Printf("%%#v", %c)`, varname)
+	fmt.Fprintf(&buf, "\n"+`pdebug.Printf("%%#v", %c)`, varname)
 	buf.WriteString("\n}")
 	if hasEID {
 		fmt.Fprintf(&buf, "\nif %c.EID == "+`""`+" {", varname)
@@ -344,8 +348,15 @@ func (p *Processor) ProcessStruct(s Struct) error {
 	buf.WriteString("\n}")
 
 	// This is very inefficient, but it's the best we can do for now
-	fmt.Fprintf(&buf, "\n\nfunc (%c %s) Update(tx *Tx) error {", varname, s.Name)
+	fmt.Fprintf(&buf, "\n\nfunc (%c %s) Update(tx *Tx) (err error) {", varname, s.Name)
+	buf.WriteString("\nif pdebug.Enabled {")
+	fmt.Fprintf(&buf, "\ng := pdebug.Marker(`%s.Update`).BindError(&err)", s.Name)
+	buf.WriteString("\ndefer g.End()")
+	buf.WriteString("\n}")
 	fmt.Fprintf(&buf, "\nif %c.OID != 0 {", varname)
+	buf.WriteString("\nif pdebug.Enabled {")
+	fmt.Fprintf(&buf, "\npdebug.Printf(`Using OID (%%d) as key`, %c.OID)", varname)
+	buf.WriteString("\n}")
 	fmt.Fprintf(&buf, "\nstmt, err := library.GetStmt(%s)", strconv.Quote(s.sqlKeyName("UpdateByOID")))
 	buf.WriteString("\nif err != nil {\nreturn errors.Wrap(err, `failed to get statement`)\n}")
 	fmt.Fprintf(&buf, "\n_, err = tx.Stmt(stmt).Exec(%s, %c.OID)", setParams.String(), varname)
@@ -353,6 +364,9 @@ func (p *Processor) ProcessStruct(s Struct) error {
 	buf.WriteString("\n}")
 	if hasEID {
 		fmt.Fprintf(&buf, "\n"+`if %c.EID != "" {`, varname)
+	buf.WriteString("\nif pdebug.Enabled {")
+	fmt.Fprintf(&buf, "\npdebug.Printf(`Using EID (%%s) as key`, %c.EID)", varname)
+	buf.WriteString("\n}")
 		fmt.Fprintf(&buf, "\nstmt, err := library.GetStmt(%s)", strconv.Quote(s.sqlKeyName("UpdateByEID")))
 		buf.WriteString("\nif err != nil {\nreturn errors.Wrap(err, `failed to get statement`)\n}")
 		fmt.Fprintf(&buf, "\n_, err = tx.Stmt(stmt).Exec(%s, %c.EID)", setParams.String(), varname)

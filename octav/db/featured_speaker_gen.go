@@ -65,7 +65,11 @@ func init() {
 	})
 }
 
-func (f *FeaturedSpeaker) LoadByEID(tx *Tx, eid string) error {
+func (f *FeaturedSpeaker) LoadByEID(tx *Tx, eid string) (err error) {
+	if pdebug.Enabled {
+		g := pdebug.Marker(`FeaturedSpeaker.LoadByEID %s`, eid).BindError(&err)
+		defer g.End()
+	}
 	stmt, err := library.GetStmt("sqlFeaturedSpeakerLoadByEIDKey")
 	if err != nil {
 		return errors.Wrap(err, `failed to get statement`)
@@ -118,8 +122,15 @@ func (f *FeaturedSpeaker) Create(tx *Tx, opts ...InsertOption) (err error) {
 	return nil
 }
 
-func (f FeaturedSpeaker) Update(tx *Tx) error {
+func (f FeaturedSpeaker) Update(tx *Tx) (err error) {
+	if pdebug.Enabled {
+		g := pdebug.Marker(`FeaturedSpeaker.Update`).BindError(&err)
+		defer g.End()
+	}
 	if f.OID != 0 {
+		if pdebug.Enabled {
+			pdebug.Printf(`Using OID (%d) as key`, f.OID)
+		}
 		stmt, err := library.GetStmt("sqlFeaturedSpeakerUpdateByOIDKey")
 		if err != nil {
 			return errors.Wrap(err, `failed to get statement`)
@@ -128,6 +139,9 @@ func (f FeaturedSpeaker) Update(tx *Tx) error {
 		return err
 	}
 	if f.EID != "" {
+		if pdebug.Enabled {
+			pdebug.Printf(`Using EID (%s) as key`, f.EID)
+		}
 		stmt, err := library.GetStmt("sqlFeaturedSpeakerUpdateByEIDKey")
 		if err != nil {
 			return errors.Wrap(err, `failed to get statement`)
