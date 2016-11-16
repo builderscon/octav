@@ -18,7 +18,7 @@ func TestSessionPopulateRowForUpdate(t *testing.T) {
 	payload.Status.Set("accepted")
 	vdb.EID = payload.ID
 
-	if !assert.NoError(t, s.populateRowForUpdate(&vdb, payload), "populateRowForUpdate should succeed") {
+	if !assert.NoError(t, s.populateRowForUpdate(&vdb, &payload), "populateRowForUpdate should succeed") {
 		return
 	}
 
