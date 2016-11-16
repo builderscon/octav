@@ -1042,22 +1042,12 @@ func generateServiceFile(ctx *genctx, m Model) error {
 			buf.WriteString("\n}")
 		}
 		if hasL10N {
-			buf.WriteString("\n\nreturn payload.LocalizedFields.Foreach(func(l, k, x string) error {")
-			buf.WriteString("\nif pdebug.Enabled {")
-			buf.WriteString("\n" + `pdebug.Printf("Updating l10n string for '%s' (%s)", k, l)`)
+			buf.WriteString("\n\nls := LocalizedString()")
+			fmt.Fprintf(&buf, "\nif err := ls.UpdateFields(tx, %s, vdb.EID, payload.LocalizedFields); err != nil {", strconv.Quote(m.Name))
+			buf.WriteString("\nreturn errors.Wrap(err, `failed to update localized fields`)")
 			buf.WriteString("\n}")
-			buf.WriteString("\nls := db.LocalizedString{")
-			fmt.Fprintf(&buf, "\nParentType: %s,", strconv.Quote(m.Name))
-			buf.WriteString("\nParentID: vdb.EID,")
-			buf.WriteString("\nLanguage: l,")
-			buf.WriteString("\nName: k,")
-			buf.WriteString("\nLocalized: x,")
-			buf.WriteString("\n}")
-			buf.WriteString("\nreturn ls.Upsert(tx)")
-			buf.WriteString("\n})")
-		} else {
-			buf.WriteString("\nreturn nil")
 		}
+		buf.WriteString("\nreturn nil")
 		buf.WriteString("\n}")
 	}
 

@@ -143,19 +143,11 @@ func (v *ConferenceSeriesSvc) UpdateFromPayload(ctx context.Context, tx *db.Tx, 
 		return errors.Wrap(err, `failed to update row in database`)
 	}
 
-	return payload.LocalizedFields.Foreach(func(l, k, x string) error {
-		if pdebug.Enabled {
-			pdebug.Printf("Updating l10n string for '%s' (%s)", k, l)
-		}
-		ls := db.LocalizedString{
-			ParentType: "ConferenceSeries",
-			ParentID:   vdb.EID,
-			Language:   l,
-			Name:       k,
-			Localized:  x,
-		}
-		return ls.Upsert(tx)
-	})
+	ls := LocalizedString()
+	if err := ls.UpdateFields(tx, "ConferenceSeries", vdb.EID, payload.LocalizedFields); err != nil {
+		return errors.Wrap(err, `failed to update localized fields`)
+	}
+	return nil
 }
 
 func (v *ConferenceSeriesSvc) ReplaceL10NStrings(tx *db.Tx, m *model.ConferenceSeries, lang string) error {

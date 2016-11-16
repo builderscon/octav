@@ -1,6 +1,9 @@
 package service
 
 import (
+	"time"
+
+	"github.com/builderscon/octav/octav/cache"
 	"github.com/builderscon/octav/octav/db"
 	"github.com/builderscon/octav/octav/internal/errors"
 	"github.com/builderscon/octav/octav/model"
@@ -47,6 +50,8 @@ func (v *LocalizedStringSvc) LookupFields(tx *db.Tx, parentType, parentID, lang 
 		l.Language = lang
 		*list = append(*list, l)
 	}
+
+	c.Set(key, *list, cache.WithExpires(time.Hour))
 	return nil
 }
 func (v *LocalizedStringSvc) UpdateFields(tx *db.Tx, parentType, parentID string, fields model.LocalizedFields) (err error) {
