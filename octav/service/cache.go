@@ -14,7 +14,7 @@ func Cache() *cache.Redis {
 	cacheOnce.Do(func() {
 		addr := os.Getenv("REDIS_ADDR")
 		if addr != "" {
-			addr = "redis:6379"
+			addr = "127.0.0.1:6379"
 		}
 		cacheSvc = cache.NewRedis(addr)
 	})
