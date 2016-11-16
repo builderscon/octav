@@ -6,6 +6,8 @@ import (
 	"sync"
 	"time"
 
+	"github.com/builderscon/octav/octav/cache"
+
 	"github.com/builderscon/octav/octav/db"
 	"github.com/builderscon/octav/octav/internal/errors"
 	"github.com/builderscon/octav/octav/model"
@@ -39,10 +41,18 @@ func (v *ConferenceComponentSvc) Lookup(tx *db.Tx, m *model.ConferenceComponent,
 		defer g.End()
 	}
 
-	r := model.ConferenceComponent{}
-	if err = r.Load(tx, id); err != nil {
-		return errors.Wrap(err, "failed to load model.ConferenceComponent from database")
-	}
+	var r model.ConferenceComponent
+	key := `api.ConferenceComponent.` + id
+	c := Cache()
+	_, err = c.GetOrSet(key, &r, func() (interface{}, error) {
+		if pdebug.Enabled {
+			pdebug.Printf(`CACHE MISS: %s`, key)
+		}
+		if err = r.Load(tx, id); err != nil {
+			return nil, errors.Wrap(err, "failed to load model.ConferenceComponent from database")
+		}
+		return &r, nil
+	}, cache.WithExpires(time.Hour))
 	*m = r
 	return nil
 }
@@ -73,7 +83,7 @@ func (v *ConferenceComponentSvc) Update(tx *db.Tx, vdb *db.ConferenceComponent, 
 		defer g.End()
 	}
 
-	if vdb.EID == "" {
+	if vdb.EID == `` {
 		return errors.New("vdb.EID is required (did you forget to call vdb.Load(tx) before hand?)")
 	}
 
@@ -83,6 +93,12 @@ func (v *ConferenceComponentSvc) Update(tx *db.Tx, vdb *db.ConferenceComponent, 
 
 	if err := vdb.Update(tx); err != nil {
 		return err
+	}
+	key := `api.ConferenceComponent.` + vdb.EID
+	c := Cache()
+	c.Delete(key)
+	if pdebug.Enabled {
+		pdebug.Printf(`CACHE DEL %s`, key)
 	}
 	return nil
 }
@@ -96,6 +112,12 @@ func (v *ConferenceComponentSvc) Delete(tx *db.Tx, id string) error {
 	vdb := db.ConferenceComponent{EID: id}
 	if err := vdb.Delete(tx); err != nil {
 		return err
+	}
+	key := `api.ConferenceComponent.` + id
+	c := Cache()
+	c.Delete(key)
+	if pdebug.Enabled {
+		pdebug.Printf(`CACHE DEL %s`, key)
 	}
 	return nil
 }

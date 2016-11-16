@@ -19,6 +19,7 @@ import (
 	"github.com/builderscon/octav/octav/model"
 	"github.com/builderscon/octav/octav/tools"
 	"github.com/lestrrat/go-pdebug"
+	urlenc "github.com/lestrrat/go-urlenc"
 )
 
 func (v *ConferenceSvc) Init() {
@@ -180,7 +181,6 @@ func (v *ConferenceSvc) CreateFromPayload(tx *db.Tx, payload model.CreateConfere
 			return errors.Wrap(err, "failed to insert contact information")
 		}
 	}
-
 
 	if err := v.AddAdministrator(tx, vdb.EID, payload.UserID); err != nil {
 		return errors.Wrap(err, "failed to associate administrators to conference")
@@ -691,6 +691,17 @@ func (v *ConferenceSvc) UpdateFromPayload(ctx context.Context, tx *db.Tx, payloa
 	if _, ok := errors.IsFinalizationRequired(uploadErr); ok {
 		return uploadErr
 	}
+
+	keybuf, err := urlenc.Marshal(payload)
+	if err != nil {
+		return errors.Wrap(err, "failed to serialize payload")
+	}
+	c := Cache()
+	c.Delete(string(keybuf))
+	if pdebug.Enabled {
+		pdebug.Printf("CACHE DEL %s", string(keybuf))
+	}
+
 	return nil
 }
 

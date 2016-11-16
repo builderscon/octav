@@ -847,6 +847,7 @@ func generateServiceFile(ctx *genctx, m Model) error {
 	buf.WriteString("\n\nimport (")
 	buf.WriteString("\n" + strconv.Quote("time"))
 	buf.WriteString("\n" + strconv.Quote("sync"))
+	buf.WriteString("\n\n" + strconv.Quote("github.com/builderscon/octav/octav/cache"))
 	buf.WriteString("\n\n" + strconv.Quote("github.com/builderscon/octav/octav/db"))
 	buf.WriteString("\n" + strconv.Quote("github.com/builderscon/octav/octav/internal/errors"))
 	buf.WriteString("\n" + strconv.Quote("github.com/builderscon/octav/octav/model"))
@@ -886,10 +887,18 @@ func generateServiceFile(ctx *genctx, m Model) error {
 	fmt.Fprintf(&buf, "\n"+`g := pdebug.Marker("service.%s.Lookup").BindError(&err)`, m.Name)
 	buf.WriteString("\ndefer g.End()")
 	buf.WriteString("\n}")
-	fmt.Fprintf(&buf, "\n\nr := model.%s{}", m.Name)
-	buf.WriteString("\nif err = r.Load(tx, id); err != nil {")
-	fmt.Fprintf(&buf, "\n"+`return errors.Wrap(err, "failed to load model.%s from database")`, m.Name)
+	fmt.Fprintf(&buf, "\n\nvar r model.%s", m.Name)
+	fmt.Fprintf(&buf, "\nkey := `api.%s.` + id", m.Name)
+	buf.WriteString("\nc := Cache()")
+	buf.WriteString("\n_, err = c.GetOrSet(key, &r, func() (interface{}, error) {")
+	buf.WriteString("\nif pdebug.Enabled {")
+	buf.WriteString("\npdebug.Printf(`CACHE MISS: %s`, key)")
 	buf.WriteString("\n}")
+	buf.WriteString("\nif err = r.Load(tx, id); err != nil {")
+	fmt.Fprintf(&buf, "\n"+`return nil, errors.Wrap(err, "failed to load model.%s from database")`, m.Name)
+	buf.WriteString("\n}")
+	buf.WriteString("\nreturn &r, nil")
+	buf.WriteString("\n}, cache.WithExpires(time.Hour))")
 
 	if svc.HasPostLookupHook {
 		buf.WriteString("\nif err = v.PostLookupHook(tx, &r); err != nil {")
@@ -929,7 +938,7 @@ func generateServiceFile(ctx *genctx, m Model) error {
 		fmt.Fprintf(&buf, "\n"+`g := pdebug.Marker("service.%s.Update (%%s)", vdb.EID).BindError(&err)`, m.Name)
 		buf.WriteString("\ndefer g.End()")
 		buf.WriteString("\n}")
-		buf.WriteString("\n\nif vdb.EID == " + `""` + " {")
+		buf.WriteString("\n\nif vdb.EID == `` {")
 		fmt.Fprintf(
 			&buf,
 			"\nreturn errors.New(%s)",
@@ -941,6 +950,12 @@ func generateServiceFile(ctx *genctx, m Model) error {
 		buf.WriteString("\n}")
 		buf.WriteString("\n\nif err := vdb.Update(tx); err != nil {")
 		buf.WriteString("\nreturn err")
+		buf.WriteString("\n}")
+		fmt.Fprintf(&buf, "\nkey := `api.%s.` + vdb.EID", m.Name)
+		buf.WriteString("\nc := Cache()")
+		buf.WriteString("\nc.Delete(key)")
+		buf.WriteString("\nif pdebug.Enabled {")
+		buf.WriteString("\npdebug.Printf(`CACHE DEL %s`, key)")
 		buf.WriteString("\n}")
 		if hasL10N {
 			buf.WriteString("\n\nreturn payload.LocalizedFields.Foreach(func(l, k, x string) error {")
@@ -1072,6 +1087,13 @@ func generateServiceFile(ctx *genctx, m Model) error {
 	fmt.Fprintf(&buf, "\n\nvdb := db.%s{EID: id}", m.Name)
 	buf.WriteString("\nif err := vdb.Delete(tx); err != nil {")
 	buf.WriteString("\nreturn err")
+	buf.WriteString("\n}")
+
+	fmt.Fprintf(&buf, "\nkey := `api.%s.` + id", m.Name)
+	buf.WriteString("\nc := Cache()")
+	buf.WriteString("\nc.Delete(key)")
+	buf.WriteString("\nif pdebug.Enabled {")
+	buf.WriteString("\npdebug.Printf(`CACHE DEL %s`, key)")
 	buf.WriteString("\n}")
 	if hasL10N {
 		fmt.Fprintf(&buf, "\nif err := db.DeleteLocalizedStringsForParent(tx, id, %s); err != nil {", strconv.Quote(m.Name))

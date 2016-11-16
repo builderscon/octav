@@ -6,6 +6,8 @@ import (
 	"sync"
 	"time"
 
+	"github.com/builderscon/octav/octav/cache"
+
 	"github.com/builderscon/octav/octav/db"
 	"github.com/builderscon/octav/octav/internal/errors"
 	"github.com/builderscon/octav/octav/model"
@@ -42,10 +44,18 @@ func (v *UserSvc) Lookup(tx *db.Tx, m *model.User, id string) (err error) {
 		defer g.End()
 	}
 
-	r := model.User{}
-	if err = r.Load(tx, id); err != nil {
-		return errors.Wrap(err, "failed to load model.User from database")
-	}
+	var r model.User
+	key := `api.User.` + id
+	c := Cache()
+	_, err = c.GetOrSet(key, &r, func() (interface{}, error) {
+		if pdebug.Enabled {
+			pdebug.Printf(`CACHE MISS: %s`, key)
+		}
+		if err = r.Load(tx, id); err != nil {
+			return nil, errors.Wrap(err, "failed to load model.User from database")
+		}
+		return &r, nil
+	}, cache.WithExpires(time.Hour))
 	if err = v.PostLookupHook(tx, &r); err != nil {
 		return errors.Wrap(err, "failed to execute PostLookupHook")
 	}
@@ -82,7 +92,7 @@ func (v *UserSvc) Update(tx *db.Tx, vdb *db.User, payload model.UpdateUserReques
 		defer g.End()
 	}
 
-	if vdb.EID == "" {
+	if vdb.EID == `` {
 		return errors.New("vdb.EID is required (did you forget to call vdb.Load(tx) before hand?)")
 	}
 
@@ -92,6 +102,12 @@ func (v *UserSvc) Update(tx *db.Tx, vdb *db.User, payload model.UpdateUserReques
 
 	if err := vdb.Update(tx); err != nil {
 		return err
+	}
+	key := `api.User.` + vdb.EID
+	c := Cache()
+	c.Delete(key)
+	if pdebug.Enabled {
+		pdebug.Printf(`CACHE DEL %s`, key)
 	}
 
 	return payload.LocalizedFields.Foreach(func(l, k, x string) error {
@@ -215,6 +231,12 @@ func (v *UserSvc) Delete(tx *db.Tx, id string) error {
 	vdb := db.User{EID: id}
 	if err := vdb.Delete(tx); err != nil {
 		return err
+	}
+	key := `api.User.` + id
+	c := Cache()
+	c.Delete(key)
+	if pdebug.Enabled {
+		pdebug.Printf(`CACHE DEL %s`, key)
 	}
 	if err := db.DeleteLocalizedStringsForParent(tx, id, "User"); err != nil {
 		return err
