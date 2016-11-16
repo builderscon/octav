@@ -5,9 +5,9 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/vmihailenco/msgpack"
 	cache "gopkg.in/go-redis/cache.v5"
 	redis "gopkg.in/redis.v5"
+	msgpack "gopkg.in/vmihailenco/msgpack.v2"
 )
 
 type Redis struct {
@@ -67,10 +67,10 @@ func (c *Redis) Delete(key string) error {
 }
 
 func (c *Redis) GetOrSet(key string, v interface{}, fn func() (interface{}, error), options ...Option) (interface{}, error) {
-	it := cache.Item {
-		Key: key,
+	it := cache.Item{
+		Key:    key,
 		Object: v,
-		Func: fn,
+		Func:   fn,
 	}
 	applyOptions(&it, options...)
 
