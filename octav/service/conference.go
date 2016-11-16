@@ -440,14 +440,15 @@ func (v *ConferenceSvc) Decorate(tx *db.Tx, c *model.Conference, trustedCall boo
 	}
 
 	if seriesID := c.SeriesID; seriesID != "" {
-		var sdb db.ConferenceSeries
-		if err := sdb.LoadByEID(tx, seriesID); err != nil {
-			return errors.Wrapf(err, "failed to load conferences series '%s'", seriesID)
-		}
-
 		var s model.ConferenceSeries
-		if err := s.FromRow(sdb); err != nil {
-			return errors.Wrapf(err, "failed to load conferences series '%s'", seriesID)
+		css := ConferenceSeries()
+		r := model.LookupConferenceSeriesRequest{
+			ID: seriesID,
+			TrustedCall: trustedCall,
+		}
+		r.Lang.Set(lang)
+		if err := css.LookupFromPayload(tx, &s, &r); err != nil {
+			return errors.Wrap(err, "failed to load conference series")
 		}
 		c.Series = &s
 		c.FullSlug = s.Slug + "/" + c.Slug
