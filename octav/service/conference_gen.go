@@ -130,28 +130,20 @@ func (v *ConferenceSvc) ReplaceL10NStrings(tx *db.Tx, m *model.Conference, lang 
 		g := pdebug.Marker("service.Conference.ReplaceL10NStrings lang = %s", lang)
 		defer g.End()
 	}
+	ls := LocalizedString()
+	list := make([]db.LocalizedString, 0, 7)
 	switch lang {
 	case "", "en":
 		if len(m.Title) > 0 && len(m.Description) > 0 && len(m.CFPLeadText) > 0 && len(m.CFPPreSubmitInstructions) > 0 && len(m.CFPPostSubmitInstructions) > 0 && len(m.ContactInformation) > 0 && len(m.SubTitle) > 0 {
 			return nil
 		}
 		for _, extralang := range []string{`ja`} {
-			rows, err := tx.Query(`SELECT oid, parent_id, parent_type, name, language, localized FROM localized_strings WHERE parent_type = ? AND parent_id = ? AND language = ?`, "Conference", m.ID, extralang)
-			if err != nil {
-				if errors.IsSQLNoRows(err) {
-					break
-				}
-				return errors.Wrap(err, `failed to excute query`)
+			list = list[:0]
+			if err := ls.LookupFields(tx, "Conference", m.ID, extralang, &list); err != nil {
+				return errors.Wrap(err, `failed to lookup localized fields`)
 			}
 
-			var l db.LocalizedString
-			for rows.Next() {
-				if err := l.Scan(rows); err != nil {
-					return err
-				}
-				if len(l.Localized) == 0 {
-					continue
-				}
+			for _, l := range list {
 				switch l.Name {
 				case "title":
 					if len(m.Title) == 0 {
@@ -207,75 +199,64 @@ func (v *ConferenceSvc) ReplaceL10NStrings(tx *db.Tx, m *model.Conference, lang 
 		}
 		return nil
 	case "all":
-		rows, err := tx.Query(`SELECT oid, parent_id, parent_type, name, language, localized FROM localized_strings WHERE parent_type = ? AND parent_id = ?`, "Conference", m.ID)
-		if err != nil {
-			return err
-		}
+		for _, extralang := range []string{`ja`} {
+			list = list[:0]
+			if err := ls.LookupFields(tx, "Conference", m.ID, extralang, &list); err != nil {
+				return errors.Wrap(err, `failed to lookup localized fields`)
+			}
 
-		var l db.LocalizedString
-		for rows.Next() {
-			if err := l.Scan(rows); err != nil {
-				return err
+			for _, l := range list {
+				if pdebug.Enabled {
+					pdebug.Printf("Adding key '%s#%s'", l.Name, l.Language)
+				}
+				m.LocalizedFields.Set(l.Language, l.Name, l.Localized)
 			}
-			if len(l.Localized) == 0 {
-				continue
-			}
-			if pdebug.Enabled {
-				pdebug.Printf("Adding key '%s#%s'", l.Name, l.Language)
-			}
-			m.LocalizedFields.Set(l.Language, l.Name, l.Localized)
 		}
 	default:
-		rows, err := tx.Query(`SELECT oid, parent_id, parent_type, name, language, localized FROM localized_strings WHERE parent_type = ? AND parent_id = ? AND language = ?`, "Conference", m.ID, lang)
-		if err != nil {
-			return err
-		}
-
-		var l db.LocalizedString
-		for rows.Next() {
-			if err := l.Scan(rows); err != nil {
-				return err
-			}
-			if len(l.Localized) == 0 {
-				continue
+		for _, extralang := range []string{`ja`} {
+			list = list[:0]
+			if err := ls.LookupFields(tx, "Conference", m.ID, extralang, &list); err != nil {
+				return errors.Wrap(err, `failed to lookup localized fields`)
 			}
 
-			switch l.Name {
-			case "title":
-				if pdebug.Enabled {
-					pdebug.Printf("Replacing for key 'title'")
+			for _, l := range list {
+				switch l.Name {
+				case "title":
+					if pdebug.Enabled {
+						pdebug.Printf("Replacing for key 'title'")
+					}
+					m.Title = l.Localized
+				case "description":
+					if pdebug.Enabled {
+						pdebug.Printf("Replacing for key 'description'")
+					}
+					m.Description = l.Localized
+				case "cfp_lead_text":
+					if pdebug.Enabled {
+						pdebug.Printf("Replacing for key 'cfp_lead_text'")
+					}
+					m.CFPLeadText = l.Localized
+				case "cfp_pre_submit_instructions":
+					if pdebug.Enabled {
+						pdebug.Printf("Replacing for key 'cfp_pre_submit_instructions'")
+					}
+					m.CFPPreSubmitInstructions = l.Localized
+				case "cfp_post_submit_instructions":
+					if pdebug.Enabled {
+						pdebug.Printf("Replacing for key 'cfp_post_submit_instructions'")
+					}
+					m.CFPPostSubmitInstructions = l.Localized
+				case "contact_information":
+					if pdebug.Enabled {
+						pdebug.Printf("Replacing for key 'contact_information'")
+					}
+					m.ContactInformation = l.Localized
+				case "sub_title":
+					if pdebug.Enabled {
+						pdebug.Printf("Replacing for key 'sub_title'")
+					}
+					m.SubTitle = l.Localized
 				}
-				m.Title = l.Localized
-			case "description":
-				if pdebug.Enabled {
-					pdebug.Printf("Replacing for key 'description'")
-				}
-				m.Description = l.Localized
-			case "cfp_lead_text":
-				if pdebug.Enabled {
-					pdebug.Printf("Replacing for key 'cfp_lead_text'")
-				}
-				m.CFPLeadText = l.Localized
-			case "cfp_pre_submit_instructions":
-				if pdebug.Enabled {
-					pdebug.Printf("Replacing for key 'cfp_pre_submit_instructions'")
-				}
-				m.CFPPreSubmitInstructions = l.Localized
-			case "cfp_post_submit_instructions":
-				if pdebug.Enabled {
-					pdebug.Printf("Replacing for key 'cfp_post_submit_instructions'")
-				}
-				m.CFPPostSubmitInstructions = l.Localized
-			case "contact_information":
-				if pdebug.Enabled {
-					pdebug.Printf("Replacing for key 'contact_information'")
-				}
-				m.ContactInformation = l.Localized
-			case "sub_title":
-				if pdebug.Enabled {
-					pdebug.Printf("Replacing for key 'sub_title'")
-				}
-				m.SubTitle = l.Localized
 			}
 		}
 	}

@@ -945,20 +945,6 @@ func generateServiceFile(ctx *genctx, m Model) error {
 		buf.WriteString("\npdebug.Printf(`CACHE %s: %s`, cacheSt, key)")
 		buf.WriteString("\n}")
 
--       return payload.LocalizedFields.Foreach(func(l, k, x string) error {
--               if pdebug.Enabled {
--                       pdebug.Printf("Updating l10n string for '%s' (%s)", k, l)
--               }
--               ls := db.LocalizedString{
--                       ParentType: "Conference",
--                       ParentID:   vdb.EID,
--                       Language:   l,
--                       Name:       k,
--                       Localized:  x,
--               return ls.Upsert(tx)
--       })
-
-
 		if svc.HasPostLookupFromPayloadHook {
 			buf.WriteString("\nif err = v.PostLookupFromPayloadHook(tx, &r); err != nil {")
 			buf.WriteString("\nreturn errors.Wrap(err, \"failed to execute PostLookupFromPayloadHook\")")
@@ -1081,9 +1067,7 @@ func generateServiceFile(ctx *genctx, m Model) error {
 		fmt.Fprintf(&buf, "\n"+`g := pdebug.Marker("service.%s.ReplaceL10NStrings lang = %%s", lang)`, m.Name)
 		buf.WriteString("\ndefer g.End()")
 		buf.WriteString("\n}")
-		buf.WriteString("\nswitch lang {")
-		buf.WriteString("\ncase \"\", \"en\":")
-		buf.WriteString("\nif ")
+
 		var l10nf []string
 		for _, f := range m.Fields {
 			if !f.L10N {
@@ -1091,26 +1075,21 @@ func generateServiceFile(ctx *genctx, m Model) error {
 			}
 			l10nf = append(l10nf, "len(m."+f.Name+") > 0")
 		}
+		buf.WriteString("\nls := LocalizedString()")
+		fmt.Fprintf(&buf, "\nlist := make([]db.LocalizedString, 0, %d)", len(l10nf))
+		buf.WriteString("\nswitch lang {")
+		buf.WriteString("\ncase \"\", \"en\":")
+		buf.WriteString("\nif ")
 		buf.WriteString(strings.Join(l10nf, " && "))
 		buf.WriteString("{\nreturn nil\n}")
 
 		buf.WriteString("\nfor _, extralang := range []string{`ja`} {")
-		fmt.Fprintf(&buf, "\nrows, err := tx.Query(`SELECT oid, parent_id, parent_type, name, language, localized FROM localized_strings WHERE parent_type = ? AND parent_id = ? AND language = ?`, %s, m.ID, extralang)", strconv.Quote(m.Name))
-		buf.WriteString("\nif err != nil {")
-		buf.WriteString("\nif errors.IsSQLNoRows(err) {")
-		buf.WriteString("\nbreak")
-		buf.WriteString("\n}")
-		buf.WriteString("\nreturn errors.Wrap(err, `failed to excute query`)")
+		buf.WriteString("\nlist = list[:0]")
+		fmt.Fprintf(&buf, "\nif err := ls.LookupFields(tx, %s, m.ID, extralang, &list); err != nil {", strconv.Quote(m.Name))
+		buf.WriteString("\nreturn errors.Wrap(err, `failed to lookup localized fields`)")
 		buf.WriteString("\n}")
 
-		buf.WriteString("\n\nvar l db.LocalizedString")
-		buf.WriteString("\nfor rows.Next() {")
-		buf.WriteString("\nif err := l.Scan(rows); err != nil {")
-		buf.WriteString("\nreturn err")
-		buf.WriteString("\n}")
-		buf.WriteString("\nif len(l.Localized) == 0 {")
-		buf.WriteString("\ncontinue")
-		buf.WriteString("\n}")
+		buf.WriteString("\n\nfor _, l := range list {")
 		buf.WriteString("\nswitch l.Name {")
 		for _, f := range m.Fields {
 			if !f.L10N {
@@ -1129,37 +1108,28 @@ func generateServiceFile(ctx *genctx, m Model) error {
 		buf.WriteString("\n}")
 		buf.WriteString("\nreturn nil")
 		buf.WriteString("\ncase \"all\":")
-		fmt.Fprintf(&buf, "\nrows, err := tx.Query(`SELECT oid, parent_id, parent_type, name, language, localized FROM localized_strings WHERE parent_type = ? AND parent_id = ?`, %s, m.ID)", strconv.Quote(m.Name))
-		buf.WriteString("\nif err != nil {")
-		buf.WriteString("\nreturn err")
+		buf.WriteString("\nfor _, extralang := range []string{`ja`} {")
+		buf.WriteString("\nlist = list[:0]")
+		fmt.Fprintf(&buf, "\nif err := ls.LookupFields(tx, %s, m.ID, extralang, &list); err != nil {", strconv.Quote(m.Name))
+		buf.WriteString("\nreturn errors.Wrap(err, `failed to lookup localized fields`)")
 		buf.WriteString("\n}")
-		buf.WriteString("\n\nvar l db.LocalizedString")
-		buf.WriteString("\nfor rows.Next() {")
-		buf.WriteString("\nif err := l.Scan(rows); err != nil {")
-		buf.WriteString("\nreturn err")
-		buf.WriteString("\n}")
-		buf.WriteString("\nif len(l.Localized) == 0 {")
-		buf.WriteString("\ncontinue")
-		buf.WriteString("\n}")
+
+		buf.WriteString("\n\nfor _, l := range list {")
 		buf.WriteString("\nif pdebug.Enabled {")
 		buf.WriteString("\npdebug.Printf(\"Adding key '%s#%s'\", l.Name, l.Language)")
 		buf.WriteString("\n}")
 		buf.WriteString("\nm.LocalizedFields.Set(l.Language, l.Name, l.Localized)")
 		buf.WriteString("\n}")
+		buf.WriteString("\n}")
 		buf.WriteString("\ndefault:")
-		fmt.Fprintf(&buf, "\nrows, err := tx.Query(`SELECT oid, parent_id, parent_type, name, language, localized FROM localized_strings WHERE parent_type = ? AND parent_id = ? AND language = ?`, %s, m.ID, lang)", strconv.Quote(m.Name))
-		buf.WriteString("\nif err != nil {")
-		buf.WriteString("\nreturn err")
+		buf.WriteString("\nfor _, extralang := range []string{`ja`} {")
+		buf.WriteString("\nlist = list[:0]")
+		fmt.Fprintf(&buf, "\nif err := ls.LookupFields(tx, %s, m.ID, extralang, &list); err != nil {", strconv.Quote(m.Name))
+		buf.WriteString("\nreturn errors.Wrap(err, `failed to lookup localized fields`)")
 		buf.WriteString("\n}")
-		buf.WriteString("\n\nvar l db.LocalizedString")
-		buf.WriteString("\nfor rows.Next() {")
-		buf.WriteString("\nif err := l.Scan(rows); err != nil {")
-		buf.WriteString("\nreturn err")
-		buf.WriteString("\n}")
-		buf.WriteString("\nif len(l.Localized) == 0 {")
-		buf.WriteString("\ncontinue")
-		buf.WriteString("\n}")
-		buf.WriteString("\n\nswitch l.Name {")
+
+		buf.WriteString("\n\nfor _, l := range list {")
+		buf.WriteString("\nswitch l.Name {")
 		for _, f := range m.Fields {
 			if !f.L10N {
 				continue
@@ -1170,6 +1140,7 @@ func generateServiceFile(ctx *genctx, m Model) error {
 			buf.WriteString("\n}")
 			fmt.Fprintf(&buf, "\nm.%s = l.Localized", f.Name)
 		}
+		buf.WriteString("\n}")
 		buf.WriteString("\n}")
 		buf.WriteString("\n}")
 		buf.WriteString("\n}")

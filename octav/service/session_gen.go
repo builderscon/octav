@@ -167,28 +167,20 @@ func (v *SessionSvc) ReplaceL10NStrings(tx *db.Tx, m *model.Session, lang string
 		g := pdebug.Marker("service.Session.ReplaceL10NStrings lang = %s", lang)
 		defer g.End()
 	}
+	ls := LocalizedString()
+	list := make([]db.LocalizedString, 0, 2)
 	switch lang {
 	case "", "en":
 		if len(m.Title) > 0 && len(m.Abstract) > 0 {
 			return nil
 		}
 		for _, extralang := range []string{`ja`} {
-			rows, err := tx.Query(`SELECT oid, parent_id, parent_type, name, language, localized FROM localized_strings WHERE parent_type = ? AND parent_id = ? AND language = ?`, "Session", m.ID, extralang)
-			if err != nil {
-				if errors.IsSQLNoRows(err) {
-					break
-				}
-				return errors.Wrap(err, `failed to excute query`)
+			list = list[:0]
+			if err := ls.LookupFields(tx, "Session", m.ID, extralang, &list); err != nil {
+				return errors.Wrap(err, `failed to lookup localized fields`)
 			}
 
-			var l db.LocalizedString
-			for rows.Next() {
-				if err := l.Scan(rows); err != nil {
-					return err
-				}
-				if len(l.Localized) == 0 {
-					continue
-				}
+			for _, l := range list {
 				switch l.Name {
 				case "title":
 					if len(m.Title) == 0 {
@@ -209,50 +201,39 @@ func (v *SessionSvc) ReplaceL10NStrings(tx *db.Tx, m *model.Session, lang string
 		}
 		return nil
 	case "all":
-		rows, err := tx.Query(`SELECT oid, parent_id, parent_type, name, language, localized FROM localized_strings WHERE parent_type = ? AND parent_id = ?`, "Session", m.ID)
-		if err != nil {
-			return err
-		}
+		for _, extralang := range []string{`ja`} {
+			list = list[:0]
+			if err := ls.LookupFields(tx, "Session", m.ID, extralang, &list); err != nil {
+				return errors.Wrap(err, `failed to lookup localized fields`)
+			}
 
-		var l db.LocalizedString
-		for rows.Next() {
-			if err := l.Scan(rows); err != nil {
-				return err
+			for _, l := range list {
+				if pdebug.Enabled {
+					pdebug.Printf("Adding key '%s#%s'", l.Name, l.Language)
+				}
+				m.LocalizedFields.Set(l.Language, l.Name, l.Localized)
 			}
-			if len(l.Localized) == 0 {
-				continue
-			}
-			if pdebug.Enabled {
-				pdebug.Printf("Adding key '%s#%s'", l.Name, l.Language)
-			}
-			m.LocalizedFields.Set(l.Language, l.Name, l.Localized)
 		}
 	default:
-		rows, err := tx.Query(`SELECT oid, parent_id, parent_type, name, language, localized FROM localized_strings WHERE parent_type = ? AND parent_id = ? AND language = ?`, "Session", m.ID, lang)
-		if err != nil {
-			return err
-		}
-
-		var l db.LocalizedString
-		for rows.Next() {
-			if err := l.Scan(rows); err != nil {
-				return err
-			}
-			if len(l.Localized) == 0 {
-				continue
+		for _, extralang := range []string{`ja`} {
+			list = list[:0]
+			if err := ls.LookupFields(tx, "Session", m.ID, extralang, &list); err != nil {
+				return errors.Wrap(err, `failed to lookup localized fields`)
 			}
 
-			switch l.Name {
-			case "title":
-				if pdebug.Enabled {
-					pdebug.Printf("Replacing for key 'title'")
+			for _, l := range list {
+				switch l.Name {
+				case "title":
+					if pdebug.Enabled {
+						pdebug.Printf("Replacing for key 'title'")
+					}
+					m.Title = l.Localized
+				case "abstract":
+					if pdebug.Enabled {
+						pdebug.Printf("Replacing for key 'abstract'")
+					}
+					m.Abstract = l.Localized
 				}
-				m.Title = l.Localized
-			case "abstract":
-				if pdebug.Enabled {
-					pdebug.Printf("Replacing for key 'abstract'")
-				}
-				m.Abstract = l.Localized
 			}
 		}
 	}

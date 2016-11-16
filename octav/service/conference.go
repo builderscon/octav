@@ -626,20 +626,8 @@ func (v *ConferenceSvc) UpdateFromPayload(ctx context.Context, tx *db.Tx, payloa
 		return errors.Wrap(err, "failed to update databased")
 	}
 
-	err = payload.LocalizedFields.Foreach(func(l, k, x string) error {
-		if pdebug.Enabled {
-			pdebug.Printf("Updating l10n string for '%s' (%s)", k, l)
-		}
-		ls := db.LocalizedString{
-			ParentType: "Conference",
-			ParentID:   vdb.EID,
-			Language:   l,
-			Name:       k,
-			Localized:  x,
-		}
-		return ls.Upsert(tx)
-	})
-	if err != nil {
+	ls := LocalizedString()
+	if err := ls.UpdateFields(tx, "Conference", vdb.EID, payload.LocalizedFields); err != nil {
 		return errors.Wrap(err, "failed to update localized fields")
 	}
 	var ccs ConferenceComponentSvc
