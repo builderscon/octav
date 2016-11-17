@@ -369,17 +369,34 @@ func (v *ConferenceSvc) LoadAdmins(tx *db.Tx, cdl *model.UserList, trustedCall b
 	return nil
 }
 
-func (v *ConferenceSvc) AddVenueFromPayload(tx *db.Tx, payload *model.AddConferenceVenueRequest) error {
+func (v *ConferenceSvc) AddVenueFromPayload(tx *db.Tx, payload *model.AddConferenceVenueRequest) (err error) {
+	if pdebug.Enabled {
+		g := pdebug.Marker("service.Conference.AddVenueFromPayload").BindError(&err)
+		defer g.End()
+	}
+
 	su := User()
 	if err := su.IsConferenceAdministrator(tx, payload.ConferenceID, payload.UserID); err != nil {
 		return errors.Wrap(err, "adding a conference venue requires conference administrator privilege")
 	}
+
 	cd := db.ConferenceVenue{
 		ConferenceID: payload.ConferenceID,
 		VenueID:      payload.VenueID,
 	}
 	if err := cd.Create(tx, db.WithInsertIgnore(true)); err != nil {
 		return errors.Wrap(err, "failed to insert new conference/venue relation")
+	}
+
+	c := Cache()
+	for _, t := range []bool{true,false} {
+		for _, l := range []string{"en", "ja"} { // not a great idea...
+		  key := c.Key("Venue", "LoadByConferenceID", payload.ConferenceID, l, fmt.Sprintf("%t", t))
+			c.Delete(key)
+			if pdebug.Enabled {
+				pdebug.Printf("CACHE DEL %s", key)
+			}
+		}
 	}
 
 	return nil
@@ -391,24 +408,6 @@ func (v *ConferenceSvc) DeleteVenueFromPayload(tx *db.Tx, payload *model.DeleteC
 		return errors.Wrap(err, "deleting a conference venue requires conference administrator privilege")
 	}
 	return errors.Wrap(db.DeleteConferenceVenue(tx, payload.ConferenceID, payload.VenueID), "failed to delete conference venue")
-}
-
-func (v *ConferenceSvc) LoadVenues(tx *db.Tx, cdl *model.VenueList, cid string) error {
-	var vdbl db.VenueList
-	if err := db.LoadConferenceVenues(tx, &vdbl, cid); err != nil {
-		return err
-	}
-
-	res := make(model.VenueList, len(vdbl))
-	for i, vdb := range vdbl {
-		var u model.Venue
-		if err := u.FromRow(vdb); err != nil {
-			return err
-		}
-		res[i] = u
-	}
-	*cdl = res
-	return nil
 }
 
 func (v *ConferenceSvc) LoadTextComponents(tx *db.Tx, c *model.Conference) error {
@@ -473,7 +472,8 @@ func (v *ConferenceSvc) Decorate(tx *db.Tx, c *model.Conference, trustedCall boo
 		return errors.Wrapf(err, "failed to load administrators for '%s'", c.ID)
 	}
 
-	if err := v.LoadVenues(tx, &c.Venues, c.ID); err != nil {
+	sv := Venue()
+	if err := sv.LoadByConferenceID(tx, &c.Venues, c.ID, lang, trustedCall); err != nil {
 		return errors.Wrapf(err, "failed to load venues for '%s'", c.ID)
 	}
 
@@ -487,13 +487,6 @@ func (v *ConferenceSvc) Decorate(tx *db.Tx, c *model.Conference, trustedCall boo
 
 	if err := v.LoadSessionTypes(tx, &c.SessionTypes, c.ID); err != nil {
 		return errors.Wrapf(err, "failed to load session types for '%s'", c.ID)
-	}
-
-	sv := Venue()
-	for i := range c.Venues {
-		if err := sv.Decorate(tx, &c.Venues[i], trustedCall, lang); err != nil {
-			return errors.Wrap(err, "failed to decorate venue with associated data")
-		}
 	}
 
 	sfs := FeaturedSpeaker()

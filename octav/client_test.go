@@ -537,6 +537,15 @@ func TestConferenceCRUD(t *testing.T) {
 		return
 	}
 	defer testDeleteSponsor(ctx, sp.ID, user.ID)
+
+	conf5, err := testLookupConference(ctx, conf1.ID, "ja")
+	if !assert.NoError(ctx.T, err, "lookup should succeed") {
+		return
+	}
+
+	if !assert.Len(ctx.T, conf5.Venues, 1, "venues should be registered") {
+		return
+	}
 }
 
 func TestRoomCRUD(t *testing.T) {
