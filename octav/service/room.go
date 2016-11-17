@@ -92,6 +92,16 @@ func (v *RoomSvc) PreUpdateFromPayloadHook(ctx context.Context, tx *db.Tx, vdb *
 	return nil
 }
 
+func (v *RoomSvc) PostUpdateHook(tx *db.Tx, vdb *db.Room) error {
+	c := Cache()
+	key := c.Key("Room", "ListByVenueID", vdb.VenueID)
+	c.Delete(key)
+	if pdebug.Enabled {
+		pdebug.Printf("CACHE DEL: %s", key)
+	}
+	return nil
+}
+
 func (v *RoomSvc) DeleteFromPayload(tx *db.Tx, payload *model.DeleteRoomRequest) error {
 	su := User()
 	if err := su.IsAdministrator(tx, payload.UserID); err != nil {

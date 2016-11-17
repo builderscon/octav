@@ -82,6 +82,7 @@ type MailgunSvc struct {
 type LocalizedStringSvc struct{}
 type QuestionSvc struct{}
 
+// +PostUpdateHook
 // +PreUpdateFromPayloadHook
 type RoomSvc struct{}
 
