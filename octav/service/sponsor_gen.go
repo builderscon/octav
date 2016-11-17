@@ -52,8 +52,8 @@ func (v *SponsorSvc) Lookup(tx *db.Tx, m *model.Sponsor, id string) (err error) 
 	}
 
 	var r model.Sponsor
-	key := `api.Sponsor.` + id
 	c := Cache()
+	key := c.Key("Sponsor", id)
 	var cacheMiss bool
 	_, err = c.GetOrSet(key, &r, func() (interface{}, error) {
 		if pdebug.Enabled {
@@ -111,15 +111,15 @@ func (v *SponsorSvc) Update(tx *db.Tx, vdb *db.Sponsor) (err error) {
 	if err := vdb.Update(tx); err != nil {
 		return errors.Wrap(err, `failed to update database`)
 	}
-	key := `api.Sponsor.` + vdb.EID
+	c := Cache()
+	key := c.Key("Sponsor", vdb.EID)
 	if pdebug.Enabled {
 		pdebug.Printf(`CACHE DEL %s`, key)
 	}
-	c := Cache()
 	cerr := c.Delete(key)
 	if pdebug.Enabled {
 		if cerr != nil {
-			pdebug.Printf(`CACHE ERR: %%s`, cerr)
+			pdebug.Printf(`CACHE ERR: %s`, cerr)
 		}
 	}
 	return nil
@@ -201,8 +201,8 @@ func (v *SponsorSvc) Delete(tx *db.Tx, id string) error {
 	if err := vdb.Delete(tx); err != nil {
 		return err
 	}
-	key := `api.Sponsor.` + id
 	c := Cache()
+	key := c.Key("Sponsor", id)
 	c.Delete(key)
 	if pdebug.Enabled {
 		pdebug.Printf(`CACHE DEL %s`, key)

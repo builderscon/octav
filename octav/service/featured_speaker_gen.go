@@ -52,8 +52,8 @@ func (v *FeaturedSpeakerSvc) Lookup(tx *db.Tx, m *model.FeaturedSpeaker, id stri
 	}
 
 	var r model.FeaturedSpeaker
-	key := `api.FeaturedSpeaker.` + id
 	c := Cache()
+	key := c.Key("FeaturedSpeaker", id)
 	var cacheMiss bool
 	_, err = c.GetOrSet(key, &r, func() (interface{}, error) {
 		if pdebug.Enabled {
@@ -111,15 +111,15 @@ func (v *FeaturedSpeakerSvc) Update(tx *db.Tx, vdb *db.FeaturedSpeaker) (err err
 	if err := vdb.Update(tx); err != nil {
 		return errors.Wrap(err, `failed to update database`)
 	}
-	key := `api.FeaturedSpeaker.` + vdb.EID
+	c := Cache()
+	key := c.Key("FeaturedSpeaker", vdb.EID)
 	if pdebug.Enabled {
 		pdebug.Printf(`CACHE DEL %s`, key)
 	}
-	c := Cache()
 	cerr := c.Delete(key)
 	if pdebug.Enabled {
 		if cerr != nil {
-			pdebug.Printf(`CACHE ERR: %%s`, cerr)
+			pdebug.Printf(`CACHE ERR: %s`, cerr)
 		}
 	}
 	return nil
@@ -242,8 +242,8 @@ func (v *FeaturedSpeakerSvc) Delete(tx *db.Tx, id string) error {
 	if err := vdb.Delete(tx); err != nil {
 		return err
 	}
-	key := `api.FeaturedSpeaker.` + id
 	c := Cache()
+	key := c.Key("FeaturedSpeaker", id)
 	c.Delete(key)
 	if pdebug.Enabled {
 		pdebug.Printf(`CACHE DEL %s`, key)

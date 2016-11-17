@@ -14,11 +14,13 @@ import (
 
 	"cloud.google.com/go/storage"
 
+	"github.com/builderscon/octav/octav/cache"
 	"github.com/builderscon/octav/octav/db"
 	"github.com/builderscon/octav/octav/internal/errors"
 	"github.com/builderscon/octav/octav/model"
 	"github.com/builderscon/octav/octav/tools"
 	"github.com/lestrrat/go-pdebug"
+	urlenc "github.com/lestrrat/go-urlenc"
 )
 
 func (v *ConferenceSvc) Init() {
@@ -443,7 +445,7 @@ func (v *ConferenceSvc) Decorate(tx *db.Tx, c *model.Conference, trustedCall boo
 		var s model.ConferenceSeries
 		css := ConferenceSeries()
 		r := model.LookupConferenceSeriesRequest{
-			ID: seriesID,
+			ID:          seriesID,
 			TrustedCall: trustedCall,
 		}
 		r.Lang.Set(lang)
@@ -709,6 +711,36 @@ func (v *ConferenceSvc) ListFromPayload(tx *db.Tx, l *model.ConferenceList, payl
 		defer g.End()
 	}
 
+	keybuf, err := urlenc.Marshal(payload)
+	if err != nil {
+		return errors.Wrap(err, "failed to marshal payload")
+	}
+	c := Cache()
+	key := c.Key("Conference", "ListFromPayload", string(keybuf))
+	var ids []string
+	if err := c.Get(key, &ids); err == nil {
+		if pdebug.Enabled {
+			pdebug.Printf("CACHE HIT: %s", key)
+		}
+		m := make(model.ConferenceList, len(ids))
+		r := model.LookupConferenceRequest{
+			// TrustedCall: payload.TrustedCall, // shouldn't we have this?
+			Lang: payload.Lang,
+		}
+		for i, id := range ids {
+			r.ID = id
+			if err := v.LookupFromPayload(tx, &m[i], &r); err != nil {
+				return errors.Wrapf(err, "failed to load %s", id)
+			}
+		}
+		*l = m
+		return nil
+	}
+
+	if pdebug.Enabled {
+		pdebug.Printf("CACHE MISS: %s", key)
+	}
+
 	var rs time.Time
 	var re time.Time
 
@@ -740,12 +772,20 @@ func (v *ConferenceSvc) ListFromPayload(tx *db.Tx, l *model.ConferenceList, payl
 	}
 
 	r := make(model.ConferenceList, len(vdbl))
+	ids = make([]string, len(vdbl))
 	for i, vdb := range vdbl {
+		ids[i] = vdb.EID
 		if err := (r[i]).FromRow(vdb); err != nil {
 			return errors.Wrap(err, "failed populate model from database")
 		}
 		if err := v.Decorate(tx, &r[i], false, payload.Lang.String); err != nil {
 			return errors.Wrap(err, "failed to decorate venue with associated data")
+		}
+	}
+
+	if err := c.Set(key, ids, cache.WithExpires(15*time.Minute)); err != nil {
+		if pdebug.Enabled {
+			pdebug.Printf("CACHE ERR: %s", err)
 		}
 	}
 

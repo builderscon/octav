@@ -1230,6 +1230,7 @@ func TestListConference(t *testing.T) {
 	}
 
 	if !assert.NoError(ctx.T, validator.HTTPListConferenceResponse.Validate(res), "Validation should succeed") {
+		t.Logf("%#v", res)
 		return
 	}
 
@@ -1255,12 +1256,17 @@ func TestListConference(t *testing.T) {
 		}
 	}
 
+	// This is going to be cached, so if we want to see the
+	// updated result, we need to tweak the request enough so
+	// that it bypasses the caching w/o disturbing testing
+	in.Limit.Set(15)
 	res, err = ctx.HTTPClient.ListConference(&in)
 	if !assert.NoError(ctx.T, err, "ListConference should succeed") {
 		return
 	}
 
 	if !assert.Len(ctx.T, res, 5, "ListConference returns 5 conferences") {
+		t.Logf("%d", len(res))
 		return
 	}
 
