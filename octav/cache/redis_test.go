@@ -28,7 +28,7 @@ func TestRedis(t *testing.T) {
 	v.Foo = "Hello"
 	v.Bar = []byte("World!")
 
-	c := cache.NewRedis(redisAddr)
+	c := cache.NewRedis([]string{redisAddr})
 
 	key := "foo"
 	c.Delete(key)

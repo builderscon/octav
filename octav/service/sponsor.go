@@ -7,14 +7,16 @@ import (
 	"net/http"
 	"time"
 
+	"context"
+
+	"cloud.google.com/go/storage"
+	"github.com/builderscon/octav/octav/cache"
 	"github.com/builderscon/octav/octav/db"
 	"github.com/builderscon/octav/octav/internal/errors"
 	"github.com/builderscon/octav/octav/model"
 	"github.com/builderscon/octav/octav/tools"
 	"github.com/lestrrat/go-pdebug"
-	"context"
 	"golang.org/x/sync/errgroup"
-	"cloud.google.com/go/storage"
 )
 
 func (v *SponsorSvc) Init() {
@@ -331,5 +333,52 @@ func (v *SponsorSvc) Decorate(tx *db.Tx, sponsor *model.Sponsor, trustedCall boo
 		return errors.Wrap(err, "failed to replace L10N strings")
 	}
 
+	return nil
+}
+
+func (v *SponsorSvc) LoadByConferenceID(tx *db.Tx, cdl *model.SponsorList, cid string) (err error) {
+	if pdebug.Enabled {
+		g := pdebug.Marker("serviec.Sponsor.LoadByConferenceID %s", cid).BindError(&err)
+		defer g.End()
+	}
+
+	var ids []string
+	c := Cache()
+	key := c.Key("Sponsor", "LoadByConferenceID", cid)
+	if err := c.Get(key, &ids); err == nil {
+		if pdebug.Enabled {
+			pdebug.Printf("CACHE HIT: %s", key)
+		}
+		m := make(model.SponsorList, len(ids))
+		for i, id := range ids {
+			if err := v.Lookup(tx, &m[i], id); err != nil {
+				return errors.Wrap(err, "failed to load from database")
+			}
+		}
+
+		return nil
+	}
+
+	if pdebug.Enabled {
+		pdebug.Printf("CACHE MISS: %s", key)
+	}
+	var vdbl db.SponsorList
+	if err := db.LoadSponsors(tx, &vdbl, cid); err != nil {
+		return err
+	}
+
+	ids = make([]string, len(vdbl))
+	res := make(model.SponsorList, len(vdbl))
+	for i, vdb := range vdbl {
+		var u model.Sponsor
+		if err := u.FromRow(vdb); err != nil {
+			return err
+		}
+		ids[i] = vdb.EID
+		res[i] = u
+	}
+	*cdl = res
+
+	c.Set(key, ids, cache.WithExpires(15*time.Minute))
 	return nil
 }

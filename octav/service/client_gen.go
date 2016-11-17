@@ -49,8 +49,8 @@ func (v *ClientSvc) Lookup(tx *db.Tx, m *model.Client, id string) (err error) {
 	}
 
 	var r model.Client
-	key := `api.Client.` + id
 	c := Cache()
+	key := c.Key("Client", id)
 	var cacheMiss bool
 	_, err = c.GetOrSet(key, &r, func() (interface{}, error) {
 		if pdebug.Enabled {
@@ -85,15 +85,15 @@ func (v *ClientSvc) Update(tx *db.Tx, vdb *db.Client) (err error) {
 	if err := vdb.Update(tx); err != nil {
 		return errors.Wrap(err, `failed to update database`)
 	}
-	key := `api.Client.` + vdb.EID
+	c := Cache()
+	key := c.Key("Client", vdb.EID)
 	if pdebug.Enabled {
 		pdebug.Printf(`CACHE DEL %s`, key)
 	}
-	c := Cache()
 	cerr := c.Delete(key)
 	if pdebug.Enabled {
 		if cerr != nil {
-			pdebug.Printf(`CACHE ERR: %%s`, cerr)
+			pdebug.Printf(`CACHE ERR: %s`, cerr)
 		}
 	}
 	return nil
@@ -109,8 +109,8 @@ func (v *ClientSvc) Delete(tx *db.Tx, id string) error {
 	if err := vdb.Delete(tx); err != nil {
 		return err
 	}
-	key := `api.Client.` + id
 	c := Cache()
+	key := c.Key("Client", id)
 	c.Delete(key)
 	if pdebug.Enabled {
 		pdebug.Printf(`CACHE DEL %s`, key)

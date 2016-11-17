@@ -14,11 +14,13 @@ import (
 
 	"cloud.google.com/go/storage"
 
+	"github.com/builderscon/octav/octav/cache"
 	"github.com/builderscon/octav/octav/db"
 	"github.com/builderscon/octav/octav/internal/errors"
 	"github.com/builderscon/octav/octav/model"
 	"github.com/builderscon/octav/octav/tools"
 	"github.com/lestrrat/go-pdebug"
+	urlenc "github.com/lestrrat/go-urlenc"
 )
 
 func (v *ConferenceSvc) Init() {
@@ -367,17 +369,30 @@ func (v *ConferenceSvc) LoadAdmins(tx *db.Tx, cdl *model.UserList, trustedCall b
 	return nil
 }
 
-func (v *ConferenceSvc) AddVenueFromPayload(tx *db.Tx, payload *model.AddConferenceVenueRequest) error {
+func (v *ConferenceSvc) AddVenueFromPayload(tx *db.Tx, payload *model.AddConferenceVenueRequest) (err error) {
+	if pdebug.Enabled {
+		g := pdebug.Marker("service.Conference.AddVenueFromPayload").BindError(&err)
+		defer g.End()
+	}
+
 	su := User()
 	if err := su.IsConferenceAdministrator(tx, payload.ConferenceID, payload.UserID); err != nil {
 		return errors.Wrap(err, "adding a conference venue requires conference administrator privilege")
 	}
+
 	cd := db.ConferenceVenue{
 		ConferenceID: payload.ConferenceID,
 		VenueID:      payload.VenueID,
 	}
 	if err := cd.Create(tx, db.WithInsertIgnore(true)); err != nil {
 		return errors.Wrap(err, "failed to insert new conference/venue relation")
+	}
+
+	c := Cache()
+  key := c.Key("Venue", "LoadByConferenceID", payload.ConferenceID)
+	c.Delete(key)
+	if pdebug.Enabled {
+		pdebug.Printf("CACHE DEL %s", key)
 	}
 
 	return nil
@@ -389,24 +404,6 @@ func (v *ConferenceSvc) DeleteVenueFromPayload(tx *db.Tx, payload *model.DeleteC
 		return errors.Wrap(err, "deleting a conference venue requires conference administrator privilege")
 	}
 	return errors.Wrap(db.DeleteConferenceVenue(tx, payload.ConferenceID, payload.VenueID), "failed to delete conference venue")
-}
-
-func (v *ConferenceSvc) LoadVenues(tx *db.Tx, cdl *model.VenueList, cid string) error {
-	var vdbl db.VenueList
-	if err := db.LoadConferenceVenues(tx, &vdbl, cid); err != nil {
-		return err
-	}
-
-	res := make(model.VenueList, len(vdbl))
-	for i, vdb := range vdbl {
-		var u model.Venue
-		if err := u.FromRow(vdb); err != nil {
-			return err
-		}
-		res[i] = u
-	}
-	*cdl = res
-	return nil
 }
 
 func (v *ConferenceSvc) LoadTextComponents(tx *db.Tx, c *model.Conference) error {
@@ -440,14 +437,15 @@ func (v *ConferenceSvc) Decorate(tx *db.Tx, c *model.Conference, trustedCall boo
 	}
 
 	if seriesID := c.SeriesID; seriesID != "" {
-		var sdb db.ConferenceSeries
-		if err := sdb.LoadByEID(tx, seriesID); err != nil {
-			return errors.Wrapf(err, "failed to load conferences series '%s'", seriesID)
-		}
-
 		var s model.ConferenceSeries
-		if err := s.FromRow(sdb); err != nil {
-			return errors.Wrapf(err, "failed to load conferences series '%s'", seriesID)
+		css := ConferenceSeries()
+		r := model.LookupConferenceSeriesRequest{
+			ID:          seriesID,
+			TrustedCall: trustedCall,
+		}
+		r.Lang.Set(lang)
+		if err := css.LookupFromPayload(tx, &s, &r); err != nil {
+			return errors.Wrap(err, "failed to load conference series")
 		}
 		c.Series = &s
 		c.FullSlug = s.Slug + "/" + c.Slug
@@ -470,30 +468,20 @@ func (v *ConferenceSvc) Decorate(tx *db.Tx, c *model.Conference, trustedCall boo
 		return errors.Wrapf(err, "failed to load administrators for '%s'", c.ID)
 	}
 
-	if err := v.LoadVenues(tx, &c.Venues, c.ID); err != nil {
+	sv := Venue()
+	if err := sv.LoadByConferenceID(tx, &c.Venues, c.ID); err != nil {
 		return errors.Wrapf(err, "failed to load venues for '%s'", c.ID)
 	}
-
-	if err := v.LoadFeaturedSpeakers(tx, &c.FeaturedSpeakers, c.ID); err != nil {
-		return errors.Wrapf(err, "failed to load featured speakers for '%s'", c.ID)
-	}
-
-	if err := v.LoadSponsors(tx, &c.Sponsors, c.ID); err != nil {
-		return errors.Wrapf(err, "failed to load sponsors for '%s'", c.ID)
-	}
-
-	if err := v.LoadSessionTypes(tx, &c.SessionTypes, c.ID); err != nil {
-		return errors.Wrapf(err, "failed to load session types for '%s'", c.ID)
-	}
-
-	sv := Venue()
 	for i := range c.Venues {
 		if err := sv.Decorate(tx, &c.Venues[i], trustedCall, lang); err != nil {
-			return errors.Wrap(err, "failed to decorate venue with associated data")
+			return errors.Wrap(err, "failed to decorate venues")
 		}
 	}
 
 	sfs := FeaturedSpeaker()
+	if err := sfs.LoadByConferenceID(tx, &c.FeaturedSpeakers, c.ID); err != nil {
+		return errors.Wrapf(err, "failed to load featured speakers for '%s'", c.ID)
+	}
 	for i := range c.FeaturedSpeakers {
 		if err := sfs.Decorate(tx, &c.FeaturedSpeakers[i], trustedCall, lang); err != nil {
 			return errors.Wrap(err, "failed to decorate featured speakers with associated data")
@@ -501,6 +489,9 @@ func (v *ConferenceSvc) Decorate(tx *db.Tx, c *model.Conference, trustedCall boo
 	}
 
 	sps := Sponsor()
+	if err := sps.LoadByConferenceID(tx, &c.Sponsors, c.ID); err != nil {
+		return errors.Wrapf(err, "failed to load sponsors for '%s'", c.ID)
+	}
 	for i := range c.Sponsors {
 		if err := sps.Decorate(tx, &c.Sponsors[i], trustedCall, lang); err != nil {
 			return errors.Wrap(err, "failed to decorate sponsors with associated data")
@@ -508,6 +499,9 @@ func (v *ConferenceSvc) Decorate(tx *db.Tx, c *model.Conference, trustedCall boo
 	}
 
 	sts := SessionType()
+	if err := sts.LoadByConferenceID(tx, &c.SessionTypes, c.ID); err != nil {
+		return errors.Wrapf(err, "failed to load session types for '%s'", c.ID)
+	}
 	for i := range c.SessionTypes {
 		if err := sts.Decorate(tx, &c.SessionTypes[i], trustedCall, lang); err != nil {
 			return errors.Wrap(err, "failed to decorate session types with associated data")
@@ -708,6 +702,36 @@ func (v *ConferenceSvc) ListFromPayload(tx *db.Tx, l *model.ConferenceList, payl
 		defer g.End()
 	}
 
+	keybuf, err := urlenc.Marshal(payload)
+	if err != nil {
+		return errors.Wrap(err, "failed to marshal payload")
+	}
+	c := Cache()
+	key := c.Key("Conference", "ListFromPayload", string(keybuf))
+	var ids []string
+	if err := c.Get(key, &ids); err == nil {
+		if pdebug.Enabled {
+			pdebug.Printf("CACHE HIT: %s", key)
+		}
+		m := make(model.ConferenceList, len(ids))
+		r := model.LookupConferenceRequest{
+			// TrustedCall: payload.TrustedCall, // shouldn't we have this?
+			Lang: payload.Lang,
+		}
+		for i, id := range ids {
+			r.ID = id
+			if err := v.LookupFromPayload(tx, &m[i], &r); err != nil {
+				return errors.Wrapf(err, "failed to load %s", id)
+			}
+		}
+		*l = m
+		return nil
+	}
+
+	if pdebug.Enabled {
+		pdebug.Printf("CACHE MISS: %s", key)
+	}
+
 	var rs time.Time
 	var re time.Time
 
@@ -739,7 +763,9 @@ func (v *ConferenceSvc) ListFromPayload(tx *db.Tx, l *model.ConferenceList, payl
 	}
 
 	r := make(model.ConferenceList, len(vdbl))
+	ids = make([]string, len(vdbl))
 	for i, vdb := range vdbl {
+		ids[i] = vdb.EID
 		if err := (r[i]).FromRow(vdb); err != nil {
 			return errors.Wrap(err, "failed populate model from database")
 		}
@@ -748,61 +774,13 @@ func (v *ConferenceSvc) ListFromPayload(tx *db.Tx, l *model.ConferenceList, payl
 		}
 	}
 
+	if err := c.Set(key, ids, cache.WithExpires(15*time.Minute)); err != nil {
+		if pdebug.Enabled {
+			pdebug.Printf("CACHE ERR: %s", err)
+		}
+	}
+
 	*l = r
-	return nil
-}
-
-func (v *ConferenceSvc) LoadFeaturedSpeakers(tx *db.Tx, cdl *model.FeaturedSpeakerList, cid string) error {
-	var vdbl db.FeaturedSpeakerList
-	if err := db.LoadFeaturedSpeakers(tx, &vdbl, cid); err != nil {
-		return err
-	}
-
-	res := make(model.FeaturedSpeakerList, len(vdbl))
-	for i, vdb := range vdbl {
-		var u model.FeaturedSpeaker
-		if err := u.FromRow(vdb); err != nil {
-			return err
-		}
-		res[i] = u
-	}
-	*cdl = res
-	return nil
-}
-
-func (v *ConferenceSvc) LoadSponsors(tx *db.Tx, cdl *model.SponsorList, cid string) error {
-	var vdbl db.SponsorList
-	if err := db.LoadSponsors(tx, &vdbl, cid); err != nil {
-		return err
-	}
-
-	res := make(model.SponsorList, len(vdbl))
-	for i, vdb := range vdbl {
-		var u model.Sponsor
-		if err := u.FromRow(vdb); err != nil {
-			return err
-		}
-		res[i] = u
-	}
-	*cdl = res
-	return nil
-}
-
-func (v *ConferenceSvc) LoadSessionTypes(tx *db.Tx, cdl *model.SessionTypeList, cid string) error {
-	var vdbl db.SessionTypeList
-	if err := db.LoadSessionTypes(tx, &vdbl, cid); err != nil {
-		return err
-	}
-
-	res := make(model.SessionTypeList, len(vdbl))
-	for i, vdb := range vdbl {
-		var u model.SessionType
-		if err := u.FromRow(vdb); err != nil {
-			return err
-		}
-		res[i] = u
-	}
-	*cdl = res
 	return nil
 }
 

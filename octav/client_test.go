@@ -537,6 +537,15 @@ func TestConferenceCRUD(t *testing.T) {
 		return
 	}
 	defer testDeleteSponsor(ctx, sp.ID, user.ID)
+
+	conf5, err := testLookupConference(ctx, conf1.ID, "ja")
+	if !assert.NoError(ctx.T, err, "lookup should succeed") {
+		return
+	}
+
+	if !assert.Len(ctx.T, conf5.Venues, 1, "venues should be registered") {
+		return
+	}
 }
 
 func TestRoomCRUD(t *testing.T) {
@@ -724,7 +733,8 @@ func TestSessionCRUD(t *testing.T) {
 	if err != nil {
 		return
 	}
-	if !assert.Equal(ctx.T, session2, session1, "LookupSession is the same as the room created") {
+
+	if !assert.Equal(ctx.T, session1, session2, "LookupSession is the same as the room created") {
 		return
 	}
 
@@ -1230,6 +1240,7 @@ func TestListConference(t *testing.T) {
 	}
 
 	if !assert.NoError(ctx.T, validator.HTTPListConferenceResponse.Validate(res), "Validation should succeed") {
+		t.Logf("%#v", res)
 		return
 	}
 
@@ -1255,12 +1266,17 @@ func TestListConference(t *testing.T) {
 		}
 	}
 
+	// This is going to be cached, so if we want to see the
+	// updated result, we need to tweak the request enough so
+	// that it bypasses the caching w/o disturbing testing
+	in.Limit.Set(15)
 	res, err = ctx.HTTPClient.ListConference(&in)
 	if !assert.NoError(ctx.T, err, "ListConference should succeed") {
 		return
 	}
 
 	if !assert.Len(ctx.T, res, 5, "ListConference returns 5 conferences") {
+		t.Logf("%d", len(res))
 		return
 	}
 

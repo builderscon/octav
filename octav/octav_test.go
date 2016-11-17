@@ -54,6 +54,7 @@ func setupAndRun(m *testing.M) int {
 	}
 
 	service.User().EnableVerify = false
+	service.DefaultCacheMagic = tools.UUID()
 
 	return m.Run()
 }

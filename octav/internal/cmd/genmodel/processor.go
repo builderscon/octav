@@ -81,6 +81,7 @@ type Service struct {
 	HasPostLookupFromPayloadHook bool
 	HasPreUpdateFromPayloadHook  bool
 	HasPostUpdateFromPayloadHook bool
+	HasPostUpdateHook bool
 }
 
 type Field struct {
@@ -469,6 +470,9 @@ func (ctx *genctx) extractServiceStructs(n ast.Node) bool {
 			}
 			if strings.HasPrefix(strings.TrimSpace(strings.TrimPrefix(c.Text, "//")), "+PostUpdateFromPayloadHook") {
 				svc.HasPostUpdateFromPayloadHook = true
+			}
+			if strings.HasPrefix(strings.TrimSpace(strings.TrimPrefix(c.Text, "//")), "+PostUpdateHook") {
+				svc.HasPostUpdateHook = true
 			}
 		}
 
@@ -925,8 +929,8 @@ func generateServiceFile(ctx *genctx, m Model) error {
 		buf.WriteString("\ndefer g.End()")
 		buf.WriteString("\n}")
 		fmt.Fprintf(&buf, "\n\nvar r model.%s", m.Name)
-		fmt.Fprintf(&buf, "\nkey := `api.%s.` + id", m.Name)
 		buf.WriteString("\nc := Cache()")
+		fmt.Fprintf(&buf, "\nkey := c.Key(%s, id)", strconv.Quote(m.Name))
 		buf.WriteString("\nvar cacheMiss bool")
 		buf.WriteString("\n_, err = c.GetOrSet(key, &r, func() (interface{}, error) {")
 		buf.WriteString("\nif pdebug.Enabled {")
@@ -996,17 +1000,22 @@ func generateServiceFile(ctx *genctx, m Model) error {
 		buf.WriteString("\n\nif err := vdb.Update(tx); err != nil {")
 		buf.WriteString("\nreturn errors.Wrap(err, `failed to update database`)")
 		buf.WriteString("\n}")
-		fmt.Fprintf(&buf, "\nkey := `api.%s.` + vdb.EID", m.Name)
+		buf.WriteString("\nc := Cache()")
+		fmt.Fprintf(&buf, "\nkey := c.Key(%s, vdb.EID)", strconv.Quote(m.Name))
 		buf.WriteString("\nif pdebug.Enabled {")
 		buf.WriteString("\npdebug.Printf(`CACHE DEL %s`, key)")
 		buf.WriteString("\n}")
-		buf.WriteString("\nc := Cache()")
 		buf.WriteString("\ncerr := c.Delete(key)")
 		buf.WriteString("\nif pdebug.Enabled {")
 		buf.WriteString("\nif cerr != nil {")
-		buf.WriteString("\npdebug.Printf(`CACHE ERR: %%s`, cerr)")
+		buf.WriteString("\npdebug.Printf(`CACHE ERR: %s`, cerr)")
 		buf.WriteString("\n}")
 		buf.WriteString("\n}")
+		if svc.HasPostUpdateHook {
+			buf.WriteString("\nif err := v.PostUpdateHook(tx, vdb); err != nil {")
+			buf.WriteString("\nreturn errors.Wrap(err, \"post update hook failed\")")
+			buf.WriteString("\n}")
+		}
 		buf.WriteString("\nreturn nil")
 		buf.WriteString("\n}")
 	}
@@ -1037,7 +1046,7 @@ func generateServiceFile(ctx *genctx, m Model) error {
 		buf.WriteString("\nreturn errors.Wrap(err, `failed to update row in database`)")
 		buf.WriteString("\n}")
 		if svc.HasPostUpdateFromPayloadHook {
-			buf.WriteString("\n\nif err := v.PostUpdateFromPayloadHook(ctx, tx, payload); err != nil {")
+			buf.WriteString("\n\nif err := v.PostUpdateFromPayloadHook(ctx, tx, &vdb, payload); err != nil {")
 			buf.WriteString("\nreturn errors.Wrap(err, `failed to execute PostUpdateFromPayloadHook`)")
 			buf.WriteString("\n}")
 		}
@@ -1149,8 +1158,8 @@ func generateServiceFile(ctx *genctx, m Model) error {
 		buf.WriteString("\nreturn err")
 		buf.WriteString("\n}")
 
-		fmt.Fprintf(&buf, "\nkey := `api.%s.` + id", m.Name)
 		buf.WriteString("\nc := Cache()")
+		fmt.Fprintf(&buf, "\nkey := c.Key(%s, id)", strconv.Quote(m.Name))
 		buf.WriteString("\nc.Delete(key)")
 		buf.WriteString("\nif pdebug.Enabled {")
 		buf.WriteString("\npdebug.Printf(`CACHE DEL %s`, key)")

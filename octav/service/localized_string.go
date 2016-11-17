@@ -17,8 +17,19 @@ func (v *LocalizedStringSvc) LookupFields(tx *db.Tx, parentType, parentID, lang 
 		g := pdebug.Marker("service.LocalizedString.LookupFields (%s, %s, %s)", parentType, parentID, lang).BindError(&err)
 		defer g.End()
 	}
-	key := `api.LocalizedString.` + parentType + `.` + parentID + `.` + lang
+
+	if parentType == "" {
+		return errors.New("missing parent type")
+	}
+	if parentID == "" {
+		return errors.New("missing parent ID")
+	}
+	if lang == "" {
+		return errors.New("missing language")
+	}
+
 	c := Cache()
+	key := c.Key(`LocalizedString`, parentType, parentID, lang)
 	if err := c.Get(key, list); err == nil {
 		if pdebug.Enabled {
 			pdebug.Printf("CACHE HIT: %s", key)
@@ -70,7 +81,7 @@ func (v *LocalizedStringSvc) UpdateFields(tx *db.Tx, parentType, parentID string
 
 		c := Cache()
 		for l := range langs {
-			key := `api.LocalizedString.` + parentType + `.` + parentID + `.` + l
+			key := c.Key("LocalizedString", parentType, parentID, l)
 			c.Delete(key)
 			if pdebug.Enabled {
 				pdebug.Printf("CACHE DEL: %s", key)

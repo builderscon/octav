@@ -1,9 +1,13 @@
 package db
 
-import "bytes"
+import (
+	"github.com/builderscon/octav/octav/tools"
+	pdebug "github.com/lestrrat/go-pdebug"
+)
 
 func DeleteConferenceVenue(tx *Tx, cid, vid string) error {
-	stmt := bytes.Buffer{}
+	stmt := tools.GetBuffer()
+	defer tools.ReleaseBuffer(stmt)
 	stmt.WriteString(`DELETE FROM `)
 	stmt.WriteString(ConferenceVenueTable)
 	stmt.WriteString(` WHERE conference_id = ? AND venue_id = ?`)
@@ -12,8 +16,14 @@ func DeleteConferenceVenue(tx *Tx, cid, vid string) error {
 	return err
 }
 
-func LoadConferenceVenues(tx *Tx, venues *VenueList, cid string) error {
-	stmt := bytes.Buffer{}
+func LoadConferenceVenues(tx *Tx, venues *VenueList, cid string) (err error) {
+	if pdebug.Enabled {
+		g := pdebug.Marker("db.LoadConferenceVenues %s", cid).BindError(&err)
+		defer g.End()
+	}
+
+	stmt := tools.GetBuffer()
+	defer tools.ReleaseBuffer(stmt)
 	stmt.WriteString(`SELECT `)
 	stmt.WriteString(VenueStdSelectColumns)
 	stmt.WriteString(` FROM `)

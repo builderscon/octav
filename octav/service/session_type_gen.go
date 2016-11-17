@@ -52,8 +52,8 @@ func (v *SessionTypeSvc) Lookup(tx *db.Tx, m *model.SessionType, id string) (err
 	}
 
 	var r model.SessionType
-	key := `api.SessionType.` + id
 	c := Cache()
+	key := c.Key("SessionType", id)
 	var cacheMiss bool
 	_, err = c.GetOrSet(key, &r, func() (interface{}, error) {
 		if pdebug.Enabled {
@@ -111,16 +111,19 @@ func (v *SessionTypeSvc) Update(tx *db.Tx, vdb *db.SessionType) (err error) {
 	if err := vdb.Update(tx); err != nil {
 		return errors.Wrap(err, `failed to update database`)
 	}
-	key := `api.SessionType.` + vdb.EID
+	c := Cache()
+	key := c.Key("SessionType", vdb.EID)
 	if pdebug.Enabled {
 		pdebug.Printf(`CACHE DEL %s`, key)
 	}
-	c := Cache()
 	cerr := c.Delete(key)
 	if pdebug.Enabled {
 		if cerr != nil {
-			pdebug.Printf(`CACHE ERR: %%s`, cerr)
+			pdebug.Printf(`CACHE ERR: %s`, cerr)
 		}
+	}
+	if err := v.PostUpdateHook(tx, vdb); err != nil {
+		return errors.Wrap(err, "post update hook failed")
 	}
 	return nil
 }
@@ -238,8 +241,8 @@ func (v *SessionTypeSvc) Delete(tx *db.Tx, id string) error {
 	if err := vdb.Delete(tx); err != nil {
 		return err
 	}
-	key := `api.SessionType.` + id
 	c := Cache()
+	key := c.Key("SessionType", id)
 	c.Delete(key)
 	if pdebug.Enabled {
 		pdebug.Printf(`CACHE DEL %s`, key)

@@ -435,9 +435,8 @@ func (v *SessionSvc) ListFromPayload(tx *db.Tx, result *model.SessionList, paylo
 	if err != nil {
 		return errors.Wrap(err, "failed to marshal payload")
 	}
-	key := string(keybytes)
-
 	c := Cache()
+	key := c.Key("Session", "ListFromPayload", string(keybytes))
 	x, err := c.GetOrSet(key, result, func() (interface{}, error) {
 		if pdebug.Enabled {
 			pdebug.Printf("CACHE MISS: Re-generating")

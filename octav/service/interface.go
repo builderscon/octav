@@ -82,11 +82,14 @@ type MailgunSvc struct {
 type LocalizedStringSvc struct{}
 type QuestionSvc struct{}
 
+// +PostUpdateHook
 // +PreUpdateFromPayloadHook
 type RoomSvc struct{}
 
 // +PreUpdateFromPayloadHook
 type SessionSvc struct{}
+
+// +PostUpdateHook
 type SessionTypeSvc struct{}
 type SponsorSvc struct {
 	mediaStorage StorageClient

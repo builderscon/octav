@@ -5,6 +5,8 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/builderscon/octav/octav/tools"
+
 	cache "gopkg.in/go-redis/cache.v5"
 	redis "gopkg.in/redis.v5"
 	msgpack "gopkg.in/vmihailenco/msgpack.v2"
@@ -13,9 +15,33 @@ import (
 type Redis struct {
 	server *redis.Ring
 	codec  *cache.Codec
+	prefix string
+	magic  string
 }
 
-func NewRedis(servers ...string) *Redis {
+type RedisOption interface {
+	Configure(*Redis)
+}
+
+type RedisOptionFunc func(*Redis)
+
+func (f RedisOptionFunc) Configure(r *Redis) {
+	f(r)
+}
+
+func WithPrefix(s string) RedisOption {
+	return RedisOptionFunc(func(r *Redis) {
+		r.prefix = s
+	})
+}
+
+func WithMagic(s string) RedisOption {
+	return RedisOptionFunc(func(r *Redis) {
+		r.magic = s
+	})
+}
+
+func NewRedis(servers []string, options ...RedisOption) *Redis {
 	sort.Strings(servers)
 
 	addrs := make(map[string]string)
@@ -26,7 +52,7 @@ func NewRedis(servers ...string) *Redis {
 	r := redis.NewRing(&redis.RingOptions{
 		Addrs: addrs,
 	})
-	return &Redis{
+	c := &Redis{
 		server: r,
 		codec: &cache.Codec{
 			Redis: r,
@@ -38,6 +64,10 @@ func NewRedis(servers ...string) *Redis {
 			},
 		},
 	}
+	for _, o := range options {
+		o.Configure(c)
+	}
+	return c
 }
 
 func (c *Redis) Get(key string, v interface{}) error {
@@ -75,4 +105,26 @@ func (c *Redis) GetOrSet(key string, v interface{}, fn func() (interface{}, erro
 	applyOptions(&it, options...)
 
 	return c.codec.Do(&it)
+}
+
+func (c *Redis) Key(list ...string) string {
+	// The magic number allows us to purge entire cache sets without
+	// having to delete each one
+	if c.magic != "" {
+		list = append(list, c.magic)
+	}
+
+	if c.prefix != "" {
+		list = append([]string{c.prefix}, list...)
+	}
+
+	buf := tools.GetBuffer()
+	defer tools.ReleaseBuffer(buf)
+	for i := 0; i < len(list); i++ {
+		buf.WriteString(list[i])
+		if i < len(list)-1 {
+			buf.WriteByte('.')
+		}
+	}
+	return buf.String()
 }

@@ -52,8 +52,8 @@ func (v *VenueSvc) Lookup(tx *db.Tx, m *model.Venue, id string) (err error) {
 	}
 
 	var r model.Venue
-	key := `api.Venue.` + id
 	c := Cache()
+	key := c.Key("Venue", id)
 	var cacheMiss bool
 	_, err = c.GetOrSet(key, &r, func() (interface{}, error) {
 		if pdebug.Enabled {
@@ -111,15 +111,15 @@ func (v *VenueSvc) Update(tx *db.Tx, vdb *db.Venue) (err error) {
 	if err := vdb.Update(tx); err != nil {
 		return errors.Wrap(err, `failed to update database`)
 	}
-	key := `api.Venue.` + vdb.EID
+	c := Cache()
+	key := c.Key("Venue", vdb.EID)
 	if pdebug.Enabled {
 		pdebug.Printf(`CACHE DEL %s`, key)
 	}
-	c := Cache()
 	cerr := c.Delete(key)
 	if pdebug.Enabled {
 		if cerr != nil {
-			pdebug.Printf(`CACHE ERR: %%s`, cerr)
+			pdebug.Printf(`CACHE ERR: %s`, cerr)
 		}
 	}
 	return nil
@@ -238,8 +238,8 @@ func (v *VenueSvc) Delete(tx *db.Tx, id string) error {
 	if err := vdb.Delete(tx); err != nil {
 		return err
 	}
-	key := `api.Venue.` + id
 	c := Cache()
+	key := c.Key("Venue", id)
 	c.Delete(key)
 	if pdebug.Enabled {
 		pdebug.Printf(`CACHE DEL %s`, key)
