@@ -41,10 +41,21 @@ func (v *VenueSvc) populateRowForUpdate(vdb *db.Venue, payload *model.UpdateVenu
 	return nil
 }
 
-func (v *VenueSvc) Decorate(tx *db.Tx, venue *model.Venue, trustedCall bool, lang string) error {
+func (v *VenueSvc) Decorate(tx *db.Tx, venue *model.Venue, trustedCall bool, lang string) (err error) {
+	if pdebug.Enabled {
+		g := pdebug.Marker("service.Venue.Decorate (%s, %t, %s)", venue.ID, trustedCall, lang).BindError(&err)
+		defer g.End()
+	}
+
 	sr := Room()
 	if err := sr.LoadByVenueID(tx, &venue.Rooms, venue.ID); err != nil {
 		return errors.Wrap(err, "failed to load rooms")
+	}
+
+	for i := range venue.Rooms {
+		if err := sr.Decorate(tx, &venue.Rooms[i], trustedCall, lang); err != nil {
+			return errors.Wrap(err, "failed to decorate room")
+		}
 	}
 
 	if lang != "" {
@@ -52,11 +63,6 @@ func (v *VenueSvc) Decorate(tx *db.Tx, venue *model.Venue, trustedCall bool, lan
 			return errors.Wrap(err, "failed to replace L10N strings")
 		}
 
-		for i := range venue.Rooms {
-			if err := sr.Decorate(tx, &venue.Rooms[i], trustedCall, lang); err != nil {
-				return errors.Wrap(err, "failed to decorate room")
-			}
-		}
 	}
 
 	return nil

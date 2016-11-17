@@ -8,6 +8,7 @@ import (
 	"github.com/builderscon/octav/octav/db"
 	"github.com/builderscon/octav/octav/model"
 	"github.com/builderscon/octav/octav/tools"
+	pdebug "github.com/lestrrat/go-pdebug"
 	"github.com/pkg/errors"
 )
 
@@ -100,7 +101,12 @@ func (v *RoomSvc) DeleteFromPayload(tx *db.Tx, payload *model.DeleteRoomRequest)
 	return errors.Wrap(v.Delete(tx, payload.ID), "failed to delete from ddatabase")
 }
 
-func (v *RoomSvc) Decorate(tx *db.Tx, room *model.Room, trustedCall bool, lang string) error {
+func (v *RoomSvc) Decorate(tx *db.Tx, room *model.Room, trustedCall bool, lang string) (err error) {
+	if pdebug.Enabled {
+		g := pdebug.Marker("service.Room.Decorate (%s, %t, %s)", room.ID, trustedCall, lang).BindError(&err)
+		defer g.End()
+	}
+
 	if lang != "" {
 		if err := v.ReplaceL10NStrings(tx, room, lang); err != nil {
 			return errors.Wrap(err, "failed to replace L10N strings")
@@ -109,11 +115,19 @@ func (v *RoomSvc) Decorate(tx *db.Tx, room *model.Room, trustedCall bool, lang s
 	return nil
 }
 
-func (v *RoomSvc) LoadByVenueID(tx *db.Tx, cdl *model.RoomList, venueID string) error {
+func (v *RoomSvc) LoadByVenueID(tx *db.Tx, cdl *model.RoomList, venueID string) (err error) {
+	if pdebug.Enabled {
+		g := pdebug.Marker("service.Room.LoadByVenueID %s", venueID).BindError(&err)
+		defer g.End()
+	}
+
 	var ids []string
 	c := Cache()
 	key := c.Key("Room", "LoadByVenueID", venueID)
 	if err := c.Get(key, &ids); err != nil {
+		if pdebug.Enabled {
+			pdebug.Printf("CACHE HIT: %s", key)
+		}
 		m := make(model.RoomList, len(ids))
 		for i, id := range ids {
 			if err := v.Lookup(tx, &m[i], id); err != nil {
@@ -125,6 +139,9 @@ func (v *RoomSvc) LoadByVenueID(tx *db.Tx, cdl *model.RoomList, venueID string) 
 		return nil
 	}
 
+	if pdebug.Enabled {
+		pdebug.Printf("CACHE MISS: %s", key)
+	}
 	var vdbl db.RoomList
 	if err := db.LoadVenueRooms(tx, &vdbl, venueID); err != nil {
 		return err
