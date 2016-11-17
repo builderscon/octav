@@ -733,7 +733,8 @@ func TestSessionCRUD(t *testing.T) {
 	if err != nil {
 		return
 	}
-	if !assert.Equal(ctx.T, session2, session1, "LookupSession is the same as the room created") {
+
+	if !assert.Equal(ctx.T, session1, session2, "LookupSession is the same as the room created") {
 		return
 	}
 

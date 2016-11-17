@@ -3,12 +3,14 @@ package service
 import (
 	"time"
 
+	"context"
+
+	"github.com/builderscon/octav/octav/cache"
 	"github.com/builderscon/octav/octav/db"
 	"github.com/builderscon/octav/octav/model"
 	"github.com/builderscon/octav/octav/tools"
 	pdebug "github.com/lestrrat/go-pdebug"
 	"github.com/pkg/errors"
-	"context"
 )
 
 func (v *SessionTypeSvc) Init() {}
@@ -26,7 +28,7 @@ func (v *SessionTypeSvc) populateRowForCreate(vdb *db.SessionType, payload *mode
 			return errors.Wrap(err, "failed to parse submission_start for session type")
 		}
 		vdb.SubmissionStart.Valid = true
-		vdb.SubmissionStart.Time = t
+		vdb.SubmissionStart.Time = t.UTC()
 	}
 
 	if payload.SubmissionEnd.Valid() {
@@ -35,7 +37,7 @@ func (v *SessionTypeSvc) populateRowForCreate(vdb *db.SessionType, payload *mode
 			return errors.Wrap(err, "failed to parse submission_end for session type")
 		}
 		vdb.SubmissionEnd.Valid = true
-		vdb.SubmissionEnd.Time = t
+		vdb.SubmissionEnd.Time = t.UTC()
 	}
 
 	return nil
@@ -60,7 +62,7 @@ func (v *SessionTypeSvc) populateRowForUpdate(vdb *db.SessionType, payload *mode
 			return errors.Wrap(err, "failed to parse submission_start for session type")
 		}
 		vdb.SubmissionStart.Valid = true
-		vdb.SubmissionStart.Time = t
+		vdb.SubmissionStart.Time = t.UTC()
 	}
 
 	if payload.SubmissionEnd.Valid() {
@@ -69,7 +71,7 @@ func (v *SessionTypeSvc) populateRowForUpdate(vdb *db.SessionType, payload *mode
 			return errors.Wrap(err, "failed to parse submission_end for session type")
 		}
 		vdb.SubmissionEnd.Valid = true
-		vdb.SubmissionEnd.Time = t
+		vdb.SubmissionEnd.Time = t.UTC()
 	}
 
 	return nil
@@ -108,6 +110,16 @@ func (v *SessionTypeSvc) PreUpdateFromPayloadHook(ctx context.Context, tx *db.Tx
 	su := User()
 	if err := su.IsConferenceAdministrator(tx, vdb.ConferenceID, payload.UserID); err != nil {
 		return errors.Wrap(err, "updating a featured sponsor requires conference administrator privilege")
+	}
+	return nil
+}
+
+func (v *SessionTypeSvc) PostUpdateHook(tx *db.Tx, vdb *db.SessionType) error {
+	c := Cache()
+	key := c.Key("SessionType", "LoadByConferenceID", vdb.ConferenceID)
+	c.Delete(key)
+	if pdebug.Enabled {
+		pdebug.Printf("CACHE DEL: %s", key)
 	}
 	return nil
 }
@@ -171,6 +183,13 @@ func (v *SessionTypeSvc) Decorate(tx *db.Tx, st *model.SessionType, trustedCall 
 	ssvalid := !st.SubmissionStart.IsZero()
 	sevalid := !st.SubmissionEnd.IsZero()
 
+	if ssvalid {
+		st.SubmissionStart = st.SubmissionStart.UTC()
+	}
+	if sevalid {
+		st.SubmissionEnd = st.SubmissionEnd.UTC()
+	}
+
 	if ssvalid && sevalid {
 		if now.After(st.SubmissionStart) && now.Before(st.SubmissionEnd) {
 			st.IsAcceptingSubmission = true
@@ -185,5 +204,53 @@ func (v *SessionTypeSvc) Decorate(tx *db.Tx, st *model.SessionType, trustedCall 
 		return errors.Wrap(err, "failed to replace L10N strings")
 	}
 
+	return nil
+}
+
+func (v *SessionTypeSvc) LoadByConferenceID(tx *db.Tx, cdl *model.SessionTypeList, cid string) (err error) {
+	if pdebug.Enabled {
+		g := pdebug.Marker("serviec.SessionType.LoadByConferenceID %s", cid).BindError(&err)
+		defer g.End()
+	}
+
+	var ids []string
+	c := Cache()
+	key := c.Key("SessionType", "LoadByConferenceID", cid)
+	if err := c.Get(key, &ids); err == nil {
+		if pdebug.Enabled {
+			pdebug.Printf("CACHE HIT: %s", key)
+		}
+		m := make(model.SessionTypeList, len(ids))
+		for i, id := range ids {
+			if err := v.Lookup(tx, &m[i], id); err != nil {
+				return errors.Wrap(err, "failed to load from database")
+			}
+		}
+
+		*cdl = m
+		return nil
+	}
+
+	if pdebug.Enabled {
+		pdebug.Printf("CACHE MISS: %s", key)
+	}
+	var vdbl db.SessionTypeList
+	if err := db.LoadSessionTypes(tx, &vdbl, cid); err != nil {
+		return err
+	}
+
+	ids = make([]string, len(vdbl))
+	res := make(model.SessionTypeList, len(vdbl))
+	for i, vdb := range vdbl {
+		var u model.SessionType
+		if err := u.FromRow(vdb); err != nil {
+			return err
+		}
+		ids[i] = vdb.EID
+		res[i] = u
+	}
+	*cdl = res
+
+	c.Set(key, ids, cache.WithExpires(15*time.Minute))
 	return nil
 }

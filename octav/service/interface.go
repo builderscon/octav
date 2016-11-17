@@ -88,6 +88,8 @@ type RoomSvc struct{}
 
 // +PreUpdateFromPayloadHook
 type SessionSvc struct{}
+
+// +PostUpdateHook
 type SessionTypeSvc struct{}
 type SponsorSvc struct {
 	mediaStorage StorageClient

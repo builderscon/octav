@@ -122,6 +122,9 @@ func (v *SessionTypeSvc) Update(tx *db.Tx, vdb *db.SessionType) (err error) {
 			pdebug.Printf(`CACHE ERR: %s`, cerr)
 		}
 	}
+	if err := v.PostUpdateHook(tx, vdb); err != nil {
+		return errors.Wrap(err, "post update hook failed")
+	}
 	return nil
 }
 
