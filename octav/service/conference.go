@@ -488,15 +488,14 @@ func (v *ConferenceSvc) Decorate(tx *db.Tx, c *model.Conference, trustedCall boo
 		}
 	}
 
-	if err := v.LoadSponsors(tx, &c.Sponsors, c.ID); err != nil {
-		return errors.Wrapf(err, "failed to load sponsors for '%s'", c.ID)
-	}
-
 	if err := v.LoadSessionTypes(tx, &c.SessionTypes, c.ID); err != nil {
 		return errors.Wrapf(err, "failed to load session types for '%s'", c.ID)
 	}
 
 	sps := Sponsor()
+	if err := sps.LoadByConferenceID(tx, &c.Sponsors, c.ID); err != nil {
+		return errors.Wrapf(err, "failed to load sponsors for '%s'", c.ID)
+	}
 	for i := range c.Sponsors {
 		if err := sps.Decorate(tx, &c.Sponsors[i], trustedCall, lang); err != nil {
 			return errors.Wrap(err, "failed to decorate sponsors with associated data")
