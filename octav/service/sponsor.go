@@ -356,6 +356,7 @@ func (v *SponsorSvc) LoadByConferenceID(tx *db.Tx, cdl *model.SponsorList, cid s
 			}
 		}
 
+		*cdl = m
 		return nil
 	}
 
