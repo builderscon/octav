@@ -2,7 +2,9 @@ package service
 
 import (
 	"context"
+	"time"
 
+	"github.com/builderscon/octav/octav/cache"
 	"github.com/builderscon/octav/octav/db"
 	"github.com/builderscon/octav/octav/model"
 	"github.com/builderscon/octav/octav/tools"
@@ -104,5 +106,42 @@ func (v *RoomSvc) Decorate(tx *db.Tx, room *model.Room, trustedCall bool, lang s
 			return errors.Wrap(err, "failed to replace L10N strings")
 		}
 	}
+	return nil
+}
+
+func (v *RoomSvc) LoadByVenueID(tx *db.Tx, cdl *model.RoomList, venueID string) error {
+	var ids []string
+	c := Cache()
+	key := c.Key("Room", "LoadByVenueID", venueID)
+	if err := c.Get(key, &ids); err != nil {
+		m := make(model.RoomList, len(ids))
+		for i, id := range ids {
+			if err := v.Lookup(tx, &m[i], id); err != nil {
+				return errors.Wrap(err, "failed to load from database")
+			}
+		}
+
+		*cdl = m
+		return nil
+	}
+
+	var vdbl db.RoomList
+	if err := db.LoadVenueRooms(tx, &vdbl, venueID); err != nil {
+		return err
+	}
+
+	ids = make([]string, len(vdbl))
+	res := make(model.RoomList, len(vdbl))
+	for i, vdb := range vdbl {
+		var u model.Room
+		if err := u.FromRow(vdb); err != nil {
+			return err
+		}
+		ids[i] = vdb.EID
+		res[i] = u
+	}
+	*cdl = res
+
+	c.Set(key, ids, cache.WithExpires(15*time.Minute))
 	return nil
 }

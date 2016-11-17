@@ -1,7 +1,6 @@
 package service
 
 import (
-	"fmt"
 	"time"
 
 	"github.com/builderscon/octav/octav/cache"
@@ -42,39 +41,21 @@ func (v *VenueSvc) populateRowForUpdate(vdb *db.Venue, payload *model.UpdateVenu
 	return nil
 }
 
-func (v *VenueSvc) LoadRooms(tx *db.Tx, cdl *model.RoomList, venueID string) error {
-	var vdbl db.RoomList
-	if err := db.LoadVenueRooms(tx, &vdbl, venueID); err != nil {
-		return err
-	}
-
-	res := make(model.RoomList, len(vdbl))
-	for i, vdb := range vdbl {
-		var u model.Room
-		if err := u.FromRow(vdb); err != nil {
-			return err
-		}
-		res[i] = u
-	}
-	*cdl = res
-	return nil
-}
-
 func (v *VenueSvc) Decorate(tx *db.Tx, venue *model.Venue, trustedCall bool, lang string) error {
-	if err := v.LoadRooms(tx, &venue.Rooms, venue.ID); err != nil {
-		return err
+	sr := Room()
+	if err := sr.LoadByVenueID(tx, &venue.Rooms, venue.ID); err != nil {
+		return errors.Wrap(err, "failed to load rooms")
 	}
 
 	if lang != "" {
-		sr := Room()
-		for i := range venue.Rooms {
-			if err := sr.ReplaceL10NStrings(tx, &venue.Rooms[i], lang); err != nil {
-				return errors.Wrap(err, "failed to replace L10N strings")
-			}
-		}
-
 		if err := v.ReplaceL10NStrings(tx, venue, lang); err != nil {
 			return errors.Wrap(err, "failed to replace L10N strings")
+		}
+
+		for i := range venue.Rooms {
+			if err := sr.Decorate(tx, &venue.Rooms[i], trustedCall, lang); err != nil {
+				return errors.Wrap(err, "failed to decorate room")
+			}
 		}
 	}
 
@@ -131,9 +112,9 @@ func (v *VenueSvc) ListFromPayload(tx *db.Tx, result *model.VenueList, payload *
 	return nil
 }
 
-func (v *VenueSvc) LoadByConferenceID(tx *db.Tx, cdl *model.VenueList, cid, lang string, trustedCall bool) (err error) {
+func (v *VenueSvc) LoadByConferenceID(tx *db.Tx, cdl *model.VenueList, cid string) (err error) {
 	if pdebug.Enabled {
-		g := pdebug.Marker("service.Venue.LoadByConferenceID (%s,%s,%t)", cid, lang, trustedCall).BindError(&err)
+		g := pdebug.Marker("service.Venue.LoadByConferenceID (%s)", cid).BindError(&err)
 		defer g.End()
 		defer func() {
 			pdebug.Printf("Loaded %d venues", len(*cdl))
@@ -141,21 +122,15 @@ func (v *VenueSvc) LoadByConferenceID(tx *db.Tx, cdl *model.VenueList, cid, lang
 	}
 
 	c := Cache()
-	key := c.Key("Venue", "LoadByConferenceID", cid, lang, fmt.Sprintf("%t", trustedCall))
-
+	key := c.Key("Venue", "LoadByConferenceID", cid)
 	var ids []string
 	if err := c.Get(key, &ids); err == nil {
 		if pdebug.Enabled {
 			pdebug.Printf("CACHE HIT %s", key)
 		}
 		m := make(model.VenueList, len(ids))
-		r := model.LookupVenueRequest{
-			TrustedCall: trustedCall,
-		}
-		r.Lang.Set(lang)
 		for i, id := range ids {
-			r.ID = id
-			if err := v.LookupFromPayload(tx, &m[i], &r); err != nil {
+			if err := v.Lookup(tx, &m[i], id); err != nil {
 				return errors.Wrap(err, "failed to lookup venue")
 			}
 		}

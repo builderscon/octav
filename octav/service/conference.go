@@ -389,14 +389,10 @@ func (v *ConferenceSvc) AddVenueFromPayload(tx *db.Tx, payload *model.AddConfere
 	}
 
 	c := Cache()
-	for _, t := range []bool{true,false} {
-		for _, l := range []string{"en", "ja"} { // not a great idea...
-		  key := c.Key("Venue", "LoadByConferenceID", payload.ConferenceID, l, fmt.Sprintf("%t", t))
-			c.Delete(key)
-			if pdebug.Enabled {
-				pdebug.Printf("CACHE DEL %s", key)
-			}
-		}
+  key := c.Key("Venue", "LoadByConferenceID", payload.ConferenceID)
+	c.Delete(key)
+	if pdebug.Enabled {
+		pdebug.Printf("CACHE DEL %s", key)
 	}
 
 	return nil
@@ -473,8 +469,13 @@ func (v *ConferenceSvc) Decorate(tx *db.Tx, c *model.Conference, trustedCall boo
 	}
 
 	sv := Venue()
-	if err := sv.LoadByConferenceID(tx, &c.Venues, c.ID, lang, trustedCall); err != nil {
+	if err := sv.LoadByConferenceID(tx, &c.Venues, c.ID); err != nil {
 		return errors.Wrapf(err, "failed to load venues for '%s'", c.ID)
+	}
+	for i := range c.Venues {
+		if err := sv.Decorate(tx, &c.Venues[i], trustedCall, lang); err != nil {
+			return errors.Wrap(err, "failed to decorate venues")
+		}
 	}
 
 	if err := v.LoadFeaturedSpeakers(tx, &c.FeaturedSpeakers, c.ID); err != nil {
