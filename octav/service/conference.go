@@ -478,8 +478,14 @@ func (v *ConferenceSvc) Decorate(tx *db.Tx, c *model.Conference, trustedCall boo
 		}
 	}
 
-	if err := v.LoadFeaturedSpeakers(tx, &c.FeaturedSpeakers, c.ID); err != nil {
+	sfs := FeaturedSpeaker()
+	if err := sfs.LoadByConferenceID(tx, &c.FeaturedSpeakers, c.ID); err != nil {
 		return errors.Wrapf(err, "failed to load featured speakers for '%s'", c.ID)
+	}
+	for i := range c.FeaturedSpeakers {
+		if err := sfs.Decorate(tx, &c.FeaturedSpeakers[i], trustedCall, lang); err != nil {
+			return errors.Wrap(err, "failed to decorate featured speakers with associated data")
+		}
 	}
 
 	if err := v.LoadSponsors(tx, &c.Sponsors, c.ID); err != nil {
@@ -488,13 +494,6 @@ func (v *ConferenceSvc) Decorate(tx *db.Tx, c *model.Conference, trustedCall boo
 
 	if err := v.LoadSessionTypes(tx, &c.SessionTypes, c.ID); err != nil {
 		return errors.Wrapf(err, "failed to load session types for '%s'", c.ID)
-	}
-
-	sfs := FeaturedSpeaker()
-	for i := range c.FeaturedSpeakers {
-		if err := sfs.Decorate(tx, &c.FeaturedSpeakers[i], trustedCall, lang); err != nil {
-			return errors.Wrap(err, "failed to decorate featured speakers with associated data")
-		}
 	}
 
 	sps := Sponsor()
@@ -784,24 +783,6 @@ func (v *ConferenceSvc) ListFromPayload(tx *db.Tx, l *model.ConferenceList, payl
 	}
 
 	*l = r
-	return nil
-}
-
-func (v *ConferenceSvc) LoadFeaturedSpeakers(tx *db.Tx, cdl *model.FeaturedSpeakerList, cid string) error {
-	var vdbl db.FeaturedSpeakerList
-	if err := db.LoadFeaturedSpeakers(tx, &vdbl, cid); err != nil {
-		return err
-	}
-
-	res := make(model.FeaturedSpeakerList, len(vdbl))
-	for i, vdb := range vdbl {
-		var u model.FeaturedSpeaker
-		if err := u.FromRow(vdb); err != nil {
-			return err
-		}
-		res[i] = u
-	}
-	*cdl = res
 	return nil
 }
 
