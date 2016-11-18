@@ -95,13 +95,13 @@ func (v *Session) Load(tx *db.Tx, id string) (err error) {
 		return err
 	}
 
-	if err := v.FromRow(vdb); err != nil {
+	if err := v.FromRow(&vdb); err != nil {
 		return err
 	}
 	return nil
 }
 
-func (v *Session) FromRow(vdb db.Session) error {
+func (v *Session) FromRow(vdb *db.Session) error {
 	v.ID = vdb.EID
 	v.ConferenceID = vdb.ConferenceID
 	if vdb.RoomID.Valid {

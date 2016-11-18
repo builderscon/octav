@@ -95,7 +95,7 @@ func (c ConferenceSeriesAdministrator) Update(tx *Tx) (err error) {
 		_, err = tx.Stmt(stmt).Exec(c.SeriesID, c.UserID, c.OID)
 		return err
 	}
-	return errors.New("either OID/EID must be filled")
+	return errors.New("OID must be filled")
 }
 
 func (c ConferenceSeriesAdministrator) Delete(tx *Tx) error {

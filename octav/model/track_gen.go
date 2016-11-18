@@ -13,19 +13,17 @@ import (
 var _ = pdebug.Enabled
 var _ = time.Time{}
 
-type rawRoom struct {
-	ID       string `json:"id"`
-	VenueID  string `json:"venue_id"`
-	Name     string `json:"name" l10n:"true"`
-	Capacity uint   `json:"capacity"`
+type rawTrack struct {
+	ID     string `json:"id"`
+	RoomID string `json:"room_id"`
+	Name   string `json:"name" l10n:"true"`
 }
 
-func (v Room) MarshalJSON() ([]byte, error) {
-	var raw rawRoom
+func (v Track) MarshalJSON() ([]byte, error) {
+	var raw rawTrack
 	raw.ID = v.ID
-	raw.VenueID = v.VenueID
+	raw.RoomID = v.RoomID
 	raw.Name = v.Name
-	raw.Capacity = v.Capacity
 	buf, err := json.Marshal(raw)
 	if err != nil {
 		return nil, err
@@ -33,12 +31,12 @@ func (v Room) MarshalJSON() ([]byte, error) {
 	return MarshalJSONWithL10N(buf, v.LocalizedFields)
 }
 
-func (v *Room) Load(tx *db.Tx, id string) (err error) {
+func (v *Track) Load(tx *db.Tx, id string) (err error) {
 	if pdebug.Enabled {
-		g := pdebug.Marker("model.Room.Load %s", id).BindError(&err)
+		g := pdebug.Marker("model.Track.Load %s", id).BindError(&err)
 		defer g.End()
 	}
-	vdb := db.Room{}
+	vdb := db.Track{}
 	if err := vdb.LoadByEID(tx, id); err != nil {
 		return err
 	}
@@ -49,18 +47,16 @@ func (v *Room) Load(tx *db.Tx, id string) (err error) {
 	return nil
 }
 
-func (v *Room) FromRow(vdb *db.Room) error {
+func (v *Track) FromRow(vdb *db.Track) error {
 	v.ID = vdb.EID
-	v.VenueID = vdb.VenueID
+	v.RoomID = vdb.RoomID
 	v.Name = vdb.Name
-	v.Capacity = vdb.Capacity
 	return nil
 }
 
-func (v *Room) ToRow(vdb *db.Room) error {
+func (v *Track) ToRow(vdb *db.Track) error {
 	vdb.EID = v.ID
-	vdb.VenueID = v.VenueID
+	vdb.RoomID = v.RoomID
 	vdb.Name = v.Name
-	vdb.Capacity = v.Capacity
 	return nil
 }

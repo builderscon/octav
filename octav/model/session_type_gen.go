@@ -57,13 +57,13 @@ func (v *SessionType) Load(tx *db.Tx, id string) (err error) {
 		return err
 	}
 
-	if err := v.FromRow(vdb); err != nil {
+	if err := v.FromRow(&vdb); err != nil {
 		return err
 	}
 	return nil
 }
 
-func (v *SessionType) FromRow(vdb db.SessionType) error {
+func (v *SessionType) FromRow(vdb *db.SessionType) error {
 	v.ID = vdb.EID
 	v.ConferenceID = vdb.ConferenceID
 	v.Name = vdb.Name

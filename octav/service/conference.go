@@ -188,7 +188,7 @@ func (v *ConferenceSvc) CreateFromPayload(tx *db.Tx, payload *model.CreateConfer
 	}
 
 	var c model.Conference
-	if err := c.FromRow(vdb); err != nil {
+	if err := c.FromRow(&vdb); err != nil {
 		return errors.Wrap(err, "failed to populate model from database")
 	}
 
@@ -358,7 +358,7 @@ func (v *ConferenceSvc) LoadAdmins(tx *db.Tx, cdl *model.UserList, trustedCall b
 	res := make(model.UserList, len(vdbl))
 	su := User()
 	for i, vdb := range vdbl {
-		if err := res[i].FromRow(vdb); err != nil {
+		if err := res[i].FromRow(&vdb); err != nil {
 			return errors.Wrap(err, "failed to map database to model")
 		}
 		if err := su.Decorate(tx, &res[i], trustedCall, lang); err != nil {
@@ -388,11 +388,45 @@ func (v *ConferenceSvc) AddVenueFromPayload(tx *db.Tx, payload *model.AddConfere
 		return errors.Wrap(err, "failed to insert new conference/venue relation")
 	}
 
-	c := Cache()
-  key := c.Key("Venue", "LoadByConferenceID", payload.ConferenceID)
-	c.Delete(key)
+	// When we add the venue, we need to add the tracks that go along with it.
+	// Decorate it so that we can get the localized strings too
+	var rooms model.RoomList
+	sr := Room()
+	if err := sr.LoadByVenueID(tx, &rooms, payload.VenueID); err != nil {
+		return errors.Wrap(err, "failed to load rooms for venue")
+	}
+	for i := range rooms {
+		if err := sr.Decorate(tx, &rooms[i], true, "all"); err != nil {
+			return errors.Wrap(err, "failed to decorate room")
+		}
+	}
+
 	if pdebug.Enabled {
-		pdebug.Printf("CACHE DEL %s", key)
+		pdebug.Printf("Loaded %d rooms", len(rooms))
+	}
+
+	st := Track()
+	var r model.CreateTrackRequest
+	r.ConferenceID = payload.ConferenceID
+	for _, room := range rooms {
+		r.RoomID = room.ID
+		r.Name.Set(room.Name)
+		r.LocalizedFields = room.LocalizedFields
+		if err := st.CreateFromPayload(tx, &r, nil); err != nil {
+			return errors.Wrap(err, "failed to create track")
+		}
+	}
+
+	c := Cache()
+	keys := []string{
+		c.Key("Tracks", "LoadByConferenceID", payload.ConferenceID),
+		c.Key("Venue", "LoadByConferenceID", payload.ConferenceID),
+	}
+	for _, key := range keys {
+		c.Delete(key)
+		if pdebug.Enabled {
+			pdebug.Printf("CACHE DEL %s", key)
+		}
 	}
 
 	return nil
@@ -403,7 +437,14 @@ func (v *ConferenceSvc) DeleteVenueFromPayload(tx *db.Tx, payload *model.DeleteC
 	if err := su.IsConferenceAdministrator(tx, payload.ConferenceID, payload.UserID); err != nil {
 		return errors.Wrap(err, "deleting a conference venue requires conference administrator privilege")
 	}
-	return errors.Wrap(db.DeleteConferenceVenue(tx, payload.ConferenceID, payload.VenueID), "failed to delete conference venue")
+	if err := db.DeleteConferenceVenue(tx, payload.ConferenceID, payload.VenueID); err != nil {
+		return errors.Wrap(err, "failed to delete conference venue")
+	}
+	if err := db.DeleteTracks(tx, payload.ConferenceID); err != nil {
+		return errors.Wrap(err, "failed to delete trakcs")
+	}
+
+	return nil
 }
 
 func (v *ConferenceSvc) LoadTextComponents(tx *db.Tx, c *model.Conference) error {
@@ -475,6 +516,16 @@ func (v *ConferenceSvc) Decorate(tx *db.Tx, c *model.Conference, trustedCall boo
 	for i := range c.Venues {
 		if err := sv.Decorate(tx, &c.Venues[i], trustedCall, lang); err != nil {
 			return errors.Wrap(err, "failed to decorate venues")
+		}
+	}
+
+	st := Track()
+	if err := st.LoadByConferenceID(tx, &c.Tracks, c.ID); err != nil {
+		return errors.Wrap(err, "failed to load by conference")
+	}
+	for i := range c.Tracks {
+		if err := st.Decorate(tx, &c.Tracks[i], trustedCall, lang); err != nil {
+			return errors.Wrap(err, "failed to decorate tracks with associated data")
 		}
 	}
 
@@ -608,7 +659,7 @@ func (v *ConferenceSvc) UpdateFromPayload(ctx context.Context, tx *db.Tx, payloa
 	}
 
 	if err := v.populateRowForUpdate(&vdb, payload); err != nil {
-		return err
+		return errors.Wrap(err, `failed to populate from request`)
 	}
 
 	uploadErr := v.UploadImagesFromPayload(ctx, tx, payload)
@@ -766,7 +817,7 @@ func (v *ConferenceSvc) ListFromPayload(tx *db.Tx, l *model.ConferenceList, payl
 	ids = make([]string, len(vdbl))
 	for i, vdb := range vdbl {
 		ids[i] = vdb.EID
-		if err := (r[i]).FromRow(vdb); err != nil {
+		if err := (r[i]).FromRow(&vdb); err != nil {
 			return errors.Wrap(err, "failed populate model from database")
 		}
 		if err := v.Decorate(tx, &r[i], false, payload.Lang.String); err != nil {
@@ -792,7 +843,7 @@ func (v *ConferenceSvc) ListByOrganizerFromPayload(tx *db.Tx, l *model.Conferenc
 
 	res := make(model.ConferenceList, len(vdbl))
 	for i, vdb := range vdbl {
-		if err := (res[i]).FromRow(vdb); err != nil {
+		if err := (res[i]).FromRow(&vdb); err != nil {
 			return errors.Wrap(err, "failed populate model from database")
 		}
 		if err := v.Decorate(tx, &res[i], false, payload.Lang.String); err != nil {

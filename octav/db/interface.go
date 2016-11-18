@@ -258,3 +258,14 @@ type TemporaryEmail struct {
 	Email           string
 	ExpiresOn       time.Time
 }
+
+// +DB tablename:"tracks"
+type Track struct {
+	OID          int64
+	EID          string
+	ConferenceID string
+	RoomID       string
+	Name         string
+	CreatedOn    time.Time
+	ModifiedOn   NullTime
+}

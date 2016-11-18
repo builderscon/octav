@@ -10,7 +10,7 @@ func (v *RoomList) LoadForVenue(tx *db.Tx, venueID, since string, limit int) err
 
 	res := make([]Room, len(vdbl))
 	for i, vdb := range vdbl {
-		if err := res[i].FromRow(vdb); err != nil {
+		if err := res[i].FromRow(&vdb); err != nil {
 			return err
 		}
 	}

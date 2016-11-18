@@ -47,13 +47,13 @@ func (v *Venue) Load(tx *db.Tx, id string) (err error) {
 		return err
 	}
 
-	if err := v.FromRow(vdb); err != nil {
+	if err := v.FromRow(&vdb); err != nil {
 		return err
 	}
 	return nil
 }
 
-func (v *Venue) FromRow(vdb db.Venue) error {
+func (v *Venue) FromRow(vdb *db.Venue) error {
 	v.ID = vdb.EID
 	v.Name = vdb.Name
 	v.Address = vdb.Address

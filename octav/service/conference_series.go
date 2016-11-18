@@ -76,7 +76,7 @@ func (v *ConferenceSeriesSvc) CreateFromPayload(tx *db.Tx, result *model.Confere
 	}
 
 	c := model.ConferenceSeries{}
-	if err := c.FromRow(vdb); err != nil {
+	if err := c.FromRow(&vdb); err != nil {
 		return errors.Wrap(err, "failed to populate model from database")
 	}
 
@@ -92,7 +92,7 @@ func (v *ConferenceSeriesSvc) LoadByRange(tx *db.Tx, l *[]model.ConferenceSeries
 
 	csl := make([]model.ConferenceSeries, len(vdbl))
 	for i, row := range vdbl {
-		if err := (csl[i]).FromRow(row); err != nil {
+		if err := (csl[i]).FromRow(&row); err != nil {
 			return errors.Wrap(err, "failed to convert row to model")
 		}
 	}

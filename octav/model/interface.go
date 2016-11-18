@@ -57,6 +57,7 @@ type Conference struct {
 	FeaturedSpeakers          FeaturedSpeakerList `json:"featured_speakers,omitempty" decorate:"true"`
 	Sponsors                  SponsorList         `json:"sponsors,omitempty" decorate:"true"`
 	SessionTypes              SessionTypeList     `json:"session_types,omitempty" decorate:"true"`
+	Tracks                    TrackList           `json:"tracks,omitempty" decorate:"true"`
 }
 type ConferenceList []Conference
 
@@ -1000,4 +1001,36 @@ type LocalizedString struct {
 	Name       string
 	Language   string
 	Localized  string
+}
+
+// +model
+type Track struct {
+	LocalizedFields `json:"-"`
+	ID              string `json:"id"`
+	ConferenceID    string `json:"-"` // ignore in json
+	RoomID          string `json:"room_id"`
+	Name            string `json:"name" l10n:"true"`
+}
+type TrackList []Track
+
+// +transport
+type LookupTrackRequest struct {
+	ID          string            `json:"id"`
+	Lang        jsval.MaybeString `json:"lang" urlenc:"lang,omitempty,string"`
+	TrustedCall bool              `json:"-"`
+}
+
+// +transport
+type CreateTrackRequest struct {
+	ConferenceID    string            `json:"conference_id"`
+	RoomID          string            `json:"room_id"`
+	Name            jsval.MaybeString `json:"name,omitempty" l10n:"true"`
+	LocalizedFields `json:"-"`
+}
+
+// +transport
+type UpdateTrackRequest struct {
+	ID              string            `json:"id"`
+	Name            jsval.MaybeString `json:"name,omitempty" l10n:"true"`
+	LocalizedFields `json:"-"`
 }

@@ -358,7 +358,7 @@ func (v *SessionSvc) CreateFromPayload(tx *db.Tx, result *model.Session, payload
 	}
 
 	var m model.Session
-	if err := m.FromRow(vdb); err != nil {
+	if err := m.FromRow(&vdb); err != nil {
 		return errors.Wrap(err, "failed to populate model from database")
 	}
 
@@ -449,7 +449,7 @@ func (v *SessionSvc) ListFromPayload(tx *db.Tx, result *model.SessionList, paylo
 
 		l := make(model.SessionList, len(vdbl))
 		for i, vdb := range vdbl {
-			if err := l[i].FromRow(vdb); err != nil {
+			if err := l[i].FromRow(&vdb); err != nil {
 				return nil, errors.Wrap(err, "failed to populate model from database")
 			}
 

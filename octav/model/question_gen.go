@@ -22,13 +22,13 @@ func (v *Question) Load(tx *db.Tx, id string) (err error) {
 		return err
 	}
 
-	if err := v.FromRow(vdb); err != nil {
+	if err := v.FromRow(&vdb); err != nil {
 		return err
 	}
 	return nil
 }
 
-func (v *Question) FromRow(vdb db.Question) error {
+func (v *Question) FromRow(vdb *db.Question) error {
 	v.ID = vdb.EID
 	v.SessionID = vdb.SessionID
 	v.UserID = vdb.UserID

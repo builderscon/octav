@@ -166,7 +166,7 @@ func (v *UserSvc) ListFromPayload(tx *db.Tx, result *model.UserList, payload *mo
 
 	l := make(model.UserList, len(vdbl))
 	for i, vdb := range vdbl {
-		if err := l[i].FromRow(vdb); err != nil {
+		if err := l[i].FromRow(&vdb); err != nil {
 			return errors.Wrap(err, "failed to populate model from database")
 		}
 
@@ -188,7 +188,7 @@ func (v *UserSvc) CreateFromPayload(tx *db.Tx, result *model.User, payload *mode
 	}
 
 	var m model.User
-	if err := m.FromRow(vdb); err != nil {
+	if err := m.FromRow(&vdb); err != nil {
 		return errors.Wrap(err, "failed to populate model from database")
 	}
 
@@ -257,7 +257,7 @@ func (v *UserSvc) LookupUserByAuthUserIDFromPayload(tx *db.Tx, result *model.Use
 	}
 
 	var r model.User
-	if err := r.FromRow(vdb); err != nil {
+	if err := r.FromRow(&vdb); err != nil {
 		return errors.Wrap(err, "failed to populate mode from database")
 	}
 

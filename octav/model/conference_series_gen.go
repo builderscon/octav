@@ -41,13 +41,13 @@ func (v *ConferenceSeries) Load(tx *db.Tx, id string) (err error) {
 		return err
 	}
 
-	if err := v.FromRow(vdb); err != nil {
+	if err := v.FromRow(&vdb); err != nil {
 		return err
 	}
 	return nil
 }
 
-func (v *ConferenceSeries) FromRow(vdb db.ConferenceSeries) error {
+func (v *ConferenceSeries) FromRow(vdb *db.ConferenceSeries) error {
 	v.ID = vdb.EID
 	v.Slug = vdb.Slug
 	v.Title = vdb.Title

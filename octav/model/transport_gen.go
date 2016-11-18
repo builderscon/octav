@@ -6494,3 +6494,226 @@ func (r *SendAllSelectionResultNotificationResponse) Populate(m map[string]inter
 	}
 	return nil
 }
+
+func (r LookupTrackRequest) collectMarshalData() map[string]interface{} {
+	m := make(map[string]interface{})
+	m["id"] = r.ID
+	if r.Lang.Valid() {
+		m["lang"] = r.Lang.Value()
+	}
+	return m
+}
+
+func (r LookupTrackRequest) MarshalJSON() ([]byte, error) {
+	m := r.collectMarshalData()
+	buf, err := json.Marshal(m)
+	if err != nil {
+		return nil, err
+	}
+	return buf, nil
+}
+
+func (r LookupTrackRequest) MarshalURL() ([]byte, error) {
+	m := r.collectMarshalData()
+	buf, err := urlenc.Marshal(m)
+	if err != nil {
+		return nil, err
+	}
+	return buf, nil
+}
+
+func (r *LookupTrackRequest) UnmarshalJSON(data []byte) error {
+	m := make(map[string]interface{})
+	if err := json.Unmarshal(data, &m); err != nil {
+		return err
+	}
+	return r.Populate(m)
+}
+
+func (r *LookupTrackRequest) Populate(m map[string]interface{}) error {
+	if jv, ok := m["id"]; ok {
+		switch jv.(type) {
+		case string:
+			r.ID = jv.(string)
+			delete(m, "id")
+		default:
+			return errors.Wrap(ErrInvalidJSONFieldType{Field: "id"}, "failed to populate fields for LookupTrackRequest")
+		}
+	}
+	if jv, ok := m["lang"]; ok {
+		if err := r.Lang.Set(jv); err != nil {
+			return errors.New("set field Lang failed: " + err.Error())
+		}
+		delete(m, "lang")
+	}
+	return nil
+}
+
+func (r CreateTrackRequest) collectMarshalData() map[string]interface{} {
+	m := make(map[string]interface{})
+	m["conference_id"] = r.ConferenceID
+	m["room_id"] = r.RoomID
+	if r.Name.Valid() {
+		m["name"] = r.Name.Value()
+	}
+	return m
+}
+
+func (r CreateTrackRequest) MarshalJSON() ([]byte, error) {
+	m := r.collectMarshalData()
+	buf, err := json.Marshal(m)
+	if err != nil {
+		return nil, err
+	}
+	return MarshalJSONWithL10N(buf, r.LocalizedFields)
+}
+
+func (r CreateTrackRequest) MarshalURL() ([]byte, error) {
+	m := r.collectMarshalData()
+	buf, err := urlenc.Marshal(m)
+	if err != nil {
+		return nil, err
+	}
+	return MarshalURLWithL10N(buf, r.LocalizedFields)
+}
+
+func (r *CreateTrackRequest) UnmarshalJSON(data []byte) error {
+	m := make(map[string]interface{})
+	if err := json.Unmarshal(data, &m); err != nil {
+		return err
+	}
+	return r.Populate(m)
+}
+
+func (r *CreateTrackRequest) Populate(m map[string]interface{}) error {
+	if jv, ok := m["conference_id"]; ok {
+		switch jv.(type) {
+		case string:
+			r.ConferenceID = jv.(string)
+			delete(m, "conference_id")
+		default:
+			return errors.Wrap(ErrInvalidJSONFieldType{Field: "conference_id"}, "failed to populate fields for CreateTrackRequest")
+		}
+	}
+	if jv, ok := m["room_id"]; ok {
+		switch jv.(type) {
+		case string:
+			r.RoomID = jv.(string)
+			delete(m, "room_id")
+		default:
+			return errors.Wrap(ErrInvalidJSONFieldType{Field: "room_id"}, "failed to populate fields for CreateTrackRequest")
+		}
+	}
+	if jv, ok := m["name"]; ok {
+		if err := r.Name.Set(jv); err != nil {
+			return errors.New("set field Name failed: " + err.Error())
+		}
+		delete(m, "name")
+	}
+	if err := ExtractL10NFields(m, &r.LocalizedFields, []string{"name"}); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (r *CreateTrackRequest) GetPropNames() ([]string, error) {
+	l, _ := r.LocalizedFields.GetPropNames()
+	return append(l, "conference_id", "room_id", "name"), nil
+}
+
+func (r *CreateTrackRequest) SetPropValue(s string, v interface{}) error {
+	switch s {
+	case "conference_id":
+		if jv, ok := v.(string); ok {
+			r.ConferenceID = jv
+			return nil
+		}
+	case "room_id":
+		if jv, ok := v.(string); ok {
+			r.RoomID = jv
+			return nil
+		}
+	case "name":
+		return r.Name.Set(v)
+	default:
+		return errors.New("unknown column '" + s + "'")
+	}
+	return ErrInvalidFieldType{Field: s}
+}
+
+func (r UpdateTrackRequest) collectMarshalData() map[string]interface{} {
+	m := make(map[string]interface{})
+	m["id"] = r.ID
+	if r.Name.Valid() {
+		m["name"] = r.Name.Value()
+	}
+	return m
+}
+
+func (r UpdateTrackRequest) MarshalJSON() ([]byte, error) {
+	m := r.collectMarshalData()
+	buf, err := json.Marshal(m)
+	if err != nil {
+		return nil, err
+	}
+	return MarshalJSONWithL10N(buf, r.LocalizedFields)
+}
+
+func (r UpdateTrackRequest) MarshalURL() ([]byte, error) {
+	m := r.collectMarshalData()
+	buf, err := urlenc.Marshal(m)
+	if err != nil {
+		return nil, err
+	}
+	return MarshalURLWithL10N(buf, r.LocalizedFields)
+}
+
+func (r *UpdateTrackRequest) UnmarshalJSON(data []byte) error {
+	m := make(map[string]interface{})
+	if err := json.Unmarshal(data, &m); err != nil {
+		return err
+	}
+	return r.Populate(m)
+}
+
+func (r *UpdateTrackRequest) Populate(m map[string]interface{}) error {
+	if jv, ok := m["id"]; ok {
+		switch jv.(type) {
+		case string:
+			r.ID = jv.(string)
+			delete(m, "id")
+		default:
+			return errors.Wrap(ErrInvalidJSONFieldType{Field: "id"}, "failed to populate fields for UpdateTrackRequest")
+		}
+	}
+	if jv, ok := m["name"]; ok {
+		if err := r.Name.Set(jv); err != nil {
+			return errors.New("set field Name failed: " + err.Error())
+		}
+		delete(m, "name")
+	}
+	if err := ExtractL10NFields(m, &r.LocalizedFields, []string{"name"}); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (r *UpdateTrackRequest) GetPropNames() ([]string, error) {
+	l, _ := r.LocalizedFields.GetPropNames()
+	return append(l, "id", "name"), nil
+}
+
+func (r *UpdateTrackRequest) SetPropValue(s string, v interface{}) error {
+	switch s {
+	case "id":
+		if jv, ok := v.(string); ok {
+			r.ID = jv
+			return nil
+		}
+	case "name":
+		return r.Name.Set(v)
+	default:
+		return errors.New("unknown column '" + s + "'")
+	}
+	return ErrInvalidFieldType{Field: s}
+}
