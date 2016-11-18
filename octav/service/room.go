@@ -60,7 +60,7 @@ func (v *RoomSvc) CreateFromPayload(tx *db.Tx, result *model.Room, payload *mode
 	}
 
 	var r model.Room
-	if err := r.FromRow(vdb); err != nil {
+	if err := r.FromRow(&vdb); err != nil {
 		return errors.Wrap(err, "failed to populate model from database")
 	}
 
@@ -92,9 +92,17 @@ func (v *RoomSvc) PreUpdateFromPayloadHook(ctx context.Context, tx *db.Tx, vdb *
 	return nil
 }
 
+func (v *RoomSvc) PostCreateHook(tx *db.Tx, vdb *db.Room) error {
+	return invalidateRoomLoadByVenueID(vdb.VenueID)
+}
+
 func (v *RoomSvc) PostUpdateHook(tx *db.Tx, vdb *db.Room) error {
+	return invalidateRoomLoadByVenueID(vdb.VenueID)
+}
+
+func invalidateRoomLoadByVenueID(venueID string) error {
 	c := Cache()
-	key := c.Key("Room", "ListByVenueID", vdb.VenueID)
+	key := c.Key("Room", "LoadByVenueID", venueID)
 	c.Delete(key)
 	if pdebug.Enabled {
 		pdebug.Printf("CACHE DEL: %s", key)
@@ -134,7 +142,7 @@ func (v *RoomSvc) LoadByVenueID(tx *db.Tx, cdl *model.RoomList, venueID string) 
 	var ids []string
 	c := Cache()
 	key := c.Key("Room", "LoadByVenueID", venueID)
-	if err := c.Get(key, &ids); err != nil {
+	if err := c.Get(key, &ids); err == nil {
 		if pdebug.Enabled {
 			pdebug.Printf("CACHE HIT: %s", key)
 		}
@@ -161,7 +169,7 @@ func (v *RoomSvc) LoadByVenueID(tx *db.Tx, cdl *model.RoomList, venueID string) 
 	res := make(model.RoomList, len(vdbl))
 	for i, vdb := range vdbl {
 		var u model.Room
-		if err := u.FromRow(vdb); err != nil {
+		if err := u.FromRow(&vdb); err != nil {
 			return err
 		}
 		ids[i] = vdb.EID

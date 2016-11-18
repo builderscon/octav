@@ -93,7 +93,7 @@ func (t TemporaryEmail) Update(tx *Tx) (err error) {
 		_, err = tx.Stmt(stmt).Exec(t.UserID, t.ConfirmationKey, t.Email, t.ExpiresOn, t.OID)
 		return err
 	}
-	return errors.New("either OID/EID must be filled")
+	return errors.New("OID must be filled")
 }
 
 func (t TemporaryEmail) Delete(tx *Tx) error {

@@ -95,7 +95,7 @@ func (c ConferenceVenue) Update(tx *Tx) (err error) {
 		_, err = tx.Stmt(stmt).Exec(c.ConferenceID, c.VenueID, c.OID)
 		return err
 	}
-	return errors.New("either OID/EID must be filled")
+	return errors.New("OID must be filled")
 }
 
 func (c ConferenceVenue) Delete(tx *Tx) error {

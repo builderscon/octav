@@ -47,13 +47,13 @@ func (v *FeaturedSpeaker) Load(tx *db.Tx, id string) (err error) {
 		return err
 	}
 
-	if err := v.FromRow(vdb); err != nil {
+	if err := v.FromRow(&vdb); err != nil {
 		return err
 	}
 	return nil
 }
 
-func (v *FeaturedSpeaker) FromRow(vdb db.FeaturedSpeaker) error {
+func (v *FeaturedSpeaker) FromRow(vdb *db.FeaturedSpeaker) error {
 	v.ID = vdb.EID
 	v.ConferenceID = vdb.ConferenceID
 	if vdb.SpeakerID.Valid {

@@ -80,7 +80,7 @@ func (v *VenueSvc) CreateFromPayload(tx *db.Tx, venue *model.Venue, payload *mod
 	}
 
 	var r model.Venue
-	if err := r.FromRow(vdb); err != nil {
+	if err := r.FromRow(&vdb); err != nil {
 		return errors.Wrap(err, "failed to populate model from database")
 	}
 	*venue = r
@@ -105,7 +105,7 @@ func (v *VenueSvc) ListFromPayload(tx *db.Tx, result *model.VenueList, payload *
 
 	l := make(model.VenueList, len(vdbl))
 	for i, vdb := range vdbl {
-		if err := (l[i]).FromRow(vdb); err != nil {
+		if err := (l[i]).FromRow(&vdb); err != nil {
 			return errors.Wrap(err, "failed to populate model from database")
 		}
 
@@ -157,7 +157,7 @@ func (v *VenueSvc) LoadByConferenceID(tx *db.Tx, cdl *model.VenueList, cid strin
 	ids = make([]string, len(vdbl))
 	for i, vdb := range vdbl {
 		var u model.Venue
-		if err := u.FromRow(vdb); err != nil {
+		if err := u.FromRow(&vdb); err != nil {
 			return err
 		}
 		ids[i] = vdb.EID

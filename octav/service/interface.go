@@ -82,6 +82,7 @@ type MailgunSvc struct {
 type LocalizedStringSvc struct{}
 type QuestionSvc struct{}
 
+// +PostCreateHook
 // +PostUpdateHook
 // +PreUpdateFromPayloadHook
 type RoomSvc struct{}
@@ -107,3 +108,5 @@ type UserSvc struct {
 	EnableVerify bool
 }
 type VenueSvc struct{}
+
+type TrackSvc struct {}

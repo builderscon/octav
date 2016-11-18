@@ -67,7 +67,7 @@ func (v *FeaturedSpeakerSvc) CreateFromPayload(tx *db.Tx, payload *model.AddFeat
 	}
 
 	c := model.FeaturedSpeaker{}
-	if err := c.FromRow(vdb); err != nil {
+	if err := c.FromRow(&vdb); err != nil {
 		return errors.Wrap(err, "failed to populate model from database")
 	}
 
@@ -105,7 +105,7 @@ func (v *FeaturedSpeakerSvc) ListFromPayload(tx *db.Tx, result *model.FeaturedSp
 
 	l := make(model.FeaturedSpeakerList, len(vdbl))
 	for i, vdb := range vdbl {
-		if err := (l[i]).FromRow(vdb); err != nil {
+		if err := (l[i]).FromRow(&vdb); err != nil {
 			return errors.Wrap(err, "failed to populate model from database")
 		}
 
@@ -165,7 +165,7 @@ func (v *FeaturedSpeakerSvc) LoadByConferenceID(tx *db.Tx, cdl *model.FeaturedSp
 	res := make(model.FeaturedSpeakerList, len(vdbl))
 	for i, vdb := range vdbl {
 		var u model.FeaturedSpeaker
-		if err := u.FromRow(vdb); err != nil {
+		if err := u.FromRow(&vdb); err != nil {
 			return err
 		}
 		ids[i] = vdb.EID

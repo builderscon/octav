@@ -19,48 +19,48 @@ var _ = time.Time{}
 var _ = cache.WithExpires(time.Minute)
 var _ = context.Background
 var _ = errors.Wrap
-var _ = model.Room{}
-var _ = db.Room{}
+var _ = model.Track{}
+var _ = db.Track{}
 var _ = pdebug.Enabled
 
-var roomSvc RoomSvc
-var roomOnce sync.Once
+var trackSvc TrackSvc
+var trackOnce sync.Once
 
-func Room() *RoomSvc {
-	roomOnce.Do(roomSvc.Init)
-	return &roomSvc
+func Track() *TrackSvc {
+	trackOnce.Do(trackSvc.Init)
+	return &trackSvc
 }
 
-func (v *RoomSvc) LookupFromPayload(tx *db.Tx, m *model.Room, payload *model.LookupRoomRequest) (err error) {
+func (v *TrackSvc) LookupFromPayload(tx *db.Tx, m *model.Track, payload *model.LookupTrackRequest) (err error) {
 	if pdebug.Enabled {
-		g := pdebug.Marker("service.Room.LookupFromPayload").BindError(&err)
+		g := pdebug.Marker("service.Track.LookupFromPayload").BindError(&err)
 		defer g.End()
 	}
 	if err = v.Lookup(tx, m, payload.ID); err != nil {
-		return errors.Wrap(err, "failed to load model.Room from database")
+		return errors.Wrap(err, "failed to load model.Track from database")
 	}
 	if err := v.Decorate(tx, m, payload.TrustedCall, payload.Lang.String); err != nil {
-		return errors.Wrap(err, "failed to load associated data for model.Room from database")
+		return errors.Wrap(err, "failed to load associated data for model.Track from database")
 	}
 	return nil
 }
 
-func (v *RoomSvc) Lookup(tx *db.Tx, m *model.Room, id string) (err error) {
+func (v *TrackSvc) Lookup(tx *db.Tx, m *model.Track, id string) (err error) {
 	if pdebug.Enabled {
-		g := pdebug.Marker("service.Room.Lookup").BindError(&err)
+		g := pdebug.Marker("service.Track.Lookup").BindError(&err)
 		defer g.End()
 	}
 
-	var r model.Room
+	var r model.Track
 	c := Cache()
-	key := c.Key("Room", id)
+	key := c.Key("Track", id)
 	var cacheMiss bool
 	_, err = c.GetOrSet(key, &r, func() (interface{}, error) {
 		if pdebug.Enabled {
 			cacheMiss = true
 		}
 		if err := r.Load(tx, id); err != nil {
-			return nil, errors.Wrap(err, "failed to load model.Room from database")
+			return nil, errors.Wrap(err, "failed to load model.Track from database")
 		}
 		return &r, nil
 	}, cache.WithExpires(time.Hour))
@@ -78,9 +78,9 @@ func (v *RoomSvc) Lookup(tx *db.Tx, m *model.Room, id string) (err error) {
 // Create takes in the transaction, the incoming payload, and a reference to
 // a database row. The database row is initialized/populated so that the
 // caller can use it afterwards.
-func (v *RoomSvc) Create(tx *db.Tx, vdb *db.Room, payload *model.CreateRoomRequest) (err error) {
+func (v *TrackSvc) Create(tx *db.Tx, vdb *db.Track, payload *model.CreateTrackRequest) (err error) {
 	if pdebug.Enabled {
-		g := pdebug.Marker("service.Room.Create").BindError(&err)
+		g := pdebug.Marker("service.Track.Create").BindError(&err)
 		defer g.End()
 	}
 
@@ -92,18 +92,15 @@ func (v *RoomSvc) Create(tx *db.Tx, vdb *db.Room, payload *model.CreateRoomReque
 		return errors.Wrap(err, `failed to insert into database`)
 	}
 
-	if err := payload.LocalizedFields.CreateLocalizedStrings(tx, "Room", vdb.EID); err != nil {
+	if err := payload.LocalizedFields.CreateLocalizedStrings(tx, "Track", vdb.EID); err != nil {
 		return errors.Wrap(err, `failed to populate localized strings`)
-	}
-	if err := v.PostCreateHook(tx, vdb); err != nil {
-		return errors.Wrap(err, `failed execute post create hook`)
 	}
 	return nil
 }
 
-func (v *RoomSvc) Update(tx *db.Tx, vdb *db.Room) (err error) {
+func (v *TrackSvc) Update(tx *db.Tx, vdb *db.Track) (err error) {
 	if pdebug.Enabled {
-		g := pdebug.Marker("service.Room.Update (%s)", vdb.EID).BindError(&err)
+		g := pdebug.Marker("service.Track.Update (%s)", vdb.EID).BindError(&err)
 		defer g.End()
 	}
 
@@ -115,7 +112,7 @@ func (v *RoomSvc) Update(tx *db.Tx, vdb *db.Room) (err error) {
 		return errors.Wrap(err, `failed to update database`)
 	}
 	c := Cache()
-	key := c.Key("Room", vdb.EID)
+	key := c.Key("Track", vdb.EID)
 	if pdebug.Enabled {
 		pdebug.Printf(`CACHE DEL %s`, key)
 	}
@@ -125,24 +122,17 @@ func (v *RoomSvc) Update(tx *db.Tx, vdb *db.Room) (err error) {
 			pdebug.Printf(`CACHE ERR: %s`, cerr)
 		}
 	}
-	if err := v.PostUpdateHook(tx, vdb); err != nil {
-		return errors.Wrap(err, "post update hook failed")
-	}
 	return nil
 }
 
-func (v *RoomSvc) UpdateFromPayload(ctx context.Context, tx *db.Tx, payload *model.UpdateRoomRequest) (err error) {
+func (v *TrackSvc) UpdateFromPayload(ctx context.Context, tx *db.Tx, payload *model.UpdateTrackRequest) (err error) {
 	if pdebug.Enabled {
-		g := pdebug.Marker("service.Room.UpdateFromPayload (%s)", payload.ID).BindError(&err)
+		g := pdebug.Marker("service.Track.UpdateFromPayload (%s)", payload.ID).BindError(&err)
 		defer g.End()
 	}
-	var vdb db.Room
+	var vdb db.Track
 	if err := vdb.LoadByEID(tx, payload.ID); err != nil {
 		return errors.Wrap(err, `failed to load from database`)
-	}
-
-	if err := v.PreUpdateFromPayloadHook(ctx, tx, &vdb, payload); err != nil {
-		return errors.Wrap(err, `failed to execute PreUpdateFromPayloadHook`)
 	}
 
 	if err := v.populateRowForUpdate(&vdb, payload); err != nil {
@@ -154,15 +144,15 @@ func (v *RoomSvc) UpdateFromPayload(ctx context.Context, tx *db.Tx, payload *mod
 	}
 
 	ls := LocalizedString()
-	if err := ls.UpdateFields(tx, "Room", vdb.EID, payload.LocalizedFields); err != nil {
+	if err := ls.UpdateFields(tx, "Track", vdb.EID, payload.LocalizedFields); err != nil {
 		return errors.Wrap(err, `failed to update localized fields`)
 	}
 	return nil
 }
 
-func (v *RoomSvc) ReplaceL10NStrings(tx *db.Tx, m *model.Room, lang string) error {
+func (v *TrackSvc) ReplaceL10NStrings(tx *db.Tx, m *model.Track, lang string) error {
 	if pdebug.Enabled {
-		g := pdebug.Marker("service.Room.ReplaceL10NStrings lang = %s", lang)
+		g := pdebug.Marker("service.Track.ReplaceL10NStrings lang = %s", lang)
 		defer g.End()
 	}
 	ls := LocalizedString()
@@ -174,7 +164,7 @@ func (v *RoomSvc) ReplaceL10NStrings(tx *db.Tx, m *model.Room, lang string) erro
 		}
 		for _, extralang := range []string{`ja`} {
 			list = list[:0]
-			if err := ls.LookupFields(tx, "Room", m.ID, extralang, &list); err != nil {
+			if err := ls.LookupFields(tx, "Track", m.ID, extralang, &list); err != nil {
 				return errors.Wrap(err, `failed to lookup localized fields`)
 			}
 
@@ -194,7 +184,7 @@ func (v *RoomSvc) ReplaceL10NStrings(tx *db.Tx, m *model.Room, lang string) erro
 	case "all":
 		for _, extralang := range []string{`ja`} {
 			list = list[:0]
-			if err := ls.LookupFields(tx, "Room", m.ID, extralang, &list); err != nil {
+			if err := ls.LookupFields(tx, "Track", m.ID, extralang, &list); err != nil {
 				return errors.Wrap(err, `failed to lookup localized fields`)
 			}
 
@@ -208,7 +198,7 @@ func (v *RoomSvc) ReplaceL10NStrings(tx *db.Tx, m *model.Room, lang string) erro
 	default:
 		for _, extralang := range []string{`ja`} {
 			list = list[:0]
-			if err := ls.LookupFields(tx, "Room", m.ID, extralang, &list); err != nil {
+			if err := ls.LookupFields(tx, "Track", m.ID, extralang, &list); err != nil {
 				return errors.Wrap(err, `failed to lookup localized fields`)
 			}
 
@@ -226,23 +216,23 @@ func (v *RoomSvc) ReplaceL10NStrings(tx *db.Tx, m *model.Room, lang string) erro
 	return nil
 }
 
-func (v *RoomSvc) Delete(tx *db.Tx, id string) error {
+func (v *TrackSvc) Delete(tx *db.Tx, id string) error {
 	if pdebug.Enabled {
-		g := pdebug.Marker("Room.Delete (%s)", id)
+		g := pdebug.Marker("Track.Delete (%s)", id)
 		defer g.End()
 	}
 
-	vdb := db.Room{EID: id}
+	vdb := db.Track{EID: id}
 	if err := vdb.Delete(tx); err != nil {
 		return err
 	}
 	c := Cache()
-	key := c.Key("Room", id)
+	key := c.Key("Track", id)
 	c.Delete(key)
 	if pdebug.Enabled {
 		pdebug.Printf(`CACHE DEL %s`, key)
 	}
-	if err := db.DeleteLocalizedStringsForParent(tx, id, "Room"); err != nil {
+	if err := db.DeleteLocalizedStringsForParent(tx, id, "Track"); err != nil {
 		return err
 	}
 	return nil

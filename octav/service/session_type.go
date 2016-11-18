@@ -98,7 +98,7 @@ func (v *SessionTypeSvc) CreateFromPayload(ctx context.Context, tx *db.Tx, paylo
 	}
 
 	c := model.SessionType{}
-	if err := c.FromRow(vdb); err != nil {
+	if err := c.FromRow(&vdb); err != nil {
 		return errors.Wrap(err, "failed to populate model from database")
 	}
 
@@ -160,7 +160,7 @@ func (v *SessionTypeSvc) ListFromPayload(tx *db.Tx, result *model.SessionTypeLis
 
 	l := make(model.SessionTypeList, len(vdbl))
 	for i, vdb := range vdbl {
-		if err := (l[i]).FromRow(vdb); err != nil {
+		if err := (l[i]).FromRow(&vdb); err != nil {
 			return errors.Wrap(err, "failed to populate model from database")
 		}
 
@@ -243,7 +243,7 @@ func (v *SessionTypeSvc) LoadByConferenceID(tx *db.Tx, cdl *model.SessionTypeLis
 	res := make(model.SessionTypeList, len(vdbl))
 	for i, vdb := range vdbl {
 		var u model.SessionType
-		if err := u.FromRow(vdb); err != nil {
+		if err := u.FromRow(&vdb); err != nil {
 			return err
 		}
 		ids[i] = vdb.EID

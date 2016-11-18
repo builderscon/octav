@@ -36,6 +36,7 @@ type rawConference struct {
 	FeaturedSpeakers          FeaturedSpeakerList `json:"featured_speakers,omitempty" decorate:"true"`
 	Sponsors                  SponsorList         `json:"sponsors,omitempty" decorate:"true"`
 	SessionTypes              SessionTypeList     `json:"session_types,omitempty" decorate:"true"`
+	Tracks                    TrackList           `json:"tracks,omitempty" decorate:"true"`
 }
 
 func (v Conference) MarshalJSON() ([]byte, error) {
@@ -62,6 +63,7 @@ func (v Conference) MarshalJSON() ([]byte, error) {
 	raw.FeaturedSpeakers = v.FeaturedSpeakers
 	raw.Sponsors = v.Sponsors
 	raw.SessionTypes = v.SessionTypes
+	raw.Tracks = v.Tracks
 	buf, err := json.Marshal(raw)
 	if err != nil {
 		return nil, err
@@ -79,13 +81,13 @@ func (v *Conference) Load(tx *db.Tx, id string) (err error) {
 		return err
 	}
 
-	if err := v.FromRow(vdb); err != nil {
+	if err := v.FromRow(&vdb); err != nil {
 		return err
 	}
 	return nil
 }
 
-func (v *Conference) FromRow(vdb db.Conference) error {
+func (v *Conference) FromRow(vdb *db.Conference) error {
 	v.ID = vdb.EID
 	v.Title = vdb.Title
 	if vdb.CoverURL.Valid {

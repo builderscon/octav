@@ -84,6 +84,23 @@ CREATE TABLE conferences (
     KEY (status)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
+CREATE TABLE tracks (
+    oid INTEGER UNSIGNED NOT NULL PRIMARY KEY AUTO_INCREMENT,
+    eid CHAR(64) CHARACTER SET latin1 NOT NULL,
+    conference_id CHAR(64) CHARACTER SET latin1 NOT NULL,
+    room_id CHAR(64) CHARACTER SET latin1 NOT NULL,
+    name TEXT NOT NULL,
+    sort_order INTEGER UNSIGNED NOT NULL DEFAULT 0,
+    created_on DATETIME NOT NULL,
+    modified_on TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    UNIQUE KEY (eid),
+    UNIQUE KEY (conference_id, room_id),
+    KEY(sort_order),
+    FOREIGN KEY (room_id) REFERENCES rooms(eid) ON DELETE CASCADE,
+    FOREIGN KEY (conference_id) REFERENCES conferences(eid) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+
 -- key, value pairs of long texts that go with a conference
 CREATE TABLE conference_components (
     oid           INTEGER UNSIGNED NOT NULL PRIMARY KEY AUTO_INCREMENT,

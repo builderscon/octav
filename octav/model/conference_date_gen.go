@@ -22,13 +22,13 @@ func (v *ConferenceDate) Load(tx *db.Tx, id string) (err error) {
 		return err
 	}
 
-	if err := v.FromRow(vdb); err != nil {
+	if err := v.FromRow(&vdb); err != nil {
 		return err
 	}
 	return nil
 }
 
-func (v *ConferenceDate) FromRow(vdb db.ConferenceDate) error {
+func (v *ConferenceDate) FromRow(vdb *db.ConferenceDate) error {
 	v.ID = vdb.EID
 	if vdb.Open.Valid {
 		v.Open = vdb.Open.Time

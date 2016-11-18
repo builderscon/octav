@@ -26,7 +26,7 @@ func (v *ConferenceDateSvc) CreateFromPayload(tx *db.Tx, payload *model.CreateCo
 	}
 
 	var m model.ConferenceDate
-	if err := m.FromRow(vdb); err != nil {
+	if err := m.FromRow(&vdb); err != nil {
 		return errors.Wrap(err, "failed to populate model from database row")
 	}
 	*result = m

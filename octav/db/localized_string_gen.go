@@ -93,7 +93,7 @@ func (l LocalizedString) Update(tx *Tx) (err error) {
 		_, err = tx.Stmt(stmt).Exec(l.ParentID, l.ParentType, l.Name, l.Language, l.Localized, l.OID)
 		return err
 	}
-	return errors.New("either OID/EID must be filled")
+	return errors.New("OID must be filled")
 }
 
 func (l LocalizedString) Delete(tx *Tx) error {

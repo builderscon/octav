@@ -482,6 +482,7 @@ func TestConferenceCRUD(t *testing.T) {
 	}
 
 	in := model.UpdateConferenceRequest{ID: res.ID, UserID: user.ID}
+	in.Timezone.Set("UTC")
 	in.SubTitle.Set("Big Bang!")
 	in.LocalizedFields.Set("ja", "title", "ヤップシー エイジア")
 	in.LocalizedFields.Set("ja", "cfp_lead_text", "ばっちこい！")
@@ -514,8 +515,16 @@ func TestConferenceCRUD(t *testing.T) {
 	if !assert.Equal(ctx.T, "応募したらこれを読んでね", conf4.CFPPostSubmitInstructions, "Conference.cfp_post_submit_instructions#ja is the same as the conference updated") {
 		return
 	}
+	if !assert.Equal(ctx.T, "UTC", conf4.Timezone, "Conference.Timezone is the same as the conference updated") {
+		return
+	}
 
 	venue, err := testCreateVenuePass(ctx, bigsight(user.ID))
+	if err != nil {
+		return
+	}
+
+	_, err = testCreateRoomPass(ctx, intlConferenceRoom(venue.ID, ctx.Superuser.EID))
 	if err != nil {
 		return
 	}

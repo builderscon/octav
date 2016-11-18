@@ -22,13 +22,13 @@ func (v *ConferenceComponent) Load(tx *db.Tx, id string) (err error) {
 		return err
 	}
 
-	if err := v.FromRow(vdb); err != nil {
+	if err := v.FromRow(&vdb); err != nil {
 		return err
 	}
 	return nil
 }
 
-func (v *ConferenceComponent) FromRow(vdb db.ConferenceComponent) error {
+func (v *ConferenceComponent) FromRow(vdb *db.ConferenceComponent) error {
 	v.ID = vdb.EID
 	v.ConferenceID = vdb.ConferenceID
 	v.Name = vdb.Name

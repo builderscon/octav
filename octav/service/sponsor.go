@@ -194,7 +194,7 @@ func (v *SponsorSvc) CreateFromPayload(ctx context.Context, tx *db.Tx, payload *
 	}
 
 	var c model.Sponsor
-	if err := c.FromRow(vdb); err != nil {
+	if err := c.FromRow(&vdb); err != nil {
 		return errors.Wrap(err, "failed to populate model from database")
 	}
 
@@ -294,7 +294,7 @@ func (v *SponsorSvc) ListFromPayload(tx *db.Tx, result *model.SponsorList, paylo
 
 	l := make(model.SponsorList, len(vdbl))
 	for i, vdb := range vdbl {
-		if err := (l[i]).FromRow(vdb); err != nil {
+		if err := (l[i]).FromRow(&vdb); err != nil {
 			return errors.Wrap(err, "failed to populate model from database")
 		}
 
@@ -372,7 +372,7 @@ func (v *SponsorSvc) LoadByConferenceID(tx *db.Tx, cdl *model.SponsorList, cid s
 	res := make(model.SponsorList, len(vdbl))
 	for i, vdb := range vdbl {
 		var u model.Sponsor
-		if err := u.FromRow(vdb); err != nil {
+		if err := u.FromRow(&vdb); err != nil {
 			return err
 		}
 		ids[i] = vdb.EID

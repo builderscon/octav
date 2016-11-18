@@ -373,7 +373,12 @@ func (p *Processor) ProcessStruct(s Struct) error {
 		buf.WriteString("\nreturn err")
 		buf.WriteString("\n}")
 	}
-	fmt.Fprintf(&buf, "\nreturn errors.New(%s)", strconv.Quote("either OID/EID must be filled"))
+
+	if hasEID {
+		fmt.Fprintf(&buf, "\nreturn errors.New(%s)", strconv.Quote("either OID/EID must be filled"))
+	} else {
+		fmt.Fprintf(&buf, "\nreturn errors.New(%s)", strconv.Quote("OID must be filled"))
+	}
 	buf.WriteString("\n}")
 
 	fmt.Fprintf(&buf, "\n\nfunc (%c %s) Delete(tx *Tx) error {", varname, s.Name)
