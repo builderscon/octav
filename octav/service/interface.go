@@ -72,6 +72,11 @@ type ConferenceComponentSvc struct{}
 type ConferenceDateSvc struct{}
 type ConferenceSeriesSvc struct{}
 
+// +PostCreateHook
+// +PostUpdateHook
+// +PostDeleteHook
+type ConferenceVenueSvc struct{}
+
 // +PreUpdateFromPayloadHook
 type FeaturedSpeakerSvc struct{}
 type MailgunSvc struct {
@@ -107,6 +112,7 @@ type TwitterSvc struct {
 type UserSvc struct {
 	EnableVerify bool
 }
+
 type VenueSvc struct{}
 
 type TrackSvc struct {}

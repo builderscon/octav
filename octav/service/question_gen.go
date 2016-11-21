@@ -85,7 +85,7 @@ func (v *QuestionSvc) Create(tx *db.Tx, vdb *db.Question, payload *model.CreateQ
 		return errors.Wrap(err, `failed to populate row`)
 	}
 
-	if err := vdb.Create(tx); err != nil {
+	if err := vdb.Create(tx, payload.DatabaseOptions...); err != nil {
 		return errors.Wrap(err, `failed to insert into database`)
 	}
 

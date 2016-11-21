@@ -6717,3 +6717,73 @@ func (r *UpdateTrackRequest) SetPropValue(s string, v interface{}) error {
 	}
 	return ErrInvalidFieldType{Field: s}
 }
+
+func (r CreateConferenceVenueRequest) collectMarshalData() map[string]interface{} {
+	m := make(map[string]interface{})
+	return m
+}
+
+func (r CreateConferenceVenueRequest) MarshalJSON() ([]byte, error) {
+	m := r.collectMarshalData()
+	buf, err := json.Marshal(m)
+	if err != nil {
+		return nil, err
+	}
+	return buf, nil
+}
+
+func (r CreateConferenceVenueRequest) MarshalURL() ([]byte, error) {
+	m := r.collectMarshalData()
+	buf, err := urlenc.Marshal(m)
+	if err != nil {
+		return nil, err
+	}
+	return buf, nil
+}
+
+func (r *CreateConferenceVenueRequest) UnmarshalJSON(data []byte) error {
+	m := make(map[string]interface{})
+	if err := json.Unmarshal(data, &m); err != nil {
+		return err
+	}
+	return r.Populate(m)
+}
+
+func (r *CreateConferenceVenueRequest) Populate(m map[string]interface{}) error {
+	return nil
+}
+
+func (r UpdateConferenceVenueRequest) collectMarshalData() map[string]interface{} {
+	m := make(map[string]interface{})
+	return m
+}
+
+func (r UpdateConferenceVenueRequest) MarshalJSON() ([]byte, error) {
+	m := r.collectMarshalData()
+	buf, err := json.Marshal(m)
+	if err != nil {
+		return nil, err
+	}
+	return buf, nil
+}
+
+func (r UpdateConferenceVenueRequest) MarshalURL() ([]byte, error) {
+	m := r.collectMarshalData()
+	buf, err := urlenc.Marshal(m)
+	if err != nil {
+		return nil, err
+	}
+	return buf, nil
+}
+
+func (r *UpdateConferenceVenueRequest) UnmarshalJSON(data []byte) error {
+	m := make(map[string]interface{})
+	if err := json.Unmarshal(data, &m); err != nil {
+		return err
+	}
+	return r.Populate(m)
+}
+
+func (r *UpdateConferenceVenueRequest) Populate(m map[string]interface{}) error {
+	return nil
+}

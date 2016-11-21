@@ -91,7 +91,7 @@ func (v *UserSvc) Create(tx *db.Tx, vdb *db.User, payload *model.CreateUserReque
 		return errors.Wrap(err, `failed to populate row`)
 	}
 
-	if err := vdb.Create(tx); err != nil {
+	if err := vdb.Create(tx, payload.DatabaseOptions...); err != nil {
 		return errors.Wrap(err, `failed to insert into database`)
 	}
 
