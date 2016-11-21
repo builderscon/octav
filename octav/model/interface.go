@@ -6,6 +6,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/builderscon/octav/octav/db"
 	"github.com/lestrrat/go-jsval"
 )
 
@@ -81,6 +82,8 @@ type CreateConferenceComponentRequest struct {
 	ConferenceID string `json:"conference_id"`
 	Name         string `json:"name"`
 	Value        string `json:"value"`
+
+	DatabaseOptions []db.InsertOption `json:"-"`
 }
 
 type UpdateConferenceComponentRequest struct {
@@ -140,7 +143,8 @@ type AddSessionTypeRequest struct {
 	SubmissionStart jsval.MaybeString `json:"submission_start,omitempty"`
 	SubmissionEnd   jsval.MaybeString `json:"submission_end,omitempty"`
 	LocalizedFields `json:"-"`
-	UserID          string `json:"user_id"`
+	UserID          string            `json:"user_id"`
+	DatabaseOptions []db.InsertOption `json:"-"`
 }
 type CreateSessionTypeRequest struct {
 	*AddSessionTypeRequest
@@ -256,6 +260,7 @@ type CreateConferenceSeriesRequest struct {
 	Slug            string `json:"slug"`
 	Title           string `json:"title"`
 	LocalizedFields `json:"-"`
+	DatabaseOptions []db.InsertOption `json:"-"`
 }
 
 // +transport
@@ -303,6 +308,7 @@ type CreateConferenceRequest struct {
 	Timezone                  jsval.MaybeString `json:"timezone"`
 	UserID                    string            `json:"user_id"`
 	LocalizedFields           `json:"-"`
+	DatabaseOptions           []db.InsertOption `json:"-"`
 }
 
 // +transport
@@ -375,9 +381,10 @@ type ListConferenceDateRequest struct {
 
 // +transport
 type CreateConferenceDateRequest struct {
-	ConferenceID string         `json:"conference_id"`
-	Date         ConferenceDate `json:"date" extract:"true"`
-	UserID       string         `json:"user_id"`
+	ConferenceID    string            `json:"conference_id"`
+	Date            ConferenceDate    `json:"date" extract:"true"`
+	UserID          string            `json:"user_id"`
+	DatabaseOptions []db.InsertOption `json:"-"`
 }
 
 // +transport
@@ -396,9 +403,10 @@ type AddConferenceAdminRequest struct {
 
 // +transport
 type AddConferenceVenueRequest struct {
-	ConferenceID string `json:"conference_id"`
-	VenueID      string `json:"venue_id"`
-	UserID       string `json:"user_id"`
+	ConferenceID    string            `json:"conference_id"`
+	VenueID         string            `json:"venue_id"`
+	UserID          string            `json:"user_id"`
+	DatabaseOptions []db.InsertOption `json:"-"`
 }
 
 // +transport
@@ -430,8 +438,9 @@ type DeleteConferenceRequest struct {
 
 // +transport
 type AddVenueRoomRequest struct {
-	VenueID string `json:"venue_id"`
-	RoomID  string `json:"room_id"`
+	VenueID         string            `json:"venue_id"`
+	RoomID          string            `json:"room_id"`
+	DatabaseOptions []db.InsertOption `json:"-"`
 }
 
 // +transport
@@ -460,7 +469,8 @@ type CreateRoomRequest struct {
 	Name            jsval.MaybeString `json:"name" l10n:"true"`
 	Capacity        jsval.MaybeUint   `json:"capacity"`
 	LocalizedFields `json:"-"`
-	UserID          string `json:"user_id"`
+	UserID          string            `json:"user_id"`
+	DatabaseOptions []db.InsertOption `json:"-"`
 }
 
 // +transport
@@ -517,8 +527,9 @@ type CreateSessionRequest struct {
 	RecordingRelease jsval.MaybeString `json:"recording_release,omitempty"`
 	MaterialsRelease jsval.MaybeString `json:"materials_release,omitempty"`
 	LocalizedFields  `json:"-"`
-	UserID           string `json:"user_id"`
-	Duration         int    `json:"-"` // This is not sent from the client, but is used internally
+	UserID           string            `json:"user_id"`
+	Duration         int               `json:"-"` // This is not sent from the client, but is used internally
+	DatabaseOptions  []db.InsertOption `json:"-"`
 }
 
 // +transport
@@ -578,6 +589,7 @@ type CreateUserRequest struct {
 	AvatarURL       jsval.MaybeString `json:"avatar_url,omitempty"`
 	TshirtSize      jsval.MaybeString `json:"tshirt_size,omitempty"`
 	LocalizedFields `json:"-"`
+	DatabaseOptions []db.InsertOption `json:"-"`
 }
 
 // +transport
@@ -636,7 +648,8 @@ type CreateVenueRequest struct {
 	Longitude       jsval.MaybeFloat  `json:"longitude,omitempty"`
 	Latitude        jsval.MaybeFloat  `json:"latitude,omitempty"`
 	LocalizedFields `json:"-"`
-	UserID          string `json:"user_id"`
+	UserID          string            `json:"user_id"`
+	DatabaseOptions []db.InsertOption `json:"-"`
 }
 
 // +transport
@@ -703,9 +716,10 @@ type LookupQuestionRequest struct {
 
 // +transport
 type CreateQuestionRequest struct {
-	SessionID string `json:"session_id" urlenc:"session_id"`
-	UserID    string `json:"user_id" urlenc:"user_id"`
-	Body      string `json:"body" urlenc:"body"`
+	SessionID       string            `json:"session_id" urlenc:"session_id"`
+	UserID          string            `json:"user_id" urlenc:"user_id"`
+	Body            string            `json:"body" urlenc:"body"`
+	DatabaseOptions []db.InsertOption `json:"-"`
 }
 
 // +transport
@@ -805,7 +819,8 @@ type AddFeaturedSpeakerRequest struct {
 	DisplayName     string            `json:"display_name" l10n:"true"`
 	Description     string            `json:"description" l10n":"true"`
 	LocalizedFields `json:"-"`
-	UserID          string `json:"user_id"`
+	UserID          string            `json:"user_id"`
+	DatabaseOptions []db.InsertOption `json:"-"`
 }
 type CreateFeaturedSpeakerRequest struct {
 	*AddFeaturedSpeakerRequest
@@ -870,7 +885,8 @@ type AddSponsorRequest struct {
 	GroupName       string `json:"group_name"`
 	SortOrder       int    `json:"sort_order"`
 	LocalizedFields `json:"-"`
-	UserID          string `json:"user_id"`
+	UserID          string            `json:"user_id"`
+	DatabaseOptions []db.InsertOption `json:"-"`
 }
 type CreateSponsorRequest struct {
 	*AddSponsorRequest
@@ -1026,6 +1042,7 @@ type CreateTrackRequest struct {
 	RoomID          string            `json:"room_id"`
 	Name            jsval.MaybeString `json:"name,omitempty" l10n:"true"`
 	LocalizedFields `json:"-"`
+	DatabaseOptions []db.InsertOption `json:"-"`
 }
 
 // +transport
@@ -1033,4 +1050,23 @@ type UpdateTrackRequest struct {
 	ID              string            `json:"id"`
 	Name            jsval.MaybeString `json:"name,omitempty" l10n:"true"`
 	LocalizedFields `json:"-"`
+}
+
+// +model
+type ConferenceVenue struct {
+	ConferenceID string
+	VenueID      string
+}
+
+// +transport
+type CreateConferenceVenueRequest struct {
+	ConferenceID    string
+	VenueID         string
+	DatabaseOptions []db.InsertOption `json:"-"`
+}
+
+// +transport
+type UpdateConferenceVenueRequest struct {
+	ConferenceID string
+	VenueID      string
 }

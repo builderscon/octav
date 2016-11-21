@@ -83,6 +83,7 @@ type Service struct {
 	HasPostUpdateFromPayloadHook bool
 	HasPostCreateHook            bool
 	HasPostUpdateHook            bool
+	HasPostDeleteHook            bool
 }
 
 type Field struct {
@@ -477,6 +478,9 @@ func (ctx *genctx) extractServiceStructs(n ast.Node) bool {
 			}
 			if strings.HasPrefix(strings.TrimSpace(strings.TrimPrefix(c.Text, "//")), "+PostUpdateHook") {
 				svc.HasPostUpdateHook = true
+			}
+			if strings.HasPrefix(strings.TrimSpace(strings.TrimPrefix(c.Text, "//")), "+PostDeleteHook") {
+				svc.HasPostDeleteHook = true
 			}
 		}
 
@@ -982,7 +986,7 @@ func generateServiceFile(ctx *genctx, m Model) error {
 		buf.WriteString("\n\nif err := v.populateRowForCreate(vdb, payload); err != nil {")
 		buf.WriteString("\nreturn errors.Wrap(err, `failed to populate row`)")
 		buf.WriteString("\n}")
-		buf.WriteString("\n\nif err := vdb.Create(tx); err != nil {")
+		buf.WriteString("\n\nif err := vdb.Create(tx, payload.DatabaseOptions...); err != nil {")
 		buf.WriteString("\nreturn errors.Wrap(err, `failed to insert into database`)")
 		buf.WriteString("\n}\n")
 		if hasL10N {
@@ -1183,6 +1187,11 @@ func generateServiceFile(ctx *genctx, m Model) error {
 		if hasL10N {
 			fmt.Fprintf(&buf, "\nif err := db.DeleteLocalizedStringsForParent(tx, id, %s); err != nil {", strconv.Quote(m.Name))
 			buf.WriteString("\nreturn err")
+			buf.WriteString("\n}")
+		}
+		if svc.HasPostDeleteHook {
+			buf.WriteString("\nif err := v.PostDeleteHook(tx, vdb); err != nil {")
+			buf.WriteString("\nreturn errors.Wrap(err, \"post update hook failed\")")
 			buf.WriteString("\n}")
 		}
 		buf.WriteString("\nreturn nil")

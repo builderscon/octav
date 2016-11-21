@@ -380,11 +380,14 @@ func (v *ConferenceSvc) AddVenueFromPayload(tx *db.Tx, payload *model.AddConfere
 		return errors.Wrap(err, "adding a conference venue requires conference administrator privilege")
 	}
 
-	cd := db.ConferenceVenue{
-		ConferenceID: payload.ConferenceID,
-		VenueID:      payload.VenueID,
+	var cd db.ConferenceVenue
+	scv := ConferenceVenue()
+	var cvr = model.CreateConferenceVenueRequest{
+		ConferenceID:    payload.ConferenceID,
+		VenueID:         payload.VenueID,
+		DatabaseOptions: []db.InsertOption{db.WithInsertIgnore(true)},
 	}
-	if err := cd.Create(tx, db.WithInsertIgnore(true)); err != nil {
+	if err := scv.Create(tx, &cd, &cvr); err != nil {
 		return errors.Wrap(err, "failed to insert new conference/venue relation")
 	}
 
@@ -442,6 +445,18 @@ func (v *ConferenceSvc) DeleteVenueFromPayload(tx *db.Tx, payload *model.DeleteC
 	}
 	if err := db.DeleteTracks(tx, payload.ConferenceID); err != nil {
 		return errors.Wrap(err, "failed to delete trakcs")
+	}
+
+	c := Cache()
+	keys := []string{
+		c.Key("Tracks", "LoadByConferenceID", payload.ConferenceID),
+		c.Key("Venue", "LoadByConferenceID", payload.ConferenceID),
+	}
+	for _, key := range keys {
+		c.Delete(key)
+		if pdebug.Enabled {
+			pdebug.Printf("CACHE DEL %s", key)
+		}
 	}
 
 	return nil
