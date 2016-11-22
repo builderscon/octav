@@ -228,7 +228,7 @@ func (v *TrackSvc) Delete(tx *db.Tx, id string) error {
 		defer g.End()
 	}
 	original := db.Track{EID: id}
-	if err := original.Load(tx, id); err != nil {
+	if err := original.LoadByEID(tx, id); err != nil {
 		return errors.Wrap(err, `failed load before delete`)
 	}
 
@@ -245,7 +245,7 @@ func (v *TrackSvc) Delete(tx *db.Tx, id string) error {
 	if err := db.DeleteLocalizedStringsForParent(tx, id, "Track"); err != nil {
 		return errors.Wrap(err, `failed to delete localized strings`)
 	}
-	if err := v.PostDeleteHook(tx, &orignal); err != nil {
+	if err := v.PostDeleteHook(tx, &original); err != nil {
 		return errors.Wrap(err, `post delete hook failed`)
 	}
 	return nil

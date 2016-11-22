@@ -1177,7 +1177,7 @@ func generateServiceFile(ctx *genctx, m Model) error {
 			// If there's a delete hook, we need the original contents to
 			// pass to the hook. therefore we must make this one extra call
 			fmt.Fprintf(&buf, "\noriginal := db.%s{EID: id}", m.Name)
-			buf.WriteString("\nif err := original.Load(tx, id); err != nil {")
+			buf.WriteString("\nif err := original.LoadByEID(tx, id); err != nil {")
 			buf.WriteString("\nreturn errors.Wrap(err, `failed load before delete`)")
 			buf.WriteString("\n}")
 		}
@@ -1198,7 +1198,7 @@ func generateServiceFile(ctx *genctx, m Model) error {
 			buf.WriteString("\n}")
 		}
 		if svc.HasPostDeleteHook {
-			buf.WriteString("\nif err := v.PostDeleteHook(tx, &orignal); err != nil {")
+			buf.WriteString("\nif err := v.PostDeleteHook(tx, &original); err != nil {")
 			buf.WriteString("\nreturn errors.Wrap(err, `post delete hook failed`)")
 			buf.WriteString("\n}")
 		}

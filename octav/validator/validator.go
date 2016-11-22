@@ -1659,12 +1659,20 @@ func init() {
 					jsval.Reference(M).RefersTo("#/definitions/uuid"),
 				).
 				AddProp(
+					"name",
+					jsval.Reference(M).RefersTo("#/definitions/string_en"),
+				).
+				AddProp(
 					"room_id",
 					jsval.Reference(M).RefersTo("#/definitions/uuid"),
 				).
 				AddProp(
 					"user_id",
 					jsval.Reference(M).RefersTo("#/definitions/uuid"),
+				).
+				PatternPropertiesString(
+					"name#[a-z]+",
+					jsval.Reference(M).RefersTo("#/definitions/string_i18n"),
 				),
 		)
 
