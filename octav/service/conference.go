@@ -423,7 +423,7 @@ func (v *ConferenceSvc) AddVenueFromPayload(tx *db.Tx, payload *model.AddConfere
 
 	c := Cache()
 	keys := []string{
-		c.Key("Tracks", "LoadByConferenceID", payload.ConferenceID),
+		c.Key("Track", "LoadByConferenceID", payload.ConferenceID),
 		c.Key("Venue", "LoadByConferenceID", payload.ConferenceID),
 	}
 	for _, key := range keys {
@@ -450,7 +450,7 @@ func (v *ConferenceSvc) DeleteVenueFromPayload(tx *db.Tx, payload *model.DeleteC
 
 	c := Cache()
 	keys := []string{
-		c.Key("Tracks", "LoadByConferenceID", payload.ConferenceID),
+		c.Key("Track", "LoadByConferenceID", payload.ConferenceID),
 		c.Key("Venue", "LoadByConferenceID", payload.ConferenceID),
 	}
 	for _, key := range keys {

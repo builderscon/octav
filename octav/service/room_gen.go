@@ -96,7 +96,7 @@ func (v *RoomSvc) Create(tx *db.Tx, vdb *db.Room, payload *model.CreateRoomReque
 		return errors.Wrap(err, `failed to populate localized strings`)
 	}
 	if err := v.PostCreateHook(tx, vdb); err != nil {
-		return errors.Wrap(err, `failed execute post create hook`)
+		return errors.Wrap(err, `post create hook failed`)
 	}
 	return nil
 }
@@ -126,7 +126,7 @@ func (v *RoomSvc) Update(tx *db.Tx, vdb *db.Room) (err error) {
 		}
 	}
 	if err := v.PostUpdateHook(tx, vdb); err != nil {
-		return errors.Wrap(err, "post update hook failed")
+		return errors.Wrap(err, `post update hook failed`)
 	}
 	return nil
 }

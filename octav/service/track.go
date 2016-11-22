@@ -151,7 +151,9 @@ func (v *TrackSvc) LoadByConferenceID(tx *db.Tx, result *model.TrackList, confer
 
 		m := make(model.TrackList, len(ids))
 		for i, id := range ids {
-			if err := v.LookupByConferenceRoom(tx, &m[i], conferenceID, id); err != nil {
+			if err := v.Lookup(tx, &m[i], id); err != nil {
+				// Something fishy. Thro away this cache
+				c.Delete(key);
 				return errors.Wrap(err, "failed to load from database")
 			}
 		}
@@ -176,7 +178,7 @@ func (v *TrackSvc) LoadByConferenceID(tx *db.Tx, result *model.TrackList, confer
 		if err := u.FromRow(&vdb); err != nil {
 			return err
 		}
-		ids[i] = vdb.RoomID
+		ids[i] = vdb.EID
 		res[i] = u
 	}
 	*result = res

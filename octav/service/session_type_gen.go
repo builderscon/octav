@@ -123,7 +123,7 @@ func (v *SessionTypeSvc) Update(tx *db.Tx, vdb *db.SessionType) (err error) {
 		}
 	}
 	if err := v.PostUpdateHook(tx, vdb); err != nil {
-		return errors.Wrap(err, "post update hook failed")
+		return errors.Wrap(err, `post update hook failed`)
 	}
 	return nil
 }

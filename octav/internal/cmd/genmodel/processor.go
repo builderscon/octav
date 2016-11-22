@@ -997,7 +997,7 @@ func generateServiceFile(ctx *genctx, m Model) error {
 
 		if svc.HasPostCreateHook {
 			buf.WriteString("\nif err := v.PostCreateHook(tx, vdb); err != nil {")
-			buf.WriteString("\nreturn errors.Wrap(err, `failed execute post create hook`)")
+			buf.WriteString("\nreturn errors.Wrap(err, `post create hook failed`)")
 			buf.WriteString("\n}")
 		}
 		buf.WriteString("\nreturn nil")
@@ -1033,7 +1033,7 @@ func generateServiceFile(ctx *genctx, m Model) error {
 		buf.WriteString("\n}")
 		if svc.HasPostUpdateHook {
 			buf.WriteString("\nif err := v.PostUpdateHook(tx, vdb); err != nil {")
-			buf.WriteString("\nreturn errors.Wrap(err, \"post update hook failed\")")
+			buf.WriteString("\nreturn errors.Wrap(err, `post update hook failed`)")
 			buf.WriteString("\n}")
 		}
 		buf.WriteString("\nreturn nil")
@@ -1191,7 +1191,7 @@ func generateServiceFile(ctx *genctx, m Model) error {
 		}
 		if svc.HasPostDeleteHook {
 			buf.WriteString("\nif err := v.PostDeleteHook(tx, &vdb); err != nil {")
-			buf.WriteString("\nreturn errors.Wrap(err, \"post update hook failed\")")
+			buf.WriteString("\nreturn errors.Wrap(err, `post delete hook failed`)")
 			buf.WriteString("\n}")
 		}
 		buf.WriteString("\nreturn nil")

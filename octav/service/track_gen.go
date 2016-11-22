@@ -96,7 +96,7 @@ func (v *TrackSvc) Create(tx *db.Tx, vdb *db.Track, payload *model.CreateTrackRe
 		return errors.Wrap(err, `failed to populate localized strings`)
 	}
 	if err := v.PostCreateHook(tx, vdb); err != nil {
-		return errors.Wrap(err, `failed execute post create hook`)
+		return errors.Wrap(err, `post create hook failed`)
 	}
 	return nil
 }
@@ -126,7 +126,7 @@ func (v *TrackSvc) Update(tx *db.Tx, vdb *db.Track) (err error) {
 		}
 	}
 	if err := v.PostUpdateHook(tx, vdb); err != nil {
-		return errors.Wrap(err, "post update hook failed")
+		return errors.Wrap(err, `post update hook failed`)
 	}
 	return nil
 }
@@ -242,7 +242,7 @@ func (v *TrackSvc) Delete(tx *db.Tx, id string) error {
 		return err
 	}
 	if err := v.PostDeleteHook(tx, &vdb); err != nil {
-		return errors.Wrap(err, "post update hook failed")
+		return errors.Wrap(err, `post delete hook failed`)
 	}
 	return nil
 }
