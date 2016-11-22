@@ -68,6 +68,17 @@ func (v *TrackSvc) CreateFromPayload(tx *db.Tx, payload *model.CreateTrackReques
 		return errors.Wrap(err, "creating a track requires conference administrator privilege")
 	}
 
+	// If the payload name doesn't exist, we must populate it
+	// using the default room name
+	if !payload.Name.Valid() || payload.Name.String == "" {
+		var m model.Room
+		sr := Room()
+		if err := sr.Lookup(tx, &m, payload.RoomID); err != nil {
+			return errors.Wrap(err, "failed to load room")
+		}
+		payload.Name.Set(m.Name)
+	}
+
 	var vdb db.Track
 	if err := v.Create(tx, &vdb, payload); err != nil {
 		return errors.Wrap(err, "failed to store in database")
