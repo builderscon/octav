@@ -1190,7 +1190,7 @@ func generateServiceFile(ctx *genctx, m Model) error {
 			buf.WriteString("\n}")
 		}
 		if svc.HasPostDeleteHook {
-			buf.WriteString("\nif err := v.PostDeleteHook(tx, vdb); err != nil {")
+			buf.WriteString("\nif err := v.PostDeleteHook(tx, &vdb); err != nil {")
 			buf.WriteString("\nreturn errors.Wrap(err, \"post update hook failed\")")
 			buf.WriteString("\n}")
 		}

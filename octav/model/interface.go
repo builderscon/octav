@@ -1041,6 +1041,7 @@ type CreateTrackRequest struct {
 	ConferenceID    string            `json:"conference_id"`
 	RoomID          string            `json:"room_id"`
 	Name            jsval.MaybeString `json:"name,omitempty" l10n:"true"`
+	UserID          string            `json:"user_id"` // ID of the user making this request
 	LocalizedFields `json:"-"`
 	DatabaseOptions []db.InsertOption `json:"-"`
 }
@@ -1049,6 +1050,14 @@ type CreateTrackRequest struct {
 type UpdateTrackRequest struct {
 	ID              string            `json:"id"`
 	Name            jsval.MaybeString `json:"name,omitempty" l10n:"true"`
+	UserID          string            `json:"user_id"` // ID of the user making this request
+	LocalizedFields `json:"-"`
+}
+
+// +transport
+type DeleteTrackRequest struct {
+	ID              string `json:"id"`
+	UserID          string `json:"user_id"` // ID of the user making this request
 	LocalizedFields `json:"-"`
 }
 

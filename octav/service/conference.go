@@ -411,6 +411,7 @@ func (v *ConferenceSvc) AddVenueFromPayload(tx *db.Tx, payload *model.AddConfere
 	st := Track()
 	var r model.CreateTrackRequest
 	r.ConferenceID = payload.ConferenceID
+	r.UserID = payload.UserID
 	for _, room := range rooms {
 		r.RoomID = room.ID
 		r.Name.Set(room.Name)

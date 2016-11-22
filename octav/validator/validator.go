@@ -31,6 +31,7 @@ var HTTPCreateSessionSurveyResponseRequest *jsval.JSVal
 var HTTPCreateSessionSurveyResponseResponse *jsval.JSVal
 var HTTPCreateTemporaryEmailRequest *jsval.JSVal
 var HTTPCreateTemporaryEmailResponse *jsval.JSVal
+var HTTPCreateTrackRequest *jsval.JSVal
 var HTTPCreateUserRequest *jsval.JSVal
 var HTTPCreateUserResponse *jsval.JSVal
 var HTTPCreateVenueRequest *jsval.JSVal
@@ -46,6 +47,7 @@ var HTTPDeleteRoomRequest *jsval.JSVal
 var HTTPDeleteSessionRequest *jsval.JSVal
 var HTTPDeleteSessionTypeRequest *jsval.JSVal
 var HTTPDeleteSponsorRequest *jsval.JSVal
+var HTTPDeleteTrackRequest *jsval.JSVal
 var HTTPDeleteUserRequest *jsval.JSVal
 var HTTPDeleteVenueRequest *jsval.JSVal
 var HTTPGetConferenceScheduleRequest *jsval.JSVal
@@ -1643,6 +1645,29 @@ func init() {
 				),
 		)
 
+	HTTPCreateTrackRequest = jsval.New().
+		SetName("HTTPCreateTrackRequest").
+		SetConstraintMap(M).
+		SetRoot(
+			jsval.Object().
+				Required("conference_id", "room_id", "user_id").
+				AdditionalProperties(
+					jsval.EmptyConstraint,
+				).
+				AddProp(
+					"conference_id",
+					jsval.Reference(M).RefersTo("#/definitions/uuid"),
+				).
+				AddProp(
+					"room_id",
+					jsval.Reference(M).RefersTo("#/definitions/uuid"),
+				).
+				AddProp(
+					"user_id",
+					jsval.Reference(M).RefersTo("#/definitions/uuid"),
+				),
+		)
+
 	HTTPCreateUserRequest = jsval.New().
 		SetName("HTTPCreateUserRequest").
 		SetConstraintMap(M).
@@ -2010,6 +2035,25 @@ func init() {
 
 	HTTPDeleteSponsorRequest = jsval.New().
 		SetName("HTTPDeleteSponsorRequest").
+		SetConstraintMap(M).
+		SetRoot(
+			jsval.Object().
+				Required("id", "user_id").
+				AdditionalProperties(
+					jsval.EmptyConstraint,
+				).
+				AddProp(
+					"id",
+					jsval.Reference(M).RefersTo("#/definitions/uuid"),
+				).
+				AddProp(
+					"user_id",
+					jsval.Reference(M).RefersTo("#/definitions/uuid"),
+				),
+		)
+
+	HTTPDeleteTrackRequest = jsval.New().
+		SetName("HTTPDeleteTrackRequest").
 		SetConstraintMap(M).
 		SetRoot(
 			jsval.Object().
@@ -3395,6 +3439,10 @@ func init() {
 				AddProp(
 					"id",
 					jsval.Reference(M).RefersTo("#/definitions/uuid"),
+				).
+				AddProp(
+					"lang",
+					jsval.Reference(M).RefersTo("#/definitions/language"),
 				),
 		)
 

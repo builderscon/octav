@@ -6556,6 +6556,7 @@ func (r CreateTrackRequest) collectMarshalData() map[string]interface{} {
 	if r.Name.Valid() {
 		m["name"] = r.Name.Value()
 	}
+	m["user_id"] = r.UserID
 	return m
 }
 
@@ -6610,6 +6611,15 @@ func (r *CreateTrackRequest) Populate(m map[string]interface{}) error {
 		}
 		delete(m, "name")
 	}
+	if jv, ok := m["user_id"]; ok {
+		switch jv.(type) {
+		case string:
+			r.UserID = jv.(string)
+			delete(m, "user_id")
+		default:
+			return errors.Wrap(ErrInvalidJSONFieldType{Field: "user_id"}, "failed to populate fields for CreateTrackRequest")
+		}
+	}
 	if err := ExtractL10NFields(m, &r.LocalizedFields, []string{"name"}); err != nil {
 		return err
 	}
@@ -6618,7 +6628,7 @@ func (r *CreateTrackRequest) Populate(m map[string]interface{}) error {
 
 func (r *CreateTrackRequest) GetPropNames() ([]string, error) {
 	l, _ := r.LocalizedFields.GetPropNames()
-	return append(l, "conference_id", "room_id", "name"), nil
+	return append(l, "conference_id", "room_id", "name", "user_id"), nil
 }
 
 func (r *CreateTrackRequest) SetPropValue(s string, v interface{}) error {
@@ -6635,6 +6645,11 @@ func (r *CreateTrackRequest) SetPropValue(s string, v interface{}) error {
 		}
 	case "name":
 		return r.Name.Set(v)
+	case "user_id":
+		if jv, ok := v.(string); ok {
+			r.UserID = jv
+			return nil
+		}
 	default:
 		return errors.New("unknown column '" + s + "'")
 	}
@@ -6647,6 +6662,7 @@ func (r UpdateTrackRequest) collectMarshalData() map[string]interface{} {
 	if r.Name.Valid() {
 		m["name"] = r.Name.Value()
 	}
+	m["user_id"] = r.UserID
 	return m
 }
 
@@ -6692,6 +6708,15 @@ func (r *UpdateTrackRequest) Populate(m map[string]interface{}) error {
 		}
 		delete(m, "name")
 	}
+	if jv, ok := m["user_id"]; ok {
+		switch jv.(type) {
+		case string:
+			r.UserID = jv.(string)
+			delete(m, "user_id")
+		default:
+			return errors.Wrap(ErrInvalidJSONFieldType{Field: "user_id"}, "failed to populate fields for UpdateTrackRequest")
+		}
+	}
 	if err := ExtractL10NFields(m, &r.LocalizedFields, []string{"name"}); err != nil {
 		return err
 	}
@@ -6700,7 +6725,7 @@ func (r *UpdateTrackRequest) Populate(m map[string]interface{}) error {
 
 func (r *UpdateTrackRequest) GetPropNames() ([]string, error) {
 	l, _ := r.LocalizedFields.GetPropNames()
-	return append(l, "id", "name"), nil
+	return append(l, "id", "name", "user_id"), nil
 }
 
 func (r *UpdateTrackRequest) SetPropValue(s string, v interface{}) error {
@@ -6712,10 +6737,70 @@ func (r *UpdateTrackRequest) SetPropValue(s string, v interface{}) error {
 		}
 	case "name":
 		return r.Name.Set(v)
+	case "user_id":
+		if jv, ok := v.(string); ok {
+			r.UserID = jv
+			return nil
+		}
 	default:
 		return errors.New("unknown column '" + s + "'")
 	}
 	return ErrInvalidFieldType{Field: s}
+}
+
+func (r DeleteTrackRequest) collectMarshalData() map[string]interface{} {
+	m := make(map[string]interface{})
+	m["id"] = r.ID
+	m["user_id"] = r.UserID
+	return m
+}
+
+func (r DeleteTrackRequest) MarshalJSON() ([]byte, error) {
+	m := r.collectMarshalData()
+	buf, err := json.Marshal(m)
+	if err != nil {
+		return nil, err
+	}
+	return buf, nil
+}
+
+func (r DeleteTrackRequest) MarshalURL() ([]byte, error) {
+	m := r.collectMarshalData()
+	buf, err := urlenc.Marshal(m)
+	if err != nil {
+		return nil, err
+	}
+	return buf, nil
+}
+
+func (r *DeleteTrackRequest) UnmarshalJSON(data []byte) error {
+	m := make(map[string]interface{})
+	if err := json.Unmarshal(data, &m); err != nil {
+		return err
+	}
+	return r.Populate(m)
+}
+
+func (r *DeleteTrackRequest) Populate(m map[string]interface{}) error {
+	if jv, ok := m["id"]; ok {
+		switch jv.(type) {
+		case string:
+			r.ID = jv.(string)
+			delete(m, "id")
+		default:
+			return errors.Wrap(ErrInvalidJSONFieldType{Field: "id"}, "failed to populate fields for DeleteTrackRequest")
+		}
+	}
+	if jv, ok := m["user_id"]; ok {
+		switch jv.(type) {
+		case string:
+			r.UserID = jv.(string)
+			delete(m, "user_id")
+		default:
+			return errors.Wrap(ErrInvalidJSONFieldType{Field: "user_id"}, "failed to populate fields for DeleteTrackRequest")
+		}
+	}
+	return nil
 }
 
 func (r CreateConferenceVenueRequest) collectMarshalData() map[string]interface{} {
