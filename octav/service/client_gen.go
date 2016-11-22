@@ -107,7 +107,7 @@ func (v *ClientSvc) Delete(tx *db.Tx, id string) error {
 
 	vdb := db.Client{EID: id}
 	if err := vdb.Delete(tx); err != nil {
-		return err
+		return errors.Wrap(err, `failed to delete from database`)
 	}
 	c := Cache()
 	key := c.Key("Client", id)

@@ -116,7 +116,7 @@ func (v *ConferenceDateSvc) Delete(tx *db.Tx, id string) error {
 
 	vdb := db.ConferenceDate{EID: id}
 	if err := vdb.Delete(tx); err != nil {
-		return err
+		return errors.Wrap(err, `failed to delete from database`)
 	}
 	c := Cache()
 	key := c.Key("ConferenceDate", id)
