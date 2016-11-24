@@ -14,15 +14,19 @@ var _ = pdebug.Enabled
 var _ = time.Time{}
 
 type rawTrack struct {
-	ID     string `json:"id"`
-	RoomID string `json:"room_id"`
-	Name   string `json:"name" l10n:"true"`
+	ID           string `json:"id"`
+	ConferenceID string `json:"conference_id,omitempty"`
+	RoomID       string `json:"room_id"`
+	SortOrder    int    `json:"sort_order"`
+	Name         string `json:"name" l10n:"true"`
 }
 
 func (v Track) MarshalJSON() ([]byte, error) {
 	var raw rawTrack
 	raw.ID = v.ID
+	raw.ConferenceID = v.ConferenceID
 	raw.RoomID = v.RoomID
+	raw.SortOrder = v.SortOrder
 	raw.Name = v.Name
 	buf, err := json.Marshal(raw)
 	if err != nil {
@@ -49,14 +53,18 @@ func (v *Track) Load(tx *db.Tx, id string) (err error) {
 
 func (v *Track) FromRow(vdb *db.Track) error {
 	v.ID = vdb.EID
+	v.ConferenceID = vdb.ConferenceID
 	v.RoomID = vdb.RoomID
+	v.SortOrder = vdb.SortOrder
 	v.Name = vdb.Name
 	return nil
 }
 
 func (v *Track) ToRow(vdb *db.Track) error {
 	vdb.EID = v.ID
+	vdb.ConferenceID = v.ConferenceID
 	vdb.RoomID = v.RoomID
+	vdb.SortOrder = v.SortOrder
 	vdb.Name = v.Name
 	return nil
 }

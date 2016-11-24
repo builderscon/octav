@@ -240,7 +240,7 @@ func (v *FeaturedSpeakerSvc) Delete(tx *db.Tx, id string) error {
 
 	vdb := db.FeaturedSpeaker{EID: id}
 	if err := vdb.Delete(tx); err != nil {
-		return err
+		return errors.Wrap(err, `failed to delete from database`)
 	}
 	c := Cache()
 	key := c.Key("FeaturedSpeaker", id)
@@ -249,7 +249,7 @@ func (v *FeaturedSpeakerSvc) Delete(tx *db.Tx, id string) error {
 		pdebug.Printf(`CACHE DEL %s`, key)
 	}
 	if err := db.DeleteLocalizedStringsForParent(tx, id, "FeaturedSpeaker"); err != nil {
-		return err
+		return errors.Wrap(err, `failed to delete localized strings`)
 	}
 	return nil
 }

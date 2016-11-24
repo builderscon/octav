@@ -49,7 +49,7 @@ func (v *ConferenceVenueSvc) Create(tx *db.Tx, vdb *db.ConferenceVenue, payload 
 	}
 
 	if err := v.PostCreateHook(tx, vdb); err != nil {
-		return errors.Wrap(err, `failed execute post create hook`)
+		return errors.Wrap(err, `post create hook failed`)
 	}
 	return nil
 }

@@ -115,4 +115,7 @@ type UserSvc struct {
 
 type VenueSvc struct{}
 
+// +PostCreateHook
+// +PostUpdateHook
+// +PostDeleteHook
 type TrackSvc struct {}

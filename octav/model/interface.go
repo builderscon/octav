@@ -1023,8 +1023,9 @@ type LocalizedString struct {
 type Track struct {
 	LocalizedFields `json:"-"`
 	ID              string `json:"id"`
-	ConferenceID    string `json:"-"` // ignore in json
+	ConferenceID    string `json:"conference_id,omitempty"`
 	RoomID          string `json:"room_id"`
+	SortOrder       int    `json:"sort_order"`
 	Name            string `json:"name" l10n:"true"`
 }
 type TrackList []Track
@@ -1041,6 +1042,8 @@ type CreateTrackRequest struct {
 	ConferenceID    string            `json:"conference_id"`
 	RoomID          string            `json:"room_id"`
 	Name            jsval.MaybeString `json:"name,omitempty" l10n:"true"`
+	SortOrder       jsval.MaybeInt    `json:"sort_order,omitempty"`
+	UserID          string            `json:"user_id"` // ID of the user making this request
 	LocalizedFields `json:"-"`
 	DatabaseOptions []db.InsertOption `json:"-"`
 }
@@ -1049,6 +1052,16 @@ type CreateTrackRequest struct {
 type UpdateTrackRequest struct {
 	ID              string            `json:"id"`
 	Name            jsval.MaybeString `json:"name,omitempty" l10n:"true"`
+	RoomID          jsval.MaybeString `json:"room_id,omitempty"`
+	SortOrder       jsval.MaybeInt    `json:"sort_order,omitempty"`
+	UserID          string            `json:"user_id"` // ID of the user making this request
+	LocalizedFields `json:"-"`
+}
+
+// +transport
+type DeleteTrackRequest struct {
+	ID              string `json:"id"`
+	UserID          string `json:"user_id"` // ID of the user making this request
 	LocalizedFields `json:"-"`
 }
 

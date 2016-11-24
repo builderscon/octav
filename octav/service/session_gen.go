@@ -240,7 +240,7 @@ func (v *SessionSvc) Delete(tx *db.Tx, id string) error {
 
 	vdb := db.Session{EID: id}
 	if err := vdb.Delete(tx); err != nil {
-		return err
+		return errors.Wrap(err, `failed to delete from database`)
 	}
 	c := Cache()
 	key := c.Key("Session", id)
@@ -249,7 +249,7 @@ func (v *SessionSvc) Delete(tx *db.Tx, id string) error {
 		pdebug.Printf(`CACHE DEL %s`, key)
 	}
 	if err := db.DeleteLocalizedStringsForParent(tx, id, "Session"); err != nil {
-		return err
+		return errors.Wrap(err, `failed to delete localized strings`)
 	}
 	return nil
 }

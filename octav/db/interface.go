@@ -267,5 +267,6 @@ type Track struct {
 	RoomID       string
 	Name         string
 	CreatedOn    time.Time
+	SortOrder    int
 	ModifiedOn   NullTime
 }

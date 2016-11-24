@@ -20,12 +20,18 @@ func (v *TrackSvc) populateRowForCreate(vdb *db.Track, payload *model.CreateTrac
 	if payload.Name.Valid() {
 		vdb.Name = payload.Name.String
 	}
+	if payload.SortOrder.Valid() {
+		vdb.SortOrder = int(payload.SortOrder.Int)
+	}
 	return nil
 }
 
 func (v *TrackSvc) populateRowForUpdate(vdb *db.Track, payload *model.UpdateTrackRequest) error {
 	if payload.Name.Valid() {
 		vdb.Name = payload.Name.String
+	}
+	if payload.SortOrder.Valid() {
+		vdb.SortOrder = int(payload.SortOrder.Int)
 	}
 	return nil
 }
@@ -63,22 +69,70 @@ func (v *TrackSvc) CreateFromPayload(tx *db.Tx, payload *model.CreateTrackReques
 		defer g.End()
 	}
 
+	su := User()
+	if err := su.IsConferenceAdministrator(tx, payload.ConferenceID, payload.UserID); err != nil {
+		return errors.Wrap(err, "creating a track requires conference administrator privilege")
+	}
+
+	// If the payload name doesn't exist, we must populate it
+	// using the default room name
+	if !payload.Name.Valid() || payload.Name.String == "" {
+		var m model.Room
+		sr := Room()
+		if err := sr.Lookup(tx, &m, payload.RoomID); err != nil {
+			return errors.Wrap(err, "failed to load room")
+		}
+		payload.Name.Set(m.Name)
+	}
+
 	var vdb db.Track
 	if err := v.Create(tx, &vdb, payload); err != nil {
 		return errors.Wrap(err, "failed to store in database")
 	}
 
-	var c model.Track
-	if err := c.FromRow(&vdb); err != nil {
-		return errors.Wrap(err, "failed to populate model")
-	}
-
 	if result != nil {
+		var c model.Track
+		if err := c.FromRow(&vdb); err != nil {
+			return errors.Wrap(err, "failed to populate model")
+		}
 		*result = c
 	}
 
-	invalidateTrackLoadByConferenceID(payload.ConferenceID)
 	return nil
+}
+
+func (v *TrackSvc) DeleteFromPayload(tx *db.Tx, payload *model.DeleteTrackRequest) (err error) {
+	if pdebug.Enabled {
+		g := pdebug.Marker("service.Track.DeleteFromPayload").BindError(&err)
+		defer g.End()
+	}
+
+	var vdb db.Track
+	if err := vdb.LoadByEID(tx, payload.ID); err != nil {
+		return errors.Wrap(err, "failed to load track")
+	}
+
+	su := User()
+	if err := su.IsConferenceAdministrator(tx, vdb.ConferenceID, payload.UserID); err != nil {
+		return errors.Wrap(err, "deleting a track requires conference administrator privilege")
+	}
+
+	if err := v.Delete(tx, payload.ID); err != nil {
+		return errors.Wrap(err, "failed to store in database")
+	}
+	return nil
+}
+
+func (v *TrackSvc) PostCreateHook(_ *db.Tx, vdb *db.Track) error {
+	return invalidateTrackLoadByConferenceID(vdb.ConferenceID)
+}
+
+func (v *TrackSvc) PostUpdateHook(_ *db.Tx, vdb *db.Track) error {
+	return invalidateTrackLoadByConferenceID(vdb.ConferenceID)
+}
+
+func (v *TrackSvc) PostDeleteHook(_ *db.Tx, vdb *db.Track) error {
+	return invalidateTrackLoadByConferenceID(vdb.ConferenceID)
 }
 
 func invalidateTrackLoadByConferenceID(conferenceID string) error {
@@ -103,7 +157,9 @@ func (v *TrackSvc) LoadByConferenceID(tx *db.Tx, result *model.TrackList, confer
 
 		m := make(model.TrackList, len(ids))
 		for i, id := range ids {
-			if err := v.LookupByConferenceRoom(tx, &m[i], conferenceID, id); err != nil {
+			if err := v.Lookup(tx, &m[i], id); err != nil {
+				// Something fishy. Thro away this cache
+				c.Delete(key);
 				return errors.Wrap(err, "failed to load from database")
 			}
 		}
@@ -128,7 +184,7 @@ func (v *TrackSvc) LoadByConferenceID(tx *db.Tx, result *model.TrackList, confer
 		if err := u.FromRow(&vdb); err != nil {
 			return err
 		}
-		ids[i] = vdb.RoomID
+		ids[i] = vdb.EID
 		res[i] = u
 	}
 	*result = res

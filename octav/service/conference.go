@@ -411,6 +411,7 @@ func (v *ConferenceSvc) AddVenueFromPayload(tx *db.Tx, payload *model.AddConfere
 	st := Track()
 	var r model.CreateTrackRequest
 	r.ConferenceID = payload.ConferenceID
+	r.UserID = payload.UserID
 	for _, room := range rooms {
 		r.RoomID = room.ID
 		r.Name.Set(room.Name)
@@ -422,7 +423,7 @@ func (v *ConferenceSvc) AddVenueFromPayload(tx *db.Tx, payload *model.AddConfere
 
 	c := Cache()
 	keys := []string{
-		c.Key("Tracks", "LoadByConferenceID", payload.ConferenceID),
+		c.Key("Track", "LoadByConferenceID", payload.ConferenceID),
 		c.Key("Venue", "LoadByConferenceID", payload.ConferenceID),
 	}
 	for _, key := range keys {
@@ -449,7 +450,7 @@ func (v *ConferenceSvc) DeleteVenueFromPayload(tx *db.Tx, payload *model.DeleteC
 
 	c := Cache()
 	keys := []string{
-		c.Key("Tracks", "LoadByConferenceID", payload.ConferenceID),
+		c.Key("Track", "LoadByConferenceID", payload.ConferenceID),
 		c.Key("Venue", "LoadByConferenceID", payload.ConferenceID),
 	}
 	for _, key := range keys {
@@ -542,6 +543,7 @@ func (v *ConferenceSvc) Decorate(tx *db.Tx, c *model.Conference, trustedCall boo
 		if err := st.Decorate(tx, &c.Tracks[i], trustedCall, lang); err != nil {
 			return errors.Wrap(err, "failed to decorate tracks with associated data")
 		}
+		c.Tracks[i].ConferenceID = ""
 	}
 
 	sfs := FeaturedSpeaker()

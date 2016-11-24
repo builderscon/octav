@@ -997,7 +997,7 @@ func generateServiceFile(ctx *genctx, m Model) error {
 
 		if svc.HasPostCreateHook {
 			buf.WriteString("\nif err := v.PostCreateHook(tx, vdb); err != nil {")
-			buf.WriteString("\nreturn errors.Wrap(err, `failed execute post create hook`)")
+			buf.WriteString("\nreturn errors.Wrap(err, `post create hook failed`)")
 			buf.WriteString("\n}")
 		}
 		buf.WriteString("\nreturn nil")
@@ -1033,7 +1033,7 @@ func generateServiceFile(ctx *genctx, m Model) error {
 		buf.WriteString("\n}")
 		if svc.HasPostUpdateHook {
 			buf.WriteString("\nif err := v.PostUpdateHook(tx, vdb); err != nil {")
-			buf.WriteString("\nreturn errors.Wrap(err, \"post update hook failed\")")
+			buf.WriteString("\nreturn errors.Wrap(err, `post update hook failed`)")
 			buf.WriteString("\n}")
 		}
 		buf.WriteString("\nreturn nil")
@@ -1173,9 +1173,17 @@ func generateServiceFile(ctx *genctx, m Model) error {
 		fmt.Fprintf(&buf, "\n"+`g := pdebug.Marker("%s.Delete (%%s)", id)`, m.Name)
 		buf.WriteString("\ndefer g.End()")
 		buf.WriteString("\n}")
+		if svc.HasPostDeleteHook {
+			// If there's a delete hook, we need the original contents to
+			// pass to the hook. therefore we must make this one extra call
+			fmt.Fprintf(&buf, "\noriginal := db.%s{EID: id}", m.Name)
+			buf.WriteString("\nif err := original.LoadByEID(tx, id); err != nil {")
+			buf.WriteString("\nreturn errors.Wrap(err, `failed load before delete`)")
+			buf.WriteString("\n}")
+		}
 		fmt.Fprintf(&buf, "\n\nvdb := db.%s{EID: id}", m.Name)
 		buf.WriteString("\nif err := vdb.Delete(tx); err != nil {")
-		buf.WriteString("\nreturn err")
+		buf.WriteString("\nreturn errors.Wrap(err, `failed to delete from database`)")
 		buf.WriteString("\n}")
 
 		buf.WriteString("\nc := Cache()")
@@ -1186,12 +1194,12 @@ func generateServiceFile(ctx *genctx, m Model) error {
 		buf.WriteString("\n}")
 		if hasL10N {
 			fmt.Fprintf(&buf, "\nif err := db.DeleteLocalizedStringsForParent(tx, id, %s); err != nil {", strconv.Quote(m.Name))
-			buf.WriteString("\nreturn err")
+			buf.WriteString("\nreturn errors.Wrap(err, `failed to delete localized strings`)")
 			buf.WriteString("\n}")
 		}
 		if svc.HasPostDeleteHook {
-			buf.WriteString("\nif err := v.PostDeleteHook(tx, vdb); err != nil {")
-			buf.WriteString("\nreturn errors.Wrap(err, \"post update hook failed\")")
+			buf.WriteString("\nif err := v.PostDeleteHook(tx, &original); err != nil {")
+			buf.WriteString("\nreturn errors.Wrap(err, `post delete hook failed`)")
 			buf.WriteString("\n}")
 		}
 		buf.WriteString("\nreturn nil")

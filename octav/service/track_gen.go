@@ -95,6 +95,9 @@ func (v *TrackSvc) Create(tx *db.Tx, vdb *db.Track, payload *model.CreateTrackRe
 	if err := payload.LocalizedFields.CreateLocalizedStrings(tx, "Track", vdb.EID); err != nil {
 		return errors.Wrap(err, `failed to populate localized strings`)
 	}
+	if err := v.PostCreateHook(tx, vdb); err != nil {
+		return errors.Wrap(err, `post create hook failed`)
+	}
 	return nil
 }
 
@@ -121,6 +124,9 @@ func (v *TrackSvc) Update(tx *db.Tx, vdb *db.Track) (err error) {
 		if cerr != nil {
 			pdebug.Printf(`CACHE ERR: %s`, cerr)
 		}
+	}
+	if err := v.PostUpdateHook(tx, vdb); err != nil {
+		return errors.Wrap(err, `post update hook failed`)
 	}
 	return nil
 }
@@ -221,10 +227,14 @@ func (v *TrackSvc) Delete(tx *db.Tx, id string) error {
 		g := pdebug.Marker("Track.Delete (%s)", id)
 		defer g.End()
 	}
+	original := db.Track{EID: id}
+	if err := original.LoadByEID(tx, id); err != nil {
+		return errors.Wrap(err, `failed load before delete`)
+	}
 
 	vdb := db.Track{EID: id}
 	if err := vdb.Delete(tx); err != nil {
-		return err
+		return errors.Wrap(err, `failed to delete from database`)
 	}
 	c := Cache()
 	key := c.Key("Track", id)
@@ -233,7 +243,10 @@ func (v *TrackSvc) Delete(tx *db.Tx, id string) error {
 		pdebug.Printf(`CACHE DEL %s`, key)
 	}
 	if err := db.DeleteLocalizedStringsForParent(tx, id, "Track"); err != nil {
-		return err
+		return errors.Wrap(err, `failed to delete localized strings`)
+	}
+	if err := v.PostDeleteHook(tx, &original); err != nil {
+		return errors.Wrap(err, `post delete hook failed`)
 	}
 	return nil
 }

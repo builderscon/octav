@@ -510,6 +510,91 @@ func doAddConferenceAdmin(ctx context.Context, w http.ResponseWriter, r *http.Re
 	httpJSON(w, map[string]string{"status": "success"})
 }
 
+func doDeleteTrack(ctx context.Context, w http.ResponseWriter, r *http.Request, payload *model.DeleteTrackRequest) {
+	tx, err := db.Begin()
+	if err != nil {
+		httpError(w, `DeleteTrack`, http.StatusInternalServerError, err)
+		return
+	}
+	defer tx.AutoRollback()
+
+	s := service.Track()
+	if err := s.DeleteFromPayload(tx, payload); err != nil {
+		httpError(w, `DeleteTrack`, http.StatusInternalServerError, err)
+		return
+	}
+
+	if err := tx.Commit(); err != nil {
+		httpError(w, `DeleteTrack`, http.StatusInternalServerError, err)
+		return
+	}
+	httpJSON(w, map[string]string{"status": "success"})
+}
+
+func doCreateTrack(ctx context.Context, w http.ResponseWriter, r *http.Request, payload *model.CreateTrackRequest) {
+	tx, err := db.Begin()
+	if err != nil {
+		httpError(w, `CreateTrack`, http.StatusInternalServerError, err)
+		return
+	}
+	defer tx.AutoRollback()
+
+	s := service.Track()
+	if err := s.CreateFromPayload(tx, payload, nil); err != nil {
+		httpError(w, `CreateTrack`, http.StatusInternalServerError, err)
+		return
+	}
+
+	if err := tx.Commit(); err != nil {
+		httpError(w, `CreateTrack`, http.StatusInternalServerError, err)
+		return
+	}
+	httpJSON(w, map[string]string{"status": "success"})
+}
+
+func doUpdateTrack(ctx context.Context, w http.ResponseWriter, r *http.Request, payload *model.UpdateTrackRequest) {
+	tx, err := db.Begin()
+	if err != nil {
+		httpError(w, `UpdateTrack`, http.StatusInternalServerError, err)
+		return
+	}
+	defer tx.AutoRollback()
+
+	s := service.Track()
+	if err := s.UpdateFromPayload(ctx, tx, payload); err != nil {
+		httpError(w, `UpdateTrack`, http.StatusInternalServerError, err)
+		return
+	}
+
+	if err := tx.Commit(); err != nil {
+		httpError(w, `UpdateTrack`, http.StatusInternalServerError, err)
+		return
+	}
+	httpJSON(w, map[string]string{"status": "success"})
+}
+
+func doLookupTrack(ctx context.Context, w http.ResponseWriter, r *http.Request, payload *model.LookupTrackRequest) {
+	if pdebug.Enabled {
+		g := pdebug.Marker("doLookupTrack")
+		defer g.End()
+	}
+	tx, err := db.Begin()
+	if err != nil {
+		httpError(w, `LookupTrack`, http.StatusInternalServerError, err)
+		return
+	}
+	defer tx.AutoRollback()
+
+	s := service.Track()
+	var v model.Track
+	if err := s.LookupFromPayload(tx, &v, payload); err != nil {
+		httpError(w, `LookupTrack`, http.StatusInternalServerError, err)
+		return
+	}
+
+	httpJSON(w, v)
+}
+
 func doDeleteConferenceVenue(ctx context.Context, w http.ResponseWriter, r *http.Request, payload *model.DeleteConferenceVenueRequest) {
 	tx, err := db.Begin()
 	if err != nil {

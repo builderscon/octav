@@ -96,7 +96,7 @@ func (v *RoomSvc) Create(tx *db.Tx, vdb *db.Room, payload *model.CreateRoomReque
 		return errors.Wrap(err, `failed to populate localized strings`)
 	}
 	if err := v.PostCreateHook(tx, vdb); err != nil {
-		return errors.Wrap(err, `failed execute post create hook`)
+		return errors.Wrap(err, `post create hook failed`)
 	}
 	return nil
 }
@@ -126,7 +126,7 @@ func (v *RoomSvc) Update(tx *db.Tx, vdb *db.Room) (err error) {
 		}
 	}
 	if err := v.PostUpdateHook(tx, vdb); err != nil {
-		return errors.Wrap(err, "post update hook failed")
+		return errors.Wrap(err, `post update hook failed`)
 	}
 	return nil
 }
@@ -234,7 +234,7 @@ func (v *RoomSvc) Delete(tx *db.Tx, id string) error {
 
 	vdb := db.Room{EID: id}
 	if err := vdb.Delete(tx); err != nil {
-		return err
+		return errors.Wrap(err, `failed to delete from database`)
 	}
 	c := Cache()
 	key := c.Key("Room", id)
@@ -243,7 +243,7 @@ func (v *RoomSvc) Delete(tx *db.Tx, id string) error {
 		pdebug.Printf(`CACHE DEL %s`, key)
 	}
 	if err := db.DeleteLocalizedStringsForParent(tx, id, "Room"); err != nil {
-		return err
+		return errors.Wrap(err, `failed to delete localized strings`)
 	}
 	return nil
 }

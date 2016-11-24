@@ -259,12 +259,27 @@
         "timetable_available": { "type": "boolean" },
         "venue": { "$ref": "#/definitions/venue" },
         "dates": { "$ref": "#/definitions/conference_date_array" },
+        "tracks": {
+          "type": "array",
+          "items": { "$ref": "#/definitions/track" }
+        },
         "administrators": { "$ref": "#/definitions/user_array" },
         "featured_speakers": { "$ref": "#/definitions/featured_speaker_array" }
       },
       "patternProperties": {
         "title#[a-z]+": { "$ref": "#/definitions/string_i18n" },
         "description#[a-z]+": { "$ref": "#/definitions/string_i18n" }
+      }
+    },
+    "track": {
+      "type": "object",
+      "hsup.type": "model.Venue",
+      "properties": {
+        "id": { "$ref": "#/definitions/uuid" },
+        "conference_id": { "$ref": "#/definitions/uuid" },
+        "room_id": { "$ref": "#/definitions/uuid" },
+        "name": { "type": "string" },
+        "sort_order": {"type": "integer"}
       }
     },
     "venue": {
@@ -676,7 +691,8 @@
         "type": "object",
         "required": ["id"],
         "properties": {
-          "id": { "$ref": "#/definitions/uuid" }
+          "id": { "$ref": "#/definitions/uuid" },
+          "lang": { "$ref": "#/definitions/language" }
         }
       },
       "targetSchema": { "$ref": "#/definitions/venue" }
@@ -1790,6 +1806,78 @@
           "message": {"type": "string"}
         }
       }
+    },
+    {
+      "title": "Create track",
+      "rel": "update",
+      "hsup.wrapper": "httpWithBasicAuth",
+      "method": "POST",
+      "href": "/v1/track/create",
+      "encType": "application/json",
+      "schema": {
+        "properties": {
+          "conference_id": {"$ref": "#/definitions/uuid"},
+          "room_id": {"$ref":"#/definitions/uuid"},
+          "name": {"$ref":"#/definitions/string_en"},
+          "sort_order": {"$ref":"#/definitions/positiveInteger"},
+          "user_id": {"$ref":"#/definitions/uuid"}
+        },
+        "patternProperties": {
+          "name#[a-z]+": { "$ref": "#/definitions/string_i18n" }
+        },
+        "required": ["conference_id","room_id","user_id"]
+      }
+    },
+    {
+      "title": "Update track",
+      "rel": "update",
+      "hsup.wrapper": "httpWithBasicAuth",
+      "method": "POST",
+      "href": "/v1/track/update",
+      "encType": "application/json",
+      "schema": {
+        "properties": {
+          "id": {"$ref": "#/definitions/uuid"},
+          "room_id": {"$ref":"#/definitions/uuid"},
+          "name": {"$ref":"#/definitions/string_en"},
+          "sort_order": {"$ref":"#/definitions/positiveInteger"},
+          "user_id": {"$ref":"#/definitions/uuid"}
+        },
+        "patternProperties": {
+          "name#[a-z]+": { "$ref": "#/definitions/string_i18n" }
+        },
+        "required": ["id","user_id"]
+      }
+    },
+    {
+      "title": "Delete track",
+      "rel": "delete",
+      "hsup.wrapper": "httpWithBasicAuth",
+      "method": "POST",
+      "href": "/v1/track/delete",
+      "encType": "application/json",
+      "schema": {
+        "properties": {
+          "id": {"$ref": "#/definitions/uuid"},
+          "user_id": {"$ref":"#/definitions/uuid"}
+        },
+        "required": ["id","user_id"]
+      }
+    },
+    {
+      "title": "Lookup track",
+      "rel": "lookup",
+      "href": "/v1/track/lookup",
+      "method": "GET",
+      "schema": {
+        "type": "object",
+        "required": ["id"],
+        "properties": {
+          "id": { "$ref": "#/definitions/uuid" },
+          "lang": { "$ref": "#/definitions/language" }
+        }
+      },
+      "targetSchema": { "$ref": "#/definitions/track" }
     }
   ]
 }
