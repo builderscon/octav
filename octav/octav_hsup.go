@@ -2295,6 +2295,38 @@ func httpLookupSponsor(ctx context.Context, w http.ResponseWriter, r *http.Reque
 	doLookupSponsor(ctx, w, r, &payload)
 }
 
+func httpLookupTrack(ctx context.Context, w http.ResponseWriter, r *http.Request) {
+	if pdebug.Enabled {
+		g := pdebug.Marker("httpLookupTrack")
+		defer g.End()
+	}
+	if strings.ToLower(r.Method) != `get` {
+		w.Header().Set("Allow", "get")
+		msgbuf := getBytesBuffer()
+		defer releaseBytesBuffer(msgbuf)
+		msgbuf.WriteString(`Method was `)
+		msgbuf.WriteString(r.Method)
+		msgbuf.WriteString(`, expected 'get'`)
+		httpError(w, msgbuf.String(), http.StatusNotFound, nil)
+		return
+	}
+
+	var payload model.LookupTrackRequest
+	qbuf := getBytesBuffer()
+	defer releaseBytesBuffer(qbuf)
+	qbuf.WriteString(r.URL.RawQuery)
+	if err := urlenc.Unmarshal(qbuf.Bytes(), &payload); err != nil {
+		httpError(w, `Failed to parse url query string`, http.StatusInternalServerError, err)
+		return
+	}
+
+	if err := validator.HTTPLookupTrackRequest.Validate(&payload); err != nil {
+		httpError(w, `Invalid input (validation failed)`, http.StatusInternalServerError, err)
+		return
+	}
+	doLookupTrack(ctx, w, r, &payload)
+}
+
 func httpLookupUser(ctx context.Context, w http.ResponseWriter, r *http.Request) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("httpLookupUser")
@@ -3018,6 +3050,7 @@ func (s *Server) SetupRoutes() {
 	r.HandleFunc(`/v1/survey_session_response/create`, httpWithContext(httpWithBasicAuth(httpCreateSessionSurveyResponse)))
 	r.HandleFunc(`/v1/track/create`, httpWithContext(httpWithBasicAuth(httpCreateTrack)))
 	r.HandleFunc(`/v1/track/delete`, httpWithContext(httpWithBasicAuth(httpDeleteTrack)))
+	r.HandleFunc(`/v1/track/lookup`, httpWithContext(httpLookupTrack))
 	r.HandleFunc(`/v1/user/create`, httpWithContext(httpWithBasicAuth(httpCreateUser)))
 	r.HandleFunc(`/v1/user/delete`, httpWithContext(httpWithBasicAuth(httpDeleteUser)))
 	r.HandleFunc(`/v1/user/list`, httpWithContext(httpWithOptionalBasicAuth(httpListUser)))

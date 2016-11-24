@@ -93,6 +93,8 @@ var HTTPLookupSessionTypeRequest *jsval.JSVal
 var HTTPLookupSessionTypeResponse *jsval.JSVal
 var HTTPLookupSponsorRequest *jsval.JSVal
 var HTTPLookupSponsorResponse *jsval.JSVal
+var HTTPLookupTrackRequest *jsval.JSVal
+var HTTPLookupTrackResponse *jsval.JSVal
 var HTTPLookupUserByAuthUserIDRequest *jsval.JSVal
 var HTTPLookupUserByAuthUserIDResponse *jsval.JSVal
 var HTTPLookupUserRequest *jsval.JSVal
@@ -163,6 +165,7 @@ var R45 jsval.Constraint
 var R46 jsval.Constraint
 var R47 jsval.Constraint
 var R48 jsval.Constraint
+var R49 jsval.Constraint
 
 func init() {
 	M = &jsval.ConstraintMap{}
@@ -209,6 +212,16 @@ func init() {
 		AddProp(
 			"timetable_available",
 			jsval.Boolean(),
+		).
+		AddProp(
+			"tracks",
+			jsval.Array().
+				Items(
+					jsval.Reference(M).RefersTo("#/definitions/track"),
+				).
+				AdditionalItems(
+					jsval.EmptyConstraint,
+				),
 		).
 		AddProp(
 			"venue",
@@ -676,7 +689,31 @@ func init() {
 			jsval.EmptyConstraint,
 		)
 	R42 = jsval.String().Default("UTC")
-	R43 = jsval.OneOf().
+	R43 = jsval.Object().
+		AdditionalProperties(
+			jsval.EmptyConstraint,
+		).
+		AddProp(
+			"conference_id",
+			jsval.Reference(M).RefersTo("#/definitions/uuid"),
+		).
+		AddProp(
+			"id",
+			jsval.Reference(M).RefersTo("#/definitions/uuid"),
+		).
+		AddProp(
+			"name",
+			jsval.String(),
+		).
+		AddProp(
+			"room_id",
+			jsval.Reference(M).RefersTo("#/definitions/uuid"),
+		).
+		AddProp(
+			"sort_order",
+			jsval.Integer(),
+		)
+	R44 = jsval.OneOf().
 		Add(
 			jsval.String().Enum("XXXL", "XXL", "XL", "L", "M", "S", "XS"),
 		).
@@ -686,8 +723,8 @@ func init() {
 		Add(
 			jsval.String().MaxLength(0),
 		)
-	R44 = jsval.String().Format("uri")
-	R45 = jsval.Object().
+	R45 = jsval.String().Format("uri")
+	R46 = jsval.Object().
 		AdditionalProperties(
 			jsval.EmptyConstraint,
 		).
@@ -740,15 +777,15 @@ func init() {
 			"last_name#[a-z]+",
 			jsval.Reference(M).RefersTo("#/definitions/string_i18n"),
 		)
-	R46 = jsval.Array().
+	R47 = jsval.Array().
 		Items(
 			jsval.Reference(M).RefersTo("#/definitions/user"),
 		).
 		AdditionalItems(
 			jsval.EmptyConstraint,
 		)
-	R47 = jsval.String().RegexpString("^[a-fA-F0-9-]+$")
-	R48 = jsval.Object().
+	R48 = jsval.String().RegexpString("^[a-fA-F0-9-]+$")
+	R49 = jsval.Object().
 		AdditionalProperties(
 			jsval.EmptyConstraint,
 		).
@@ -807,12 +844,13 @@ func init() {
 	M.SetReference("#/definitions/tag", R40)
 	M.SetReference("#/definitions/tag_array", R41)
 	M.SetReference("#/definitions/timezone_default_utc", R42)
-	M.SetReference("#/definitions/tshirt_size", R43)
-	M.SetReference("#/definitions/url", R44)
-	M.SetReference("#/definitions/user", R45)
-	M.SetReference("#/definitions/user_array", R46)
-	M.SetReference("#/definitions/uuid", R47)
-	M.SetReference("#/definitions/venue", R48)
+	M.SetReference("#/definitions/track", R43)
+	M.SetReference("#/definitions/tshirt_size", R44)
+	M.SetReference("#/definitions/url", R45)
+	M.SetReference("#/definitions/user", R46)
+	M.SetReference("#/definitions/user_array", R47)
+	M.SetReference("#/definitions/uuid", R48)
+	M.SetReference("#/definitions/venue", R49)
 	HTTPAddConferenceAdminRequest = jsval.New().
 		SetName("HTTPAddConferenceAdminRequest").
 		SetConstraintMap(M).
@@ -2751,6 +2789,16 @@ func init() {
 					jsval.Boolean(),
 				).
 				AddProp(
+					"tracks",
+					jsval.Array().
+						Items(
+							jsval.Reference(M).RefersTo("#/definitions/track"),
+						).
+						AdditionalItems(
+							jsval.EmptyConstraint,
+						),
+				).
+				AddProp(
 					"venue",
 					jsval.Reference(M).RefersTo("#/definitions/venue"),
 				).
@@ -2826,6 +2874,16 @@ func init() {
 				AddProp(
 					"timetable_available",
 					jsval.Boolean(),
+				).
+				AddProp(
+					"tracks",
+					jsval.Array().
+						Items(
+							jsval.Reference(M).RefersTo("#/definitions/track"),
+						).
+						AdditionalItems(
+							jsval.EmptyConstraint,
+						),
 				).
 				AddProp(
 					"venue",
@@ -3280,6 +3338,55 @@ func init() {
 				PatternPropertiesString(
 					"name#[a-z]+",
 					jsval.Reference(M).RefersTo("#/definitions/string_i18n"),
+				),
+		)
+
+	HTTPLookupTrackRequest = jsval.New().
+		SetName("HTTPLookupTrackRequest").
+		SetConstraintMap(M).
+		SetRoot(
+			jsval.Object().
+				Required("id").
+				AdditionalProperties(
+					jsval.EmptyConstraint,
+				).
+				AddProp(
+					"id",
+					jsval.Reference(M).RefersTo("#/definitions/uuid"),
+				).
+				AddProp(
+					"lang",
+					jsval.Reference(M).RefersTo("#/definitions/language"),
+				),
+		)
+
+	HTTPLookupTrackResponse = jsval.New().
+		SetName("HTTPLookupTrackResponse").
+		SetConstraintMap(M).
+		SetRoot(
+			jsval.Object().
+				AdditionalProperties(
+					jsval.EmptyConstraint,
+				).
+				AddProp(
+					"conference_id",
+					jsval.Reference(M).RefersTo("#/definitions/uuid"),
+				).
+				AddProp(
+					"id",
+					jsval.Reference(M).RefersTo("#/definitions/uuid"),
+				).
+				AddProp(
+					"name",
+					jsval.String(),
+				).
+				AddProp(
+					"room_id",
+					jsval.Reference(M).RefersTo("#/definitions/uuid"),
+				).
+				AddProp(
+					"sort_order",
+					jsval.Integer(),
 				),
 		)
 
