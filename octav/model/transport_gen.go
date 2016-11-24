@@ -6556,6 +6556,9 @@ func (r CreateTrackRequest) collectMarshalData() map[string]interface{} {
 	if r.Name.Valid() {
 		m["name"] = r.Name.Value()
 	}
+	if r.SortOrder.Valid() {
+		m["sort_order"] = r.SortOrder.Value()
+	}
 	m["user_id"] = r.UserID
 	return m
 }
@@ -6611,6 +6614,12 @@ func (r *CreateTrackRequest) Populate(m map[string]interface{}) error {
 		}
 		delete(m, "name")
 	}
+	if jv, ok := m["sort_order"]; ok {
+		if err := r.SortOrder.Set(jv); err != nil {
+			return errors.New("set field SortOrder failed: " + err.Error())
+		}
+		delete(m, "sort_order")
+	}
 	if jv, ok := m["user_id"]; ok {
 		switch jv.(type) {
 		case string:
@@ -6628,7 +6637,7 @@ func (r *CreateTrackRequest) Populate(m map[string]interface{}) error {
 
 func (r *CreateTrackRequest) GetPropNames() ([]string, error) {
 	l, _ := r.LocalizedFields.GetPropNames()
-	return append(l, "conference_id", "room_id", "name", "user_id"), nil
+	return append(l, "conference_id", "room_id", "name", "sort_order", "user_id"), nil
 }
 
 func (r *CreateTrackRequest) SetPropValue(s string, v interface{}) error {
@@ -6645,6 +6654,8 @@ func (r *CreateTrackRequest) SetPropValue(s string, v interface{}) error {
 		}
 	case "name":
 		return r.Name.Set(v)
+	case "sort_order":
+		return r.SortOrder.Set(v)
 	case "user_id":
 		if jv, ok := v.(string); ok {
 			r.UserID = jv
@@ -6664,6 +6675,9 @@ func (r UpdateTrackRequest) collectMarshalData() map[string]interface{} {
 	}
 	if r.RoomID.Valid() {
 		m["room_id"] = r.RoomID.Value()
+	}
+	if r.SortOrder.Valid() {
+		m["sort_order"] = r.SortOrder.Value()
 	}
 	m["user_id"] = r.UserID
 	return m
@@ -6717,6 +6731,12 @@ func (r *UpdateTrackRequest) Populate(m map[string]interface{}) error {
 		}
 		delete(m, "room_id")
 	}
+	if jv, ok := m["sort_order"]; ok {
+		if err := r.SortOrder.Set(jv); err != nil {
+			return errors.New("set field SortOrder failed: " + err.Error())
+		}
+		delete(m, "sort_order")
+	}
 	if jv, ok := m["user_id"]; ok {
 		switch jv.(type) {
 		case string:
@@ -6734,7 +6754,7 @@ func (r *UpdateTrackRequest) Populate(m map[string]interface{}) error {
 
 func (r *UpdateTrackRequest) GetPropNames() ([]string, error) {
 	l, _ := r.LocalizedFields.GetPropNames()
-	return append(l, "id", "name", "room_id", "user_id"), nil
+	return append(l, "id", "name", "room_id", "sort_order", "user_id"), nil
 }
 
 func (r *UpdateTrackRequest) SetPropValue(s string, v interface{}) error {
@@ -6748,6 +6768,8 @@ func (r *UpdateTrackRequest) SetPropValue(s string, v interface{}) error {
 		return r.Name.Set(v)
 	case "room_id":
 		return r.RoomID.Set(v)
+	case "sort_order":
+		return r.SortOrder.Set(v)
 	case "user_id":
 		if jv, ok := v.(string); ok {
 			r.UserID = jv

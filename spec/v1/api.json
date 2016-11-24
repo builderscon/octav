@@ -1819,6 +1819,7 @@
           "conference_id": {"$ref": "#/definitions/uuid"},
           "room_id": {"$ref":"#/definitions/uuid"},
           "name": {"$ref":"#/definitions/string_en"},
+          "sort_order": {"$ref":"#/definitions/positiveInteger"},
           "user_id": {"$ref":"#/definitions/uuid"}
         },
         "patternProperties": {
@@ -1839,6 +1840,7 @@
           "id": {"$ref": "#/definitions/uuid"},
           "room_id": {"$ref":"#/definitions/uuid"},
           "name": {"$ref":"#/definitions/string_en"},
+          "sort_order": {"$ref":"#/definitions/positiveInteger"},
           "user_id": {"$ref":"#/definitions/uuid"}
         },
         "patternProperties": {

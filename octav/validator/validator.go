@@ -1706,6 +1706,10 @@ func init() {
 					jsval.Reference(M).RefersTo("#/definitions/uuid"),
 				).
 				AddProp(
+					"sort_order",
+					jsval.Reference(M).RefersTo("#/definitions/positiveInteger"),
+				).
+				AddProp(
 					"user_id",
 					jsval.Reference(M).RefersTo("#/definitions/uuid"),
 				).
@@ -4075,6 +4079,10 @@ func init() {
 				AddProp(
 					"room_id",
 					jsval.Reference(M).RefersTo("#/definitions/uuid"),
+				).
+				AddProp(
+					"sort_order",
+					jsval.Reference(M).RefersTo("#/definitions/positiveInteger"),
 				).
 				AddProp(
 					"user_id",

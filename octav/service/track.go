@@ -20,12 +20,18 @@ func (v *TrackSvc) populateRowForCreate(vdb *db.Track, payload *model.CreateTrac
 	if payload.Name.Valid() {
 		vdb.Name = payload.Name.String
 	}
+	if payload.SortOrder.Valid() {
+		vdb.SortOrder = int(payload.SortOrder.Int)
+	}
 	return nil
 }
 
 func (v *TrackSvc) populateRowForUpdate(vdb *db.Track, payload *model.UpdateTrackRequest) error {
 	if payload.Name.Valid() {
 		vdb.Name = payload.Name.String
+	}
+	if payload.SortOrder.Valid() {
+		vdb.SortOrder = int(payload.SortOrder.Int)
 	}
 	return nil
 }
