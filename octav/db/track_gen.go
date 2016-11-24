@@ -13,7 +13,7 @@ import (
 	"github.com/pkg/errors"
 )
 
-const TrackStdSelectColumns = "tracks.oid, tracks.eid, tracks.conference_id, tracks.room_id, tracks.name, tracks.created_on, tracks.modified_on"
+const TrackStdSelectColumns = "tracks.oid, tracks.eid, tracks.conference_id, tracks.room_id, tracks.name, tracks.created_on, tracks.sort_order, tracks.modified_on"
 const TrackTable = "tracks"
 
 type TrackList []Track
@@ -21,7 +21,7 @@ type TrackList []Track
 func (t *Track) Scan(scanner interface {
 	Scan(...interface{}) error
 }) error {
-	return scanner.Scan(&t.OID, &t.EID, &t.ConferenceID, &t.RoomID, &t.Name, &t.CreatedOn, &t.ModifiedOn)
+	return scanner.Scan(&t.OID, &t.EID, &t.ConferenceID, &t.RoomID, &t.Name, &t.CreatedOn, &t.SortOrder, &t.ModifiedOn)
 }
 
 func init() {
@@ -38,7 +38,7 @@ func init() {
 		stmt.Reset()
 		stmt.WriteString(`UPDATE `)
 		stmt.WriteString(TrackTable)
-		stmt.WriteString(` SET eid = ?, conference_id = ?, room_id = ?, name = ? WHERE oid = ?`)
+		stmt.WriteString(` SET eid = ?, conference_id = ?, room_id = ?, name = ?, sort_order = ? WHERE oid = ?`)
 		library.Register("sqlTrackUpdateByOIDKey", stmt.String())
 
 		stmt.Reset()
@@ -60,7 +60,7 @@ func init() {
 		stmt.Reset()
 		stmt.WriteString(`UPDATE `)
 		stmt.WriteString(TrackTable)
-		stmt.WriteString(` SET eid = ?, conference_id = ?, room_id = ?, name = ? WHERE eid = ?`)
+		stmt.WriteString(` SET eid = ?, conference_id = ?, room_id = ?, name = ?, sort_order = ? WHERE eid = ?`)
 		library.Register("sqlTrackUpdateByEIDKey", stmt.String())
 	})
 }
@@ -107,8 +107,8 @@ func (t *Track) Create(tx *Tx, opts ...InsertOption) (err error) {
 	}
 	stmt.WriteString("INTO ")
 	stmt.WriteString(TrackTable)
-	stmt.WriteString(` (eid, conference_id, room_id, name, created_on, modified_on) VALUES (?, ?, ?, ?, ?, ?)`)
-	result, err := tx.Exec(stmt.String(), t.EID, t.ConferenceID, t.RoomID, t.Name, t.CreatedOn, t.ModifiedOn)
+	stmt.WriteString(` (eid, conference_id, room_id, name, created_on, sort_order, modified_on) VALUES (?, ?, ?, ?, ?, ?, ?)`)
+	result, err := tx.Exec(stmt.String(), t.EID, t.ConferenceID, t.RoomID, t.Name, t.CreatedOn, t.SortOrder, t.ModifiedOn)
 	if err != nil {
 		return err
 	}
@@ -135,7 +135,7 @@ func (t Track) Update(tx *Tx) (err error) {
 		if err != nil {
 			return errors.Wrap(err, `failed to get statement`)
 		}
-		_, err = tx.Stmt(stmt).Exec(t.EID, t.ConferenceID, t.RoomID, t.Name, t.OID)
+		_, err = tx.Stmt(stmt).Exec(t.EID, t.ConferenceID, t.RoomID, t.Name, t.SortOrder, t.OID)
 		return err
 	}
 	if t.EID != "" {
@@ -146,7 +146,7 @@ func (t Track) Update(tx *Tx) (err error) {
 		if err != nil {
 			return errors.Wrap(err, `failed to get statement`)
 		}
-		_, err = tx.Stmt(stmt).Exec(t.EID, t.ConferenceID, t.RoomID, t.Name, t.EID)
+		_, err = tx.Stmt(stmt).Exec(t.EID, t.ConferenceID, t.RoomID, t.Name, t.SortOrder, t.EID)
 		return err
 	}
 	return errors.New("either OID/EID must be filled")

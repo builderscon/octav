@@ -55,6 +55,7 @@ func (v *Track) FromRow(vdb *db.Track) error {
 	v.ID = vdb.EID
 	v.ConferenceID = vdb.ConferenceID
 	v.RoomID = vdb.RoomID
+	v.SortOrder = vdb.SortOrder
 	v.Name = vdb.Name
 	return nil
 }
@@ -63,6 +64,7 @@ func (v *Track) ToRow(vdb *db.Track) error {
 	vdb.EID = v.ID
 	vdb.ConferenceID = v.ConferenceID
 	vdb.RoomID = v.RoomID
+	vdb.SortOrder = v.SortOrder
 	vdb.Name = v.Name
 	return nil
 }
