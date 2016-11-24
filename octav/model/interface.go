@@ -1023,7 +1023,7 @@ type LocalizedString struct {
 type Track struct {
 	LocalizedFields `json:"-"`
 	ID              string `json:"id"`
-	ConferenceID    string `json:"-"` // ignore in json
+	ConferenceID    string `json:"conference_id,omitempty"`
 	RoomID          string `json:"room_id"`
 	Name            string `json:"name" l10n:"true"`
 }

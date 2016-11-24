@@ -543,6 +543,7 @@ func (v *ConferenceSvc) Decorate(tx *db.Tx, c *model.Conference, trustedCall boo
 		if err := st.Decorate(tx, &c.Tracks[i], trustedCall, lang); err != nil {
 			return errors.Wrap(err, "failed to decorate tracks with associated data")
 		}
+		c.Tracks[i].ConferenceID = ""
 	}
 
 	sfs := FeaturedSpeaker()
