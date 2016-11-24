@@ -112,6 +112,7 @@ var HTTPUpdateRoomRequest *jsval.JSVal
 var HTTPUpdateSessionRequest *jsval.JSVal
 var HTTPUpdateSessionTypeRequest *jsval.JSVal
 var HTTPUpdateSponsorRequest *jsval.JSVal
+var HTTPUpdateTrackRequest *jsval.JSVal
 var HTTPUpdateUserRequest *jsval.JSVal
 var HTTPUpdateVenueRequest *jsval.JSVal
 var HTTPVerifyUserRequest *jsval.JSVal
@@ -4043,6 +4044,37 @@ func init() {
 				AddProp(
 					"url",
 					jsval.Reference(M).RefersTo("#/definitions/url"),
+				).
+				AddProp(
+					"user_id",
+					jsval.Reference(M).RefersTo("#/definitions/uuid"),
+				).
+				PatternPropertiesString(
+					"name#[a-z]+",
+					jsval.Reference(M).RefersTo("#/definitions/string_i18n"),
+				),
+		)
+
+	HTTPUpdateTrackRequest = jsval.New().
+		SetName("HTTPUpdateTrackRequest").
+		SetConstraintMap(M).
+		SetRoot(
+			jsval.Object().
+				Required("id", "room_id", "user_id").
+				AdditionalProperties(
+					jsval.EmptyConstraint,
+				).
+				AddProp(
+					"id",
+					jsval.Reference(M).RefersTo("#/definitions/uuid"),
+				).
+				AddProp(
+					"name",
+					jsval.Reference(M).RefersTo("#/definitions/string_en"),
+				).
+				AddProp(
+					"room_id",
+					jsval.Reference(M).RefersTo("#/definitions/uuid"),
 				).
 				AddProp(
 					"user_id",

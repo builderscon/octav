@@ -6662,6 +6662,9 @@ func (r UpdateTrackRequest) collectMarshalData() map[string]interface{} {
 	if r.Name.Valid() {
 		m["name"] = r.Name.Value()
 	}
+	if r.RoomID.Valid() {
+		m["room_id"] = r.RoomID.Value()
+	}
 	m["user_id"] = r.UserID
 	return m
 }
@@ -6708,6 +6711,12 @@ func (r *UpdateTrackRequest) Populate(m map[string]interface{}) error {
 		}
 		delete(m, "name")
 	}
+	if jv, ok := m["room_id"]; ok {
+		if err := r.RoomID.Set(jv); err != nil {
+			return errors.New("set field RoomID failed: " + err.Error())
+		}
+		delete(m, "room_id")
+	}
 	if jv, ok := m["user_id"]; ok {
 		switch jv.(type) {
 		case string:
@@ -6725,7 +6734,7 @@ func (r *UpdateTrackRequest) Populate(m map[string]interface{}) error {
 
 func (r *UpdateTrackRequest) GetPropNames() ([]string, error) {
 	l, _ := r.LocalizedFields.GetPropNames()
-	return append(l, "id", "name", "user_id"), nil
+	return append(l, "id", "name", "room_id", "user_id"), nil
 }
 
 func (r *UpdateTrackRequest) SetPropValue(s string, v interface{}) error {
@@ -6737,6 +6746,8 @@ func (r *UpdateTrackRequest) SetPropValue(s string, v interface{}) error {
 		}
 	case "name":
 		return r.Name.Set(v)
+	case "room_id":
+		return r.RoomID.Set(v)
 	case "user_id":
 		if jv, ok := v.(string); ok {
 			r.UserID = jv

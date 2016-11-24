@@ -1828,6 +1828,26 @@
       }
     },
     {
+      "title": "Update track",
+      "rel": "update",
+      "hsup.wrapper": "httpWithBasicAuth",
+      "method": "POST",
+      "href": "/v1/track/update",
+      "encType": "application/json",
+      "schema": {
+        "properties": {
+          "id": {"$ref": "#/definitions/uuid"},
+          "room_id": {"$ref":"#/definitions/uuid"},
+          "name": {"$ref":"#/definitions/string_en"},
+          "user_id": {"$ref":"#/definitions/uuid"}
+        },
+        "patternProperties": {
+          "name#[a-z]+": { "$ref": "#/definitions/string_i18n" }
+        },
+        "required": ["id","room_id","user_id"]
+      }
+    },
+    {
       "title": "Delete track",
       "rel": "delete",
       "hsup.wrapper": "httpWithBasicAuth",

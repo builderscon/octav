@@ -2854,6 +2854,51 @@ func httpUpdateSponsor(ctx context.Context, w http.ResponseWriter, r *http.Reque
 	doUpdateSponsor(ctx, w, r, &payload)
 }
 
+func httpUpdateTrack(ctx context.Context, w http.ResponseWriter, r *http.Request) {
+	if pdebug.Enabled {
+		g := pdebug.Marker("httpUpdateTrack")
+		defer g.End()
+	}
+	if strings.ToLower(r.Method) != `post` {
+		w.Header().Set("Allow", "post")
+		msgbuf := getBytesBuffer()
+		defer releaseBytesBuffer(msgbuf)
+		msgbuf.WriteString(`Method was `)
+		msgbuf.WriteString(r.Method)
+		msgbuf.WriteString(`, expected 'post'`)
+		httpError(w, msgbuf.String(), http.StatusNotFound, nil)
+		return
+	}
+
+	var payload model.UpdateTrackRequest
+	jsonbuf := getBytesBuffer()
+	defer releaseBytesBuffer(jsonbuf)
+
+	switch ct := r.Header.Get("Content-Type"); {
+	case ct == "application/json":
+		if _, err := io.Copy(jsonbuf, io.LimitReader(r.Body, MaxPostSize)); err != nil {
+			httpError(w, `Failed to read request body`, http.StatusInternalServerError, err)
+			return
+		}
+	default:
+		httpError(w, `Invalid content-type`, http.StatusInternalServerError, nil)
+		return
+	}
+	if pdebug.Enabled {
+		pdebug.Printf(`-----> %s`, jsonbuf.Bytes())
+	}
+	if err := json.Unmarshal(jsonbuf.Bytes(), &payload); err != nil {
+		httpError(w, `Invalid JSON input`, http.StatusInternalServerError, err)
+		return
+	}
+
+	if err := validator.HTTPUpdateTrackRequest.Validate(&payload); err != nil {
+		httpError(w, `Invalid input (validation failed)`, http.StatusInternalServerError, err)
+		return
+	}
+	doUpdateTrack(ctx, w, r, &payload)
+}
+
 func httpUpdateUser(ctx context.Context, w http.ResponseWriter, r *http.Request) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("httpUpdateUser")
@@ -3051,6 +3096,7 @@ func (s *Server) SetupRoutes() {
 	r.HandleFunc(`/v1/track/create`, httpWithContext(httpWithBasicAuth(httpCreateTrack)))
 	r.HandleFunc(`/v1/track/delete`, httpWithContext(httpWithBasicAuth(httpDeleteTrack)))
 	r.HandleFunc(`/v1/track/lookup`, httpWithContext(httpLookupTrack))
+	r.HandleFunc(`/v1/track/update`, httpWithContext(httpWithBasicAuth(httpUpdateTrack)))
 	r.HandleFunc(`/v1/user/create`, httpWithContext(httpWithBasicAuth(httpCreateUser)))
 	r.HandleFunc(`/v1/user/delete`, httpWithContext(httpWithBasicAuth(httpDeleteUser)))
 	r.HandleFunc(`/v1/user/list`, httpWithContext(httpWithOptionalBasicAuth(httpListUser)))

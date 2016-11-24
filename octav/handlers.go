@@ -552,6 +552,27 @@ func doCreateTrack(ctx context.Context, w http.ResponseWriter, r *http.Request, 
 	httpJSON(w, map[string]string{"status": "success"})
 }
 
+func doUpdateTrack(ctx context.Context, w http.ResponseWriter, r *http.Request, payload *model.UpdateTrackRequest) {
+	tx, err := db.Begin()
+	if err != nil {
+		httpError(w, `UpdateTrack`, http.StatusInternalServerError, err)
+		return
+	}
+	defer tx.AutoRollback()
+
+	s := service.Track()
+	if err := s.UpdateFromPayload(ctx, tx, payload); err != nil {
+		httpError(w, `UpdateTrack`, http.StatusInternalServerError, err)
+		return
+	}
+
+	if err := tx.Commit(); err != nil {
+		httpError(w, `UpdateTrack`, http.StatusInternalServerError, err)
+		return
+	}
+	httpJSON(w, map[string]string{"status": "success"})
+}
+
 func doLookupTrack(ctx context.Context, w http.ResponseWriter, r *http.Request, payload *model.LookupTrackRequest) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("doLookupTrack")

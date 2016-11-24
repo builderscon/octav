@@ -1050,6 +1050,7 @@ type CreateTrackRequest struct {
 type UpdateTrackRequest struct {
 	ID              string            `json:"id"`
 	Name            jsval.MaybeString `json:"name,omitempty" l10n:"true"`
+	RoomID          jsval.MaybeString `json:"room_id,omitempty"`
 	UserID          string            `json:"user_id"` // ID of the user making this request
 	LocalizedFields `json:"-"`
 }
