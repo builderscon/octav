@@ -1844,7 +1844,7 @@
         "patternProperties": {
           "name#[a-z]+": { "$ref": "#/definitions/string_i18n" }
         },
-        "required": ["id","room_id","user_id"]
+        "required": ["id","user_id"]
       }
     },
     {

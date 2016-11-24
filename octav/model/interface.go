@@ -1025,6 +1025,7 @@ type Track struct {
 	ID              string `json:"id"`
 	ConferenceID    string `json:"conference_id,omitempty"`
 	RoomID          string `json:"room_id"`
+	SortOrder       int    `json:"sort_order"`
 	Name            string `json:"name" l10n:"true"`
 }
 type TrackList []Track

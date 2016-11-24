@@ -17,6 +17,7 @@ type rawTrack struct {
 	ID           string `json:"id"`
 	ConferenceID string `json:"conference_id,omitempty"`
 	RoomID       string `json:"room_id"`
+	SortOrder    int    `json:"sort_order"`
 	Name         string `json:"name" l10n:"true"`
 }
 
@@ -25,6 +26,7 @@ func (v Track) MarshalJSON() ([]byte, error) {
 	raw.ID = v.ID
 	raw.ConferenceID = v.ConferenceID
 	raw.RoomID = v.RoomID
+	raw.SortOrder = v.SortOrder
 	raw.Name = v.Name
 	buf, err := json.Marshal(raw)
 	if err != nil {
