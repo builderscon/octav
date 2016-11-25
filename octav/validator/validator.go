@@ -3995,6 +3995,10 @@ func init() {
 					jsval.Reference(M).RefersTo("#/definitions/uuid"),
 				).
 				AddProp(
+					"is_default",
+					jsval.Boolean(),
+				).
+				AddProp(
 					"name",
 					jsval.Reference(M).RefersTo("#/definitions/string_en"),
 				).

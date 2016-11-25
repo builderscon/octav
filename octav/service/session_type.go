@@ -56,6 +56,10 @@ func (v *SessionTypeSvc) populateRowForUpdate(vdb *db.SessionType, payload *mode
 		vdb.Duration = int(payload.Duration.Int)
 	}
 
+	if payload.IsDefault.Valid() {
+		vdb.IsDefault = payload.IsDefault.Bool
+	}
+
 	if payload.SubmissionStart.Valid() {
 		t, err := time.Parse(time.RFC3339, payload.SubmissionStart.String)
 		if err != nil {
@@ -143,6 +147,7 @@ func (v *SessionTypeSvc) DeleteFromPayload(ctx context.Context, tx *db.Tx, paylo
 	if err := v.Delete(tx, m.EID); err != nil {
 		return errors.Wrap(err, "failed to delete from database")
 	}
+
 
 	return nil
 }

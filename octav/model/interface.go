@@ -172,6 +172,7 @@ type UpdateSessionTypeRequest struct {
 	Name            jsval.MaybeString `json:"name,omitempty"`
 	Abstract        jsval.MaybeString `json:"abstract,omitempty"`
 	Duration        jsval.MaybeInt    `json:"duration,omitempty"`
+	IsDefault       jsval.MaybeBool   `json:"is_default,omitempty"`
 	SubmissionStart jsval.MaybeString `json:"submission_start,omitempty"`
 	SubmissionEnd   jsval.MaybeString `json:"submission_end,omitempty"`
 	LocalizedFields `json:"-"`
