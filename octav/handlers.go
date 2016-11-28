@@ -1655,7 +1655,11 @@ func doGetConferenceSchedule(ctx context.Context, w http.ResponseWriter, r *http
 	var lp model.ListSessionsRequest
 	lp.ConferenceID.Set(payload.ConferenceID)
 	lp.Status = []string{"accepted"}
-	lp.Lang.Set(payload.Lang.String)
+	if payload.Lang.Valid() {
+		lp.Lang.Set(payload.Lang.String)
+	} else {
+		lp.Lang.Set("all")
+	}
 	s := service.Session()
 	var v model.SessionList
 	if err := s.ListFromPayload(tx, &v, &lp); err != nil {
@@ -1677,18 +1681,67 @@ func doGetConferenceSchedule(ctx context.Context, w http.ResponseWriter, r *http
 		tz = time.UTC
 	}
 
-	lang := payload.Lang.String
-	if lang == "" {
-		lang = "en"
-	}
+	languages := []string{"ja"}
+
 	for _, session := range v {
 		e := ical.NewEvent()
 		e.AddProperty("url", fmt.Sprintf("https://builderscon.io/%s/%s/session/%s", series.Slug, conf.Slug, session.ID))
-		e.AddProperty("description", session.Abstract, ical.WithParameters(ical.Parameters{
-			"language": []string{lang},
+
+		var abstract string
+		var abstractLang string
+		var title string
+		var titleLang string
+		if payload.Lang.Valid() && payload.Lang.String != "all" {
+			if len(session.Abstract) > 0 {
+				abstract = session.Abstract
+				abstractLang = payload.Lang.String
+			}
+			if len(session.Title) > 0 {
+				title = session.Title
+				titleLang = payload.Lang.String
+			}
+		}
+
+		if len(abstract) == 0 {
+			found := false
+			for _, lang := range languages {
+				v, _ := session.LocalizedFields.Get(lang, "abstract")
+				if v == "" {
+					continue
+				}
+				abstract = v
+				abstractLang = lang
+				found = true
+				break
+			}
+			if !found {
+				abstract = session.Abstract
+				abstractLang = "en"
+			}
+		}
+
+		if len(title) == 0 {
+			found := false
+			for _, lang := range languages {
+				v, _ := session.LocalizedFields.Get(lang, "title")
+				if v == "" {
+					continue
+				}
+				title = v
+				titleLang = lang
+				found = true
+				break
+			}
+			if !found {
+				title = session.Title
+				titleLang = "en"
+			}
+		}
+		e.AddProperty("description", abstract, ical.WithParameters(ical.Parameters{
+			"language": []string{abstractLang},
 		}))
-		e.AddProperty("summary", session.Title, ical.WithParameters(ical.Parameters{
-			"language": []string{lang},
+		e.AddProperty("summary", title, ical.WithParameters(ical.Parameters{
+			"language": []string{titleLang},
 		}))
 		if !session.StartsOn.IsZero() {
 			e.AddProperty(
