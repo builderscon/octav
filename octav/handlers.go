@@ -1677,14 +1677,18 @@ func doGetConferenceSchedule(ctx context.Context, w http.ResponseWriter, r *http
 		tz = time.UTC
 	}
 
+	lang := payload.Lang.String
+	if lang == "" {
+		lang = "en"
+	}
 	for _, session := range v {
 		e := ical.NewEvent()
 		e.AddProperty("url", fmt.Sprintf("https://builderscon.io/%s/%s/session/%s", series.Slug, conf.Slug, session.ID))
 		e.AddProperty("description", session.Abstract, ical.WithParameters(ical.Parameters{
-			"language": []string{payload.Lang.String},
+			"language": []string{lang},
 		}))
 		e.AddProperty("summary", session.Title, ical.WithParameters(ical.Parameters{
-			"language": []string{payload.Lang.String},
+			"language": []string{lang},
 		}))
 		if !session.StartsOn.IsZero() {
 			e.AddProperty(
