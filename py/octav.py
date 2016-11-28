@@ -1,5 +1,5 @@
 """OCTAV Client Library"""
-"""DO NOT EDIT: This file was generated from ../spec/v1/api.json on Thu Nov 24 15:46:01 2016"""
+"""DO NOT EDIT: This file was generated from ../spec/v1/api.json on Tue Nov 29 07:51:56 2016"""
 
 import certifi
 import json
@@ -1470,7 +1470,7 @@ class Octav(object):
         self.error = repr(e)
         return None
 
-  def update_session_type (self, id, user_id, abstract=None, duration=None, name=None, submission_end=None, submission_start=None, **args):
+  def update_session_type (self, id, user_id, abstract=None, duration=None, is_default=None, name=None, submission_end=None, submission_start=None, **args):
     try:
         payload = {}
         hdrs = {}
@@ -1486,6 +1486,8 @@ class Octav(object):
             payload['duration'] = duration
         if id is not None:
             payload['id'] = id
+        if is_default is not None:
+            payload['is_default'] = is_default
         if name is not None:
             payload['name'] = name
         if submission_end is not None:
