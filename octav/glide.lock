@@ -1,8 +1,8 @@
 hash: e1eb99342a2ade2c714d9b45b6b125527837a026051de91f819f7608b2c16df9
-updated: 2016-11-28T21:09:22.274947176+09:00
+updated: 2016-11-29T07:29:18.431766616+09:00
 imports:
 - name: cloud.google.com/go
-  version: 5eaf111e5069f953c4365a8e93cc23f674630c93
+  version: e86221fc41f28bd94f749e29ee4592a07aca604f
   subpackages:
   - logging
   - storage
@@ -57,7 +57,7 @@ imports:
 - name: github.com/lestrrat/go-bufferpool
   version: a1a4a9cf09b4f3e6d263ba25cf09de3276e1d589
 - name: github.com/lestrrat/go-ical
-  version: 279ebf3f2968a81734e8b250fee1d7e3457aaa5d
+  version: 581648cd761dc20c515ccca505e2131d0f521d38
 - name: github.com/lestrrat/go-jshschema
   version: 4514acd168a63041862eb3d223a09a789cae6b3b
 - name: github.com/lestrrat/go-jspointer
@@ -170,7 +170,7 @@ imports:
   - googleapis/api/metric
   - protobuf
 - name: google.golang.org/grpc
-  version: eca2ad68af4d7bf894ada6bd263133f069a441d5
+  version: 5e3de3f21767d4e0e8dd0ee8383bbbfe172d35de
   subpackages:
   - codes
   - metadata
