@@ -314,6 +314,7 @@ func (v *ConferenceSvc) LoadDates(tx *db.Tx, cdl *model.ConferenceDateList, cid 
 
 	res := make(model.ConferenceDateList, len(vdbl))
 	for i, vdb := range vdbl {
+		res[i].ID = vdb.EID
 		if vdb.Open.Valid {
 			res[i].Open = vdb.Open.Time
 		}

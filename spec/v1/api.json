@@ -1167,6 +1167,7 @@
           "name": {"$ref":"#/definitions/string_en"},
           "abstract": {"$ref":"#/definitions/string_en"},
           "duration": {"$ref":"#/definitions/positiveInteger"},
+          "is_default": {"type": "boolean"},
           "user_id": {"$ref":"#/definitions/uuid"},
           "submission_start": {"$ref":"#/definitions/rfc3339"},
           "submission_end": {"$ref":"#/definitions/rfc3339"}

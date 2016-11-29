@@ -57,7 +57,7 @@ $(INTERNAL_BIN_DIR)/glide-$(GOOS)-$(GOARCH):
 
 build_internal_cmd: $(patsubst %,$(INTERNAL_BIN_DIR)/%, $(INTERNAL_CMDS))
 
-generate: build_internal_cmd $(INTERNAL_BIN_DIR)/go-bindata
+generate: build_internal_cmd $(INTERNAL_BIN_DIR)/go-bindata buildspec
 	@echo "go generate ."
 	@PATH=$(CURDIR)/_internal_bin:$(PATH) go generate .
 

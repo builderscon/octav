@@ -359,6 +359,9 @@ func (r UpdateSessionTypeRequest) collectMarshalData() map[string]interface{} {
 	if r.Duration.Valid() {
 		m["duration"] = r.Duration.Value()
 	}
+	if r.IsDefault.Valid() {
+		m["is_default"] = r.IsDefault.Value()
+	}
 	if r.SubmissionStart.Valid() {
 		m["submission_start"] = r.SubmissionStart.Value()
 	}
@@ -422,6 +425,12 @@ func (r *UpdateSessionTypeRequest) Populate(m map[string]interface{}) error {
 			return errors.New("set field Duration failed: " + err.Error())
 		}
 		delete(m, "duration")
+	}
+	if jv, ok := m["is_default"]; ok {
+		if err := r.IsDefault.Set(jv); err != nil {
+			return errors.New("set field IsDefault failed: " + err.Error())
+		}
+		delete(m, "is_default")
 	}
 	if jv, ok := m["submission_start"]; ok {
 		if err := r.SubmissionStart.Set(jv); err != nil {

@@ -1,16 +1,16 @@
 hash: e1eb99342a2ade2c714d9b45b6b125527837a026051de91f819f7608b2c16df9
-updated: 2016-11-16T10:22:37.52129565+09:00
+updated: 2016-11-29T07:29:18.431766616+09:00
 imports:
 - name: cloud.google.com/go
-  version: 62745400f3add64573c4bf61f0be11483dd2cd4c
+  version: e86221fc41f28bd94f749e29ee4592a07aca604f
   subpackages:
   - logging
   - storage
   - logging/apiv2
   - logging/internal
+  - internal
   - internal/optional
   - compute/metadata
-  - internal
 - name: github.com/cenkalti/backoff
   version: 32cd0c5b3aef12c76ed64aaf678f6c79736be7dc
 - name: github.com/davecgh/go-spew
@@ -26,9 +26,9 @@ imports:
 - name: github.com/dghubble/sling
   version: c961a4334054e64299d16f8a31bd686ee2565ae4
 - name: github.com/go-sql-driver/mysql
-  version: 8f6c67f0228a4a6a962008d6c3d1e694e4532e71
+  version: abfd04d323c28c5c5683c2beb877fae36491d5a8
 - name: github.com/golang/protobuf
-  version: 1bdfb324ed170f07fd36e676b0d09fd9c6ec086a
+  version: 8ee79997227bf9b34611aee7946ae64735e6fd93
   subpackages:
   - proto
   - ptypes
@@ -51,13 +51,13 @@ imports:
 - name: github.com/jessevdk/go-flags
   version: 8bc97d602c3bfeb5fc6fc9b5a9c898f245495637
 - name: github.com/lestrrat/go-apache-logformat
-  version: 0f5817c5c9e626d408c4d68e3d90fd7697e97d5f
+  version: b900d0f73560d153d85f9c0c619d07a5b9d829be
 - name: github.com/lestrrat/go-bindata
   version: b9f2acfb40bc204a6e6c1a94547e128554650f95
 - name: github.com/lestrrat/go-bufferpool
   version: a1a4a9cf09b4f3e6d263ba25cf09de3276e1d589
 - name: github.com/lestrrat/go-ical
-  version: beafb9f1e8d7f2d7f1150bf702c066f53c157d6c
+  version: 581648cd761dc20c515ccca505e2131d0f521d38
 - name: github.com/lestrrat/go-jshschema
   version: 4514acd168a63041862eb3d223a09a789cae6b3b
 - name: github.com/lestrrat/go-jspointer
@@ -83,7 +83,7 @@ imports:
 - name: github.com/lestrrat/go-tx-guard
   version: f922362dce0d717f2035e3c446974d6aa64f466b
 - name: github.com/lestrrat/go-urlenc
-  version: 5c3f94270d877132bee7c096683119f95537c7be
+  version: 2a4c9da0eb88ae4e4c47ba902bf2f1bfd9f9c8de
 - name: github.com/mattn/anko
   version: a8c68fa2983e7dd5d3472992b1fbe2f7c44261f0
   subpackages:
@@ -95,15 +95,15 @@ imports:
 - name: github.com/shogo82148/go-sql-proxy
   version: 0ff9659b5642274097d62b43b2d754b001ed4f4d
 - name: github.com/stretchr/testify
-  version: 976c720a22c8eb4eb6a0b4348ad85ad12491a506
+  version: 18a02ba4a312f95da08ff4cfc0055750ce50ae9e
   subpackages:
   - assert
 - name: go4.org
-  version: 399a9d7bfe85437346a5ec4ef0450fc2f1084e61
+  version: 09d86de304dc27e636298361bbfee4ac6ab04f21
   subpackages:
   - syncutil/singleflight
 - name: golang.org/x/net
-  version: e57319ce2bbbdc638169d4756554fbaedc805399
+  version: 4971afdc2f162e82d185353533d3cf16188a9f4e
   subpackages:
   - context
   - context/ctxhttp
@@ -125,12 +125,12 @@ imports:
   subpackages:
   - errgroup
 - name: golang.org/x/text
-  version: a263ba8db058568bb9beba166777d9c9dbe75d68
+  version: b01949dc0793a9af5e4cb3fce4d42999e76e8ca1
   subpackages:
   - language
   - internal/tag
 - name: google.golang.org/api
-  version: a53f28dc539c26b08a77fc5ae954e02917686ef4
+  version: c8d75a8ec737f9b8b1ed2676c28feedbe21f543f
   subpackages:
   - urlshortener/v1
   - option
@@ -170,7 +170,7 @@ imports:
   - googleapis/api/metric
   - protobuf
 - name: google.golang.org/grpc
-  version: 941cc894cea3c87a12943fd12b594964541b6d28
+  version: 5e3de3f21767d4e0e8dd0ee8383bbbfe172d35de
   subpackages:
   - codes
   - metadata
@@ -186,7 +186,7 @@ imports:
 - name: gopkg.in/bsm/ratelimit.v1
   version: db14e161995a5177acef654cb0dd785e8ee8bc22
 - name: gopkg.in/go-redis/cache.v5
-  version: a837e46393859f10514445cab55e7e76d9f0eb6e
+  version: 3ea78f40a74e0ad893d51f0d7f90c5b234c03843
   subpackages:
   - lrucache
 - name: gopkg.in/leonelquinteros/gotext.v1
@@ -194,7 +194,7 @@ imports:
 - name: gopkg.in/mailgun/mailgun-go.v1
   version: 369a1fa57ce6fb314e627087b9fff0db5c266c0f
 - name: gopkg.in/redis.v5
-  version: b6bfe529a846fbb9a58c832ce71c61b6fde12c15
+  version: c9856861674f102a5f51104c36401a3cf691739c
   subpackages:
   - internal
   - internal/consistenthash
@@ -202,7 +202,7 @@ imports:
   - internal/pool
   - internal/proto
 - name: gopkg.in/vmihailenco/msgpack.v2
-  version: 200315d5c8aab339f5a5cd44219f4b50ad0782df
+  version: 402848aa02a6334afb0a5f48fe2f8cd0ee12d8d7
   subpackages:
   - codes
 devImports: []
