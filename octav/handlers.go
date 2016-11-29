@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"os"
 	"strconv"
+	"strings"
 	"time"
 
 	"context"
@@ -1692,12 +1693,12 @@ func doGetConferenceSchedule(ctx context.Context, w http.ResponseWriter, r *http
 		var title string
 		var titleLang string
 		if payload.Lang.Valid() && payload.Lang.String != "all" {
-			if len(session.Abstract) > 0 {
-				abstract = session.Abstract
+			if v := strings.TrimSpace(session.Abstract); len(v) > 0 {
+				abstract = v
 				abstractLang = payload.Lang.String
 			}
-			if len(session.Title) > 0 {
-				title = session.Title
+			if v := strings.TrimSpace(session.Title); len(v) > 0 {
+				title = v
 				titleLang = payload.Lang.String
 			}
 		}
@@ -1706,7 +1707,8 @@ func doGetConferenceSchedule(ctx context.Context, w http.ResponseWriter, r *http
 			found := false
 			for _, lang := range languages {
 				v, _ := session.LocalizedFields.Get(lang, "abstract")
-				if v == "" {
+				v = strings.TrimSpace(v)
+				if len(v) == 0 {
 					continue
 				}
 				abstract = v
@@ -1715,7 +1717,7 @@ func doGetConferenceSchedule(ctx context.Context, w http.ResponseWriter, r *http
 				break
 			}
 			if !found {
-				abstract = session.Abstract
+				abstract = strings.TrimSpace(session.Abstract)
 				abstractLang = "en"
 			}
 		}
@@ -1724,6 +1726,7 @@ func doGetConferenceSchedule(ctx context.Context, w http.ResponseWriter, r *http
 			found := false
 			for _, lang := range languages {
 				v, _ := session.LocalizedFields.Get(lang, "title")
+				v = strings.TrimSpace(v)
 				if v == "" {
 					continue
 				}
@@ -1733,7 +1736,7 @@ func doGetConferenceSchedule(ctx context.Context, w http.ResponseWriter, r *http
 				break
 			}
 			if !found {
-				title = session.Title
+				title = strings.TrimSpace(session.Title)
 				titleLang = "en"
 			}
 		}
