@@ -1656,10 +1656,11 @@ func doGetConferenceSchedule(ctx context.Context, w http.ResponseWriter, r *http
 	var lp model.ListSessionsRequest
 	lp.ConferenceID.Set(payload.ConferenceID)
 	lp.Status = []string{"accepted"}
+	lp.Lang.Set("all")
+
+	preferredLang := "en"
 	if payload.Lang.Valid() {
-		lp.Lang.Set(payload.Lang.String)
-	} else {
-		lp.Lang.Set("all")
+		preferredLang = payload.Lang.String
 	}
 	s := service.Session()
 	var v model.SessionList
@@ -1682,8 +1683,10 @@ func doGetConferenceSchedule(ctx context.Context, w http.ResponseWriter, r *http
 		tz = time.UTC
 	}
 
-	languages := []string{"ja"}
-
+	// supported languages
+	// first, try the preferred language, then try the other supported
+	// languages
+	languages := []string{preferredLang, "ja", "en"}
 	for _, session := range v {
 		e := ical.NewEvent()
 		e.AddProperty("url", fmt.Sprintf("https://builderscon.io/%s/%s/session/%s", series.Slug, conf.Slug, session.ID))
@@ -1692,52 +1695,40 @@ func doGetConferenceSchedule(ctx context.Context, w http.ResponseWriter, r *http
 		var abstractLang string
 		var title string
 		var titleLang string
-		if payload.Lang.Valid() && payload.Lang.String != "all" {
-			if v := strings.TrimSpace(session.Abstract); len(v) > 0 {
-				abstract = v
-				abstractLang = payload.Lang.String
-			}
-			if v := strings.TrimSpace(session.Title); len(v) > 0 {
-				title = v
-				titleLang = payload.Lang.String
-			}
-		}
-
-		if len(abstract) == 0 {
-			found := false
-			for _, lang := range languages {
-				v, _ := session.LocalizedFields.Get(lang, "abstract")
-				v = strings.TrimSpace(v)
-				if len(v) == 0 {
-					continue
+		for _, lang := range languages {
+			if len(abstract) == 0 {
+				if lang == "en" {
+					if v := strings.TrimSpace(session.Abstract); len(v) > 0 {
+						abstract = v
+						abstractLang = lang
+					}
+				} else {
+					v, _ := session.LocalizedFields.Get(lang, "abstract")
+					v = strings.TrimSpace(v)
+					if len(v) > 0 {
+						abstract = v
+						abstractLang = lang
+					}
 				}
-				abstract = v
-				abstractLang = lang
-				found = true
-				break
 			}
-			if !found {
-				abstract = strings.TrimSpace(session.Abstract)
-				abstractLang = "en"
-			}
-		}
 
-		if len(title) == 0 {
-			found := false
-			for _, lang := range languages {
-				v, _ := session.LocalizedFields.Get(lang, "title")
-				v = strings.TrimSpace(v)
-				if v == "" {
-					continue
+			if len(title) == 0 {
+				if lang == "en" {
+					if v := strings.TrimSpace(session.Title); len(v) > 0 {
+						title = v
+						titleLang = lang
+					}
+				} else {
+					v, _ := session.LocalizedFields.Get(lang, "title")
+					v = strings.TrimSpace(v)
+					if len(v) > 0 {
+						title = v
+						titleLang = lang
+					}
 				}
-				title = v
-				titleLang = lang
-				found = true
-				break
 			}
-			if !found {
-				title = strings.TrimSpace(session.Title)
-				titleLang = "en"
+			if len(title) > 0 && len(abstract) > 0 {
+				break
 			}
 		}
 		e.AddProperty("description", abstract, ical.WithParameters(ical.Parameters{
