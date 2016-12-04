@@ -13,7 +13,7 @@ import (
 	"github.com/pkg/errors"
 )
 
-const TrackStdSelectColumns = "tracks.oid, tracks.eid, tracks.conference_id, tracks.room_id, tracks.name, tracks.created_on, tracks.sort_order, tracks.modified_on"
+const TrackStdSelectColumns = "tracks.oid, tracks.eid, tracks.conference_id, tracks.room_id, tracks.name, tracks.sort_order, tracks.created_on, tracks.modified_on"
 const TrackTable = "tracks"
 
 type TrackList []Track
@@ -21,7 +21,7 @@ type TrackList []Track
 func (t *Track) Scan(scanner interface {
 	Scan(...interface{}) error
 }) error {
-	return scanner.Scan(&t.OID, &t.EID, &t.ConferenceID, &t.RoomID, &t.Name, &t.CreatedOn, &t.SortOrder, &t.ModifiedOn)
+	return scanner.Scan(&t.OID, &t.EID, &t.ConferenceID, &t.RoomID, &t.Name, &t.SortOrder, &t.CreatedOn, &t.ModifiedOn)
 }
 
 func init() {
@@ -107,8 +107,8 @@ func (t *Track) Create(tx *Tx, opts ...InsertOption) (err error) {
 	}
 	stmt.WriteString("INTO ")
 	stmt.WriteString(TrackTable)
-	stmt.WriteString(` (eid, conference_id, room_id, name, created_on, sort_order, modified_on) VALUES (?, ?, ?, ?, ?, ?, ?)`)
-	result, err := tx.Exec(stmt.String(), t.EID, t.ConferenceID, t.RoomID, t.Name, t.CreatedOn, t.SortOrder, t.ModifiedOn)
+	stmt.WriteString(` (eid, conference_id, room_id, name, sort_order, created_on, modified_on) VALUES (?, ?, ?, ?, ?, ?, ?)`)
+	result, err := tx.Exec(stmt.String(), t.EID, t.ConferenceID, t.RoomID, t.Name, t.SortOrder, t.CreatedOn, t.ModifiedOn)
 	if err != nil {
 		return err
 	}

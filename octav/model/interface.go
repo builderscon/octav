@@ -1084,3 +1084,36 @@ type UpdateConferenceVenueRequest struct {
 	ConferenceID string
 	VenueID      string
 }
+
+// +model
+type BlogEntry struct {
+	ID           string
+	ConferenceID string
+	URL          string
+	URLHash      string
+}
+
+// +transport
+type CreateBlogEntryRequest struct {
+	ConferenceID    string            `json:"conference_id"`
+	Title           string            `json:"title"`
+	URL             string            `json:"url"`
+	DatabaseOptions []db.InsertOption `json:"-"`
+}
+
+// +transport
+type UpdateBlogEntryRequest struct {
+	ID    string            `json:"id"`
+	Title jsval.MaybeString `json:"title"`
+	URL   jsval.MaybeString `json:"url"`
+}
+
+// +transport
+type LookupBlogEntryRequest struct {
+	ID string `json:"id"`
+}
+
+// +transport
+type DeleteBlogEntryRequest struct {
+	ID string `json:"id"`
+}

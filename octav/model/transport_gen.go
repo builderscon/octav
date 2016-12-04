@@ -6914,3 +6914,108 @@ func (r *UpdateConferenceVenueRequest) UnmarshalJSON(data []byte) error {
 func (r *UpdateConferenceVenueRequest) Populate(m map[string]interface{}) error {
 	return nil
 }
+
+func (r CreateBlogEntryRequest) collectMarshalData() map[string]interface{} {
+	m := make(map[string]interface{})
+	return m
+}
+
+func (r CreateBlogEntryRequest) MarshalJSON() ([]byte, error) {
+	m := r.collectMarshalData()
+	buf, err := json.Marshal(m)
+	if err != nil {
+		return nil, err
+	}
+	return buf, nil
+}
+
+func (r CreateBlogEntryRequest) MarshalURL() ([]byte, error) {
+	m := r.collectMarshalData()
+	buf, err := urlenc.Marshal(m)
+	if err != nil {
+		return nil, err
+	}
+	return buf, nil
+}
+
+func (r *CreateBlogEntryRequest) UnmarshalJSON(data []byte) error {
+	m := make(map[string]interface{})
+	if err := json.Unmarshal(data, &m); err != nil {
+		return err
+	}
+	return r.Populate(m)
+}
+
+func (r *CreateBlogEntryRequest) Populate(m map[string]interface{}) error {
+	return nil
+}
+
+func (r UpdateBlogEntryRequest) collectMarshalData() map[string]interface{} {
+	m := make(map[string]interface{})
+	return m
+}
+
+func (r UpdateBlogEntryRequest) MarshalJSON() ([]byte, error) {
+	m := r.collectMarshalData()
+	buf, err := json.Marshal(m)
+	if err != nil {
+		return nil, err
+	}
+	return buf, nil
+}
+
+func (r UpdateBlogEntryRequest) MarshalURL() ([]byte, error) {
+	m := r.collectMarshalData()
+	buf, err := urlenc.Marshal(m)
+	if err != nil {
+		return nil, err
+	}
+	return buf, nil
+}
+
+func (r *UpdateBlogEntryRequest) UnmarshalJSON(data []byte) error {
+	m := make(map[string]interface{})
+	if err := json.Unmarshal(data, &m); err != nil {
+		return err
+	}
+	return r.Populate(m)
+}
+
+func (r *UpdateBlogEntryRequest) Populate(m map[string]interface{}) error {
+	return nil
+}
+
+func (r DeleteBlogEntryRequest) collectMarshalData() map[string]interface{} {
+	m := make(map[string]interface{})
+	return m
+}
+
+func (r DeleteBlogEntryRequest) MarshalJSON() ([]byte, error) {
+	m := r.collectMarshalData()
+	buf, err := json.Marshal(m)
+	if err != nil {
+		return nil, err
+	}
+	return buf, nil
+}
+
+func (r DeleteBlogEntryRequest) MarshalURL() ([]byte, error) {
+	m := r.collectMarshalData()
+	buf, err := urlenc.Marshal(m)
+	if err != nil {
+		return nil, err
+	}
+	return buf, nil
+}
+
+func (r *DeleteBlogEntryRequest) UnmarshalJSON(data []byte) error {
+	m := make(map[string]interface{})
+	if err := json.Unmarshal(data, &m); err != nil {
+		return err
+	}
+	return r.Populate(m)
+}
+
+func (r *DeleteBlogEntryRequest) Populate(m map[string]interface{}) error {
+	return nil
+}

@@ -119,3 +119,5 @@ type VenueSvc struct{}
 // +PostUpdateHook
 // +PostDeleteHook
 type TrackSvc struct {}
+
+type BlogEntrySvc struct {}

@@ -266,7 +266,19 @@ type Track struct {
 	ConferenceID string
 	RoomID       string
 	Name         string
-	CreatedOn    time.Time
 	SortOrder    int
+	CreatedOn    time.Time
+	ModifiedOn   NullTime
+}
+
+// +DB tablename:"blog_entries"
+type BlogEntry struct {
+	OID          int64
+	EID          string
+	ConferenceID string
+	Title        string
+	URL          string
+	URLHash      string
+	CreatedOn    time.Time
 	ModifiedOn   NullTime
 }

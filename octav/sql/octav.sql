@@ -307,3 +307,15 @@ CREATE TABLE temporary_emails (
     FOREIGN KEY (user_id) REFERENCES users(eid) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
+CREATE TABLE blog_entries (
+    oid INTEGER UNSIGNED NOT NULL PRIMARY KEY AUTO_INCREMENT,
+    eid CHAR(64) CHARACTER SET latin1 NOT NULL,
+    conference_id CHAR(64) CHARACTER SET latin1 NOT NULL,
+    title TEXT,
+    url TEXT NOT NULL,
+    url_hash CHAR(64) CHARACTER SET latin1 NOT NULL,
+    UNIQUE KEY(eid),
+    UNIQUE KEY(url_hash),
+    FOREIGN KEY(conference_id) REFERENCES conference(eid) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
