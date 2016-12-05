@@ -2255,7 +2255,6 @@ func init() {
 		SetConstraintMap(M).
 		SetRoot(
 			jsval.Object().
-				Required("id").
 				AdditionalProperties(
 					jsval.EmptyConstraint,
 				).
