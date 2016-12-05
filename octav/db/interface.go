@@ -279,6 +279,7 @@ type BlogEntry struct {
 	Title        string
 	URL          string
 	URLHash      string
+	Status       string
 	CreatedOn    time.Time
 	ModifiedOn   NullTime
 }

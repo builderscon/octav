@@ -7172,3 +7172,76 @@ func (r *DeleteBlogEntryRequest) Populate(m map[string]interface{}) error {
 	}
 	return nil
 }
+
+func (r ListBlogEntriesRequest) collectMarshalData() map[string]interface{} {
+	m := make(map[string]interface{})
+	m["conference_id"] = r.ConferenceID
+	m["status"] = r.Status
+	if r.Lang.Valid() {
+		m["lang"] = r.Lang.Value()
+	}
+	return m
+}
+
+func (r ListBlogEntriesRequest) MarshalJSON() ([]byte, error) {
+	m := r.collectMarshalData()
+	buf, err := json.Marshal(m)
+	if err != nil {
+		return nil, err
+	}
+	return buf, nil
+}
+
+func (r ListBlogEntriesRequest) MarshalURL() ([]byte, error) {
+	m := r.collectMarshalData()
+	buf, err := urlenc.Marshal(m)
+	if err != nil {
+		return nil, err
+	}
+	return buf, nil
+}
+
+func (r *ListBlogEntriesRequest) UnmarshalJSON(data []byte) error {
+	m := make(map[string]interface{})
+	if err := json.Unmarshal(data, &m); err != nil {
+		return err
+	}
+	return r.Populate(m)
+}
+
+func (r *ListBlogEntriesRequest) Populate(m map[string]interface{}) error {
+	if jv, ok := m["conference_id"]; ok {
+		switch jv.(type) {
+		case string:
+			r.ConferenceID = jv.(string)
+			delete(m, "conference_id")
+		default:
+			return errors.Wrap(ErrInvalidJSONFieldType{Field: "conference_id"}, "failed to populate fields for ListBlogEntriesRequest")
+		}
+	}
+	if jv, ok := m["status"]; ok {
+		switch jv.(type) {
+		case []interface{}:
+			jvl := jv.([]interface{})
+			list := make([]string, len(jvl))
+			for i, el := range jvl {
+				switch el.(type) {
+				case string:
+					list[i] = el.(string)
+				default:
+					return errors.Wrap(ErrInvalidJSONFieldType{Field: "status"}, "failed to populate fields for ListBlogEntriesRequest")
+				}
+			}
+			r.Status = list
+		default:
+			return errors.Wrap(ErrInvalidJSONFieldType{Field: "status"}, "failed to populate fields for ListBlogEntriesRequest")
+		}
+	}
+	if jv, ok := m["lang"]; ok {
+		if err := r.Lang.Set(jv); err != nil {
+			return errors.New("set field Lang failed: " + err.Error())
+		}
+		delete(m, "lang")
+	}
+	return nil
+}

@@ -4,10 +4,13 @@ import (
 	"context"
 	"crypto/sha1"
 	"io"
+	"time"
 
+	"github.com/builderscon/octav/octav/cache"
 	"github.com/builderscon/octav/octav/db"
 	"github.com/builderscon/octav/octav/model"
 	pdebug "github.com/lestrrat/go-pdebug"
+	urlenc "github.com/lestrrat/go-urlenc"
 	"github.com/pkg/errors"
 )
 
@@ -81,4 +84,56 @@ func (v *BlogEntrySvc) DeleteFromPayload(ctx context.Context, tx *db.Tx, payload
 		return errors.Wrap(err, "failed to delete session")
 	}
 	return nil
+}
+
+func (v *BlogEntrySvc) ListFromPayload(tx *db.Tx, result *model.BlogEntryList, payload *model.ListBlogEntriesRequest) (err error) {
+	if pdebug.Enabled {
+		g := pdebug.Marker("BlogEntrySvc.ListFromPayload").BindError(&err)
+		defer g.End()
+	}
+
+	status := payload.Status
+	if len(status) == 0 {
+		status = append(status, model.StatusPublic)
+	}
+
+	keybytes, err := urlenc.Marshal(payload)
+	if err != nil {
+		return errors.Wrap(err, "failed to marshal payload")
+	}
+	c := Cache()
+	key := c.Key("BlogEntry", "ListFromPayload", string(keybytes))
+	x, err := c.GetOrSet(key, result, func() (interface{}, error) {
+		if pdebug.Enabled {
+			pdebug.Printf("CACHE MISS: Re-generating")
+		}
+
+		var vdbl db.BlogEntryList
+		if err := vdbl.LoadByConference(tx, payload.ConferenceID, status); err != nil {
+			return nil, errors.Wrap(err, "failed to load from database")
+		}
+
+		l := make(model.BlogEntryList, len(vdbl))
+		for i, vdb := range vdbl {
+			if err := l[i].FromRow(&vdb); err != nil {
+				return nil, errors.Wrap(err, "failed to populate model from database")
+			}
+
+/*
+			if err := v.Decorate(tx, &l[i], payload.TrustedCall, payload.Lang.String); err != nil {
+				return nil, errors.Wrap(err, "failed to decorate session with associated data")
+			}
+*/
+		}
+
+		return &l, nil
+	}, cache.WithExpires(10*time.Minute))
+
+	if err != nil {
+		return err
+	}
+
+	*result = *(x.(*model.BlogEntryList))
+	return nil
+
 }

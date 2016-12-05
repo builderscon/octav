@@ -13,7 +13,7 @@ import (
 	"github.com/pkg/errors"
 )
 
-const BlogEntryStdSelectColumns = "blog_entries.oid, blog_entries.eid, blog_entries.conference_id, blog_entries.title, blog_entries.url, blog_entries.urlhash, blog_entries.created_on, blog_entries.modified_on"
+const BlogEntryStdSelectColumns = "blog_entries.oid, blog_entries.eid, blog_entries.conference_id, blog_entries.title, blog_entries.url, blog_entries.urlhash, blog_entries.status, blog_entries.created_on, blog_entries.modified_on"
 const BlogEntryTable = "blog_entries"
 
 type BlogEntryList []BlogEntry
@@ -21,7 +21,7 @@ type BlogEntryList []BlogEntry
 func (b *BlogEntry) Scan(scanner interface {
 	Scan(...interface{}) error
 }) error {
-	return scanner.Scan(&b.OID, &b.EID, &b.ConferenceID, &b.Title, &b.URL, &b.URLHash, &b.CreatedOn, &b.ModifiedOn)
+	return scanner.Scan(&b.OID, &b.EID, &b.ConferenceID, &b.Title, &b.URL, &b.URLHash, &b.Status, &b.CreatedOn, &b.ModifiedOn)
 }
 
 func init() {
@@ -38,7 +38,7 @@ func init() {
 		stmt.Reset()
 		stmt.WriteString(`UPDATE `)
 		stmt.WriteString(BlogEntryTable)
-		stmt.WriteString(` SET eid = ?, conference_id = ?, title = ?, url = ?, urlhash = ? WHERE oid = ?`)
+		stmt.WriteString(` SET eid = ?, conference_id = ?, title = ?, url = ?, urlhash = ?, status = ? WHERE oid = ?`)
 		library.Register("sqlBlogEntryUpdateByOIDKey", stmt.String())
 
 		stmt.Reset()
@@ -60,7 +60,7 @@ func init() {
 		stmt.Reset()
 		stmt.WriteString(`UPDATE `)
 		stmt.WriteString(BlogEntryTable)
-		stmt.WriteString(` SET eid = ?, conference_id = ?, title = ?, url = ?, urlhash = ? WHERE eid = ?`)
+		stmt.WriteString(` SET eid = ?, conference_id = ?, title = ?, url = ?, urlhash = ?, status = ? WHERE eid = ?`)
 		library.Register("sqlBlogEntryUpdateByEIDKey", stmt.String())
 	})
 }
@@ -107,8 +107,8 @@ func (b *BlogEntry) Create(tx *Tx, opts ...InsertOption) (err error) {
 	}
 	stmt.WriteString("INTO ")
 	stmt.WriteString(BlogEntryTable)
-	stmt.WriteString(` (eid, conference_id, title, url, urlhash, created_on, modified_on) VALUES (?, ?, ?, ?, ?, ?, ?)`)
-	result, err := tx.Exec(stmt.String(), b.EID, b.ConferenceID, b.Title, b.URL, b.URLHash, b.CreatedOn, b.ModifiedOn)
+	stmt.WriteString(` (eid, conference_id, title, url, urlhash, status, created_on, modified_on) VALUES (?, ?, ?, ?, ?, ?, ?, ?)`)
+	result, err := tx.Exec(stmt.String(), b.EID, b.ConferenceID, b.Title, b.URL, b.URLHash, b.Status, b.CreatedOn, b.ModifiedOn)
 	if err != nil {
 		return err
 	}
@@ -135,7 +135,7 @@ func (b BlogEntry) Update(tx *Tx) (err error) {
 		if err != nil {
 			return errors.Wrap(err, `failed to get statement`)
 		}
-		_, err = tx.Stmt(stmt).Exec(b.EID, b.ConferenceID, b.Title, b.URL, b.URLHash, b.OID)
+		_, err = tx.Stmt(stmt).Exec(b.EID, b.ConferenceID, b.Title, b.URL, b.URLHash, b.Status, b.OID)
 		return err
 	}
 	if b.EID != "" {
@@ -146,7 +146,7 @@ func (b BlogEntry) Update(tx *Tx) (err error) {
 		if err != nil {
 			return errors.Wrap(err, `failed to get statement`)
 		}
-		_, err = tx.Stmt(stmt).Exec(b.EID, b.ConferenceID, b.Title, b.URL, b.URLHash, b.EID)
+		_, err = tx.Stmt(stmt).Exec(b.EID, b.ConferenceID, b.Title, b.URL, b.URLHash, b.Status, b.EID)
 		return err
 	}
 	return errors.New("either OID/EID must be filled")

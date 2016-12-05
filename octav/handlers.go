@@ -1973,4 +1973,22 @@ func doLookupBlogEntry(ctx context.Context, w http.ResponseWriter, r *http.Reque
 	httpJSON(w, v)
 }
 
+func doListBlogEntries(ctx context.Context, w http.ResponseWriter, r *http.Request, payload *model.ListBlogEntriesRequest) {
+	var v model.BlogEntryList
+
+	tx, err := db.Begin()
+	if err != nil {
+		httpError(w, `ListBlogEntries`, http.StatusInternalServerError, err)
+		return
+	}
+	defer tx.AutoRollback()
+
+	s := service.BlogEntry()
+	if err := s.ListFromPayload(tx, &v, payload); err != nil {
+		httpError(w, `ListBlogEntries`, http.StatusInternalServerError, err)
+		return
+	}
+
+	httpJSON(w, v)
+}
 

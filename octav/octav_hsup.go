@@ -1713,6 +1713,38 @@ func httpHealthCheck(ctx context.Context, w http.ResponseWriter, r *http.Request
 	doHealthCheck(ctx, w, r)
 }
 
+func httpListBlogEntries(ctx context.Context, w http.ResponseWriter, r *http.Request) {
+	if pdebug.Enabled {
+		g := pdebug.Marker("httpListBlogEntries")
+		defer g.End()
+	}
+	if strings.ToLower(r.Method) != `get` {
+		w.Header().Set("Allow", "get")
+		msgbuf := getBytesBuffer()
+		defer releaseBytesBuffer(msgbuf)
+		msgbuf.WriteString(`Method was `)
+		msgbuf.WriteString(r.Method)
+		msgbuf.WriteString(`, expected 'get'`)
+		httpError(w, msgbuf.String(), http.StatusNotFound, nil)
+		return
+	}
+
+	var payload model.ListBlogEntriesRequest
+	qbuf := getBytesBuffer()
+	defer releaseBytesBuffer(qbuf)
+	qbuf.WriteString(r.URL.RawQuery)
+	if err := urlenc.Unmarshal(qbuf.Bytes(), &payload); err != nil {
+		httpError(w, `Failed to parse url query string`, http.StatusInternalServerError, err)
+		return
+	}
+
+	if err := validator.HTTPListBlogEntriesRequest.Validate(&payload); err != nil {
+		httpError(w, `Invalid input (validation failed)`, http.StatusInternalServerError, err)
+		return
+	}
+	doListBlogEntries(ctx, w, r, &payload)
+}
+
 func httpListConference(ctx context.Context, w http.ResponseWriter, r *http.Request) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("httpListConference")
@@ -3206,6 +3238,7 @@ func (s *Server) SetupRoutes() {
 	r.HandleFunc(`/`, httpWithContext(httpHealthCheck))
 	r.HandleFunc(`/v1/blog_entry/create`, httpWithContext(httpWithBasicAuth(httpCreateBlogEntry)))
 	r.HandleFunc(`/v1/blog_entry/delete`, httpWithContext(httpWithBasicAuth(httpDeleteBlogEntry)))
+	r.HandleFunc(`/v1/blog_entry/list`, httpWithContext(httpListBlogEntries))
 	r.HandleFunc(`/v1/blog_entry/lookup`, httpWithContext(httpLookupBlogEntry))
 	r.HandleFunc(`/v1/blog_entry/update`, httpWithContext(httpWithBasicAuth(httpUpdateBlogEntry)))
 	r.HandleFunc(`/v1/conference/admin/add`, httpWithContext(httpWithBasicAuth(httpAddConferenceAdmin)))

@@ -14,6 +14,8 @@ const (
 	StatusPending  = "pending"
 	StatusAccepted = "accepted"
 	StatusRejected = "rejected"
+	StatusPublic   = "public"
+	StatusPrivate  = "private"
 )
 
 var ErrInvalidConferenceHour = errors.New("invalid conference hour specification")
@@ -1089,9 +1091,11 @@ type UpdateConferenceVenueRequest struct {
 type BlogEntry struct {
 	ID           string
 	ConferenceID string
+	Status       string
 	URL          string
 	URLHash      string
 }
+type BlogEntryList []BlogEntry
 
 // +transport
 type CreateBlogEntryRequest struct {
@@ -1104,20 +1108,28 @@ type CreateBlogEntryRequest struct {
 
 // +transport
 type UpdateBlogEntryRequest struct {
-	ID    string            `json:"id"`
-	Title jsval.MaybeString `json:"title"`
-	URL   jsval.MaybeString `json:"url"`
-	UserID          string            `json:"user_id"`
+	ID     string            `json:"id"`
+	Title  jsval.MaybeString `json:"title"`
+	URL    jsval.MaybeString `json:"url"`
+	UserID string            `json:"user_id"`
 }
 
 // +transport
 type LookupBlogEntryRequest struct {
-	ID string `json:"id"`
-	UserID          string            `json:"user_id"`
+	ID     string `json:"id"`
+	UserID string `json:"user_id"`
 }
 
 // +transport
 type DeleteBlogEntryRequest struct {
-	ID string `json:"id"`
-	UserID          string            `json:"user_id"`
+	ID     string `json:"id"`
+	UserID string `json:"user_id"`
+}
+
+// +transport
+type ListBlogEntriesRequest struct {
+	ConferenceID string            `json:"conference_id"`
+	Status       []string          `json:"status" urlenc:"status,omitempty"`
+	Lang         jsval.MaybeString `json:"lang,omitempty" urlenc:"lang,omitempty,string"`
+	TrustedCall  bool              `json:"-"`
 }
