@@ -316,6 +316,6 @@ CREATE TABLE blog_entries (
     url_hash CHAR(64) CHARACTER SET latin1 NOT NULL,
     UNIQUE KEY(eid),
     UNIQUE KEY(url_hash),
-    FOREIGN KEY(conference_id) REFERENCES conference(eid) ON DELETE CASCADE
+    FOREIGN KEY (conference_id) REFERENCES conferences(eid) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 

@@ -528,6 +528,51 @@ func (c *Client) ConfirmTemporaryEmail(in *model.ConfirmTemporaryEmailRequest) (
 	return nil
 }
 
+func (c *Client) CreateBlogEntry(in *model.CreateBlogEntryRequest) (err error) {
+	if pdebug.Enabled {
+		g := pdebug.Marker("client.CreateBlogEntry").BindError(&err)
+		defer g.End()
+	}
+	u, err := url.Parse(c.Endpoint + "/v1/blog_entry/create")
+	if err != nil {
+		return err
+	}
+	var buf bytes.Buffer
+	err = json.NewEncoder(&buf).Encode(in)
+	if err != nil {
+		return err
+	}
+	if pdebug.Enabled {
+		pdebug.Printf("POST to %s", u.String())
+		pdebug.Printf("%s", buf.String())
+	}
+	req, err := http.NewRequest("POST", u.String(), &buf)
+	if err != nil {
+		return err
+	}
+	req.Header.Set("Content-Type", "application/json")
+	if c.BasicAuth.Username != "" && c.BasicAuth.Password != "" {
+		req.SetBasicAuth(c.BasicAuth.Username, c.BasicAuth.Password)
+	}
+	res, err := c.Client.Do(req)
+	if err != nil {
+		return err
+	}
+	if res.StatusCode != http.StatusOK {
+		if strings.HasPrefix(strings.ToLower(res.Header.Get(`Content-Type`)), `application/json`) {
+			var errjson ErrJSON
+			if err := json.NewDecoder(res.Body).Decode(&errjson); err != nil {
+				return errors.Errorf(`Invalid response: '%s'`, res.Status)
+			}
+			if len(errjson.Error) > 0 {
+				return errors.New(errjson.Error)
+			}
+		}
+		return errors.Errorf(`Invalid response: '%s'`, res.Status)
+	}
+	return nil
+}
+
 func (c *Client) CreateConference(in *model.CreateConferenceRequest) (ret *model.ObjectID, err error) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("client.CreateConference").BindError(&err)
@@ -1152,6 +1197,51 @@ func (c *Client) CreateVenue(in *model.CreateVenueRequest) (ret *model.ObjectID,
 		return nil, err
 	}
 	return &payload, nil
+}
+
+func (c *Client) DeleteBlogEntry(in *model.DeleteBlogEntryRequest) (err error) {
+	if pdebug.Enabled {
+		g := pdebug.Marker("client.DeleteBlogEntry").BindError(&err)
+		defer g.End()
+	}
+	u, err := url.Parse(c.Endpoint + "/v1/blog_entry/delete")
+	if err != nil {
+		return err
+	}
+	var buf bytes.Buffer
+	err = json.NewEncoder(&buf).Encode(in)
+	if err != nil {
+		return err
+	}
+	if pdebug.Enabled {
+		pdebug.Printf("POST to %s", u.String())
+		pdebug.Printf("%s", buf.String())
+	}
+	req, err := http.NewRequest("POST", u.String(), &buf)
+	if err != nil {
+		return err
+	}
+	req.Header.Set("Content-Type", "application/json")
+	if c.BasicAuth.Username != "" && c.BasicAuth.Password != "" {
+		req.SetBasicAuth(c.BasicAuth.Username, c.BasicAuth.Password)
+	}
+	res, err := c.Client.Do(req)
+	if err != nil {
+		return err
+	}
+	if res.StatusCode != http.StatusOK {
+		if strings.HasPrefix(strings.ToLower(res.Header.Get(`Content-Type`)), `application/json`) {
+			var errjson ErrJSON
+			if err := json.NewDecoder(res.Body).Decode(&errjson); err != nil {
+				return errors.Errorf(`Invalid response: '%s'`, res.Status)
+			}
+			if len(errjson.Error) > 0 {
+				return errors.New(errjson.Error)
+			}
+		}
+		return errors.Errorf(`Invalid response: '%s'`, res.Status)
+	}
+	return nil
 }
 
 func (c *Client) DeleteConference(in *model.DeleteConferenceRequest) (err error) {
@@ -2684,6 +2774,69 @@ func (c *Client) ListVenue(in *model.ListVenueRequest) (ret []model.Venue, err e
 	return payload, nil
 }
 
+func (c *Client) LookupBlogEntry(in *model.LookupBlogEntryRequest) (ret *model.BlogEntry, err error) {
+	if pdebug.Enabled {
+		g := pdebug.Marker("client.LookupBlogEntry").BindError(&err)
+		defer g.End()
+	}
+	u, err := url.Parse(c.Endpoint + "/v1/blog_entry/lookup")
+	if err != nil {
+		return nil, err
+	}
+	buf, err := urlenc.Marshal(in)
+	if err != nil {
+		return nil, err
+	}
+	u.RawQuery = string(buf)
+	if pdebug.Enabled {
+		pdebug.Printf("GET to %s", u.String())
+	}
+	req, err := http.NewRequest("GET", u.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+	if c.BasicAuth.Username != "" && c.BasicAuth.Password != "" {
+		req.SetBasicAuth(c.BasicAuth.Username, c.BasicAuth.Password)
+	}
+	res, err := c.Client.Do(req)
+	if err != nil {
+		return nil, err
+	}
+	if res.StatusCode != http.StatusOK {
+		if strings.HasPrefix(strings.ToLower(res.Header.Get(`Content-Type`)), `application/json`) {
+			var errjson ErrJSON
+			if err := json.NewDecoder(res.Body).Decode(&errjson); err != nil {
+				return nil, errors.Errorf(`Invalid response: '%s'`, res.Status)
+			}
+			if len(errjson.Error) > 0 {
+				return nil, errors.New(errjson.Error)
+			}
+		}
+		return nil, errors.Errorf(`Invalid response: '%s'`, res.Status)
+	}
+	jsonbuf := getTransportJSONBuffer()
+	defer releaseTransportJSONBuffer(jsonbuf)
+	_, err = io.Copy(jsonbuf, io.LimitReader(res.Body, MaxResponseSize))
+	defer res.Body.Close()
+	if pdebug.Enabled {
+		if err != nil {
+			pdebug.Printf("failed to read respons buffer: %s", err)
+		} else {
+			pdebug.Printf("response buffer: %s", jsonbuf)
+		}
+	}
+	if err != nil {
+		return nil, err
+	}
+
+	var payload model.BlogEntry
+	err = json.Unmarshal(jsonbuf.Bytes(), &payload)
+	if err != nil {
+		return nil, err
+	}
+	return &payload, nil
+}
+
 func (c *Client) LookupConference(in *model.LookupConferenceRequest) (ret *model.Conference, err error) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("client.LookupConference").BindError(&err)
@@ -3576,6 +3729,51 @@ func (c *Client) TweetAsConference(in *model.TweetAsConferenceRequest) (err erro
 		defer g.End()
 	}
 	u, err := url.Parse(c.Endpoint + "/v1/conference/tweet")
+	if err != nil {
+		return err
+	}
+	var buf bytes.Buffer
+	err = json.NewEncoder(&buf).Encode(in)
+	if err != nil {
+		return err
+	}
+	if pdebug.Enabled {
+		pdebug.Printf("POST to %s", u.String())
+		pdebug.Printf("%s", buf.String())
+	}
+	req, err := http.NewRequest("POST", u.String(), &buf)
+	if err != nil {
+		return err
+	}
+	req.Header.Set("Content-Type", "application/json")
+	if c.BasicAuth.Username != "" && c.BasicAuth.Password != "" {
+		req.SetBasicAuth(c.BasicAuth.Username, c.BasicAuth.Password)
+	}
+	res, err := c.Client.Do(req)
+	if err != nil {
+		return err
+	}
+	if res.StatusCode != http.StatusOK {
+		if strings.HasPrefix(strings.ToLower(res.Header.Get(`Content-Type`)), `application/json`) {
+			var errjson ErrJSON
+			if err := json.NewDecoder(res.Body).Decode(&errjson); err != nil {
+				return errors.Errorf(`Invalid response: '%s'`, res.Status)
+			}
+			if len(errjson.Error) > 0 {
+				return errors.New(errjson.Error)
+			}
+		}
+		return errors.Errorf(`Invalid response: '%s'`, res.Status)
+	}
+	return nil
+}
+
+func (c *Client) UpdateBlogEntry(in *model.UpdateBlogEntryRequest) (err error) {
+	if pdebug.Enabled {
+		g := pdebug.Marker("client.UpdateBlogEntry").BindError(&err)
+		defer g.End()
+	}
+	u, err := url.Parse(c.Endpoint + "/v1/blog_entry/update")
 	if err != nil {
 		return err
 	}

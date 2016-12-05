@@ -6917,6 +6917,10 @@ func (r *UpdateConferenceVenueRequest) Populate(m map[string]interface{}) error 
 
 func (r CreateBlogEntryRequest) collectMarshalData() map[string]interface{} {
 	m := make(map[string]interface{})
+	m["conference_id"] = r.ConferenceID
+	m["title"] = r.Title
+	m["url"] = r.URL
+	m["user_id"] = r.UserID
 	return m
 }
 
@@ -6947,11 +6951,55 @@ func (r *CreateBlogEntryRequest) UnmarshalJSON(data []byte) error {
 }
 
 func (r *CreateBlogEntryRequest) Populate(m map[string]interface{}) error {
+	if jv, ok := m["conference_id"]; ok {
+		switch jv.(type) {
+		case string:
+			r.ConferenceID = jv.(string)
+			delete(m, "conference_id")
+		default:
+			return errors.Wrap(ErrInvalidJSONFieldType{Field: "conference_id"}, "failed to populate fields for CreateBlogEntryRequest")
+		}
+	}
+	if jv, ok := m["title"]; ok {
+		switch jv.(type) {
+		case string:
+			r.Title = jv.(string)
+			delete(m, "title")
+		default:
+			return errors.Wrap(ErrInvalidJSONFieldType{Field: "title"}, "failed to populate fields for CreateBlogEntryRequest")
+		}
+	}
+	if jv, ok := m["url"]; ok {
+		switch jv.(type) {
+		case string:
+			r.URL = jv.(string)
+			delete(m, "url")
+		default:
+			return errors.Wrap(ErrInvalidJSONFieldType{Field: "url"}, "failed to populate fields for CreateBlogEntryRequest")
+		}
+	}
+	if jv, ok := m["user_id"]; ok {
+		switch jv.(type) {
+		case string:
+			r.UserID = jv.(string)
+			delete(m, "user_id")
+		default:
+			return errors.Wrap(ErrInvalidJSONFieldType{Field: "user_id"}, "failed to populate fields for CreateBlogEntryRequest")
+		}
+	}
 	return nil
 }
 
 func (r UpdateBlogEntryRequest) collectMarshalData() map[string]interface{} {
 	m := make(map[string]interface{})
+	m["id"] = r.ID
+	if r.Title.Valid() {
+		m["title"] = r.Title.Value()
+	}
+	if r.URL.Valid() {
+		m["url"] = r.URL.Value()
+	}
+	m["user_id"] = r.UserID
 	return m
 }
 
@@ -6982,11 +7030,98 @@ func (r *UpdateBlogEntryRequest) UnmarshalJSON(data []byte) error {
 }
 
 func (r *UpdateBlogEntryRequest) Populate(m map[string]interface{}) error {
+	if jv, ok := m["id"]; ok {
+		switch jv.(type) {
+		case string:
+			r.ID = jv.(string)
+			delete(m, "id")
+		default:
+			return errors.Wrap(ErrInvalidJSONFieldType{Field: "id"}, "failed to populate fields for UpdateBlogEntryRequest")
+		}
+	}
+	if jv, ok := m["title"]; ok {
+		if err := r.Title.Set(jv); err != nil {
+			return errors.New("set field Title failed: " + err.Error())
+		}
+		delete(m, "title")
+	}
+	if jv, ok := m["url"]; ok {
+		if err := r.URL.Set(jv); err != nil {
+			return errors.New("set field URL failed: " + err.Error())
+		}
+		delete(m, "url")
+	}
+	if jv, ok := m["user_id"]; ok {
+		switch jv.(type) {
+		case string:
+			r.UserID = jv.(string)
+			delete(m, "user_id")
+		default:
+			return errors.Wrap(ErrInvalidJSONFieldType{Field: "user_id"}, "failed to populate fields for UpdateBlogEntryRequest")
+		}
+	}
+	return nil
+}
+
+func (r LookupBlogEntryRequest) collectMarshalData() map[string]interface{} {
+	m := make(map[string]interface{})
+	m["id"] = r.ID
+	m["user_id"] = r.UserID
+	return m
+}
+
+func (r LookupBlogEntryRequest) MarshalJSON() ([]byte, error) {
+	m := r.collectMarshalData()
+	buf, err := json.Marshal(m)
+	if err != nil {
+		return nil, err
+	}
+	return buf, nil
+}
+
+func (r LookupBlogEntryRequest) MarshalURL() ([]byte, error) {
+	m := r.collectMarshalData()
+	buf, err := urlenc.Marshal(m)
+	if err != nil {
+		return nil, err
+	}
+	return buf, nil
+}
+
+func (r *LookupBlogEntryRequest) UnmarshalJSON(data []byte) error {
+	m := make(map[string]interface{})
+	if err := json.Unmarshal(data, &m); err != nil {
+		return err
+	}
+	return r.Populate(m)
+}
+
+func (r *LookupBlogEntryRequest) Populate(m map[string]interface{}) error {
+	if jv, ok := m["id"]; ok {
+		switch jv.(type) {
+		case string:
+			r.ID = jv.(string)
+			delete(m, "id")
+		default:
+			return errors.Wrap(ErrInvalidJSONFieldType{Field: "id"}, "failed to populate fields for LookupBlogEntryRequest")
+		}
+	}
+	if jv, ok := m["user_id"]; ok {
+		switch jv.(type) {
+		case string:
+			r.UserID = jv.(string)
+			delete(m, "user_id")
+		default:
+			return errors.Wrap(ErrInvalidJSONFieldType{Field: "user_id"}, "failed to populate fields for LookupBlogEntryRequest")
+		}
+	}
 	return nil
 }
 
 func (r DeleteBlogEntryRequest) collectMarshalData() map[string]interface{} {
 	m := make(map[string]interface{})
+	m["id"] = r.ID
+	m["user_id"] = r.UserID
 	return m
 }
 
@@ -7017,5 +7152,23 @@ func (r *DeleteBlogEntryRequest) UnmarshalJSON(data []byte) error {
 }
 
 func (r *DeleteBlogEntryRequest) Populate(m map[string]interface{}) error {
+	if jv, ok := m["id"]; ok {
+		switch jv.(type) {
+		case string:
+			r.ID = jv.(string)
+			delete(m, "id")
+		default:
+			return errors.Wrap(ErrInvalidJSONFieldType{Field: "id"}, "failed to populate fields for DeleteBlogEntryRequest")
+		}
+	}
+	if jv, ok := m["user_id"]; ok {
+		switch jv.(type) {
+		case string:
+			r.UserID = jv.(string)
+			delete(m, "user_id")
+		default:
+			return errors.Wrap(ErrInvalidJSONFieldType{Field: "user_id"}, "failed to populate fields for DeleteBlogEntryRequest")
+		}
+	}
 	return nil
 }

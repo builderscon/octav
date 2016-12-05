@@ -1098,6 +1098,7 @@ type CreateBlogEntryRequest struct {
 	ConferenceID    string            `json:"conference_id"`
 	Title           string            `json:"title"`
 	URL             string            `json:"url"`
+	UserID          string            `json:"user_id"`
 	DatabaseOptions []db.InsertOption `json:"-"`
 }
 
@@ -1106,14 +1107,17 @@ type UpdateBlogEntryRequest struct {
 	ID    string            `json:"id"`
 	Title jsval.MaybeString `json:"title"`
 	URL   jsval.MaybeString `json:"url"`
+	UserID          string            `json:"user_id"`
 }
 
 // +transport
 type LookupBlogEntryRequest struct {
 	ID string `json:"id"`
+	UserID          string            `json:"user_id"`
 }
 
 // +transport
 type DeleteBlogEntryRequest struct {
 	ID string `json:"id"`
+	UserID          string            `json:"user_id"`
 }

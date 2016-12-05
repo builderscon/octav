@@ -17,6 +17,7 @@ var HTTPAddSessionTypeRequest *jsval.JSVal
 var HTTPAddSponsorRequest *jsval.JSVal
 var HTTPAddSponsorResponse *jsval.JSVal
 var HTTPConfirmTemporaryEmailRequest *jsval.JSVal
+var HTTPCreateBlogEntryRequest *jsval.JSVal
 var HTTPCreateConferenceRequest *jsval.JSVal
 var HTTPCreateConferenceResponse *jsval.JSVal
 var HTTPCreateConferenceSeriesRequest *jsval.JSVal
@@ -36,6 +37,7 @@ var HTTPCreateUserRequest *jsval.JSVal
 var HTTPCreateUserResponse *jsval.JSVal
 var HTTPCreateVenueRequest *jsval.JSVal
 var HTTPCreateVenueResponse *jsval.JSVal
+var HTTPDeleteBlogEntryRequest *jsval.JSVal
 var HTTPDeleteConferenceAdminRequest *jsval.JSVal
 var HTTPDeleteConferenceDateRequest *jsval.JSVal
 var HTTPDeleteConferenceRequest *jsval.JSVal
@@ -77,6 +79,8 @@ var HTTPListUserRequest *jsval.JSVal
 var HTTPListUserResponse *jsval.JSVal
 var HTTPListVenueRequest *jsval.JSVal
 var HTTPListVenueResponse *jsval.JSVal
+var HTTPLookupBlogEntryRequest *jsval.JSVal
+var HTTPLookupBlogEntryResponse *jsval.JSVal
 var HTTPLookupConferenceBySlugRequest *jsval.JSVal
 var HTTPLookupConferenceBySlugResponse *jsval.JSVal
 var HTTPLookupConferenceRequest *jsval.JSVal
@@ -106,6 +110,7 @@ var HTTPSendAllSelectionResultNotificationResponse *jsval.JSVal
 var HTTPSendSelectionResultNotificationRequest *jsval.JSVal
 var HTTPSendSelectionResultNotificationResponse *jsval.JSVal
 var HTTPTweetAsConferenceRequest *jsval.JSVal
+var HTTPUpdateBlogEntryRequest *jsval.JSVal
 var HTTPUpdateConferenceRequest *jsval.JSVal
 var HTTPUpdateFeaturedSpeakerRequest *jsval.JSVal
 var HTTPUpdateRoomRequest *jsval.JSVal
@@ -1237,6 +1242,33 @@ func init() {
 				),
 		)
 
+	HTTPCreateBlogEntryRequest = jsval.New().
+		SetName("HTTPCreateBlogEntryRequest").
+		SetConstraintMap(M).
+		SetRoot(
+			jsval.Object().
+				Required("conference_id", "url").
+				AdditionalProperties(
+					jsval.EmptyConstraint,
+				).
+				AddProp(
+					"conference_id",
+					jsval.Reference(M).RefersTo("#/definitions/uuid"),
+				).
+				AddProp(
+					"title",
+					jsval.String(),
+				).
+				AddProp(
+					"url",
+					jsval.Reference(M).RefersTo("#/definitions/url"),
+				).
+				AddProp(
+					"user_id",
+					jsval.Reference(M).RefersTo("#/definitions/uuid"),
+				),
+		)
+
 	HTTPCreateConferenceRequest = jsval.New().
 		SetName("HTTPCreateConferenceRequest").
 		SetConstraintMap(M).
@@ -1887,6 +1919,25 @@ func init() {
 				AddProp(
 					"type",
 					jsval.String(),
+				),
+		)
+
+	HTTPDeleteBlogEntryRequest = jsval.New().
+		SetName("HTTPDeleteBlogEntryRequest").
+		SetConstraintMap(M).
+		SetRoot(
+			jsval.Object().
+				Required("id", "user_id").
+				AdditionalProperties(
+					jsval.EmptyConstraint,
+				).
+				AddProp(
+					"id",
+					jsval.Reference(M).RefersTo("#/definitions/uuid"),
+				).
+				AddProp(
+					"user_id",
+					jsval.Reference(M).RefersTo("#/definitions/uuid"),
 				),
 		)
 
@@ -2727,6 +2778,47 @@ func init() {
 				).
 				AdditionalItems(
 					jsval.EmptyConstraint,
+				),
+		)
+
+	HTTPLookupBlogEntryRequest = jsval.New().
+		SetName("HTTPLookupBlogEntryRequest").
+		SetConstraintMap(M).
+		SetRoot(
+			jsval.Object().
+				Required("id").
+				AdditionalProperties(
+					jsval.EmptyConstraint,
+				).
+				AddProp(
+					"id",
+					jsval.Reference(M).RefersTo("#/definitions/uuid"),
+				).
+				AddProp(
+					"lang",
+					jsval.Reference(M).RefersTo("#/definitions/language"),
+				),
+		)
+
+	HTTPLookupBlogEntryResponse = jsval.New().
+		SetName("HTTPLookupBlogEntryResponse").
+		SetConstraintMap(M).
+		SetRoot(
+			jsval.Object().
+				AdditionalProperties(
+					jsval.EmptyConstraint,
+				).
+				AddProp(
+					"id",
+					jsval.Reference(M).RefersTo("#/definitions/uuid"),
+				).
+				AddProp(
+					"title",
+					jsval.String(),
+				).
+				AddProp(
+					"url",
+					jsval.Reference(M).RefersTo("#/definitions/url"),
 				),
 		)
 
@@ -3678,6 +3770,33 @@ func init() {
 				AddProp(
 					"tweet",
 					jsval.String(),
+				).
+				AddProp(
+					"user_id",
+					jsval.Reference(M).RefersTo("#/definitions/uuid"),
+				),
+		)
+
+	HTTPUpdateBlogEntryRequest = jsval.New().
+		SetName("HTTPUpdateBlogEntryRequest").
+		SetConstraintMap(M).
+		SetRoot(
+			jsval.Object().
+				Required("id", "user_id").
+				AdditionalProperties(
+					jsval.EmptyConstraint,
+				).
+				AddProp(
+					"id",
+					jsval.Reference(M).RefersTo("#/definitions/uuid"),
+				).
+				AddProp(
+					"title",
+					jsval.String(),
+				).
+				AddProp(
+					"url",
+					jsval.Reference(M).RefersTo("#/definitions/url"),
 				).
 				AddProp(
 					"user_id",

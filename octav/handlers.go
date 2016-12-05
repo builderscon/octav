@@ -740,7 +740,6 @@ func doUpdateSession(ctx context.Context, w http.ResponseWriter, r *http.Request
 	defer tx.AutoRollback()
 
 	s := service.Session()
-	var v model.Session
 	if err := s.UpdateFromPayload(ctx, tx, payload); err != nil {
 		httpError(w, `UpdateConference`, http.StatusNotFound, err)
 		return
@@ -751,7 +750,7 @@ func doUpdateSession(ctx context.Context, w http.ResponseWriter, r *http.Request
 		return
 	}
 
-	httpJSON(w, v)
+	httpJSON(w, map[string]string{"status": "success"})
 }
 
 func doDeleteSession(ctx context.Context, w http.ResponseWriter, r *http.Request, payload *model.DeleteSessionRequest) {
@@ -1888,3 +1887,90 @@ func doSendAllSelectionResultNotification(ctx context.Context, w http.ResponseWr
 		"message": "Notification scheduled",
 	})
 }
+
+func doCreateBlogEntry(ctx context.Context, w http.ResponseWriter, r *http.Request, payload *model.CreateBlogEntryRequest) {
+	tx, err := db.Begin()
+	if err != nil {
+		httpError(w, `CreateBlogEntry`, http.StatusInternalServerError, err)
+		return
+	}
+	defer tx.AutoRollback()
+
+	s := service.BlogEntry()
+	if err := s.CreateFromPayload(ctx, tx, nil, payload); err != nil {
+		httpError(w, `CreateBlogEntry`, http.StatusInternalServerError, err)
+		return
+	}
+
+	if err := tx.Commit(); err != nil {
+		httpError(w, `CreateBlogEntry`, http.StatusInternalServerError, err)
+		return
+	}
+	httpJSON(w, map[string]string{"status": "success"})
+}
+
+func doUpdateBlogEntry(ctx context.Context, w http.ResponseWriter, r *http.Request, payload *model.UpdateBlogEntryRequest) {
+	tx, err := db.Begin()
+	if err != nil {
+		httpError(w, `UpdateBlogEntry`, http.StatusInternalServerError, err)
+		return
+	}
+	defer tx.AutoRollback()
+
+	s := service.BlogEntry()
+	if err := s.UpdateFromPayload(ctx, tx, payload); err != nil {
+		httpError(w, `UpdateBlogEntry`, http.StatusInternalServerError, err)
+		return
+	}
+
+	if err := tx.Commit(); err != nil {
+		httpError(w, `UpdateBlogEntry`, http.StatusInternalServerError, err)
+		return
+	}
+	httpJSON(w, map[string]string{"status": "success"})
+}
+
+func doDeleteBlogEntry(ctx context.Context, w http.ResponseWriter, r *http.Request, payload *model.DeleteBlogEntryRequest) {
+	tx, err := db.Begin()
+	if err != nil {
+		httpError(w, `DeleteBlogEntry`, http.StatusInternalServerError, err)
+		return
+	}
+	defer tx.AutoRollback()
+
+	s := service.BlogEntry()
+	if err := s.DeleteFromPayload(ctx, tx, payload); err != nil {
+		httpError(w, `DeleteBlogEntry`, http.StatusInternalServerError, err)
+		return
+	}
+
+	if err := tx.Commit(); err != nil {
+		httpError(w, `DeleteBlogEntry`, http.StatusInternalServerError, err)
+		return
+	}
+	httpJSON(w, map[string]string{"status": "success"})
+}
+
+func doLookupBlogEntry(ctx context.Context, w http.ResponseWriter, r *http.Request, payload *model.LookupBlogEntryRequest) {
+	if pdebug.Enabled {
+		g := pdebug.Marker("doLookupBlogEntry")
+		defer g.End()
+	}
+	tx, err := db.Begin()
+	if err != nil {
+		httpError(w, `LookupBlogEntry`, http.StatusInternalServerError, err)
+		return
+	}
+	defer tx.AutoRollback()
+
+	s := service.BlogEntry()
+	var v model.BlogEntry
+	if err := s.LookupFromPayload(tx, &v, payload); err != nil {
+		httpError(w, `LookupBlogEntry`, http.StatusInternalServerError, err)
+		return
+	}
+
+	httpJSON(w, v)
+}
+
+
