@@ -6918,6 +6918,7 @@ func (r *UpdateConferenceVenueRequest) Populate(m map[string]interface{}) error 
 func (r CreateBlogEntryRequest) collectMarshalData() map[string]interface{} {
 	m := make(map[string]interface{})
 	m["conference_id"] = r.ConferenceID
+	m["status"] = r.Status
 	m["title"] = r.Title
 	m["url"] = r.URL
 	m["user_id"] = r.UserID
@@ -6958,6 +6959,15 @@ func (r *CreateBlogEntryRequest) Populate(m map[string]interface{}) error {
 			delete(m, "conference_id")
 		default:
 			return errors.Wrap(ErrInvalidJSONFieldType{Field: "conference_id"}, "failed to populate fields for CreateBlogEntryRequest")
+		}
+	}
+	if jv, ok := m["status"]; ok {
+		switch jv.(type) {
+		case string:
+			r.Status = jv.(string)
+			delete(m, "status")
+		default:
+			return errors.Wrap(ErrInvalidJSONFieldType{Field: "status"}, "failed to populate fields for CreateBlogEntryRequest")
 		}
 	}
 	if jv, ok := m["title"]; ok {

@@ -1100,6 +1100,7 @@ type BlogEntryList []BlogEntry
 // +transport
 type CreateBlogEntryRequest struct {
 	ConferenceID    string            `json:"conference_id"`
+	Status          string            `json:"status"`
 	Title           string            `json:"title"`
 	URL             string            `json:"url"`
 	UserID          string            `json:"user_id"`
