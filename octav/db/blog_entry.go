@@ -30,7 +30,7 @@ func (v *BlogEntryList) LoadByConference(tx *Tx, confID string, status []string)
 	where.WriteString(`.conference_id = ? `)
 	if l := len(status); l > 0 {
 		if where.Len() > 0 {
-			where.WriteString(` AND`)
+			where.WriteString(` AND `)
 		}
 		where.WriteString(BlogEntryTable)
 		where.WriteString(`.status IN (`)
