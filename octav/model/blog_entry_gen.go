@@ -31,15 +31,19 @@ func (v *BlogEntry) Load(tx *db.Tx, id string) (err error) {
 func (v *BlogEntry) FromRow(vdb *db.BlogEntry) error {
 	v.ID = vdb.EID
 	v.ConferenceID = vdb.ConferenceID
+	v.Status = vdb.Status
 	v.Title = vdb.Title
 	v.URL = vdb.URL
+	v.URLHash = vdb.URLHash
 	return nil
 }
 
 func (v *BlogEntry) ToRow(vdb *db.BlogEntry) error {
 	vdb.EID = v.ID
 	vdb.ConferenceID = v.ConferenceID
+	vdb.Status = v.Status
 	vdb.Title = v.Title
 	vdb.URL = v.URL
+	vdb.URLHash = v.URLHash
 	return nil
 }

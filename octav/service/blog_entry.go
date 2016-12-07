@@ -98,6 +98,16 @@ func (v *BlogEntrySvc) PostDeleteHook(_ *db.Tx, vdb *db.BlogEntry) error {
 	return invalidateBlogEntryLoadByConferenceID(vdb.ConferenceID)
 }
 
+func (v *BlogEntrySvc) Decorate(tx *db.Tx, v *model.BlogEntry, trustedCall bool, lang string) (err error) {
+	// If this is not a trustedCall, we don't want to send the conference_id, status, or the url_hash
+	if !trustedCall {
+		v.ConferenceID = ""
+		v.Status = ""
+		v.URLHash = ""
+	}
+	return nil
+}
+
 func (v *BlogEntrySvc) CreateFromPayload(ctx context.Context, tx *db.Tx, result *model.BlogEntry, payload *model.CreateBlogEntryRequest) (err error) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("BlogEntrySvc.CreateFromPayload").BindError(&err)
@@ -181,11 +191,9 @@ func (v *BlogEntrySvc) ListFromPayload(tx *db.Tx, result *model.BlogEntryList, p
 				return nil, errors.Wrap(err, "failed to populate model from database")
 			}
 
-			/*
-				if err := v.Decorate(tx, &l[i], payload.TrustedCall, payload.Lang.String); err != nil {
-					return nil, errors.Wrap(err, "failed to decorate session with associated data")
-				}
-			*/
+			if err := v.Decorate(tx, &l[i], payload.TrustedCall, payload.Lang.String); err != nil {
+				return nil, errors.Wrap(err, "failed to decorate session with associated data")
+			}
 		}
 
 		return &l, nil
