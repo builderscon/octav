@@ -9,6 +9,7 @@ import (
 	"github.com/builderscon/octav/octav/cache"
 	"github.com/builderscon/octav/octav/db"
 	"github.com/builderscon/octav/octav/model"
+	"github.com/builderscon/octav/octav/tools"
 	pdebug "github.com/lestrrat/go-pdebug"
 	urlenc "github.com/lestrrat/go-urlenc"
 	"github.com/pkg/errors"
@@ -17,6 +18,7 @@ import (
 func (v *BlogEntrySvc) Init() {}
 
 func (v *BlogEntrySvc) populateRowForCreate(vdb *db.BlogEntry, payload *model.CreateBlogEntryRequest) error {
+	vdb.EID = tools.UUID()
 	vdb.ConferenceID = payload.ConferenceID
 	vdb.Title = payload.Title
 	vdb.URL = payload.URL
@@ -119,11 +121,11 @@ func (v *BlogEntrySvc) ListFromPayload(tx *db.Tx, result *model.BlogEntryList, p
 				return nil, errors.Wrap(err, "failed to populate model from database")
 			}
 
-/*
-			if err := v.Decorate(tx, &l[i], payload.TrustedCall, payload.Lang.String); err != nil {
-				return nil, errors.Wrap(err, "failed to decorate session with associated data")
-			}
-*/
+			/*
+				if err := v.Decorate(tx, &l[i], payload.TrustedCall, payload.Lang.String); err != nil {
+					return nil, errors.Wrap(err, "failed to decorate session with associated data")
+				}
+			*/
 		}
 
 		return &l, nil
