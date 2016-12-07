@@ -5,6 +5,7 @@ import (
 	"crypto/sha1"
 	"fmt"
 	"io"
+	"net/url"
 	"time"
 
 	"github.com/builderscon/octav/octav/cache"
@@ -22,7 +23,14 @@ func (v *BlogEntrySvc) populateRowForCreate(vdb *db.BlogEntry, payload *model.Cr
 	vdb.EID = tools.UUID()
 	vdb.ConferenceID = payload.ConferenceID
 	vdb.Title = payload.Title
-	vdb.URL = payload.URL
+
+	// Parse the URL, and do away with the URL fragment, if any
+	u, err := url.Parse(payload.URL)
+	if err != nil {
+		return errors.Wrap(err, "failed to parse URL")
+	}
+	u.Fragment = ""
+	vdb.URL = u.String()
 
 	h := sha1.New()
 	io.WriteString(h, payload.URL)
