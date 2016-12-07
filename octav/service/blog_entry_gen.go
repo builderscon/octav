@@ -89,6 +89,9 @@ func (v *BlogEntrySvc) Create(tx *db.Tx, vdb *db.BlogEntry, payload *model.Creat
 		return errors.Wrap(err, `failed to insert into database`)
 	}
 
+	if err := v.PostCreateHook(tx, vdb); err != nil {
+		return errors.Wrap(err, `post create hook failed`)
+	}
 	return nil
 }
 
@@ -115,6 +118,9 @@ func (v *BlogEntrySvc) Update(tx *db.Tx, vdb *db.BlogEntry) (err error) {
 		if cerr != nil {
 			pdebug.Printf(`CACHE ERR: %s`, cerr)
 		}
+	}
+	if err := v.PostUpdateHook(tx, vdb); err != nil {
+		return errors.Wrap(err, `post update hook failed`)
 	}
 	return nil
 }
@@ -144,6 +150,10 @@ func (v *BlogEntrySvc) Delete(tx *db.Tx, id string) error {
 		g := pdebug.Marker("BlogEntry.Delete (%s)", id)
 		defer g.End()
 	}
+	original := db.BlogEntry{EID: id}
+	if err := original.LoadByEID(tx, id); err != nil {
+		return errors.Wrap(err, `failed load before delete`)
+	}
 
 	vdb := db.BlogEntry{EID: id}
 	if err := vdb.Delete(tx); err != nil {
@@ -154,6 +164,9 @@ func (v *BlogEntrySvc) Delete(tx *db.Tx, id string) error {
 	c.Delete(key)
 	if pdebug.Enabled {
 		pdebug.Printf(`CACHE DEL %s`, key)
+	}
+	if err := v.PostDeleteHook(tx, &original); err != nil {
+		return errors.Wrap(err, `post delete hook failed`)
 	}
 	return nil
 }

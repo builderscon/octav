@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io"
 	"net/url"
+	"sort"
 	"time"
 
 	"github.com/builderscon/octav/octav/cache"
@@ -47,6 +48,54 @@ func (v *BlogEntrySvc) populateRowForUpdate(vdb *db.BlogEntry, payload *model.Up
 		vdb.URL = payload.URL.String
 	}
 	return nil
+}
+
+func invalidateBlogEntryLoadByConferenceID(confID string) error {
+	c := Cache()
+
+	var r model.ListBlogEntriesRequest
+	r.ConferenceID = confID
+
+	var keys []string
+	for _, status := range [][]string{{"private"}, {"public"}, {"private", "public"}} {
+		for _, trustedCall := range []bool{true, false} {
+			for _, lang := range []string{"ja", "en", ""} {
+				if lang == "" {
+					r.Lang.ValidFlag = false
+					r.Lang.String = ""
+				} else {
+					r.Lang.Set(lang)
+				}
+
+				r.Status = status
+				r.TrustedCall = trustedCall
+				keybytes, err := urlenc.Marshal(r)
+				if err != nil {
+					return errors.Wrap(err, "failed to marshal payload")
+				}
+
+				key := c.Key("BlogEntry", "ListFromPayload", string(keybytes))
+				keys = append(keys, key)
+			}
+		}
+	}
+
+	for _, key := range keys {
+		c.Delete(key)
+	}
+	return nil
+}
+
+func (v *BlogEntrySvc) PostCreateHook(_ *db.Tx, vdb *db.BlogEntry) error {
+	return invalidateBlogEntryLoadByConferenceID(vdb.ConferenceID)
+}
+
+func (v *BlogEntrySvc) PostUpdateHook(_ *db.Tx, vdb *db.BlogEntry) error {
+	return invalidateBlogEntryLoadByConferenceID(vdb.ConferenceID)
+}
+
+func (v *BlogEntrySvc) PostDeleteHook(_ *db.Tx, vdb *db.BlogEntry) error {
+	return invalidateBlogEntryLoadByConferenceID(vdb.ConferenceID)
 }
 
 func (v *BlogEntrySvc) CreateFromPayload(ctx context.Context, tx *db.Tx, result *model.BlogEntry, payload *model.CreateBlogEntryRequest) (err error) {
@@ -109,6 +158,7 @@ func (v *BlogEntrySvc) ListFromPayload(tx *db.Tx, result *model.BlogEntryList, p
 		status = append(status, model.StatusPublic)
 	}
 
+	sort.Strings(payload.Status) // normalize
 	keybytes, err := urlenc.Marshal(payload)
 	if err != nil {
 		return errors.Wrap(err, "failed to marshal payload")
