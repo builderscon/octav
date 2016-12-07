@@ -25,6 +25,7 @@ var ErrAnnotatedStructNotFound = errors.New("annotated struct was not found")
 func snakeCase(s string) string {
 	ret := []rune{}
 	wasLower := false
+	upCount := 0
 	for len(s) > 0 {
 		r, n := utf8.DecodeRuneInString(s)
 		if r == utf8.RuneError {
@@ -33,11 +34,19 @@ func snakeCase(s string) string {
 
 		s = s[n:]
 		if unicode.IsUpper(r) {
+			upCount++
 			if wasLower {
 				ret = append(ret, '_')
 			}
 			wasLower = false
 		} else {
+			// consecutive upper cases. naively assume that we only have
+			// A-Za-z0-9 in our column names
+			if ((r >= 'A' && r <= 'Z') || (r >= 'a' && r <= 'z')) && upCount > 1 {
+				ret = append(ret, ret[len(ret)-1])
+				ret[len(ret)-2] = '_'
+			}
+			upCount = 0
 			wasLower = true
 		}
 
@@ -45,6 +54,7 @@ func snakeCase(s string) string {
 	}
 	return string(ret)
 }
+
 
 type Processor struct {
 	Types []string
