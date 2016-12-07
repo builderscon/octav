@@ -98,12 +98,12 @@ func (v *BlogEntrySvc) PostDeleteHook(_ *db.Tx, vdb *db.BlogEntry) error {
 	return invalidateBlogEntryLoadByConferenceID(vdb.ConferenceID)
 }
 
-func (v *BlogEntrySvc) Decorate(tx *db.Tx, v *model.BlogEntry, trustedCall bool, lang string) (err error) {
+func (v *BlogEntrySvc) Decorate(tx *db.Tx, m *model.BlogEntry, trustedCall bool, lang string) (err error) {
 	// If this is not a trustedCall, we don't want to send the conference_id, status, or the url_hash
 	if !trustedCall {
-		v.ConferenceID = ""
-		v.Status = ""
-		v.URLHash = ""
+		m.ConferenceID = ""
+		m.Status = ""
+		m.URLHash = ""
 	}
 	return nil
 }
