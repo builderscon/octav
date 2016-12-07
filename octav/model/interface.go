@@ -1109,8 +1109,9 @@ type CreateBlogEntryRequest struct {
 // +transport
 type UpdateBlogEntryRequest struct {
 	ID     string            `json:"id"`
-	Title  jsval.MaybeString `json:"title"`
-	URL    jsval.MaybeString `json:"url"`
+	Status jsval.MaybeString `json:"status,omitempty"`
+	Title  jsval.MaybeString `json:"title,omitempty"`
+	URL    jsval.MaybeString `json:"url,omitempty"`
 	UserID string            `json:"user_id"`
 }
 

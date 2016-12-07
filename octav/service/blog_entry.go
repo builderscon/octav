@@ -23,6 +23,7 @@ func (v *BlogEntrySvc) populateRowForCreate(vdb *db.BlogEntry, payload *model.Cr
 	vdb.EID = tools.UUID()
 	vdb.ConferenceID = payload.ConferenceID
 	vdb.Title = payload.Title
+	vdb.Status = payload.Status
 
 	// Parse the URL, and do away with the URL fragment, if any
 	u, err := url.Parse(payload.URL)

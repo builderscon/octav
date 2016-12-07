@@ -3856,6 +3856,10 @@ func init() {
 					jsval.Reference(M).RefersTo("#/definitions/uuid"),
 				).
 				AddProp(
+					"status",
+					jsval.String().Enum("public", "private"),
+				).
+				AddProp(
 					"title",
 					jsval.String(),
 				).

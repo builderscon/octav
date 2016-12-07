@@ -6993,6 +6993,9 @@ func (r *CreateBlogEntryRequest) Populate(m map[string]interface{}) error {
 func (r UpdateBlogEntryRequest) collectMarshalData() map[string]interface{} {
 	m := make(map[string]interface{})
 	m["id"] = r.ID
+	if r.Status.Valid() {
+		m["status"] = r.Status.Value()
+	}
 	if r.Title.Valid() {
 		m["title"] = r.Title.Value()
 	}
@@ -7038,6 +7041,12 @@ func (r *UpdateBlogEntryRequest) Populate(m map[string]interface{}) error {
 		default:
 			return errors.Wrap(ErrInvalidJSONFieldType{Field: "id"}, "failed to populate fields for UpdateBlogEntryRequest")
 		}
+	}
+	if jv, ok := m["status"]; ok {
+		if err := r.Status.Set(jv); err != nil {
+			return errors.New("set field Status failed: " + err.Error())
+		}
+		delete(m, "status")
 	}
 	if jv, ok := m["title"]; ok {
 		if err := r.Title.Set(jv); err != nil {
