@@ -1149,6 +1149,9 @@ func (r UpdateConferenceRequest) collectMarshalData() map[string]interface{} {
 	if r.Status.Valid() {
 		m["status"] = r.Status.Value()
 	}
+	if r.BlogFeedbackAvailable.Valid() {
+		m["blog_feedback_available"] = r.BlogFeedbackAvailable.Value()
+	}
 	if r.TimetableAvailable.Valid() {
 		m["timetable_available"] = r.TimetableAvailable.Value()
 	}
@@ -1255,6 +1258,12 @@ func (r *UpdateConferenceRequest) Populate(m map[string]interface{}) error {
 		}
 		delete(m, "status")
 	}
+	if jv, ok := m["blog_feedback_available"]; ok {
+		if err := r.BlogFeedbackAvailable.Set(jv); err != nil {
+			return errors.New("set field BlogFeedbackAvailable failed: " + err.Error())
+		}
+		delete(m, "blog_feedback_available")
+	}
 	if jv, ok := m["timetable_available"]; ok {
 		if err := r.TimetableAvailable.Set(jv); err != nil {
 			return errors.New("set field TimetableAvailable failed: " + err.Error())
@@ -1284,7 +1293,7 @@ func (r *UpdateConferenceRequest) Populate(m map[string]interface{}) error {
 
 func (r *UpdateConferenceRequest) GetPropNames() ([]string, error) {
 	l, _ := r.LocalizedFields.GetPropNames()
-	return append(l, "id", "title", "description", "cfp_lead_text", "cfp_pre_submit_instructions", "cfp_post_submit_instructions", "contact_information", "series_id", "slug", "sub_title", "status", "timetable_available", "timezone", "user_id"), nil
+	return append(l, "id", "title", "description", "cfp_lead_text", "cfp_pre_submit_instructions", "cfp_post_submit_instructions", "contact_information", "series_id", "slug", "sub_title", "status", "blog_feedback_available", "timetable_available", "timezone", "user_id"), nil
 }
 
 func (r *UpdateConferenceRequest) SetPropValue(s string, v interface{}) error {
@@ -1314,6 +1323,8 @@ func (r *UpdateConferenceRequest) SetPropValue(s string, v interface{}) error {
 		return r.SubTitle.Set(v)
 	case "status":
 		return r.Status.Set(v)
+	case "blog_feedback_available":
+		return r.BlogFeedbackAvailable.Set(v)
 	case "timetable_available":
 		return r.TimetableAvailable.Set(v)
 	case "timezone":

@@ -77,6 +77,14 @@ func (v *ConferenceSvc) populateRowForUpdate(vdb *db.Conference, payload *model.
 		vdb.SubTitle.String = payload.SubTitle.String
 	}
 
+	if payload.BlogFeedbackAvailable.Valid() {
+		vdb.BlogFeedbackAvailable = payload.BlogFeedbackAvailable.Bool
+	}
+
+	if payload.TimetableAvailable.Valid() {
+		vdb.TimetableAvailable = payload.TimetableAvailable.Bool
+	}
+
 	if payload.Timezone.Valid() {
 		if _, err := time.LoadLocation(payload.Timezone.String); err == nil {
 			vdb.Timezone = payload.Timezone.String

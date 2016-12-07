@@ -52,6 +52,7 @@ type Conference struct {
 	Slug                      string              `json:"slug"`
 	FullSlug                  string              `json:"full_slug,omitempty"` // Only populated when decorated
 	Status                    string              `json:"status"`
+	BlogFeedbackAvailable     bool                `json:"blog_feedback_available"`
 	TimetableAvailable        bool                `json:"timetable_available"`
 	Timezone                  string              `json:"timezone"`
 	Dates                     ConferenceDateList  `json:"dates,omitempty"`
@@ -344,6 +345,7 @@ type UpdateConferenceRequest struct {
 	Slug                      jsval.MaybeString `json:"slug,omitempty"`
 	SubTitle                  jsval.MaybeString `json:"sub_title,omitempty" l10n:"true"`
 	Status                    jsval.MaybeString `json:"status,omitempty"`
+	BlogFeedbackAvailable     jsval.MaybeBool   `json:"blog_feedback_available,omitempty"`
 	TimetableAvailable        jsval.MaybeBool   `json:"timetable_available,omitempty"`
 	Timezone                  jsval.MaybeString `json:"timezone,omitempty"`
 	UserID                    string            `json:"user_id"`
