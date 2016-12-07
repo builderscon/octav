@@ -1493,4 +1493,194 @@ sub send_all_selection_result_notification {
     return JSON::decode_json($res->decoded_content);
 }
 
+sub create_track {
+    my ($self, $payload) = @_;
+    for my $required (qw(conference_id room_id user_id)) {
+        if (!$payload->{$required}) {
+            die qq|property "$required" must be provided|;
+        }
+    }
+    my $uri = URI->new($self->{endpoint} . qq|/v1/track/create|);
+    my @request_args;
+    push @request_args, (Content_Type => "application/json", Content => JSON::encode_json($payload));
+    my $req = HTTP::Request::Common::POST($uri, @request_args);
+    if (my($u, $p) = @{$self->{credentials} || []}) {
+        $req->authorization_basic($u, $p);
+    }
+    my $res = $self->{user_agent}->request($req);
+    if (!$res->is_success) {
+        $self->{last_error} = $res->status_line;
+        return;
+    }
+    return 1
+}
+
+sub update_track {
+    my ($self, $payload) = @_;
+    for my $required (qw(id user_id)) {
+        if (!$payload->{$required}) {
+            die qq|property "$required" must be provided|;
+        }
+    }
+    my $uri = URI->new($self->{endpoint} . qq|/v1/track/update|);
+    my @request_args;
+    push @request_args, (Content_Type => "application/json", Content => JSON::encode_json($payload));
+    my $req = HTTP::Request::Common::POST($uri, @request_args);
+    if (my($u, $p) = @{$self->{credentials} || []}) {
+        $req->authorization_basic($u, $p);
+    }
+    my $res = $self->{user_agent}->request($req);
+    if (!$res->is_success) {
+        $self->{last_error} = $res->status_line;
+        return;
+    }
+    return 1
+}
+
+sub delete_track {
+    my ($self, $payload) = @_;
+    for my $required (qw(id user_id)) {
+        if (!$payload->{$required}) {
+            die qq|property "$required" must be provided|;
+        }
+    }
+    my $uri = URI->new($self->{endpoint} . qq|/v1/track/delete|);
+    my @request_args;
+    push @request_args, (Content_Type => "application/json", Content => JSON::encode_json($payload));
+    my $req = HTTP::Request::Common::POST($uri, @request_args);
+    if (my($u, $p) = @{$self->{credentials} || []}) {
+        $req->authorization_basic($u, $p);
+    }
+    my $res = $self->{user_agent}->request($req);
+    if (!$res->is_success) {
+        $self->{last_error} = $res->status_line;
+        return;
+    }
+    return 1
+}
+
+sub lookup_track {
+    my ($self, $payload) = @_;
+    for my $required (qw(id)) {
+        if (!$payload->{$required}) {
+            die qq|property "$required" must be provided|;
+        }
+    }
+    my $uri = URI->new($self->{endpoint} . qq|/v1/track/lookup|);
+    $uri->query_form($payload);
+    my $req = HTTP::Request::Common::GET($uri->as_string());
+    if (my($u, $p) = @{$self->{credentials} || []}) {
+        $req->authorization_basic($u, $p);
+    }
+    my $res = $self->{user_agent}->request($req);
+    if (!$res->is_success) {
+        $self->{last_error} = $res->status_line;
+        return;
+    }
+    return JSON::decode_json($res->decoded_content);
+}
+
+sub create_blog_entry {
+    my ($self, $payload) = @_;
+    for my $required (qw(conference_id url)) {
+        if (!$payload->{$required}) {
+            die qq|property "$required" must be provided|;
+        }
+    }
+    my $uri = URI->new($self->{endpoint} . qq|/v1/blog_entry/create|);
+    my @request_args;
+    push @request_args, (Content_Type => "application/json", Content => JSON::encode_json($payload));
+    my $req = HTTP::Request::Common::POST($uri, @request_args);
+    if (my($u, $p) = @{$self->{credentials} || []}) {
+        $req->authorization_basic($u, $p);
+    }
+    my $res = $self->{user_agent}->request($req);
+    if (!$res->is_success) {
+        $self->{last_error} = $res->status_line;
+        return;
+    }
+    return JSON::decode_json($res->decoded_content);
+}
+
+sub update_blog_entry {
+    my ($self, $payload) = @_;
+    for my $required (qw(id user_id)) {
+        if (!$payload->{$required}) {
+            die qq|property "$required" must be provided|;
+        }
+    }
+    my $uri = URI->new($self->{endpoint} . qq|/v1/blog_entry/update|);
+    my @request_args;
+    push @request_args, (Content_Type => "application/json", Content => JSON::encode_json($payload));
+    my $req = HTTP::Request::Common::POST($uri, @request_args);
+    if (my($u, $p) = @{$self->{credentials} || []}) {
+        $req->authorization_basic($u, $p);
+    }
+    my $res = $self->{user_agent}->request($req);
+    if (!$res->is_success) {
+        $self->{last_error} = $res->status_line;
+        return;
+    }
+    return 1
+}
+
+sub delete_blog_entry {
+    my ($self, $payload) = @_;
+    for my $required (qw(id user_id)) {
+        if (!$payload->{$required}) {
+            die qq|property "$required" must be provided|;
+        }
+    }
+    my $uri = URI->new($self->{endpoint} . qq|/v1/blog_entry/delete|);
+    my @request_args;
+    push @request_args, (Content_Type => "application/json", Content => JSON::encode_json($payload));
+    my $req = HTTP::Request::Common::POST($uri, @request_args);
+    if (my($u, $p) = @{$self->{credentials} || []}) {
+        $req->authorization_basic($u, $p);
+    }
+    my $res = $self->{user_agent}->request($req);
+    if (!$res->is_success) {
+        $self->{last_error} = $res->status_line;
+        return;
+    }
+    return 1
+}
+
+sub lookup_blog_entry {
+    my ($self, $payload) = @_;
+    for my $required (qw(id)) {
+        if (!$payload->{$required}) {
+            die qq|property "$required" must be provided|;
+        }
+    }
+    my $uri = URI->new($self->{endpoint} . qq|/v1/blog_entry/lookup|);
+    $uri->query_form($payload);
+    my $req = HTTP::Request::Common::GET($uri->as_string());
+    if (my($u, $p) = @{$self->{credentials} || []}) {
+        $req->authorization_basic($u, $p);
+    }
+    my $res = $self->{user_agent}->request($req);
+    if (!$res->is_success) {
+        $self->{last_error} = $res->status_line;
+        return;
+    }
+    return JSON::decode_json($res->decoded_content);
+}
+
+sub list_blog_entries {
+    my ($self, $payload) = @_;
+    my $uri = URI->new($self->{endpoint} . qq|/v1/blog_entry/list|);
+    $uri->query_form($payload);
+    my $req = HTTP::Request::Common::GET($uri->as_string());
+    if (my($u, $p) = @{$self->{credentials} || []}) {
+        $req->authorization_basic($u, $p);
+    }
+    my $res = $self->{user_agent}->request($req);
+    if (!$res->is_success) {
+        $self->{last_error} = $res->status_line;
+        return;
+    }
+    return JSON::decode_json($res->decoded_content);
+}
+
 1;

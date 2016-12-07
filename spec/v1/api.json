@@ -496,6 +496,20 @@
           "type": "object"
         }
       ]
+    },
+    "blog_entry": {
+      "hsup.type": "model.BlogEntry",
+      "type": "object",
+      "properties": {
+        "conference_id": {"$ref": "#/definitions/uuid"},
+        "id": {"$ref":"#/definitions/uuid"},
+        "status": {
+          "type": "string",
+          "enum": ["public", "private"]
+        },
+        "title": {"type": "string"},
+        "url": {"$ref":"#/definitions/url"}
+      }
     }
   },
   "links": [
@@ -1879,6 +1893,104 @@
         }
       },
       "targetSchema": { "$ref": "#/definitions/track" }
+    },
+    {
+      "title": "Create blog entry",
+      "rel": "update",
+      "hsup.wrapper": "httpWithBasicAuth",
+      "method": "POST",
+      "href": "/v1/blog_entry/create",
+      "encType": "application/json",
+      "schema": {
+        "properties": {
+          "conference_id": {"$ref": "#/definitions/uuid"},
+          "title": {"type": "string"},
+          "url": {"$ref": "#/definitions/url" },
+          "status": {
+            "type": "string",
+            "enum": ["public", "private"]
+          },
+          "user_id": {"$ref":"#/definitions/uuid"}
+        },
+        "required": ["conference_id","url"]
+      },
+      "targetSchema": {"$ref": "#/definitions/blog_entry"}
+    },
+    {
+      "title": "Update blog entry",
+      "rel": "update",
+      "hsup.wrapper": "httpWithBasicAuth",
+      "method": "POST",
+      "href": "/v1/blog_entry/update",
+      "encType": "application/json",
+      "schema": {
+        "properties": {
+          "id": {"$ref": "#/definitions/uuid"},
+          "status": {
+            "type": "string",
+            "enum": ["public", "private"]
+          },
+          "title": {"type": "string"},
+          "url": {"$ref": "#/definitions/url" },
+          "user_id": {"$ref":"#/definitions/uuid"}
+        },
+        "required": ["id","user_id"]
+      }
+    },
+    {
+      "title": "Delete blog entry",
+      "rel": "delete",
+      "hsup.wrapper": "httpWithBasicAuth",
+      "method": "POST",
+      "href": "/v1/blog_entry/delete",
+      "encType": "application/json",
+      "schema": {
+        "properties": {
+          "id": {"$ref": "#/definitions/uuid"},
+          "user_id": {"$ref":"#/definitions/uuid"}
+        },
+        "required": ["id","user_id"]
+      }
+    },
+    {
+      "title": "Lookup blog entry",
+      "rel": "lookup",
+      "href": "/v1/blog_entry/lookup",
+      "method": "GET",
+      "schema": {
+        "type": "object",
+        "required": ["id"],
+        "properties": {
+          "id": { "$ref": "#/definitions/uuid" },
+          "lang": { "$ref": "#/definitions/language" }
+        }
+      },
+      "targetSchema": { "$ref": "#/definitions/blog_entry" }
+    },
+    {
+      "title": "List blog entries",
+      "rel": "lookup",
+      "href": "/v1/blog_entry/list",
+      "method": "GET",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "conference_id": { "$ref": "#/definitions/uuid" },
+          "lang": { "$ref": "#/definitions/language" },
+          "status": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": ["public", "private"]
+            }
+          }
+        }
+      },
+      "targetSchema": {
+        "hsup.type": "[]model.BlogEntry",
+        "type": "array",
+        "items": { "$ref": "#/definitions/blog_entry" }
+      }
     }
   ]
 }
