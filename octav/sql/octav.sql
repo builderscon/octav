@@ -315,6 +315,8 @@ CREATE TABLE blog_entries (
     url TEXT NOT NULL,
     url_hash CHAR(64) CHARACTER SET latin1 NOT NULL,
     status CHAR(16) NOT NULL DEFAULT 'private',
+    created_on DATETIME NOT NULL,
+    modified_on TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     UNIQUE KEY(eid),
     UNIQUE KEY(url_hash),
     KEY(status),

@@ -25,7 +25,7 @@ func (v *BlogEntrySvc) populateRowForCreate(vdb *db.BlogEntry, payload *model.Cr
 
 	h := sha1.New()
 	io.WriteString(h, payload.URL)
-	vdb.URLHash = string(h.Sum(nil))
+	vdb.URLHash = fmt.Sprintf("%x", (h.Sum(nil)))
 	return nil
 }
 
