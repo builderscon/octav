@@ -14,6 +14,8 @@ const (
 	StatusPending  = "pending"
 	StatusAccepted = "accepted"
 	StatusRejected = "rejected"
+	StatusPublic   = "public"
+	StatusPrivate  = "private"
 )
 
 var ErrInvalidConferenceHour = errors.New("invalid conference hour specification")
@@ -50,6 +52,7 @@ type Conference struct {
 	Slug                      string              `json:"slug"`
 	FullSlug                  string              `json:"full_slug,omitempty"` // Only populated when decorated
 	Status                    string              `json:"status"`
+	BlogFeedbackAvailable     bool                `json:"blog_feedback_available"`
 	TimetableAvailable        bool                `json:"timetable_available"`
 	Timezone                  string              `json:"timezone"`
 	Dates                     ConferenceDateList  `json:"dates,omitempty"`
@@ -342,6 +345,7 @@ type UpdateConferenceRequest struct {
 	Slug                      jsval.MaybeString `json:"slug,omitempty"`
 	SubTitle                  jsval.MaybeString `json:"sub_title,omitempty" l10n:"true"`
 	Status                    jsval.MaybeString `json:"status,omitempty"`
+	BlogFeedbackAvailable     jsval.MaybeBool   `json:"blog_feedback_available,omitempty"`
 	TimetableAvailable        jsval.MaybeBool   `json:"timetable_available,omitempty"`
 	Timezone                  jsval.MaybeString `json:"timezone,omitempty"`
 	UserID                    string            `json:"user_id"`
@@ -1083,4 +1087,54 @@ type CreateConferenceVenueRequest struct {
 type UpdateConferenceVenueRequest struct {
 	ConferenceID string
 	VenueID      string
+}
+
+// +model
+type BlogEntry struct {
+	ID           string `json:"id"`
+	ConferenceID string `json:"conference_id,omitempty"`
+	Status       string `json:"status,omitempty"`
+	Title        string `json:"title"`
+	URL          string `json:"url"`
+	URLHash      string `json:"status,omitempty"`
+}
+type BlogEntryList []BlogEntry
+
+// +transport
+type CreateBlogEntryRequest struct {
+	ConferenceID    string            `json:"conference_id"`
+	Status          string            `json:"status"`
+	Title           string            `json:"title"`
+	URL             string            `json:"url"`
+	UserID          string            `json:"user_id"`
+	DatabaseOptions []db.InsertOption `json:"-"`
+}
+
+// +transport
+type UpdateBlogEntryRequest struct {
+	ID     string            `json:"id"`
+	Status jsval.MaybeString `json:"status,omitempty"`
+	Title  jsval.MaybeString `json:"title,omitempty"`
+	URL    jsval.MaybeString `json:"url,omitempty"`
+	UserID string            `json:"user_id"`
+}
+
+// +transport
+type LookupBlogEntryRequest struct {
+	ID     string `json:"id"`
+	UserID string `json:"user_id"`
+}
+
+// +transport
+type DeleteBlogEntryRequest struct {
+	ID     string `json:"id"`
+	UserID string `json:"user_id"`
+}
+
+// +transport
+type ListBlogEntriesRequest struct {
+	ConferenceID string            `json:"conference_id"`
+	Status       []string          `json:"status" urlenc:"status,omitempty"`
+	Lang         jsval.MaybeString `json:"lang,omitempty" urlenc:"lang,omitempty,string"`
+	TrustedCall  bool              `json:"-"`
 }

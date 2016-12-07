@@ -28,6 +28,7 @@ type rawConference struct {
 	Slug                      string              `json:"slug"`
 	FullSlug                  string              `json:"full_slug,omitempty"`
 	Status                    string              `json:"status"`
+	BlogFeedbackAvailable     bool                `json:"blog_feedback_available"`
 	TimetableAvailable        bool                `json:"timetable_available"`
 	Timezone                  string              `json:"timezone"`
 	Dates                     ConferenceDateList  `json:"dates,omitempty"`
@@ -55,6 +56,7 @@ func (v Conference) MarshalJSON() ([]byte, error) {
 	raw.Slug = v.Slug
 	raw.FullSlug = v.FullSlug
 	raw.Status = v.Status
+	raw.BlogFeedbackAvailable = v.BlogFeedbackAvailable
 	raw.TimetableAvailable = v.TimetableAvailable
 	raw.Timezone = v.Timezone
 	raw.Dates = v.Dates
@@ -99,6 +101,7 @@ func (v *Conference) FromRow(vdb *db.Conference) error {
 	}
 	v.Slug = vdb.Slug
 	v.Status = vdb.Status
+	v.BlogFeedbackAvailable = vdb.BlogFeedbackAvailable
 	v.TimetableAvailable = vdb.TimetableAvailable
 	v.Timezone = vdb.Timezone
 	return nil
@@ -114,6 +117,7 @@ func (v *Conference) ToRow(vdb *db.Conference) error {
 	vdb.SubTitle.String = v.SubTitle
 	vdb.Slug = v.Slug
 	vdb.Status = v.Status
+	vdb.BlogFeedbackAvailable = v.BlogFeedbackAvailable
 	vdb.TimetableAvailable = v.TimetableAvailable
 	vdb.Timezone = v.Timezone
 	return nil

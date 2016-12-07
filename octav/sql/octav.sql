@@ -73,6 +73,7 @@ CREATE TABLE conferences (
     sub_title TEXT,
     cover_url TEXT,
     timetable_available TINYINT(1) NOT NULL DEFAULT 0,
+    blog_feedback_available TINYINT(1) NOT NULL DEFAULT 0,
     status CHAR(64) CHARACTER SET latin1 NOT NULL default "private",
     timezone CHAR(32) NOT NULL DEFAULT 'UTC',
     created_by CHAR(64) CHARACTER SET latin1 NOT NULL,
@@ -305,5 +306,21 @@ CREATE TABLE temporary_emails (
     UNIQUE KEY(confirmation_key),
     UNIQUE KEY(user_id),
     FOREIGN KEY (user_id) REFERENCES users(eid) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE blog_entries (
+    oid INTEGER UNSIGNED NOT NULL PRIMARY KEY AUTO_INCREMENT,
+    eid CHAR(64) CHARACTER SET latin1 NOT NULL,
+    conference_id CHAR(64) CHARACTER SET latin1 NOT NULL,
+    title TEXT,
+    url TEXT NOT NULL,
+    url_hash CHAR(64) CHARACTER SET latin1 NOT NULL,
+    status CHAR(16) NOT NULL DEFAULT 'private',
+    created_on DATETIME NOT NULL,
+    modified_on TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    UNIQUE KEY(eid),
+    UNIQUE KEY(url_hash),
+    KEY(status),
+    FOREIGN KEY (conference_id) REFERENCES conferences(eid) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 

@@ -518,6 +518,51 @@ func httpConfirmTemporaryEmail(ctx context.Context, w http.ResponseWriter, r *ht
 	doConfirmTemporaryEmail(ctx, w, r, &payload)
 }
 
+func httpCreateBlogEntry(ctx context.Context, w http.ResponseWriter, r *http.Request) {
+	if pdebug.Enabled {
+		g := pdebug.Marker("httpCreateBlogEntry")
+		defer g.End()
+	}
+	if strings.ToLower(r.Method) != `post` {
+		w.Header().Set("Allow", "post")
+		msgbuf := getBytesBuffer()
+		defer releaseBytesBuffer(msgbuf)
+		msgbuf.WriteString(`Method was `)
+		msgbuf.WriteString(r.Method)
+		msgbuf.WriteString(`, expected 'post'`)
+		httpError(w, msgbuf.String(), http.StatusNotFound, nil)
+		return
+	}
+
+	var payload model.CreateBlogEntryRequest
+	jsonbuf := getBytesBuffer()
+	defer releaseBytesBuffer(jsonbuf)
+
+	switch ct := r.Header.Get("Content-Type"); {
+	case ct == "application/json":
+		if _, err := io.Copy(jsonbuf, io.LimitReader(r.Body, MaxPostSize)); err != nil {
+			httpError(w, `Failed to read request body`, http.StatusInternalServerError, err)
+			return
+		}
+	default:
+		httpError(w, `Invalid content-type`, http.StatusInternalServerError, nil)
+		return
+	}
+	if pdebug.Enabled {
+		pdebug.Printf(`-----> %s`, jsonbuf.Bytes())
+	}
+	if err := json.Unmarshal(jsonbuf.Bytes(), &payload); err != nil {
+		httpError(w, `Invalid JSON input`, http.StatusInternalServerError, err)
+		return
+	}
+
+	if err := validator.HTTPCreateBlogEntryRequest.Validate(&payload); err != nil {
+		httpError(w, `Invalid input (validation failed)`, http.StatusInternalServerError, err)
+		return
+	}
+	doCreateBlogEntry(ctx, w, r, &payload)
+}
+
 func httpCreateConference(ctx context.Context, w http.ResponseWriter, r *http.Request) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("httpCreateConference")
@@ -940,6 +985,51 @@ func httpCreateVenue(ctx context.Context, w http.ResponseWriter, r *http.Request
 		return
 	}
 	doCreateVenue(ctx, w, r, &payload)
+}
+
+func httpDeleteBlogEntry(ctx context.Context, w http.ResponseWriter, r *http.Request) {
+	if pdebug.Enabled {
+		g := pdebug.Marker("httpDeleteBlogEntry")
+		defer g.End()
+	}
+	if strings.ToLower(r.Method) != `post` {
+		w.Header().Set("Allow", "post")
+		msgbuf := getBytesBuffer()
+		defer releaseBytesBuffer(msgbuf)
+		msgbuf.WriteString(`Method was `)
+		msgbuf.WriteString(r.Method)
+		msgbuf.WriteString(`, expected 'post'`)
+		httpError(w, msgbuf.String(), http.StatusNotFound, nil)
+		return
+	}
+
+	var payload model.DeleteBlogEntryRequest
+	jsonbuf := getBytesBuffer()
+	defer releaseBytesBuffer(jsonbuf)
+
+	switch ct := r.Header.Get("Content-Type"); {
+	case ct == "application/json":
+		if _, err := io.Copy(jsonbuf, io.LimitReader(r.Body, MaxPostSize)); err != nil {
+			httpError(w, `Failed to read request body`, http.StatusInternalServerError, err)
+			return
+		}
+	default:
+		httpError(w, `Invalid content-type`, http.StatusInternalServerError, nil)
+		return
+	}
+	if pdebug.Enabled {
+		pdebug.Printf(`-----> %s`, jsonbuf.Bytes())
+	}
+	if err := json.Unmarshal(jsonbuf.Bytes(), &payload); err != nil {
+		httpError(w, `Invalid JSON input`, http.StatusInternalServerError, err)
+		return
+	}
+
+	if err := validator.HTTPDeleteBlogEntryRequest.Validate(&payload); err != nil {
+		httpError(w, `Invalid input (validation failed)`, http.StatusInternalServerError, err)
+		return
+	}
+	doDeleteBlogEntry(ctx, w, r, &payload)
 }
 
 func httpDeleteConference(ctx context.Context, w http.ResponseWriter, r *http.Request) {
@@ -1623,6 +1713,38 @@ func httpHealthCheck(ctx context.Context, w http.ResponseWriter, r *http.Request
 	doHealthCheck(ctx, w, r)
 }
 
+func httpListBlogEntries(ctx context.Context, w http.ResponseWriter, r *http.Request) {
+	if pdebug.Enabled {
+		g := pdebug.Marker("httpListBlogEntries")
+		defer g.End()
+	}
+	if strings.ToLower(r.Method) != `get` {
+		w.Header().Set("Allow", "get")
+		msgbuf := getBytesBuffer()
+		defer releaseBytesBuffer(msgbuf)
+		msgbuf.WriteString(`Method was `)
+		msgbuf.WriteString(r.Method)
+		msgbuf.WriteString(`, expected 'get'`)
+		httpError(w, msgbuf.String(), http.StatusNotFound, nil)
+		return
+	}
+
+	var payload model.ListBlogEntriesRequest
+	qbuf := getBytesBuffer()
+	defer releaseBytesBuffer(qbuf)
+	qbuf.WriteString(r.URL.RawQuery)
+	if err := urlenc.Unmarshal(qbuf.Bytes(), &payload); err != nil {
+		httpError(w, `Failed to parse url query string`, http.StatusInternalServerError, err)
+		return
+	}
+
+	if err := validator.HTTPListBlogEntriesRequest.Validate(&payload); err != nil {
+		httpError(w, `Invalid input (validation failed)`, http.StatusInternalServerError, err)
+		return
+	}
+	doListBlogEntries(ctx, w, r, &payload)
+}
+
 func httpListConference(ctx context.Context, w http.ResponseWriter, r *http.Request) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("httpListConference")
@@ -2037,6 +2159,38 @@ func httpListVenue(ctx context.Context, w http.ResponseWriter, r *http.Request) 
 		return
 	}
 	doListVenue(ctx, w, r, &payload)
+}
+
+func httpLookupBlogEntry(ctx context.Context, w http.ResponseWriter, r *http.Request) {
+	if pdebug.Enabled {
+		g := pdebug.Marker("httpLookupBlogEntry")
+		defer g.End()
+	}
+	if strings.ToLower(r.Method) != `get` {
+		w.Header().Set("Allow", "get")
+		msgbuf := getBytesBuffer()
+		defer releaseBytesBuffer(msgbuf)
+		msgbuf.WriteString(`Method was `)
+		msgbuf.WriteString(r.Method)
+		msgbuf.WriteString(`, expected 'get'`)
+		httpError(w, msgbuf.String(), http.StatusNotFound, nil)
+		return
+	}
+
+	var payload model.LookupBlogEntryRequest
+	qbuf := getBytesBuffer()
+	defer releaseBytesBuffer(qbuf)
+	qbuf.WriteString(r.URL.RawQuery)
+	if err := urlenc.Unmarshal(qbuf.Bytes(), &payload); err != nil {
+		httpError(w, `Failed to parse url query string`, http.StatusInternalServerError, err)
+		return
+	}
+
+	if err := validator.HTTPLookupBlogEntryRequest.Validate(&payload); err != nil {
+		httpError(w, `Invalid input (validation failed)`, http.StatusInternalServerError, err)
+		return
+	}
+	doLookupBlogEntry(ctx, w, r, &payload)
 }
 
 func httpLookupConference(ctx context.Context, w http.ResponseWriter, r *http.Request) {
@@ -2558,6 +2712,51 @@ func httpTweetAsConference(ctx context.Context, w http.ResponseWriter, r *http.R
 	doTweetAsConference(ctx, w, r, &payload)
 }
 
+func httpUpdateBlogEntry(ctx context.Context, w http.ResponseWriter, r *http.Request) {
+	if pdebug.Enabled {
+		g := pdebug.Marker("httpUpdateBlogEntry")
+		defer g.End()
+	}
+	if strings.ToLower(r.Method) != `post` {
+		w.Header().Set("Allow", "post")
+		msgbuf := getBytesBuffer()
+		defer releaseBytesBuffer(msgbuf)
+		msgbuf.WriteString(`Method was `)
+		msgbuf.WriteString(r.Method)
+		msgbuf.WriteString(`, expected 'post'`)
+		httpError(w, msgbuf.String(), http.StatusNotFound, nil)
+		return
+	}
+
+	var payload model.UpdateBlogEntryRequest
+	jsonbuf := getBytesBuffer()
+	defer releaseBytesBuffer(jsonbuf)
+
+	switch ct := r.Header.Get("Content-Type"); {
+	case ct == "application/json":
+		if _, err := io.Copy(jsonbuf, io.LimitReader(r.Body, MaxPostSize)); err != nil {
+			httpError(w, `Failed to read request body`, http.StatusInternalServerError, err)
+			return
+		}
+	default:
+		httpError(w, `Invalid content-type`, http.StatusInternalServerError, nil)
+		return
+	}
+	if pdebug.Enabled {
+		pdebug.Printf(`-----> %s`, jsonbuf.Bytes())
+	}
+	if err := json.Unmarshal(jsonbuf.Bytes(), &payload); err != nil {
+		httpError(w, `Invalid JSON input`, http.StatusInternalServerError, err)
+		return
+	}
+
+	if err := validator.HTTPUpdateBlogEntryRequest.Validate(&payload); err != nil {
+		httpError(w, `Invalid input (validation failed)`, http.StatusInternalServerError, err)
+		return
+	}
+	doUpdateBlogEntry(ctx, w, r, &payload)
+}
+
 func httpUpdateConference(ctx context.Context, w http.ResponseWriter, r *http.Request) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("httpUpdateConference")
@@ -3037,6 +3236,11 @@ func httpVerifyUser(ctx context.Context, w http.ResponseWriter, r *http.Request)
 func (s *Server) SetupRoutes() {
 	r := s.Router
 	r.HandleFunc(`/`, httpWithContext(httpHealthCheck))
+	r.HandleFunc(`/v1/blog_entry/create`, httpWithContext(httpWithBasicAuth(httpCreateBlogEntry)))
+	r.HandleFunc(`/v1/blog_entry/delete`, httpWithContext(httpWithBasicAuth(httpDeleteBlogEntry)))
+	r.HandleFunc(`/v1/blog_entry/list`, httpWithContext(httpListBlogEntries))
+	r.HandleFunc(`/v1/blog_entry/lookup`, httpWithContext(httpLookupBlogEntry))
+	r.HandleFunc(`/v1/blog_entry/update`, httpWithContext(httpWithBasicAuth(httpUpdateBlogEntry)))
 	r.HandleFunc(`/v1/conference/admin/add`, httpWithContext(httpWithBasicAuth(httpAddConferenceAdmin)))
 	r.HandleFunc(`/v1/conference/admin/delete`, httpWithContext(httpWithBasicAuth(httpDeleteConferenceAdmin)))
 	r.HandleFunc(`/v1/conference/admin/list`, httpWithContext(httpWithBasicAuth(httpListConferenceAdmin)))
