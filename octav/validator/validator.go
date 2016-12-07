@@ -18,6 +18,7 @@ var HTTPAddSponsorRequest *jsval.JSVal
 var HTTPAddSponsorResponse *jsval.JSVal
 var HTTPConfirmTemporaryEmailRequest *jsval.JSVal
 var HTTPCreateBlogEntryRequest *jsval.JSVal
+var HTTPCreateBlogEntryResponse *jsval.JSVal
 var HTTPCreateConferenceRequest *jsval.JSVal
 var HTTPCreateConferenceResponse *jsval.JSVal
 var HTTPCreateConferenceSeriesRequest *jsval.JSVal
@@ -186,8 +187,16 @@ func init() {
 			jsval.EmptyConstraint,
 		).
 		AddProp(
+			"conference_id",
+			jsval.Reference(M).RefersTo("#/definitions/uuid"),
+		).
+		AddProp(
 			"id",
 			jsval.Reference(M).RefersTo("#/definitions/uuid"),
+		).
+		AddProp(
+			"status",
+			jsval.String().Enum("public", "private"),
 		).
 		AddProp(
 			"title",
@@ -1290,6 +1299,36 @@ func init() {
 				AddProp(
 					"user_id",
 					jsval.Reference(M).RefersTo("#/definitions/uuid"),
+				),
+		)
+
+	HTTPCreateBlogEntryResponse = jsval.New().
+		SetName("HTTPCreateBlogEntryResponse").
+		SetConstraintMap(M).
+		SetRoot(
+			jsval.Object().
+				AdditionalProperties(
+					jsval.EmptyConstraint,
+				).
+				AddProp(
+					"conference_id",
+					jsval.Reference(M).RefersTo("#/definitions/uuid"),
+				).
+				AddProp(
+					"id",
+					jsval.Reference(M).RefersTo("#/definitions/uuid"),
+				).
+				AddProp(
+					"status",
+					jsval.String().Enum("public", "private"),
+				).
+				AddProp(
+					"title",
+					jsval.String(),
+				).
+				AddProp(
+					"url",
+					jsval.Reference(M).RefersTo("#/definitions/url"),
 				),
 		)
 
@@ -2874,8 +2913,16 @@ func init() {
 					jsval.EmptyConstraint,
 				).
 				AddProp(
+					"conference_id",
+					jsval.Reference(M).RefersTo("#/definitions/uuid"),
+				).
+				AddProp(
 					"id",
 					jsval.Reference(M).RefersTo("#/definitions/uuid"),
+				).
+				AddProp(
+					"status",
+					jsval.String().Enum("public", "private"),
 				).
 				AddProp(
 					"title",

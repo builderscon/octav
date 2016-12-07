@@ -1897,7 +1897,8 @@ func doCreateBlogEntry(ctx context.Context, w http.ResponseWriter, r *http.Reque
 	defer tx.AutoRollback()
 
 	s := service.BlogEntry()
-	if err := s.CreateFromPayload(ctx, tx, nil, payload); err != nil {
+	var m model.BlogEntry
+	if err := s.CreateFromPayload(ctx, tx, &m, payload); err != nil {
 		httpError(w, `CreateBlogEntry`, http.StatusInternalServerError, err)
 		return
 	}
@@ -1906,7 +1907,7 @@ func doCreateBlogEntry(ctx context.Context, w http.ResponseWriter, r *http.Reque
 		httpError(w, `CreateBlogEntry`, http.StatusInternalServerError, err)
 		return
 	}
-	httpJSON(w, map[string]string{"status": "success"})
+	httpJSON(w, &m)
 }
 
 func doUpdateBlogEntry(ctx context.Context, w http.ResponseWriter, r *http.Request, payload *model.UpdateBlogEntryRequest) {
