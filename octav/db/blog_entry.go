@@ -18,9 +18,6 @@ func (v *BlogEntryList) LoadByConference(tx *Tx, confID string, status []string)
 	stmt.WriteString(BlogEntryStdSelectColumns)
 	stmt.WriteString(` FROM `)
 	stmt.WriteString(BlogEntryTable)
-	stmt.WriteString(` WHERE `)
-	stmt.WriteString(BlogEntryTable)
-	stmt.WriteString(`.conference_id = ? `)
 
 	var args []interface{}
 	args = append(args, confID)
@@ -28,11 +25,15 @@ func (v *BlogEntryList) LoadByConference(tx *Tx, confID string, status []string)
 	where := tools.GetBuffer()
 	defer tools.ReleaseBuffer(where)
 
+	where.WriteString(` WHERE `)
+	where.WriteString(BlogEntryTable)
+	where.WriteString(`.conference_id = ? `)
 	if l := len(status); l > 0 {
 		if where.Len() > 0 {
 			where.WriteString(` AND`)
 		}
-		where.WriteString(` status IN (`)
+		where.WriteString(BlogEntryTable)
+		where.WriteString(`.status IN (`)
 		for i, st := range status {
 			where.WriteString(`?`)
 			if i < l-1 {
