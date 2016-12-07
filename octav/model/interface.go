@@ -1089,11 +1089,12 @@ type UpdateConferenceVenueRequest struct {
 
 // +model
 type BlogEntry struct {
-	ID           string
-	ConferenceID string
-	Status       string
-	URL          string
-	URLHash      string
+	ID           string `json:"id"`
+	ConferenceID string `json:"conference_id"`
+	Status       string `json:"-"`
+	Title        string `json:"title"`
+	URL          string `json:"url"`
+	URLHash      string `json:"-"`
 }
 type BlogEntryList []BlogEntry
 
