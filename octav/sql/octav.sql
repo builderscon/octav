@@ -138,6 +138,8 @@ CREATE TABLE conference_administrators (
     UNIQUE KEY(conference_id, user_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
+CREATE TABLE conference_staff LIKE conference_administrators;
+
 CREATE TABLE conference_venues (
     oid INTEGER UNSIGNED NOT NULL PRIMARY KEY AUTO_INCREMENT,
     conference_id CHAR(64) CHARACTER SET latin1 NOT NULL,
