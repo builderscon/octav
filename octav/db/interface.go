@@ -41,6 +41,7 @@ type Conference struct {
 	OID                   int64  // intenral id, used for sorting and what not
 	EID                   string // ID that is visible to the outside
 	CoverURL              sql.NullString
+	RedirectURL           sql.NullString
 	SeriesID              string // ConferenceSeries ID
 	Slug                  string
 	Status                string

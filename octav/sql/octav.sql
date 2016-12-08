@@ -72,6 +72,7 @@ CREATE TABLE conferences (
     title TEXT NOT NULL,
     sub_title TEXT,
     cover_url TEXT,
+    redirect_url TEXT,
     timetable_available TINYINT(1) NOT NULL DEFAULT 0,
     blog_feedback_available TINYINT(1) NOT NULL DEFAULT 0,
     status CHAR(64) CHARACTER SET latin1 NOT NULL default "private",
