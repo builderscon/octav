@@ -13,7 +13,7 @@ import (
 	"github.com/pkg/errors"
 )
 
-const ConferenceStdSelectColumns = "conferences.oid, conferences.eid, conferences.cover_url, conferences.series_id, conferences.slug, conferences.status, conferences.sub_title, conferences.title, conferences.blog_feedback_available, conferences.timetable_available, conferences.timezone, conferences.created_by, conferences.created_on, conferences.modified_on"
+const ConferenceStdSelectColumns = "conferences.oid, conferences.eid, conferences.cover_url, conferences.redirect_url, conferences.series_id, conferences.slug, conferences.status, conferences.sub_title, conferences.title, conferences.blog_feedback_available, conferences.timetable_available, conferences.timezone, conferences.created_by, conferences.created_on, conferences.modified_on"
 const ConferenceTable = "conferences"
 
 type ConferenceList []Conference
@@ -21,7 +21,7 @@ type ConferenceList []Conference
 func (c *Conference) Scan(scanner interface {
 	Scan(...interface{}) error
 }) error {
-	return scanner.Scan(&c.OID, &c.EID, &c.CoverURL, &c.SeriesID, &c.Slug, &c.Status, &c.SubTitle, &c.Title, &c.BlogFeedbackAvailable, &c.TimetableAvailable, &c.Timezone, &c.CreatedBy, &c.CreatedOn, &c.ModifiedOn)
+	return scanner.Scan(&c.OID, &c.EID, &c.CoverURL, &c.RedirectURL, &c.SeriesID, &c.Slug, &c.Status, &c.SubTitle, &c.Title, &c.BlogFeedbackAvailable, &c.TimetableAvailable, &c.Timezone, &c.CreatedBy, &c.CreatedOn, &c.ModifiedOn)
 }
 
 func init() {
@@ -38,7 +38,7 @@ func init() {
 		stmt.Reset()
 		stmt.WriteString(`UPDATE `)
 		stmt.WriteString(ConferenceTable)
-		stmt.WriteString(` SET eid = ?, cover_url = ?, series_id = ?, slug = ?, status = ?, sub_title = ?, title = ?, blog_feedback_available = ?, timetable_available = ?, timezone = ?, created_by = ? WHERE oid = ?`)
+		stmt.WriteString(` SET eid = ?, cover_url = ?, redirect_url = ?, series_id = ?, slug = ?, status = ?, sub_title = ?, title = ?, blog_feedback_available = ?, timetable_available = ?, timezone = ?, created_by = ? WHERE oid = ?`)
 		library.Register("sqlConferenceUpdateByOIDKey", stmt.String())
 
 		stmt.Reset()
@@ -60,7 +60,7 @@ func init() {
 		stmt.Reset()
 		stmt.WriteString(`UPDATE `)
 		stmt.WriteString(ConferenceTable)
-		stmt.WriteString(` SET eid = ?, cover_url = ?, series_id = ?, slug = ?, status = ?, sub_title = ?, title = ?, blog_feedback_available = ?, timetable_available = ?, timezone = ?, created_by = ? WHERE eid = ?`)
+		stmt.WriteString(` SET eid = ?, cover_url = ?, redirect_url = ?, series_id = ?, slug = ?, status = ?, sub_title = ?, title = ?, blog_feedback_available = ?, timetable_available = ?, timezone = ?, created_by = ? WHERE eid = ?`)
 		library.Register("sqlConferenceUpdateByEIDKey", stmt.String())
 	})
 }
@@ -107,8 +107,8 @@ func (c *Conference) Create(tx *Tx, opts ...InsertOption) (err error) {
 	}
 	stmt.WriteString("INTO ")
 	stmt.WriteString(ConferenceTable)
-	stmt.WriteString(` (eid, cover_url, series_id, slug, status, sub_title, title, blog_feedback_available, timetable_available, timezone, created_by, created_on, modified_on) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`)
-	result, err := tx.Exec(stmt.String(), c.EID, c.CoverURL, c.SeriesID, c.Slug, c.Status, c.SubTitle, c.Title, c.BlogFeedbackAvailable, c.TimetableAvailable, c.Timezone, c.CreatedBy, c.CreatedOn, c.ModifiedOn)
+	stmt.WriteString(` (eid, cover_url, redirect_url, series_id, slug, status, sub_title, title, blog_feedback_available, timetable_available, timezone, created_by, created_on, modified_on) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`)
+	result, err := tx.Exec(stmt.String(), c.EID, c.CoverURL, c.RedirectURL, c.SeriesID, c.Slug, c.Status, c.SubTitle, c.Title, c.BlogFeedbackAvailable, c.TimetableAvailable, c.Timezone, c.CreatedBy, c.CreatedOn, c.ModifiedOn)
 	if err != nil {
 		return err
 	}
@@ -135,7 +135,7 @@ func (c Conference) Update(tx *Tx) (err error) {
 		if err != nil {
 			return errors.Wrap(err, `failed to get statement`)
 		}
-		_, err = tx.Stmt(stmt).Exec(c.EID, c.CoverURL, c.SeriesID, c.Slug, c.Status, c.SubTitle, c.Title, c.BlogFeedbackAvailable, c.TimetableAvailable, c.Timezone, c.CreatedBy, c.OID)
+		_, err = tx.Stmt(stmt).Exec(c.EID, c.CoverURL, c.RedirectURL, c.SeriesID, c.Slug, c.Status, c.SubTitle, c.Title, c.BlogFeedbackAvailable, c.TimetableAvailable, c.Timezone, c.CreatedBy, c.OID)
 		return err
 	}
 	if c.EID != "" {
@@ -146,7 +146,7 @@ func (c Conference) Update(tx *Tx) (err error) {
 		if err != nil {
 			return errors.Wrap(err, `failed to get statement`)
 		}
-		_, err = tx.Stmt(stmt).Exec(c.EID, c.CoverURL, c.SeriesID, c.Slug, c.Status, c.SubTitle, c.Title, c.BlogFeedbackAvailable, c.TimetableAvailable, c.Timezone, c.CreatedBy, c.EID)
+		_, err = tx.Stmt(stmt).Exec(c.EID, c.CoverURL, c.RedirectURL, c.SeriesID, c.Slug, c.Status, c.SubTitle, c.Title, c.BlogFeedbackAvailable, c.TimetableAvailable, c.Timezone, c.CreatedBy, c.EID)
 		return err
 	}
 	return errors.New("either OID/EID must be filled")

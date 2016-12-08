@@ -22,6 +22,7 @@ type rawConference struct {
 	CFPPostSubmitInstructions string              `json:"cfp_post_submit_instructions,omitempty" l10n:"true"`
 	ContactInformation        string              `json:"contact_information,omitempty" l10n:"true"`
 	CoverURL                  string              `json:"cover_url"`
+	RedirectURL               string              `json:"redirect_url"`
 	SeriesID                  string              `json:"series_id,omitempty"`
 	Series                    *ConferenceSeries   `json:"series,omitempty" decorate:"true"`
 	SubTitle                  string              `json:"sub_title" l10n:"true"`
@@ -50,6 +51,7 @@ func (v Conference) MarshalJSON() ([]byte, error) {
 	raw.CFPPostSubmitInstructions = v.CFPPostSubmitInstructions
 	raw.ContactInformation = v.ContactInformation
 	raw.CoverURL = v.CoverURL
+	raw.RedirectURL = v.RedirectURL
 	raw.SeriesID = v.SeriesID
 	raw.Series = v.Series
 	raw.SubTitle = v.SubTitle
@@ -95,6 +97,9 @@ func (v *Conference) FromRow(vdb *db.Conference) error {
 	if vdb.CoverURL.Valid {
 		v.CoverURL = vdb.CoverURL.String
 	}
+	if vdb.RedirectURL.Valid {
+		v.RedirectURL = vdb.RedirectURL.String
+	}
 	v.SeriesID = vdb.SeriesID
 	if vdb.SubTitle.Valid {
 		v.SubTitle = vdb.SubTitle.String
@@ -112,6 +117,8 @@ func (v *Conference) ToRow(vdb *db.Conference) error {
 	vdb.Title = v.Title
 	vdb.CoverURL.Valid = true
 	vdb.CoverURL.String = v.CoverURL
+	vdb.RedirectURL.Valid = true
+	vdb.RedirectURL.String = v.RedirectURL
 	vdb.SeriesID = v.SeriesID
 	vdb.SubTitle.Valid = true
 	vdb.SubTitle.String = v.SubTitle

@@ -46,6 +46,7 @@ type Conference struct {
 	CFPPostSubmitInstructions string              `json:"cfp_post_submit_instructions,omitempty" l10n:"true"`
 	ContactInformation        string              `json:"contact_information,omitempty" l10n:"true"`
 	CoverURL                  string              `json:"cover_url"`
+	RedirectURL               string              `json:"redirect_url"`
 	SeriesID                  string              `json:"series_id,omitempty"`
 	Series                    *ConferenceSeries   `json:"series,omitempty" decorate:"true"`
 	SubTitle                  string              `json:"sub_title" l10n:"true"`
