@@ -60,6 +60,11 @@ func (v *ConferenceSvc) populateRowForUpdate(vdb *db.Conference, payload *model.
 		vdb.CoverURL.String = payload.CoverURL.String
 	}
 
+	if payload.RedirectURL.Valid() {
+		vdb.RedirectURL.Valid = true
+		vdb.RedirectURL.String = payload.RedirectURL.String
+	}
+
 	if payload.Slug.Valid() {
 		vdb.Slug = payload.Slug.String
 	}

@@ -416,6 +416,8 @@ func doConferenceUpdate(args cmdargs) int {
 	fs.StringVar(&description, "description", "", "")
 	var id string
 	fs.StringVar(&id, "id", "", "")
+	var redirect_url string
+	fs.StringVar(&redirect_url, "redirect_url", "", "")
 	var slug string
 	fs.StringVar(&slug, "slug", "", "")
 	var status string
@@ -453,6 +455,9 @@ func doConferenceUpdate(args cmdargs) int {
 	}
 	if id != "" {
 		m["id"] = id
+	}
+	if redirect_url != "" {
+		m["redirect_url"] = redirect_url
 	}
 	if slug != "" {
 		m["slug"] = slug

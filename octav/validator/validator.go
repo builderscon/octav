@@ -3954,6 +3954,10 @@ func init() {
 					jsval.Reference(M).RefersTo("#/definitions/uuid"),
 				).
 				AddProp(
+					"redirect_url",
+					jsval.Reference(M).RefersTo("#/definitions/url"),
+				).
+				AddProp(
 					"slug",
 					jsval.Reference(M).RefersTo("#/definitions/string_en"),
 				).
