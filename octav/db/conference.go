@@ -65,7 +65,7 @@ func (v *ConferenceList) LoadFromQuery(tx *Tx, status, organizerID []string, ran
 		hasDate = true
 	}
 
-	qbuf.WriteString(`SELECT `)
+	qbuf.WriteString(`SELECT DISTINCT `)
 	qbuf.WriteString(ConferenceStdSelectColumns)
 	qbuf.WriteString(` FROM `)
 	qbuf.WriteString(ConferenceTable)

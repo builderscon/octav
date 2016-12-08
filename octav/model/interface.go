@@ -342,6 +342,7 @@ type UpdateConferenceRequest struct {
 	CFPPostSubmitInstructions jsval.MaybeString `json:"cfp_post_submit_instructions" l10n:"true"`
 	ContactInformation        jsval.MaybeString `json:"contact_information" l10n:"true"`
 	MultipartForm             *multipart.Form   `json:"-"`
+	RedirectURL               jsval.MaybeString `json:"redirect_url,omitempty"`
 	SeriesID                  jsval.MaybeString `json:"series_id,omitempty"`
 	Slug                      jsval.MaybeString `json:"slug,omitempty"`
 	SubTitle                  jsval.MaybeString `json:"sub_title,omitempty" l10n:"true"`

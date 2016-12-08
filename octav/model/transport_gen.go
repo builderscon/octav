@@ -1137,6 +1137,9 @@ func (r UpdateConferenceRequest) collectMarshalData() map[string]interface{} {
 	if r.ContactInformation.Valid() {
 		m["contact_information"] = r.ContactInformation.Value()
 	}
+	if r.RedirectURL.Valid() {
+		m["redirect_url"] = r.RedirectURL.Value()
+	}
 	if r.SeriesID.Valid() {
 		m["series_id"] = r.SeriesID.Value()
 	}
@@ -1234,6 +1237,12 @@ func (r *UpdateConferenceRequest) Populate(m map[string]interface{}) error {
 		}
 		delete(m, "contact_information")
 	}
+	if jv, ok := m["redirect_url"]; ok {
+		if err := r.RedirectURL.Set(jv); err != nil {
+			return errors.New("set field RedirectURL failed: " + err.Error())
+		}
+		delete(m, "redirect_url")
+	}
 	if jv, ok := m["series_id"]; ok {
 		if err := r.SeriesID.Set(jv); err != nil {
 			return errors.New("set field SeriesID failed: " + err.Error())
@@ -1293,7 +1302,7 @@ func (r *UpdateConferenceRequest) Populate(m map[string]interface{}) error {
 
 func (r *UpdateConferenceRequest) GetPropNames() ([]string, error) {
 	l, _ := r.LocalizedFields.GetPropNames()
-	return append(l, "id", "title", "description", "cfp_lead_text", "cfp_pre_submit_instructions", "cfp_post_submit_instructions", "contact_information", "series_id", "slug", "sub_title", "status", "blog_feedback_available", "timetable_available", "timezone", "user_id"), nil
+	return append(l, "id", "title", "description", "cfp_lead_text", "cfp_pre_submit_instructions", "cfp_post_submit_instructions", "contact_information", "redirect_url", "series_id", "slug", "sub_title", "status", "blog_feedback_available", "timetable_available", "timezone", "user_id"), nil
 }
 
 func (r *UpdateConferenceRequest) SetPropValue(s string, v interface{}) error {
@@ -1315,6 +1324,8 @@ func (r *UpdateConferenceRequest) SetPropValue(s string, v interface{}) error {
 		return r.CFPPostSubmitInstructions.Set(v)
 	case "contact_information":
 		return r.ContactInformation.Set(v)
+	case "redirect_url":
+		return r.RedirectURL.Set(v)
 	case "series_id":
 		return r.SeriesID.Set(v)
 	case "slug":

@@ -1304,6 +1304,7 @@
           "cfp_pre_submit_instructions": { "$ref": "#/definitions/string_en" },
           "cfp_post_submit_instructions": { "$ref": "#/definitions/string_en" },
           "contact_information": { "$ref": "#/definitions/string_en" },
+          "redirect_url": {"$ref": "#/definitions/url"},
           "slug": { "$ref": "#/definitions/string_en" },
           "status": { "$ref": "#/definitions/conference_status" },
           "sub_title": { "$ref": "#/definitions/string_en" },

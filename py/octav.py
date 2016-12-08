@@ -1,5 +1,5 @@
 """OCTAV Client Library"""
-"""DO NOT EDIT: This file was generated from ../spec/v1/api.json on Wed Dec  7 11:00:58 2016"""
+"""DO NOT EDIT: This file was generated from ../spec/v1/api.json on Thu Dec  8 10:46:42 2016"""
 
 import certifi
 import json
@@ -1683,7 +1683,7 @@ class Octav(object):
         self.error = repr(e)
         return None
 
-  def update_conference (self, id, user_id, cfp_lead_text=None, cfp_post_submit_instructions=None, cfp_pre_submit_instructions=None, contact_information=None, description=None, slug=None, status=None, sub_title=None, timetable_available=None, timezone=None, title=None, **args):
+  def update_conference (self, id, user_id, cfp_lead_text=None, cfp_post_submit_instructions=None, cfp_pre_submit_instructions=None, contact_information=None, description=None, redirect_url=None, slug=None, status=None, sub_title=None, timetable_available=None, timezone=None, title=None, **args):
     try:
         payload = {}
         hdrs = {}
@@ -1705,6 +1705,8 @@ class Octav(object):
             payload['description'] = description
         if id is not None:
             payload['id'] = id
+        if redirect_url is not None:
+            payload['redirect_url'] = redirect_url
         if slug is not None:
             payload['slug'] = slug
         if status is not None:
