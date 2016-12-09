@@ -293,6 +293,51 @@ func httpAddConferenceSeriesAdmin(ctx context.Context, w http.ResponseWriter, r 
 	doAddConferenceSeriesAdmin(ctx, w, r, &payload)
 }
 
+func httpAddConferenceStaff(ctx context.Context, w http.ResponseWriter, r *http.Request) {
+	if pdebug.Enabled {
+		g := pdebug.Marker("httpAddConferenceStaff")
+		defer g.End()
+	}
+	if strings.ToLower(r.Method) != `post` {
+		w.Header().Set("Allow", "post")
+		msgbuf := getBytesBuffer()
+		defer releaseBytesBuffer(msgbuf)
+		msgbuf.WriteString(`Method was `)
+		msgbuf.WriteString(r.Method)
+		msgbuf.WriteString(`, expected 'post'`)
+		httpError(w, msgbuf.String(), http.StatusNotFound, nil)
+		return
+	}
+
+	var payload model.AddConferenceStaffRequest
+	jsonbuf := getBytesBuffer()
+	defer releaseBytesBuffer(jsonbuf)
+
+	switch ct := r.Header.Get("Content-Type"); {
+	case ct == "application/json":
+		if _, err := io.Copy(jsonbuf, io.LimitReader(r.Body, MaxPostSize)); err != nil {
+			httpError(w, `Failed to read request body`, http.StatusInternalServerError, err)
+			return
+		}
+	default:
+		httpError(w, `Invalid content-type`, http.StatusInternalServerError, nil)
+		return
+	}
+	if pdebug.Enabled {
+		pdebug.Printf(`-----> %s`, jsonbuf.Bytes())
+	}
+	if err := json.Unmarshal(jsonbuf.Bytes(), &payload); err != nil {
+		httpError(w, `Invalid JSON input`, http.StatusInternalServerError, err)
+		return
+	}
+
+	if err := validator.HTTPAddConferenceStaffRequest.Validate(&payload); err != nil {
+		httpError(w, `Invalid input (validation failed)`, http.StatusInternalServerError, err)
+		return
+	}
+	doAddConferenceStaff(ctx, w, r, &payload)
+}
+
 func httpAddConferenceVenue(ctx context.Context, w http.ResponseWriter, r *http.Request) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("httpAddConferenceVenue")
@@ -1212,6 +1257,51 @@ func httpDeleteConferenceSeries(ctx context.Context, w http.ResponseWriter, r *h
 	doDeleteConferenceSeries(ctx, w, r, &payload)
 }
 
+func httpDeleteConferenceStaff(ctx context.Context, w http.ResponseWriter, r *http.Request) {
+	if pdebug.Enabled {
+		g := pdebug.Marker("httpDeleteConferenceStaff")
+		defer g.End()
+	}
+	if strings.ToLower(r.Method) != `post` {
+		w.Header().Set("Allow", "post")
+		msgbuf := getBytesBuffer()
+		defer releaseBytesBuffer(msgbuf)
+		msgbuf.WriteString(`Method was `)
+		msgbuf.WriteString(r.Method)
+		msgbuf.WriteString(`, expected 'post'`)
+		httpError(w, msgbuf.String(), http.StatusNotFound, nil)
+		return
+	}
+
+	var payload model.DeleteConferenceStaffRequest
+	jsonbuf := getBytesBuffer()
+	defer releaseBytesBuffer(jsonbuf)
+
+	switch ct := r.Header.Get("Content-Type"); {
+	case ct == "application/json":
+		if _, err := io.Copy(jsonbuf, io.LimitReader(r.Body, MaxPostSize)); err != nil {
+			httpError(w, `Failed to read request body`, http.StatusInternalServerError, err)
+			return
+		}
+	default:
+		httpError(w, `Invalid content-type`, http.StatusInternalServerError, nil)
+		return
+	}
+	if pdebug.Enabled {
+		pdebug.Printf(`-----> %s`, jsonbuf.Bytes())
+	}
+	if err := json.Unmarshal(jsonbuf.Bytes(), &payload); err != nil {
+		httpError(w, `Invalid JSON input`, http.StatusInternalServerError, err)
+		return
+	}
+
+	if err := validator.HTTPDeleteConferenceStaffRequest.Validate(&payload); err != nil {
+		httpError(w, `Invalid input (validation failed)`, http.StatusInternalServerError, err)
+		return
+	}
+	doDeleteConferenceStaff(ctx, w, r, &payload)
+}
+
 func httpDeleteConferenceVenue(ctx context.Context, w http.ResponseWriter, r *http.Request) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("httpDeleteConferenceVenue")
@@ -1871,6 +1961,38 @@ func httpListConferenceSeries(ctx context.Context, w http.ResponseWriter, r *htt
 		return
 	}
 	doListConferenceSeries(ctx, w, r, &payload)
+}
+
+func httpListConferenceStaff(ctx context.Context, w http.ResponseWriter, r *http.Request) {
+	if pdebug.Enabled {
+		g := pdebug.Marker("httpListConferenceStaff")
+		defer g.End()
+	}
+	if strings.ToLower(r.Method) != `get` {
+		w.Header().Set("Allow", "get")
+		msgbuf := getBytesBuffer()
+		defer releaseBytesBuffer(msgbuf)
+		msgbuf.WriteString(`Method was `)
+		msgbuf.WriteString(r.Method)
+		msgbuf.WriteString(`, expected 'get'`)
+		httpError(w, msgbuf.String(), http.StatusNotFound, nil)
+		return
+	}
+
+	var payload model.ListConferenceStaffRequest
+	qbuf := getBytesBuffer()
+	defer releaseBytesBuffer(qbuf)
+	qbuf.WriteString(r.URL.RawQuery)
+	if err := urlenc.Unmarshal(qbuf.Bytes(), &payload); err != nil {
+		httpError(w, `Failed to parse url query string`, http.StatusInternalServerError, err)
+		return
+	}
+
+	if err := validator.HTTPListConferenceStaffRequest.Validate(&payload); err != nil {
+		httpError(w, `Invalid input (validation failed)`, http.StatusInternalServerError, err)
+		return
+	}
+	doListConferenceStaff(ctx, w, r, &payload)
 }
 
 func httpListConferencesByOrganizer(ctx context.Context, w http.ResponseWriter, r *http.Request) {
@@ -3256,6 +3378,9 @@ func (s *Server) SetupRoutes() {
 	r.HandleFunc(`/v1/conference/lookup_by_slug`, httpWithContext(httpLookupConferenceBySlug))
 	r.HandleFunc(`/v1/conference/schedule.ics`, httpWithContext(httpGetConferenceSchedule))
 	r.HandleFunc(`/v1/conference/session_type/add`, httpWithContext(httpWithBasicAuth(httpAddSessionType)))
+	r.HandleFunc(`/v1/conference/staff/add`, httpWithContext(httpWithBasicAuth(httpAddConferenceStaff)))
+	r.HandleFunc(`/v1/conference/staff/delete`, httpWithContext(httpWithBasicAuth(httpDeleteConferenceStaff)))
+	r.HandleFunc(`/v1/conference/staff/list`, httpWithContext(httpWithOptionalBasicAuth(httpListConferenceStaff)))
 	r.HandleFunc(`/v1/conference/tweet`, httpWithContext(httpWithBasicAuth(httpTweetAsConference)))
 	r.HandleFunc(`/v1/conference/update`, httpWithContext(httpWithBasicAuth(httpUpdateConference)))
 	r.HandleFunc(`/v1/conference/venue/add`, httpWithContext(httpWithBasicAuth(httpAddConferenceVenue)))

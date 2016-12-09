@@ -10,6 +10,7 @@ var HTTPAddConferenceCredentialRequest *jsval.JSVal
 var HTTPAddConferenceDateRequest *jsval.JSVal
 var HTTPAddConferenceDateResponse *jsval.JSVal
 var HTTPAddConferenceSeriesAdminRequest *jsval.JSVal
+var HTTPAddConferenceStaffRequest *jsval.JSVal
 var HTTPAddConferenceVenueRequest *jsval.JSVal
 var HTTPAddFeaturedSpeakerRequest *jsval.JSVal
 var HTTPAddFeaturedSpeakerResponse *jsval.JSVal
@@ -43,6 +44,7 @@ var HTTPDeleteConferenceAdminRequest *jsval.JSVal
 var HTTPDeleteConferenceDateRequest *jsval.JSVal
 var HTTPDeleteConferenceRequest *jsval.JSVal
 var HTTPDeleteConferenceSeriesRequest *jsval.JSVal
+var HTTPDeleteConferenceStaffRequest *jsval.JSVal
 var HTTPDeleteConferenceVenueRequest *jsval.JSVal
 var HTTPDeleteFeaturedSpeakerRequest *jsval.JSVal
 var HTTPDeleteQuestionRequest *jsval.JSVal
@@ -64,6 +66,8 @@ var HTTPListConferenceRequest *jsval.JSVal
 var HTTPListConferenceResponse *jsval.JSVal
 var HTTPListConferenceSeriesRequest *jsval.JSVal
 var HTTPListConferenceSeriesResponse *jsval.JSVal
+var HTTPListConferenceStaffRequest *jsval.JSVal
+var HTTPListConferenceStaffResponse *jsval.JSVal
 var HTTPListConferencesByOrganizerRequest *jsval.JSVal
 var HTTPListConferencesByOrganizerResponse *jsval.JSVal
 var HTTPListFeaturedSpeakersRequest *jsval.JSVal
@@ -996,6 +1000,29 @@ func init() {
 				).
 				AddProp(
 					"series_id",
+					jsval.Reference(M).RefersTo("#/definitions/uuid"),
+				).
+				AddProp(
+					"user_id",
+					jsval.Reference(M).RefersTo("#/definitions/uuid"),
+				),
+		)
+
+	HTTPAddConferenceStaffRequest = jsval.New().
+		SetName("HTTPAddConferenceStaffRequest").
+		SetConstraintMap(M).
+		SetRoot(
+			jsval.Object().
+				Required("conference_id", "staff_id", "user_id").
+				AdditionalProperties(
+					jsval.EmptyConstraint,
+				).
+				AddProp(
+					"conference_id",
+					jsval.Reference(M).RefersTo("#/definitions/uuid"),
+				).
+				AddProp(
+					"staff_id",
 					jsval.Reference(M).RefersTo("#/definitions/uuid"),
 				).
 				AddProp(
@@ -2084,6 +2111,29 @@ func init() {
 				),
 		)
 
+	HTTPDeleteConferenceStaffRequest = jsval.New().
+		SetName("HTTPDeleteConferenceStaffRequest").
+		SetConstraintMap(M).
+		SetRoot(
+			jsval.Object().
+				Required("conference_id", "staff_id", "user_id").
+				AdditionalProperties(
+					jsval.EmptyConstraint,
+				).
+				AddProp(
+					"conference_id",
+					jsval.Reference(M).RefersTo("#/definitions/uuid"),
+				).
+				AddProp(
+					"staff_id",
+					jsval.Reference(M).RefersTo("#/definitions/uuid"),
+				).
+				AddProp(
+					"user_id",
+					jsval.Reference(M).RefersTo("#/definitions/uuid"),
+				),
+		)
+
 	HTTPDeleteConferenceVenueRequest = jsval.New().
 		SetName("HTTPDeleteConferenceVenueRequest").
 		SetConstraintMap(M).
@@ -2498,6 +2548,37 @@ func init() {
 			jsval.Array().
 				Items(
 					jsval.Reference(M).RefersTo("#/definitions/conference_series"),
+				).
+				AdditionalItems(
+					jsval.EmptyConstraint,
+				),
+		)
+
+	HTTPListConferenceStaffRequest = jsval.New().
+		SetName("HTTPListConferenceStaffRequest").
+		SetConstraintMap(M).
+		SetRoot(
+			jsval.Object().
+				AdditionalProperties(
+					jsval.EmptyConstraint,
+				).
+				AddProp(
+					"conference_id",
+					jsval.Reference(M).RefersTo("#/definitions/uuid"),
+				).
+				AddProp(
+					"lang",
+					jsval.Reference(M).RefersTo("#/definitions/language"),
+				),
+		)
+
+	HTTPListConferenceStaffResponse = jsval.New().
+		SetName("HTTPListConferenceStaffResponse").
+		SetConstraintMap(M).
+		SetRoot(
+			jsval.Array().
+				Items(
+					jsval.Reference(M).RefersTo("#/definitions/user"),
 				).
 				AdditionalItems(
 					jsval.EmptyConstraint,

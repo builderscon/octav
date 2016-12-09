@@ -12,12 +12,12 @@ import (
 	"github.com/pkg/errors"
 )
 
-const ConferenceAdministratorStdSelectColumns = "conference_administrators.oid, conference_administrators.conference_id, conference_administrators.user_id, conference_administrators.sort_order, conference_administrators.created_on, conference_administrators.modified_on"
-const ConferenceAdministratorTable = "conference_administrators"
+const ConferenceStaffStdSelectColumns = "conference_staff.oid, conference_staff.conference_id, conference_staff.user_id, conference_staff.sort_order, conference_staff.created_on, conference_staff.modified_on"
+const ConferenceStaffTable = "conference_staff"
 
-type ConferenceAdministratorList []ConferenceAdministrator
+type ConferenceStaffList []ConferenceStaff
 
-func (c *ConferenceAdministrator) Scan(scanner interface {
+func (c *ConferenceStaff) Scan(scanner interface {
 	Scan(...interface{}) error
 }) error {
 	return scanner.Scan(&c.OID, &c.ConferenceID, &c.UserID, &c.SortOrder, &c.CreatedOn, &c.ModifiedOn)
@@ -30,21 +30,21 @@ func init() {
 
 		stmt.Reset()
 		stmt.WriteString(`DELETE FROM `)
-		stmt.WriteString(ConferenceAdministratorTable)
+		stmt.WriteString(ConferenceStaffTable)
 		stmt.WriteString(` WHERE oid = ?`)
-		library.Register("sqlConferenceAdministratorDeleteByOIDKey", stmt.String())
+		library.Register("sqlConferenceStaffDeleteByOIDKey", stmt.String())
 
 		stmt.Reset()
 		stmt.WriteString(`UPDATE `)
-		stmt.WriteString(ConferenceAdministratorTable)
+		stmt.WriteString(ConferenceStaffTable)
 		stmt.WriteString(` SET conference_id = ?, user_id = ?, sort_order = ? WHERE oid = ?`)
-		library.Register("sqlConferenceAdministratorUpdateByOIDKey", stmt.String())
+		library.Register("sqlConferenceStaffUpdateByOIDKey", stmt.String())
 	})
 }
 
-func (c *ConferenceAdministrator) Create(tx *Tx, opts ...InsertOption) (err error) {
+func (c *ConferenceStaff) Create(tx *Tx, opts ...InsertOption) (err error) {
 	if pdebug.Enabled {
-		g := pdebug.Marker("db.ConferenceAdministrator.Create").BindError(&err)
+		g := pdebug.Marker("db.ConferenceStaff.Create").BindError(&err)
 		defer g.End()
 		pdebug.Printf("%#v", c)
 	}
@@ -63,7 +63,7 @@ func (c *ConferenceAdministrator) Create(tx *Tx, opts ...InsertOption) (err erro
 		stmt.WriteString("IGNORE ")
 	}
 	stmt.WriteString("INTO ")
-	stmt.WriteString(ConferenceAdministratorTable)
+	stmt.WriteString(ConferenceStaffTable)
 	stmt.WriteString(` (conference_id, user_id, sort_order, created_on, modified_on) VALUES (?, ?, ?, ?, ?)`)
 	result, err := tx.Exec(stmt.String(), c.ConferenceID, c.UserID, c.SortOrder, c.CreatedOn, c.ModifiedOn)
 	if err != nil {
@@ -79,16 +79,16 @@ func (c *ConferenceAdministrator) Create(tx *Tx, opts ...InsertOption) (err erro
 	return nil
 }
 
-func (c ConferenceAdministrator) Update(tx *Tx) (err error) {
+func (c ConferenceStaff) Update(tx *Tx) (err error) {
 	if pdebug.Enabled {
-		g := pdebug.Marker(`ConferenceAdministrator.Update`).BindError(&err)
+		g := pdebug.Marker(`ConferenceStaff.Update`).BindError(&err)
 		defer g.End()
 	}
 	if c.OID != 0 {
 		if pdebug.Enabled {
 			pdebug.Printf(`Using OID (%d) as key`, c.OID)
 		}
-		stmt, err := library.GetStmt("sqlConferenceAdministratorUpdateByOIDKey")
+		stmt, err := library.GetStmt("sqlConferenceStaffUpdateByOIDKey")
 		if err != nil {
 			return errors.Wrap(err, `failed to get statement`)
 		}
@@ -98,9 +98,9 @@ func (c ConferenceAdministrator) Update(tx *Tx) (err error) {
 	return errors.New("OID must be filled")
 }
 
-func (c ConferenceAdministrator) Delete(tx *Tx) error {
+func (c ConferenceStaff) Delete(tx *Tx) error {
 	if c.OID != 0 {
-		stmt, err := library.GetStmt("sqlConferenceAdministratorDeleteByOIDKey")
+		stmt, err := library.GetStmt("sqlConferenceStaffDeleteByOIDKey")
 		if err != nil {
 			return errors.Wrap(err, `failed to get statement`)
 		}
@@ -111,16 +111,16 @@ func (c ConferenceAdministrator) Delete(tx *Tx) error {
 	return errors.New("column OID must be filled")
 }
 
-func (v *ConferenceAdministratorList) FromRows(rows *sql.Rows, capacity int) error {
-	var res []ConferenceAdministrator
+func (v *ConferenceStaffList) FromRows(rows *sql.Rows, capacity int) error {
+	var res []ConferenceStaff
 	if capacity > 0 {
-		res = make([]ConferenceAdministrator, 0, capacity)
+		res = make([]ConferenceStaff, 0, capacity)
 	} else {
-		res = []ConferenceAdministrator{}
+		res = []ConferenceStaff{}
 	}
 
 	for rows.Next() {
-		vdb := ConferenceAdministrator{}
+		vdb := ConferenceStaff{}
 		if err := vdb.Scan(rows); err != nil {
 			return err
 		}

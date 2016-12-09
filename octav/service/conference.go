@@ -931,3 +931,63 @@ func (v *ConferenceSvc) AddCredentialFromPayload(ctx context.Context, tx *db.Tx,
 
 	return nil
 }
+
+func (v *ConferenceSvc) LoadStaff(tx *db.Tx, users *model.UserList, trustedCall bool, confID, lang string) (err error) {
+	if pdebug.Enabled {
+		g := pdebug.Marker("service.Conference.LoadStaff").BindError(&err)
+		defer g.End()
+	}
+
+	var vdbl db.UserList
+	if err := db.LoadConferenceStaff(tx, &vdbl, confID); err != nil {
+		return err
+	}
+
+	if pdebug.Enabled {
+		pdebug.Printf("Loaded %d staff", len(vdbl))
+	}
+
+	res := make(model.UserList, len(vdbl))
+	su := User()
+	for i, vdb := range vdbl {
+		if err := res[i].FromRow(&vdb); err != nil {
+			return errors.Wrap(err, "failed to map database to model")
+		}
+		if err := su.Decorate(tx, &res[i], trustedCall, lang); err != nil {
+			return errors.Wrap(err, "failed to decorate administrator")
+		}
+	}
+	*users = res
+	return nil
+}
+
+func (v *ConferenceSvc) AddStaffFromPayload(tx *db.Tx, payload *model.AddConferenceStaffRequest) error {
+	su := User()
+	if err := su.IsConferenceAdministrator(tx, payload.ConferenceID, payload.UserID); err != nil {
+		return errors.Wrap(err, "adding a conference administrator requires conference administrator privilege")
+	}
+
+	var c db.ConferenceStaff
+	c.ConferenceID = payload.ConferenceID
+	c.UserID = payload.StaffID
+
+	return errors.Wrap(
+		c.Create(tx, db.WithInsertIgnore(true)),
+		`failed to add staff`,
+	)
+}
+
+func (v *ConferenceSvc) DeleteStaffFromPayload(tx *db.Tx, payload *model.DeleteConferenceStaffRequest) (err error) {
+	if pdebug.Enabled {
+		g := pdebug.Marker("service.Conference.DeleteStaffFromPayload").BindError(&err)
+		defer g.End()
+	}
+
+	su := User()
+	if err := su.IsConferenceAdministrator(tx, payload.ConferenceID, payload.UserID); err != nil {
+		return errors.Wrap(err, "deleting a conference staff requires conference administrator privilege")
+	}
+
+	return db.DeleteConferenceStaff(tx, payload.ConferenceID, payload.StaffID)
+}
+

@@ -1992,6 +1992,57 @@
         "type": "array",
         "items": { "$ref": "#/definitions/blog_entry" }
       }
+    },
+    {
+      "title": "List conference staff",
+      "rel": "lookup",
+      "hsup.wrapper": "httpWithOptionalBasicAuth",
+      "href": "/v1/conference/staff/list",
+      "method": "GET",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "conference_id": { "$ref": "#/definitions/uuid" },
+          "lang": { "$ref": "#/definitions/language" }
+        }
+      },
+      "targetSchema": {
+        "hsup.type": "[]model.User",
+        "type": "array",
+        "items": { "$ref": "#/definitions/user" }
+      }
+    },
+    {
+      "title": "Add conference staff",
+      "rel": "update",
+      "hsup.wrapper": "httpWithBasicAuth",
+      "method": "POST",
+      "href": "/v1/conference/staff/add",
+      "encType": "application/json",
+      "schema": {
+        "properties": {
+          "conference_id": {"$ref": "#/definitions/uuid"},
+          "staff_id": {"$ref":"#/definitions/uuid"},
+          "user_id": {"$ref":"#/definitions/uuid"}
+        },
+        "required": ["conference_id","staff_id","user_id"]
+      }
+    },
+    {
+      "title": "Delete conference staff",
+      "rel": "delete",
+      "hsup.wrapper": "httpWithBasicAuth",
+      "method": "POST",
+      "href": "/v1/conference/staff/delete",
+      "encType": "application/json",
+      "schema": {
+        "properties": {
+          "conference_id": {"$ref": "#/definitions/uuid"},
+          "staff_id": {"$ref":"#/definitions/uuid"},
+          "user_id": {"$ref":"#/definitions/uuid"}
+        },
+        "required": ["conference_id","staff_id","user_id"]
+      }
     }
   ]
 }

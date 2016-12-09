@@ -1140,3 +1140,26 @@ type ListBlogEntriesRequest struct {
 	Lang         jsval.MaybeString `json:"lang,omitempty" urlenc:"lang,omitempty,string"`
 	TrustedCall  bool              `json:"-"`
 }
+
+// +transport
+type AddConferenceStaffRequest struct {
+	ConferenceID string `json:"conference_id"`
+	StaffID      string `json:"staff_id"`
+	UserID       string `json:"user_id"`
+}
+
+// +transport
+type DeleteConferenceStaffRequest struct {
+	ConferenceID string `json:"conference_id"`
+	StaffID      string `json:"staff_id"`
+	UserID       string `json:"user_id"`
+}
+
+// +transport
+type ListConferenceStaffRequest struct {
+	ConferenceID string            `json:"conference_id"`
+	UserID       string            `json:"user_id"`
+	Lang         jsval.MaybeString `json:"lang,omitempty" urlenc:"lang,omitempty,string"`
+}
+
+

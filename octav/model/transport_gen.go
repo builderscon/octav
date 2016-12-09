@@ -7286,3 +7286,197 @@ func (r *ListBlogEntriesRequest) Populate(m map[string]interface{}) error {
 	}
 	return nil
 }
+
+func (r AddConferenceStaffRequest) collectMarshalData() map[string]interface{} {
+	m := make(map[string]interface{})
+	m["conference_id"] = r.ConferenceID
+	m["staff_id"] = r.StaffID
+	m["user_id"] = r.UserID
+	return m
+}
+
+func (r AddConferenceStaffRequest) MarshalJSON() ([]byte, error) {
+	m := r.collectMarshalData()
+	buf, err := json.Marshal(m)
+	if err != nil {
+		return nil, err
+	}
+	return buf, nil
+}
+
+func (r AddConferenceStaffRequest) MarshalURL() ([]byte, error) {
+	m := r.collectMarshalData()
+	buf, err := urlenc.Marshal(m)
+	if err != nil {
+		return nil, err
+	}
+	return buf, nil
+}
+
+func (r *AddConferenceStaffRequest) UnmarshalJSON(data []byte) error {
+	m := make(map[string]interface{})
+	if err := json.Unmarshal(data, &m); err != nil {
+		return err
+	}
+	return r.Populate(m)
+}
+
+func (r *AddConferenceStaffRequest) Populate(m map[string]interface{}) error {
+	if jv, ok := m["conference_id"]; ok {
+		switch jv.(type) {
+		case string:
+			r.ConferenceID = jv.(string)
+			delete(m, "conference_id")
+		default:
+			return errors.Wrap(ErrInvalidJSONFieldType{Field: "conference_id"}, "failed to populate fields for AddConferenceStaffRequest")
+		}
+	}
+	if jv, ok := m["staff_id"]; ok {
+		switch jv.(type) {
+		case string:
+			r.StaffID = jv.(string)
+			delete(m, "staff_id")
+		default:
+			return errors.Wrap(ErrInvalidJSONFieldType{Field: "staff_id"}, "failed to populate fields for AddConferenceStaffRequest")
+		}
+	}
+	if jv, ok := m["user_id"]; ok {
+		switch jv.(type) {
+		case string:
+			r.UserID = jv.(string)
+			delete(m, "user_id")
+		default:
+			return errors.Wrap(ErrInvalidJSONFieldType{Field: "user_id"}, "failed to populate fields for AddConferenceStaffRequest")
+		}
+	}
+	return nil
+}
+
+func (r DeleteConferenceStaffRequest) collectMarshalData() map[string]interface{} {
+	m := make(map[string]interface{})
+	m["conference_id"] = r.ConferenceID
+	m["staff_id"] = r.StaffID
+	m["user_id"] = r.UserID
+	return m
+}
+
+func (r DeleteConferenceStaffRequest) MarshalJSON() ([]byte, error) {
+	m := r.collectMarshalData()
+	buf, err := json.Marshal(m)
+	if err != nil {
+		return nil, err
+	}
+	return buf, nil
+}
+
+func (r DeleteConferenceStaffRequest) MarshalURL() ([]byte, error) {
+	m := r.collectMarshalData()
+	buf, err := urlenc.Marshal(m)
+	if err != nil {
+		return nil, err
+	}
+	return buf, nil
+}
+
+func (r *DeleteConferenceStaffRequest) UnmarshalJSON(data []byte) error {
+	m := make(map[string]interface{})
+	if err := json.Unmarshal(data, &m); err != nil {
+		return err
+	}
+	return r.Populate(m)
+}
+
+func (r *DeleteConferenceStaffRequest) Populate(m map[string]interface{}) error {
+	if jv, ok := m["conference_id"]; ok {
+		switch jv.(type) {
+		case string:
+			r.ConferenceID = jv.(string)
+			delete(m, "conference_id")
+		default:
+			return errors.Wrap(ErrInvalidJSONFieldType{Field: "conference_id"}, "failed to populate fields for DeleteConferenceStaffRequest")
+		}
+	}
+	if jv, ok := m["staff_id"]; ok {
+		switch jv.(type) {
+		case string:
+			r.StaffID = jv.(string)
+			delete(m, "staff_id")
+		default:
+			return errors.Wrap(ErrInvalidJSONFieldType{Field: "staff_id"}, "failed to populate fields for DeleteConferenceStaffRequest")
+		}
+	}
+	if jv, ok := m["user_id"]; ok {
+		switch jv.(type) {
+		case string:
+			r.UserID = jv.(string)
+			delete(m, "user_id")
+		default:
+			return errors.Wrap(ErrInvalidJSONFieldType{Field: "user_id"}, "failed to populate fields for DeleteConferenceStaffRequest")
+		}
+	}
+	return nil
+}
+
+func (r ListConferenceStaffRequest) collectMarshalData() map[string]interface{} {
+	m := make(map[string]interface{})
+	m["conference_id"] = r.ConferenceID
+	m["user_id"] = r.UserID
+	if r.Lang.Valid() {
+		m["lang"] = r.Lang.Value()
+	}
+	return m
+}
+
+func (r ListConferenceStaffRequest) MarshalJSON() ([]byte, error) {
+	m := r.collectMarshalData()
+	buf, err := json.Marshal(m)
+	if err != nil {
+		return nil, err
+	}
+	return buf, nil
+}
+
+func (r ListConferenceStaffRequest) MarshalURL() ([]byte, error) {
+	m := r.collectMarshalData()
+	buf, err := urlenc.Marshal(m)
+	if err != nil {
+		return nil, err
+	}
+	return buf, nil
+}
+
+func (r *ListConferenceStaffRequest) UnmarshalJSON(data []byte) error {
+	m := make(map[string]interface{})
+	if err := json.Unmarshal(data, &m); err != nil {
+		return err
+	}
+	return r.Populate(m)
+}
+
+func (r *ListConferenceStaffRequest) Populate(m map[string]interface{}) error {
+	if jv, ok := m["conference_id"]; ok {
+		switch jv.(type) {
+		case string:
+			r.ConferenceID = jv.(string)
+			delete(m, "conference_id")
+		default:
+			return errors.Wrap(ErrInvalidJSONFieldType{Field: "conference_id"}, "failed to populate fields for ListConferenceStaffRequest")
+		}
+	}
+	if jv, ok := m["user_id"]; ok {
+		switch jv.(type) {
+		case string:
+			r.UserID = jv.(string)
+			delete(m, "user_id")
+		default:
+			return errors.Wrap(ErrInvalidJSONFieldType{Field: "user_id"}, "failed to populate fields for ListConferenceStaffRequest")
+		}
+	}
+	if jv, ok := m["lang"]; ok {
+		if err := r.Lang.Set(jv); err != nil {
+			return errors.New("set field Lang failed: " + err.Error())
+		}
+		delete(m, "lang")
+	}
+	return nil
+}

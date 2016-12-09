@@ -1993,3 +1993,65 @@ func doListBlogEntries(ctx context.Context, w http.ResponseWriter, r *http.Reque
 	httpJSON(w, v)
 }
 
+func doListConferenceStaff(ctx context.Context, w http.ResponseWriter, r *http.Request, payload *model.ListConferenceStaffRequest) {
+	trustedCall := isTrustedCall(ctx)
+
+	tx, err := db.Begin()
+	if err != nil {
+		httpError(w, `ListConferenceStaff`, http.StatusInternalServerError, err)
+		return
+	}
+	defer tx.AutoRollback()
+
+	s := service.Conference()
+	var cdl model.UserList
+	if err := s.LoadStaff(tx, &cdl, trustedCall, payload.ConferenceID, payload.Lang.String); err != nil {
+		httpError(w, `ListConferenceStaff`, http.StatusInternalServerError, err)
+		return
+	}
+
+	httpJSON(w, cdl)
+}
+
+func doAddConferenceStaff(ctx context.Context, w http.ResponseWriter, r *http.Request, payload *model.AddConferenceStaffRequest) {
+	tx, err := db.Begin()
+	if err != nil {
+		httpError(w, `AddConferenceStaff`, http.StatusInternalServerError, err)
+		return
+	}
+	defer tx.AutoRollback()
+
+	s := service.Conference()
+	if err := s.AddStaffFromPayload(tx, payload); err != nil {
+		httpError(w, `AddConferenceStaff`, http.StatusInternalServerError, err)
+		return
+	}
+
+	if err := tx.Commit(); err != nil {
+		httpError(w, `AddConferenceStaff`, http.StatusInternalServerError, err)
+		return
+	}
+	httpJSON(w, map[string]string{"status": "success"})
+}
+
+func doDeleteConferenceStaff(ctx context.Context, w http.ResponseWriter, r *http.Request, payload *model.DeleteConferenceStaffRequest) {
+	tx, err := db.Begin()
+	if err != nil {
+		httpError(w, `DeleteConferenceStaff`, http.StatusInternalServerError, err)
+		return
+	}
+	defer tx.AutoRollback()
+
+	s := service.Conference()
+	if err := s.DeleteStaffFromPayload(tx, payload); err != nil {
+		httpError(w, `DeleteConferenceStaff`, http.StatusInternalServerError, err)
+		return
+	}
+
+	if err := tx.Commit(); err != nil {
+		httpError(w, `DeleteConferenceStaff`, http.StatusInternalServerError, err)
+		return
+	}
+	httpJSON(w, map[string]string{"status": "success"})
+}
+
