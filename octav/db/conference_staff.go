@@ -28,7 +28,7 @@ func init() {
 		stmt.WriteString(UserTable)
 		stmt.WriteString(`.eid WHERE `)
 		stmt.WriteString(ConferenceStaffTable)
-		stmt.WriteString(`.conference_id = ?`)
+		stmt.WriteString(`.conference_id = ? ORDER BY sort_order ASC`)
 		library.Register(sqlConferenceStaffLoadKey, stmt.String())
 
 		stmt.Reset()

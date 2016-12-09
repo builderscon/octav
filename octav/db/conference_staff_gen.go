@@ -12,7 +12,7 @@ import (
 	"github.com/pkg/errors"
 )
 
-const ConferenceStaffStdSelectColumns = "conference_staff.oid, conference_staff.conference_id, conference_staff.user_id, conference_staff.created_on, conference_staff.modified_on"
+const ConferenceStaffStdSelectColumns = "conference_staff.oid, conference_staff.conference_id, conference_staff.user_id, conference_staff.sort_order, conference_staff.created_on, conference_staff.modified_on"
 const ConferenceStaffTable = "conference_staff"
 
 type ConferenceStaffList []ConferenceStaff
@@ -20,7 +20,7 @@ type ConferenceStaffList []ConferenceStaff
 func (c *ConferenceStaff) Scan(scanner interface {
 	Scan(...interface{}) error
 }) error {
-	return scanner.Scan(&c.OID, &c.ConferenceID, &c.UserID, &c.CreatedOn, &c.ModifiedOn)
+	return scanner.Scan(&c.OID, &c.ConferenceID, &c.UserID, &c.SortOrder, &c.CreatedOn, &c.ModifiedOn)
 }
 
 func init() {
@@ -37,7 +37,7 @@ func init() {
 		stmt.Reset()
 		stmt.WriteString(`UPDATE `)
 		stmt.WriteString(ConferenceStaffTable)
-		stmt.WriteString(` SET conference_id = ?, user_id = ? WHERE oid = ?`)
+		stmt.WriteString(` SET conference_id = ?, user_id = ?, sort_order = ? WHERE oid = ?`)
 		library.Register("sqlConferenceStaffUpdateByOIDKey", stmt.String())
 	})
 }
@@ -64,8 +64,8 @@ func (c *ConferenceStaff) Create(tx *Tx, opts ...InsertOption) (err error) {
 	}
 	stmt.WriteString("INTO ")
 	stmt.WriteString(ConferenceStaffTable)
-	stmt.WriteString(` (conference_id, user_id, created_on, modified_on) VALUES (?, ?, ?, ?)`)
-	result, err := tx.Exec(stmt.String(), c.ConferenceID, c.UserID, c.CreatedOn, c.ModifiedOn)
+	stmt.WriteString(` (conference_id, user_id, sort_order, created_on, modified_on) VALUES (?, ?, ?, ?, ?)`)
+	result, err := tx.Exec(stmt.String(), c.ConferenceID, c.UserID, c.SortOrder, c.CreatedOn, c.ModifiedOn)
 	if err != nil {
 		return err
 	}
@@ -92,7 +92,7 @@ func (c ConferenceStaff) Update(tx *Tx) (err error) {
 		if err != nil {
 			return errors.Wrap(err, `failed to get statement`)
 		}
-		_, err = tx.Stmt(stmt).Exec(c.ConferenceID, c.UserID, c.OID)
+		_, err = tx.Stmt(stmt).Exec(c.ConferenceID, c.UserID, c.SortOrder, c.OID)
 		return err
 	}
 	return errors.New("OID must be filled")

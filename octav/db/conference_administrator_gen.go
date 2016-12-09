@@ -12,7 +12,7 @@ import (
 	"github.com/pkg/errors"
 )
 
-const ConferenceAdministratorStdSelectColumns = "conference_administrators.oid, conference_administrators.conference_id, conference_administrators.user_id, conference_administrators.created_on, conference_administrators.modified_on"
+const ConferenceAdministratorStdSelectColumns = "conference_administrators.oid, conference_administrators.conference_id, conference_administrators.user_id, conference_administrators.sort_order, conference_administrators.created_on, conference_administrators.modified_on"
 const ConferenceAdministratorTable = "conference_administrators"
 
 type ConferenceAdministratorList []ConferenceAdministrator
@@ -20,7 +20,7 @@ type ConferenceAdministratorList []ConferenceAdministrator
 func (c *ConferenceAdministrator) Scan(scanner interface {
 	Scan(...interface{}) error
 }) error {
-	return scanner.Scan(&c.OID, &c.ConferenceID, &c.UserID, &c.CreatedOn, &c.ModifiedOn)
+	return scanner.Scan(&c.OID, &c.ConferenceID, &c.UserID, &c.SortOrder, &c.CreatedOn, &c.ModifiedOn)
 }
 
 func init() {
@@ -37,7 +37,7 @@ func init() {
 		stmt.Reset()
 		stmt.WriteString(`UPDATE `)
 		stmt.WriteString(ConferenceAdministratorTable)
-		stmt.WriteString(` SET conference_id = ?, user_id = ? WHERE oid = ?`)
+		stmt.WriteString(` SET conference_id = ?, user_id = ?, sort_order = ? WHERE oid = ?`)
 		library.Register("sqlConferenceAdministratorUpdateByOIDKey", stmt.String())
 	})
 }
@@ -64,8 +64,8 @@ func (c *ConferenceAdministrator) Create(tx *Tx, opts ...InsertOption) (err erro
 	}
 	stmt.WriteString("INTO ")
 	stmt.WriteString(ConferenceAdministratorTable)
-	stmt.WriteString(` (conference_id, user_id, created_on, modified_on) VALUES (?, ?, ?, ?)`)
-	result, err := tx.Exec(stmt.String(), c.ConferenceID, c.UserID, c.CreatedOn, c.ModifiedOn)
+	stmt.WriteString(` (conference_id, user_id, sort_order, created_on, modified_on) VALUES (?, ?, ?, ?, ?)`)
+	result, err := tx.Exec(stmt.String(), c.ConferenceID, c.UserID, c.SortOrder, c.CreatedOn, c.ModifiedOn)
 	if err != nil {
 		return err
 	}
@@ -92,7 +92,7 @@ func (c ConferenceAdministrator) Update(tx *Tx) (err error) {
 		if err != nil {
 			return errors.Wrap(err, `failed to get statement`)
 		}
-		_, err = tx.Stmt(stmt).Exec(c.ConferenceID, c.UserID, c.OID)
+		_, err = tx.Stmt(stmt).Exec(c.ConferenceID, c.UserID, c.SortOrder, c.OID)
 		return err
 	}
 	return errors.New("OID must be filled")
