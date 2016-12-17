@@ -698,6 +698,51 @@ func httpCreateConferenceSeries(ctx context.Context, w http.ResponseWriter, r *h
 	doCreateConferenceSeries(ctx, w, r, &payload)
 }
 
+func httpCreateExternalResource(ctx context.Context, w http.ResponseWriter, r *http.Request) {
+	if pdebug.Enabled {
+		g := pdebug.Marker("httpCreateExternalResource")
+		defer g.End()
+	}
+	if strings.ToLower(r.Method) != `post` {
+		w.Header().Set("Allow", "post")
+		msgbuf := getBytesBuffer()
+		defer releaseBytesBuffer(msgbuf)
+		msgbuf.WriteString(`Method was `)
+		msgbuf.WriteString(r.Method)
+		msgbuf.WriteString(`, expected 'post'`)
+		httpError(w, msgbuf.String(), http.StatusNotFound, nil)
+		return
+	}
+
+	var payload model.CreateExternalResourceRequest
+	jsonbuf := getBytesBuffer()
+	defer releaseBytesBuffer(jsonbuf)
+
+	switch ct := r.Header.Get("Content-Type"); {
+	case ct == "application/json":
+		if _, err := io.Copy(jsonbuf, io.LimitReader(r.Body, MaxPostSize)); err != nil {
+			httpError(w, `Failed to read request body`, http.StatusInternalServerError, err)
+			return
+		}
+	default:
+		httpError(w, `Invalid content-type`, http.StatusInternalServerError, nil)
+		return
+	}
+	if pdebug.Enabled {
+		pdebug.Printf(`-----> %s`, jsonbuf.Bytes())
+	}
+	if err := json.Unmarshal(jsonbuf.Bytes(), &payload); err != nil {
+		httpError(w, `Invalid JSON input`, http.StatusInternalServerError, err)
+		return
+	}
+
+	if err := validator.HTTPCreateExternalResourceRequest.Validate(&payload); err != nil {
+		httpError(w, `Invalid input (validation failed)`, http.StatusInternalServerError, err)
+		return
+	}
+	doCreateExternalResource(ctx, w, r, &payload)
+}
+
 func httpCreateQuestion(ctx context.Context, w http.ResponseWriter, r *http.Request) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("httpCreateQuestion")
@@ -1345,6 +1390,51 @@ func httpDeleteConferenceVenue(ctx context.Context, w http.ResponseWriter, r *ht
 		return
 	}
 	doDeleteConferenceVenue(ctx, w, r, &payload)
+}
+
+func httpDeleteExternalResource(ctx context.Context, w http.ResponseWriter, r *http.Request) {
+	if pdebug.Enabled {
+		g := pdebug.Marker("httpDeleteExternalResource")
+		defer g.End()
+	}
+	if strings.ToLower(r.Method) != `post` {
+		w.Header().Set("Allow", "post")
+		msgbuf := getBytesBuffer()
+		defer releaseBytesBuffer(msgbuf)
+		msgbuf.WriteString(`Method was `)
+		msgbuf.WriteString(r.Method)
+		msgbuf.WriteString(`, expected 'post'`)
+		httpError(w, msgbuf.String(), http.StatusNotFound, nil)
+		return
+	}
+
+	var payload model.DeleteExternalResourceRequest
+	jsonbuf := getBytesBuffer()
+	defer releaseBytesBuffer(jsonbuf)
+
+	switch ct := r.Header.Get("Content-Type"); {
+	case ct == "application/json":
+		if _, err := io.Copy(jsonbuf, io.LimitReader(r.Body, MaxPostSize)); err != nil {
+			httpError(w, `Failed to read request body`, http.StatusInternalServerError, err)
+			return
+		}
+	default:
+		httpError(w, `Invalid content-type`, http.StatusInternalServerError, nil)
+		return
+	}
+	if pdebug.Enabled {
+		pdebug.Printf(`-----> %s`, jsonbuf.Bytes())
+	}
+	if err := json.Unmarshal(jsonbuf.Bytes(), &payload); err != nil {
+		httpError(w, `Invalid JSON input`, http.StatusInternalServerError, err)
+		return
+	}
+
+	if err := validator.HTTPDeleteExternalResourceRequest.Validate(&payload); err != nil {
+		httpError(w, `Invalid input (validation failed)`, http.StatusInternalServerError, err)
+		return
+	}
+	doDeleteExternalResource(ctx, w, r, &payload)
 }
 
 func httpDeleteFeaturedSpeaker(ctx context.Context, w http.ResponseWriter, r *http.Request) {
@@ -2027,6 +2117,38 @@ func httpListConferencesByOrganizer(ctx context.Context, w http.ResponseWriter, 
 	doListConferencesByOrganizer(ctx, w, r, &payload)
 }
 
+func httpListExternalResource(ctx context.Context, w http.ResponseWriter, r *http.Request) {
+	if pdebug.Enabled {
+		g := pdebug.Marker("httpListExternalResource")
+		defer g.End()
+	}
+	if strings.ToLower(r.Method) != `get` {
+		w.Header().Set("Allow", "get")
+		msgbuf := getBytesBuffer()
+		defer releaseBytesBuffer(msgbuf)
+		msgbuf.WriteString(`Method was `)
+		msgbuf.WriteString(r.Method)
+		msgbuf.WriteString(`, expected 'get'`)
+		httpError(w, msgbuf.String(), http.StatusNotFound, nil)
+		return
+	}
+
+	var payload model.ListExternalResourceRequest
+	qbuf := getBytesBuffer()
+	defer releaseBytesBuffer(qbuf)
+	qbuf.WriteString(r.URL.RawQuery)
+	if err := urlenc.Unmarshal(qbuf.Bytes(), &payload); err != nil {
+		httpError(w, `Failed to parse url query string`, http.StatusInternalServerError, err)
+		return
+	}
+
+	if err := validator.HTTPListExternalResourceRequest.Validate(&payload); err != nil {
+		httpError(w, `Invalid input (validation failed)`, http.StatusInternalServerError, err)
+		return
+	}
+	doListExternalResource(ctx, w, r, &payload)
+}
+
 func httpListFeaturedSpeakers(ctx context.Context, w http.ResponseWriter, r *http.Request) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("httpListFeaturedSpeakers")
@@ -2409,6 +2531,38 @@ func httpLookupConferenceSeries(ctx context.Context, w http.ResponseWriter, r *h
 		return
 	}
 	doLookupConferenceSeries(ctx, w, r, &payload)
+}
+
+func httpLookupExternalResource(ctx context.Context, w http.ResponseWriter, r *http.Request) {
+	if pdebug.Enabled {
+		g := pdebug.Marker("httpLookupExternalResource")
+		defer g.End()
+	}
+	if strings.ToLower(r.Method) != `get` {
+		w.Header().Set("Allow", "get")
+		msgbuf := getBytesBuffer()
+		defer releaseBytesBuffer(msgbuf)
+		msgbuf.WriteString(`Method was `)
+		msgbuf.WriteString(r.Method)
+		msgbuf.WriteString(`, expected 'get'`)
+		httpError(w, msgbuf.String(), http.StatusNotFound, nil)
+		return
+	}
+
+	var payload model.LookupExternalResourceRequest
+	qbuf := getBytesBuffer()
+	defer releaseBytesBuffer(qbuf)
+	qbuf.WriteString(r.URL.RawQuery)
+	if err := urlenc.Unmarshal(qbuf.Bytes(), &payload); err != nil {
+		httpError(w, `Failed to parse url query string`, http.StatusInternalServerError, err)
+		return
+	}
+
+	if err := validator.HTTPLookupExternalResourceRequest.Validate(&payload); err != nil {
+		httpError(w, `Invalid input (validation failed)`, http.StatusInternalServerError, err)
+		return
+	}
+	doLookupExternalResource(ctx, w, r, &payload)
 }
 
 func httpLookupFeaturedSpeaker(ctx context.Context, w http.ResponseWriter, r *http.Request) {
@@ -2937,6 +3091,51 @@ func httpUpdateConference(ctx context.Context, w http.ResponseWriter, r *http.Re
 	doUpdateConference(ctx, w, r, &payload)
 }
 
+func httpUpdateExternalResource(ctx context.Context, w http.ResponseWriter, r *http.Request) {
+	if pdebug.Enabled {
+		g := pdebug.Marker("httpUpdateExternalResource")
+		defer g.End()
+	}
+	if strings.ToLower(r.Method) != `post` {
+		w.Header().Set("Allow", "post")
+		msgbuf := getBytesBuffer()
+		defer releaseBytesBuffer(msgbuf)
+		msgbuf.WriteString(`Method was `)
+		msgbuf.WriteString(r.Method)
+		msgbuf.WriteString(`, expected 'post'`)
+		httpError(w, msgbuf.String(), http.StatusNotFound, nil)
+		return
+	}
+
+	var payload model.UpdateExternalResourceRequest
+	jsonbuf := getBytesBuffer()
+	defer releaseBytesBuffer(jsonbuf)
+
+	switch ct := r.Header.Get("Content-Type"); {
+	case ct == "application/json":
+		if _, err := io.Copy(jsonbuf, io.LimitReader(r.Body, MaxPostSize)); err != nil {
+			httpError(w, `Failed to read request body`, http.StatusInternalServerError, err)
+			return
+		}
+	default:
+		httpError(w, `Invalid content-type`, http.StatusInternalServerError, nil)
+		return
+	}
+	if pdebug.Enabled {
+		pdebug.Printf(`-----> %s`, jsonbuf.Bytes())
+	}
+	if err := json.Unmarshal(jsonbuf.Bytes(), &payload); err != nil {
+		httpError(w, `Invalid JSON input`, http.StatusInternalServerError, err)
+		return
+	}
+
+	if err := validator.HTTPUpdateExternalResourceRequest.Validate(&payload); err != nil {
+		httpError(w, `Invalid input (validation failed)`, http.StatusInternalServerError, err)
+		return
+	}
+	doUpdateExternalResource(ctx, w, r, &payload)
+}
+
 func httpUpdateFeaturedSpeaker(ctx context.Context, w http.ResponseWriter, r *http.Request) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("httpUpdateFeaturedSpeaker")
@@ -3392,6 +3591,11 @@ func (s *Server) SetupRoutes() {
 	r.HandleFunc(`/v1/conference_series/lookup`, httpWithContext(httpLookupConferenceSeries))
 	r.HandleFunc(`/v1/email/confirm`, httpWithContext(httpWithBasicAuth(httpConfirmTemporaryEmail)))
 	r.HandleFunc(`/v1/email/create`, httpWithContext(httpWithBasicAuth(httpCreateTemporaryEmail)))
+	r.HandleFunc(`/v1/external_resource/create`, httpWithContext(httpWithBasicAuth(httpCreateExternalResource)))
+	r.HandleFunc(`/v1/external_resource/delete`, httpWithContext(httpWithBasicAuth(httpDeleteExternalResource)))
+	r.HandleFunc(`/v1/external_resource/list`, httpWithContext(httpListExternalResource))
+	r.HandleFunc(`/v1/external_resource/lookup`, httpWithContext(httpLookupExternalResource))
+	r.HandleFunc(`/v1/external_resource/update`, httpWithContext(httpWithBasicAuth(httpUpdateExternalResource)))
 	r.HandleFunc(`/v1/featured_speaker/add`, httpWithContext(httpWithBasicAuth(httpAddFeaturedSpeaker)))
 	r.HandleFunc(`/v1/featured_speaker/delete`, httpWithContext(httpWithBasicAuth(httpDeleteFeaturedSpeaker)))
 	r.HandleFunc(`/v1/featured_speaker/list`, httpWithContext(httpWithOptionalBasicAuth(httpListFeaturedSpeakers)))
