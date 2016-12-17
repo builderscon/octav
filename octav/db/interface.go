@@ -75,6 +75,15 @@ type ConferenceDate struct {
 	Close        NullTime
 }
 
+// +DB tablename:"external_resources"
+type ExternalResource struct {
+	OID          int64
+	EID          string
+	ConferenceID string
+	Name         string
+	URL          string
+}
+
 // +DB tablename:"conference_series_administrators"
 type ConferenceSeriesAdministrator struct {
 	OID        int64 // OID is the internal id, used for sorting and what not
