@@ -2055,3 +2055,117 @@ func doDeleteConferenceStaff(ctx context.Context, w http.ResponseWriter, r *http
 	httpJSON(w, map[string]string{"status": "success"})
 }
 
+func doCreateExternalResource(ctx context.Context, w http.ResponseWriter, r *http.Request, payload *model.CreateExternalResourceRequest) {
+	if pdebug.Enabled {
+		g := pdebug.Marker("doCreateExternalResource")
+		defer g.End()
+	}
+
+	tx, err := db.Begin()
+	if err != nil {
+		httpError(w, `CreateExternalResource`, http.StatusInternalServerError, err)
+		return
+	}
+	defer tx.AutoRollback()
+
+	s := service.ExternalResource()
+	var v model.ExternalResource
+	if err := s.CreateFromPayload(tx, &v, payload); err != nil {
+		httpError(w, `CreateExternalResource`, http.StatusInternalServerError, err)
+		return
+	}
+
+	if err := tx.Commit(); err != nil {
+		httpError(w, `CreateExternalResource`, http.StatusInternalServerError, err)
+		return
+	}
+
+	httpJSON(w, v)
+}
+
+func doDeleteExternalResource(ctx context.Context, w http.ResponseWriter, r *http.Request, payload *model.DeleteExternalResourceRequest) {
+	if pdebug.Enabled {
+		g := pdebug.Marker("doDeleteExternalResource")
+		defer g.End()
+	}
+
+	tx, err := db.Begin()
+	if err != nil {
+		httpError(w, `DeleteExternalResource`, http.StatusInternalServerError, err)
+		return
+	}
+	defer tx.AutoRollback()
+
+	s := service.ExternalResource()
+	if err := s.DeleteFromPayload(tx, payload); err != nil {
+		httpError(w, `DeleteExternalResource`, http.StatusInternalServerError, err)
+		return
+	}
+	if err := tx.Commit(); err != nil {
+		httpError(w, `DeleteExternalResource`, http.StatusInternalServerError, err)
+		return
+	}
+	httpJSON(w, map[string]string{"status": "success"})
+}
+
+func doListExternalResource(ctx context.Context, w http.ResponseWriter, r *http.Request, payload *model.ListExternalResourceRequest) {
+	tx, err := db.Begin()
+	if err != nil {
+		httpError(w, `ListExternalResources`, http.StatusInternalServerError, err)
+		return
+	}
+	defer tx.AutoRollback()
+
+	s := service.ExternalResource()
+	var v model.ExternalResourceList
+	if err := s.ListFromPayload(tx, &v, payload); err != nil {
+		httpError(w, `ListExternalResources`, http.StatusInternalServerError, err)
+		return
+	}
+
+	httpJSON(w, v)
+}
+
+func doLookupExternalResource(ctx context.Context, w http.ResponseWriter, r *http.Request, payload *model.LookupExternalResourceRequest) {
+	if pdebug.Enabled {
+		g := pdebug.Marker("doLookupExternalResource")
+		defer g.End()
+	}
+	tx, err := db.Begin()
+	if err != nil {
+		httpError(w, `LookupExternalResource`, http.StatusInternalServerError, err)
+		return
+	}
+	defer tx.AutoRollback()
+
+	s := service.ExternalResource()
+	var v model.ExternalResource
+	if err := s.LookupFromPayload(tx, &v, payload); err != nil {
+		httpError(w, `LookupExternalResource`, http.StatusInternalServerError, err)
+		return
+	}
+
+	httpJSON(w, v)
+}
+
+func doUpdateExternalResource(ctx context.Context, w http.ResponseWriter, r *http.Request, payload *model.UpdateExternalResourceRequest) {
+	tx, err := db.Begin()
+	if err != nil {
+		httpError(w, `UpdateExternalResource`, http.StatusInternalServerError, err)
+		return
+	}
+	defer tx.AutoRollback()
+
+	s := service.ExternalResource()
+	if err := s.UpdateFromPayload(ctx, tx, payload); err != nil {
+		httpError(w, `UpdateExternalResource`, http.StatusInternalServerError, err)
+		return
+	}
+
+	if err := tx.Commit(); err != nil {
+		httpError(w, `UpdateExternalResource`, http.StatusInternalServerError, err)
+		return
+	}
+
+	httpJSON(w, map[string]string{"status": "success"})
+}
