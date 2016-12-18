@@ -590,6 +590,17 @@ func (v *ConferenceSvc) Decorate(tx *db.Tx, c *model.Conference, trustedCall boo
 		}
 	}
 
+	ers := ExternalResource()
+	if err := ers.LoadByConferenceID(tx, &c.ExternalResources, c.ID); err != nil {
+		return errors.Wrapf(err, "failed to load external resources for '%s'", c.ID)
+	}
+	for i := range c.ExternalResources {
+		if err := ers.Decorate(tx, &c.ExternalResources[i], trustedCall, lang); err != nil {
+			return errors.Wrap(err, "failed to decorate external resources with associated data")
+		}
+	}
+
+
 	switch lang {
 	case "", "en":
 	default:
