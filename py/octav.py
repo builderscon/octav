@@ -1,5 +1,5 @@
 """OCTAV Client Library"""
-"""DO NOT EDIT: This file was generated from ../spec/v1/api.json on Thu Dec  8 10:46:42 2016"""
+"""DO NOT EDIT: This file was generated from ../spec/v1/api.json on Mon Dec 19 03:14:14 2016"""
 
 import certifi
 import json
@@ -3136,6 +3136,313 @@ class Octav(object):
             self.extract_error(res)
             return None
         return json.loads(res.data)
+    except BaseException as e:
+        if self.debug:
+            print("error during http access: " + repr(e))
+        self.error = repr(e)
+        return None
+
+  def list_conference_staff (self, conference_id=None, lang=None):
+    try:
+        payload = {}
+        hdrs = {}
+        if conference_id is not None:
+            payload['conference_id'] = conference_id
+        if lang is not None:
+            payload['lang'] = lang
+        uri = '%s/v1/conference/staff/list' % self.endpoint
+        hdrs = urllib3.util.make_headers(
+            basic_auth='%s:%s' % (self.key, self.secret),
+        )
+        qs = urlencode(payload, True)
+        if self.debug:
+            print('GET %s?%s' % (uri, qs))
+        res = self.http.request('GET', '%s?%s' % (uri, qs), headers=hdrs)
+        if self.debug:
+            print(res)
+        self.res = res
+        if res.status != 200:
+            self.extract_error(res)
+            return None
+        return json.loads(res.data)
+    except BaseException as e:
+        if self.debug:
+            print("error during http access: " + repr(e))
+        self.error = repr(e)
+        return None
+
+  def add_conference_staff (self, conference_id, staff_id, user_id):
+    try:
+        payload = {}
+        hdrs = {}
+        if conference_id is None:
+            raise MissingRequiredArgument('property conference_id must be provided')
+        payload['conference_id'] = conference_id
+        if staff_id is None:
+            raise MissingRequiredArgument('property staff_id must be provided')
+        payload['staff_id'] = staff_id
+        if user_id is None:
+            raise MissingRequiredArgument('property user_id must be provided')
+        payload['user_id'] = user_id
+        if conference_id is not None:
+            payload['conference_id'] = conference_id
+        if staff_id is not None:
+            payload['staff_id'] = staff_id
+        if user_id is not None:
+            payload['user_id'] = user_id
+        uri = '%s/v1/conference/staff/add' % self.endpoint
+        hdrs = urllib3.util.make_headers(
+            basic_auth='%s:%s' % (self.key, self.secret),
+        )
+        if self.debug:
+            print('POST %s' % uri)
+        hdrs['Content-Type']= 'application/json'
+        res = self.http.request('POST', uri, headers=hdrs, body=json.dumps(payload))
+        if self.debug:
+            print(res)
+        self.res = res
+        if res.status != 200:
+            self.extract_error(res)
+            return None
+        return True
+    except BaseException as e:
+        if self.debug:
+            print("error during http access: " + repr(e))
+        self.error = repr(e)
+        return None
+
+  def delete_conference_staff (self, conference_id, staff_id, user_id):
+    try:
+        payload = {}
+        hdrs = {}
+        if conference_id is None:
+            raise MissingRequiredArgument('property conference_id must be provided')
+        payload['conference_id'] = conference_id
+        if staff_id is None:
+            raise MissingRequiredArgument('property staff_id must be provided')
+        payload['staff_id'] = staff_id
+        if user_id is None:
+            raise MissingRequiredArgument('property user_id must be provided')
+        payload['user_id'] = user_id
+        if conference_id is not None:
+            payload['conference_id'] = conference_id
+        if staff_id is not None:
+            payload['staff_id'] = staff_id
+        if user_id is not None:
+            payload['user_id'] = user_id
+        uri = '%s/v1/conference/staff/delete' % self.endpoint
+        hdrs = urllib3.util.make_headers(
+            basic_auth='%s:%s' % (self.key, self.secret),
+        )
+        if self.debug:
+            print('POST %s' % uri)
+        hdrs['Content-Type']= 'application/json'
+        res = self.http.request('POST', uri, headers=hdrs, body=json.dumps(payload))
+        if self.debug:
+            print(res)
+        self.res = res
+        if res.status != 200:
+            self.extract_error(res)
+            return None
+        return True
+    except BaseException as e:
+        if self.debug:
+            print("error during http access: " + repr(e))
+        self.error = repr(e)
+        return None
+
+  def lookup_external_resource (self, id, lang=None, limit=None, since=None):
+    try:
+        payload = {}
+        hdrs = {}
+        if id is None:
+            raise MissingRequiredArgument('property id must be provided')
+        payload['id'] = id
+        if id is not None:
+            payload['id'] = id
+        if lang is not None:
+            payload['lang'] = lang
+        if limit is not None:
+            payload['limit'] = limit
+        if since is not None:
+            payload['since'] = since
+        uri = '%s/v1/external_resource/lookup' % self.endpoint
+        qs = urlencode(payload, True)
+        if self.debug:
+            print('GET %s?%s' % (uri, qs))
+        res = self.http.request('GET', '%s?%s' % (uri, qs), headers=hdrs)
+        if self.debug:
+            print(res)
+        self.res = res
+        if res.status != 200:
+            self.extract_error(res)
+            return None
+        return json.loads(res.data)
+    except BaseException as e:
+        if self.debug:
+            print("error during http access: " + repr(e))
+        self.error = repr(e)
+        return None
+
+  def list_external_resource (self, conference_id, user_id, lang=None, limit=None, since=None):
+    try:
+        payload = {}
+        hdrs = {}
+        if conference_id is None:
+            raise MissingRequiredArgument('property conference_id must be provided')
+        payload['conference_id'] = conference_id
+        if user_id is None:
+            raise MissingRequiredArgument('property user_id must be provided')
+        payload['user_id'] = user_id
+        if conference_id is not None:
+            payload['conference_id'] = conference_id
+        if lang is not None:
+            payload['lang'] = lang
+        if limit is not None:
+            payload['limit'] = limit
+        if since is not None:
+            payload['since'] = since
+        uri = '%s/v1/external_resource/list' % self.endpoint
+        qs = urlencode(payload, True)
+        if self.debug:
+            print('GET %s?%s' % (uri, qs))
+        res = self.http.request('GET', '%s?%s' % (uri, qs), headers=hdrs)
+        if self.debug:
+            print(res)
+        self.res = res
+        if res.status != 200:
+            self.extract_error(res)
+            return None
+        return json.loads(res.data)
+    except BaseException as e:
+        if self.debug:
+            print("error during http access: " + repr(e))
+        self.error = repr(e)
+        return None
+
+  def create_external_resource (self, conference_id, name, url, user_id, **args):
+    try:
+        payload = {}
+        hdrs = {}
+        if conference_id is None:
+            raise MissingRequiredArgument('property conference_id must be provided')
+        payload['conference_id'] = conference_id
+        if name is None:
+            raise MissingRequiredArgument('property name must be provided')
+        payload['name'] = name
+        if url is None:
+            raise MissingRequiredArgument('property url must be provided')
+        payload['url'] = url
+        if user_id is None:
+            raise MissingRequiredArgument('property user_id must be provided')
+        payload['user_id'] = user_id
+        if conference_id is not None:
+            payload['conference_id'] = conference_id
+        if name is not None:
+            payload['name'] = name
+        if url is not None:
+            payload['url'] = url
+        if user_id is not None:
+            payload['user_id'] = user_id
+        patterns = [re.compile('name#[a-z]+')]
+        for key in args:
+            for p in patterns:
+                if p.match(key):
+                    payload[key] = args[key]
+        uri = '%s/v1/external_resource/create' % self.endpoint
+        hdrs = urllib3.util.make_headers(
+            basic_auth='%s:%s' % (self.key, self.secret),
+        )
+        if self.debug:
+            print('POST %s' % uri)
+        hdrs['Content-Type']= 'application/json'
+        res = self.http.request('POST', uri, headers=hdrs, body=json.dumps(payload))
+        if self.debug:
+            print(res)
+        self.res = res
+        if res.status != 200:
+            self.extract_error(res)
+            return None
+        return json.loads(res.data)
+    except BaseException as e:
+        if self.debug:
+            print("error during http access: " + repr(e))
+        self.error = repr(e)
+        return None
+
+  def update_external_resource (self, conference_id, user_id, id=None, name=None, url=None, **args):
+    try:
+        payload = {}
+        hdrs = {}
+        if conference_id is None:
+            raise MissingRequiredArgument('property conference_id must be provided')
+        payload['conference_id'] = conference_id
+        if user_id is None:
+            raise MissingRequiredArgument('property user_id must be provided')
+        payload['user_id'] = user_id
+        if id is not None:
+            payload['id'] = id
+        if name is not None:
+            payload['name'] = name
+        if url is not None:
+            payload['url'] = url
+        if user_id is not None:
+            payload['user_id'] = user_id
+        patterns = [re.compile('name#[a-z]+')]
+        for key in args:
+            for p in patterns:
+                if p.match(key):
+                    payload[key] = args[key]
+        uri = '%s/v1/external_resource/update' % self.endpoint
+        hdrs = urllib3.util.make_headers(
+            basic_auth='%s:%s' % (self.key, self.secret),
+        )
+        if self.debug:
+            print('POST %s' % uri)
+        hdrs['Content-Type']= 'application/json'
+        res = self.http.request('POST', uri, headers=hdrs, body=json.dumps(payload))
+        if self.debug:
+            print(res)
+        self.res = res
+        if res.status != 200:
+            self.extract_error(res)
+            return None
+        return json.loads(res.data)
+    except BaseException as e:
+        if self.debug:
+            print("error during http access: " + repr(e))
+        self.error = repr(e)
+        return None
+
+  def delete_external_resource (self, id, user_id):
+    try:
+        payload = {}
+        hdrs = {}
+        if id is None:
+            raise MissingRequiredArgument('property id must be provided')
+        payload['id'] = id
+        if user_id is None:
+            raise MissingRequiredArgument('property user_id must be provided')
+        payload['user_id'] = user_id
+        if id is not None:
+            payload['id'] = id
+        if user_id is not None:
+            payload['user_id'] = user_id
+        uri = '%s/v1/external_resource/delete' % self.endpoint
+        hdrs = urllib3.util.make_headers(
+            basic_auth='%s:%s' % (self.key, self.secret),
+        )
+        if self.debug:
+            print('POST %s' % uri)
+        hdrs['Content-Type']= 'application/json'
+        res = self.http.request('POST', uri, headers=hdrs, body=json.dumps(payload))
+        if self.debug:
+            print(res)
+        self.res = res
+        if res.status != 200:
+            self.extract_error(res)
+            return None
+        return True
     except BaseException as e:
         if self.debug:
             print("error during http access: " + repr(e))
