@@ -2,9 +2,15 @@ package db
 
 import (
 	"github.com/builderscon/octav/octav/tools"
+	"github.com/lestrrat/go-pdebug"
 )
 
-func LoadExternalResources(tx *Tx, externalResources *ExternalResourceList, cid string) error {
+func (v *ExternalResourceList) LoadByConference(tx *Tx, cid string) (err error) {
+	if pdebug.Enabled {
+		g := pdebug.Marker("db.ExternalResourceList.LoadByConference %s", cid).BindError(&err)
+		defer g.End()
+	}
+
 	stmt := tools.GetBuffer()
 	defer tools.ReleaseBuffer(stmt)
 
@@ -20,17 +26,9 @@ func LoadExternalResources(tx *Tx, externalResources *ExternalResourceList, cid 
 	if err != nil {
 		return err
 	}
-
-	var res ExternalResourceList
-	for rows.Next() {
-		var u ExternalResource
-		if err := u.Scan(rows); err != nil {
-			return err
-		}
-
-		res = append(res, u)
+	if err := v.FromRows(rows, 0); err != nil {
+		return err
 	}
 
-	*externalResources = res
 	return nil
 }

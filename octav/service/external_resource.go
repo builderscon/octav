@@ -87,50 +87,42 @@ func (v *ExternalResourceSvc) Decorate(tx *db.Tx, c *model.ExternalResource, tru
 	return nil
 }
 
-func (v *ExternalResourceSvc) LoadByConferenceID(tx *db.Tx, cdl *model.ExternalResourceList, cid string) (err error) {
+func (v *ExternalResourceSvc) LoadByConferenceID(tx *db.Tx, result *model.ExternalResourceList, cid string, trustedCall bool, lang string) (err error) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("service.ExternalResource.LoadByConferenceID %s", cid).BindError(&err)
 		defer g.End()
 	}
 
-	var ids []string
 	c := Cache()
-	key := c.Key("ExternalResource", "LoadByConferenceID", cid)
-	if err := c.Get(key, &ids); err == nil {
+	key := c.Key("ExternalResource", "ListFromPayload", cid)
+	x, err := c.GetOrSet(key, result, func() (interface{}, error) {
 		if pdebug.Enabled {
-			pdebug.Printf("CACHE HIT: %s", key)
+			pdebug.Printf("CACHE MISS: Re-generating")
 		}
-		m := make(model.ExternalResourceList, len(ids))
-		for i, id := range ids {
-			if err := v.Lookup(tx, &m[i], id); err != nil {
-				return errors.Wrap(err, "failed to load from database")
+
+		var vdbl db.ExternalResourceList
+		if err := vdbl.LoadByConference(tx, cid); err != nil {
+			return nil, errors.Wrap(err, "failed to load from database")
+		}
+
+		l := make(model.ExternalResourceList, len(vdbl))
+		for i, vdb := range vdbl {
+			if err := l[i].FromRow(&vdb); err != nil {
+				return nil, errors.Wrap(err, "failed to populate model from database")
+			}
+
+			if err := v.Decorate(tx, &l[i], trustedCall, lang); err != nil {
+				return nil, errors.Wrap(err, "failed to decorate ExternalResource with associated data")
 			}
 		}
-		*cdl = m
 
-		return nil
-	}
+		return &l, nil
+	}, cache.WithExpires(time.Hour))
 
-	if pdebug.Enabled {
-		pdebug.Printf("CACHE MISS: %s", key)
-	}
-	var vdbl db.ExternalResourceList
-	if err := db.LoadExternalResources(tx, &vdbl, cid); err != nil {
+	if err != nil {
 		return err
 	}
 
-	ids = make([]string, len(vdbl))
-	res := make(model.ExternalResourceList, len(vdbl))
-	for i, vdb := range vdbl {
-		var u model.ExternalResource
-		if err := u.FromRow(&vdb); err != nil {
-			return err
-		}
-		ids[i] = vdb.EID
-		res[i] = u
-	}
-	*cdl = res
-
-	c.Set(key, ids, cache.WithExpires(15*time.Minute))
+	*result = *(x.(*model.ExternalResourceList))
 	return nil
 }
