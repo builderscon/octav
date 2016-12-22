@@ -2,6 +2,7 @@ package service
 
 import (
 	"time"
+	"net/url"
 
 	"github.com/builderscon/octav/octav/cache"
 	"github.com/builderscon/octav/octav/db"
@@ -18,16 +19,37 @@ func (v *ExternalResourceSvc) populateRowForCreate(vdb *db.ExternalResource, pay
 	vdb.EID = tools.UUID()
 	vdb.ConferenceID = payload.ConferenceID
 	vdb.Name = payload.Name
-	vdb.URL = payload.URL
+
+	if payload.Description.Valid() {
+		vdb.Description = payload.Description.String
+	}
+
+	// Parse the URL, and do away with the URL fragment, if any
+	u, err := url.Parse(payload.URL)
+	if err != nil {
+		return errors.Wrap(err, "failed to parse URL")
+	}
+	u.Fragment = ""
+	vdb.URL = u.String()
+
 	return nil
 }
 
 func (v *ExternalResourceSvc) populateRowForUpdate(vdb *db.ExternalResource, payload *model.UpdateExternalResourceRequest) error {
+	if payload.Description.Valid() {
+		vdb.Description = payload.Description.String
+	}
 	if payload.Name.Valid() {
 		vdb.Name = payload.Name.String
 	}
 	if payload.URL.Valid() {
-		vdb.URL = payload.URL.String
+		// Parse the URL, and do away with the URL fragment, if any
+		u, err := url.Parse(payload.URL.String)
+		if err != nil {
+			return errors.Wrap(err, "failed to parse URL")
+		}
+		u.Fragment = ""
+		vdb.URL = u.String()
 	}
 	return nil
 }

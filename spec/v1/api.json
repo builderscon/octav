@@ -82,10 +82,12 @@
       "type": "object",
       "properties": {
         "id": {"$ref": "#/definitions/uuid"},
+        "description": {"$ref": "#/definitions/string_en"},
         "name": {"$ref": "#/definitions/string_en"},
         "url": {"$ref": "#/definitions/url"}
       },
       "patternProperties":{
+        "description#[a-z]+": {"$ref": "#/definitions/string_en"},
         "name#[a-z]+": { "$ref": "#/definitions/string_i18n" }
       }
     },
@@ -2111,11 +2113,13 @@
         "hsup.type": "model.CreateExternalResourceRequest",
         "properties": {
           "conference_id": {"$ref": "#/definitions/uuid"},
+          "description": {"$ref": "#/definitions/string_en"},
           "name": {"$ref": "#/definitions/string_en_not_empty"},
           "url": {"$ref": "#/definitions/url"},
           "user_id": {"$ref":"#/definitions/uuid"}
         },
         "patternProperties": {
+          "description#[a-z]+": { "$ref": "#/definitions/string_i18n" },
           "name#[a-z]+": { "$ref": "#/definitions/string_i18n" }
         },
         "required": ["conference_id", "name", "url", "user_id"]
@@ -2133,11 +2137,13 @@
         "hsup.type": "model.UpdateExternalResourceRequest",
         "properties": {
           "id": {"$ref": "#/definitions/uuid"},
+          "description": {"$ref": "#/definitions/string_en"},
           "name": {"$ref": "#/definitions/string_en"},
           "url": {"$ref": "#/definitions/url"},
           "user_id": {"$ref":"#/definitions/uuid"}
         },
         "patternProperties": {
+          "description#[a-z]+": { "$ref": "#/definitions/string_i18n" },
           "name#[a-z]+": { "$ref": "#/definitions/string_i18n" }
         },
         "required": ["conference_id", "user_id"]

@@ -80,6 +80,7 @@ type ExternalResource struct {
 	OID          int64
 	EID          string
 	ConferenceID string
+	Description  string
 	Name         string
 	URL          string
 }

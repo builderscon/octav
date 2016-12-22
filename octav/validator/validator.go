@@ -360,6 +360,10 @@ func init() {
 			jsval.EmptyConstraint,
 		).
 		AddProp(
+			"description",
+			jsval.Reference(M).RefersTo("#/definitions/string_en"),
+		).
+		AddProp(
 			"id",
 			jsval.Reference(M).RefersTo("#/definitions/uuid"),
 		).
@@ -370,6 +374,10 @@ func init() {
 		AddProp(
 			"url",
 			jsval.Reference(M).RefersTo("#/definitions/url"),
+		).
+		PatternPropertiesString(
+			"description#[a-z]+",
+			jsval.Reference(M).RefersTo("#/definitions/string_en"),
 		).
 		PatternPropertiesString(
 			"name#[a-z]+",
@@ -1563,6 +1571,10 @@ func init() {
 					jsval.Reference(M).RefersTo("#/definitions/uuid"),
 				).
 				AddProp(
+					"description",
+					jsval.Reference(M).RefersTo("#/definitions/string_en"),
+				).
+				AddProp(
 					"name",
 					jsval.Reference(M).RefersTo("#/definitions/string_en_not_empty"),
 				).
@@ -1573,6 +1585,10 @@ func init() {
 				AddProp(
 					"user_id",
 					jsval.Reference(M).RefersTo("#/definitions/uuid"),
+				).
+				PatternPropertiesString(
+					"description#[a-z]+",
+					jsval.Reference(M).RefersTo("#/definitions/string_i18n"),
 				).
 				PatternPropertiesString(
 					"name#[a-z]+",
@@ -1589,6 +1605,10 @@ func init() {
 					jsval.EmptyConstraint,
 				).
 				AddProp(
+					"description",
+					jsval.Reference(M).RefersTo("#/definitions/string_en"),
+				).
+				AddProp(
 					"id",
 					jsval.Reference(M).RefersTo("#/definitions/uuid"),
 				).
@@ -1599,6 +1619,10 @@ func init() {
 				AddProp(
 					"url",
 					jsval.Reference(M).RefersTo("#/definitions/url"),
+				).
+				PatternPropertiesString(
+					"description#[a-z]+",
+					jsval.Reference(M).RefersTo("#/definitions/string_en"),
 				).
 				PatternPropertiesString(
 					"name#[a-z]+",
@@ -3434,6 +3458,10 @@ func init() {
 					jsval.EmptyConstraint,
 				).
 				AddProp(
+					"description",
+					jsval.Reference(M).RefersTo("#/definitions/string_en"),
+				).
+				AddProp(
 					"id",
 					jsval.Reference(M).RefersTo("#/definitions/uuid"),
 				).
@@ -3444,6 +3472,10 @@ func init() {
 				AddProp(
 					"url",
 					jsval.Reference(M).RefersTo("#/definitions/url"),
+				).
+				PatternPropertiesString(
+					"description#[a-z]+",
+					jsval.Reference(M).RefersTo("#/definitions/string_en"),
 				).
 				PatternPropertiesString(
 					"name#[a-z]+",
@@ -4327,6 +4359,10 @@ func init() {
 					jsval.EmptyConstraint,
 				).
 				AddProp(
+					"description",
+					jsval.Reference(M).RefersTo("#/definitions/string_en"),
+				).
+				AddProp(
 					"id",
 					jsval.Reference(M).RefersTo("#/definitions/uuid"),
 				).
@@ -4343,6 +4379,10 @@ func init() {
 					jsval.Reference(M).RefersTo("#/definitions/uuid"),
 				).
 				PatternPropertiesString(
+					"description#[a-z]+",
+					jsval.Reference(M).RefersTo("#/definitions/string_i18n"),
+				).
+				PatternPropertiesString(
 					"name#[a-z]+",
 					jsval.Reference(M).RefersTo("#/definitions/string_i18n"),
 				),
@@ -4357,6 +4397,10 @@ func init() {
 					jsval.EmptyConstraint,
 				).
 				AddProp(
+					"description",
+					jsval.Reference(M).RefersTo("#/definitions/string_en"),
+				).
+				AddProp(
 					"id",
 					jsval.Reference(M).RefersTo("#/definitions/uuid"),
 				).
@@ -4367,6 +4411,10 @@ func init() {
 				AddProp(
 					"url",
 					jsval.Reference(M).RefersTo("#/definitions/url"),
+				).
+				PatternPropertiesString(
+					"description#[a-z]+",
+					jsval.Reference(M).RefersTo("#/definitions/string_en"),
 				).
 				PatternPropertiesString(
 					"name#[a-z]+",

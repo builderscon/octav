@@ -7638,6 +7638,9 @@ func (r *ListExternalResourceRequest) Populate(m map[string]interface{}) error {
 func (r CreateExternalResourceRequest) collectMarshalData() map[string]interface{} {
 	m := make(map[string]interface{})
 	m["conference_id"] = r.ConferenceID
+	if r.Description.Valid() {
+		m["description"] = r.Description.Value()
+	}
 	m["name"] = r.Name
 	m["url"] = r.URL
 	m["user_id"] = r.UserID
@@ -7680,6 +7683,12 @@ func (r *CreateExternalResourceRequest) Populate(m map[string]interface{}) error
 			return errors.Wrap(ErrInvalidJSONFieldType{Field: "conference_id"}, "failed to populate fields for CreateExternalResourceRequest")
 		}
 	}
+	if jv, ok := m["description"]; ok {
+		if err := r.Description.Set(jv); err != nil {
+			return errors.New("set field Description failed: " + err.Error())
+		}
+		delete(m, "description")
+	}
 	if jv, ok := m["name"]; ok {
 		switch jv.(type) {
 		case string:
@@ -7707,7 +7716,7 @@ func (r *CreateExternalResourceRequest) Populate(m map[string]interface{}) error
 			return errors.Wrap(ErrInvalidJSONFieldType{Field: "user_id"}, "failed to populate fields for CreateExternalResourceRequest")
 		}
 	}
-	if err := ExtractL10NFields(m, &r.LocalizedFields, []string{"name"}); err != nil {
+	if err := ExtractL10NFields(m, &r.LocalizedFields, []string{"description", "name"}); err != nil {
 		return err
 	}
 	return nil
@@ -7715,7 +7724,7 @@ func (r *CreateExternalResourceRequest) Populate(m map[string]interface{}) error
 
 func (r *CreateExternalResourceRequest) GetPropNames() ([]string, error) {
 	l, _ := r.LocalizedFields.GetPropNames()
-	return append(l, "conference_id", "name", "url", "user_id"), nil
+	return append(l, "conference_id", "description", "name", "url", "user_id"), nil
 }
 
 func (r *CreateExternalResourceRequest) SetPropValue(s string, v interface{}) error {
@@ -7725,6 +7734,8 @@ func (r *CreateExternalResourceRequest) SetPropValue(s string, v interface{}) er
 			r.ConferenceID = jv
 			return nil
 		}
+	case "description":
+		return r.Description.Set(v)
 	case "name":
 		if jv, ok := v.(string); ok {
 			r.Name = jv
@@ -7749,6 +7760,9 @@ func (r *CreateExternalResourceRequest) SetPropValue(s string, v interface{}) er
 func (r UpdateExternalResourceRequest) collectMarshalData() map[string]interface{} {
 	m := make(map[string]interface{})
 	m["id"] = r.ID
+	if r.Description.Valid() {
+		m["description"] = r.Description.Value()
+	}
 	if r.Name.Valid() {
 		m["name"] = r.Name.Value()
 	}
@@ -7795,6 +7809,12 @@ func (r *UpdateExternalResourceRequest) Populate(m map[string]interface{}) error
 			return errors.Wrap(ErrInvalidJSONFieldType{Field: "id"}, "failed to populate fields for UpdateExternalResourceRequest")
 		}
 	}
+	if jv, ok := m["description"]; ok {
+		if err := r.Description.Set(jv); err != nil {
+			return errors.New("set field Description failed: " + err.Error())
+		}
+		delete(m, "description")
+	}
 	if jv, ok := m["name"]; ok {
 		if err := r.Name.Set(jv); err != nil {
 			return errors.New("set field Name failed: " + err.Error())
@@ -7816,7 +7836,7 @@ func (r *UpdateExternalResourceRequest) Populate(m map[string]interface{}) error
 			return errors.Wrap(ErrInvalidJSONFieldType{Field: "user_id"}, "failed to populate fields for UpdateExternalResourceRequest")
 		}
 	}
-	if err := ExtractL10NFields(m, &r.LocalizedFields, []string{"name"}); err != nil {
+	if err := ExtractL10NFields(m, &r.LocalizedFields, []string{"description", "name"}); err != nil {
 		return err
 	}
 	return nil
@@ -7824,7 +7844,7 @@ func (r *UpdateExternalResourceRequest) Populate(m map[string]interface{}) error
 
 func (r *UpdateExternalResourceRequest) GetPropNames() ([]string, error) {
 	l, _ := r.LocalizedFields.GetPropNames()
-	return append(l, "id", "name", "url", "user_id"), nil
+	return append(l, "id", "description", "name", "url", "user_id"), nil
 }
 
 func (r *UpdateExternalResourceRequest) SetPropValue(s string, v interface{}) error {
@@ -7834,6 +7854,8 @@ func (r *UpdateExternalResourceRequest) SetPropValue(s string, v interface{}) er
 			r.ID = jv
 			return nil
 		}
+	case "description":
+		return r.Description.Set(v)
 	case "name":
 		return r.Name.Set(v)
 	case "url":

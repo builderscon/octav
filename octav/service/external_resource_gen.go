@@ -156,10 +156,10 @@ func (v *ExternalResourceSvc) ReplaceL10NStrings(tx *db.Tx, m *model.ExternalRes
 		defer g.End()
 	}
 	ls := LocalizedString()
-	list := make([]db.LocalizedString, 0, 1)
+	list := make([]db.LocalizedString, 0, 2)
 	switch lang {
 	case "", "en":
-		if len(m.Name) > 0 {
+		if len(m.Description) > 0 && len(m.Name) > 0 {
 			return nil
 		}
 		for _, extralang := range []string{`ja`} {
@@ -170,6 +170,13 @@ func (v *ExternalResourceSvc) ReplaceL10NStrings(tx *db.Tx, m *model.ExternalRes
 
 			for _, l := range list {
 				switch l.Name {
+				case "description":
+					if len(m.Description) == 0 {
+						if pdebug.Enabled {
+							pdebug.Printf("Replacing for key 'description' (fallback en -> %s", l.Language)
+						}
+						m.Description = l.Localized
+					}
 				case "name":
 					if len(m.Name) == 0 {
 						if pdebug.Enabled {
@@ -204,6 +211,11 @@ func (v *ExternalResourceSvc) ReplaceL10NStrings(tx *db.Tx, m *model.ExternalRes
 
 			for _, l := range list {
 				switch l.Name {
+				case "description":
+					if pdebug.Enabled {
+						pdebug.Printf("Replacing for key 'description'")
+					}
+					m.Description = l.Localized
 				case "name":
 					if pdebug.Enabled {
 						pdebug.Printf("Replacing for key 'name'")

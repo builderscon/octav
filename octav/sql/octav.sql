@@ -131,6 +131,7 @@ CREATE TABLE external_resources (
     oid INTEGER UNSIGNED NOT NULL PRIMARY KEY AUTO_INCREMENT,
     eid           CHAR(64) CHARACTER SET latin1 NOT NULL,
     conference_id CHAR(64) CHARACTER SET latin1 NOT NULL,
+    description TEXT,
     name TEXT NOT NULL,
     url  TEXT NOT NULL,
     UNIQUE KEY(eid),

@@ -1167,6 +1167,7 @@ type ListConferenceStaffRequest struct {
 type ExternalResource struct {
 	LocalizedFields `json:"-"`
 	ID              string `json:"id"`
+	Description     string `json:"description"  l10n:"true"`
 	Name            string `json:"name"  l10n:"true"`
 	URL             string `json:"url"`
 }
@@ -1196,6 +1197,7 @@ type ListExternalResourceRequest struct {
 // +transport
 type CreateExternalResourceRequest struct {
 	ConferenceID    string `json:"conference_id"`
+	Description     jsval.MaybeString `json:"description,omitempty" l10n:"true"`
 	Name            string `json:"name" l10n:"true"`
 	URL             string `json:"url"`
 	LocalizedFields `json:"-"`
@@ -1206,6 +1208,7 @@ type CreateExternalResourceRequest struct {
 // +transport
 type UpdateExternalResourceRequest struct {
 	ID              string            `json:"id"`
+	Description     jsval.MaybeString `json:"description,omitempty" l10n:"true"`
 	Name            jsval.MaybeString `json:"name,omitempty" l10n:"true"`
 	URL             jsval.MaybeString `json:"url,omitempty"`
 	LocalizedFields `json:"-"`
