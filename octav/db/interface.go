@@ -81,7 +81,7 @@ type ExternalResource struct {
 	EID          string
 	ConferenceID string
 	Description  string
-	Name         string
+	Title        string
 	URL          string
 }
 

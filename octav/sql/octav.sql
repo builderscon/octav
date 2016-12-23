@@ -132,7 +132,7 @@ CREATE TABLE external_resources (
     eid           CHAR(64) CHARACTER SET latin1 NOT NULL,
     conference_id CHAR(64) CHARACTER SET latin1 NOT NULL,
     description TEXT,
-    name TEXT NOT NULL,
+    title TEXT NOT NULL,
     url  TEXT NOT NULL,
     UNIQUE KEY(eid),
     FOREIGN KEY (conference_id) REFERENCES conferences(eid) ON DELETE CASCADE

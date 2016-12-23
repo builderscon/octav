@@ -18,7 +18,7 @@ func (v *ExternalResourceSvc) Init() {}
 func (v *ExternalResourceSvc) populateRowForCreate(vdb *db.ExternalResource, payload *model.CreateExternalResourceRequest) error {
 	vdb.EID = tools.UUID()
 	vdb.ConferenceID = payload.ConferenceID
-	vdb.Name = payload.Name
+	vdb.Title = payload.Title
 
 	if payload.Description.Valid() {
 		vdb.Description = payload.Description.String
@@ -39,8 +39,8 @@ func (v *ExternalResourceSvc) populateRowForUpdate(vdb *db.ExternalResource, pay
 	if payload.Description.Valid() {
 		vdb.Description = payload.Description.String
 	}
-	if payload.Name.Valid() {
-		vdb.Name = payload.Name.String
+	if payload.Title.Valid() {
+		vdb.Title = payload.Title.String
 	}
 	if payload.URL.Valid() {
 		// Parse the URL, and do away with the URL fragment, if any

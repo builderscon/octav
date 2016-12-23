@@ -83,12 +83,12 @@
       "properties": {
         "id": {"$ref": "#/definitions/uuid"},
         "description": {"$ref": "#/definitions/string_en"},
-        "name": {"$ref": "#/definitions/string_en"},
+        "title": {"$ref": "#/definitions/string_en"},
         "url": {"$ref": "#/definitions/url"}
       },
       "patternProperties":{
         "description#[a-z]+": {"$ref": "#/definitions/string_en"},
-        "name#[a-z]+": { "$ref": "#/definitions/string_i18n" }
+        "title#[a-z]+": { "$ref": "#/definitions/string_i18n" }
       }
     },
     "external_resource_array": {
@@ -2114,15 +2114,15 @@
         "properties": {
           "conference_id": {"$ref": "#/definitions/uuid"},
           "description": {"$ref": "#/definitions/string_en"},
-          "name": {"$ref": "#/definitions/string_en_not_empty"},
+          "title": {"$ref": "#/definitions/string_en_not_empty"},
           "url": {"$ref": "#/definitions/url"},
           "user_id": {"$ref":"#/definitions/uuid"}
         },
         "patternProperties": {
           "description#[a-z]+": { "$ref": "#/definitions/string_i18n" },
-          "name#[a-z]+": { "$ref": "#/definitions/string_i18n" }
+          "title#[a-z]+": { "$ref": "#/definitions/string_i18n" }
         },
-        "required": ["conference_id", "name", "url", "user_id"]
+        "required": ["conference_id", "title", "url", "user_id"]
       },
       "targetSchema": { "$ref": "#/definitions/external_resource" }
     },
@@ -2138,13 +2138,13 @@
         "properties": {
           "id": {"$ref": "#/definitions/uuid"},
           "description": {"$ref": "#/definitions/string_en"},
-          "name": {"$ref": "#/definitions/string_en"},
+          "title": {"$ref": "#/definitions/string_en"},
           "url": {"$ref": "#/definitions/url"},
           "user_id": {"$ref":"#/definitions/uuid"}
         },
         "patternProperties": {
           "description#[a-z]+": { "$ref": "#/definitions/string_i18n" },
-          "name#[a-z]+": { "$ref": "#/definitions/string_i18n" }
+          "title#[a-z]+": { "$ref": "#/definitions/string_i18n" }
         },
         "required": ["conference_id", "user_id"]
       },

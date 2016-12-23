@@ -1,5 +1,5 @@
 """OCTAV Client Library"""
-"""DO NOT EDIT: This file was generated from ../spec/v1/api.json on Mon Dec 19 03:14:14 2016"""
+"""DO NOT EDIT: This file was generated from ../spec/v1/api.json on Fri Dec 23 10:26:24 2016"""
 
 import certifi
 import json
@@ -3320,16 +3320,16 @@ class Octav(object):
         self.error = repr(e)
         return None
 
-  def create_external_resource (self, conference_id, name, url, user_id, **args):
+  def create_external_resource (self, conference_id, title, url, user_id, description=None, **args):
     try:
         payload = {}
         hdrs = {}
         if conference_id is None:
             raise MissingRequiredArgument('property conference_id must be provided')
         payload['conference_id'] = conference_id
-        if name is None:
-            raise MissingRequiredArgument('property name must be provided')
-        payload['name'] = name
+        if title is None:
+            raise MissingRequiredArgument('property title must be provided')
+        payload['title'] = title
         if url is None:
             raise MissingRequiredArgument('property url must be provided')
         payload['url'] = url
@@ -3338,13 +3338,15 @@ class Octav(object):
         payload['user_id'] = user_id
         if conference_id is not None:
             payload['conference_id'] = conference_id
-        if name is not None:
-            payload['name'] = name
+        if description is not None:
+            payload['description'] = description
+        if title is not None:
+            payload['title'] = title
         if url is not None:
             payload['url'] = url
         if user_id is not None:
             payload['user_id'] = user_id
-        patterns = [re.compile('name#[a-z]+')]
+        patterns = [re.compile('description#[a-z]+'), re.compile('title#[a-z]+')]
         for key in args:
             for p in patterns:
                 if p.match(key):
@@ -3370,7 +3372,7 @@ class Octav(object):
         self.error = repr(e)
         return None
 
-  def update_external_resource (self, conference_id, user_id, id=None, name=None, url=None, **args):
+  def update_external_resource (self, conference_id, user_id, description=None, id=None, title=None, url=None, **args):
     try:
         payload = {}
         hdrs = {}
@@ -3380,15 +3382,17 @@ class Octav(object):
         if user_id is None:
             raise MissingRequiredArgument('property user_id must be provided')
         payload['user_id'] = user_id
+        if description is not None:
+            payload['description'] = description
         if id is not None:
             payload['id'] = id
-        if name is not None:
-            payload['name'] = name
+        if title is not None:
+            payload['title'] = title
         if url is not None:
             payload['url'] = url
         if user_id is not None:
             payload['user_id'] = user_id
-        patterns = [re.compile('name#[a-z]+')]
+        patterns = [re.compile('description#[a-z]+'), re.compile('title#[a-z]+')]
         for key in args:
             for p in patterns:
                 if p.match(key):

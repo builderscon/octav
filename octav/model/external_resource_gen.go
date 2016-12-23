@@ -15,8 +15,8 @@ var _ = time.Time{}
 
 type rawExternalResource struct {
 	ID          string `json:"id"`
-	Description string `json:"description"  l10n:"true"`
-	Name        string `json:"name"  l10n:"true"`
+	Description string `json:"description" l10n:"true"`
+	Title       string `json:"title" l10n:"true"`
 	URL         string `json:"url"`
 }
 
@@ -24,7 +24,7 @@ func (v ExternalResource) MarshalJSON() ([]byte, error) {
 	var raw rawExternalResource
 	raw.ID = v.ID
 	raw.Description = v.Description
-	raw.Name = v.Name
+	raw.Title = v.Title
 	raw.URL = v.URL
 	buf, err := json.Marshal(raw)
 	if err != nil {
@@ -52,7 +52,7 @@ func (v *ExternalResource) Load(tx *db.Tx, id string) (err error) {
 func (v *ExternalResource) FromRow(vdb *db.ExternalResource) error {
 	v.ID = vdb.EID
 	v.Description = vdb.Description
-	v.Name = vdb.Name
+	v.Title = vdb.Title
 	v.URL = vdb.URL
 	return nil
 }
@@ -60,7 +60,7 @@ func (v *ExternalResource) FromRow(vdb *db.ExternalResource) error {
 func (v *ExternalResource) ToRow(vdb *db.ExternalResource) error {
 	vdb.EID = v.ID
 	vdb.Description = v.Description
-	vdb.Name = v.Name
+	vdb.Title = v.Title
 	vdb.URL = v.URL
 	return nil
 }

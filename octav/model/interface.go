@@ -1167,8 +1167,8 @@ type ListConferenceStaffRequest struct {
 type ExternalResource struct {
 	LocalizedFields `json:"-"`
 	ID              string `json:"id"`
-	Description     string `json:"description"  l10n:"true"`
-	Name            string `json:"name"  l10n:"true"`
+	Description     string `json:"description" l10n:"true"`
+	Title           string `json:"title" l10n:"true"`
 	URL             string `json:"url"`
 }
 type ExternalResourceList []ExternalResource
@@ -1196,10 +1196,10 @@ type ListExternalResourceRequest struct {
 
 // +transport
 type CreateExternalResourceRequest struct {
-	ConferenceID    string `json:"conference_id"`
+	ConferenceID    string            `json:"conference_id"`
 	Description     jsval.MaybeString `json:"description,omitempty" l10n:"true"`
-	Name            string `json:"name" l10n:"true"`
-	URL             string `json:"url"`
+	Title           string            `json:"title" l10n:"true"`
+	URL             string            `json:"url"`
 	LocalizedFields `json:"-"`
 	UserID          string            `json:"user_id"`
 	DatabaseOptions []db.InsertOption `json:"-"`
@@ -1209,7 +1209,7 @@ type CreateExternalResourceRequest struct {
 type UpdateExternalResourceRequest struct {
 	ID              string            `json:"id"`
 	Description     jsval.MaybeString `json:"description,omitempty" l10n:"true"`
-	Name            jsval.MaybeString `json:"name,omitempty" l10n:"true"`
+	Title           jsval.MaybeString `json:"title,omitempty" l10n:"true"`
 	URL             jsval.MaybeString `json:"url,omitempty"`
 	LocalizedFields `json:"-"`
 	UserID          string `json:"user_id"`

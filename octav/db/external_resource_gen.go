@@ -12,7 +12,7 @@ import (
 	"github.com/pkg/errors"
 )
 
-const ExternalResourceStdSelectColumns = "external_resources.oid, external_resources.eid, external_resources.conference_id, external_resources.description, external_resources.name, external_resources.url"
+const ExternalResourceStdSelectColumns = "external_resources.oid, external_resources.eid, external_resources.conference_id, external_resources.description, external_resources.title, external_resources.url"
 const ExternalResourceTable = "external_resources"
 
 type ExternalResourceList []ExternalResource
@@ -20,7 +20,7 @@ type ExternalResourceList []ExternalResource
 func (e *ExternalResource) Scan(scanner interface {
 	Scan(...interface{}) error
 }) error {
-	return scanner.Scan(&e.OID, &e.EID, &e.ConferenceID, &e.Description, &e.Name, &e.URL)
+	return scanner.Scan(&e.OID, &e.EID, &e.ConferenceID, &e.Description, &e.Title, &e.URL)
 }
 
 func init() {
@@ -37,7 +37,7 @@ func init() {
 		stmt.Reset()
 		stmt.WriteString(`UPDATE `)
 		stmt.WriteString(ExternalResourceTable)
-		stmt.WriteString(` SET eid = ?, conference_id = ?, description = ?, name = ?, url = ? WHERE oid = ?`)
+		stmt.WriteString(` SET eid = ?, conference_id = ?, description = ?, title = ?, url = ? WHERE oid = ?`)
 		library.Register("sqlExternalResourceUpdateByOIDKey", stmt.String())
 
 		stmt.Reset()
@@ -59,7 +59,7 @@ func init() {
 		stmt.Reset()
 		stmt.WriteString(`UPDATE `)
 		stmt.WriteString(ExternalResourceTable)
-		stmt.WriteString(` SET eid = ?, conference_id = ?, description = ?, name = ?, url = ? WHERE eid = ?`)
+		stmt.WriteString(` SET eid = ?, conference_id = ?, description = ?, title = ?, url = ? WHERE eid = ?`)
 		library.Register("sqlExternalResourceUpdateByEIDKey", stmt.String())
 	})
 }
@@ -105,8 +105,8 @@ func (e *ExternalResource) Create(tx *Tx, opts ...InsertOption) (err error) {
 	}
 	stmt.WriteString("INTO ")
 	stmt.WriteString(ExternalResourceTable)
-	stmt.WriteString(` (eid, conference_id, description, name, url) VALUES (?, ?, ?, ?, ?)`)
-	result, err := tx.Exec(stmt.String(), e.EID, e.ConferenceID, e.Description, e.Name, e.URL)
+	stmt.WriteString(` (eid, conference_id, description, title, url) VALUES (?, ?, ?, ?, ?)`)
+	result, err := tx.Exec(stmt.String(), e.EID, e.ConferenceID, e.Description, e.Title, e.URL)
 	if err != nil {
 		return err
 	}
@@ -133,7 +133,7 @@ func (e ExternalResource) Update(tx *Tx) (err error) {
 		if err != nil {
 			return errors.Wrap(err, `failed to get statement`)
 		}
-		_, err = tx.Stmt(stmt).Exec(e.EID, e.ConferenceID, e.Description, e.Name, e.URL, e.OID)
+		_, err = tx.Stmt(stmt).Exec(e.EID, e.ConferenceID, e.Description, e.Title, e.URL, e.OID)
 		return err
 	}
 	if e.EID != "" {
@@ -144,7 +144,7 @@ func (e ExternalResource) Update(tx *Tx) (err error) {
 		if err != nil {
 			return errors.Wrap(err, `failed to get statement`)
 		}
-		_, err = tx.Stmt(stmt).Exec(e.EID, e.ConferenceID, e.Description, e.Name, e.URL, e.EID)
+		_, err = tx.Stmt(stmt).Exec(e.EID, e.ConferenceID, e.Description, e.Title, e.URL, e.EID)
 		return err
 	}
 	return errors.New("either OID/EID must be filled")
