@@ -85,6 +85,9 @@ build: $(BIN_DIR)/octav
 run: build
 	$(BIN_DIR)/octav
 
+run-debug: build
+	$(BIN_DIR)/octav-debug
+
 clean:
 	-rm _internal_bin/*
 	-rm -rf _bin/*

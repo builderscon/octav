@@ -1170,6 +1170,7 @@ type ExternalResource struct {
 	Description     string `json:"description" l10n:"true"`
 	Title           string `json:"title" l10n:"true"`
 	URL             string `json:"url"`
+	SortOrder       int    `json:"sort_order"`
 }
 type ExternalResourceList []ExternalResource
 
@@ -1202,6 +1203,7 @@ type CreateExternalResourceRequest struct {
 	URL             string            `json:"url"`
 	LocalizedFields `json:"-"`
 	UserID          string            `json:"user_id"`
+	SortOrder       jsval.MaybeInt    `json:"sort_order,omitempty"`
 	DatabaseOptions []db.InsertOption `json:"-"`
 }
 
@@ -1212,7 +1214,8 @@ type UpdateExternalResourceRequest struct {
 	Title           jsval.MaybeString `json:"title,omitempty" l10n:"true"`
 	URL             jsval.MaybeString `json:"url,omitempty"`
 	LocalizedFields `json:"-"`
-	UserID          string `json:"user_id"`
+	UserID          string         `json:"user_id"`
+	SortOrder       jsval.MaybeInt `json:"sort_order,omitempty"`
 }
 
 // +transport

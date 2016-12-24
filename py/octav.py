@@ -1,5 +1,5 @@
 """OCTAV Client Library"""
-"""DO NOT EDIT: This file was generated from ../spec/v1/api.json on Fri Dec 23 10:26:24 2016"""
+"""DO NOT EDIT: This file was generated from ../spec/v1/api.json on Sat Dec 24 14:44:51 2016"""
 
 import certifi
 import json
@@ -3320,7 +3320,7 @@ class Octav(object):
         self.error = repr(e)
         return None
 
-  def create_external_resource (self, conference_id, title, url, user_id, description=None, **args):
+  def create_external_resource (self, conference_id, title, url, user_id, description=None, sort_order=None, **args):
     try:
         payload = {}
         hdrs = {}
@@ -3340,6 +3340,8 @@ class Octav(object):
             payload['conference_id'] = conference_id
         if description is not None:
             payload['description'] = description
+        if sort_order is not None:
+            payload['sort_order'] = sort_order
         if title is not None:
             payload['title'] = title
         if url is not None:
@@ -3372,7 +3374,7 @@ class Octav(object):
         self.error = repr(e)
         return None
 
-  def update_external_resource (self, conference_id, user_id, description=None, id=None, title=None, url=None, **args):
+  def update_external_resource (self, conference_id, user_id, description=None, id=None, sort_order=None, title=None, url=None, **args):
     try:
         payload = {}
         hdrs = {}
@@ -3386,6 +3388,8 @@ class Octav(object):
             payload['description'] = description
         if id is not None:
             payload['id'] = id
+        if sort_order is not None:
+            payload['sort_order'] = sort_order
         if title is not None:
             payload['title'] = title
         if url is not None:

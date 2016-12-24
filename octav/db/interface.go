@@ -83,6 +83,7 @@ type ExternalResource struct {
 	Description  string
 	Title        string
 	URL          string
+	SortOrder    int
 }
 
 // +DB tablename:"conference_series_administrators"

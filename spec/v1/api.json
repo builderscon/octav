@@ -84,7 +84,8 @@
         "id": {"$ref": "#/definitions/uuid"},
         "description": {"$ref": "#/definitions/string_en"},
         "title": {"$ref": "#/definitions/string_en"},
-        "url": {"$ref": "#/definitions/url"}
+        "url": {"$ref": "#/definitions/url"},
+        "sort_order": { "$ref": "#/definitions/positiveInteger" }
       },
       "patternProperties":{
         "description#[a-z]+": {"$ref": "#/definitions/string_en"},
@@ -2116,6 +2117,7 @@
           "description": {"$ref": "#/definitions/string_en"},
           "title": {"$ref": "#/definitions/string_en_not_empty"},
           "url": {"$ref": "#/definitions/url"},
+          "sort_order": { "$ref": "#/definitions/positiveInteger" },
           "user_id": {"$ref":"#/definitions/uuid"}
         },
         "patternProperties": {
@@ -2140,6 +2142,7 @@
           "description": {"$ref": "#/definitions/string_en"},
           "title": {"$ref": "#/definitions/string_en"},
           "url": {"$ref": "#/definitions/url"},
+          "sort_order": { "$ref": "#/definitions/positiveInteger" },
           "user_id": {"$ref":"#/definitions/uuid"}
         },
         "patternProperties": {

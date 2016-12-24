@@ -95,6 +95,9 @@ func (v *ExternalResourceSvc) Create(tx *db.Tx, vdb *db.ExternalResource, payloa
 	if err := payload.LocalizedFields.CreateLocalizedStrings(tx, "ExternalResource", vdb.EID); err != nil {
 		return errors.Wrap(err, `failed to populate localized strings`)
 	}
+	if err := v.PostCreateHook(tx, vdb); err != nil {
+		return errors.Wrap(err, `post create hook failed`)
+	}
 	return nil
 }
 
@@ -121,6 +124,9 @@ func (v *ExternalResourceSvc) Update(tx *db.Tx, vdb *db.ExternalResource) (err e
 		if cerr != nil {
 			pdebug.Printf(`CACHE ERR: %s`, cerr)
 		}
+	}
+	if err := v.PostUpdateHook(tx, vdb); err != nil {
+		return errors.Wrap(err, `post update hook failed`)
 	}
 	return nil
 }
@@ -233,6 +239,10 @@ func (v *ExternalResourceSvc) Delete(tx *db.Tx, id string) error {
 		g := pdebug.Marker("ExternalResource.Delete (%s)", id)
 		defer g.End()
 	}
+	original := db.ExternalResource{EID: id}
+	if err := original.LoadByEID(tx, id); err != nil {
+		return errors.Wrap(err, `failed load before delete`)
+	}
 
 	vdb := db.ExternalResource{EID: id}
 	if err := vdb.Delete(tx); err != nil {
@@ -246,6 +256,9 @@ func (v *ExternalResourceSvc) Delete(tx *db.Tx, id string) error {
 	}
 	if err := db.DeleteLocalizedStringsForParent(tx, id, "ExternalResource"); err != nil {
 		return errors.Wrap(err, `failed to delete localized strings`)
+	}
+	if err := v.PostDeleteHook(tx, &original); err != nil {
+		return errors.Wrap(err, `post delete hook failed`)
 	}
 	return nil
 }

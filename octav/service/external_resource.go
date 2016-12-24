@@ -32,6 +32,10 @@ func (v *ExternalResourceSvc) populateRowForCreate(vdb *db.ExternalResource, pay
 	u.Fragment = ""
 	vdb.URL = u.String()
 
+	if payload.SortOrder.Valid() {
+		vdb.SortOrder = int(payload.SortOrder.Int)
+	}
+
 	return nil
 }
 
@@ -50,6 +54,9 @@ func (v *ExternalResourceSvc) populateRowForUpdate(vdb *db.ExternalResource, pay
 		}
 		u.Fragment = ""
 		vdb.URL = u.String()
+	}
+	if payload.SortOrder.Valid() {
+		vdb.SortOrder = int(payload.SortOrder.Int)
 	}
 	return nil
 }
@@ -99,6 +106,28 @@ func (v *ExternalResourceSvc) ListFromPayload(tx *db.Tx, result *model.ExternalR
 	return nil
 }
 
+func invalidateExternalResourceLoadByConferenceID(conferenceID string) error {
+	c := Cache()
+	key := c.Key("ExternalResource", "LoadByConferenceID", conferenceID)
+	c.Delete(key)
+	if pdebug.Enabled {
+		pdebug.Printf("CACHE DEL: %s", key)
+	}
+	return nil
+}
+
+func (v *ExternalResourceSvc) PostCreateHook(_ *db.Tx, vdb *db.ExternalResource) error {
+	return invalidateExternalResourceLoadByConferenceID(vdb.ConferenceID)
+}
+
+func (v *ExternalResourceSvc) PostUpdateHook(_ *db.Tx, vdb *db.ExternalResource) error {
+	return invalidateExternalResourceLoadByConferenceID(vdb.ConferenceID)
+}
+
+func (v *ExternalResourceSvc) PostDeleteHook(_ *db.Tx, vdb *db.ExternalResource) error {
+	return invalidateExternalResourceLoadByConferenceID(vdb.ConferenceID)
+}
+
 func (v *ExternalResourceSvc) Decorate(tx *db.Tx, c *model.ExternalResource, trustedCall bool, lang string) error {
 	if lang == "" {
 		return nil
@@ -116,7 +145,7 @@ func (v *ExternalResourceSvc) LoadByConferenceID(tx *db.Tx, result *model.Extern
 	}
 
 	c := Cache()
-	key := c.Key("ExternalResource", "ListFromPayload", cid)
+	key := c.Key("ExternalResource", "LoadByConferenceID", cid)
 	x, err := c.GetOrSet(key, result, func() (interface{}, error) {
 		if pdebug.Enabled {
 			pdebug.Printf("CACHE MISS: Re-generating")
@@ -131,10 +160,6 @@ func (v *ExternalResourceSvc) LoadByConferenceID(tx *db.Tx, result *model.Extern
 		for i, vdb := range vdbl {
 			if err := l[i].FromRow(&vdb); err != nil {
 				return nil, errors.Wrap(err, "failed to populate model from database")
-			}
-
-			if err := v.Decorate(tx, &l[i], trustedCall, lang); err != nil {
-				return nil, errors.Wrap(err, "failed to decorate ExternalResource with associated data")
 			}
 		}
 

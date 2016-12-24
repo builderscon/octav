@@ -18,6 +18,7 @@ type rawExternalResource struct {
 	Description string `json:"description" l10n:"true"`
 	Title       string `json:"title" l10n:"true"`
 	URL         string `json:"url"`
+	SortOrder   int    `json:"sort_order"`
 }
 
 func (v ExternalResource) MarshalJSON() ([]byte, error) {
@@ -26,6 +27,7 @@ func (v ExternalResource) MarshalJSON() ([]byte, error) {
 	raw.Description = v.Description
 	raw.Title = v.Title
 	raw.URL = v.URL
+	raw.SortOrder = v.SortOrder
 	buf, err := json.Marshal(raw)
 	if err != nil {
 		return nil, err
@@ -54,6 +56,7 @@ func (v *ExternalResource) FromRow(vdb *db.ExternalResource) error {
 	v.Description = vdb.Description
 	v.Title = vdb.Title
 	v.URL = vdb.URL
+	v.SortOrder = vdb.SortOrder
 	return nil
 }
 
@@ -62,5 +65,6 @@ func (v *ExternalResource) ToRow(vdb *db.ExternalResource) error {
 	vdb.Description = v.Description
 	vdb.Title = v.Title
 	vdb.URL = v.URL
+	vdb.SortOrder = v.SortOrder
 	return nil
 }

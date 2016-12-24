@@ -134,8 +134,10 @@ CREATE TABLE external_resources (
     description TEXT,
     title TEXT NOT NULL,
     url  TEXT NOT NULL,
+    sort_order int not null default 0,
     UNIQUE KEY(eid),
-    FOREIGN KEY (conference_id) REFERENCES conferences(eid) ON DELETE CASCADE
+    FOREIGN KEY (conference_id) REFERENCES conferences(eid) ON DELETE CASCADE,
+    KEY(sort_order)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 

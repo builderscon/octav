@@ -7644,6 +7644,9 @@ func (r CreateExternalResourceRequest) collectMarshalData() map[string]interface
 	m["title"] = r.Title
 	m["url"] = r.URL
 	m["user_id"] = r.UserID
+	if r.SortOrder.Valid() {
+		m["sort_order"] = r.SortOrder.Value()
+	}
 	return m
 }
 
@@ -7716,6 +7719,12 @@ func (r *CreateExternalResourceRequest) Populate(m map[string]interface{}) error
 			return errors.Wrap(ErrInvalidJSONFieldType{Field: "user_id"}, "failed to populate fields for CreateExternalResourceRequest")
 		}
 	}
+	if jv, ok := m["sort_order"]; ok {
+		if err := r.SortOrder.Set(jv); err != nil {
+			return errors.New("set field SortOrder failed: " + err.Error())
+		}
+		delete(m, "sort_order")
+	}
 	if err := ExtractL10NFields(m, &r.LocalizedFields, []string{"description", "title"}); err != nil {
 		return err
 	}
@@ -7724,7 +7733,7 @@ func (r *CreateExternalResourceRequest) Populate(m map[string]interface{}) error
 
 func (r *CreateExternalResourceRequest) GetPropNames() ([]string, error) {
 	l, _ := r.LocalizedFields.GetPropNames()
-	return append(l, "conference_id", "description", "title", "url", "user_id"), nil
+	return append(l, "conference_id", "description", "title", "url", "user_id", "sort_order"), nil
 }
 
 func (r *CreateExternalResourceRequest) SetPropValue(s string, v interface{}) error {
@@ -7751,6 +7760,8 @@ func (r *CreateExternalResourceRequest) SetPropValue(s string, v interface{}) er
 			r.UserID = jv
 			return nil
 		}
+	case "sort_order":
+		return r.SortOrder.Set(v)
 	default:
 		return errors.New("unknown column '" + s + "'")
 	}
@@ -7770,6 +7781,9 @@ func (r UpdateExternalResourceRequest) collectMarshalData() map[string]interface
 		m["url"] = r.URL.Value()
 	}
 	m["user_id"] = r.UserID
+	if r.SortOrder.Valid() {
+		m["sort_order"] = r.SortOrder.Value()
+	}
 	return m
 }
 
@@ -7836,6 +7850,12 @@ func (r *UpdateExternalResourceRequest) Populate(m map[string]interface{}) error
 			return errors.Wrap(ErrInvalidJSONFieldType{Field: "user_id"}, "failed to populate fields for UpdateExternalResourceRequest")
 		}
 	}
+	if jv, ok := m["sort_order"]; ok {
+		if err := r.SortOrder.Set(jv); err != nil {
+			return errors.New("set field SortOrder failed: " + err.Error())
+		}
+		delete(m, "sort_order")
+	}
 	if err := ExtractL10NFields(m, &r.LocalizedFields, []string{"description", "title"}); err != nil {
 		return err
 	}
@@ -7844,7 +7864,7 @@ func (r *UpdateExternalResourceRequest) Populate(m map[string]interface{}) error
 
 func (r *UpdateExternalResourceRequest) GetPropNames() ([]string, error) {
 	l, _ := r.LocalizedFields.GetPropNames()
-	return append(l, "id", "description", "title", "url", "user_id"), nil
+	return append(l, "id", "description", "title", "url", "user_id", "sort_order"), nil
 }
 
 func (r *UpdateExternalResourceRequest) SetPropValue(s string, v interface{}) error {
@@ -7865,6 +7885,8 @@ func (r *UpdateExternalResourceRequest) SetPropValue(s string, v interface{}) er
 			r.UserID = jv
 			return nil
 		}
+	case "sort_order":
+		return r.SortOrder.Set(v)
 	default:
 		return errors.New("unknown column '" + s + "'")
 	}
