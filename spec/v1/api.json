@@ -82,6 +82,7 @@
       "type": "object",
       "properties": {
         "id": {"$ref": "#/definitions/uuid"},
+        "conference_id": {"$ref": "#/definitions/uuid"},
         "description": {"$ref": "#/definitions/string_en"},
         "title": {"$ref": "#/definitions/string_en"},
         "url": {"$ref": "#/definitions/url"},
@@ -2149,7 +2150,7 @@
           "description#[a-z]+": { "$ref": "#/definitions/string_i18n" },
           "title#[a-z]+": { "$ref": "#/definitions/string_i18n" }
         },
-        "required": ["conference_id", "user_id"]
+        "required": ["id", "user_id"]
       },
       "targetSchema": { "$ref": "#/definitions/external_resource" }
     },

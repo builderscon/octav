@@ -1167,6 +1167,7 @@ type ListConferenceStaffRequest struct {
 type ExternalResource struct {
 	LocalizedFields `json:"-"`
 	ID              string `json:"id"`
+	ConferenceID    string `json:"conference_id"`
 	Description     string `json:"description" l10n:"true"`
 	Title           string `json:"title" l10n:"true"`
 	URL             string `json:"url"`

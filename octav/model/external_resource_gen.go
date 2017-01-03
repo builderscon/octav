@@ -14,16 +14,18 @@ var _ = pdebug.Enabled
 var _ = time.Time{}
 
 type rawExternalResource struct {
-	ID          string `json:"id"`
-	Description string `json:"description" l10n:"true"`
-	Title       string `json:"title" l10n:"true"`
-	URL         string `json:"url"`
-	SortOrder   int    `json:"sort_order"`
+	ID           string `json:"id"`
+	ConferenceID string `json:"conference_id"`
+	Description  string `json:"description" l10n:"true"`
+	Title        string `json:"title" l10n:"true"`
+	URL          string `json:"url"`
+	SortOrder    int    `json:"sort_order"`
 }
 
 func (v ExternalResource) MarshalJSON() ([]byte, error) {
 	var raw rawExternalResource
 	raw.ID = v.ID
+	raw.ConferenceID = v.ConferenceID
 	raw.Description = v.Description
 	raw.Title = v.Title
 	raw.URL = v.URL
@@ -53,6 +55,7 @@ func (v *ExternalResource) Load(tx *db.Tx, id string) (err error) {
 
 func (v *ExternalResource) FromRow(vdb *db.ExternalResource) error {
 	v.ID = vdb.EID
+	v.ConferenceID = vdb.ConferenceID
 	v.Description = vdb.Description
 	v.Title = vdb.Title
 	v.URL = vdb.URL
@@ -62,6 +65,7 @@ func (v *ExternalResource) FromRow(vdb *db.ExternalResource) error {
 
 func (v *ExternalResource) ToRow(vdb *db.ExternalResource) error {
 	vdb.EID = v.ID
+	vdb.ConferenceID = v.ConferenceID
 	vdb.Description = v.Description
 	vdb.Title = v.Title
 	vdb.URL = v.URL
