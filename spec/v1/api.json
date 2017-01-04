@@ -77,6 +77,26 @@
         { "type": "object", "description": "implementation specific object representing time" }
       ]
     },
+    "external_resource": {
+      "hsup.type": "model.ExternalResource",
+      "type": "object",
+      "properties": {
+        "id": {"$ref": "#/definitions/uuid"},
+        "conference_id": {"$ref": "#/definitions/uuid"},
+        "description": {"$ref": "#/definitions/string_en"},
+        "title": {"$ref": "#/definitions/string_en"},
+        "url": {"$ref": "#/definitions/url"},
+        "sort_order": { "$ref": "#/definitions/positiveInteger" }
+      },
+      "patternProperties":{
+        "description#[a-z]+": {"$ref": "#/definitions/string_en"},
+        "title#[a-z]+": { "$ref": "#/definitions/string_i18n" }
+      }
+    },
+    "external_resource_array": {
+      "type": "array",
+      "items": { "$ref": "#/definitions/external_resource" }
+    },
     "featured_speaker": {
       "hsup.type": "model.FeaturedSpeaker",
       "type": "object",
@@ -264,7 +284,8 @@
           "items": { "$ref": "#/definitions/track" }
         },
         "administrators": { "$ref": "#/definitions/user_array" },
-        "featured_speakers": { "$ref": "#/definitions/featured_speaker_array" }
+        "featured_speakers": { "$ref": "#/definitions/featured_speaker_array" },
+        "external_resources": { "$ref": "#/definitions/external_resource_array" }
       },
       "patternProperties": {
         "title#[a-z]+": { "$ref": "#/definitions/string_i18n" },
@@ -2042,6 +2063,110 @@
           "user_id": {"$ref":"#/definitions/uuid"}
         },
         "required": ["conference_id","staff_id","user_id"]
+      }
+    },
+    {
+      "title": "Lookup external resource",
+      "rel": "lookup",
+      "method": "GET",
+      "href": "/v1/external_resource/lookup",
+      "encType": "application/json",
+      "schema": {
+        "hsup.type": "model.LookupExternalResourceRequest",
+        "properties": {
+          "id": {"$ref": "#/definitions/uuid"},
+          "limit": { "$ref": "#/definitions/positiveIntegerDefault10" },
+          "since": { "$ref": "#/definitions/uuid" },
+          "lang": { "$ref": "#/definitions/language" }
+        },
+        "required": ["id"]
+      },
+      "targetSchema": { "$ref": "#/definitions/external_resource" }
+    },
+    {
+      "title": "List external resource",
+      "rel": "list",
+      "method": "GET",
+      "href": "/v1/external_resource/list",
+      "encType": "application/json",
+      "schema": {
+        "properties": {
+          "conference_id": {"$ref": "#/definitions/uuid"},
+          "limit": { "$ref": "#/definitions/positiveIntegerDefault10" },
+          "since": { "$ref": "#/definitions/uuid" },
+          "lang": { "$ref": "#/definitions/language" }
+        },
+        "required": ["conference_id","user_id"]
+      },
+      "targetSchema": {
+        "type": "array",
+        "hsup.type": "[]model.ExternalResource",
+        "items": { "$ref": "#/definitions/external_resource" }
+      }
+    },
+    {
+      "title": "Create external resource",
+      "hsup.wrapper": "httpWithBasicAuth",
+      "rel": "create",
+      "method": "POST",
+      "href": "/v1/external_resource/create",
+      "encType": "application/json",
+      "schema": {
+        "hsup.type": "model.CreateExternalResourceRequest",
+        "properties": {
+          "conference_id": {"$ref": "#/definitions/uuid"},
+          "description": {"$ref": "#/definitions/string_en"},
+          "title": {"$ref": "#/definitions/string_en_not_empty"},
+          "url": {"$ref": "#/definitions/url"},
+          "sort_order": { "$ref": "#/definitions/positiveInteger" },
+          "user_id": {"$ref":"#/definitions/uuid"}
+        },
+        "patternProperties": {
+          "description#[a-z]+": { "$ref": "#/definitions/string_i18n" },
+          "title#[a-z]+": { "$ref": "#/definitions/string_i18n" }
+        },
+        "required": ["conference_id", "title", "url", "user_id"]
+      },
+      "targetSchema": { "$ref": "#/definitions/external_resource" }
+    },
+    {
+      "title": "Update external resource",
+      "hsup.wrapper": "httpWithBasicAuth",
+      "rel": "update",
+      "method": "POST",
+      "href": "/v1/external_resource/update",
+      "encType": "application/json",
+      "schema": {
+        "hsup.type": "model.UpdateExternalResourceRequest",
+        "properties": {
+          "id": {"$ref": "#/definitions/uuid"},
+          "description": {"$ref": "#/definitions/string_en"},
+          "title": {"$ref": "#/definitions/string_en"},
+          "url": {"$ref": "#/definitions/url"},
+          "sort_order": { "$ref": "#/definitions/positiveInteger" },
+          "user_id": {"$ref":"#/definitions/uuid"}
+        },
+        "patternProperties": {
+          "description#[a-z]+": { "$ref": "#/definitions/string_i18n" },
+          "title#[a-z]+": { "$ref": "#/definitions/string_i18n" }
+        },
+        "required": ["id", "user_id"]
+      },
+      "targetSchema": { "$ref": "#/definitions/external_resource" }
+    },
+    {
+      "title": "Delete external resource",
+      "hsup.wrapper": "httpWithBasicAuth",
+      "rel": "delete",
+      "method": "POST",
+      "href": "/v1/external_resource/delete",
+      "encType": "application/json",
+      "schema": {
+        "properties": {
+          "id": {"$ref": "#/definitions/uuid"},
+          "user_id": {"$ref": "#/definitions/uuid"}
+        },
+        "required": ["id","user_id"]
       }
     }
   ]

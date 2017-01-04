@@ -14,31 +14,32 @@ var _ = pdebug.Enabled
 var _ = time.Time{}
 
 type rawConference struct {
-	ID                        string              `json:"id"`
-	Title                     string              `json:"title" l10n:"true"`
-	Description               string              `json:"description,omitempty" l10n:"true"`
-	CFPLeadText               string              `json:"cfp_lead_text,omitempty" l10n:"true"`
-	CFPPreSubmitInstructions  string              `json:"cfp_pre_submit_instructions,omitempty" l10n:"true"`
-	CFPPostSubmitInstructions string              `json:"cfp_post_submit_instructions,omitempty" l10n:"true"`
-	ContactInformation        string              `json:"contact_information,omitempty" l10n:"true"`
-	CoverURL                  string              `json:"cover_url"`
-	RedirectURL               string              `json:"redirect_url"`
-	SeriesID                  string              `json:"series_id,omitempty"`
-	Series                    *ConferenceSeries   `json:"series,omitempty" decorate:"true"`
-	SubTitle                  string              `json:"sub_title" l10n:"true"`
-	Slug                      string              `json:"slug"`
-	FullSlug                  string              `json:"full_slug,omitempty"`
-	Status                    string              `json:"status"`
-	BlogFeedbackAvailable     bool                `json:"blog_feedback_available"`
-	TimetableAvailable        bool                `json:"timetable_available"`
-	Timezone                  string              `json:"timezone"`
-	Dates                     ConferenceDateList  `json:"dates,omitempty"`
-	Administrators            UserList            `json:"administrators,omitempty" decorate:"true"`
-	Venues                    VenueList           `json:"venues,omitempty" decorate:"true"`
-	FeaturedSpeakers          FeaturedSpeakerList `json:"featured_speakers,omitempty" decorate:"true"`
-	Sponsors                  SponsorList         `json:"sponsors,omitempty" decorate:"true"`
-	SessionTypes              SessionTypeList     `json:"session_types,omitempty" decorate:"true"`
-	Tracks                    TrackList           `json:"tracks,omitempty" decorate:"true"`
+	ID                        string               `json:"id"`
+	Title                     string               `json:"title" l10n:"true"`
+	Description               string               `json:"description,omitempty" l10n:"true"`
+	CFPLeadText               string               `json:"cfp_lead_text,omitempty" l10n:"true"`
+	CFPPreSubmitInstructions  string               `json:"cfp_pre_submit_instructions,omitempty" l10n:"true"`
+	CFPPostSubmitInstructions string               `json:"cfp_post_submit_instructions,omitempty" l10n:"true"`
+	ContactInformation        string               `json:"contact_information,omitempty" l10n:"true"`
+	CoverURL                  string               `json:"cover_url"`
+	RedirectURL               string               `json:"redirect_url"`
+	SeriesID                  string               `json:"series_id,omitempty"`
+	Series                    *ConferenceSeries    `json:"series,omitempty" decorate:"true"`
+	SubTitle                  string               `json:"sub_title" l10n:"true"`
+	Slug                      string               `json:"slug"`
+	FullSlug                  string               `json:"full_slug,omitempty"`
+	Status                    string               `json:"status"`
+	BlogFeedbackAvailable     bool                 `json:"blog_feedback_available"`
+	TimetableAvailable        bool                 `json:"timetable_available"`
+	Timezone                  string               `json:"timezone"`
+	Dates                     ConferenceDateList   `json:"dates,omitempty"`
+	Administrators            UserList             `json:"administrators,omitempty" decorate:"true"`
+	Venues                    VenueList            `json:"venues,omitempty" decorate:"true"`
+	FeaturedSpeakers          FeaturedSpeakerList  `json:"featured_speakers,omitempty" decorate:"true"`
+	Sponsors                  SponsorList          `json:"sponsors,omitempty" decorate:"true"`
+	SessionTypes              SessionTypeList      `json:"session_types,omitempty" decorate:"true"`
+	Tracks                    TrackList            `json:"tracks,omitempty" decorate:"true"`
+	ExternalResources         ExternalResourceList `json:"external_resources,omitempty"`
 }
 
 func (v Conference) MarshalJSON() ([]byte, error) {
@@ -68,6 +69,7 @@ func (v Conference) MarshalJSON() ([]byte, error) {
 	raw.Sponsors = v.Sponsors
 	raw.SessionTypes = v.SessionTypes
 	raw.Tracks = v.Tracks
+	raw.ExternalResources = v.ExternalResources
 	buf, err := json.Marshal(raw)
 	if err != nil {
 		return nil, err

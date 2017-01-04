@@ -38,31 +38,32 @@ type ObjectID struct {
 // +model `UpdateRequest:"false"`
 type Conference struct {
 	LocalizedFields           `json:"-"`
-	ID                        string              `json:"id"`
-	Title                     string              `json:"title" l10n:"true"`
-	Description               string              `json:"description,omitempty" l10n:"true"`
-	CFPLeadText               string              `json:"cfp_lead_text,omitempty" l10n:"true"`
-	CFPPreSubmitInstructions  string              `json:"cfp_pre_submit_instructions,omitempty" l10n:"true"`
-	CFPPostSubmitInstructions string              `json:"cfp_post_submit_instructions,omitempty" l10n:"true"`
-	ContactInformation        string              `json:"contact_information,omitempty" l10n:"true"`
-	CoverURL                  string              `json:"cover_url"`
-	RedirectURL               string              `json:"redirect_url"`
-	SeriesID                  string              `json:"series_id,omitempty"`
-	Series                    *ConferenceSeries   `json:"series,omitempty" decorate:"true"`
-	SubTitle                  string              `json:"sub_title" l10n:"true"`
-	Slug                      string              `json:"slug"`
-	FullSlug                  string              `json:"full_slug,omitempty"` // Only populated when decorated
-	Status                    string              `json:"status"`
-	BlogFeedbackAvailable     bool                `json:"blog_feedback_available"`
-	TimetableAvailable        bool                `json:"timetable_available"`
-	Timezone                  string              `json:"timezone"`
-	Dates                     ConferenceDateList  `json:"dates,omitempty"`
-	Administrators            UserList            `json:"administrators,omitempty" decorate:"true"`
-	Venues                    VenueList           `json:"venues,omitempty" decorate:"true"`
-	FeaturedSpeakers          FeaturedSpeakerList `json:"featured_speakers,omitempty" decorate:"true"`
-	Sponsors                  SponsorList         `json:"sponsors,omitempty" decorate:"true"`
-	SessionTypes              SessionTypeList     `json:"session_types,omitempty" decorate:"true"`
-	Tracks                    TrackList           `json:"tracks,omitempty" decorate:"true"`
+	ID                        string               `json:"id"`
+	Title                     string               `json:"title" l10n:"true"`
+	Description               string               `json:"description,omitempty" l10n:"true"`
+	CFPLeadText               string               `json:"cfp_lead_text,omitempty" l10n:"true"`
+	CFPPreSubmitInstructions  string               `json:"cfp_pre_submit_instructions,omitempty" l10n:"true"`
+	CFPPostSubmitInstructions string               `json:"cfp_post_submit_instructions,omitempty" l10n:"true"`
+	ContactInformation        string               `json:"contact_information,omitempty" l10n:"true"`
+	CoverURL                  string               `json:"cover_url"`
+	RedirectURL               string               `json:"redirect_url"`
+	SeriesID                  string               `json:"series_id,omitempty"`
+	Series                    *ConferenceSeries    `json:"series,omitempty" decorate:"true"`
+	SubTitle                  string               `json:"sub_title" l10n:"true"`
+	Slug                      string               `json:"slug"`
+	FullSlug                  string               `json:"full_slug,omitempty"` // Only populated when decorated
+	Status                    string               `json:"status"`
+	BlogFeedbackAvailable     bool                 `json:"blog_feedback_available"`
+	TimetableAvailable        bool                 `json:"timetable_available"`
+	Timezone                  string               `json:"timezone"`
+	Dates                     ConferenceDateList   `json:"dates,omitempty"`
+	Administrators            UserList             `json:"administrators,omitempty" decorate:"true"`
+	Venues                    VenueList            `json:"venues,omitempty" decorate:"true"`
+	FeaturedSpeakers          FeaturedSpeakerList  `json:"featured_speakers,omitempty" decorate:"true"`
+	Sponsors                  SponsorList          `json:"sponsors,omitempty" decorate:"true"`
+	SessionTypes              SessionTypeList      `json:"session_types,omitempty" decorate:"true"`
+	Tracks                    TrackList            `json:"tracks,omitempty" decorate:"true"`
+	ExternalResources         ExternalResourceList `json:"external_resources,omitempty"`
 }
 type ConferenceList []Conference
 
@@ -1162,4 +1163,64 @@ type ListConferenceStaffRequest struct {
 	Lang         jsval.MaybeString `json:"lang,omitempty" urlenc:"lang,omitempty,string"`
 }
 
+// +model
+type ExternalResource struct {
+	LocalizedFields `json:"-"`
+	ID              string `json:"id"`
+	ConferenceID    string `json:"conference_id"`
+	Description     string `json:"description" l10n:"true"`
+	Title           string `json:"title" l10n:"true"`
+	URL             string `json:"url"`
+	SortOrder       int    `json:"sort_order"`
+}
+type ExternalResourceList []ExternalResource
 
+// +transport
+type LookupExternalResourceRequest struct {
+	ID    string            `json:"id"`
+	Since jsval.MaybeString `json:"since,omitempty" urlenc:"since,omitempty,string"`
+	Limit jsval.MaybeInt    `json:"limit,omitempty" urlenc:"limit,omitempty,int64"`
+	Lang  jsval.MaybeString `json:"lang,omitempty" urlenc:"lang,omitempty,string"`
+
+	TrustedCall bool `json:"-"`
+}
+
+// +transport
+type ListExternalResourceRequest struct {
+	ConferenceID string            `json:"conference_id"`
+	UserID       string            `json:"user_id"`
+	Since        jsval.MaybeString `json:"since,omitempty" urlenc:"since,omitempty,string"`
+	Limit        jsval.MaybeInt    `json:"limit,omitempty" urlenc:"limit,omitempty,int64"`
+	Lang         jsval.MaybeString `json:"lang,omitempty" urlenc:"lang,omitempty,string"`
+
+	TrustedCall bool `json:"-"`
+}
+
+// +transport
+type CreateExternalResourceRequest struct {
+	ConferenceID    string            `json:"conference_id"`
+	Description     jsval.MaybeString `json:"description,omitempty" l10n:"true"`
+	Title           string            `json:"title" l10n:"true"`
+	URL             string            `json:"url"`
+	LocalizedFields `json:"-"`
+	UserID          string            `json:"user_id"`
+	SortOrder       jsval.MaybeInt    `json:"sort_order,omitempty"`
+	DatabaseOptions []db.InsertOption `json:"-"`
+}
+
+// +transport
+type UpdateExternalResourceRequest struct {
+	ID              string            `json:"id"`
+	Description     jsval.MaybeString `json:"description,omitempty" l10n:"true"`
+	Title           jsval.MaybeString `json:"title,omitempty" l10n:"true"`
+	URL             jsval.MaybeString `json:"url,omitempty"`
+	LocalizedFields `json:"-"`
+	UserID          string         `json:"user_id"`
+	SortOrder       jsval.MaybeInt `json:"sort_order,omitempty"`
+}
+
+// +transport
+type DeleteExternalResourceRequest struct {
+	ID     string `json:"id"`
+	UserID string `json:"user_id"`
+}

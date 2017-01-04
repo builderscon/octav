@@ -124,3 +124,8 @@ type TrackSvc struct {}
 // +PostUpdateHook
 // +PostDeleteHook
 type BlogEntrySvc struct {}
+
+// +PostCreateHook
+// +PostUpdateHook
+// +PostDeleteHook
+type ExternalResourceSvc struct{}

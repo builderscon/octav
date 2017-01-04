@@ -768,6 +768,71 @@ func (c *Client) CreateConferenceSeries(in *model.CreateConferenceSeriesRequest)
 	return &payload, nil
 }
 
+func (c *Client) CreateExternalResource(in *model.CreateExternalResourceRequest) (ret *model.ExternalResource, err error) {
+	if pdebug.Enabled {
+		g := pdebug.Marker("client.CreateExternalResource").BindError(&err)
+		defer g.End()
+	}
+	u, err := url.Parse(c.Endpoint + "/v1/external_resource/create")
+	if err != nil {
+		return nil, err
+	}
+	var buf bytes.Buffer
+	err = json.NewEncoder(&buf).Encode(in)
+	if err != nil {
+		return nil, err
+	}
+	if pdebug.Enabled {
+		pdebug.Printf("POST to %s", u.String())
+		pdebug.Printf("%s", buf.String())
+	}
+	req, err := http.NewRequest("POST", u.String(), &buf)
+	if err != nil {
+		return nil, err
+	}
+	req.Header.Set("Content-Type", "application/json")
+	if c.BasicAuth.Username != "" && c.BasicAuth.Password != "" {
+		req.SetBasicAuth(c.BasicAuth.Username, c.BasicAuth.Password)
+	}
+	res, err := c.Client.Do(req)
+	if err != nil {
+		return nil, err
+	}
+	if res.StatusCode != http.StatusOK {
+		if strings.HasPrefix(strings.ToLower(res.Header.Get(`Content-Type`)), `application/json`) {
+			var errjson ErrJSON
+			if err := json.NewDecoder(res.Body).Decode(&errjson); err != nil {
+				return nil, errors.Errorf(`Invalid response: '%s'`, res.Status)
+			}
+			if len(errjson.Error) > 0 {
+				return nil, errors.New(errjson.Error)
+			}
+		}
+		return nil, errors.Errorf(`Invalid response: '%s'`, res.Status)
+	}
+	jsonbuf := getTransportJSONBuffer()
+	defer releaseTransportJSONBuffer(jsonbuf)
+	_, err = io.Copy(jsonbuf, io.LimitReader(res.Body, MaxResponseSize))
+	defer res.Body.Close()
+	if pdebug.Enabled {
+		if err != nil {
+			pdebug.Printf("failed to read respons buffer: %s", err)
+		} else {
+			pdebug.Printf("response buffer: %s", jsonbuf)
+		}
+	}
+	if err != nil {
+		return nil, err
+	}
+
+	var payload model.ExternalResource
+	err = json.Unmarshal(jsonbuf.Bytes(), &payload)
+	if err != nil {
+		return nil, err
+	}
+	return &payload, nil
+}
+
 func (c *Client) CreateQuestion(in *model.CreateQuestionRequest) (ret *model.ObjectID, err error) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("client.CreateQuestion").BindError(&err)
@@ -1540,6 +1605,51 @@ func (c *Client) DeleteConferenceVenue(in *model.DeleteConferenceVenueRequest) (
 		defer g.End()
 	}
 	u, err := url.Parse(c.Endpoint + "/v1/conference/venue/delete")
+	if err != nil {
+		return err
+	}
+	var buf bytes.Buffer
+	err = json.NewEncoder(&buf).Encode(in)
+	if err != nil {
+		return err
+	}
+	if pdebug.Enabled {
+		pdebug.Printf("POST to %s", u.String())
+		pdebug.Printf("%s", buf.String())
+	}
+	req, err := http.NewRequest("POST", u.String(), &buf)
+	if err != nil {
+		return err
+	}
+	req.Header.Set("Content-Type", "application/json")
+	if c.BasicAuth.Username != "" && c.BasicAuth.Password != "" {
+		req.SetBasicAuth(c.BasicAuth.Username, c.BasicAuth.Password)
+	}
+	res, err := c.Client.Do(req)
+	if err != nil {
+		return err
+	}
+	if res.StatusCode != http.StatusOK {
+		if strings.HasPrefix(strings.ToLower(res.Header.Get(`Content-Type`)), `application/json`) {
+			var errjson ErrJSON
+			if err := json.NewDecoder(res.Body).Decode(&errjson); err != nil {
+				return errors.Errorf(`Invalid response: '%s'`, res.Status)
+			}
+			if len(errjson.Error) > 0 {
+				return errors.New(errjson.Error)
+			}
+		}
+		return errors.Errorf(`Invalid response: '%s'`, res.Status)
+	}
+	return nil
+}
+
+func (c *Client) DeleteExternalResource(in *model.DeleteExternalResourceRequest) (err error) {
+	if pdebug.Enabled {
+		g := pdebug.Marker("client.DeleteExternalResource").BindError(&err)
+		defer g.End()
+	}
+	u, err := url.Parse(c.Endpoint + "/v1/external_resource/delete")
 	if err != nil {
 		return err
 	}
@@ -2506,6 +2616,69 @@ func (c *Client) ListConferencesByOrganizer(in *model.ListConferencesByOrganizer
 	return payload, nil
 }
 
+func (c *Client) ListExternalResource(in *model.ListExternalResourceRequest) (ret []model.ExternalResource, err error) {
+	if pdebug.Enabled {
+		g := pdebug.Marker("client.ListExternalResource").BindError(&err)
+		defer g.End()
+	}
+	u, err := url.Parse(c.Endpoint + "/v1/external_resource/list")
+	if err != nil {
+		return nil, err
+	}
+	buf, err := urlenc.Marshal(in)
+	if err != nil {
+		return nil, err
+	}
+	u.RawQuery = string(buf)
+	if pdebug.Enabled {
+		pdebug.Printf("GET to %s", u.String())
+	}
+	req, err := http.NewRequest("GET", u.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+	if c.BasicAuth.Username != "" && c.BasicAuth.Password != "" {
+		req.SetBasicAuth(c.BasicAuth.Username, c.BasicAuth.Password)
+	}
+	res, err := c.Client.Do(req)
+	if err != nil {
+		return nil, err
+	}
+	if res.StatusCode != http.StatusOK {
+		if strings.HasPrefix(strings.ToLower(res.Header.Get(`Content-Type`)), `application/json`) {
+			var errjson ErrJSON
+			if err := json.NewDecoder(res.Body).Decode(&errjson); err != nil {
+				return nil, errors.Errorf(`Invalid response: '%s'`, res.Status)
+			}
+			if len(errjson.Error) > 0 {
+				return nil, errors.New(errjson.Error)
+			}
+		}
+		return nil, errors.Errorf(`Invalid response: '%s'`, res.Status)
+	}
+	jsonbuf := getTransportJSONBuffer()
+	defer releaseTransportJSONBuffer(jsonbuf)
+	_, err = io.Copy(jsonbuf, io.LimitReader(res.Body, MaxResponseSize))
+	defer res.Body.Close()
+	if pdebug.Enabled {
+		if err != nil {
+			pdebug.Printf("failed to read respons buffer: %s", err)
+		} else {
+			pdebug.Printf("response buffer: %s", jsonbuf)
+		}
+	}
+	if err != nil {
+		return nil, err
+	}
+
+	var payload []model.ExternalResource
+	err = json.Unmarshal(jsonbuf.Bytes(), &payload)
+	if err != nil {
+		return nil, err
+	}
+	return payload, nil
+}
+
 func (c *Client) ListFeaturedSpeakers(in *model.ListFeaturedSpeakersRequest) (ret []model.FeaturedSpeaker, err error) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("client.ListFeaturedSpeakers").BindError(&err)
@@ -3255,6 +3428,69 @@ func (c *Client) LookupConferenceSeries(in *model.LookupConferenceSeriesRequest)
 	}
 
 	var payload model.ConferenceSeries
+	err = json.Unmarshal(jsonbuf.Bytes(), &payload)
+	if err != nil {
+		return nil, err
+	}
+	return &payload, nil
+}
+
+func (c *Client) LookupExternalResource(in *model.LookupExternalResourceRequest) (ret *model.ExternalResource, err error) {
+	if pdebug.Enabled {
+		g := pdebug.Marker("client.LookupExternalResource").BindError(&err)
+		defer g.End()
+	}
+	u, err := url.Parse(c.Endpoint + "/v1/external_resource/lookup")
+	if err != nil {
+		return nil, err
+	}
+	buf, err := urlenc.Marshal(in)
+	if err != nil {
+		return nil, err
+	}
+	u.RawQuery = string(buf)
+	if pdebug.Enabled {
+		pdebug.Printf("GET to %s", u.String())
+	}
+	req, err := http.NewRequest("GET", u.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+	if c.BasicAuth.Username != "" && c.BasicAuth.Password != "" {
+		req.SetBasicAuth(c.BasicAuth.Username, c.BasicAuth.Password)
+	}
+	res, err := c.Client.Do(req)
+	if err != nil {
+		return nil, err
+	}
+	if res.StatusCode != http.StatusOK {
+		if strings.HasPrefix(strings.ToLower(res.Header.Get(`Content-Type`)), `application/json`) {
+			var errjson ErrJSON
+			if err := json.NewDecoder(res.Body).Decode(&errjson); err != nil {
+				return nil, errors.Errorf(`Invalid response: '%s'`, res.Status)
+			}
+			if len(errjson.Error) > 0 {
+				return nil, errors.New(errjson.Error)
+			}
+		}
+		return nil, errors.Errorf(`Invalid response: '%s'`, res.Status)
+	}
+	jsonbuf := getTransportJSONBuffer()
+	defer releaseTransportJSONBuffer(jsonbuf)
+	_, err = io.Copy(jsonbuf, io.LimitReader(res.Body, MaxResponseSize))
+	defer res.Body.Close()
+	if pdebug.Enabled {
+		if err != nil {
+			pdebug.Printf("failed to read respons buffer: %s", err)
+		} else {
+			pdebug.Printf("response buffer: %s", jsonbuf)
+		}
+	}
+	if err != nil {
+		return nil, err
+	}
+
+	var payload model.ExternalResource
 	err = json.Unmarshal(jsonbuf.Bytes(), &payload)
 	if err != nil {
 		return nil, err
@@ -4114,6 +4350,71 @@ func (c *Client) UpdateConference(in *model.UpdateConferenceRequest, files map[s
 		return errors.Errorf(`Invalid response: '%s'`, res.Status)
 	}
 	return nil
+}
+
+func (c *Client) UpdateExternalResource(in *model.UpdateExternalResourceRequest) (ret *model.ExternalResource, err error) {
+	if pdebug.Enabled {
+		g := pdebug.Marker("client.UpdateExternalResource").BindError(&err)
+		defer g.End()
+	}
+	u, err := url.Parse(c.Endpoint + "/v1/external_resource/update")
+	if err != nil {
+		return nil, err
+	}
+	var buf bytes.Buffer
+	err = json.NewEncoder(&buf).Encode(in)
+	if err != nil {
+		return nil, err
+	}
+	if pdebug.Enabled {
+		pdebug.Printf("POST to %s", u.String())
+		pdebug.Printf("%s", buf.String())
+	}
+	req, err := http.NewRequest("POST", u.String(), &buf)
+	if err != nil {
+		return nil, err
+	}
+	req.Header.Set("Content-Type", "application/json")
+	if c.BasicAuth.Username != "" && c.BasicAuth.Password != "" {
+		req.SetBasicAuth(c.BasicAuth.Username, c.BasicAuth.Password)
+	}
+	res, err := c.Client.Do(req)
+	if err != nil {
+		return nil, err
+	}
+	if res.StatusCode != http.StatusOK {
+		if strings.HasPrefix(strings.ToLower(res.Header.Get(`Content-Type`)), `application/json`) {
+			var errjson ErrJSON
+			if err := json.NewDecoder(res.Body).Decode(&errjson); err != nil {
+				return nil, errors.Errorf(`Invalid response: '%s'`, res.Status)
+			}
+			if len(errjson.Error) > 0 {
+				return nil, errors.New(errjson.Error)
+			}
+		}
+		return nil, errors.Errorf(`Invalid response: '%s'`, res.Status)
+	}
+	jsonbuf := getTransportJSONBuffer()
+	defer releaseTransportJSONBuffer(jsonbuf)
+	_, err = io.Copy(jsonbuf, io.LimitReader(res.Body, MaxResponseSize))
+	defer res.Body.Close()
+	if pdebug.Enabled {
+		if err != nil {
+			pdebug.Printf("failed to read respons buffer: %s", err)
+		} else {
+			pdebug.Printf("response buffer: %s", jsonbuf)
+		}
+	}
+	if err != nil {
+		return nil, err
+	}
+
+	var payload model.ExternalResource
+	err = json.Unmarshal(jsonbuf.Bytes(), &payload)
+	if err != nil {
+		return nil, err
+	}
+	return &payload, nil
 }
 
 func (c *Client) UpdateFeaturedSpeaker(in *model.UpdateFeaturedSpeakerRequest) (err error) {
