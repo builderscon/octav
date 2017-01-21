@@ -83,15 +83,15 @@ func (vdbl *UserList) LoadFromQuery(tx *Tx, pattern, since string, limit int) er
 		return vdbl.LoadSinceEID(tx, since, limit)
 	}
 
-  var s int64
-  if id := since; id != "" {
-    vdb := User{}
-    if err := vdb.LoadByEID(tx, id); err != nil {
-      return err
-    }
+        var s int64
+        if id := since; id != "" {
+                vdb := User{}
+                if err := vdb.LoadByEID(tx, id); err != nil {
+                        return err
+                }
 
-    s = vdb.OID
-  }
+                s = vdb.OID
+        }
 
 	patbuf := tools.GetBuffer()
 	defer tools.ReleaseBuffer(patbuf)
