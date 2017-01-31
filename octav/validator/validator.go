@@ -372,6 +372,10 @@ func init() {
 			jsval.Reference(M).RefersTo("#/definitions/uuid"),
 		).
 		AddProp(
+			"image_url",
+			jsval.Reference(M).RefersTo("#/definitions/url"),
+		).
+		AddProp(
 			"sort_order",
 			jsval.Reference(M).RefersTo("#/definitions/positiveInteger"),
 		).
@@ -1583,6 +1587,10 @@ func init() {
 					jsval.Reference(M).RefersTo("#/definitions/string_en"),
 				).
 				AddProp(
+					"image_url",
+					jsval.Reference(M).RefersTo("#/definitions/url"),
+				).
+				AddProp(
 					"sort_order",
 					jsval.Reference(M).RefersTo("#/definitions/positiveInteger"),
 				).
@@ -1627,6 +1635,10 @@ func init() {
 				AddProp(
 					"id",
 					jsval.Reference(M).RefersTo("#/definitions/uuid"),
+				).
+				AddProp(
+					"image_url",
+					jsval.Reference(M).RefersTo("#/definitions/url"),
 				).
 				AddProp(
 					"sort_order",
@@ -3490,6 +3502,10 @@ func init() {
 					jsval.Reference(M).RefersTo("#/definitions/uuid"),
 				).
 				AddProp(
+					"image_url",
+					jsval.Reference(M).RefersTo("#/definitions/url"),
+				).
+				AddProp(
 					"sort_order",
 					jsval.Reference(M).RefersTo("#/definitions/positiveInteger"),
 				).
@@ -4395,6 +4411,10 @@ func init() {
 					jsval.Reference(M).RefersTo("#/definitions/uuid"),
 				).
 				AddProp(
+					"image_url",
+					jsval.Reference(M).RefersTo("#/definitions/url"),
+				).
+				AddProp(
 					"sort_order",
 					jsval.Reference(M).RefersTo("#/definitions/positiveInteger"),
 				).
@@ -4439,6 +4459,10 @@ func init() {
 				AddProp(
 					"id",
 					jsval.Reference(M).RefersTo("#/definitions/uuid"),
+				).
+				AddProp(
+					"image_url",
+					jsval.Reference(M).RefersTo("#/definitions/url"),
 				).
 				AddProp(
 					"sort_order",

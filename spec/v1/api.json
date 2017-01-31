@@ -84,6 +84,7 @@
         "id": {"$ref": "#/definitions/uuid"},
         "conference_id": {"$ref": "#/definitions/uuid"},
         "description": {"$ref": "#/definitions/string_en"},
+        "image_url": {"$ref": "#/definitions/url"},
         "title": {"$ref": "#/definitions/string_en"},
         "url": {"$ref": "#/definitions/url"},
         "sort_order": { "$ref": "#/definitions/positiveInteger" }
@@ -2116,6 +2117,7 @@
         "properties": {
           "conference_id": {"$ref": "#/definitions/uuid"},
           "description": {"$ref": "#/definitions/string_en"},
+          "image_url": {"$ref": "#/definitions/url"},
           "title": {"$ref": "#/definitions/string_en_not_empty"},
           "url": {"$ref": "#/definitions/url"},
           "sort_order": { "$ref": "#/definitions/positiveInteger" },
@@ -2141,6 +2143,7 @@
         "properties": {
           "id": {"$ref": "#/definitions/uuid"},
           "description": {"$ref": "#/definitions/string_en"},
+          "image_url": {"$ref": "#/definitions/url"},
           "title": {"$ref": "#/definitions/string_en"},
           "url": {"$ref": "#/definitions/url"},
           "sort_order": { "$ref": "#/definitions/positiveInteger" },

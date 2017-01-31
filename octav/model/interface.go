@@ -1169,6 +1169,7 @@ type ExternalResource struct {
 	ID              string `json:"id"`
 	ConferenceID    string `json:"conference_id"`
 	Description     string `json:"description" l10n:"true"`
+	ImageURL        string `json:"image_url"`
 	Title           string `json:"title" l10n:"true"`
 	URL             string `json:"url"`
 	SortOrder       int    `json:"sort_order"`
