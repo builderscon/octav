@@ -17,6 +17,7 @@ type rawExternalResource struct {
 	ID           string `json:"id"`
 	ConferenceID string `json:"conference_id"`
 	Description  string `json:"description" l10n:"true"`
+	ImageURL     string `json:"image_url"`
 	Title        string `json:"title" l10n:"true"`
 	URL          string `json:"url"`
 	SortOrder    int    `json:"sort_order"`
@@ -27,6 +28,7 @@ func (v ExternalResource) MarshalJSON() ([]byte, error) {
 	raw.ID = v.ID
 	raw.ConferenceID = v.ConferenceID
 	raw.Description = v.Description
+	raw.ImageURL = v.ImageURL
 	raw.Title = v.Title
 	raw.URL = v.URL
 	raw.SortOrder = v.SortOrder
@@ -57,6 +59,7 @@ func (v *ExternalResource) FromRow(vdb *db.ExternalResource) error {
 	v.ID = vdb.EID
 	v.ConferenceID = vdb.ConferenceID
 	v.Description = vdb.Description
+	v.ImageURL = vdb.ImageURL
 	v.Title = vdb.Title
 	v.URL = vdb.URL
 	v.SortOrder = vdb.SortOrder
@@ -67,6 +70,7 @@ func (v *ExternalResource) ToRow(vdb *db.ExternalResource) error {
 	vdb.EID = v.ID
 	vdb.ConferenceID = v.ConferenceID
 	vdb.Description = v.Description
+	vdb.ImageURL = v.ImageURL
 	vdb.Title = v.Title
 	vdb.URL = v.URL
 	vdb.SortOrder = v.SortOrder
