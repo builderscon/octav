@@ -150,6 +150,7 @@ func (v *FeaturedSpeakerSvc) LoadByConferenceID(tx *db.Tx, cdl *model.FeaturedSp
 			}
 		}
 
+		*cdl = m
 		return nil
 	}
 
