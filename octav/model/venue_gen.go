@@ -18,6 +18,7 @@ type rawVenue struct {
 	Name      string   `json:"name" l10n:"true" decorate:"true"`
 	Address   string   `json:"address" l10n:"true" decorate:"true"`
 	PlaceID   string   `json:"place_id,omitempty"`
+	URL       string   `json:"url,omitempty"`
 	Longitude float64  `json:"longitude,omitempty"`
 	Latitude  float64  `json:"latitude,omitempty"`
 	Rooms     RoomList `json:"rooms,omitempty"`
@@ -29,6 +30,7 @@ func (v Venue) MarshalJSON() ([]byte, error) {
 	raw.Name = v.Name
 	raw.Address = v.Address
 	raw.PlaceID = v.PlaceID
+	raw.URL = v.URL
 	raw.Longitude = v.Longitude
 	raw.Latitude = v.Latitude
 	raw.Rooms = v.Rooms
@@ -60,6 +62,7 @@ func (v *Venue) FromRow(vdb *db.Venue) error {
 	v.Name = vdb.Name
 	v.Address = vdb.Address
 	v.PlaceID = vdb.PlaceID
+	v.URL = vdb.URL
 	v.Longitude = vdb.Longitude
 	v.Latitude = vdb.Latitude
 	return nil
@@ -70,6 +73,7 @@ func (v *Venue) ToRow(vdb *db.Venue) error {
 	vdb.Name = v.Name
 	vdb.Address = v.Address
 	vdb.PlaceID = v.PlaceID
+	vdb.URL = v.URL
 	vdb.Longitude = v.Longitude
 	vdb.Latitude = v.Latitude
 	return nil

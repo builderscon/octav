@@ -24,6 +24,7 @@ CREATE TABLE venues (
     name TEXT NOT NULL,
     address TEXT NOT NULL,
     place_id TEXT,
+    url TEXT,
     latitude DECIMAL(10,7),
     longitude DECIMAL(10,7),
     created_on DATETIME NOT NULL,

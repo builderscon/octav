@@ -210,6 +210,7 @@ type Venue struct {
 	Name       string // Name of the venue (English)
 	Address    string
 	PlaceID    string
+	URL        string
 	Latitude   float64
 	Longitude  float64
 	CreatedOn  time.Time
