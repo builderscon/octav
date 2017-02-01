@@ -59,7 +59,9 @@ func (v *ExternalResource) FromRow(vdb *db.ExternalResource) error {
 	v.ID = vdb.EID
 	v.ConferenceID = vdb.ConferenceID
 	v.Description = vdb.Description
-	v.ImageURL = vdb.ImageURL
+	if vdb.ImageURL.Valid {
+		v.ImageURL = vdb.ImageURL.String
+	}
 	v.Title = vdb.Title
 	v.URL = vdb.URL
 	v.SortOrder = vdb.SortOrder
@@ -70,7 +72,8 @@ func (v *ExternalResource) ToRow(vdb *db.ExternalResource) error {
 	vdb.EID = v.ID
 	vdb.ConferenceID = v.ConferenceID
 	vdb.Description = v.Description
-	vdb.ImageURL = v.ImageURL
+	vdb.ImageURL.Valid = true
+	vdb.ImageURL.String = v.ImageURL
 	vdb.Title = v.Title
 	vdb.URL = v.URL
 	vdb.SortOrder = v.SortOrder

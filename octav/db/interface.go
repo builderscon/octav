@@ -81,7 +81,7 @@ type ExternalResource struct {
 	EID          string
 	ConferenceID string
 	Description  string
-	ImageURL     string
+	ImageURL     sql.NullString
 	Title        string
 	URL          string
 	SortOrder    int
@@ -209,7 +209,8 @@ type Venue struct {
 	EID        string // ID that is visible to the outside
 	Name       string // Name of the venue (English)
 	Address    string
-	PlaceID    string
+	PlaceID    sql.NullString
+	URL        sql.NullString
 	Latitude   float64
 	Longitude  float64
 	CreatedOn  time.Time

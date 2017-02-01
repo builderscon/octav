@@ -904,6 +904,10 @@ func init() {
 		AddProp(
 			"rooms",
 			jsval.Reference(M).RefersTo("#/definitions/room_array"),
+		).
+		AddProp(
+			"url",
+			jsval.Reference(M).RefersTo("#/definitions/url"),
 		)
 	M.SetReference("#/definitions/acceptance_status", R0)
 	M.SetReference("#/definitions/binary_permission", R1)
@@ -2144,6 +2148,10 @@ func init() {
 				AddProp(
 					"place_id",
 					jsval.String(),
+				).
+				AddProp(
+					"url",
+					jsval.Reference(M).RefersTo("#/definitions/url"),
 				).
 				AddProp(
 					"user_id",
@@ -4179,6 +4187,10 @@ func init() {
 				AddProp(
 					"rooms",
 					jsval.Reference(M).RefersTo("#/definitions/room_array"),
+				).
+				AddProp(
+					"url",
+					jsval.Reference(M).RefersTo("#/definitions/url"),
 				),
 		)
 
@@ -4899,6 +4911,10 @@ func init() {
 				AddProp(
 					"place_id",
 					jsval.String(),
+				).
+				AddProp(
+					"url",
+					jsval.Reference(M).RefersTo("#/definitions/url"),
 				).
 				AddProp(
 					"user_id",

@@ -13,7 +13,7 @@ import (
 	"github.com/pkg/errors"
 )
 
-const VenueStdSelectColumns = "venues.oid, venues.eid, venues.name, venues.address, venues.place_id, venues.latitude, venues.longitude, venues.created_on, venues.modified_on"
+const VenueStdSelectColumns = "venues.oid, venues.eid, venues.name, venues.address, venues.place_id, venues.url, venues.latitude, venues.longitude, venues.created_on, venues.modified_on"
 const VenueTable = "venues"
 
 type VenueList []Venue
@@ -21,7 +21,7 @@ type VenueList []Venue
 func (v *Venue) Scan(scanner interface {
 	Scan(...interface{}) error
 }) error {
-	return scanner.Scan(&v.OID, &v.EID, &v.Name, &v.Address, &v.PlaceID, &v.Latitude, &v.Longitude, &v.CreatedOn, &v.ModifiedOn)
+	return scanner.Scan(&v.OID, &v.EID, &v.Name, &v.Address, &v.PlaceID, &v.URL, &v.Latitude, &v.Longitude, &v.CreatedOn, &v.ModifiedOn)
 }
 
 func init() {
@@ -38,7 +38,7 @@ func init() {
 		stmt.Reset()
 		stmt.WriteString(`UPDATE `)
 		stmt.WriteString(VenueTable)
-		stmt.WriteString(` SET eid = ?, name = ?, address = ?, place_id = ?, latitude = ?, longitude = ? WHERE oid = ?`)
+		stmt.WriteString(` SET eid = ?, name = ?, address = ?, place_id = ?, url = ?, latitude = ?, longitude = ? WHERE oid = ?`)
 		library.Register("sqlVenueUpdateByOIDKey", stmt.String())
 
 		stmt.Reset()
@@ -60,7 +60,7 @@ func init() {
 		stmt.Reset()
 		stmt.WriteString(`UPDATE `)
 		stmt.WriteString(VenueTable)
-		stmt.WriteString(` SET eid = ?, name = ?, address = ?, place_id = ?, latitude = ?, longitude = ? WHERE eid = ?`)
+		stmt.WriteString(` SET eid = ?, name = ?, address = ?, place_id = ?, url = ?, latitude = ?, longitude = ? WHERE eid = ?`)
 		library.Register("sqlVenueUpdateByEIDKey", stmt.String())
 	})
 }
@@ -107,8 +107,8 @@ func (v *Venue) Create(tx *Tx, opts ...InsertOption) (err error) {
 	}
 	stmt.WriteString("INTO ")
 	stmt.WriteString(VenueTable)
-	stmt.WriteString(` (eid, name, address, place_id, latitude, longitude, created_on, modified_on) VALUES (?, ?, ?, ?, ?, ?, ?, ?)`)
-	result, err := tx.Exec(stmt.String(), v.EID, v.Name, v.Address, v.PlaceID, v.Latitude, v.Longitude, v.CreatedOn, v.ModifiedOn)
+	stmt.WriteString(` (eid, name, address, place_id, url, latitude, longitude, created_on, modified_on) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`)
+	result, err := tx.Exec(stmt.String(), v.EID, v.Name, v.Address, v.PlaceID, v.URL, v.Latitude, v.Longitude, v.CreatedOn, v.ModifiedOn)
 	if err != nil {
 		return err
 	}
@@ -135,7 +135,7 @@ func (v Venue) Update(tx *Tx) (err error) {
 		if err != nil {
 			return errors.Wrap(err, `failed to get statement`)
 		}
-		_, err = tx.Stmt(stmt).Exec(v.EID, v.Name, v.Address, v.PlaceID, v.Latitude, v.Longitude, v.OID)
+		_, err = tx.Stmt(stmt).Exec(v.EID, v.Name, v.Address, v.PlaceID, v.URL, v.Latitude, v.Longitude, v.OID)
 		return err
 	}
 	if v.EID != "" {
@@ -146,7 +146,7 @@ func (v Venue) Update(tx *Tx) (err error) {
 		if err != nil {
 			return errors.Wrap(err, `failed to get statement`)
 		}
-		_, err = tx.Stmt(stmt).Exec(v.EID, v.Name, v.Address, v.PlaceID, v.Latitude, v.Longitude, v.EID)
+		_, err = tx.Stmt(stmt).Exec(v.EID, v.Name, v.Address, v.PlaceID, v.URL, v.Latitude, v.Longitude, v.EID)
 		return err
 	}
 	return errors.New("either OID/EID must be filled")
