@@ -5140,7 +5140,7 @@ func (r *AddFeaturedSpeakerRequest) Populate(m map[string]interface{}) error {
 			return errors.Wrap(ErrInvalidJSONFieldType{Field: "user_id"}, "failed to populate fields for AddFeaturedSpeakerRequest")
 		}
 	}
-	if err := ExtractL10NFields(m, &r.LocalizedFields, []string{"display_name"}); err != nil {
+	if err := ExtractL10NFields(m, &r.LocalizedFields, []string{"display_name", "description"}); err != nil {
 		return err
 	}
 	return nil
@@ -5271,7 +5271,7 @@ func (r *UpdateFeaturedSpeakerRequest) Populate(m map[string]interface{}) error 
 			return errors.Wrap(ErrInvalidJSONFieldType{Field: "user_id"}, "failed to populate fields for UpdateFeaturedSpeakerRequest")
 		}
 	}
-	if err := ExtractL10NFields(m, &r.LocalizedFields, []string{"display_name"}); err != nil {
+	if err := ExtractL10NFields(m, &r.LocalizedFields, []string{"display_name", "description"}); err != nil {
 		return err
 	}
 	return nil
