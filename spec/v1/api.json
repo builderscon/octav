@@ -310,6 +310,7 @@
       "properties": {
         "id": { "$ref": "#/definitions/uuid" },
         "name": { "type": "string" },
+        "place_id": {"type": "string"},
         "rooms": { "$ref": "#/definitions/room_array" }
       }
     },
@@ -688,6 +689,7 @@
         "properties": {
           "name": { "$ref": "#/definitions/string_en" },
           "address": { "$ref": "#/definitions/string_en" },
+          "place_id": {"type": "string"},
           "latitude": { "$ref": "#/definitions/latitude" },
           "longitude": { "$ref": "#/definitions/longitude" },
           "user_id": { "$ref": "#/definitions/uuid" }
@@ -745,6 +747,10 @@
         "required": ["id", "user_id"],
         "properties": {
           "id": { "$ref": "#/definitions/uuid" },
+          "name": { "$ref": "#/definitions/string_en" },
+          "place_id": {"type": "string"},
+          "latitude": { "$ref": "#/definitions/latitude" },
+          "longitude": { "$ref": "#/definitions/longitude" },
           "user_id": { "$ref": "#/definitions/uuid" }
         }
       }

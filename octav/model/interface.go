@@ -246,6 +246,7 @@ type Venue struct {
 	ID              string   `json:"id,omitempty"`
 	Name            string   `json:"name" l10n:"true" decorate:"true"`
 	Address         string   `json:"address" l10n:"true" decorate:"true"`
+	PlaceID         string   `json:"place_id,omitempty"`
 	Longitude       float64  `json:"longitude,omitempty"`
 	Latitude        float64  `json:"latitude,omitempty"`
 	Rooms           RoomList `json:"rooms,omitempty"`

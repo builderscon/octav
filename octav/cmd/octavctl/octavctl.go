@@ -731,6 +731,8 @@ func doVenueCreate(args cmdargs) int {
 	fs.Float64Var(&longitude, "longitude", 0, "")
 	var name string
 	fs.StringVar(&name, "name", "", "")
+	var place_id string
+	fs.StringVar(&place_id, "place_id", "", "")
 	var user_id string
 	fs.StringVar(&user_id, "user_id", "", "")
 	prepGlobalFlags(fs)
@@ -750,6 +752,9 @@ func doVenueCreate(args cmdargs) int {
 	}
 	if name != "" {
 		m["name"] = name
+	}
+	if place_id != "" {
+		m["place_id"] = place_id
 	}
 	if user_id != "" {
 		m["user_id"] = user_id

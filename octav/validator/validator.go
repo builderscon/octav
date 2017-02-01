@@ -898,6 +898,10 @@ func init() {
 			jsval.String(),
 		).
 		AddProp(
+			"place_id",
+			jsval.String(),
+		).
+		AddProp(
 			"rooms",
 			jsval.Reference(M).RefersTo("#/definitions/room_array"),
 		)
@@ -2136,6 +2140,10 @@ func init() {
 				AddProp(
 					"name",
 					jsval.Reference(M).RefersTo("#/definitions/string_en"),
+				).
+				AddProp(
+					"place_id",
+					jsval.String(),
 				).
 				AddProp(
 					"user_id",
@@ -4165,6 +4173,10 @@ func init() {
 					jsval.String(),
 				).
 				AddProp(
+					"place_id",
+					jsval.String(),
+				).
+				AddProp(
 					"rooms",
 					jsval.Reference(M).RefersTo("#/definitions/room_array"),
 				),
@@ -4871,6 +4883,22 @@ func init() {
 				AddProp(
 					"id",
 					jsval.Reference(M).RefersTo("#/definitions/uuid"),
+				).
+				AddProp(
+					"latitude",
+					jsval.Reference(M).RefersTo("#/definitions/latitude"),
+				).
+				AddProp(
+					"longitude",
+					jsval.Reference(M).RefersTo("#/definitions/longitude"),
+				).
+				AddProp(
+					"name",
+					jsval.Reference(M).RefersTo("#/definitions/string_en"),
+				).
+				AddProp(
+					"place_id",
+					jsval.String(),
 				).
 				AddProp(
 					"user_id",
