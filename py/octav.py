@@ -1,5 +1,5 @@
 """OCTAV Client Library"""
-"""DO NOT EDIT: This file was generated from ../spec/v1/api.json on Mon Jan  2 15:33:16 2017"""
+"""DO NOT EDIT: This file was generated from ../spec/v1/api.json on Wed Feb  1 12:39:17 2017"""
 
 import certifi
 import json
@@ -351,7 +351,7 @@ class Octav(object):
         self.error = repr(e)
         return None
 
-  def create_venue (self, address, name, user_id, latitude=None, longitude=None, **args):
+  def create_venue (self, address, name, user_id, latitude=None, longitude=None, place_id=None, url=None, **args):
     try:
         payload = {}
         hdrs = {}
@@ -372,6 +372,10 @@ class Octav(object):
             payload['longitude'] = longitude
         if name is not None:
             payload['name'] = name
+        if place_id is not None:
+            payload['place_id'] = place_id
+        if url is not None:
+            payload['url'] = url
         if user_id is not None:
             payload['user_id'] = user_id
         patterns = [re.compile('address#[a-z]+'), re.compile('name#[a-z]+')]
@@ -460,7 +464,7 @@ class Octav(object):
         self.error = repr(e)
         return None
 
-  def update_venue (self, id, user_id):
+  def update_venue (self, id, user_id, latitude=None, longitude=None, name=None, place_id=None, url=None):
     try:
         payload = {}
         hdrs = {}
@@ -472,6 +476,16 @@ class Octav(object):
         payload['user_id'] = user_id
         if id is not None:
             payload['id'] = id
+        if latitude is not None:
+            payload['latitude'] = latitude
+        if longitude is not None:
+            payload['longitude'] = longitude
+        if name is not None:
+            payload['name'] = name
+        if place_id is not None:
+            payload['place_id'] = place_id
+        if url is not None:
+            payload['url'] = url
         if user_id is not None:
             payload['user_id'] = user_id
         uri = '%s/v1/venue/update' % self.endpoint
@@ -3320,7 +3334,7 @@ class Octav(object):
         self.error = repr(e)
         return None
 
-  def create_external_resource (self, conference_id, title, url, user_id, description=None, sort_order=None, **args):
+  def create_external_resource (self, conference_id, title, url, user_id, description=None, image_url=None, sort_order=None, **args):
     try:
         payload = {}
         hdrs = {}
@@ -3340,6 +3354,8 @@ class Octav(object):
             payload['conference_id'] = conference_id
         if description is not None:
             payload['description'] = description
+        if image_url is not None:
+            payload['image_url'] = image_url
         if sort_order is not None:
             payload['sort_order'] = sort_order
         if title is not None:
@@ -3374,7 +3390,7 @@ class Octav(object):
         self.error = repr(e)
         return None
 
-  def update_external_resource (self, id, user_id, description=None, sort_order=None, title=None, url=None, **args):
+  def update_external_resource (self, id, user_id, description=None, image_url=None, sort_order=None, title=None, url=None, **args):
     try:
         payload = {}
         hdrs = {}
@@ -3388,6 +3404,8 @@ class Octav(object):
             payload['description'] = description
         if id is not None:
             payload['id'] = id
+        if image_url is not None:
+            payload['image_url'] = image_url
         if sort_order is not None:
             payload['sort_order'] = sort_order
         if title is not None:
