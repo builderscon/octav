@@ -61,8 +61,12 @@ func (v *Venue) FromRow(vdb *db.Venue) error {
 	v.ID = vdb.EID
 	v.Name = vdb.Name
 	v.Address = vdb.Address
-	v.PlaceID = vdb.PlaceID
-	v.URL = vdb.URL
+	if vdb.PlaceID.Valid {
+		v.PlaceID = vdb.PlaceID.String
+	}
+	if vdb.URL.Valid {
+		v.URL = vdb.URL.String
+	}
 	v.Longitude = vdb.Longitude
 	v.Latitude = vdb.Latitude
 	return nil
@@ -72,8 +76,10 @@ func (v *Venue) ToRow(vdb *db.Venue) error {
 	vdb.EID = v.ID
 	vdb.Name = v.Name
 	vdb.Address = v.Address
-	vdb.PlaceID = v.PlaceID
-	vdb.URL = v.URL
+	vdb.PlaceID.Valid = true
+	vdb.PlaceID.String = v.PlaceID
+	vdb.URL.Valid = true
+	vdb.URL.String = v.URL
 	vdb.Longitude = v.Longitude
 	vdb.Latitude = v.Latitude
 	return nil

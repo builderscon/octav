@@ -209,8 +209,8 @@ type Venue struct {
 	EID        string // ID that is visible to the outside
 	Name       string // Name of the venue (English)
 	Address    string
-	PlaceID    string
-	URL        string
+	PlaceID    sql.NullString
+	URL        sql.NullString
 	Latitude   float64
 	Longitude  float64
 	CreatedOn  time.Time
