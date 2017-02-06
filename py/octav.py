@@ -1,5 +1,5 @@
 """OCTAV Client Library"""
-"""DO NOT EDIT: This file was generated from ../spec/v1/api.json on Wed Feb  1 12:39:17 2017"""
+"""DO NOT EDIT: This file was generated from ../spec/v1/api.json on Mon Feb  6 19:24:21 2017"""
 
 import certifi
 import json
@@ -2467,7 +2467,7 @@ class Octav(object):
         self.error = repr(e)
         return None
 
-  def add_sponsor (self, conference_id, group_name, name, url, user_id, sort_order=None, **args):
+  def add_sponsor (self, conference_id, group_name, name, url, user_id, logo_url=None, sort_order=None, **args):
     try:
         payload = {}
         hdrs = {}
@@ -2490,6 +2490,8 @@ class Octav(object):
             payload['conference_id'] = conference_id
         if group_name is not None:
             payload['group_name'] = group_name
+        if logo_url is not None:
+            payload['logo_url'] = logo_url
         if name is not None:
             payload['name'] = name
         if sort_order is not None:
@@ -2589,7 +2591,7 @@ class Octav(object):
         self.error = repr(e)
         return None
 
-  def update_sponsor (self, id, user_id, group_name=None, name=None, sort_order=None, url=None, **args):
+  def update_sponsor (self, id, user_id, group_name=None, logo_url=None, name=None, sort_order=None, url=None, **args):
     try:
         payload = {}
         hdrs = {}
@@ -2603,6 +2605,8 @@ class Octav(object):
             payload['group_name'] = group_name
         if id is not None:
             payload['id'] = id
+        if logo_url is not None:
+            payload['logo_url'] = logo_url
         if name is not None:
             payload['name'] = name
         if sort_order is not None:

@@ -267,9 +267,7 @@ type Sponsor struct {
 	EID          string
 	ConferenceID string
 	Name         string
-	LogoURL1     sql.NullString
-	LogoURL2     sql.NullString
-	LogoURL3     sql.NullString
+	LogoURL      sql.NullString
 	URL          string
 	GroupName    string
 	SortOrder    int

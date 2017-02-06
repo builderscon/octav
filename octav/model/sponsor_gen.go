@@ -17,9 +17,7 @@ type rawSponsor struct {
 	ID           string `json:"id"`
 	ConferenceID string `json:"conference_id"`
 	Name         string `json:"name" l10n:"true"`
-	LogoURL1     string `json:"logo_url1,omitempty"`
-	LogoURL2     string `json:"logo_url2,omitempty"`
-	LogoURL3     string `json:"logo_url3,omitempty"`
+	LogoURL      string `json:"logo_url,omitempty"`
 	URL          string `json:"url"`
 	GroupName    string `json:"group_name"`
 	SortOrder    int    `json:"sort_order"`
@@ -30,9 +28,7 @@ func (v Sponsor) MarshalJSON() ([]byte, error) {
 	raw.ID = v.ID
 	raw.ConferenceID = v.ConferenceID
 	raw.Name = v.Name
-	raw.LogoURL1 = v.LogoURL1
-	raw.LogoURL2 = v.LogoURL2
-	raw.LogoURL3 = v.LogoURL3
+	raw.LogoURL = v.LogoURL
 	raw.URL = v.URL
 	raw.GroupName = v.GroupName
 	raw.SortOrder = v.SortOrder
@@ -63,14 +59,8 @@ func (v *Sponsor) FromRow(vdb *db.Sponsor) error {
 	v.ID = vdb.EID
 	v.ConferenceID = vdb.ConferenceID
 	v.Name = vdb.Name
-	if vdb.LogoURL1.Valid {
-		v.LogoURL1 = vdb.LogoURL1.String
-	}
-	if vdb.LogoURL2.Valid {
-		v.LogoURL2 = vdb.LogoURL2.String
-	}
-	if vdb.LogoURL3.Valid {
-		v.LogoURL3 = vdb.LogoURL3.String
+	if vdb.LogoURL.Valid {
+		v.LogoURL = vdb.LogoURL.String
 	}
 	v.URL = vdb.URL
 	v.GroupName = vdb.GroupName
@@ -82,12 +72,8 @@ func (v *Sponsor) ToRow(vdb *db.Sponsor) error {
 	vdb.EID = v.ID
 	vdb.ConferenceID = v.ConferenceID
 	vdb.Name = v.Name
-	vdb.LogoURL1.Valid = true
-	vdb.LogoURL1.String = v.LogoURL1
-	vdb.LogoURL2.Valid = true
-	vdb.LogoURL2.String = v.LogoURL2
-	vdb.LogoURL3.Valid = true
-	vdb.LogoURL3.String = v.LogoURL3
+	vdb.LogoURL.Valid = true
+	vdb.LogoURL.String = v.LogoURL
 	vdb.URL = v.URL
 	vdb.GroupName = v.GroupName
 	vdb.SortOrder = v.SortOrder
