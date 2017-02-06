@@ -827,7 +827,7 @@ type AddFeaturedSpeakerRequest struct {
 	SpeakerID       jsval.MaybeString `json:"speaker_id"`
 	AvatarURL       jsval.MaybeString `json:"avatar_url"`
 	DisplayName     string            `json:"display_name" l10n:"true"`
-	Description     string            `json:"description" l10n":"true"`
+	Description     string            `json:"description" l10n:"true"`
 	LocalizedFields `json:"-"`
 	UserID          string            `json:"user_id"`
 	DatabaseOptions []db.InsertOption `json:"-"`
@@ -842,7 +842,7 @@ type UpdateFeaturedSpeakerRequest struct {
 	SpeakerID       jsval.MaybeString `json:"speaker_id,omitempty"`
 	AvatarURL       jsval.MaybeString `json:"avatar_url,omitempty"`
 	DisplayName     jsval.MaybeString `json:"display_name,omitempty" l10n:"true"`
-	Description     jsval.MaybeString `json:"description,omitempty" l10n":"true"`
+	Description     jsval.MaybeString `json:"description,omitempty" l10n:"true"`
 	LocalizedFields `json:"-"`
 	UserID          string `json:"user_id"`
 }

@@ -61,17 +61,24 @@ func (v *FeaturedSpeakerSvc) CreateFromPayload(tx *db.Tx, payload *model.AddFeat
 		return errors.Wrap(err, "creating a featured speaker requires conference administrator privilege")
 	}
 
-	vdb := db.FeaturedSpeaker{}
+	var vdb db.FeaturedSpeaker
 	if err := v.Create(tx, &vdb, &model.CreateFeaturedSpeakerRequest{payload}); err != nil {
 		return errors.Wrap(err, "failed to store in database")
 	}
 
-	c := model.FeaturedSpeaker{}
-	if err := c.FromRow(&vdb); err != nil {
+	var m model.FeaturedSpeaker
+	if err := m.FromRow(&vdb); err != nil {
 		return errors.Wrap(err, "failed to populate model from database")
 	}
 
-	*result = c
+	c := Cache()
+	key := c.Key("FeaturedSpeaker", "LoadByConferenceID", payload.ConferenceID)
+	c.Delete(key)
+	if pdebug.Enabled {
+		pdebug.Printf("CACHE DEL %s", key)
+	}
+
+	*result = m
 	return nil
 }
 
@@ -94,7 +101,17 @@ func (v *FeaturedSpeakerSvc) DeleteFromPayload(tx *db.Tx, payload *model.DeleteF
 		return errors.Wrap(err, "deleting venues require administrator privileges")
 	}
 
-	return errors.Wrap(v.Delete(tx, m.EID), "failed to delete from database")
+	if err := v.Delete(tx, m.EID); err != nil {
+		return errors.Wrap(err, "failed to delete from database")
+	}
+
+	c := Cache()
+	key :=c.Key("FeaturedSpeaker", "LoadByConferenceID", m.ConferenceID)
+	c.Delete(key)
+	if pdebug.Enabled {
+		pdebug.Printf("CACHE DEL %s", key)
+	}
+	return nil
 }
 
 func (v *FeaturedSpeakerSvc) ListFromPayload(tx *db.Tx, result *model.FeaturedSpeakerList, payload *model.ListFeaturedSpeakersRequest) error {

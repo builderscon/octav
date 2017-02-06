@@ -193,12 +193,20 @@ func (v *SponsorSvc) CreateFromPayload(ctx context.Context, tx *db.Tx, payload *
 		return errors.Wrap(err, "failed to store in database")
 	}
 
-	var c model.Sponsor
-	if err := c.FromRow(&vdb); err != nil {
+	var m model.Sponsor
+	if err := m.FromRow(&vdb); err != nil {
 		return errors.Wrap(err, "failed to populate model from database")
 	}
 
-	*result = c
+	*result = m
+
+	c := Cache()
+	key := c.Key("Sponsor", "LoadByConferenceID", payload.ConferenceID)
+	c.Delete(key)
+	if pdebug.Enabled {
+		pdebug.Printf("CACHE DEL %s", key)
+	}
+
 	return nil
 }
 
@@ -252,6 +260,13 @@ func (v *SponsorSvc) DeleteFromPayload(ctx context.Context, tx *db.Tx, payload *
 
 	if err := v.Delete(tx, m.EID); err != nil {
 		return errors.Wrap(err, "failed to delete from database")
+	}
+
+	c := Cache()
+	key := c.Key("Sponsor", "LoadByConferenceID", m.ConferenceID)
+	c.Delete(key)
+	if pdebug.Enabled {
+		pdebug.Printf("CACHE DEL %s", key)
 	}
 
 	// For (current) testing purposes, we don't want to actually
