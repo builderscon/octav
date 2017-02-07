@@ -125,6 +125,31 @@ func (v *SponsorSvc) Update(tx *db.Tx, vdb *db.Sponsor) (err error) {
 	return nil
 }
 
+func (v *SponsorSvc) UpdateFromPayload(ctx context.Context, tx *db.Tx, payload *model.UpdateSponsorRequest) (err error) {
+	if pdebug.Enabled {
+		g := pdebug.Marker("service.Sponsor.UpdateFromPayload (%s)", payload.ID).BindError(&err)
+		defer g.End()
+	}
+	var vdb db.Sponsor
+	if err := vdb.LoadByEID(tx, payload.ID); err != nil {
+		return errors.Wrap(err, `failed to load from database`)
+	}
+
+	if err := v.populateRowForUpdate(&vdb, payload); err != nil {
+		return errors.Wrap(err, `failed to populate row data`)
+	}
+
+	if err := v.Update(tx, &vdb); err != nil {
+		return errors.Wrap(err, `failed to update row in database`)
+	}
+
+	ls := LocalizedString()
+	if err := ls.UpdateFields(tx, "Sponsor", vdb.EID, payload.LocalizedFields); err != nil {
+		return errors.Wrap(err, `failed to update localized fields`)
+	}
+	return nil
+}
+
 func (v *SponsorSvc) ReplaceL10NStrings(tx *db.Tx, m *model.Sponsor, lang string) error {
 	if pdebug.Enabled {
 		g := pdebug.Marker("service.Sponsor.ReplaceL10NStrings lang = %s", lang)
