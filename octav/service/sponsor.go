@@ -25,6 +25,10 @@ func (v *SponsorSvc) populateRowForCreate(vdb *db.Sponsor, payload *model.Create
 	vdb.URL = payload.URL
 	vdb.GroupName = payload.GroupName
 	vdb.SortOrder = payload.SortOrder
+	if payload.LogoURL.Valid() {
+		vdb.LogoURL.Valid = true
+		vdb.LogoURL.String = payload.LogoURL.String
+	}
 
 	return nil
 }
