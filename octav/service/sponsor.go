@@ -107,6 +107,7 @@ func (v *SponsorSvc) CreateFromPayload(ctx context.Context, tx *db.Tx, payload *
 	return nil
 }
 
+/*
 func (v *SponsorSvc) UpdateFromPayload(ctx context.Context, tx *db.Tx, payload *model.UpdateSponsorRequest) (err error) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("service.Sponsor.UpdateFromPayload").BindError(&err)
@@ -129,7 +130,7 @@ func (v *SponsorSvc) UpdateFromPayload(ctx context.Context, tx *db.Tx, payload *
 
 	return nil
 
-}
+}*/
 
 func (v *SponsorSvc) DeleteFromPayload(ctx context.Context, tx *db.Tx, payload *model.DeleteSponsorRequest) (err error) {
 	if pdebug.Enabled {

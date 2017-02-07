@@ -1345,23 +1345,14 @@ func doUpdateSponsor(ctx context.Context, w http.ResponseWriter, r *http.Request
 	defer tx.AutoRollback()
 
 	s := service.Sponsor()
-	updateErr := s.UpdateFromPayload(ctx, tx, payload)
-	if !errors.IsIgnorable(updateErr) {
-		httpError(w, `Failed to update data from payload`, http.StatusInternalServerError, updateErr)
+	if err := s.UpdateFromPayload(ctx, tx, payload); err != nil {
+		httpError(w, `Failed to update data from payload`, http.StatusInternalServerError, err)
 		return
 	}
 
 	if err := tx.Commit(); err != nil {
 		httpError(w, `Failed to commit data`, http.StatusInternalServerError, err)
 		return
-	}
-
-	// This extra bit is for finalizing the image upload
-	if cb, ok := errors.IsFinalizationRequired(updateErr); ok {
-		if err := cb(); err != nil {
-			httpError(w, `Failed to finalize image uploads`, http.StatusInternalServerError, err)
-			return
-		}
 	}
 
 	httpJSON(w, map[string]string{"status": "success"})

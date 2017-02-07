@@ -853,7 +853,7 @@ type DeleteFeaturedSpeakerRequest struct {
 	UserID string `json:"user_id"`
 }
 
-// +model `UpdateRequest:"false"`
+// +model
 type Sponsor struct {
 	LocalizedFields `json:"-"`
 	ID              string `json:"id"`
@@ -888,7 +888,7 @@ type ListSponsorsRequest struct {
 // +transport
 type AddSponsorRequest struct {
 	ConferenceID    string            `json:"conference_id"`
-	Name            string            `json:"name"`
+	Name            string            `json:"name" l10n:"true"`
 	URL             string            `json:"url"`
 	LogoURL         jsval.MaybeString `json:"logo_url"`
 	GroupName       string            `json:"group_name"`
