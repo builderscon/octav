@@ -859,9 +859,7 @@ type Sponsor struct {
 	ID              string `json:"id"`
 	ConferenceID    string `json:"conference_id"`
 	Name            string `json:"name" l10n:"true"`
-	LogoURL1        string `json:"logo_url1,omitempty"`
-	LogoURL2        string `json:"logo_url2,omitempty"`
-	LogoURL3        string `json:"logo_url3,omitempty"`
+	LogoURL         string `json:"logo_url,omitempty"`
 	URL             string `json:"url"`
 	GroupName       string `json:"group_name"`
 	SortOrder       int    `json:"sort_order"`
@@ -904,8 +902,6 @@ type CreateSponsorRequest struct {
 
 // +transport
 type UpdateSponsorRequest struct {
-	// Note: Logos can be uploaded as multipart/form-data messages, but is not
-	// part of this request payload.
 	ID              string            `json:"id"`
 	Name            jsval.MaybeString `json:"name,omitempty" l10n:"true"`
 	URL             jsval.MaybeString `json:"url,omitempty"`
@@ -913,12 +909,8 @@ type UpdateSponsorRequest struct {
 	MultipartForm   *multipart.Form   `json:"-"`
 	SortOrder       jsval.MaybeInt    `json:"sort_order,omitempty"`
 	LocalizedFields `json:"-"`
-	UserID          string `json:"user_id"`
-
-	// These fields are only used internally
-	LogoURL1 jsval.MaybeString `json:"-"`
-	LogoURL2 jsval.MaybeString `json:"-"`
-	LogoURL3 jsval.MaybeString `json:"-"`
+	UserID          string            `json:"user_id"`
+	LogoURL         jsval.MaybeString `json:"-"`
 }
 
 // +transport

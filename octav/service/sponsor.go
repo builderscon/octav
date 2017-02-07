@@ -1,22 +1,16 @@
 package service
 
 import (
-	"bytes"
-	"io"
-	"mime/multipart"
-	"net/http"
 	"time"
 
 	"context"
 
-	"cloud.google.com/go/storage"
 	"github.com/builderscon/octav/octav/cache"
 	"github.com/builderscon/octav/octav/db"
 	"github.com/builderscon/octav/octav/internal/errors"
 	"github.com/builderscon/octav/octav/model"
 	"github.com/builderscon/octav/octav/tools"
 	"github.com/lestrrat/go-pdebug"
-	"golang.org/x/sync/errgroup"
 )
 
 func (v *SponsorSvc) Init() {
@@ -40,19 +34,9 @@ func (v *SponsorSvc) populateRowForUpdate(vdb *db.Sponsor, payload *model.Update
 		vdb.Name = payload.Name.String
 	}
 
-	if payload.LogoURL1.Valid() {
-		vdb.LogoURL1.Valid = true
-		vdb.LogoURL1.String = payload.LogoURL1.String
-	}
-
-	if payload.LogoURL2.Valid() {
-		vdb.LogoURL2.Valid = true
-		vdb.LogoURL2.String = payload.LogoURL2.String
-	}
-
-	if payload.LogoURL3.Valid() {
-		vdb.LogoURL3.Valid = true
-		vdb.LogoURL3.String = payload.LogoURL3.String
+	if payload.LogoURL.Valid() {
+		vdb.LogoURL.Valid = true
+		vdb.LogoURL.String = payload.LogoURL.String
 	}
 
 	if payload.URL.Valid() {
@@ -84,97 +68,6 @@ func (ff finalizeFunc) Ignorable() bool {
 
 func (ff finalizeFunc) Error() string {
 	return "operation needs finalization"
-}
-
-func (v *SponsorSvc) UploadImagesFromPayload(ctx context.Context, tx *db.Tx, row *db.Sponsor, payload *model.UpdateSponsorRequest) (err error) {
-	if pdebug.Enabled {
-		g := pdebug.Marker("service.Sponsor.UploadImagesFromPayload").BindError(&err)
-		defer g.End()
-	}
-
-	// There's nothing to do
-	if payload.MultipartForm == nil || payload.MultipartForm.File == nil {
-		return nil
-	}
-
-	cl := v.mediaStorage
-	finalizers := make([]func() error, 0, 3)
-	for _, field := range []string{"logo1", "logo2", "logo3"} {
-		fhs := payload.MultipartForm.File[field]
-		if len(fhs) == 0 {
-			continue
-		}
-
-		var imgf multipart.File
-		imgf, err = fhs[0].Open()
-		if err != nil {
-			return errors.Wrap(err, "failed to open logo file from multipart form")
-		}
-
-		var imgbuf bytes.Buffer
-		if _, err := io.Copy(&imgbuf, imgf); err != nil {
-			return errors.Wrap(err, "failed to copy logo image data to memory")
-		}
-		ct := http.DetectContentType(imgbuf.Bytes())
-
-		// Only work with image/png or image/jpeg
-		var suffix string
-		switch ct {
-		case "image/png":
-			suffix = "png"
-		case "image/jpeg":
-			suffix = "jpeg"
-		default:
-			return errors.Errorf("Unsupported image type %s", ct)
-		}
-
-		// TODO: Validate the image
-		// TODO: Avoid Google Storage hardcoding?
-		// Upload this to a temporary location, then upon successful write to DB
-		// rename it to $conference_id/$sponsor_id
-		tmpname := time.Now().UTC().Format("2006-01-02") + "/" + tools.RandomString(64) + "." + suffix
-		err = cl.Upload(ctx, tmpname, &imgbuf, WithObjectAttrs(storage.ObjectAttrs{
-			ContentType: ct,
-			ACL: []storage.ACLRule{
-				{storage.AllUsers, storage.RoleReader},
-			},
-		}))
-		if err != nil {
-			return errors.Wrap(err, "failed to upload file")
-		}
-
-		dstname := "conferences/" + row.ConferenceID + "/" + row.EID + "-" + field + "." + suffix
-		fullURL := cl.URLFor(dstname)
-		switch field {
-		case "logo1":
-			payload.LogoURL1.Set(fullURL)
-		case "logo2":
-			payload.LogoURL2.Set(fullURL)
-		case "logo3":
-			payload.LogoURL3.Set(fullURL)
-		}
-
-		finalizers = append(finalizers, func() (err error) {
-			if pdebug.Enabled {
-				g := pdebug.Marker("Finalizer for service.Sponsor.UploadImagesFromPayload").BindError(&err)
-				defer g.End()
-			}
-
-			return cl.Move(ctx, tmpname, dstname)
-		})
-	}
-
-	if len(finalizers) == 0 {
-		return nil
-	}
-
-	return finalizeFunc(func() error {
-		var g errgroup.Group
-		for _, f := range finalizers {
-			g.Go(f)
-		}
-		return g.Wait()
-	})
 }
 
 func (v *SponsorSvc) CreateFromPayload(ctx context.Context, tx *db.Tx, payload *model.AddSponsorRequest, result *model.Sponsor) (err error) {
@@ -226,18 +119,10 @@ func (v *SponsorSvc) UpdateFromPayload(ctx context.Context, tx *db.Tx, payload *
 		return errors.Wrap(err, "updating a featured sponsor requires conference administrator privilege")
 	}
 
-	var uploadErr error
-	if uploadErr = v.UploadImagesFromPayload(ctx, tx, &vdb, payload); !errors.IsIgnorable(uploadErr) {
-		return errors.Wrap(uploadErr, "failed to process image uploads")
-	}
-
 	if err := v.Update(tx, &vdb); err != nil {
 		return errors.Wrap(err, "failed to update sponsor in database")
 	}
 
-	if _, ok := errors.IsFinalizationRequired(uploadErr); ok {
-		return uploadErr
-	}
 	return nil
 
 }
@@ -328,16 +213,8 @@ func (v *SponsorSvc) Decorate(tx *db.Tx, sponsor *model.Sponsor, trustedCall boo
 		defer g.End()
 	}
 
-	if sponsor.LogoURL1 == "" {
-		sponsor.LogoURL1 = "https://storage.googleapis.com/media-builderscon-1248/system/nophoto_600.png"
-	}
-
-	if sponsor.LogoURL2 == "" {
-		sponsor.LogoURL2 = "https://storage.googleapis.com/media-builderscon-1248/system/nophoto_400.png"
-	}
-
-	if sponsor.LogoURL3 == "" {
-		sponsor.LogoURL3 = "https://storage.googleapis.com/media-builderscon-1248/system/nophoto_200.png"
+	if sponsor.LogoURL == "" {
+		sponsor.LogoURL = "https://storage.googleapis.com/media-builderscon-1248/system/nophoto_600.png"
 	}
 
 	if lang == "" {

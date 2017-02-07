@@ -750,15 +750,7 @@ func init() {
 			jsval.Reference(M).RefersTo("#/definitions/uuid"),
 		).
 		AddProp(
-			"logo_url1",
-			jsval.Reference(M).RefersTo("#/definitions/url"),
-		).
-		AddProp(
-			"logo_url2",
-			jsval.Reference(M).RefersTo("#/definitions/url"),
-		).
-		AddProp(
-			"logo_url3",
+			"logo_url",
 			jsval.Reference(M).RefersTo("#/definitions/url"),
 		).
 		AddProp(
@@ -1276,6 +1268,10 @@ func init() {
 					jsval.Reference(M).RefersTo("#/definitions/string_en_not_empty"),
 				).
 				AddProp(
+					"logo_url",
+					jsval.Reference(M).RefersTo("#/definitions/url"),
+				).
+				AddProp(
 					"name",
 					jsval.Reference(M).RefersTo("#/definitions/string_en_not_empty"),
 				).
@@ -1318,15 +1314,7 @@ func init() {
 					jsval.Reference(M).RefersTo("#/definitions/uuid"),
 				).
 				AddProp(
-					"logo_url1",
-					jsval.Reference(M).RefersTo("#/definitions/url"),
-				).
-				AddProp(
-					"logo_url2",
-					jsval.Reference(M).RefersTo("#/definitions/url"),
-				).
-				AddProp(
-					"logo_url3",
+					"logo_url",
 					jsval.Reference(M).RefersTo("#/definitions/url"),
 				).
 				AddProp(
@@ -3915,15 +3903,7 @@ func init() {
 					jsval.Reference(M).RefersTo("#/definitions/uuid"),
 				).
 				AddProp(
-					"logo_url1",
-					jsval.Reference(M).RefersTo("#/definitions/url"),
-				).
-				AddProp(
-					"logo_url2",
-					jsval.Reference(M).RefersTo("#/definitions/url"),
-				).
-				AddProp(
-					"logo_url3",
+					"logo_url",
 					jsval.Reference(M).RefersTo("#/definitions/url"),
 				).
 				AddProp(
@@ -4774,6 +4754,10 @@ func init() {
 				AddProp(
 					"id",
 					jsval.Reference(M).RefersTo("#/definitions/uuid"),
+				).
+				AddProp(
+					"logo_url",
+					jsval.Reference(M).RefersTo("#/definitions/url"),
 				).
 				AddProp(
 					"name",
