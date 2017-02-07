@@ -5503,6 +5503,9 @@ func (r AddSponsorRequest) collectMarshalData() map[string]interface{} {
 	m["conference_id"] = r.ConferenceID
 	m["name"] = r.Name
 	m["url"] = r.URL
+	if r.LogoURL.Valid() {
+		m["logo_url"] = r.LogoURL.Value()
+	}
 	m["group_name"] = r.GroupName
 	m["sort_order"] = r.SortOrder
 	m["user_id"] = r.UserID
@@ -5562,6 +5565,12 @@ func (r *AddSponsorRequest) Populate(m map[string]interface{}) error {
 		default:
 			return errors.Wrap(ErrInvalidJSONFieldType{Field: "url"}, "failed to populate fields for AddSponsorRequest")
 		}
+	}
+	if jv, ok := m["logo_url"]; ok {
+		if err := r.LogoURL.Set(jv); err != nil {
+			return errors.New("set field LogoURL failed: " + err.Error())
+		}
+		delete(m, "logo_url")
 	}
 	if jv, ok := m["group_name"]; ok {
 		switch jv.(type) {

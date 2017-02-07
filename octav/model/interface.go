@@ -887,13 +887,14 @@ type ListSponsorsRequest struct {
 
 // +transport
 type AddSponsorRequest struct {
-	ConferenceID    string `json:"conference_id"`
-	Name            string `json:"name"`
-	URL             string `json:"url"`
-	GroupName       string `json:"group_name"`
-	SortOrder       int    `json:"sort_order"`
-	LocalizedFields `json:"-"`
+	ConferenceID    string            `json:"conference_id"`
+	Name            string            `json:"name"`
+	URL             string            `json:"url"`
+	LogoURL         jsval.MaybeString `json:"logo_url"`
+	GroupName       string            `json:"group_name"`
+	SortOrder       int               `json:"sort_order"`
 	UserID          string            `json:"user_id"`
+	LocalizedFields `json:"-"`
 	DatabaseOptions []db.InsertOption `json:"-"`
 }
 type CreateSponsorRequest struct {
