@@ -16,7 +16,7 @@ func (v *SponsorList) LoadByConferenceSinceEID(tx *Tx, confID, since string, lim
 
 		s = vdb.OID
 	}
-	return v.LoadSince(tx, s, limit)
+	return v.LoadByConferenceSince(tx, confID, s, limit)
 }
 
 func (v *SponsorList) LoadByConferenceSince(tx *Tx, confID string, since int64, limit int) error {
