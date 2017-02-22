@@ -2878,7 +2878,7 @@ func init() {
 				).
 				AddProp(
 					"limit",
-					jsval.Reference(M).RefersTo("#/definitions/positiveInteger"),
+					jsval.Reference(M).RefersTo("#/definitions/positiveIntegerDefault10"),
 				).
 				AddProp(
 					"since",
@@ -3091,7 +3091,7 @@ func init() {
 				).
 				AddProp(
 					"limit",
-					jsval.Reference(M).RefersTo("#/definitions/positiveInteger"),
+					jsval.Reference(M).RefersTo("#/definitions/positiveIntegerDefault10"),
 				).
 				AddProp(
 					"since",
