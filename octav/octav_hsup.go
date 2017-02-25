@@ -118,7 +118,8 @@ func httpAddConferenceAdmin(ctx context.Context, w http.ResponseWriter, r *http.
 		g := pdebug.Marker("httpAddConferenceAdmin")
 		defer g.End()
 	}
-	if strings.ToLower(r.Method) != `post` {
+	method := strings.ToLower(r.Method)
+	if method != `post` {
 		w.Header().Set("Allow", "post")
 		msgbuf := getBytesBuffer()
 		defer releaseBytesBuffer(msgbuf)
@@ -163,7 +164,8 @@ func httpAddConferenceCredential(ctx context.Context, w http.ResponseWriter, r *
 		g := pdebug.Marker("httpAddConferenceCredential")
 		defer g.End()
 	}
-	if strings.ToLower(r.Method) != `post` {
+	method := strings.ToLower(r.Method)
+	if method != `post` {
 		w.Header().Set("Allow", "post")
 		msgbuf := getBytesBuffer()
 		defer releaseBytesBuffer(msgbuf)
@@ -208,7 +210,8 @@ func httpAddConferenceDate(ctx context.Context, w http.ResponseWriter, r *http.R
 		g := pdebug.Marker("httpAddConferenceDate")
 		defer g.End()
 	}
-	if strings.ToLower(r.Method) != `post` {
+	method := strings.ToLower(r.Method)
+	if method != `post` {
 		w.Header().Set("Allow", "post")
 		msgbuf := getBytesBuffer()
 		defer releaseBytesBuffer(msgbuf)
@@ -253,7 +256,8 @@ func httpAddConferenceSeriesAdmin(ctx context.Context, w http.ResponseWriter, r 
 		g := pdebug.Marker("httpAddConferenceSeriesAdmin")
 		defer g.End()
 	}
-	if strings.ToLower(r.Method) != `post` {
+	method := strings.ToLower(r.Method)
+	if method != `post` {
 		w.Header().Set("Allow", "post")
 		msgbuf := getBytesBuffer()
 		defer releaseBytesBuffer(msgbuf)
@@ -298,7 +302,8 @@ func httpAddConferenceStaff(ctx context.Context, w http.ResponseWriter, r *http.
 		g := pdebug.Marker("httpAddConferenceStaff")
 		defer g.End()
 	}
-	if strings.ToLower(r.Method) != `post` {
+	method := strings.ToLower(r.Method)
+	if method != `post` {
 		w.Header().Set("Allow", "post")
 		msgbuf := getBytesBuffer()
 		defer releaseBytesBuffer(msgbuf)
@@ -343,7 +348,8 @@ func httpAddConferenceVenue(ctx context.Context, w http.ResponseWriter, r *http.
 		g := pdebug.Marker("httpAddConferenceVenue")
 		defer g.End()
 	}
-	if strings.ToLower(r.Method) != `post` {
+	method := strings.ToLower(r.Method)
+	if method != `post` {
 		w.Header().Set("Allow", "post")
 		msgbuf := getBytesBuffer()
 		defer releaseBytesBuffer(msgbuf)
@@ -388,7 +394,8 @@ func httpAddFeaturedSpeaker(ctx context.Context, w http.ResponseWriter, r *http.
 		g := pdebug.Marker("httpAddFeaturedSpeaker")
 		defer g.End()
 	}
-	if strings.ToLower(r.Method) != `post` {
+	method := strings.ToLower(r.Method)
+	if method != `post` {
 		w.Header().Set("Allow", "post")
 		msgbuf := getBytesBuffer()
 		defer releaseBytesBuffer(msgbuf)
@@ -433,7 +440,8 @@ func httpAddSessionType(ctx context.Context, w http.ResponseWriter, r *http.Requ
 		g := pdebug.Marker("httpAddSessionType")
 		defer g.End()
 	}
-	if strings.ToLower(r.Method) != `post` {
+	method := strings.ToLower(r.Method)
+	if method != `post` {
 		w.Header().Set("Allow", "post")
 		msgbuf := getBytesBuffer()
 		defer releaseBytesBuffer(msgbuf)
@@ -478,7 +486,8 @@ func httpAddSponsor(ctx context.Context, w http.ResponseWriter, r *http.Request)
 		g := pdebug.Marker("httpAddSponsor")
 		defer g.End()
 	}
-	if strings.ToLower(r.Method) != `post` {
+	method := strings.ToLower(r.Method)
+	if method != `post` {
 		w.Header().Set("Allow", "post")
 		msgbuf := getBytesBuffer()
 		defer releaseBytesBuffer(msgbuf)
@@ -523,7 +532,8 @@ func httpConfirmTemporaryEmail(ctx context.Context, w http.ResponseWriter, r *ht
 		g := pdebug.Marker("httpConfirmTemporaryEmail")
 		defer g.End()
 	}
-	if strings.ToLower(r.Method) != `post` {
+	method := strings.ToLower(r.Method)
+	if method != `post` {
 		w.Header().Set("Allow", "post")
 		msgbuf := getBytesBuffer()
 		defer releaseBytesBuffer(msgbuf)
@@ -568,7 +578,8 @@ func httpCreateBlogEntry(ctx context.Context, w http.ResponseWriter, r *http.Req
 		g := pdebug.Marker("httpCreateBlogEntry")
 		defer g.End()
 	}
-	if strings.ToLower(r.Method) != `post` {
+	method := strings.ToLower(r.Method)
+	if method != `post` {
 		w.Header().Set("Allow", "post")
 		msgbuf := getBytesBuffer()
 		defer releaseBytesBuffer(msgbuf)
@@ -613,7 +624,8 @@ func httpCreateConference(ctx context.Context, w http.ResponseWriter, r *http.Re
 		g := pdebug.Marker("httpCreateConference")
 		defer g.End()
 	}
-	if strings.ToLower(r.Method) != `post` {
+	method := strings.ToLower(r.Method)
+	if method != `post` {
 		w.Header().Set("Allow", "post")
 		msgbuf := getBytesBuffer()
 		defer releaseBytesBuffer(msgbuf)
@@ -658,7 +670,8 @@ func httpCreateConferenceSeries(ctx context.Context, w http.ResponseWriter, r *h
 		g := pdebug.Marker("httpCreateConferenceSeries")
 		defer g.End()
 	}
-	if strings.ToLower(r.Method) != `post` {
+	method := strings.ToLower(r.Method)
+	if method != `post` {
 		w.Header().Set("Allow", "post")
 		msgbuf := getBytesBuffer()
 		defer releaseBytesBuffer(msgbuf)
@@ -703,7 +716,8 @@ func httpCreateExternalResource(ctx context.Context, w http.ResponseWriter, r *h
 		g := pdebug.Marker("httpCreateExternalResource")
 		defer g.End()
 	}
-	if strings.ToLower(r.Method) != `post` {
+	method := strings.ToLower(r.Method)
+	if method != `post` {
 		w.Header().Set("Allow", "post")
 		msgbuf := getBytesBuffer()
 		defer releaseBytesBuffer(msgbuf)
@@ -748,7 +762,8 @@ func httpCreateQuestion(ctx context.Context, w http.ResponseWriter, r *http.Requ
 		g := pdebug.Marker("httpCreateQuestion")
 		defer g.End()
 	}
-	if strings.ToLower(r.Method) != `get` {
+	method := strings.ToLower(r.Method)
+	if method != `get` {
 		w.Header().Set("Allow", "get")
 		msgbuf := getBytesBuffer()
 		defer releaseBytesBuffer(msgbuf)
@@ -780,7 +795,8 @@ func httpCreateRoom(ctx context.Context, w http.ResponseWriter, r *http.Request)
 		g := pdebug.Marker("httpCreateRoom")
 		defer g.End()
 	}
-	if strings.ToLower(r.Method) != `post` {
+	method := strings.ToLower(r.Method)
+	if method != `post` {
 		w.Header().Set("Allow", "post")
 		msgbuf := getBytesBuffer()
 		defer releaseBytesBuffer(msgbuf)
@@ -825,7 +841,8 @@ func httpCreateSession(ctx context.Context, w http.ResponseWriter, r *http.Reque
 		g := pdebug.Marker("httpCreateSession")
 		defer g.End()
 	}
-	if strings.ToLower(r.Method) != `post` {
+	method := strings.ToLower(r.Method)
+	if method != `post` {
 		w.Header().Set("Allow", "post")
 		msgbuf := getBytesBuffer()
 		defer releaseBytesBuffer(msgbuf)
@@ -870,7 +887,8 @@ func httpCreateSessionSurveyResponse(ctx context.Context, w http.ResponseWriter,
 		g := pdebug.Marker("httpCreateSessionSurveyResponse")
 		defer g.End()
 	}
-	if strings.ToLower(r.Method) != `get` {
+	method := strings.ToLower(r.Method)
+	if method != `get` {
 		w.Header().Set("Allow", "get")
 		msgbuf := getBytesBuffer()
 		defer releaseBytesBuffer(msgbuf)
@@ -902,7 +920,8 @@ func httpCreateTemporaryEmail(ctx context.Context, w http.ResponseWriter, r *htt
 		g := pdebug.Marker("httpCreateTemporaryEmail")
 		defer g.End()
 	}
-	if strings.ToLower(r.Method) != `post` {
+	method := strings.ToLower(r.Method)
+	if method != `post` {
 		w.Header().Set("Allow", "post")
 		msgbuf := getBytesBuffer()
 		defer releaseBytesBuffer(msgbuf)
@@ -947,7 +966,8 @@ func httpCreateTrack(ctx context.Context, w http.ResponseWriter, r *http.Request
 		g := pdebug.Marker("httpCreateTrack")
 		defer g.End()
 	}
-	if strings.ToLower(r.Method) != `post` {
+	method := strings.ToLower(r.Method)
+	if method != `post` {
 		w.Header().Set("Allow", "post")
 		msgbuf := getBytesBuffer()
 		defer releaseBytesBuffer(msgbuf)
@@ -992,7 +1012,8 @@ func httpCreateUser(ctx context.Context, w http.ResponseWriter, r *http.Request)
 		g := pdebug.Marker("httpCreateUser")
 		defer g.End()
 	}
-	if strings.ToLower(r.Method) != `post` {
+	method := strings.ToLower(r.Method)
+	if method != `post` {
 		w.Header().Set("Allow", "post")
 		msgbuf := getBytesBuffer()
 		defer releaseBytesBuffer(msgbuf)
@@ -1037,7 +1058,8 @@ func httpCreateVenue(ctx context.Context, w http.ResponseWriter, r *http.Request
 		g := pdebug.Marker("httpCreateVenue")
 		defer g.End()
 	}
-	if strings.ToLower(r.Method) != `post` {
+	method := strings.ToLower(r.Method)
+	if method != `post` {
 		w.Header().Set("Allow", "post")
 		msgbuf := getBytesBuffer()
 		defer releaseBytesBuffer(msgbuf)
@@ -1082,7 +1104,8 @@ func httpDeleteBlogEntry(ctx context.Context, w http.ResponseWriter, r *http.Req
 		g := pdebug.Marker("httpDeleteBlogEntry")
 		defer g.End()
 	}
-	if strings.ToLower(r.Method) != `post` {
+	method := strings.ToLower(r.Method)
+	if method != `post` {
 		w.Header().Set("Allow", "post")
 		msgbuf := getBytesBuffer()
 		defer releaseBytesBuffer(msgbuf)
@@ -1127,7 +1150,8 @@ func httpDeleteConference(ctx context.Context, w http.ResponseWriter, r *http.Re
 		g := pdebug.Marker("httpDeleteConference")
 		defer g.End()
 	}
-	if strings.ToLower(r.Method) != `post` {
+	method := strings.ToLower(r.Method)
+	if method != `post` {
 		w.Header().Set("Allow", "post")
 		msgbuf := getBytesBuffer()
 		defer releaseBytesBuffer(msgbuf)
@@ -1172,7 +1196,8 @@ func httpDeleteConferenceAdmin(ctx context.Context, w http.ResponseWriter, r *ht
 		g := pdebug.Marker("httpDeleteConferenceAdmin")
 		defer g.End()
 	}
-	if strings.ToLower(r.Method) != `post` {
+	method := strings.ToLower(r.Method)
+	if method != `post` {
 		w.Header().Set("Allow", "post")
 		msgbuf := getBytesBuffer()
 		defer releaseBytesBuffer(msgbuf)
@@ -1217,7 +1242,8 @@ func httpDeleteConferenceDate(ctx context.Context, w http.ResponseWriter, r *htt
 		g := pdebug.Marker("httpDeleteConferenceDate")
 		defer g.End()
 	}
-	if strings.ToLower(r.Method) != `post` {
+	method := strings.ToLower(r.Method)
+	if method != `post` {
 		w.Header().Set("Allow", "post")
 		msgbuf := getBytesBuffer()
 		defer releaseBytesBuffer(msgbuf)
@@ -1262,7 +1288,8 @@ func httpDeleteConferenceSeries(ctx context.Context, w http.ResponseWriter, r *h
 		g := pdebug.Marker("httpDeleteConferenceSeries")
 		defer g.End()
 	}
-	if strings.ToLower(r.Method) != `post` {
+	method := strings.ToLower(r.Method)
+	if method != `post` {
 		w.Header().Set("Allow", "post")
 		msgbuf := getBytesBuffer()
 		defer releaseBytesBuffer(msgbuf)
@@ -1307,7 +1334,8 @@ func httpDeleteConferenceStaff(ctx context.Context, w http.ResponseWriter, r *ht
 		g := pdebug.Marker("httpDeleteConferenceStaff")
 		defer g.End()
 	}
-	if strings.ToLower(r.Method) != `post` {
+	method := strings.ToLower(r.Method)
+	if method != `post` {
 		w.Header().Set("Allow", "post")
 		msgbuf := getBytesBuffer()
 		defer releaseBytesBuffer(msgbuf)
@@ -1352,7 +1380,8 @@ func httpDeleteConferenceVenue(ctx context.Context, w http.ResponseWriter, r *ht
 		g := pdebug.Marker("httpDeleteConferenceVenue")
 		defer g.End()
 	}
-	if strings.ToLower(r.Method) != `post` {
+	method := strings.ToLower(r.Method)
+	if method != `post` {
 		w.Header().Set("Allow", "post")
 		msgbuf := getBytesBuffer()
 		defer releaseBytesBuffer(msgbuf)
@@ -1397,7 +1426,8 @@ func httpDeleteExternalResource(ctx context.Context, w http.ResponseWriter, r *h
 		g := pdebug.Marker("httpDeleteExternalResource")
 		defer g.End()
 	}
-	if strings.ToLower(r.Method) != `post` {
+	method := strings.ToLower(r.Method)
+	if method != `post` {
 		w.Header().Set("Allow", "post")
 		msgbuf := getBytesBuffer()
 		defer releaseBytesBuffer(msgbuf)
@@ -1442,7 +1472,8 @@ func httpDeleteFeaturedSpeaker(ctx context.Context, w http.ResponseWriter, r *ht
 		g := pdebug.Marker("httpDeleteFeaturedSpeaker")
 		defer g.End()
 	}
-	if strings.ToLower(r.Method) != `post` {
+	method := strings.ToLower(r.Method)
+	if method != `post` {
 		w.Header().Set("Allow", "post")
 		msgbuf := getBytesBuffer()
 		defer releaseBytesBuffer(msgbuf)
@@ -1487,7 +1518,8 @@ func httpDeleteQuestion(ctx context.Context, w http.ResponseWriter, r *http.Requ
 		g := pdebug.Marker("httpDeleteQuestion")
 		defer g.End()
 	}
-	if strings.ToLower(r.Method) != `post` {
+	method := strings.ToLower(r.Method)
+	if method != `post` {
 		w.Header().Set("Allow", "post")
 		msgbuf := getBytesBuffer()
 		defer releaseBytesBuffer(msgbuf)
@@ -1532,7 +1564,8 @@ func httpDeleteRoom(ctx context.Context, w http.ResponseWriter, r *http.Request)
 		g := pdebug.Marker("httpDeleteRoom")
 		defer g.End()
 	}
-	if strings.ToLower(r.Method) != `post` {
+	method := strings.ToLower(r.Method)
+	if method != `post` {
 		w.Header().Set("Allow", "post")
 		msgbuf := getBytesBuffer()
 		defer releaseBytesBuffer(msgbuf)
@@ -1577,7 +1610,8 @@ func httpDeleteSession(ctx context.Context, w http.ResponseWriter, r *http.Reque
 		g := pdebug.Marker("httpDeleteSession")
 		defer g.End()
 	}
-	if strings.ToLower(r.Method) != `post` {
+	method := strings.ToLower(r.Method)
+	if method != `post` {
 		w.Header().Set("Allow", "post")
 		msgbuf := getBytesBuffer()
 		defer releaseBytesBuffer(msgbuf)
@@ -1622,7 +1656,8 @@ func httpDeleteSessionType(ctx context.Context, w http.ResponseWriter, r *http.R
 		g := pdebug.Marker("httpDeleteSessionType")
 		defer g.End()
 	}
-	if strings.ToLower(r.Method) != `post` {
+	method := strings.ToLower(r.Method)
+	if method != `post` {
 		w.Header().Set("Allow", "post")
 		msgbuf := getBytesBuffer()
 		defer releaseBytesBuffer(msgbuf)
@@ -1667,7 +1702,8 @@ func httpDeleteSponsor(ctx context.Context, w http.ResponseWriter, r *http.Reque
 		g := pdebug.Marker("httpDeleteSponsor")
 		defer g.End()
 	}
-	if strings.ToLower(r.Method) != `post` {
+	method := strings.ToLower(r.Method)
+	if method != `post` {
 		w.Header().Set("Allow", "post")
 		msgbuf := getBytesBuffer()
 		defer releaseBytesBuffer(msgbuf)
@@ -1712,7 +1748,8 @@ func httpDeleteTrack(ctx context.Context, w http.ResponseWriter, r *http.Request
 		g := pdebug.Marker("httpDeleteTrack")
 		defer g.End()
 	}
-	if strings.ToLower(r.Method) != `post` {
+	method := strings.ToLower(r.Method)
+	if method != `post` {
 		w.Header().Set("Allow", "post")
 		msgbuf := getBytesBuffer()
 		defer releaseBytesBuffer(msgbuf)
@@ -1757,7 +1794,8 @@ func httpDeleteUser(ctx context.Context, w http.ResponseWriter, r *http.Request)
 		g := pdebug.Marker("httpDeleteUser")
 		defer g.End()
 	}
-	if strings.ToLower(r.Method) != `post` {
+	method := strings.ToLower(r.Method)
+	if method != `post` {
 		w.Header().Set("Allow", "post")
 		msgbuf := getBytesBuffer()
 		defer releaseBytesBuffer(msgbuf)
@@ -1802,7 +1840,8 @@ func httpDeleteVenue(ctx context.Context, w http.ResponseWriter, r *http.Request
 		g := pdebug.Marker("httpDeleteVenue")
 		defer g.End()
 	}
-	if strings.ToLower(r.Method) != `post` {
+	method := strings.ToLower(r.Method)
+	if method != `post` {
 		w.Header().Set("Allow", "post")
 		msgbuf := getBytesBuffer()
 		defer releaseBytesBuffer(msgbuf)
@@ -1847,7 +1886,8 @@ func httpGetConferenceSchedule(ctx context.Context, w http.ResponseWriter, r *ht
 		g := pdebug.Marker("httpGetConferenceSchedule")
 		defer g.End()
 	}
-	if strings.ToLower(r.Method) != `get` {
+	method := strings.ToLower(r.Method)
+	if method != `get` {
 		w.Header().Set("Allow", "get")
 		msgbuf := getBytesBuffer()
 		defer releaseBytesBuffer(msgbuf)
@@ -1858,6 +1898,7 @@ func httpGetConferenceSchedule(ctx context.Context, w http.ResponseWriter, r *ht
 		return
 	}
 
+	w.Header().Set(`Access-Control-Allow-Origin`, "*")
 	var payload model.GetConferenceScheduleRequest
 	qbuf := getBytesBuffer()
 	defer releaseBytesBuffer(qbuf)
@@ -1879,7 +1920,8 @@ func httpHealthCheck(ctx context.Context, w http.ResponseWriter, r *http.Request
 		g := pdebug.Marker("httpHealthCheck")
 		defer g.End()
 	}
-	if strings.ToLower(r.Method) != `get` {
+	method := strings.ToLower(r.Method)
+	if method != `get` {
 		w.Header().Set("Allow", "get")
 		msgbuf := getBytesBuffer()
 		defer releaseBytesBuffer(msgbuf)
@@ -1898,7 +1940,8 @@ func httpListBlogEntries(ctx context.Context, w http.ResponseWriter, r *http.Req
 		g := pdebug.Marker("httpListBlogEntries")
 		defer g.End()
 	}
-	if strings.ToLower(r.Method) != `get` {
+	method := strings.ToLower(r.Method)
+	if method != `get` {
 		w.Header().Set("Allow", "get")
 		msgbuf := getBytesBuffer()
 		defer releaseBytesBuffer(msgbuf)
@@ -1909,6 +1952,7 @@ func httpListBlogEntries(ctx context.Context, w http.ResponseWriter, r *http.Req
 		return
 	}
 
+	w.Header().Set(`Access-Control-Allow-Origin`, "*")
 	var payload model.ListBlogEntriesRequest
 	qbuf := getBytesBuffer()
 	defer releaseBytesBuffer(qbuf)
@@ -1930,7 +1974,8 @@ func httpListConference(ctx context.Context, w http.ResponseWriter, r *http.Requ
 		g := pdebug.Marker("httpListConference")
 		defer g.End()
 	}
-	if strings.ToLower(r.Method) != `get` {
+	method := strings.ToLower(r.Method)
+	if method != `get` {
 		w.Header().Set("Allow", "get")
 		msgbuf := getBytesBuffer()
 		defer releaseBytesBuffer(msgbuf)
@@ -1941,6 +1986,7 @@ func httpListConference(ctx context.Context, w http.ResponseWriter, r *http.Requ
 		return
 	}
 
+	w.Header().Set(`Access-Control-Allow-Origin`, "*")
 	var payload model.ListConferenceRequest
 	qbuf := getBytesBuffer()
 	defer releaseBytesBuffer(qbuf)
@@ -1962,7 +2008,8 @@ func httpListConferenceAdmin(ctx context.Context, w http.ResponseWriter, r *http
 		g := pdebug.Marker("httpListConferenceAdmin")
 		defer g.End()
 	}
-	if strings.ToLower(r.Method) != `get` {
+	method := strings.ToLower(r.Method)
+	if method != `get` {
 		w.Header().Set("Allow", "get")
 		msgbuf := getBytesBuffer()
 		defer releaseBytesBuffer(msgbuf)
@@ -1973,6 +2020,7 @@ func httpListConferenceAdmin(ctx context.Context, w http.ResponseWriter, r *http
 		return
 	}
 
+	w.Header().Set(`Access-Control-Allow-Origin`, "*")
 	var payload model.ListConferenceAdminRequest
 	qbuf := getBytesBuffer()
 	defer releaseBytesBuffer(qbuf)
@@ -1994,7 +2042,8 @@ func httpListConferenceDate(ctx context.Context, w http.ResponseWriter, r *http.
 		g := pdebug.Marker("httpListConferenceDate")
 		defer g.End()
 	}
-	if strings.ToLower(r.Method) != `get` {
+	method := strings.ToLower(r.Method)
+	if method != `get` {
 		w.Header().Set("Allow", "get")
 		msgbuf := getBytesBuffer()
 		defer releaseBytesBuffer(msgbuf)
@@ -2005,6 +2054,7 @@ func httpListConferenceDate(ctx context.Context, w http.ResponseWriter, r *http.
 		return
 	}
 
+	w.Header().Set(`Access-Control-Allow-Origin`, "*")
 	var payload model.ListConferenceDateRequest
 	qbuf := getBytesBuffer()
 	defer releaseBytesBuffer(qbuf)
@@ -2026,7 +2076,8 @@ func httpListConferenceSeries(ctx context.Context, w http.ResponseWriter, r *htt
 		g := pdebug.Marker("httpListConferenceSeries")
 		defer g.End()
 	}
-	if strings.ToLower(r.Method) != `get` {
+	method := strings.ToLower(r.Method)
+	if method != `get` {
 		w.Header().Set("Allow", "get")
 		msgbuf := getBytesBuffer()
 		defer releaseBytesBuffer(msgbuf)
@@ -2037,6 +2088,7 @@ func httpListConferenceSeries(ctx context.Context, w http.ResponseWriter, r *htt
 		return
 	}
 
+	w.Header().Set(`Access-Control-Allow-Origin`, "*")
 	var payload model.ListConferenceSeriesRequest
 	qbuf := getBytesBuffer()
 	defer releaseBytesBuffer(qbuf)
@@ -2058,7 +2110,8 @@ func httpListConferenceStaff(ctx context.Context, w http.ResponseWriter, r *http
 		g := pdebug.Marker("httpListConferenceStaff")
 		defer g.End()
 	}
-	if strings.ToLower(r.Method) != `get` {
+	method := strings.ToLower(r.Method)
+	if method != `get` {
 		w.Header().Set("Allow", "get")
 		msgbuf := getBytesBuffer()
 		defer releaseBytesBuffer(msgbuf)
@@ -2069,6 +2122,7 @@ func httpListConferenceStaff(ctx context.Context, w http.ResponseWriter, r *http
 		return
 	}
 
+	w.Header().Set(`Access-Control-Allow-Origin`, "*")
 	var payload model.ListConferenceStaffRequest
 	qbuf := getBytesBuffer()
 	defer releaseBytesBuffer(qbuf)
@@ -2090,7 +2144,8 @@ func httpListConferencesByOrganizer(ctx context.Context, w http.ResponseWriter, 
 		g := pdebug.Marker("httpListConferencesByOrganizer")
 		defer g.End()
 	}
-	if strings.ToLower(r.Method) != `get` {
+	method := strings.ToLower(r.Method)
+	if method != `get` {
 		w.Header().Set("Allow", "get")
 		msgbuf := getBytesBuffer()
 		defer releaseBytesBuffer(msgbuf)
@@ -2122,7 +2177,8 @@ func httpListExternalResource(ctx context.Context, w http.ResponseWriter, r *htt
 		g := pdebug.Marker("httpListExternalResource")
 		defer g.End()
 	}
-	if strings.ToLower(r.Method) != `get` {
+	method := strings.ToLower(r.Method)
+	if method != `get` {
 		w.Header().Set("Allow", "get")
 		msgbuf := getBytesBuffer()
 		defer releaseBytesBuffer(msgbuf)
@@ -2133,6 +2189,7 @@ func httpListExternalResource(ctx context.Context, w http.ResponseWriter, r *htt
 		return
 	}
 
+	w.Header().Set(`Access-Control-Allow-Origin`, "*")
 	var payload model.ListExternalResourceRequest
 	qbuf := getBytesBuffer()
 	defer releaseBytesBuffer(qbuf)
@@ -2154,7 +2211,8 @@ func httpListFeaturedSpeakers(ctx context.Context, w http.ResponseWriter, r *htt
 		g := pdebug.Marker("httpListFeaturedSpeakers")
 		defer g.End()
 	}
-	if strings.ToLower(r.Method) != `get` {
+	method := strings.ToLower(r.Method)
+	if method != `get` {
 		w.Header().Set("Allow", "get")
 		msgbuf := getBytesBuffer()
 		defer releaseBytesBuffer(msgbuf)
@@ -2186,7 +2244,8 @@ func httpListQuestion(ctx context.Context, w http.ResponseWriter, r *http.Reques
 		g := pdebug.Marker("httpListQuestion")
 		defer g.End()
 	}
-	if strings.ToLower(r.Method) != `get` {
+	method := strings.ToLower(r.Method)
+	if method != `get` {
 		w.Header().Set("Allow", "get")
 		msgbuf := getBytesBuffer()
 		defer releaseBytesBuffer(msgbuf)
@@ -2218,7 +2277,8 @@ func httpListRoom(ctx context.Context, w http.ResponseWriter, r *http.Request) {
 		g := pdebug.Marker("httpListRoom")
 		defer g.End()
 	}
-	if strings.ToLower(r.Method) != `get` {
+	method := strings.ToLower(r.Method)
+	if method != `get` {
 		w.Header().Set("Allow", "get")
 		msgbuf := getBytesBuffer()
 		defer releaseBytesBuffer(msgbuf)
@@ -2229,6 +2289,7 @@ func httpListRoom(ctx context.Context, w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	w.Header().Set(`Access-Control-Allow-Origin`, "*")
 	var payload model.ListRoomRequest
 	qbuf := getBytesBuffer()
 	defer releaseBytesBuffer(qbuf)
@@ -2250,7 +2311,8 @@ func httpListSessionTypesByConference(ctx context.Context, w http.ResponseWriter
 		g := pdebug.Marker("httpListSessionTypesByConference")
 		defer g.End()
 	}
-	if strings.ToLower(r.Method) != `get` {
+	method := strings.ToLower(r.Method)
+	if method != `get` {
 		w.Header().Set("Allow", "get")
 		msgbuf := getBytesBuffer()
 		defer releaseBytesBuffer(msgbuf)
@@ -2282,7 +2344,8 @@ func httpListSessions(ctx context.Context, w http.ResponseWriter, r *http.Reques
 		g := pdebug.Marker("httpListSessions")
 		defer g.End()
 	}
-	if strings.ToLower(r.Method) != `get` {
+	method := strings.ToLower(r.Method)
+	if method != `get` {
 		w.Header().Set("Allow", "get")
 		msgbuf := getBytesBuffer()
 		defer releaseBytesBuffer(msgbuf)
@@ -2314,7 +2377,8 @@ func httpListSponsors(ctx context.Context, w http.ResponseWriter, r *http.Reques
 		g := pdebug.Marker("httpListSponsors")
 		defer g.End()
 	}
-	if strings.ToLower(r.Method) != `get` {
+	method := strings.ToLower(r.Method)
+	if method != `get` {
 		w.Header().Set("Allow", "get")
 		msgbuf := getBytesBuffer()
 		defer releaseBytesBuffer(msgbuf)
@@ -2346,7 +2410,8 @@ func httpListUser(ctx context.Context, w http.ResponseWriter, r *http.Request) {
 		g := pdebug.Marker("httpListUser")
 		defer g.End()
 	}
-	if strings.ToLower(r.Method) != `get` {
+	method := strings.ToLower(r.Method)
+	if method != `get` {
 		w.Header().Set("Allow", "get")
 		msgbuf := getBytesBuffer()
 		defer releaseBytesBuffer(msgbuf)
@@ -2378,7 +2443,8 @@ func httpListVenue(ctx context.Context, w http.ResponseWriter, r *http.Request) 
 		g := pdebug.Marker("httpListVenue")
 		defer g.End()
 	}
-	if strings.ToLower(r.Method) != `get` {
+	method := strings.ToLower(r.Method)
+	if method != `get` {
 		w.Header().Set("Allow", "get")
 		msgbuf := getBytesBuffer()
 		defer releaseBytesBuffer(msgbuf)
@@ -2410,7 +2476,8 @@ func httpLookupBlogEntry(ctx context.Context, w http.ResponseWriter, r *http.Req
 		g := pdebug.Marker("httpLookupBlogEntry")
 		defer g.End()
 	}
-	if strings.ToLower(r.Method) != `get` {
+	method := strings.ToLower(r.Method)
+	if method != `get` {
 		w.Header().Set("Allow", "get")
 		msgbuf := getBytesBuffer()
 		defer releaseBytesBuffer(msgbuf)
@@ -2421,6 +2488,7 @@ func httpLookupBlogEntry(ctx context.Context, w http.ResponseWriter, r *http.Req
 		return
 	}
 
+	w.Header().Set(`Access-Control-Allow-Origin`, "*")
 	var payload model.LookupBlogEntryRequest
 	qbuf := getBytesBuffer()
 	defer releaseBytesBuffer(qbuf)
@@ -2442,7 +2510,8 @@ func httpLookupConference(ctx context.Context, w http.ResponseWriter, r *http.Re
 		g := pdebug.Marker("httpLookupConference")
 		defer g.End()
 	}
-	if strings.ToLower(r.Method) != `get` {
+	method := strings.ToLower(r.Method)
+	if method != `get` {
 		w.Header().Set("Allow", "get")
 		msgbuf := getBytesBuffer()
 		defer releaseBytesBuffer(msgbuf)
@@ -2474,7 +2543,8 @@ func httpLookupConferenceBySlug(ctx context.Context, w http.ResponseWriter, r *h
 		g := pdebug.Marker("httpLookupConferenceBySlug")
 		defer g.End()
 	}
-	if strings.ToLower(r.Method) != `get` {
+	method := strings.ToLower(r.Method)
+	if method != `get` {
 		w.Header().Set("Allow", "get")
 		msgbuf := getBytesBuffer()
 		defer releaseBytesBuffer(msgbuf)
@@ -2506,7 +2576,8 @@ func httpLookupConferenceSeries(ctx context.Context, w http.ResponseWriter, r *h
 		g := pdebug.Marker("httpLookupConferenceSeries")
 		defer g.End()
 	}
-	if strings.ToLower(r.Method) != `get` {
+	method := strings.ToLower(r.Method)
+	if method != `get` {
 		w.Header().Set("Allow", "get")
 		msgbuf := getBytesBuffer()
 		defer releaseBytesBuffer(msgbuf)
@@ -2538,7 +2609,8 @@ func httpLookupExternalResource(ctx context.Context, w http.ResponseWriter, r *h
 		g := pdebug.Marker("httpLookupExternalResource")
 		defer g.End()
 	}
-	if strings.ToLower(r.Method) != `get` {
+	method := strings.ToLower(r.Method)
+	if method != `get` {
 		w.Header().Set("Allow", "get")
 		msgbuf := getBytesBuffer()
 		defer releaseBytesBuffer(msgbuf)
@@ -2549,6 +2621,7 @@ func httpLookupExternalResource(ctx context.Context, w http.ResponseWriter, r *h
 		return
 	}
 
+	w.Header().Set(`Access-Control-Allow-Origin`, "*")
 	var payload model.LookupExternalResourceRequest
 	qbuf := getBytesBuffer()
 	defer releaseBytesBuffer(qbuf)
@@ -2570,7 +2643,8 @@ func httpLookupFeaturedSpeaker(ctx context.Context, w http.ResponseWriter, r *ht
 		g := pdebug.Marker("httpLookupFeaturedSpeaker")
 		defer g.End()
 	}
-	if strings.ToLower(r.Method) != `get` {
+	method := strings.ToLower(r.Method)
+	if method != `get` {
 		w.Header().Set("Allow", "get")
 		msgbuf := getBytesBuffer()
 		defer releaseBytesBuffer(msgbuf)
@@ -2602,7 +2676,8 @@ func httpLookupRoom(ctx context.Context, w http.ResponseWriter, r *http.Request)
 		g := pdebug.Marker("httpLookupRoom")
 		defer g.End()
 	}
-	if strings.ToLower(r.Method) != `get` {
+	method := strings.ToLower(r.Method)
+	if method != `get` {
 		w.Header().Set("Allow", "get")
 		msgbuf := getBytesBuffer()
 		defer releaseBytesBuffer(msgbuf)
@@ -2613,6 +2688,7 @@ func httpLookupRoom(ctx context.Context, w http.ResponseWriter, r *http.Request)
 		return
 	}
 
+	w.Header().Set(`Access-Control-Allow-Origin`, "*")
 	var payload model.LookupRoomRequest
 	qbuf := getBytesBuffer()
 	defer releaseBytesBuffer(qbuf)
@@ -2634,7 +2710,8 @@ func httpLookupSession(ctx context.Context, w http.ResponseWriter, r *http.Reque
 		g := pdebug.Marker("httpLookupSession")
 		defer g.End()
 	}
-	if strings.ToLower(r.Method) != `get` {
+	method := strings.ToLower(r.Method)
+	if method != `get` {
 		w.Header().Set("Allow", "get")
 		msgbuf := getBytesBuffer()
 		defer releaseBytesBuffer(msgbuf)
@@ -2666,7 +2743,8 @@ func httpLookupSessionType(ctx context.Context, w http.ResponseWriter, r *http.R
 		g := pdebug.Marker("httpLookupSessionType")
 		defer g.End()
 	}
-	if strings.ToLower(r.Method) != `get` {
+	method := strings.ToLower(r.Method)
+	if method != `get` {
 		w.Header().Set("Allow", "get")
 		msgbuf := getBytesBuffer()
 		defer releaseBytesBuffer(msgbuf)
@@ -2698,7 +2776,8 @@ func httpLookupSponsor(ctx context.Context, w http.ResponseWriter, r *http.Reque
 		g := pdebug.Marker("httpLookupSponsor")
 		defer g.End()
 	}
-	if strings.ToLower(r.Method) != `get` {
+	method := strings.ToLower(r.Method)
+	if method != `get` {
 		w.Header().Set("Allow", "get")
 		msgbuf := getBytesBuffer()
 		defer releaseBytesBuffer(msgbuf)
@@ -2730,7 +2809,8 @@ func httpLookupTrack(ctx context.Context, w http.ResponseWriter, r *http.Request
 		g := pdebug.Marker("httpLookupTrack")
 		defer g.End()
 	}
-	if strings.ToLower(r.Method) != `get` {
+	method := strings.ToLower(r.Method)
+	if method != `get` {
 		w.Header().Set("Allow", "get")
 		msgbuf := getBytesBuffer()
 		defer releaseBytesBuffer(msgbuf)
@@ -2741,6 +2821,7 @@ func httpLookupTrack(ctx context.Context, w http.ResponseWriter, r *http.Request
 		return
 	}
 
+	w.Header().Set(`Access-Control-Allow-Origin`, "*")
 	var payload model.LookupTrackRequest
 	qbuf := getBytesBuffer()
 	defer releaseBytesBuffer(qbuf)
@@ -2762,7 +2843,8 @@ func httpLookupUser(ctx context.Context, w http.ResponseWriter, r *http.Request)
 		g := pdebug.Marker("httpLookupUser")
 		defer g.End()
 	}
-	if strings.ToLower(r.Method) != `get` {
+	method := strings.ToLower(r.Method)
+	if method != `get` {
 		w.Header().Set("Allow", "get")
 		msgbuf := getBytesBuffer()
 		defer releaseBytesBuffer(msgbuf)
@@ -2773,6 +2855,7 @@ func httpLookupUser(ctx context.Context, w http.ResponseWriter, r *http.Request)
 		return
 	}
 
+	w.Header().Set(`Access-Control-Allow-Origin`, "*")
 	var payload model.LookupUserRequest
 	qbuf := getBytesBuffer()
 	defer releaseBytesBuffer(qbuf)
@@ -2794,7 +2877,8 @@ func httpLookupUserByAuthUserID(ctx context.Context, w http.ResponseWriter, r *h
 		g := pdebug.Marker("httpLookupUserByAuthUserID")
 		defer g.End()
 	}
-	if strings.ToLower(r.Method) != `get` {
+	method := strings.ToLower(r.Method)
+	if method != `get` {
 		w.Header().Set("Allow", "get")
 		msgbuf := getBytesBuffer()
 		defer releaseBytesBuffer(msgbuf)
@@ -2805,6 +2889,7 @@ func httpLookupUserByAuthUserID(ctx context.Context, w http.ResponseWriter, r *h
 		return
 	}
 
+	w.Header().Set(`Access-Control-Allow-Origin`, "*")
 	var payload model.LookupUserByAuthUserIDRequest
 	qbuf := getBytesBuffer()
 	defer releaseBytesBuffer(qbuf)
@@ -2826,7 +2911,8 @@ func httpLookupVenue(ctx context.Context, w http.ResponseWriter, r *http.Request
 		g := pdebug.Marker("httpLookupVenue")
 		defer g.End()
 	}
-	if strings.ToLower(r.Method) != `get` {
+	method := strings.ToLower(r.Method)
+	if method != `get` {
 		w.Header().Set("Allow", "get")
 		msgbuf := getBytesBuffer()
 		defer releaseBytesBuffer(msgbuf)
@@ -2837,6 +2923,7 @@ func httpLookupVenue(ctx context.Context, w http.ResponseWriter, r *http.Request
 		return
 	}
 
+	w.Header().Set(`Access-Control-Allow-Origin`, "*")
 	var payload model.LookupVenueRequest
 	qbuf := getBytesBuffer()
 	defer releaseBytesBuffer(qbuf)
@@ -2858,7 +2945,8 @@ func httpSendAllSelectionResultNotification(ctx context.Context, w http.Response
 		g := pdebug.Marker("httpSendAllSelectionResultNotification")
 		defer g.End()
 	}
-	if strings.ToLower(r.Method) != `post` {
+	method := strings.ToLower(r.Method)
+	if method != `post` {
 		w.Header().Set("Allow", "post")
 		msgbuf := getBytesBuffer()
 		defer releaseBytesBuffer(msgbuf)
@@ -2903,7 +2991,8 @@ func httpSendSelectionResultNotification(ctx context.Context, w http.ResponseWri
 		g := pdebug.Marker("httpSendSelectionResultNotification")
 		defer g.End()
 	}
-	if strings.ToLower(r.Method) != `post` {
+	method := strings.ToLower(r.Method)
+	if method != `post` {
 		w.Header().Set("Allow", "post")
 		msgbuf := getBytesBuffer()
 		defer releaseBytesBuffer(msgbuf)
@@ -2948,7 +3037,8 @@ func httpTweetAsConference(ctx context.Context, w http.ResponseWriter, r *http.R
 		g := pdebug.Marker("httpTweetAsConference")
 		defer g.End()
 	}
-	if strings.ToLower(r.Method) != `post` {
+	method := strings.ToLower(r.Method)
+	if method != `post` {
 		w.Header().Set("Allow", "post")
 		msgbuf := getBytesBuffer()
 		defer releaseBytesBuffer(msgbuf)
@@ -2993,7 +3083,8 @@ func httpUpdateBlogEntry(ctx context.Context, w http.ResponseWriter, r *http.Req
 		g := pdebug.Marker("httpUpdateBlogEntry")
 		defer g.End()
 	}
-	if strings.ToLower(r.Method) != `post` {
+	method := strings.ToLower(r.Method)
+	if method != `post` {
 		w.Header().Set("Allow", "post")
 		msgbuf := getBytesBuffer()
 		defer releaseBytesBuffer(msgbuf)
@@ -3038,7 +3129,8 @@ func httpUpdateConference(ctx context.Context, w http.ResponseWriter, r *http.Re
 		g := pdebug.Marker("httpUpdateConference")
 		defer g.End()
 	}
-	if strings.ToLower(r.Method) != `post` {
+	method := strings.ToLower(r.Method)
+	if method != `post` {
 		w.Header().Set("Allow", "post")
 		msgbuf := getBytesBuffer()
 		defer releaseBytesBuffer(msgbuf)
@@ -3096,7 +3188,8 @@ func httpUpdateExternalResource(ctx context.Context, w http.ResponseWriter, r *h
 		g := pdebug.Marker("httpUpdateExternalResource")
 		defer g.End()
 	}
-	if strings.ToLower(r.Method) != `post` {
+	method := strings.ToLower(r.Method)
+	if method != `post` {
 		w.Header().Set("Allow", "post")
 		msgbuf := getBytesBuffer()
 		defer releaseBytesBuffer(msgbuf)
@@ -3141,7 +3234,8 @@ func httpUpdateFeaturedSpeaker(ctx context.Context, w http.ResponseWriter, r *ht
 		g := pdebug.Marker("httpUpdateFeaturedSpeaker")
 		defer g.End()
 	}
-	if strings.ToLower(r.Method) != `post` {
+	method := strings.ToLower(r.Method)
+	if method != `post` {
 		w.Header().Set("Allow", "post")
 		msgbuf := getBytesBuffer()
 		defer releaseBytesBuffer(msgbuf)
@@ -3186,7 +3280,8 @@ func httpUpdateRoom(ctx context.Context, w http.ResponseWriter, r *http.Request)
 		g := pdebug.Marker("httpUpdateRoom")
 		defer g.End()
 	}
-	if strings.ToLower(r.Method) != `post` {
+	method := strings.ToLower(r.Method)
+	if method != `post` {
 		w.Header().Set("Allow", "post")
 		msgbuf := getBytesBuffer()
 		defer releaseBytesBuffer(msgbuf)
@@ -3231,7 +3326,8 @@ func httpUpdateSession(ctx context.Context, w http.ResponseWriter, r *http.Reque
 		g := pdebug.Marker("httpUpdateSession")
 		defer g.End()
 	}
-	if strings.ToLower(r.Method) != `post` {
+	method := strings.ToLower(r.Method)
+	if method != `post` {
 		w.Header().Set("Allow", "post")
 		msgbuf := getBytesBuffer()
 		defer releaseBytesBuffer(msgbuf)
@@ -3276,7 +3372,8 @@ func httpUpdateSessionType(ctx context.Context, w http.ResponseWriter, r *http.R
 		g := pdebug.Marker("httpUpdateSessionType")
 		defer g.End()
 	}
-	if strings.ToLower(r.Method) != `post` {
+	method := strings.ToLower(r.Method)
+	if method != `post` {
 		w.Header().Set("Allow", "post")
 		msgbuf := getBytesBuffer()
 		defer releaseBytesBuffer(msgbuf)
@@ -3321,7 +3418,8 @@ func httpUpdateSponsor(ctx context.Context, w http.ResponseWriter, r *http.Reque
 		g := pdebug.Marker("httpUpdateSponsor")
 		defer g.End()
 	}
-	if strings.ToLower(r.Method) != `post` {
+	method := strings.ToLower(r.Method)
+	if method != `post` {
 		w.Header().Set("Allow", "post")
 		msgbuf := getBytesBuffer()
 		defer releaseBytesBuffer(msgbuf)
@@ -3379,7 +3477,8 @@ func httpUpdateTrack(ctx context.Context, w http.ResponseWriter, r *http.Request
 		g := pdebug.Marker("httpUpdateTrack")
 		defer g.End()
 	}
-	if strings.ToLower(r.Method) != `post` {
+	method := strings.ToLower(r.Method)
+	if method != `post` {
 		w.Header().Set("Allow", "post")
 		msgbuf := getBytesBuffer()
 		defer releaseBytesBuffer(msgbuf)
@@ -3424,7 +3523,8 @@ func httpUpdateUser(ctx context.Context, w http.ResponseWriter, r *http.Request)
 		g := pdebug.Marker("httpUpdateUser")
 		defer g.End()
 	}
-	if strings.ToLower(r.Method) != `post` {
+	method := strings.ToLower(r.Method)
+	if method != `post` {
 		w.Header().Set("Allow", "post")
 		msgbuf := getBytesBuffer()
 		defer releaseBytesBuffer(msgbuf)
@@ -3469,7 +3569,8 @@ func httpUpdateVenue(ctx context.Context, w http.ResponseWriter, r *http.Request
 		g := pdebug.Marker("httpUpdateVenue")
 		defer g.End()
 	}
-	if strings.ToLower(r.Method) != `post` {
+	method := strings.ToLower(r.Method)
+	if method != `post` {
 		w.Header().Set("Allow", "post")
 		msgbuf := getBytesBuffer()
 		defer releaseBytesBuffer(msgbuf)
@@ -3514,7 +3615,8 @@ func httpVerifyUser(ctx context.Context, w http.ResponseWriter, r *http.Request)
 		g := pdebug.Marker("httpVerifyUser")
 		defer g.End()
 	}
-	if strings.ToLower(r.Method) != `post` {
+	method := strings.ToLower(r.Method)
+	if method != `post` {
 		w.Header().Set("Allow", "post")
 		msgbuf := getBytesBuffer()
 		defer releaseBytesBuffer(msgbuf)
