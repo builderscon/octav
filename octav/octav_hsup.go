@@ -2156,6 +2156,7 @@ func httpListConferencesByOrganizer(ctx context.Context, w http.ResponseWriter, 
 		return
 	}
 
+	w.Header().Set(`Access-Control-Allow-Origin`, "*")
 	var payload model.ListConferencesByOrganizerRequest
 	qbuf := getBytesBuffer()
 	defer releaseBytesBuffer(qbuf)
@@ -2522,6 +2523,7 @@ func httpLookupConference(ctx context.Context, w http.ResponseWriter, r *http.Re
 		return
 	}
 
+	w.Header().Set(`Access-Control-Allow-Origin`, "*")
 	var payload model.LookupConferenceRequest
 	qbuf := getBytesBuffer()
 	defer releaseBytesBuffer(qbuf)
@@ -2555,6 +2557,7 @@ func httpLookupConferenceBySlug(ctx context.Context, w http.ResponseWriter, r *h
 		return
 	}
 
+	w.Header().Set(`Access-Control-Allow-Origin`, "*")
 	var payload model.LookupConferenceBySlugRequest
 	qbuf := getBytesBuffer()
 	defer releaseBytesBuffer(qbuf)
@@ -2588,6 +2591,7 @@ func httpLookupConferenceSeries(ctx context.Context, w http.ResponseWriter, r *h
 		return
 	}
 
+	w.Header().Set(`Access-Control-Allow-Origin`, "*")
 	var payload model.LookupConferenceSeriesRequest
 	qbuf := getBytesBuffer()
 	defer releaseBytesBuffer(qbuf)
@@ -2655,6 +2659,7 @@ func httpLookupFeaturedSpeaker(ctx context.Context, w http.ResponseWriter, r *ht
 		return
 	}
 
+	w.Header().Set(`Access-Control-Allow-Origin`, "*")
 	var payload model.LookupFeaturedSpeakerRequest
 	qbuf := getBytesBuffer()
 	defer releaseBytesBuffer(qbuf)
@@ -2722,6 +2727,7 @@ func httpLookupSession(ctx context.Context, w http.ResponseWriter, r *http.Reque
 		return
 	}
 
+	w.Header().Set(`Access-Control-Allow-Origin`, "*")
 	var payload model.LookupSessionRequest
 	qbuf := getBytesBuffer()
 	defer releaseBytesBuffer(qbuf)
@@ -2755,6 +2761,7 @@ func httpLookupSessionType(ctx context.Context, w http.ResponseWriter, r *http.R
 		return
 	}
 
+	w.Header().Set(`Access-Control-Allow-Origin`, "*")
 	var payload model.LookupSessionTypeRequest
 	qbuf := getBytesBuffer()
 	defer releaseBytesBuffer(qbuf)
@@ -2788,6 +2795,7 @@ func httpLookupSponsor(ctx context.Context, w http.ResponseWriter, r *http.Reque
 		return
 	}
 
+	w.Header().Set(`Access-Control-Allow-Origin`, "*")
 	var payload model.LookupSponsorRequest
 	qbuf := getBytesBuffer()
 	defer releaseBytesBuffer(qbuf)
