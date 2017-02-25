@@ -573,6 +573,7 @@
       "title": "Lookup user",
       "rel": "lookup",
       "href": "/v1/user/lookup",
+      "hsup.cors": "*",
       "hsup.wrapper": "httpWithOptionalBasicAuth",
       "method": "GET",
       "schema": {
@@ -586,6 +587,7 @@
     },
     {
       "title": "Lookup user by auth user ID",
+      "hsup.cors": "*",
       "hsup.wrapper": "httpWithOptionalBasicAuth",
       "rel": "lookup",
       "href": "/v1/user/lookup_user_by_auth_user_id",
@@ -724,6 +726,7 @@
       "title": "Lookup venue",
       "rel": "lookup",
       "href": "/v1/venue/lookup",
+      "hsup.cors": "*",
       "method": "GET",
       "schema": {
         "type": "object",
@@ -820,6 +823,7 @@
       "title": "Lookup room",
       "rel": "lookup",
       "href": "/v1/room/lookup",
+      "hsup.cors": "*",
       "method": "GET",
       "schema": {
         "type": "object",
@@ -851,6 +855,7 @@
       "rel": "list",
       "href": "/v1/room/list",
       "method": "GET",
+      "hsup.cors": "*",
       "hsup.wrapper": "httpWithOptionalBasicAuth",
       "encType": "application/x-www-form-urlencoded",
       "schema": {
@@ -898,6 +903,7 @@
       "title": "List conference series",
       "rel": "list",
       "href": "/v1/conference_series/list",
+      "hsup.cors": "*",
       "hsup.wrapper": "httpWithOptionalBasicAuth",
       "method": "GET",
       "encType": "application/x-www-form-urlencoded",
@@ -962,6 +968,7 @@
     {
       "title": "Get conference schedule",
       "rel": "list",
+      "hsup.cors": "*",
       "method": "GET",
       "href": "/v1/conference/schedule.ics",
       "schema": {
@@ -1008,6 +1015,7 @@
     {
       "title": "List conference date",
       "rel": "list",
+      "hsup.cors": "*",
       "hsup.wrapper": "httpWithBasicAuth",
       "method": "GET",
       "href": "/v1/conference/date/list",
@@ -1061,6 +1069,7 @@
     {
       "title": "List conference admin",
       "rel": "list",
+      "hsup.cors": "*",
       "hsup.wrapper": "httpWithBasicAuth",
       "method": "GET",
       "href": "/v1/conference/admin/list",
@@ -1287,6 +1296,7 @@
       "title": "List conference",
       "href": "/v1/conference/list",
       "rel": "list",
+      "hsup.cors": "*",
       "hsup.wrapper": "httpWithOptionalBasicAuth",
       "schema": {
         "properties": {
@@ -1915,6 +1925,7 @@
       "title": "Lookup track",
       "rel": "lookup",
       "href": "/v1/track/lookup",
+      "hsup.cors": "*",
       "method": "GET",
       "schema": {
         "type": "object",
@@ -1988,6 +1999,7 @@
       "title": "Lookup blog entry",
       "rel": "lookup",
       "href": "/v1/blog_entry/lookup",
+      "hsup.cors": "*",
       "method": "GET",
       "schema": {
         "type": "object",
@@ -2003,6 +2015,7 @@
       "title": "List blog entries",
       "rel": "lookup",
       "href": "/v1/blog_entry/list",
+      "hsup.cors": "*",
       "method": "GET",
       "schema": {
         "type": "object",
@@ -2027,6 +2040,7 @@
     {
       "title": "List conference staff",
       "rel": "lookup",
+      "hsup.cors": "*",
       "hsup.wrapper": "httpWithOptionalBasicAuth",
       "href": "/v1/conference/staff/list",
       "method": "GET",
@@ -2078,6 +2092,7 @@
     {
       "title": "Lookup external resource",
       "rel": "lookup",
+      "hsup.cors": "*",
       "method": "GET",
       "href": "/v1/external_resource/lookup",
       "encType": "application/json",
@@ -2096,6 +2111,7 @@
     {
       "title": "List external resource",
       "rel": "list",
+      "hsup.cors": "*",
       "method": "GET",
       "href": "/v1/external_resource/list",
       "encType": "application/json",
