@@ -890,6 +890,8 @@
       "title": "Lookup conference series",
       "href": "/v1/conference_series/lookup",
       "rel": "lookup",
+      "hsup.cors": "*",
+      "method": "GET",
       "schema": {
         "required": ["id"],
         "properties": {
@@ -1193,7 +1195,9 @@
     {
       "title": "Lookup session type",
       "href": "/v1/session_type/lookup",
+      "hsup.cors": "*",
       "hsup.wrapper": "httpWithOptionalBasicAuth",
+      "method": "GET",
       "rel": "update",
       "schema": {
         "required": ["id"],
@@ -1248,6 +1252,8 @@
       "title": "Lookup conference",
       "href": "/v1/conference/lookup",
       "rel": "lookup",
+      "hsup.cors": "*",
+      "method": "GET",
       "schema": {
         "required": ["id"],
         "properties": {
@@ -1261,6 +1267,8 @@
       "title": "Lookup conference by slug",
       "href": "/v1/conference/lookup_by_slug",
       "rel": "lookup",
+      "hsup.cors": "*",
+      "method": "GET",
       "schema": {
         "required": ["slug"],
         "properties": {
@@ -1275,6 +1283,8 @@
       "href": "/v1/conference/list_by_organizer",
       "rel": "list",
       "hsup.wrapper": "httpWithOptionalBasicAuth",
+      "hsup.cors": "*",
+      "method": "GET",
       "schema": {
         "properties": {
           "lang": {"$ref": "#/definitions/language"},
@@ -1436,6 +1446,8 @@
       "href": "/v1/session/lookup",
       "rel": "lookup",
       "hsup.wrapper": "httpWithOptionalBasicAuth",
+      "hsup.cors": "*",
+      "method": "GET",
       "schema": {
         "required": ["id"],
         "properties": {
@@ -1622,6 +1634,8 @@
       "title": "Lookup featured speaker",
       "href": "/v1/featured_speaker/lookup",
       "hsup.wrapper": "httpWithBasicAuth",
+      "hsup.cors": "*",
+      "method": "GET",
       "rel": "update",
       "schema": {
         "type": "object",
@@ -1715,6 +1729,8 @@
       "title": "Lookup sponsor",
       "href": "/v1/sponsor/lookup",
       "hsup.wrapper": "httpWithOptionalBasicAuth",
+      "hsup.cors": "*",
+      "method": "GET",
       "rel": "update",
       "schema": {
         "type": "object",
