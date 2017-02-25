@@ -2357,6 +2357,7 @@ func httpListSessions(ctx context.Context, w http.ResponseWriter, r *http.Reques
 		return
 	}
 
+	w.Header().Set(`Access-Control-Allow-Origin`, "*")
 	var payload model.ListSessionsRequest
 	qbuf := getBytesBuffer()
 	defer releaseBytesBuffer(qbuf)

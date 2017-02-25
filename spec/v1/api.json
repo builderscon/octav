@@ -1517,7 +1517,9 @@
     {
       "title": "List sessions",
       "href": "/v1/session/list",
+      "hsup.cors": "*",
       "hsup.wrapper": "httpWithOptionalBasicAuth",
+      "method": "GET",
       "rel": "list",
       "schema": {
         "type": "object",
