@@ -395,7 +395,7 @@ func (v *UserSvc) Verify(m *model.User) (err error) {
 		if err != nil {
 			return errors.Wrap(err, "failed to convert user id to int64")
 		}
-		u, _, err := c.Users.Show(&twitter.UserShowParams{UserID: id})
+		u, _, err := c.client.Users.Show(&twitter.UserShowParams{UserID: id})
 		if err != nil {
 			return errors.Wrap(err, "failed to fetch twitter user information via users/show")
 		}

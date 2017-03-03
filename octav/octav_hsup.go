@@ -3041,6 +3041,65 @@ func httpSendSelectionResultNotification(ctx context.Context, w http.ResponseWri
 	doSendSelectionResultNotification(ctx, w, r, &payload)
 }
 
+func httpSetSessionVideoCover(ctx context.Context, w http.ResponseWriter, r *http.Request) {
+	if pdebug.Enabled {
+		g := pdebug.Marker("httpSetSessionVideoCover")
+		defer g.End()
+	}
+	method := strings.ToLower(r.Method)
+	if method != `post` {
+		w.Header().Set("Allow", "post")
+		msgbuf := getBytesBuffer()
+		defer releaseBytesBuffer(msgbuf)
+		msgbuf.WriteString(`Method was `)
+		msgbuf.WriteString(r.Method)
+		msgbuf.WriteString(`, expected 'post'`)
+		httpError(w, msgbuf.String(), http.StatusNotFound, nil)
+		return
+	}
+
+	var payload model.SetSessionVideoCoverRequest
+	jsonbuf := getBytesBuffer()
+	defer releaseBytesBuffer(jsonbuf)
+
+	switch ct := r.Header.Get("Content-Type"); {
+	case ct == "application/json":
+		if _, err := io.Copy(jsonbuf, io.LimitReader(r.Body, MaxPostSize)); err != nil {
+			httpError(w, `Failed to read request body`, http.StatusInternalServerError, err)
+			return
+		}
+	case strings.HasPrefix(ct, "multipart/"):
+		if err := r.ParseMultipartForm(MaxPostSize); err != nil {
+			httpError(w, `Invalid multipart data`, http.StatusInternalServerError, err)
+			return
+		}
+		vals, ok := r.MultipartForm.Value["payload"]
+		if ok && len(vals) > 0 {
+			if _, err := jsonbuf.WriteString(vals[0]); err != nil {
+				httpError(w, `Failed to read payload`, http.StatusInternalServerError, err)
+				return
+			}
+		}
+		payload.MultipartForm = r.MultipartForm
+	default:
+		httpError(w, `Invalid content-type`, http.StatusInternalServerError, nil)
+		return
+	}
+	if pdebug.Enabled {
+		pdebug.Printf(`-----> %s`, jsonbuf.Bytes())
+	}
+	if err := json.Unmarshal(jsonbuf.Bytes(), &payload); err != nil {
+		httpError(w, `Invalid JSON input`, http.StatusInternalServerError, err)
+		return
+	}
+
+	if err := validator.HTTPSetSessionVideoCoverRequest.Validate(&payload); err != nil {
+		httpError(w, `Invalid input (validation failed)`, http.StatusInternalServerError, err)
+		return
+	}
+	doSetSessionVideoCover(ctx, w, r, &payload)
+}
+
 func httpTweetAsConference(ctx context.Context, w http.ResponseWriter, r *http.Request) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("httpTweetAsConference")
@@ -3449,19 +3508,6 @@ func httpUpdateSponsor(ctx context.Context, w http.ResponseWriter, r *http.Reque
 			httpError(w, `Failed to read request body`, http.StatusInternalServerError, err)
 			return
 		}
-	case strings.HasPrefix(ct, "multipart/"):
-		if err := r.ParseMultipartForm(MaxPostSize); err != nil {
-			httpError(w, `Invalid multipart data`, http.StatusInternalServerError, err)
-			return
-		}
-		vals, ok := r.MultipartForm.Value["payload"]
-		if ok && len(vals) > 0 {
-			if _, err := jsonbuf.WriteString(vals[0]); err != nil {
-				httpError(w, `Failed to read payload`, http.StatusInternalServerError, err)
-				return
-			}
-		}
-		payload.MultipartForm = r.MultipartForm
 	default:
 		httpError(w, `Invalid content-type`, http.StatusInternalServerError, nil)
 		return
@@ -3727,6 +3773,7 @@ func (s *Server) SetupRoutes() {
 	r.HandleFunc(`/v1/session/send_all_selection_result_notification`, httpWithContext(httpWithBasicAuth(httpSendAllSelectionResultNotification)))
 	r.HandleFunc(`/v1/session/send_selection_result_notification`, httpWithContext(httpWithBasicAuth(httpSendSelectionResultNotification)))
 	r.HandleFunc(`/v1/session/update`, httpWithContext(httpWithBasicAuth(httpUpdateSession)))
+	r.HandleFunc(`/v1/session/video_cover`, httpWithContext(httpWithBasicAuth(httpSetSessionVideoCover)))
 	r.HandleFunc(`/v1/session_type/delete`, httpWithContext(httpWithBasicAuth(httpDeleteSessionType)))
 	r.HandleFunc(`/v1/session_type/list`, httpWithContext(httpWithOptionalBasicAuth(httpListSessionTypesByConference)))
 	r.HandleFunc(`/v1/session_type/lookup`, httpWithContext(httpWithOptionalBasicAuth(httpLookupSessionType)))

@@ -1763,8 +1763,6 @@
     {
       "title": "Update sponsor",
       "href": "/v1/sponsor/update",
-      "encType": "multipart/form-data",
-      "hsup.multipartFiles": ["logo1", "logo2", "logo3"],
       "hsup.wrapper": "httpWithBasicAuth",
       "method": "POST",
       "rel": "update",
@@ -2213,6 +2211,23 @@
           "user_id": {"$ref": "#/definitions/uuid"}
         },
         "required": ["id","user_id"]
+      }
+    },
+    {
+      "title": "Set session video cover",
+      "href": "/v1/session/video_cover",
+      "hsup.multipartFiles": ["image"],
+      "hsup.wrapper": "httpWithBasicAuth",
+      "encType": "multipart/form-data",
+      "method": "POST",
+      "rel": "update",
+      "schema": {
+        "type": "object",
+        "required": ["id","user_id"],
+        "properties": {
+          "id": {"$ref": "#/definitions/uuid"},
+          "user_id": {"$ref": "#/definitions/uuid"}
+        }
       }
     }
   ]

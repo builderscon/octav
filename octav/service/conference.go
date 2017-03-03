@@ -7,6 +7,7 @@ import (
 	"io"
 	"mime/multipart"
 	"net/http"
+	"path/filepath"
 	"regexp"
 	"time"
 
@@ -600,7 +601,6 @@ func (v *ConferenceSvc) Decorate(tx *db.Tx, c *model.Conference, trustedCall boo
 		}
 	}
 
-
 	switch lang {
 	case "", "en":
 	default:
@@ -943,6 +943,35 @@ func (v *ConferenceSvc) AddCredentialFromPayload(ctx context.Context, tx *db.Tx,
 	return nil
 }
 
+func (v *ConferenceSvc) ListCredentialFromPayload(ctx context.Context, tx *db.Tx, names *[]string, payload *model.ListConferenceCredentialRequest) (err error) {
+	if pdebug.Enabled {
+		g := pdebug.Marker("service.Conference.ListCredentialFromPayload").BindError(&err)
+		defer g.End()
+	}
+
+	// Check if this is an administrator/organizer
+	su := User()
+	if err := su.IsConferenceAdministrator(tx, payload.ConferenceID, payload.UserID); err != nil {
+		return errors.Wrap(err, "listing conference credentials requires conference administrator privilege")
+	}
+
+	prefix := "conferences/" + payload.ConferenceID + "/credentials/"
+	cl := v.credentialStorage
+	list, err := cl.List(ctx, WithQueryPrefix(prefix))
+	if err != nil {
+		return errors.Wrap(err, `failed to list credentials`)
+	}
+
+	for list.Next() {
+		attrs, ok := list.Object().(*storage.ObjectAttrs)
+		if !ok {
+			continue
+		}
+		*names = append(*names, filepath.Base(attrs.Name))
+	}
+	return nil
+}
+
 func (v *ConferenceSvc) LoadStaff(tx *db.Tx, users *model.UserList, trustedCall bool, confID, lang string) (err error) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("service.Conference.LoadStaff").BindError(&err)
@@ -1001,4 +1030,3 @@ func (v *ConferenceSvc) DeleteStaffFromPayload(tx *db.Tx, payload *model.DeleteC
 
 	return db.DeleteConferenceStaff(tx, payload.ConferenceID, payload.StaffID)
 }
-

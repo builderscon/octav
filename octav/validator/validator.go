@@ -123,6 +123,7 @@ var HTTPSendAllSelectionResultNotificationRequest *jsval.JSVal
 var HTTPSendAllSelectionResultNotificationResponse *jsval.JSVal
 var HTTPSendSelectionResultNotificationRequest *jsval.JSVal
 var HTTPSendSelectionResultNotificationResponse *jsval.JSVal
+var HTTPSetSessionVideoCoverRequest *jsval.JSVal
 var HTTPTweetAsConferenceRequest *jsval.JSVal
 var HTTPUpdateBlogEntryRequest *jsval.JSVal
 var HTTPUpdateConferenceRequest *jsval.JSVal
@@ -4245,6 +4246,25 @@ func init() {
 				AddProp(
 					"message",
 					jsval.String(),
+				),
+		)
+
+	HTTPSetSessionVideoCoverRequest = jsval.New().
+		SetName("HTTPSetSessionVideoCoverRequest").
+		SetConstraintMap(M).
+		SetRoot(
+			jsval.Object().
+				Required("id", "user_id").
+				AdditionalProperties(
+					jsval.EmptyConstraint,
+				).
+				AddProp(
+					"id",
+					jsval.Reference(M).RefersTo("#/definitions/uuid"),
+				).
+				AddProp(
+					"user_id",
+					jsval.Reference(M).RefersTo("#/definitions/uuid"),
 				),
 		)
 

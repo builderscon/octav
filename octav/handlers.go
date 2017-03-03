@@ -2160,3 +2160,29 @@ func doUpdateExternalResource(ctx context.Context, w http.ResponseWriter, r *htt
 
 	httpJSON(w, map[string]string{"status": "success"})
 }
+
+func doSetSessionVideoCover(ctx context.Context, w http.ResponseWriter, r *http.Request, payload *model.SetSessionVideoCoverRequest) {
+	if pdebug.Enabled {
+		g := pdebug.Marker("doSetSessionVideoCover")
+		defer g.End()
+	}
+	tx, err := db.Begin()
+	if err != nil {
+		httpError(w, `SetSessionVideoCover`, http.StatusInternalServerError, err)
+		return
+	}
+	defer tx.AutoRollback()
+
+	s := service.Youtube()
+	if err := s.UploadThumbnailFromPayload(ctx, tx, payload); err != nil {
+		httpError(w, `SetSessionVideoCover`, http.StatusInternalServerError, err)
+		return
+	}
+
+	if err := tx.Commit(); err != nil {
+		httpError(w, `SetSessionVideoCover`, http.StatusInternalServerError, err)
+		return
+	}
+
+	httpJSON(w, map[string]string{"status": "success"})
+}

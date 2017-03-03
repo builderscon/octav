@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"fmt"
+	"regexp"
 	"strconv"
 	"time"
 	"unicode/utf8"
@@ -695,4 +696,18 @@ func (v *SessionSvc) SendSelectionResultNotificationFromPayload(ctx context.Cont
 	}
 
 	return nil
+}
+
+var videoRx = regexp.MustCompile(`^https://youtube.com/watch?v=(.+)`)
+
+func (v *SessionSvc) VideoID(s *model.Session) (string, error) {
+	if s.VideoURL == "" {
+		return "", errors.New(`video url is not initialized`)
+	}
+
+	matches := videoRx.FindStringSubmatch(s.VideoURL)
+	if matches == nil {
+		return "", errors.New(`could not match video url`)
+	}
+	return matches[1], nil
 }

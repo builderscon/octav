@@ -4195,6 +4195,73 @@ func (c *Client) SendSelectionResultNotification(in *model.SendSelectionResultNo
 	return &payload, nil
 }
 
+func (c *Client) SetSessionVideoCover(in *model.SetSessionVideoCoverRequest, files map[string]string) (err error) {
+	if pdebug.Enabled {
+		g := pdebug.Marker("client.SetSessionVideoCover").BindError(&err)
+		defer g.End()
+	}
+	u, err := url.Parse(c.Endpoint + "/v1/session/video_cover")
+	if err != nil {
+		return err
+	}
+	var buf bytes.Buffer
+	w := multipart.NewWriter(&buf)
+	var jsbuf bytes.Buffer
+	err = json.NewEncoder(&jsbuf).Encode(in)
+	if err != nil {
+		return err
+	}
+	w.WriteField("payload", jsbuf.String())
+	if fn, ok := files["image"]; ok {
+		fw, err := w.CreateFormFile("image", fn)
+		if err != nil {
+			return err
+		}
+		f, err := os.Open(fn)
+		if err != nil {
+			return err
+		}
+		defer f.Close()
+		_, err = io.Copy(fw, f)
+		if err != nil {
+			return err
+		}
+	}
+	err = w.Close()
+	if err != nil {
+		return err
+	}
+	if pdebug.Enabled {
+		pdebug.Printf("POST to %s", u.String())
+		pdebug.Printf("%s", buf.String())
+	}
+	req, err := http.NewRequest("POST", u.String(), &buf)
+	if err != nil {
+		return err
+	}
+	req.Header.Set("Content-Type", w.FormDataContentType())
+	if c.BasicAuth.Username != "" && c.BasicAuth.Password != "" {
+		req.SetBasicAuth(c.BasicAuth.Username, c.BasicAuth.Password)
+	}
+	res, err := c.Client.Do(req)
+	if err != nil {
+		return err
+	}
+	if res.StatusCode != http.StatusOK {
+		if strings.HasPrefix(strings.ToLower(res.Header.Get(`Content-Type`)), `application/json`) {
+			var errjson ErrJSON
+			if err := json.NewDecoder(res.Body).Decode(&errjson); err != nil {
+				return errors.Errorf(`Invalid response: '%s'`, res.Status)
+			}
+			if len(errjson.Error) > 0 {
+				return errors.New(errjson.Error)
+			}
+		}
+		return errors.Errorf(`Invalid response: '%s'`, res.Status)
+	}
+	return nil
+}
+
 func (c *Client) TweetAsConference(in *model.TweetAsConferenceRequest) (err error) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("client.TweetAsConference").BindError(&err)
@@ -4597,7 +4664,7 @@ func (c *Client) UpdateSessionType(in *model.UpdateSessionTypeRequest) (err erro
 	return nil
 }
 
-func (c *Client) UpdateSponsor(in *model.UpdateSponsorRequest, files map[string]string) (err error) {
+func (c *Client) UpdateSponsor(in *model.UpdateSponsorRequest) (err error) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("client.UpdateSponsor").BindError(&err)
 		defer g.End()
@@ -4607,59 +4674,7 @@ func (c *Client) UpdateSponsor(in *model.UpdateSponsorRequest, files map[string]
 		return err
 	}
 	var buf bytes.Buffer
-	w := multipart.NewWriter(&buf)
-	var jsbuf bytes.Buffer
-	err = json.NewEncoder(&jsbuf).Encode(in)
-	if err != nil {
-		return err
-	}
-	w.WriteField("payload", jsbuf.String())
-	if fn, ok := files["logo1"]; ok {
-		fw, err := w.CreateFormFile("logo1", fn)
-		if err != nil {
-			return err
-		}
-		f, err := os.Open(fn)
-		if err != nil {
-			return err
-		}
-		defer f.Close()
-		_, err = io.Copy(fw, f)
-		if err != nil {
-			return err
-		}
-	}
-	if fn, ok := files["logo2"]; ok {
-		fw, err := w.CreateFormFile("logo2", fn)
-		if err != nil {
-			return err
-		}
-		f, err := os.Open(fn)
-		if err != nil {
-			return err
-		}
-		defer f.Close()
-		_, err = io.Copy(fw, f)
-		if err != nil {
-			return err
-		}
-	}
-	if fn, ok := files["logo3"]; ok {
-		fw, err := w.CreateFormFile("logo3", fn)
-		if err != nil {
-			return err
-		}
-		f, err := os.Open(fn)
-		if err != nil {
-			return err
-		}
-		defer f.Close()
-		_, err = io.Copy(fw, f)
-		if err != nil {
-			return err
-		}
-	}
-	err = w.Close()
+	err = json.NewEncoder(&buf).Encode(in)
 	if err != nil {
 		return err
 	}
@@ -4671,7 +4686,7 @@ func (c *Client) UpdateSponsor(in *model.UpdateSponsorRequest, files map[string]
 	if err != nil {
 		return err
 	}
-	req.Header.Set("Content-Type", w.FormDataContentType())
+	req.Header.Set("Content-Type", "application/json")
 	if c.BasicAuth.Username != "" && c.BasicAuth.Password != "" {
 		req.SetBasicAuth(c.BasicAuth.Username, c.BasicAuth.Password)
 	}

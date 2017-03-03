@@ -956,6 +956,12 @@ type ConfirmTemporaryEmailRequest struct {
 }
 
 // +transport
+type ListConferenceCredentialRequest struct {
+	ConferenceID string `json:"conference_id"`
+	UserID       string `json:"user_id"` // ID of the user making this request
+}
+
+// +transport
 type AddConferenceCredentialRequest struct {
 	ConferenceID string `json:"conference_id"`
 	UserID       string `json:"user_id"` // ID of the user making this request
@@ -1219,4 +1225,11 @@ type UpdateExternalResourceRequest struct {
 type DeleteExternalResourceRequest struct {
 	ID     string `json:"id"`
 	UserID string `json:"user_id"`
+}
+
+// +transport
+type SetSessionVideoCoverRequest struct {
+	ID            string          `json:"id"`
+	UserID        string          `json:"user_id"`
+	MultipartForm *multipart.Form `json:"-"`
 }

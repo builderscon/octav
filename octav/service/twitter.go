@@ -23,7 +23,7 @@ func Twitter() *TwitterSvc {
 }
 
 func (v *TwitterSvc) Init() {
-	twitterSvc.Client = NewTwitterClientFromToken(os.Getenv("TWITTER_OAUTH2_ACCESS_TOKEN"))
+	twitterSvc.client = NewTwitterClientFromToken(os.Getenv("TWITTER_OAUTH2_ACCESS_TOKEN"))
 }
 
 func NewTwitterClientFromToken(s string) *twitter.Client {
