@@ -1,6 +1,8 @@
 package service
 
 import (
+	"context"
+	"database/sql"
 	"time"
 
 	"github.com/builderscon/octav/octav/cache"
@@ -36,7 +38,7 @@ func (v *TrackSvc) populateRowForUpdate(vdb *db.Track, payload *model.UpdateTrac
 	return nil
 }
 
-func (v *TrackSvc) LookupByConferenceRoom(tx *db.Tx, m *model.Track, conferenceID, roomID string) (err error) {
+func (v *TrackSvc) LookupByConferenceRoom(tx *sql.Tx, m *model.Track, conferenceID, roomID string) (err error) {
 	var r model.Track
 	c := Cache()
 	key := c.Key("Track", conferenceID, roomID)
@@ -63,14 +65,14 @@ func (v *TrackSvc) LookupByConferenceRoom(tx *db.Tx, m *model.Track, conferenceI
 	return nil
 }
 
-func (v *TrackSvc) CreateFromPayload(tx *db.Tx, payload *model.CreateTrackRequest, result *model.Track) (err error) {
+func (v *TrackSvc) CreateFromPayload(ctx context.Context, tx *sql.Tx, payload *model.CreateTrackRequest, result *model.Track) (err error) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("service.Track.CreateFromPayload").BindError(&err)
 		defer g.End()
 	}
 
 	su := User()
-	if err := su.IsConferenceAdministrator(tx, payload.ConferenceID, payload.UserID); err != nil {
+	if err := su.IsConferenceAdministrator(ctx, tx, payload.ConferenceID, payload.UserID); err != nil {
 		return errors.Wrap(err, "creating a track requires conference administrator privilege")
 	}
 
@@ -79,14 +81,14 @@ func (v *TrackSvc) CreateFromPayload(tx *db.Tx, payload *model.CreateTrackReques
 	if !payload.Name.Valid() || payload.Name.String == "" {
 		var m model.Room
 		sr := Room()
-		if err := sr.Lookup(tx, &m, payload.RoomID); err != nil {
+		if err := sr.Lookup(ctx, tx, &m, payload.RoomID); err != nil {
 			return errors.Wrap(err, "failed to load room")
 		}
 		payload.Name.Set(m.Name)
 	}
 
 	var vdb db.Track
-	if err := v.Create(tx, &vdb, payload); err != nil {
+	if err := v.Create(ctx, tx, &vdb, payload); err != nil {
 		return errors.Wrap(err, "failed to store in database")
 	}
 
@@ -101,7 +103,7 @@ func (v *TrackSvc) CreateFromPayload(tx *db.Tx, payload *model.CreateTrackReques
 	return nil
 }
 
-func (v *TrackSvc) DeleteFromPayload(tx *db.Tx, payload *model.DeleteTrackRequest) (err error) {
+func (v *TrackSvc) DeleteFromPayload(ctx context.Context, tx *sql.Tx, payload *model.DeleteTrackRequest) (err error) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("service.Track.DeleteFromPayload").BindError(&err)
 		defer g.End()
@@ -113,7 +115,7 @@ func (v *TrackSvc) DeleteFromPayload(tx *db.Tx, payload *model.DeleteTrackReques
 	}
 
 	su := User()
-	if err := su.IsConferenceAdministrator(tx, vdb.ConferenceID, payload.UserID); err != nil {
+	if err := su.IsConferenceAdministrator(ctx, tx, vdb.ConferenceID, payload.UserID); err != nil {
 		return errors.Wrap(err, "deleting a track requires conference administrator privilege")
 	}
 
@@ -123,15 +125,15 @@ func (v *TrackSvc) DeleteFromPayload(tx *db.Tx, payload *model.DeleteTrackReques
 	return nil
 }
 
-func (v *TrackSvc) PostCreateHook(_ *db.Tx, vdb *db.Track) error {
+func (v *TrackSvc) PostCreateHook(ctx context.Context, _ *sql.Tx, vdb *db.Track) error {
 	return invalidateTrackLoadByConferenceID(vdb.ConferenceID)
 }
 
-func (v *TrackSvc) PostUpdateHook(_ *db.Tx, vdb *db.Track) error {
+func (v *TrackSvc) PostUpdateHook(_ *sql.Tx, vdb *db.Track) error {
 	return invalidateTrackLoadByConferenceID(vdb.ConferenceID)
 }
 
-func (v *TrackSvc) PostDeleteHook(_ *db.Tx, vdb *db.Track) error {
+func (v *TrackSvc) PostDeleteHook(_ *sql.Tx, vdb *db.Track) error {
 	return invalidateTrackLoadByConferenceID(vdb.ConferenceID)
 }
 
@@ -145,7 +147,7 @@ func invalidateTrackLoadByConferenceID(conferenceID string) error {
 	return nil
 }
 
-func (v *TrackSvc) LoadByConferenceID(tx *db.Tx, result *model.TrackList, conferenceID string) (err error) {
+func (v *TrackSvc) LoadByConferenceID(ctx context.Context, tx *sql.Tx, result *model.TrackList, conferenceID string) (err error) {
 	c := Cache()
 	key := c.Key("Track", "LoadByConferenceID", conferenceID)
 
@@ -157,9 +159,9 @@ func (v *TrackSvc) LoadByConferenceID(tx *db.Tx, result *model.TrackList, confer
 
 		m := make(model.TrackList, len(ids))
 		for i, id := range ids {
-			if err := v.Lookup(tx, &m[i], id); err != nil {
+			if err := v.Lookup(ctx, tx, &m[i], id); err != nil {
 				// Something fishy. Thro away this cache
-				c.Delete(key);
+				c.Delete(key)
 				return errors.Wrap(err, "failed to load from database")
 			}
 		}
@@ -193,7 +195,7 @@ func (v *TrackSvc) LoadByConferenceID(tx *db.Tx, result *model.TrackList, confer
 	return nil
 }
 
-func (v *TrackSvc) Decorate(tx *db.Tx, track *model.Track, trustedCall bool, lang string) (err error) {
+func (v *TrackSvc) Decorate(ctx context.Context, tx *sql.Tx, track *model.Track, trustedCall bool, lang string) (err error) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("service.Track.Decorate (%s, %s, %t, %s)", track.ConferenceID, track.RoomID, trustedCall, lang).BindError(&err)
 		defer g.End()

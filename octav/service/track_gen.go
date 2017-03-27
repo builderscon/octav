@@ -4,6 +4,7 @@ package service
 
 import (
 	"context"
+	"database/sql"
 	"sync"
 	"time"
 
@@ -21,6 +22,7 @@ var _ = context.Background
 var _ = errors.Wrap
 var _ = model.Track{}
 var _ = db.Track{}
+var _ = sql.ErrNoRows
 var _ = pdebug.Enabled
 
 var trackSvc TrackSvc
@@ -31,21 +33,21 @@ func Track() *TrackSvc {
 	return &trackSvc
 }
 
-func (v *TrackSvc) LookupFromPayload(tx *db.Tx, m *model.Track, payload *model.LookupTrackRequest) (err error) {
+func (v *TrackSvc) LookupFromPayload(ctx context.Context, tx *sql.Tx, m *model.Track, payload *model.LookupTrackRequest) (err error) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("service.Track.LookupFromPayload").BindError(&err)
 		defer g.End()
 	}
-	if err = v.Lookup(tx, m, payload.ID); err != nil {
+	if err = v.Lookup(ctx, tx, m, payload.ID); err != nil {
 		return errors.Wrap(err, "failed to load model.Track from database")
 	}
-	if err := v.Decorate(tx, m, payload.TrustedCall, payload.Lang.String); err != nil {
+	if err := v.Decorate(ctx, tx, m, payload.TrustedCall, payload.Lang.String); err != nil {
 		return errors.Wrap(err, "failed to load associated data for model.Track from database")
 	}
 	return nil
 }
 
-func (v *TrackSvc) Lookup(tx *db.Tx, m *model.Track, id string) (err error) {
+func (v *TrackSvc) Lookup(ctx context.Context, tx *sql.Tx, m *model.Track, id string) (err error) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("service.Track.Lookup").BindError(&err)
 		defer g.End()
@@ -78,7 +80,7 @@ func (v *TrackSvc) Lookup(tx *db.Tx, m *model.Track, id string) (err error) {
 // Create takes in the transaction, the incoming payload, and a reference to
 // a database row. The database row is initialized/populated so that the
 // caller can use it afterwards.
-func (v *TrackSvc) Create(tx *db.Tx, vdb *db.Track, payload *model.CreateTrackRequest) (err error) {
+func (v *TrackSvc) Create(ctx context.Context, tx *sql.Tx, vdb *db.Track, payload *model.CreateTrackRequest) (err error) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("service.Track.Create").BindError(&err)
 		defer g.End()
@@ -95,13 +97,13 @@ func (v *TrackSvc) Create(tx *db.Tx, vdb *db.Track, payload *model.CreateTrackRe
 	if err := payload.LocalizedFields.CreateLocalizedStrings(tx, "Track", vdb.EID); err != nil {
 		return errors.Wrap(err, `failed to populate localized strings`)
 	}
-	if err := v.PostCreateHook(tx, vdb); err != nil {
+	if err := v.PostCreateHook(ctx, tx, vdb); err != nil {
 		return errors.Wrap(err, `post create hook failed`)
 	}
 	return nil
 }
 
-func (v *TrackSvc) Update(tx *db.Tx, vdb *db.Track) (err error) {
+func (v *TrackSvc) Update(tx *sql.Tx, vdb *db.Track) (err error) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("service.Track.Update (%s)", vdb.EID).BindError(&err)
 		defer g.End()
@@ -131,7 +133,7 @@ func (v *TrackSvc) Update(tx *db.Tx, vdb *db.Track) (err error) {
 	return nil
 }
 
-func (v *TrackSvc) UpdateFromPayload(ctx context.Context, tx *db.Tx, payload *model.UpdateTrackRequest) (err error) {
+func (v *TrackSvc) UpdateFromPayload(ctx context.Context, tx *sql.Tx, payload *model.UpdateTrackRequest) (err error) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("service.Track.UpdateFromPayload (%s)", payload.ID).BindError(&err)
 		defer g.End()
@@ -156,7 +158,7 @@ func (v *TrackSvc) UpdateFromPayload(ctx context.Context, tx *db.Tx, payload *mo
 	return nil
 }
 
-func (v *TrackSvc) ReplaceL10NStrings(tx *db.Tx, m *model.Track, lang string) error {
+func (v *TrackSvc) ReplaceL10NStrings(tx *sql.Tx, m *model.Track, lang string) error {
 	if pdebug.Enabled {
 		g := pdebug.Marker("service.Track.ReplaceL10NStrings lang = %s", lang)
 		defer g.End()
@@ -222,7 +224,7 @@ func (v *TrackSvc) ReplaceL10NStrings(tx *db.Tx, m *model.Track, lang string) er
 	return nil
 }
 
-func (v *TrackSvc) Delete(tx *db.Tx, id string) error {
+func (v *TrackSvc) Delete(tx *sql.Tx, id string) error {
 	if pdebug.Enabled {
 		g := pdebug.Marker("Track.Delete (%s)", id)
 		defer g.End()

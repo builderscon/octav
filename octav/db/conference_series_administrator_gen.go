@@ -42,7 +42,7 @@ func init() {
 	})
 }
 
-func (c *ConferenceSeriesAdministrator) Create(tx *Tx, opts ...InsertOption) (err error) {
+func (c *ConferenceSeriesAdministrator) Create(tx *sql.Tx, opts ...InsertOption) (err error) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("db.ConferenceSeriesAdministrator.Create").BindError(&err)
 		defer g.End()
@@ -79,7 +79,7 @@ func (c *ConferenceSeriesAdministrator) Create(tx *Tx, opts ...InsertOption) (er
 	return nil
 }
 
-func (c ConferenceSeriesAdministrator) Update(tx *Tx) (err error) {
+func (c ConferenceSeriesAdministrator) Update(tx *sql.Tx) (err error) {
 	if pdebug.Enabled {
 		g := pdebug.Marker(`ConferenceSeriesAdministrator.Update`).BindError(&err)
 		defer g.End()
@@ -98,7 +98,7 @@ func (c ConferenceSeriesAdministrator) Update(tx *Tx) (err error) {
 	return errors.New("OID must be filled")
 }
 
-func (c ConferenceSeriesAdministrator) Delete(tx *Tx) error {
+func (c ConferenceSeriesAdministrator) Delete(tx *sql.Tx) error {
 	if c.OID != 0 {
 		stmt, err := library.GetStmt("sqlConferenceSeriesAdministratorDeleteByOIDKey")
 		if err != nil {

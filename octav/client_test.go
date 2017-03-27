@@ -1,6 +1,7 @@
 package octav_test
 
 import (
+	"context"
 	"fmt"
 	"net/http"
 	"net/http/httptest"
@@ -41,11 +42,13 @@ func NewTestCtx(t *testing.T) (*TestCtx, error) {
 		Nickname:   "root",
 	}
 
-	tx, err := db.Begin()
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+
+	tx, err := db.BeginTx(ctx, nil)
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to start DB transaction")
 	}
-	defer tx.AutoRollback()
 
 	if err = client.Create(tx); err != nil {
 		return nil, err
@@ -59,13 +62,13 @@ func NewTestCtx(t *testing.T) (*TestCtx, error) {
 		return nil, errors.Wrap(err, "failed to commit changes to DB")
 	}
 
-	ctx := &TestCtx{
+	tctx := &TestCtx{
 		T:         t,
 		APIClient: &client,
 		Superuser: &superuser,
 	}
 
-	return ctx, nil
+	return tctx, nil
 }
 
 func (ctx *TestCtx) Subtest(name string, cb func(*TestCtx)) {
@@ -80,20 +83,22 @@ func (ctx *TestCtx) Subtest(name string, cb func(*TestCtx)) {
 	})
 }
 
-func (ctx *TestCtx) Close() error {
-	tx, err := db.Begin()
+func (tctx *TestCtx) Close() error {
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+
+	tx, err := db.BeginTx(ctx, nil)
 	if err != nil {
 		return errors.Wrap(err, "failed to start DB transaction")
 	}
-	defer tx.AutoRollback()
 
-	if cl := ctx.APIClient; cl != nil {
+	if cl := tctx.APIClient; cl != nil {
 		if err := cl.Delete(tx); err != nil {
 			return errors.Wrap(err, "failed to delete client")
 		}
 	}
 
-	if u := ctx.Superuser; u != nil {
+	if u := tctx.Superuser; u != nil {
 		if err := u.Delete(tx); err != nil {
 			return errors.Wrap(err, "failed to delete superuser")
 		}

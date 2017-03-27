@@ -1233,3 +1233,9 @@ type SetSessionVideoCoverRequest struct {
 	UserID        string          `json:"user_id"`
 	MultipartForm *multipart.Form `json:"-"`
 }
+
+type CreateClientSessionRequest struct {
+	AccessToken string `json:"access_token"`
+	UserID      string `json:"user_id"`
+}
+type CreateClientSessionResponse struct{}

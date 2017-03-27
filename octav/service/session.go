@@ -3,6 +3,7 @@ package service
 import (
 	"bytes"
 	"context"
+	"database/sql"
 	"fmt"
 	"regexp"
 	"strconv"
@@ -253,7 +254,7 @@ func (v *SessionSvc) populateRowForUpdate(vdb *db.Session, payload *model.Update
 }
 
 /*
-func (v *SessionSvc) LoadByConference(tx *db.Tx, vdbl *db.SessionList, cid string, date string) error {
+func (v *SessionSvc) LoadByConference(tx *sql.Tx, vdbl *db.SessionList, cid string, date string) error {
 	if err := vdbl.LoadByConference(tx, cid, "", date, nil, nil); err != nil {
 		return err
 	}
@@ -261,7 +262,7 @@ func (v *SessionSvc) LoadByConference(tx *db.Tx, vdbl *db.SessionList, cid strin
 }
 */
 
-func (v *SessionSvc) Decorate(tx *db.Tx, session *model.Session, trustedCall bool, lang string) error {
+func (v *SessionSvc) Decorate(ctx context.Context, tx *sql.Tx, session *model.Session, trustedCall bool, lang string) error {
 	if pdebug.Enabled {
 		g := pdebug.Marker("service.Session.Decorate")
 		defer g.End()
@@ -270,10 +271,10 @@ func (v *SessionSvc) Decorate(tx *db.Tx, session *model.Session, trustedCall boo
 	if session.ConferenceID != "" {
 		var cs ConferenceSvc
 		var mc model.Conference
-		if err := cs.Lookup(tx, &mc, session.ConferenceID); err != nil {
+		if err := cs.Lookup(ctx, tx, &mc, session.ConferenceID); err != nil {
 			return errors.Wrap(err, "failed to load conference")
 		}
-		if err := cs.Decorate(tx, &mc, trustedCall, lang); err != nil {
+		if err := cs.Decorate(ctx, tx, &mc, trustedCall, lang); err != nil {
 			return errors.Wrap(err, "failed to decorate conference")
 		}
 		session.Conference = &mc
@@ -290,10 +291,10 @@ func (v *SessionSvc) Decorate(tx *db.Tx, session *model.Session, trustedCall boo
 	if session.RoomID != "" {
 		var rs RoomSvc
 		var room model.Room
-		if err := rs.Lookup(tx, &room, session.RoomID); err != nil {
+		if err := rs.Lookup(ctx, tx, &room, session.RoomID); err != nil {
 			return errors.Wrap(err, "failed to load room")
 		}
-		if err := rs.Decorate(tx, &room, trustedCall, lang); err != nil {
+		if err := rs.Decorate(ctx, tx, &room, trustedCall, lang); err != nil {
 			return errors.Wrap(err, "failed to decorate room")
 		}
 		session.Room = &room
@@ -302,10 +303,10 @@ func (v *SessionSvc) Decorate(tx *db.Tx, session *model.Session, trustedCall boo
 	if session.SpeakerID != "" {
 		var su UserSvc
 		var speaker model.User
-		if err := su.Lookup(tx, &speaker, session.SpeakerID); err != nil {
+		if err := su.Lookup(ctx, tx, &speaker, session.SpeakerID); err != nil {
 			return errors.Wrapf(err, "failed to load speaker '%s'", session.SpeakerID)
 		}
-		if err := su.Decorate(tx, &speaker, trustedCall, lang); err != nil {
+		if err := su.Decorate(ctx, tx, &speaker, trustedCall, lang); err != nil {
 			return errors.Wrap(err, "failed to decorate speaker")
 		}
 		session.Speaker = &speaker
@@ -314,10 +315,10 @@ func (v *SessionSvc) Decorate(tx *db.Tx, session *model.Session, trustedCall boo
 	if session.SessionTypeID != "" {
 		var sts SessionTypeSvc
 		var sessionType model.SessionType
-		if err := sts.Lookup(tx, &sessionType, session.SessionTypeID); err != nil {
+		if err := sts.Lookup(ctx, tx, &sessionType, session.SessionTypeID); err != nil {
 			return errors.Wrapf(err, "failed to load session type '%s'", session.SessionTypeID)
 		}
-		if err := sts.Decorate(tx, &sessionType, trustedCall, lang); err != nil {
+		if err := sts.Decorate(ctx, tx, &sessionType, trustedCall, lang); err != nil {
 			return errors.Wrap(err, "failed to decorate session type")
 		}
 		session.SessionType = &sessionType
@@ -332,10 +333,10 @@ func (v *SessionSvc) Decorate(tx *db.Tx, session *model.Session, trustedCall boo
 	return nil
 }
 
-func (v *SessionSvc) CreateFromPayload(tx *db.Tx, result *model.Session, payload *model.CreateSessionRequest) error {
+func (v *SessionSvc) CreateFromPayload(ctx context.Context, tx *sql.Tx, result *model.Session, payload *model.CreateSessionRequest) error {
 	var u model.User
 	su := User()
-	if err := su.Lookup(tx, &u, payload.UserID); err != nil {
+	if err := su.Lookup(ctx, tx, &u, payload.UserID); err != nil {
 		return errors.Wrapf(err, "failed to load user %s", payload.UserID)
 	}
 
@@ -347,14 +348,14 @@ func (v *SessionSvc) CreateFromPayload(tx *db.Tx, result *model.Session, payload
 
 	// Load the session type, so we can populate payload.Duration
 	var mst model.SessionType
-	if err := sst.Lookup(tx, &mst, payload.SessionTypeID); err != nil {
+	if err := sst.Lookup(ctx, tx, &mst, payload.SessionTypeID); err != nil {
 		return errors.Wrap(err, "failed to lookup session type")
 	}
 
 	payload.Duration = mst.Duration
 
 	var vdb db.Session
-	if err := v.Create(tx, &vdb, payload); err != nil {
+	if err := v.Create(ctx, tx, &vdb, payload); err != nil {
 		return errors.Wrap(err, "failed to insert into database")
 	}
 
@@ -367,16 +368,16 @@ func (v *SessionSvc) CreateFromPayload(tx *db.Tx, result *model.Session, payload
 	return nil
 }
 
-func (v *SessionSvc) PreUpdateFromPayloadHook(ctx context.Context, tx *db.Tx, vdb *db.Session, payload *model.UpdateSessionRequest) (err error) {
+func (v *SessionSvc) PreUpdateFromPayloadHook(ctx context.Context, tx *sql.Tx, vdb *db.Session, payload *model.UpdateSessionRequest) (err error) {
 	su := User()
-	if err := su.IsSessionOwner(tx, payload.ID, payload.UserID); err != nil {
+	if err := su.IsSessionOwner(ctx, tx, payload.ID, payload.UserID); err != nil {
 		return errors.Wrap(err, "updating sessions require session owner privileges")
 	}
 
 	// We must protect the API server from changing important
 	// fields like conference_id, speaker_id, room_id, etc from regular
 	// users, but allow administrators to do anything they want
-	if err := su.IsAdministrator(tx, payload.UserID); err != nil {
+	if err := su.IsAdministrator(ctx, tx, payload.UserID); err != nil {
 		// Reset the payload, whatever it is
 		payload.ConferenceID.Set(vdb.ConferenceID)
 		payload.SpeakerID.Set(vdb.SpeakerID)
@@ -386,7 +387,7 @@ func (v *SessionSvc) PreUpdateFromPayloadHook(ctx context.Context, tx *db.Tx, vd
 	return nil
 }
 
-func (v *SessionSvc) ListFromPayload(tx *db.Tx, result *model.SessionList, payload *model.ListSessionsRequest) (err error) {
+func (v *SessionSvc) ListFromPayload(ctx context.Context, tx *sql.Tx, result *model.SessionList, payload *model.ListSessionsRequest) (err error) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("service.Session.ListFromPayload").BindError(&err)
 		defer g.End()
@@ -454,7 +455,7 @@ func (v *SessionSvc) ListFromPayload(tx *db.Tx, result *model.SessionList, paylo
 				return nil, errors.Wrap(err, "failed to populate model from database")
 			}
 
-			if err := v.Decorate(tx, &l[i], payload.TrustedCall, payload.Lang.String); err != nil {
+			if err := v.Decorate(ctx, tx, &l[i], payload.TrustedCall, payload.Lang.String); err != nil {
 				return nil, errors.Wrap(err, "failed to decorate session with associated data")
 			}
 		}
@@ -470,7 +471,7 @@ func (v *SessionSvc) ListFromPayload(tx *db.Tx, result *model.SessionList, paylo
 	return nil
 }
 
-func (v *SessionSvc) DeleteFromPayload(tx *db.Tx, payload *model.DeleteSessionRequest) (err error) {
+func (v *SessionSvc) DeleteFromPayload(ctx context.Context, tx *sql.Tx, payload *model.DeleteSessionRequest) (err error) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("service.Session.DeleteFromPayload %s", payload.ID).BindError(&err)
 		defer g.End()
@@ -478,7 +479,7 @@ func (v *SessionSvc) DeleteFromPayload(tx *db.Tx, payload *model.DeleteSessionRe
 
 	// First, we need to load the target session
 	var s model.Session
-	if err := v.Lookup(tx, &s, payload.ID); err != nil {
+	if err := v.Lookup(ctx, tx, &s, payload.ID); err != nil {
 		return errors.Wrap(err, "failed to lookup session")
 	}
 
@@ -492,7 +493,7 @@ func (v *SessionSvc) DeleteFromPayload(tx *db.Tx, payload *model.DeleteSessionRe
 		}
 		// The only user(s) that can delete an accepted session is an administrator.
 		su := User()
-		if err := su.IsConferenceAdministrator(tx, s.ConferenceID, payload.UserID); err != nil {
+		if err := su.IsConferenceAdministrator(ctx, tx, s.ConferenceID, payload.UserID); err != nil {
 			return errors.Wrap(err, "deleting accepted sessions require administrator privileges")
 		}
 	} else {
@@ -502,7 +503,7 @@ func (v *SessionSvc) DeleteFromPayload(tx *db.Tx, payload *model.DeleteSessionRe
 			}
 
 			su := User()
-			if err := su.IsConferenceAdministrator(tx, s.ConferenceID, payload.UserID); err != nil {
+			if err := su.IsConferenceAdministrator(ctx, tx, s.ConferenceID, payload.UserID); err != nil {
 				return errors.Wrap(err, "deleting sessions require operation from speaker or user with administrator privileges")
 			}
 		}
@@ -514,7 +515,7 @@ func (v *SessionSvc) DeleteFromPayload(tx *db.Tx, payload *model.DeleteSessionRe
 	return nil
 }
 
-func (v *SessionSvc) PostSocialServices(session *model.Session) (err error) {
+func (v *SessionSvc) PostSocialServices(ctx context.Context, session *model.Session) (err error) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("SessionSvc.PostSocialServices %s", session.ID).BindError(&err)
 		defer g.End()
@@ -524,11 +525,10 @@ func (v *SessionSvc) PostSocialServices(session *model.Session) (err error) {
 		return errors.New("skipped during testing")
 	}
 
-	tx, err := db.Begin()
+	tx, err := db.BeginTx(ctx, nil)
 	if err != nil {
 		return errors.Wrap(err, "failed to start database transaction")
 	}
-	defer tx.AutoRollback()
 
 	var conf model.Conference
 	if err := conf.Load(tx, session.ConferenceID); err != nil {
@@ -597,9 +597,9 @@ func formatSessionTweet(session *model.Session, conf *model.Conference, series *
 	), nil
 }
 
-func (v *SessionSvc) SendSelectionResultNotificationFromPayload(ctx context.Context, tx *db.Tx, payload *model.SendSelectionResultNotificationRequest) error {
+func (v *SessionSvc) SendSelectionResultNotificationFromPayload(ctx context.Context, tx *sql.Tx, payload *model.SendSelectionResultNotificationRequest) error {
 	var m model.Session
-	if err := v.Lookup(tx, &m, payload.SessionID); err != nil {
+	if err := v.Lookup(ctx, tx, &m, payload.SessionID); err != nil {
 		return errors.Wrap(err, "failed to load model.Session from database")
 	}
 
@@ -609,7 +609,7 @@ func (v *SessionSvc) SendSelectionResultNotificationFromPayload(ctx context.Cont
 	// flag is specified
 	if m.SelectionResultSent {
 		if payload.Force {
-			if err := su.IsAdministrator(tx, payload.UserID); err != nil {
+			if err := su.IsAdministrator(ctx, tx, payload.UserID); err != nil {
 				return errors.New("must be administrator to force send notification")
 			}
 		} else {
@@ -619,12 +619,12 @@ func (v *SessionSvc) SendSelectionResultNotificationFromPayload(ctx context.Cont
 
 	// Load the user
 	var u model.User
-	if err := su.Lookup(tx, &u, m.SpeakerID); err != nil {
+	if err := su.Lookup(ctx, tx, &u, m.SpeakerID); err != nil {
 		return errors.Wrap(err, "failed to load model.User from database")
 	}
 
 	// Now, based on the user's language, decorate the session
-	if err := v.Decorate(tx, &m, payload.TrustedCall, u.Lang); err != nil {
+	if err := v.Decorate(ctx, tx, &m, payload.TrustedCall, u.Lang); err != nil {
 		return errors.Wrap(err, "failed to declorate mode.Session")
 	}
 

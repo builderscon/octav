@@ -4,6 +4,7 @@ package service
 
 import (
 	"context"
+	"database/sql"
 	"sync"
 	"time"
 
@@ -21,6 +22,7 @@ var _ = context.Background
 var _ = errors.Wrap
 var _ = model.Client{}
 var _ = db.Client{}
+var _ = sql.ErrNoRows
 var _ = pdebug.Enabled
 
 var clientSvc ClientSvc
@@ -31,18 +33,18 @@ func Client() *ClientSvc {
 	return &clientSvc
 }
 
-func (v *ClientSvc) LookupFromPayload(tx *db.Tx, m *model.Client, payload *model.LookupClientRequest) (err error) {
+func (v *ClientSvc) LookupFromPayload(ctx context.Context, tx *sql.Tx, m *model.Client, payload *model.LookupClientRequest) (err error) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("service.Client.LookupFromPayload").BindError(&err)
 		defer g.End()
 	}
-	if err = v.Lookup(tx, m, payload.ID); err != nil {
+	if err = v.Lookup(ctx, tx, m, payload.ID); err != nil {
 		return errors.Wrap(err, "failed to load model.Client from database")
 	}
 	return nil
 }
 
-func (v *ClientSvc) Lookup(tx *db.Tx, m *model.Client, id string) (err error) {
+func (v *ClientSvc) Lookup(ctx context.Context, tx *sql.Tx, m *model.Client, id string) (err error) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("service.Client.Lookup").BindError(&err)
 		defer g.End()
@@ -72,7 +74,7 @@ func (v *ClientSvc) Lookup(tx *db.Tx, m *model.Client, id string) (err error) {
 	return nil
 }
 
-func (v *ClientSvc) Update(tx *db.Tx, vdb *db.Client) (err error) {
+func (v *ClientSvc) Update(tx *sql.Tx, vdb *db.Client) (err error) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("service.Client.Update (%s)", vdb.EID).BindError(&err)
 		defer g.End()
@@ -99,7 +101,7 @@ func (v *ClientSvc) Update(tx *db.Tx, vdb *db.Client) (err error) {
 	return nil
 }
 
-func (v *ClientSvc) Delete(tx *db.Tx, id string) error {
+func (v *ClientSvc) Delete(tx *sql.Tx, id string) error {
 	if pdebug.Enabled {
 		g := pdebug.Marker("Client.Delete (%s)", id)
 		defer g.End()

@@ -65,7 +65,7 @@ func init() {
 	})
 }
 
-func (b *BlogEntry) LoadByEID(tx *Tx, eid string) (err error) {
+func (b *BlogEntry) LoadByEID(tx *sql.Tx, eid string) (err error) {
 	if pdebug.Enabled {
 		g := pdebug.Marker(`BlogEntry.LoadByEID %s`, eid).BindError(&err)
 		defer g.End()
@@ -81,7 +81,7 @@ func (b *BlogEntry) LoadByEID(tx *Tx, eid string) (err error) {
 	return nil
 }
 
-func (b *BlogEntry) Create(tx *Tx, opts ...InsertOption) (err error) {
+func (b *BlogEntry) Create(tx *sql.Tx, opts ...InsertOption) (err error) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("db.BlogEntry.Create").BindError(&err)
 		defer g.End()
@@ -122,7 +122,7 @@ func (b *BlogEntry) Create(tx *Tx, opts ...InsertOption) (err error) {
 	return nil
 }
 
-func (b BlogEntry) Update(tx *Tx) (err error) {
+func (b BlogEntry) Update(tx *sql.Tx) (err error) {
 	if pdebug.Enabled {
 		g := pdebug.Marker(`BlogEntry.Update`).BindError(&err)
 		defer g.End()
@@ -152,7 +152,7 @@ func (b BlogEntry) Update(tx *Tx) (err error) {
 	return errors.New("either OID/EID must be filled")
 }
 
-func (b BlogEntry) Delete(tx *Tx) error {
+func (b BlogEntry) Delete(tx *sql.Tx) error {
 	if b.OID != 0 {
 		stmt, err := library.GetStmt("sqlBlogEntryDeleteByOIDKey")
 		if err != nil {
@@ -193,7 +193,7 @@ func (v *BlogEntryList) FromRows(rows *sql.Rows, capacity int) error {
 	return nil
 }
 
-func (v *BlogEntryList) LoadSinceEID(tx *Tx, since string, limit int) error {
+func (v *BlogEntryList) LoadSinceEID(tx *sql.Tx, since string, limit int) error {
 	var s int64
 	if id := since; id != "" {
 		vdb := BlogEntry{}
@@ -206,7 +206,7 @@ func (v *BlogEntryList) LoadSinceEID(tx *Tx, since string, limit int) error {
 	return v.LoadSince(tx, s, limit)
 }
 
-func (v *BlogEntryList) LoadSince(tx *Tx, since int64, limit int) error {
+func (v *BlogEntryList) LoadSince(tx *sql.Tx, since int64, limit int) error {
 	rows, err := tx.Query(`SELECT `+BlogEntryStdSelectColumns+` FROM `+BlogEntryTable+` WHERE blog_entries.oid > ? ORDER BY oid ASC LIMIT `+strconv.Itoa(limit), since)
 	if err != nil {
 		return err

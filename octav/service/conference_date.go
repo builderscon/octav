@@ -1,6 +1,9 @@
 package service
 
 import (
+	"context"
+	"database/sql"
+
 	"github.com/builderscon/octav/octav/db"
 	"github.com/builderscon/octav/octav/model"
 	"github.com/builderscon/octav/octav/tools"
@@ -19,9 +22,9 @@ func (v *ConferenceDateSvc) populateRowForCreate(vdb *db.ConferenceDate, payload
 	return nil
 }
 
-func (v *ConferenceDateSvc) CreateFromPayload(tx *db.Tx, payload *model.CreateConferenceDateRequest, result *model.ConferenceDate) error {
+func (v *ConferenceDateSvc) CreateFromPayload(ctx context.Context, tx *sql.Tx, payload *model.CreateConferenceDateRequest, result *model.ConferenceDate) error {
 	var vdb db.ConferenceDate
-	if err := v.Create(tx, &vdb, payload); err != nil {
+	if err := v.Create(ctx, tx, &vdb, payload); err != nil {
 		return errors.Wrap(err, "failed to insert into database")
 	}
 

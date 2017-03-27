@@ -1,6 +1,8 @@
 package service
 
 import (
+	"database/sql"
+
 	"github.com/builderscon/octav/octav/db"
 	"github.com/builderscon/octav/octav/model"
 	"github.com/builderscon/octav/octav/tools"
@@ -28,7 +30,7 @@ func (v *ConferenceComponentSvc) populateRowForUpdate(vdb *db.ConferenceComponen
 	return nil
 }
 
-func (v *ConferenceComponentSvc) DeleteByConferenceIDAndName(tx *db.Tx, conferenceID string, names ...string) error {
+func (v *ConferenceComponentSvc) DeleteByConferenceIDAndName(tx *sql.Tx, conferenceID string, names ...string) error {
 	if err := db.DeleteConferenceComponentsByIDAndName(tx, conferenceID, names...); err != nil {
 		return errors.Wrap(err, "failed to delete from database")
 	}
@@ -36,11 +38,10 @@ func (v *ConferenceComponentSvc) DeleteByConferenceIDAndName(tx *db.Tx, conferen
 	return nil
 }
 
-func (v *ConferenceComponentSvc) UpsertByConferenceIDAndName(tx *db.Tx, conferenceID string, values map[string]string) error {
+func (v *ConferenceComponentSvc) UpsertByConferenceIDAndName(tx *sql.Tx, conferenceID string, values map[string]string) error {
 	if err := db.UpsertConferenceComponentsByIDAndName(tx, conferenceID, values); err != nil {
 		return errors.Wrap(err, "failed to update/insert into database")
 	}
 
 	return nil
 }
-

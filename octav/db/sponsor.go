@@ -1,12 +1,13 @@
 package db
 
 import (
+	"database/sql"
 	"strconv"
 
 	"github.com/builderscon/octav/octav/tools"
 )
 
-func (v *SponsorList) LoadByConferenceSinceEID(tx *Tx, confID, since string, limit int) error {
+func (v *SponsorList) LoadByConferenceSinceEID(tx *sql.Tx, confID, since string, limit int) error {
 	var s int64
 	if id := since; id != "" {
 		vdb := Sponsor{}
@@ -19,7 +20,7 @@ func (v *SponsorList) LoadByConferenceSinceEID(tx *Tx, confID, since string, lim
 	return v.LoadByConferenceSince(tx, confID, s, limit)
 }
 
-func (v *SponsorList) LoadByConferenceSince(tx *Tx, confID string, since int64, limit int) error {
+func (v *SponsorList) LoadByConferenceSince(tx *sql.Tx, confID string, since int64, limit int) error {
 	stmt := tools.GetBuffer()
 	defer tools.ReleaseBuffer(stmt)
 
@@ -43,7 +44,7 @@ func (v *SponsorList) LoadByConferenceSince(tx *Tx, confID string, since int64, 
 	return nil
 }
 
-func LoadSponsors(tx *Tx, venues *SponsorList, cid string) error {
+func LoadSponsors(tx *sql.Tx, venues *SponsorList, cid string) error {
 	stmt := tools.GetBuffer()
 	defer tools.ReleaseBuffer(stmt)
 

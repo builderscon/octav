@@ -1,6 +1,8 @@
 package db
 
 import (
+	"database/sql"
+
 	"github.com/builderscon/octav/octav/tools"
 	"github.com/lestrrat/go-pdebug"
 	"github.com/pkg/errors"
@@ -37,7 +39,7 @@ func init() {
 	})
 }
 
-func (l *LocalizedString) LoadByLangKey(tx *Tx, language, name, parentType, parentID string) error {
+func (l *LocalizedString) LoadByLangKey(tx *sql.Tx, language, name, parentType, parentID string) error {
 	stmt, err := library.GetStmt("sqlLocalizedStringLoadByLangKeyKey")
 	if err != nil {
 		return errors.Wrap(err, "failed to get statement")
@@ -50,7 +52,7 @@ func (l *LocalizedString) LoadByLangKey(tx *Tx, language, name, parentType, pare
 	return nil
 }
 
-func (l *LocalizedString) Upsert(tx *Tx) (err error) {
+func (l *LocalizedString) Upsert(tx *sql.Tx) (err error) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("LocalizedString.Upsert (%s#%s)", l.Language, l.Name).BindError(&err)
 		defer g.End()
@@ -75,7 +77,7 @@ func (l *LocalizedString) Upsert(tx *Tx) (err error) {
 	return nil
 }
 
-func LoadLocalizedStringsForParent(tx *Tx, parentID, parentType string) (LocalizedStringList, error) {
+func LoadLocalizedStringsForParent(tx *sql.Tx, parentID, parentType string) (LocalizedStringList, error) {
 	stmt, err := library.GetStmt("sqlLocalizedStringLoadLocalizedStringsForParentKey")
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to get statement")
@@ -98,7 +100,7 @@ func LoadLocalizedStringsForParent(tx *Tx, parentID, parentType string) (Localiz
 	return ret, nil
 }
 
-func DeleteLocalizedStringsForParent(tx *Tx, parentID, parentType string) error {
+func DeleteLocalizedStringsForParent(tx *sql.Tx, parentID, parentType string) error {
 	stmt, err := library.GetStmt("sqlLocalizedStringDeleteLocalizedStringsForParentKey")
 	if err != nil {
 		return errors.Wrap(err, "failed to get statement")

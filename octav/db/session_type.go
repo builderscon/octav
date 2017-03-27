@@ -1,6 +1,7 @@
 package db
 
 import (
+	"database/sql"
 	"strconv"
 
 	"github.com/builderscon/octav/octav/tools"
@@ -8,7 +9,7 @@ import (
 	"github.com/pkg/errors"
 )
 
-func IsAcceptingSubmissions(tx *Tx, id string) error {
+func IsAcceptingSubmissions(tx *sql.Tx, id string) error {
 	stmt := tools.GetBuffer()
 	defer tools.ReleaseBuffer(stmt)
 
@@ -40,7 +41,7 @@ func IsAcceptingSubmissions(tx *Tx, id string) error {
 	return errors.New("currently not accepting submissions")
 }
 
-func (v *SessionTypeList) LoadByConferenceSinceEID(tx *Tx, confID, since string, limit int) error {
+func (v *SessionTypeList) LoadByConferenceSinceEID(tx *sql.Tx, confID, since string, limit int) error {
 	var s int64
 	if id := since; id != "" {
 		vdb := SessionType{}
@@ -53,7 +54,7 @@ func (v *SessionTypeList) LoadByConferenceSinceEID(tx *Tx, confID, since string,
 	return v.LoadByConferenceSince(tx, confID, s, limit)
 }
 
-func (v *SessionTypeList) LoadByConferenceSince(tx *Tx, confID string, since int64, limit int) error {
+func (v *SessionTypeList) LoadByConferenceSince(tx *sql.Tx, confID string, since int64, limit int) error {
 	stmt := tools.GetBuffer()
 	defer tools.ReleaseBuffer(stmt)
 
@@ -81,7 +82,7 @@ func (v *SessionTypeList) LoadByConferenceSince(tx *Tx, confID string, since int
 	return nil
 }
 
-func LoadSessionTypes(tx *Tx, list *SessionTypeList, cid string) error {
+func LoadSessionTypes(tx *sql.Tx, list *SessionTypeList, cid string) error {
 	stmt := tools.GetBuffer()
 	defer tools.ReleaseBuffer(stmt)
 

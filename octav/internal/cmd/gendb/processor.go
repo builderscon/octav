@@ -299,7 +299,7 @@ func (p *Processor) ProcessStruct(s Struct) error {
 	buf.WriteString("\n}")
 
 	if hasEID {
-		fmt.Fprintf(&buf, "\n\nfunc (%c *%s) LoadByEID(tx *Tx, eid string) (err error) {", varname, s.Name)
+		fmt.Fprintf(&buf, "\n\nfunc (%c *%s) LoadByEID(tx *sql.Tx, eid string) (err error) {", varname, s.Name)
 		buf.WriteString("\nif pdebug.Enabled {")
 		fmt.Fprintf(&buf, "\ng := pdebug.Marker(`%s.LoadByEID %%s`, eid).BindError(&err)", s.Name)
 		buf.WriteString("\ndefer g.End()")
@@ -314,7 +314,7 @@ func (p *Processor) ProcessStruct(s Struct) error {
 		buf.WriteString("\n}")
 	}
 
-	fmt.Fprintf(&buf, "\n\nfunc (%c *%s) Create(tx *Tx, opts ...InsertOption) (err error) {", varname, s.Name)
+	fmt.Fprintf(&buf, "\n\nfunc (%c *%s) Create(tx *sql.Tx, opts ...InsertOption) (err error) {", varname, s.Name)
 	buf.WriteString("\nif pdebug.Enabled {")
 	fmt.Fprintf(&buf, "\n"+`g := pdebug.Marker("db.%s.Create").BindError(&err)`, s.Name)
 	buf.WriteString("\ndefer g.End()")
@@ -358,7 +358,7 @@ func (p *Processor) ProcessStruct(s Struct) error {
 	buf.WriteString("\n}")
 
 	// This is very inefficient, but it's the best we can do for now
-	fmt.Fprintf(&buf, "\n\nfunc (%c %s) Update(tx *Tx) (err error) {", varname, s.Name)
+	fmt.Fprintf(&buf, "\n\nfunc (%c %s) Update(tx *sql.Tx) (err error) {", varname, s.Name)
 	buf.WriteString("\nif pdebug.Enabled {")
 	fmt.Fprintf(&buf, "\ng := pdebug.Marker(`%s.Update`).BindError(&err)", s.Name)
 	buf.WriteString("\ndefer g.End()")
@@ -391,7 +391,7 @@ func (p *Processor) ProcessStruct(s Struct) error {
 	}
 	buf.WriteString("\n}")
 
-	fmt.Fprintf(&buf, "\n\nfunc (%c %s) Delete(tx *Tx) error {", varname, s.Name)
+	fmt.Fprintf(&buf, "\n\nfunc (%c %s) Delete(tx *sql.Tx) error {", varname, s.Name)
 	fmt.Fprintf(&buf, "\nif %c.OID != 0 {", varname)
 	fmt.Fprintf(&buf, "\nstmt, err := library.GetStmt(%s)", strconv.Quote(s.sqlKeyName("DeleteByOID")))
 	buf.WriteString("\nif err != nil {\nreturn errors.Wrap(err, `failed to get statement`)\n}")
@@ -434,7 +434,7 @@ func (p *Processor) ProcessStruct(s Struct) error {
 	buf.WriteString("\n}")
 
 	if hasOID && hasEID {
-		fmt.Fprintf(&buf, "\n\nfunc (v *%sList) LoadSinceEID(tx *Tx, since string, limit int) error {", s.Name)
+		fmt.Fprintf(&buf, "\n\nfunc (v *%sList) LoadSinceEID(tx *sql.Tx, since string, limit int) error {", s.Name)
 		buf.WriteString("\nvar s int64")
 		buf.WriteString("\n" + `if id := since; id != "" {`)
 		fmt.Fprintf(&buf, "\nvdb := %s{}", s.Name)
@@ -446,7 +446,7 @@ func (p *Processor) ProcessStruct(s Struct) error {
 		buf.WriteString("\nreturn v.LoadSince(tx, s, limit)")
 		buf.WriteString("\n}\n")
 
-		fmt.Fprintf(&buf, "\n\nfunc (v *%sList) LoadSince(tx *Tx, since int64, limit int) error {", s.Name)
+		fmt.Fprintf(&buf, "\n\nfunc (v *%sList) LoadSince(tx *sql.Tx, since int64, limit int) error {", s.Name)
 		fmt.Fprintf(&buf, "\nrows, err := tx.Query(`SELECT ` + %sStdSelectColumns + ` FROM ` + %sTable + ` WHERE %s.oid > ? ORDER BY oid ASC LIMIT ` + strconv.Itoa(limit), since)", s.Name, s.Name, s.Tablename)
 		buf.WriteString("\nif err != nil {")
 		buf.WriteString("\nreturn err")

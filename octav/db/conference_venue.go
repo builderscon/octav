@@ -1,11 +1,13 @@
 package db
 
 import (
+	"database/sql"
+
 	"github.com/builderscon/octav/octav/tools"
 	pdebug "github.com/lestrrat/go-pdebug"
 )
 
-func DeleteConferenceVenue(tx *Tx, cid, vid string) error {
+func DeleteConferenceVenue(tx *sql.Tx, cid, vid string) error {
 	stmt := tools.GetBuffer()
 	defer tools.ReleaseBuffer(stmt)
 	stmt.WriteString(`DELETE FROM `)
@@ -16,7 +18,7 @@ func DeleteConferenceVenue(tx *Tx, cid, vid string) error {
 	return err
 }
 
-func LoadConferenceVenues(tx *Tx, venues *VenueList, cid string) (err error) {
+func LoadConferenceVenues(tx *sql.Tx, venues *VenueList, cid string) (err error) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("db.LoadConferenceVenues %s", cid).BindError(&err)
 		defer g.End()

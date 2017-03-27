@@ -4,6 +4,7 @@ package service
 
 import (
 	"context"
+	"database/sql"
 	"sync"
 	"time"
 
@@ -21,6 +22,7 @@ var _ = context.Background
 var _ = errors.Wrap
 var _ = model.Sponsor{}
 var _ = db.Sponsor{}
+var _ = sql.ErrNoRows
 var _ = pdebug.Enabled
 
 var sponsorSvc SponsorSvc
@@ -31,21 +33,21 @@ func Sponsor() *SponsorSvc {
 	return &sponsorSvc
 }
 
-func (v *SponsorSvc) LookupFromPayload(tx *db.Tx, m *model.Sponsor, payload *model.LookupSponsorRequest) (err error) {
+func (v *SponsorSvc) LookupFromPayload(ctx context.Context, tx *sql.Tx, m *model.Sponsor, payload *model.LookupSponsorRequest) (err error) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("service.Sponsor.LookupFromPayload").BindError(&err)
 		defer g.End()
 	}
-	if err = v.Lookup(tx, m, payload.ID); err != nil {
+	if err = v.Lookup(ctx, tx, m, payload.ID); err != nil {
 		return errors.Wrap(err, "failed to load model.Sponsor from database")
 	}
-	if err := v.Decorate(tx, m, payload.TrustedCall, payload.Lang.String); err != nil {
+	if err := v.Decorate(ctx, tx, m, payload.TrustedCall, payload.Lang.String); err != nil {
 		return errors.Wrap(err, "failed to load associated data for model.Sponsor from database")
 	}
 	return nil
 }
 
-func (v *SponsorSvc) Lookup(tx *db.Tx, m *model.Sponsor, id string) (err error) {
+func (v *SponsorSvc) Lookup(ctx context.Context, tx *sql.Tx, m *model.Sponsor, id string) (err error) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("service.Sponsor.Lookup").BindError(&err)
 		defer g.End()
@@ -78,7 +80,7 @@ func (v *SponsorSvc) Lookup(tx *db.Tx, m *model.Sponsor, id string) (err error) 
 // Create takes in the transaction, the incoming payload, and a reference to
 // a database row. The database row is initialized/populated so that the
 // caller can use it afterwards.
-func (v *SponsorSvc) Create(tx *db.Tx, vdb *db.Sponsor, payload *model.CreateSponsorRequest) (err error) {
+func (v *SponsorSvc) Create(ctx context.Context, tx *sql.Tx, vdb *db.Sponsor, payload *model.CreateSponsorRequest) (err error) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("service.Sponsor.Create").BindError(&err)
 		defer g.End()
@@ -98,7 +100,7 @@ func (v *SponsorSvc) Create(tx *db.Tx, vdb *db.Sponsor, payload *model.CreateSpo
 	return nil
 }
 
-func (v *SponsorSvc) Update(tx *db.Tx, vdb *db.Sponsor) (err error) {
+func (v *SponsorSvc) Update(tx *sql.Tx, vdb *db.Sponsor) (err error) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("service.Sponsor.Update (%s)", vdb.EID).BindError(&err)
 		defer g.End()
@@ -125,7 +127,7 @@ func (v *SponsorSvc) Update(tx *db.Tx, vdb *db.Sponsor) (err error) {
 	return nil
 }
 
-func (v *SponsorSvc) UpdateFromPayload(ctx context.Context, tx *db.Tx, payload *model.UpdateSponsorRequest) (err error) {
+func (v *SponsorSvc) UpdateFromPayload(ctx context.Context, tx *sql.Tx, payload *model.UpdateSponsorRequest) (err error) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("service.Sponsor.UpdateFromPayload (%s)", payload.ID).BindError(&err)
 		defer g.End()
@@ -150,7 +152,7 @@ func (v *SponsorSvc) UpdateFromPayload(ctx context.Context, tx *db.Tx, payload *
 	return nil
 }
 
-func (v *SponsorSvc) ReplaceL10NStrings(tx *db.Tx, m *model.Sponsor, lang string) error {
+func (v *SponsorSvc) ReplaceL10NStrings(tx *sql.Tx, m *model.Sponsor, lang string) error {
 	if pdebug.Enabled {
 		g := pdebug.Marker("service.Sponsor.ReplaceL10NStrings lang = %s", lang)
 		defer g.End()
@@ -216,7 +218,7 @@ func (v *SponsorSvc) ReplaceL10NStrings(tx *db.Tx, m *model.Sponsor, lang string
 	return nil
 }
 
-func (v *SponsorSvc) Delete(tx *db.Tx, id string) error {
+func (v *SponsorSvc) Delete(tx *sql.Tx, id string) error {
 	if pdebug.Enabled {
 		g := pdebug.Marker("Sponsor.Delete (%s)", id)
 		defer g.End()

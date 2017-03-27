@@ -41,7 +41,7 @@ func init() {
 	})
 }
 
-func (t *TemporaryEmail) Create(tx *Tx, opts ...InsertOption) (err error) {
+func (t *TemporaryEmail) Create(tx *sql.Tx, opts ...InsertOption) (err error) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("db.TemporaryEmail.Create").BindError(&err)
 		defer g.End()
@@ -77,7 +77,7 @@ func (t *TemporaryEmail) Create(tx *Tx, opts ...InsertOption) (err error) {
 	return nil
 }
 
-func (t TemporaryEmail) Update(tx *Tx) (err error) {
+func (t TemporaryEmail) Update(tx *sql.Tx) (err error) {
 	if pdebug.Enabled {
 		g := pdebug.Marker(`TemporaryEmail.Update`).BindError(&err)
 		defer g.End()
@@ -96,7 +96,7 @@ func (t TemporaryEmail) Update(tx *Tx) (err error) {
 	return errors.New("OID must be filled")
 }
 
-func (t TemporaryEmail) Delete(tx *Tx) error {
+func (t TemporaryEmail) Delete(tx *sql.Tx) error {
 	if t.OID != 0 {
 		stmt, err := library.GetStmt("sqlTemporaryEmailDeleteByOIDKey")
 		if err != nil {

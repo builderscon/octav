@@ -65,7 +65,7 @@ func init() {
 	})
 }
 
-func (c *ConferenceSeries) LoadByEID(tx *Tx, eid string) (err error) {
+func (c *ConferenceSeries) LoadByEID(tx *sql.Tx, eid string) (err error) {
 	if pdebug.Enabled {
 		g := pdebug.Marker(`ConferenceSeries.LoadByEID %s`, eid).BindError(&err)
 		defer g.End()
@@ -81,7 +81,7 @@ func (c *ConferenceSeries) LoadByEID(tx *Tx, eid string) (err error) {
 	return nil
 }
 
-func (c *ConferenceSeries) Create(tx *Tx, opts ...InsertOption) (err error) {
+func (c *ConferenceSeries) Create(tx *sql.Tx, opts ...InsertOption) (err error) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("db.ConferenceSeries.Create").BindError(&err)
 		defer g.End()
@@ -122,7 +122,7 @@ func (c *ConferenceSeries) Create(tx *Tx, opts ...InsertOption) (err error) {
 	return nil
 }
 
-func (c ConferenceSeries) Update(tx *Tx) (err error) {
+func (c ConferenceSeries) Update(tx *sql.Tx) (err error) {
 	if pdebug.Enabled {
 		g := pdebug.Marker(`ConferenceSeries.Update`).BindError(&err)
 		defer g.End()
@@ -152,7 +152,7 @@ func (c ConferenceSeries) Update(tx *Tx) (err error) {
 	return errors.New("either OID/EID must be filled")
 }
 
-func (c ConferenceSeries) Delete(tx *Tx) error {
+func (c ConferenceSeries) Delete(tx *sql.Tx) error {
 	if c.OID != 0 {
 		stmt, err := library.GetStmt("sqlConferenceSeriesDeleteByOIDKey")
 		if err != nil {
@@ -193,7 +193,7 @@ func (v *ConferenceSeriesList) FromRows(rows *sql.Rows, capacity int) error {
 	return nil
 }
 
-func (v *ConferenceSeriesList) LoadSinceEID(tx *Tx, since string, limit int) error {
+func (v *ConferenceSeriesList) LoadSinceEID(tx *sql.Tx, since string, limit int) error {
 	var s int64
 	if id := since; id != "" {
 		vdb := ConferenceSeries{}
@@ -206,7 +206,7 @@ func (v *ConferenceSeriesList) LoadSinceEID(tx *Tx, since string, limit int) err
 	return v.LoadSince(tx, s, limit)
 }
 
-func (v *ConferenceSeriesList) LoadSince(tx *Tx, since int64, limit int) error {
+func (v *ConferenceSeriesList) LoadSince(tx *sql.Tx, since int64, limit int) error {
 	rows, err := tx.Query(`SELECT `+ConferenceSeriesStdSelectColumns+` FROM `+ConferenceSeriesTable+` WHERE conference_series.oid > ? ORDER BY oid ASC LIMIT `+strconv.Itoa(limit), since)
 	if err != nil {
 		return err

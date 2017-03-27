@@ -1,13 +1,14 @@
 package db
 
 import (
+	"database/sql"
 	"time"
 
 	"github.com/builderscon/octav/octav/tools"
 	"github.com/pkg/errors"
 )
 
-func DeleteConferenceComponentsByIDAndName(tx *Tx, conferenceID string, names ...string) error {
+func DeleteConferenceComponentsByIDAndName(tx *sql.Tx, conferenceID string, names ...string) error {
 	stmt := tools.GetBuffer()
 	defer tools.ReleaseBuffer(stmt)
 
@@ -39,7 +40,7 @@ func DeleteConferenceComponentsByIDAndName(tx *Tx, conferenceID string, names ..
 	return nil
 }
 
-func UpsertConferenceComponentsByIDAndName(tx *Tx, conferenceID string, values map[string]string) error {
+func UpsertConferenceComponentsByIDAndName(tx *sql.Tx, conferenceID string, values map[string]string) error {
 	stmt := tools.GetBuffer()
 	defer tools.ReleaseBuffer(stmt)
 
@@ -72,7 +73,7 @@ func UpsertConferenceComponentsByIDAndName(tx *Tx, conferenceID string, values m
 	return nil
 }
 
-func (ccl *ConferenceComponentList) LoadByConferenceID(tx *Tx, cid string) error {
+func (ccl *ConferenceComponentList) LoadByConferenceID(tx *sql.Tx, cid string) error {
 	stmt := tools.GetBuffer()
 	defer tools.ReleaseBuffer(stmt)
 

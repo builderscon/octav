@@ -1,6 +1,7 @@
 package db
 
 import (
+	"database/sql"
 	"strconv"
 
 	"github.com/builderscon/octav/octav/tools"
@@ -24,7 +25,7 @@ func init() {
 	})
 }
 
-func (v *FeaturedSpeakerList) LoadByConferenceSinceEID(tx *Tx, confID, since string, limit int) error {
+func (v *FeaturedSpeakerList) LoadByConferenceSinceEID(tx *sql.Tx, confID, since string, limit int) error {
 	var s int64
 	if id := since; id != "" {
 		var vdb FeaturedSpeaker
@@ -37,7 +38,7 @@ func (v *FeaturedSpeakerList) LoadByConferenceSinceEID(tx *Tx, confID, since str
 	return v.LoadSince(tx, s, limit)
 }
 
-func (v *FeaturedSpeakerList) LoadByConferenceSince(tx *Tx, confID string, since int64, limit int) error {
+func (v *FeaturedSpeakerList) LoadByConferenceSince(tx *sql.Tx, confID string, since int64, limit int) error {
 	rows, err := tx.Query(`SELECT `+FeaturedSpeakerStdSelectColumns+` FROM `+FeaturedSpeakerTable+` WHERE conference_id = ? AND featured_speakers.oid > ? ORDER BY oid ASC LIMIT `+strconv.Itoa(limit), confID, since)
 	if err != nil {
 		return err
@@ -49,7 +50,7 @@ func (v *FeaturedSpeakerList) LoadByConferenceSince(tx *Tx, confID string, since
 	return nil
 }
 
-func LoadFeaturedSpeakers(tx *Tx, venues *FeaturedSpeakerList, cid string) error {
+func LoadFeaturedSpeakers(tx *sql.Tx, venues *FeaturedSpeakerList, cid string) error {
 	stmt, err := library.GetStmt("sqlFeaturedSpeakerLoadFeaturedSpeakersKey")
 	if err != nil {
 		return errors.Wrap(err, "failed to get statement")

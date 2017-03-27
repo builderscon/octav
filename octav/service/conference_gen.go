@@ -4,6 +4,7 @@ package service
 
 import (
 	"context"
+	"database/sql"
 	"sync"
 	"time"
 
@@ -21,6 +22,7 @@ var _ = context.Background
 var _ = errors.Wrap
 var _ = model.Conference{}
 var _ = db.Conference{}
+var _ = sql.ErrNoRows
 var _ = pdebug.Enabled
 
 var conferenceSvc ConferenceSvc
@@ -31,21 +33,21 @@ func Conference() *ConferenceSvc {
 	return &conferenceSvc
 }
 
-func (v *ConferenceSvc) LookupFromPayload(tx *db.Tx, m *model.Conference, payload *model.LookupConferenceRequest) (err error) {
+func (v *ConferenceSvc) LookupFromPayload(ctx context.Context, tx *sql.Tx, m *model.Conference, payload *model.LookupConferenceRequest) (err error) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("service.Conference.LookupFromPayload").BindError(&err)
 		defer g.End()
 	}
-	if err = v.Lookup(tx, m, payload.ID); err != nil {
+	if err = v.Lookup(ctx, tx, m, payload.ID); err != nil {
 		return errors.Wrap(err, "failed to load model.Conference from database")
 	}
-	if err := v.Decorate(tx, m, payload.TrustedCall, payload.Lang.String); err != nil {
+	if err := v.Decorate(ctx, tx, m, payload.TrustedCall, payload.Lang.String); err != nil {
 		return errors.Wrap(err, "failed to load associated data for model.Conference from database")
 	}
 	return nil
 }
 
-func (v *ConferenceSvc) Lookup(tx *db.Tx, m *model.Conference, id string) (err error) {
+func (v *ConferenceSvc) Lookup(ctx context.Context, tx *sql.Tx, m *model.Conference, id string) (err error) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("service.Conference.Lookup").BindError(&err)
 		defer g.End()
@@ -78,7 +80,7 @@ func (v *ConferenceSvc) Lookup(tx *db.Tx, m *model.Conference, id string) (err e
 // Create takes in the transaction, the incoming payload, and a reference to
 // a database row. The database row is initialized/populated so that the
 // caller can use it afterwards.
-func (v *ConferenceSvc) Create(tx *db.Tx, vdb *db.Conference, payload *model.CreateConferenceRequest) (err error) {
+func (v *ConferenceSvc) Create(ctx context.Context, tx *sql.Tx, vdb *db.Conference, payload *model.CreateConferenceRequest) (err error) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("service.Conference.Create").BindError(&err)
 		defer g.End()
@@ -98,7 +100,7 @@ func (v *ConferenceSvc) Create(tx *db.Tx, vdb *db.Conference, payload *model.Cre
 	return nil
 }
 
-func (v *ConferenceSvc) Update(tx *db.Tx, vdb *db.Conference) (err error) {
+func (v *ConferenceSvc) Update(tx *sql.Tx, vdb *db.Conference) (err error) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("service.Conference.Update (%s)", vdb.EID).BindError(&err)
 		defer g.End()
@@ -125,7 +127,7 @@ func (v *ConferenceSvc) Update(tx *db.Tx, vdb *db.Conference) (err error) {
 	return nil
 }
 
-func (v *ConferenceSvc) ReplaceL10NStrings(tx *db.Tx, m *model.Conference, lang string) error {
+func (v *ConferenceSvc) ReplaceL10NStrings(tx *sql.Tx, m *model.Conference, lang string) error {
 	if pdebug.Enabled {
 		g := pdebug.Marker("service.Conference.ReplaceL10NStrings lang = %s", lang)
 		defer g.End()
@@ -263,7 +265,7 @@ func (v *ConferenceSvc) ReplaceL10NStrings(tx *db.Tx, m *model.Conference, lang 
 	return nil
 }
 
-func (v *ConferenceSvc) Delete(tx *db.Tx, id string) error {
+func (v *ConferenceSvc) Delete(tx *sql.Tx, id string) error {
 	if pdebug.Enabled {
 		g := pdebug.Marker("Conference.Delete (%s)", id)
 		defer g.End()

@@ -4,6 +4,7 @@ package service
 
 import (
 	"context"
+	"database/sql"
 	"sync"
 	"time"
 
@@ -21,6 +22,7 @@ var _ = context.Background
 var _ = errors.Wrap
 var _ = model.User{}
 var _ = db.User{}
+var _ = sql.ErrNoRows
 var _ = pdebug.Enabled
 
 var userSvc UserSvc
@@ -31,21 +33,21 @@ func User() *UserSvc {
 	return &userSvc
 }
 
-func (v *UserSvc) LookupFromPayload(tx *db.Tx, m *model.User, payload *model.LookupUserRequest) (err error) {
+func (v *UserSvc) LookupFromPayload(ctx context.Context, tx *sql.Tx, m *model.User, payload *model.LookupUserRequest) (err error) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("service.User.LookupFromPayload").BindError(&err)
 		defer g.End()
 	}
-	if err = v.Lookup(tx, m, payload.ID); err != nil {
+	if err = v.Lookup(ctx, tx, m, payload.ID); err != nil {
 		return errors.Wrap(err, "failed to load model.User from database")
 	}
-	if err := v.Decorate(tx, m, payload.TrustedCall, payload.Lang.String); err != nil {
+	if err := v.Decorate(ctx, tx, m, payload.TrustedCall, payload.Lang.String); err != nil {
 		return errors.Wrap(err, "failed to load associated data for model.User from database")
 	}
 	return nil
 }
 
-func (v *UserSvc) Lookup(tx *db.Tx, m *model.User, id string) (err error) {
+func (v *UserSvc) Lookup(ctx context.Context, tx *sql.Tx, m *model.User, id string) (err error) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("service.User.Lookup").BindError(&err)
 		defer g.End()
@@ -71,7 +73,7 @@ func (v *UserSvc) Lookup(tx *db.Tx, m *model.User, id string) (err error) {
 		}
 		pdebug.Printf(`CACHE %s: %s`, cacheSt, key)
 	}
-	if err = v.PostLookupFromPayloadHook(tx, &r); err != nil {
+	if err = v.PostLookupFromPayloadHook(ctx, tx, &r); err != nil {
 		return errors.Wrap(err, "failed to execute PostLookupFromPayloadHook")
 	}
 	*m = r
@@ -81,7 +83,7 @@ func (v *UserSvc) Lookup(tx *db.Tx, m *model.User, id string) (err error) {
 // Create takes in the transaction, the incoming payload, and a reference to
 // a database row. The database row is initialized/populated so that the
 // caller can use it afterwards.
-func (v *UserSvc) Create(tx *db.Tx, vdb *db.User, payload *model.CreateUserRequest) (err error) {
+func (v *UserSvc) Create(ctx context.Context, tx *sql.Tx, vdb *db.User, payload *model.CreateUserRequest) (err error) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("service.User.Create").BindError(&err)
 		defer g.End()
@@ -101,7 +103,7 @@ func (v *UserSvc) Create(tx *db.Tx, vdb *db.User, payload *model.CreateUserReque
 	return nil
 }
 
-func (v *UserSvc) Update(tx *db.Tx, vdb *db.User) (err error) {
+func (v *UserSvc) Update(tx *sql.Tx, vdb *db.User) (err error) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("service.User.Update (%s)", vdb.EID).BindError(&err)
 		defer g.End()
@@ -128,7 +130,7 @@ func (v *UserSvc) Update(tx *db.Tx, vdb *db.User) (err error) {
 	return nil
 }
 
-func (v *UserSvc) UpdateFromPayload(ctx context.Context, tx *db.Tx, payload *model.UpdateUserRequest) (err error) {
+func (v *UserSvc) UpdateFromPayload(ctx context.Context, tx *sql.Tx, payload *model.UpdateUserRequest) (err error) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("service.User.UpdateFromPayload (%s)", payload.ID).BindError(&err)
 		defer g.End()
@@ -157,7 +159,7 @@ func (v *UserSvc) UpdateFromPayload(ctx context.Context, tx *db.Tx, payload *mod
 	return nil
 }
 
-func (v *UserSvc) ReplaceL10NStrings(tx *db.Tx, m *model.User, lang string) error {
+func (v *UserSvc) ReplaceL10NStrings(tx *sql.Tx, m *model.User, lang string) error {
 	if pdebug.Enabled {
 		g := pdebug.Marker("service.User.ReplaceL10NStrings lang = %s", lang)
 		defer g.End()
@@ -235,7 +237,7 @@ func (v *UserSvc) ReplaceL10NStrings(tx *db.Tx, m *model.User, lang string) erro
 	return nil
 }
 
-func (v *UserSvc) Delete(tx *db.Tx, id string) error {
+func (v *UserSvc) Delete(tx *sql.Tx, id string) error {
 	if pdebug.Enabled {
 		g := pdebug.Marker("User.Delete (%s)", id)
 		defer g.End()

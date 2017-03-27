@@ -41,7 +41,7 @@ func init() {
 	})
 }
 
-func (l *LocalizedString) Create(tx *Tx, opts ...InsertOption) (err error) {
+func (l *LocalizedString) Create(tx *sql.Tx, opts ...InsertOption) (err error) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("db.LocalizedString.Create").BindError(&err)
 		defer g.End()
@@ -77,7 +77,7 @@ func (l *LocalizedString) Create(tx *Tx, opts ...InsertOption) (err error) {
 	return nil
 }
 
-func (l LocalizedString) Update(tx *Tx) (err error) {
+func (l LocalizedString) Update(tx *sql.Tx) (err error) {
 	if pdebug.Enabled {
 		g := pdebug.Marker(`LocalizedString.Update`).BindError(&err)
 		defer g.End()
@@ -96,7 +96,7 @@ func (l LocalizedString) Update(tx *Tx) (err error) {
 	return errors.New("OID must be filled")
 }
 
-func (l LocalizedString) Delete(tx *Tx) error {
+func (l LocalizedString) Delete(tx *sql.Tx) error {
 	if l.OID != 0 {
 		stmt, err := library.GetStmt("sqlLocalizedStringDeleteByOIDKey")
 		if err != nil {

@@ -4,6 +4,7 @@ package service
 
 import (
 	"context"
+	"database/sql"
 	"sync"
 	"time"
 
@@ -21,6 +22,7 @@ var _ = context.Background
 var _ = errors.Wrap
 var _ = model.FeaturedSpeaker{}
 var _ = db.FeaturedSpeaker{}
+var _ = sql.ErrNoRows
 var _ = pdebug.Enabled
 
 var featuredSpeakerSvc FeaturedSpeakerSvc
@@ -31,21 +33,21 @@ func FeaturedSpeaker() *FeaturedSpeakerSvc {
 	return &featuredSpeakerSvc
 }
 
-func (v *FeaturedSpeakerSvc) LookupFromPayload(tx *db.Tx, m *model.FeaturedSpeaker, payload *model.LookupFeaturedSpeakerRequest) (err error) {
+func (v *FeaturedSpeakerSvc) LookupFromPayload(ctx context.Context, tx *sql.Tx, m *model.FeaturedSpeaker, payload *model.LookupFeaturedSpeakerRequest) (err error) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("service.FeaturedSpeaker.LookupFromPayload").BindError(&err)
 		defer g.End()
 	}
-	if err = v.Lookup(tx, m, payload.ID); err != nil {
+	if err = v.Lookup(ctx, tx, m, payload.ID); err != nil {
 		return errors.Wrap(err, "failed to load model.FeaturedSpeaker from database")
 	}
-	if err := v.Decorate(tx, m, payload.TrustedCall, payload.Lang.String); err != nil {
+	if err := v.Decorate(ctx, tx, m, payload.TrustedCall, payload.Lang.String); err != nil {
 		return errors.Wrap(err, "failed to load associated data for model.FeaturedSpeaker from database")
 	}
 	return nil
 }
 
-func (v *FeaturedSpeakerSvc) Lookup(tx *db.Tx, m *model.FeaturedSpeaker, id string) (err error) {
+func (v *FeaturedSpeakerSvc) Lookup(ctx context.Context, tx *sql.Tx, m *model.FeaturedSpeaker, id string) (err error) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("service.FeaturedSpeaker.Lookup").BindError(&err)
 		defer g.End()
@@ -78,7 +80,7 @@ func (v *FeaturedSpeakerSvc) Lookup(tx *db.Tx, m *model.FeaturedSpeaker, id stri
 // Create takes in the transaction, the incoming payload, and a reference to
 // a database row. The database row is initialized/populated so that the
 // caller can use it afterwards.
-func (v *FeaturedSpeakerSvc) Create(tx *db.Tx, vdb *db.FeaturedSpeaker, payload *model.CreateFeaturedSpeakerRequest) (err error) {
+func (v *FeaturedSpeakerSvc) Create(ctx context.Context, tx *sql.Tx, vdb *db.FeaturedSpeaker, payload *model.CreateFeaturedSpeakerRequest) (err error) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("service.FeaturedSpeaker.Create").BindError(&err)
 		defer g.End()
@@ -98,7 +100,7 @@ func (v *FeaturedSpeakerSvc) Create(tx *db.Tx, vdb *db.FeaturedSpeaker, payload 
 	return nil
 }
 
-func (v *FeaturedSpeakerSvc) Update(tx *db.Tx, vdb *db.FeaturedSpeaker) (err error) {
+func (v *FeaturedSpeakerSvc) Update(tx *sql.Tx, vdb *db.FeaturedSpeaker) (err error) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("service.FeaturedSpeaker.Update (%s)", vdb.EID).BindError(&err)
 		defer g.End()
@@ -125,7 +127,7 @@ func (v *FeaturedSpeakerSvc) Update(tx *db.Tx, vdb *db.FeaturedSpeaker) (err err
 	return nil
 }
 
-func (v *FeaturedSpeakerSvc) UpdateFromPayload(ctx context.Context, tx *db.Tx, payload *model.UpdateFeaturedSpeakerRequest) (err error) {
+func (v *FeaturedSpeakerSvc) UpdateFromPayload(ctx context.Context, tx *sql.Tx, payload *model.UpdateFeaturedSpeakerRequest) (err error) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("service.FeaturedSpeaker.UpdateFromPayload (%s)", payload.ID).BindError(&err)
 		defer g.End()
@@ -154,7 +156,7 @@ func (v *FeaturedSpeakerSvc) UpdateFromPayload(ctx context.Context, tx *db.Tx, p
 	return nil
 }
 
-func (v *FeaturedSpeakerSvc) ReplaceL10NStrings(tx *db.Tx, m *model.FeaturedSpeaker, lang string) error {
+func (v *FeaturedSpeakerSvc) ReplaceL10NStrings(tx *sql.Tx, m *model.FeaturedSpeaker, lang string) error {
 	if pdebug.Enabled {
 		g := pdebug.Marker("service.FeaturedSpeaker.ReplaceL10NStrings lang = %s", lang)
 		defer g.End()
@@ -232,7 +234,7 @@ func (v *FeaturedSpeakerSvc) ReplaceL10NStrings(tx *db.Tx, m *model.FeaturedSpea
 	return nil
 }
 
-func (v *FeaturedSpeakerSvc) Delete(tx *db.Tx, id string) error {
+func (v *FeaturedSpeakerSvc) Delete(tx *sql.Tx, id string) error {
 	if pdebug.Enabled {
 		g := pdebug.Marker("FeaturedSpeaker.Delete (%s)", id)
 		defer g.End()

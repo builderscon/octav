@@ -4,6 +4,7 @@ package service
 
 import (
 	"context"
+	"database/sql"
 	"sync"
 	"time"
 
@@ -21,6 +22,7 @@ var _ = context.Background
 var _ = errors.Wrap
 var _ = model.Room{}
 var _ = db.Room{}
+var _ = sql.ErrNoRows
 var _ = pdebug.Enabled
 
 var roomSvc RoomSvc
@@ -31,21 +33,21 @@ func Room() *RoomSvc {
 	return &roomSvc
 }
 
-func (v *RoomSvc) LookupFromPayload(tx *db.Tx, m *model.Room, payload *model.LookupRoomRequest) (err error) {
+func (v *RoomSvc) LookupFromPayload(ctx context.Context, tx *sql.Tx, m *model.Room, payload *model.LookupRoomRequest) (err error) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("service.Room.LookupFromPayload").BindError(&err)
 		defer g.End()
 	}
-	if err = v.Lookup(tx, m, payload.ID); err != nil {
+	if err = v.Lookup(ctx, tx, m, payload.ID); err != nil {
 		return errors.Wrap(err, "failed to load model.Room from database")
 	}
-	if err := v.Decorate(tx, m, payload.TrustedCall, payload.Lang.String); err != nil {
+	if err := v.Decorate(ctx, tx, m, payload.TrustedCall, payload.Lang.String); err != nil {
 		return errors.Wrap(err, "failed to load associated data for model.Room from database")
 	}
 	return nil
 }
 
-func (v *RoomSvc) Lookup(tx *db.Tx, m *model.Room, id string) (err error) {
+func (v *RoomSvc) Lookup(ctx context.Context, tx *sql.Tx, m *model.Room, id string) (err error) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("service.Room.Lookup").BindError(&err)
 		defer g.End()
@@ -78,7 +80,7 @@ func (v *RoomSvc) Lookup(tx *db.Tx, m *model.Room, id string) (err error) {
 // Create takes in the transaction, the incoming payload, and a reference to
 // a database row. The database row is initialized/populated so that the
 // caller can use it afterwards.
-func (v *RoomSvc) Create(tx *db.Tx, vdb *db.Room, payload *model.CreateRoomRequest) (err error) {
+func (v *RoomSvc) Create(ctx context.Context, tx *sql.Tx, vdb *db.Room, payload *model.CreateRoomRequest) (err error) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("service.Room.Create").BindError(&err)
 		defer g.End()
@@ -95,13 +97,13 @@ func (v *RoomSvc) Create(tx *db.Tx, vdb *db.Room, payload *model.CreateRoomReque
 	if err := payload.LocalizedFields.CreateLocalizedStrings(tx, "Room", vdb.EID); err != nil {
 		return errors.Wrap(err, `failed to populate localized strings`)
 	}
-	if err := v.PostCreateHook(tx, vdb); err != nil {
+	if err := v.PostCreateHook(ctx, tx, vdb); err != nil {
 		return errors.Wrap(err, `post create hook failed`)
 	}
 	return nil
 }
 
-func (v *RoomSvc) Update(tx *db.Tx, vdb *db.Room) (err error) {
+func (v *RoomSvc) Update(tx *sql.Tx, vdb *db.Room) (err error) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("service.Room.Update (%s)", vdb.EID).BindError(&err)
 		defer g.End()
@@ -131,7 +133,7 @@ func (v *RoomSvc) Update(tx *db.Tx, vdb *db.Room) (err error) {
 	return nil
 }
 
-func (v *RoomSvc) UpdateFromPayload(ctx context.Context, tx *db.Tx, payload *model.UpdateRoomRequest) (err error) {
+func (v *RoomSvc) UpdateFromPayload(ctx context.Context, tx *sql.Tx, payload *model.UpdateRoomRequest) (err error) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("service.Room.UpdateFromPayload (%s)", payload.ID).BindError(&err)
 		defer g.End()
@@ -160,7 +162,7 @@ func (v *RoomSvc) UpdateFromPayload(ctx context.Context, tx *db.Tx, payload *mod
 	return nil
 }
 
-func (v *RoomSvc) ReplaceL10NStrings(tx *db.Tx, m *model.Room, lang string) error {
+func (v *RoomSvc) ReplaceL10NStrings(tx *sql.Tx, m *model.Room, lang string) error {
 	if pdebug.Enabled {
 		g := pdebug.Marker("service.Room.ReplaceL10NStrings lang = %s", lang)
 		defer g.End()
@@ -226,7 +228,7 @@ func (v *RoomSvc) ReplaceL10NStrings(tx *db.Tx, m *model.Room, lang string) erro
 	return nil
 }
 
-func (v *RoomSvc) Delete(tx *db.Tx, id string) error {
+func (v *RoomSvc) Delete(tx *sql.Tx, id string) error {
 	if pdebug.Enabled {
 		g := pdebug.Marker("Room.Delete (%s)", id)
 		defer g.End()

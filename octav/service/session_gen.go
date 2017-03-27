@@ -4,6 +4,7 @@ package service
 
 import (
 	"context"
+	"database/sql"
 	"sync"
 	"time"
 
@@ -21,6 +22,7 @@ var _ = context.Background
 var _ = errors.Wrap
 var _ = model.Session{}
 var _ = db.Session{}
+var _ = sql.ErrNoRows
 var _ = pdebug.Enabled
 
 var sessionSvc SessionSvc
@@ -31,21 +33,21 @@ func Session() *SessionSvc {
 	return &sessionSvc
 }
 
-func (v *SessionSvc) LookupFromPayload(tx *db.Tx, m *model.Session, payload *model.LookupSessionRequest) (err error) {
+func (v *SessionSvc) LookupFromPayload(ctx context.Context, tx *sql.Tx, m *model.Session, payload *model.LookupSessionRequest) (err error) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("service.Session.LookupFromPayload").BindError(&err)
 		defer g.End()
 	}
-	if err = v.Lookup(tx, m, payload.ID); err != nil {
+	if err = v.Lookup(ctx, tx, m, payload.ID); err != nil {
 		return errors.Wrap(err, "failed to load model.Session from database")
 	}
-	if err := v.Decorate(tx, m, payload.TrustedCall, payload.Lang.String); err != nil {
+	if err := v.Decorate(ctx, tx, m, payload.TrustedCall, payload.Lang.String); err != nil {
 		return errors.Wrap(err, "failed to load associated data for model.Session from database")
 	}
 	return nil
 }
 
-func (v *SessionSvc) Lookup(tx *db.Tx, m *model.Session, id string) (err error) {
+func (v *SessionSvc) Lookup(ctx context.Context, tx *sql.Tx, m *model.Session, id string) (err error) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("service.Session.Lookup").BindError(&err)
 		defer g.End()
@@ -78,7 +80,7 @@ func (v *SessionSvc) Lookup(tx *db.Tx, m *model.Session, id string) (err error) 
 // Create takes in the transaction, the incoming payload, and a reference to
 // a database row. The database row is initialized/populated so that the
 // caller can use it afterwards.
-func (v *SessionSvc) Create(tx *db.Tx, vdb *db.Session, payload *model.CreateSessionRequest) (err error) {
+func (v *SessionSvc) Create(ctx context.Context, tx *sql.Tx, vdb *db.Session, payload *model.CreateSessionRequest) (err error) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("service.Session.Create").BindError(&err)
 		defer g.End()
@@ -98,7 +100,7 @@ func (v *SessionSvc) Create(tx *db.Tx, vdb *db.Session, payload *model.CreateSes
 	return nil
 }
 
-func (v *SessionSvc) Update(tx *db.Tx, vdb *db.Session) (err error) {
+func (v *SessionSvc) Update(tx *sql.Tx, vdb *db.Session) (err error) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("service.Session.Update (%s)", vdb.EID).BindError(&err)
 		defer g.End()
@@ -125,7 +127,7 @@ func (v *SessionSvc) Update(tx *db.Tx, vdb *db.Session) (err error) {
 	return nil
 }
 
-func (v *SessionSvc) UpdateFromPayload(ctx context.Context, tx *db.Tx, payload *model.UpdateSessionRequest) (err error) {
+func (v *SessionSvc) UpdateFromPayload(ctx context.Context, tx *sql.Tx, payload *model.UpdateSessionRequest) (err error) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("service.Session.UpdateFromPayload (%s)", payload.ID).BindError(&err)
 		defer g.End()
@@ -154,7 +156,7 @@ func (v *SessionSvc) UpdateFromPayload(ctx context.Context, tx *db.Tx, payload *
 	return nil
 }
 
-func (v *SessionSvc) ReplaceL10NStrings(tx *db.Tx, m *model.Session, lang string) error {
+func (v *SessionSvc) ReplaceL10NStrings(tx *sql.Tx, m *model.Session, lang string) error {
 	if pdebug.Enabled {
 		g := pdebug.Marker("service.Session.ReplaceL10NStrings lang = %s", lang)
 		defer g.End()
@@ -232,7 +234,7 @@ func (v *SessionSvc) ReplaceL10NStrings(tx *db.Tx, m *model.Session, lang string
 	return nil
 }
 
-func (v *SessionSvc) Delete(tx *db.Tx, id string) error {
+func (v *SessionSvc) Delete(tx *sql.Tx, id string) error {
 	if pdebug.Enabled {
 		g := pdebug.Marker("Session.Delete (%s)", id)
 		defer g.End()

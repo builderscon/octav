@@ -64,7 +64,7 @@ func init() {
 	})
 }
 
-func (e *ExternalResource) LoadByEID(tx *Tx, eid string) (err error) {
+func (e *ExternalResource) LoadByEID(tx *sql.Tx, eid string) (err error) {
 	if pdebug.Enabled {
 		g := pdebug.Marker(`ExternalResource.LoadByEID %s`, eid).BindError(&err)
 		defer g.End()
@@ -80,7 +80,7 @@ func (e *ExternalResource) LoadByEID(tx *Tx, eid string) (err error) {
 	return nil
 }
 
-func (e *ExternalResource) Create(tx *Tx, opts ...InsertOption) (err error) {
+func (e *ExternalResource) Create(tx *sql.Tx, opts ...InsertOption) (err error) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("db.ExternalResource.Create").BindError(&err)
 		defer g.End()
@@ -120,7 +120,7 @@ func (e *ExternalResource) Create(tx *Tx, opts ...InsertOption) (err error) {
 	return nil
 }
 
-func (e ExternalResource) Update(tx *Tx) (err error) {
+func (e ExternalResource) Update(tx *sql.Tx) (err error) {
 	if pdebug.Enabled {
 		g := pdebug.Marker(`ExternalResource.Update`).BindError(&err)
 		defer g.End()
@@ -150,7 +150,7 @@ func (e ExternalResource) Update(tx *Tx) (err error) {
 	return errors.New("either OID/EID must be filled")
 }
 
-func (e ExternalResource) Delete(tx *Tx) error {
+func (e ExternalResource) Delete(tx *sql.Tx) error {
 	if e.OID != 0 {
 		stmt, err := library.GetStmt("sqlExternalResourceDeleteByOIDKey")
 		if err != nil {
@@ -191,7 +191,7 @@ func (v *ExternalResourceList) FromRows(rows *sql.Rows, capacity int) error {
 	return nil
 }
 
-func (v *ExternalResourceList) LoadSinceEID(tx *Tx, since string, limit int) error {
+func (v *ExternalResourceList) LoadSinceEID(tx *sql.Tx, since string, limit int) error {
 	var s int64
 	if id := since; id != "" {
 		vdb := ExternalResource{}
@@ -204,7 +204,7 @@ func (v *ExternalResourceList) LoadSinceEID(tx *Tx, since string, limit int) err
 	return v.LoadSince(tx, s, limit)
 }
 
-func (v *ExternalResourceList) LoadSince(tx *Tx, since int64, limit int) error {
+func (v *ExternalResourceList) LoadSince(tx *sql.Tx, since int64, limit int) error {
 	rows, err := tx.Query(`SELECT `+ExternalResourceStdSelectColumns+` FROM `+ExternalResourceTable+` WHERE external_resources.oid > ? ORDER BY oid ASC LIMIT `+strconv.Itoa(limit), since)
 	if err != nil {
 		return err

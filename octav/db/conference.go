@@ -1,6 +1,7 @@
 package db
 
 import (
+	"database/sql"
 	"fmt"
 	"io"
 	"time"
@@ -46,7 +47,7 @@ func compileRangeWhere(dst io.Writer, args *[]interface{}, since int64, rangeSta
 	return nil
 }
 
-func (v *ConferenceList) LoadFromQuery(tx *Tx, status, organizerID []string, rangeStart, rangeEnd time.Time, since string, limit int) error {
+func (v *ConferenceList) LoadFromQuery(tx *sql.Tx, status, organizerID []string, rangeStart, rangeEnd time.Time, since string, limit int) error {
 	// We need the oid of "since"
 	var sinceOID int64
 	if since != "" {
@@ -107,7 +108,7 @@ func (v *ConferenceList) LoadFromQuery(tx *Tx, status, organizerID []string, ran
 		wherebuf.WriteString(`.user_id IN (`)
 		for i, id := range organizerID {
 			wherebuf.WriteByte('?')
-			if i < len(organizerID) - 1 {
+			if i < len(organizerID)-1 {
 				wherebuf.WriteByte(',')
 			}
 			args = append(args, id)
@@ -123,7 +124,7 @@ func (v *ConferenceList) LoadFromQuery(tx *Tx, status, organizerID []string, ran
 		wherebuf.WriteString(`.status IN (`)
 		for i, st := range status {
 			wherebuf.WriteByte('?')
-			if i < len(status) - 1 {
+			if i < len(status)-1 {
 				wherebuf.WriteByte(',')
 			}
 			args = append(args, st)
@@ -142,7 +143,7 @@ func (v *ConferenceList) LoadFromQuery(tx *Tx, status, organizerID []string, ran
 	return v.execSQLAndExtract(tx, qbuf.String(), limit, args...)
 }
 
-func (v *ConferenceList) LoadByRange(tx *Tx, since string, rangeStart, rangeEnd time.Time, limit int) error {
+func (v *ConferenceList) LoadByRange(tx *sql.Tx, since string, rangeStart, rangeEnd time.Time, limit int) error {
 	// We need the oid of "since"
 	var sinceOID int64
 	if since != "" {
@@ -194,7 +195,7 @@ func (v *ConferenceList) LoadByRange(tx *Tx, since string, rangeStart, rangeEnd 
 	return v.execSQLAndExtract(tx, qbuf.String(), limit, args...)
 }
 
-func (v *ConferenceList) execSQLAndExtract(tx *Tx, sql string, limit int, args ...interface{}) error {
+func (v *ConferenceList) execSQLAndExtract(tx *sql.Tx, sql string, limit int, args ...interface{}) error {
 	rows, err := tx.Query(sql, args...)
 	if err != nil {
 		return err
@@ -212,7 +213,7 @@ func (v *ConferenceList) execSQLAndExtract(tx *Tx, sql string, limit int, args .
 	return nil
 }
 
-func ListConferencesByOrganizer(tx *Tx, l *ConferenceList, orgID string, statuses []string, since string, limit int) error {
+func ListConferencesByOrganizer(tx *sql.Tx, l *ConferenceList, orgID string, statuses []string, since string, limit int) error {
 	stmt := tools.GetBuffer()
 	defer tools.ReleaseBuffer(stmt)
 
@@ -235,7 +236,7 @@ func ListConferencesByOrganizer(tx *Tx, l *ConferenceList, orgID string, statuse
 	stmt.WriteString(`.status IN (`)
 	for i := range statuses {
 		stmt.WriteByte('?')
-		if i != len(statuses) - 1 {
+		if i != len(statuses)-1 {
 			stmt.WriteByte(',')
 		}
 	}

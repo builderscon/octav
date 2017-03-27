@@ -65,7 +65,7 @@ func init() {
 	})
 }
 
-func (s *SessionType) LoadByEID(tx *Tx, eid string) (err error) {
+func (s *SessionType) LoadByEID(tx *sql.Tx, eid string) (err error) {
 	if pdebug.Enabled {
 		g := pdebug.Marker(`SessionType.LoadByEID %s`, eid).BindError(&err)
 		defer g.End()
@@ -81,7 +81,7 @@ func (s *SessionType) LoadByEID(tx *Tx, eid string) (err error) {
 	return nil
 }
 
-func (s *SessionType) Create(tx *Tx, opts ...InsertOption) (err error) {
+func (s *SessionType) Create(tx *sql.Tx, opts ...InsertOption) (err error) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("db.SessionType.Create").BindError(&err)
 		defer g.End()
@@ -122,7 +122,7 @@ func (s *SessionType) Create(tx *Tx, opts ...InsertOption) (err error) {
 	return nil
 }
 
-func (s SessionType) Update(tx *Tx) (err error) {
+func (s SessionType) Update(tx *sql.Tx) (err error) {
 	if pdebug.Enabled {
 		g := pdebug.Marker(`SessionType.Update`).BindError(&err)
 		defer g.End()
@@ -152,7 +152,7 @@ func (s SessionType) Update(tx *Tx) (err error) {
 	return errors.New("either OID/EID must be filled")
 }
 
-func (s SessionType) Delete(tx *Tx) error {
+func (s SessionType) Delete(tx *sql.Tx) error {
 	if s.OID != 0 {
 		stmt, err := library.GetStmt("sqlSessionTypeDeleteByOIDKey")
 		if err != nil {
@@ -193,7 +193,7 @@ func (v *SessionTypeList) FromRows(rows *sql.Rows, capacity int) error {
 	return nil
 }
 
-func (v *SessionTypeList) LoadSinceEID(tx *Tx, since string, limit int) error {
+func (v *SessionTypeList) LoadSinceEID(tx *sql.Tx, since string, limit int) error {
 	var s int64
 	if id := since; id != "" {
 		vdb := SessionType{}
@@ -206,7 +206,7 @@ func (v *SessionTypeList) LoadSinceEID(tx *Tx, since string, limit int) error {
 	return v.LoadSince(tx, s, limit)
 }
 
-func (v *SessionTypeList) LoadSince(tx *Tx, since int64, limit int) error {
+func (v *SessionTypeList) LoadSince(tx *sql.Tx, since int64, limit int) error {
 	rows, err := tx.Query(`SELECT `+SessionTypeStdSelectColumns+` FROM `+SessionTypeTable+` WHERE session_types.oid > ? ORDER BY oid ASC LIMIT `+strconv.Itoa(limit), since)
 	if err != nil {
 		return err

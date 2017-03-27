@@ -1,8 +1,12 @@
 package model
 
-import "github.com/builderscon/octav/octav/db"
+import (
+	"database/sql"
 
-func (v *RoomList) LoadForVenue(tx *db.Tx, venueID, since string, limit int) error {
+	"github.com/builderscon/octav/octav/db"
+)
+
+func (v *RoomList) LoadForVenue(tx *sql.Tx, venueID, since string, limit int) error {
 	vdbl := db.RoomList{}
 	if err := vdbl.LoadForVenueSinceEID(tx, venueID, since, limit); err != nil {
 		return err

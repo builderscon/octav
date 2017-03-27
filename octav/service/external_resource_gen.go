@@ -4,6 +4,7 @@ package service
 
 import (
 	"context"
+	"database/sql"
 	"sync"
 	"time"
 
@@ -21,6 +22,7 @@ var _ = context.Background
 var _ = errors.Wrap
 var _ = model.ExternalResource{}
 var _ = db.ExternalResource{}
+var _ = sql.ErrNoRows
 var _ = pdebug.Enabled
 
 var externalResourceSvc ExternalResourceSvc
@@ -31,21 +33,21 @@ func ExternalResource() *ExternalResourceSvc {
 	return &externalResourceSvc
 }
 
-func (v *ExternalResourceSvc) LookupFromPayload(tx *db.Tx, m *model.ExternalResource, payload *model.LookupExternalResourceRequest) (err error) {
+func (v *ExternalResourceSvc) LookupFromPayload(ctx context.Context, tx *sql.Tx, m *model.ExternalResource, payload *model.LookupExternalResourceRequest) (err error) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("service.ExternalResource.LookupFromPayload").BindError(&err)
 		defer g.End()
 	}
-	if err = v.Lookup(tx, m, payload.ID); err != nil {
+	if err = v.Lookup(ctx, tx, m, payload.ID); err != nil {
 		return errors.Wrap(err, "failed to load model.ExternalResource from database")
 	}
-	if err := v.Decorate(tx, m, payload.TrustedCall, payload.Lang.String); err != nil {
+	if err := v.Decorate(ctx, tx, m, payload.TrustedCall, payload.Lang.String); err != nil {
 		return errors.Wrap(err, "failed to load associated data for model.ExternalResource from database")
 	}
 	return nil
 }
 
-func (v *ExternalResourceSvc) Lookup(tx *db.Tx, m *model.ExternalResource, id string) (err error) {
+func (v *ExternalResourceSvc) Lookup(ctx context.Context, tx *sql.Tx, m *model.ExternalResource, id string) (err error) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("service.ExternalResource.Lookup").BindError(&err)
 		defer g.End()
@@ -78,7 +80,7 @@ func (v *ExternalResourceSvc) Lookup(tx *db.Tx, m *model.ExternalResource, id st
 // Create takes in the transaction, the incoming payload, and a reference to
 // a database row. The database row is initialized/populated so that the
 // caller can use it afterwards.
-func (v *ExternalResourceSvc) Create(tx *db.Tx, vdb *db.ExternalResource, payload *model.CreateExternalResourceRequest) (err error) {
+func (v *ExternalResourceSvc) Create(ctx context.Context, tx *sql.Tx, vdb *db.ExternalResource, payload *model.CreateExternalResourceRequest) (err error) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("service.ExternalResource.Create").BindError(&err)
 		defer g.End()
@@ -95,13 +97,13 @@ func (v *ExternalResourceSvc) Create(tx *db.Tx, vdb *db.ExternalResource, payloa
 	if err := payload.LocalizedFields.CreateLocalizedStrings(tx, "ExternalResource", vdb.EID); err != nil {
 		return errors.Wrap(err, `failed to populate localized strings`)
 	}
-	if err := v.PostCreateHook(tx, vdb); err != nil {
+	if err := v.PostCreateHook(ctx, tx, vdb); err != nil {
 		return errors.Wrap(err, `post create hook failed`)
 	}
 	return nil
 }
 
-func (v *ExternalResourceSvc) Update(tx *db.Tx, vdb *db.ExternalResource) (err error) {
+func (v *ExternalResourceSvc) Update(tx *sql.Tx, vdb *db.ExternalResource) (err error) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("service.ExternalResource.Update (%s)", vdb.EID).BindError(&err)
 		defer g.End()
@@ -131,7 +133,7 @@ func (v *ExternalResourceSvc) Update(tx *db.Tx, vdb *db.ExternalResource) (err e
 	return nil
 }
 
-func (v *ExternalResourceSvc) UpdateFromPayload(ctx context.Context, tx *db.Tx, payload *model.UpdateExternalResourceRequest) (err error) {
+func (v *ExternalResourceSvc) UpdateFromPayload(ctx context.Context, tx *sql.Tx, payload *model.UpdateExternalResourceRequest) (err error) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("service.ExternalResource.UpdateFromPayload (%s)", payload.ID).BindError(&err)
 		defer g.End()
@@ -156,7 +158,7 @@ func (v *ExternalResourceSvc) UpdateFromPayload(ctx context.Context, tx *db.Tx, 
 	return nil
 }
 
-func (v *ExternalResourceSvc) ReplaceL10NStrings(tx *db.Tx, m *model.ExternalResource, lang string) error {
+func (v *ExternalResourceSvc) ReplaceL10NStrings(tx *sql.Tx, m *model.ExternalResource, lang string) error {
 	if pdebug.Enabled {
 		g := pdebug.Marker("service.ExternalResource.ReplaceL10NStrings lang = %s", lang)
 		defer g.End()
@@ -234,7 +236,7 @@ func (v *ExternalResourceSvc) ReplaceL10NStrings(tx *db.Tx, m *model.ExternalRes
 	return nil
 }
 
-func (v *ExternalResourceSvc) Delete(tx *db.Tx, id string) error {
+func (v *ExternalResourceSvc) Delete(tx *sql.Tx, id string) error {
 	if pdebug.Enabled {
 		g := pdebug.Marker("ExternalResource.Delete (%s)", id)
 		defer g.End()

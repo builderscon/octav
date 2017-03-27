@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"database/sql"
 	"time"
 
 	"github.com/builderscon/octav/octav/cache"
@@ -48,14 +49,14 @@ func (v *RoomSvc) populateRowForUpdate(vdb *db.Room, payload *model.UpdateRoomRe
 	return nil
 }
 
-func (v *RoomSvc) CreateFromPayload(tx *db.Tx, result *model.Room, payload *model.CreateRoomRequest) error {
+func (v *RoomSvc) CreateFromPayload(ctx context.Context, tx *sql.Tx, result *model.Room, payload *model.CreateRoomRequest) error {
 	su := User()
-	if err := su.IsAdministrator(tx, payload.UserID); err != nil {
+	if err := su.IsAdministrator(ctx, tx, payload.UserID); err != nil {
 		return errors.Wrap(err, "creating a room requires conference administrator privilege")
 	}
 
 	vdb := db.Room{}
-	if err := v.Create(tx, &vdb, payload); err != nil {
+	if err := v.Create(ctx, tx, &vdb, payload); err != nil {
 		return errors.Wrap(err, "failed to store in database")
 	}
 
@@ -68,14 +69,14 @@ func (v *RoomSvc) CreateFromPayload(tx *db.Tx, result *model.Room, payload *mode
 	return nil
 }
 
-func (v *RoomSvc) ListFromPayload(tx *db.Tx, result *model.RoomList, payload *model.ListRoomRequest) error {
+func (v *RoomSvc) ListFromPayload(ctx context.Context, tx *sql.Tx, result *model.RoomList, payload *model.ListRoomRequest) error {
 	var m model.RoomList
 	if err := m.LoadForVenue(tx, payload.VenueID, payload.Since.String, int(payload.Limit.Int)); err != nil {
 		return errors.Wrap(err, "failed to load from database")
 	}
 
 	for i := range m {
-		if err := v.Decorate(tx, &m[i], payload.TrustedCall, payload.Lang.String); err != nil {
+		if err := v.Decorate(ctx, tx, &m[i], payload.TrustedCall, payload.Lang.String); err != nil {
 			return errors.Wrap(err, "failed to associate data to model")
 		}
 	}
@@ -84,19 +85,19 @@ func (v *RoomSvc) ListFromPayload(tx *db.Tx, result *model.RoomList, payload *mo
 	return nil
 }
 
-func (v *RoomSvc) PreUpdateFromPayloadHook(ctx context.Context, tx *db.Tx, vdb *db.Room, payload *model.UpdateRoomRequest) error {
+func (v *RoomSvc) PreUpdateFromPayloadHook(ctx context.Context, tx *sql.Tx, vdb *db.Room, payload *model.UpdateRoomRequest) error {
 	su := User()
-	if err := su.IsAdministrator(tx, payload.UserID); err != nil {
+	if err := su.IsAdministrator(ctx, tx, payload.UserID); err != nil {
 		return errors.Wrap(err, "deleting rooms require administrator privileges")
 	}
 	return nil
 }
 
-func (v *RoomSvc) PostCreateHook(tx *db.Tx, vdb *db.Room) error {
+func (v *RoomSvc) PostCreateHook(ctx context.Context, tx *sql.Tx, vdb *db.Room) error {
 	return invalidateRoomLoadByVenueID(vdb.VenueID)
 }
 
-func (v *RoomSvc) PostUpdateHook(tx *db.Tx, vdb *db.Room) error {
+func (v *RoomSvc) PostUpdateHook(tx *sql.Tx, vdb *db.Room) error {
 	return invalidateRoomLoadByVenueID(vdb.VenueID)
 }
 
@@ -110,16 +111,16 @@ func invalidateRoomLoadByVenueID(venueID string) error {
 	return nil
 }
 
-func (v *RoomSvc) DeleteFromPayload(tx *db.Tx, payload *model.DeleteRoomRequest) error {
+func (v *RoomSvc) DeleteFromPayload(ctx context.Context, tx *sql.Tx, payload *model.DeleteRoomRequest) error {
 	su := User()
-	if err := su.IsAdministrator(tx, payload.UserID); err != nil {
+	if err := su.IsAdministrator(ctx, tx, payload.UserID); err != nil {
 		return errors.Wrap(err, "deleting rooms require administrator privileges")
 	}
 
 	return errors.Wrap(v.Delete(tx, payload.ID), "failed to delete from ddatabase")
 }
 
-func (v *RoomSvc) Decorate(tx *db.Tx, room *model.Room, trustedCall bool, lang string) (err error) {
+func (v *RoomSvc) Decorate(ctx context.Context, tx *sql.Tx, room *model.Room, trustedCall bool, lang string) (err error) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("service.Room.Decorate (%s, %t, %s)", room.ID, trustedCall, lang).BindError(&err)
 		defer g.End()
@@ -133,7 +134,7 @@ func (v *RoomSvc) Decorate(tx *db.Tx, room *model.Room, trustedCall bool, lang s
 	return nil
 }
 
-func (v *RoomSvc) LoadByVenueID(tx *db.Tx, cdl *model.RoomList, venueID string) (err error) {
+func (v *RoomSvc) LoadByVenueID(ctx context.Context, tx *sql.Tx, cdl *model.RoomList, venueID string) (err error) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("service.Room.LoadByVenueID %s", venueID).BindError(&err)
 		defer g.End()
@@ -148,7 +149,7 @@ func (v *RoomSvc) LoadByVenueID(tx *db.Tx, cdl *model.RoomList, venueID string) 
 		}
 		m := make(model.RoomList, len(ids))
 		for i, id := range ids {
-			if err := v.Lookup(tx, &m[i], id); err != nil {
+			if err := v.Lookup(ctx, tx, &m[i], id); err != nil {
 				return errors.Wrap(err, "failed to load from database")
 			}
 		}

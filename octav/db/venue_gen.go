@@ -65,7 +65,7 @@ func init() {
 	})
 }
 
-func (v *Venue) LoadByEID(tx *Tx, eid string) (err error) {
+func (v *Venue) LoadByEID(tx *sql.Tx, eid string) (err error) {
 	if pdebug.Enabled {
 		g := pdebug.Marker(`Venue.LoadByEID %s`, eid).BindError(&err)
 		defer g.End()
@@ -81,7 +81,7 @@ func (v *Venue) LoadByEID(tx *Tx, eid string) (err error) {
 	return nil
 }
 
-func (v *Venue) Create(tx *Tx, opts ...InsertOption) (err error) {
+func (v *Venue) Create(tx *sql.Tx, opts ...InsertOption) (err error) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("db.Venue.Create").BindError(&err)
 		defer g.End()
@@ -122,7 +122,7 @@ func (v *Venue) Create(tx *Tx, opts ...InsertOption) (err error) {
 	return nil
 }
 
-func (v Venue) Update(tx *Tx) (err error) {
+func (v Venue) Update(tx *sql.Tx) (err error) {
 	if pdebug.Enabled {
 		g := pdebug.Marker(`Venue.Update`).BindError(&err)
 		defer g.End()
@@ -152,7 +152,7 @@ func (v Venue) Update(tx *Tx) (err error) {
 	return errors.New("either OID/EID must be filled")
 }
 
-func (v Venue) Delete(tx *Tx) error {
+func (v Venue) Delete(tx *sql.Tx) error {
 	if v.OID != 0 {
 		stmt, err := library.GetStmt("sqlVenueDeleteByOIDKey")
 		if err != nil {
@@ -193,7 +193,7 @@ func (v *VenueList) FromRows(rows *sql.Rows, capacity int) error {
 	return nil
 }
 
-func (v *VenueList) LoadSinceEID(tx *Tx, since string, limit int) error {
+func (v *VenueList) LoadSinceEID(tx *sql.Tx, since string, limit int) error {
 	var s int64
 	if id := since; id != "" {
 		vdb := Venue{}
@@ -206,7 +206,7 @@ func (v *VenueList) LoadSinceEID(tx *Tx, since string, limit int) error {
 	return v.LoadSince(tx, s, limit)
 }
 
-func (v *VenueList) LoadSince(tx *Tx, since int64, limit int) error {
+func (v *VenueList) LoadSince(tx *sql.Tx, since int64, limit int) error {
 	rows, err := tx.Query(`SELECT `+VenueStdSelectColumns+` FROM `+VenueTable+` WHERE venues.oid > ? ORDER BY oid ASC LIMIT `+strconv.Itoa(limit), since)
 	if err != nil {
 		return err

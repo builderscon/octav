@@ -68,7 +68,7 @@ func (c *Client) AddConferenceAdmin(in *model.AddConferenceAdminRequest) (err er
 		g := pdebug.Marker("client.AddConferenceAdmin").BindError(&err)
 		defer g.End()
 	}
-	u, err := url.Parse(c.Endpoint + "/v1/conference/admin/add")
+	u, err := url.Parse(c.Endpoint + "/v2/conference/admin/add")
 	if err != nil {
 		return err
 	}
@@ -113,7 +113,7 @@ func (c *Client) AddConferenceCredential(in *model.AddConferenceCredentialReques
 		g := pdebug.Marker("client.AddConferenceCredential").BindError(&err)
 		defer g.End()
 	}
-	u, err := url.Parse(c.Endpoint + "/v1/conference/credentials/add")
+	u, err := url.Parse(c.Endpoint + "/v2/conference/credentials/add")
 	if err != nil {
 		return err
 	}
@@ -158,7 +158,7 @@ func (c *Client) AddConferenceDate(in *model.CreateConferenceDateRequest) (ret *
 		g := pdebug.Marker("client.AddConferenceDate").BindError(&err)
 		defer g.End()
 	}
-	u, err := url.Parse(c.Endpoint + "/v1/conference/date/add")
+	u, err := url.Parse(c.Endpoint + "/v2/conference/date/add")
 	if err != nil {
 		return nil, err
 	}
@@ -223,7 +223,7 @@ func (c *Client) AddConferenceSeriesAdmin(in *model.AddConferenceSeriesAdminRequ
 		g := pdebug.Marker("client.AddConferenceSeriesAdmin").BindError(&err)
 		defer g.End()
 	}
-	u, err := url.Parse(c.Endpoint + "/v1/conference_series/admin/add")
+	u, err := url.Parse(c.Endpoint + "/v2/conference_series/admin/add")
 	if err != nil {
 		return err
 	}
@@ -268,7 +268,7 @@ func (c *Client) AddConferenceStaff(in *model.AddConferenceStaffRequest) (err er
 		g := pdebug.Marker("client.AddConferenceStaff").BindError(&err)
 		defer g.End()
 	}
-	u, err := url.Parse(c.Endpoint + "/v1/conference/staff/add")
+	u, err := url.Parse(c.Endpoint + "/v2/conference/staff/add")
 	if err != nil {
 		return err
 	}
@@ -313,7 +313,7 @@ func (c *Client) AddConferenceVenue(in *model.AddConferenceVenueRequest) (err er
 		g := pdebug.Marker("client.AddConferenceVenue").BindError(&err)
 		defer g.End()
 	}
-	u, err := url.Parse(c.Endpoint + "/v1/conference/venue/add")
+	u, err := url.Parse(c.Endpoint + "/v2/conference/venue/add")
 	if err != nil {
 		return err
 	}
@@ -358,7 +358,7 @@ func (c *Client) AddFeaturedSpeaker(in *model.AddFeaturedSpeakerRequest) (ret *m
 		g := pdebug.Marker("client.AddFeaturedSpeaker").BindError(&err)
 		defer g.End()
 	}
-	u, err := url.Parse(c.Endpoint + "/v1/featured_speaker/add")
+	u, err := url.Parse(c.Endpoint + "/v2/featured_speaker/add")
 	if err != nil {
 		return nil, err
 	}
@@ -423,7 +423,7 @@ func (c *Client) AddSessionType(in *model.AddSessionTypeRequest) (err error) {
 		g := pdebug.Marker("client.AddSessionType").BindError(&err)
 		defer g.End()
 	}
-	u, err := url.Parse(c.Endpoint + "/v1/conference/session_type/add")
+	u, err := url.Parse(c.Endpoint + "/v2/conference/session_type/add")
 	if err != nil {
 		return err
 	}
@@ -468,7 +468,7 @@ func (c *Client) AddSponsor(in *model.AddSponsorRequest) (ret *model.Sponsor, er
 		g := pdebug.Marker("client.AddSponsor").BindError(&err)
 		defer g.End()
 	}
-	u, err := url.Parse(c.Endpoint + "/v1/sponsor/add")
+	u, err := url.Parse(c.Endpoint + "/v2/sponsor/add")
 	if err != nil {
 		return nil, err
 	}
@@ -533,7 +533,7 @@ func (c *Client) ConfirmTemporaryEmail(in *model.ConfirmTemporaryEmailRequest) (
 		g := pdebug.Marker("client.ConfirmTemporaryEmail").BindError(&err)
 		defer g.End()
 	}
-	u, err := url.Parse(c.Endpoint + "/v1/email/confirm")
+	u, err := url.Parse(c.Endpoint + "/v2/email/confirm")
 	if err != nil {
 		return err
 	}
@@ -578,7 +578,7 @@ func (c *Client) CreateBlogEntry(in *model.CreateBlogEntryRequest) (ret *model.B
 		g := pdebug.Marker("client.CreateBlogEntry").BindError(&err)
 		defer g.End()
 	}
-	u, err := url.Parse(c.Endpoint + "/v1/blog_entry/create")
+	u, err := url.Parse(c.Endpoint + "/v2/blog_entry/create")
 	if err != nil {
 		return nil, err
 	}
@@ -638,12 +638,77 @@ func (c *Client) CreateBlogEntry(in *model.CreateBlogEntryRequest) (ret *model.B
 	return &payload, nil
 }
 
+func (c *Client) CreateClientSession(in *model.CreateClientSessionRequest) (ret *model.CreateClientSessionResponse, err error) {
+	if pdebug.Enabled {
+		g := pdebug.Marker("client.CreateClientSession").BindError(&err)
+		defer g.End()
+	}
+	u, err := url.Parse(c.Endpoint + "/v2/client/session")
+	if err != nil {
+		return nil, err
+	}
+	var buf bytes.Buffer
+	err = json.NewEncoder(&buf).Encode(in)
+	if err != nil {
+		return nil, err
+	}
+	if pdebug.Enabled {
+		pdebug.Printf("POST to %s", u.String())
+		pdebug.Printf("%s", buf.String())
+	}
+	req, err := http.NewRequest("POST", u.String(), &buf)
+	if err != nil {
+		return nil, err
+	}
+	req.Header.Set("Content-Type", "application/json")
+	if c.BasicAuth.Username != "" && c.BasicAuth.Password != "" {
+		req.SetBasicAuth(c.BasicAuth.Username, c.BasicAuth.Password)
+	}
+	res, err := c.Client.Do(req)
+	if err != nil {
+		return nil, err
+	}
+	if res.StatusCode != http.StatusOK {
+		if strings.HasPrefix(strings.ToLower(res.Header.Get(`Content-Type`)), `application/json`) {
+			var errjson ErrJSON
+			if err := json.NewDecoder(res.Body).Decode(&errjson); err != nil {
+				return nil, errors.Errorf(`Invalid response: '%s'`, res.Status)
+			}
+			if len(errjson.Error) > 0 {
+				return nil, errors.New(errjson.Error)
+			}
+		}
+		return nil, errors.Errorf(`Invalid response: '%s'`, res.Status)
+	}
+	jsonbuf := getTransportJSONBuffer()
+	defer releaseTransportJSONBuffer(jsonbuf)
+	_, err = io.Copy(jsonbuf, io.LimitReader(res.Body, MaxResponseSize))
+	defer res.Body.Close()
+	if pdebug.Enabled {
+		if err != nil {
+			pdebug.Printf("failed to read respons buffer: %s", err)
+		} else {
+			pdebug.Printf("response buffer: %s", jsonbuf)
+		}
+	}
+	if err != nil {
+		return nil, err
+	}
+
+	var payload model.CreateClientSessionResponse
+	err = json.Unmarshal(jsonbuf.Bytes(), &payload)
+	if err != nil {
+		return nil, err
+	}
+	return &payload, nil
+}
+
 func (c *Client) CreateConference(in *model.CreateConferenceRequest) (ret *model.ObjectID, err error) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("client.CreateConference").BindError(&err)
 		defer g.End()
 	}
-	u, err := url.Parse(c.Endpoint + "/v1/conference/create")
+	u, err := url.Parse(c.Endpoint + "/v2/conference/create")
 	if err != nil {
 		return nil, err
 	}
@@ -708,7 +773,7 @@ func (c *Client) CreateConferenceSeries(in *model.CreateConferenceSeriesRequest)
 		g := pdebug.Marker("client.CreateConferenceSeries").BindError(&err)
 		defer g.End()
 	}
-	u, err := url.Parse(c.Endpoint + "/v1/conference_series/create")
+	u, err := url.Parse(c.Endpoint + "/v2/conference_series/create")
 	if err != nil {
 		return nil, err
 	}
@@ -773,7 +838,7 @@ func (c *Client) CreateExternalResource(in *model.CreateExternalResourceRequest)
 		g := pdebug.Marker("client.CreateExternalResource").BindError(&err)
 		defer g.End()
 	}
-	u, err := url.Parse(c.Endpoint + "/v1/external_resource/create")
+	u, err := url.Parse(c.Endpoint + "/v2/external_resource/create")
 	if err != nil {
 		return nil, err
 	}
@@ -838,7 +903,7 @@ func (c *Client) CreateQuestion(in *model.CreateQuestionRequest) (ret *model.Obj
 		g := pdebug.Marker("client.CreateQuestion").BindError(&err)
 		defer g.End()
 	}
-	u, err := url.Parse(c.Endpoint + "/v1/question/create")
+	u, err := url.Parse(c.Endpoint + "/v2/question/create")
 	if err != nil {
 		return nil, err
 	}
@@ -901,7 +966,7 @@ func (c *Client) CreateRoom(in *model.CreateRoomRequest) (ret *model.ObjectID, e
 		g := pdebug.Marker("client.CreateRoom").BindError(&err)
 		defer g.End()
 	}
-	u, err := url.Parse(c.Endpoint + "/v1/room/create")
+	u, err := url.Parse(c.Endpoint + "/v2/room/create")
 	if err != nil {
 		return nil, err
 	}
@@ -966,7 +1031,7 @@ func (c *Client) CreateSession(in *model.CreateSessionRequest) (ret *model.Objec
 		g := pdebug.Marker("client.CreateSession").BindError(&err)
 		defer g.End()
 	}
-	u, err := url.Parse(c.Endpoint + "/v1/session/create")
+	u, err := url.Parse(c.Endpoint + "/v2/session/create")
 	if err != nil {
 		return nil, err
 	}
@@ -1031,7 +1096,7 @@ func (c *Client) CreateSessionSurveyResponse(in *model.CreateSessionSurveyRespon
 		g := pdebug.Marker("client.CreateSessionSurveyResponse").BindError(&err)
 		defer g.End()
 	}
-	u, err := url.Parse(c.Endpoint + "/v1/survey_session_response/create")
+	u, err := url.Parse(c.Endpoint + "/v2/survey_session_response/create")
 	if err != nil {
 		return nil, err
 	}
@@ -1094,7 +1159,7 @@ func (c *Client) CreateTemporaryEmail(in *model.CreateTemporaryEmailRequest) (re
 		g := pdebug.Marker("client.CreateTemporaryEmail").BindError(&err)
 		defer g.End()
 	}
-	u, err := url.Parse(c.Endpoint + "/v1/email/create")
+	u, err := url.Parse(c.Endpoint + "/v2/email/create")
 	if err != nil {
 		return nil, err
 	}
@@ -1159,7 +1224,7 @@ func (c *Client) CreateTrack(in *model.CreateTrackRequest) (err error) {
 		g := pdebug.Marker("client.CreateTrack").BindError(&err)
 		defer g.End()
 	}
-	u, err := url.Parse(c.Endpoint + "/v1/track/create")
+	u, err := url.Parse(c.Endpoint + "/v2/track/create")
 	if err != nil {
 		return err
 	}
@@ -1204,7 +1269,7 @@ func (c *Client) CreateUser(in *model.CreateUserRequest) (ret *model.User, err e
 		g := pdebug.Marker("client.CreateUser").BindError(&err)
 		defer g.End()
 	}
-	u, err := url.Parse(c.Endpoint + "/v1/user/create")
+	u, err := url.Parse(c.Endpoint + "/v2/user/create")
 	if err != nil {
 		return nil, err
 	}
@@ -1269,7 +1334,7 @@ func (c *Client) CreateVenue(in *model.CreateVenueRequest) (ret *model.ObjectID,
 		g := pdebug.Marker("client.CreateVenue").BindError(&err)
 		defer g.End()
 	}
-	u, err := url.Parse(c.Endpoint + "/v1/venue/create")
+	u, err := url.Parse(c.Endpoint + "/v2/venue/create")
 	if err != nil {
 		return nil, err
 	}
@@ -1334,7 +1399,7 @@ func (c *Client) DeleteBlogEntry(in *model.DeleteBlogEntryRequest) (err error) {
 		g := pdebug.Marker("client.DeleteBlogEntry").BindError(&err)
 		defer g.End()
 	}
-	u, err := url.Parse(c.Endpoint + "/v1/blog_entry/delete")
+	u, err := url.Parse(c.Endpoint + "/v2/blog_entry/delete")
 	if err != nil {
 		return err
 	}
@@ -1379,7 +1444,7 @@ func (c *Client) DeleteConference(in *model.DeleteConferenceRequest) (err error)
 		g := pdebug.Marker("client.DeleteConference").BindError(&err)
 		defer g.End()
 	}
-	u, err := url.Parse(c.Endpoint + "/v1/conference/delete")
+	u, err := url.Parse(c.Endpoint + "/v2/conference/delete")
 	if err != nil {
 		return err
 	}
@@ -1424,7 +1489,7 @@ func (c *Client) DeleteConferenceAdmin(in *model.DeleteConferenceAdminRequest) (
 		g := pdebug.Marker("client.DeleteConferenceAdmin").BindError(&err)
 		defer g.End()
 	}
-	u, err := url.Parse(c.Endpoint + "/v1/conference/admin/delete")
+	u, err := url.Parse(c.Endpoint + "/v2/conference/admin/delete")
 	if err != nil {
 		return err
 	}
@@ -1469,7 +1534,7 @@ func (c *Client) DeleteConferenceDate(in *model.DeleteConferenceDateRequest) (er
 		g := pdebug.Marker("client.DeleteConferenceDate").BindError(&err)
 		defer g.End()
 	}
-	u, err := url.Parse(c.Endpoint + "/v1/conference/date/delete")
+	u, err := url.Parse(c.Endpoint + "/v2/conference/date/delete")
 	if err != nil {
 		return err
 	}
@@ -1514,7 +1579,7 @@ func (c *Client) DeleteConferenceSeries(in *model.DeleteConferenceSeriesRequest)
 		g := pdebug.Marker("client.DeleteConferenceSeries").BindError(&err)
 		defer g.End()
 	}
-	u, err := url.Parse(c.Endpoint + "/v1/conference_series/delete")
+	u, err := url.Parse(c.Endpoint + "/v2/conference_series/delete")
 	if err != nil {
 		return err
 	}
@@ -1559,7 +1624,7 @@ func (c *Client) DeleteConferenceStaff(in *model.DeleteConferenceStaffRequest) (
 		g := pdebug.Marker("client.DeleteConferenceStaff").BindError(&err)
 		defer g.End()
 	}
-	u, err := url.Parse(c.Endpoint + "/v1/conference/staff/delete")
+	u, err := url.Parse(c.Endpoint + "/v2/conference/staff/delete")
 	if err != nil {
 		return err
 	}
@@ -1604,7 +1669,7 @@ func (c *Client) DeleteConferenceVenue(in *model.DeleteConferenceVenueRequest) (
 		g := pdebug.Marker("client.DeleteConferenceVenue").BindError(&err)
 		defer g.End()
 	}
-	u, err := url.Parse(c.Endpoint + "/v1/conference/venue/delete")
+	u, err := url.Parse(c.Endpoint + "/v2/conference/venue/delete")
 	if err != nil {
 		return err
 	}
@@ -1649,7 +1714,7 @@ func (c *Client) DeleteExternalResource(in *model.DeleteExternalResourceRequest)
 		g := pdebug.Marker("client.DeleteExternalResource").BindError(&err)
 		defer g.End()
 	}
-	u, err := url.Parse(c.Endpoint + "/v1/external_resource/delete")
+	u, err := url.Parse(c.Endpoint + "/v2/external_resource/delete")
 	if err != nil {
 		return err
 	}
@@ -1694,7 +1759,7 @@ func (c *Client) DeleteFeaturedSpeaker(in *model.DeleteFeaturedSpeakerRequest) (
 		g := pdebug.Marker("client.DeleteFeaturedSpeaker").BindError(&err)
 		defer g.End()
 	}
-	u, err := url.Parse(c.Endpoint + "/v1/featured_speaker/delete")
+	u, err := url.Parse(c.Endpoint + "/v2/featured_speaker/delete")
 	if err != nil {
 		return err
 	}
@@ -1739,7 +1804,7 @@ func (c *Client) DeleteQuestion(in *model.DeleteQuestionRequest) (err error) {
 		g := pdebug.Marker("client.DeleteQuestion").BindError(&err)
 		defer g.End()
 	}
-	u, err := url.Parse(c.Endpoint + "/v1/question/delete")
+	u, err := url.Parse(c.Endpoint + "/v2/question/delete")
 	if err != nil {
 		return err
 	}
@@ -1784,7 +1849,7 @@ func (c *Client) DeleteRoom(in *model.DeleteRoomRequest) (err error) {
 		g := pdebug.Marker("client.DeleteRoom").BindError(&err)
 		defer g.End()
 	}
-	u, err := url.Parse(c.Endpoint + "/v1/room/delete")
+	u, err := url.Parse(c.Endpoint + "/v2/room/delete")
 	if err != nil {
 		return err
 	}
@@ -1829,7 +1894,7 @@ func (c *Client) DeleteSession(in *model.DeleteSessionRequest) (err error) {
 		g := pdebug.Marker("client.DeleteSession").BindError(&err)
 		defer g.End()
 	}
-	u, err := url.Parse(c.Endpoint + "/v1/session/delete")
+	u, err := url.Parse(c.Endpoint + "/v2/session/delete")
 	if err != nil {
 		return err
 	}
@@ -1874,7 +1939,7 @@ func (c *Client) DeleteSessionType(in *model.DeleteSessionTypeRequest) (err erro
 		g := pdebug.Marker("client.DeleteSessionType").BindError(&err)
 		defer g.End()
 	}
-	u, err := url.Parse(c.Endpoint + "/v1/session_type/delete")
+	u, err := url.Parse(c.Endpoint + "/v2/session_type/delete")
 	if err != nil {
 		return err
 	}
@@ -1919,7 +1984,7 @@ func (c *Client) DeleteSponsor(in *model.DeleteSponsorRequest) (err error) {
 		g := pdebug.Marker("client.DeleteSponsor").BindError(&err)
 		defer g.End()
 	}
-	u, err := url.Parse(c.Endpoint + "/v1/sponsor/delete")
+	u, err := url.Parse(c.Endpoint + "/v2/sponsor/delete")
 	if err != nil {
 		return err
 	}
@@ -1964,7 +2029,7 @@ func (c *Client) DeleteTrack(in *model.DeleteTrackRequest) (err error) {
 		g := pdebug.Marker("client.DeleteTrack").BindError(&err)
 		defer g.End()
 	}
-	u, err := url.Parse(c.Endpoint + "/v1/track/delete")
+	u, err := url.Parse(c.Endpoint + "/v2/track/delete")
 	if err != nil {
 		return err
 	}
@@ -2009,7 +2074,7 @@ func (c *Client) DeleteUser(in *model.DeleteUserRequest) (err error) {
 		g := pdebug.Marker("client.DeleteUser").BindError(&err)
 		defer g.End()
 	}
-	u, err := url.Parse(c.Endpoint + "/v1/user/delete")
+	u, err := url.Parse(c.Endpoint + "/v2/user/delete")
 	if err != nil {
 		return err
 	}
@@ -2054,7 +2119,7 @@ func (c *Client) DeleteVenue(in *model.DeleteVenueRequest) (err error) {
 		g := pdebug.Marker("client.DeleteVenue").BindError(&err)
 		defer g.End()
 	}
-	u, err := url.Parse(c.Endpoint + "/v1/venue/delete")
+	u, err := url.Parse(c.Endpoint + "/v2/venue/delete")
 	if err != nil {
 		return err
 	}
@@ -2099,7 +2164,7 @@ func (c *Client) GetConferenceSchedule(in *model.GetConferenceScheduleRequest) (
 		g := pdebug.Marker("client.GetConferenceSchedule").BindError(&err)
 		defer g.End()
 	}
-	u, err := url.Parse(c.Endpoint + "/v1/conference/schedule.ics")
+	u, err := url.Parse(c.Endpoint + "/v2/conference/schedule.ics")
 	if err != nil {
 		return err
 	}
@@ -2180,7 +2245,7 @@ func (c *Client) ListBlogEntries(in *model.ListBlogEntriesRequest) (ret []model.
 		g := pdebug.Marker("client.ListBlogEntries").BindError(&err)
 		defer g.End()
 	}
-	u, err := url.Parse(c.Endpoint + "/v1/blog_entry/list")
+	u, err := url.Parse(c.Endpoint + "/v2/blog_entry/list")
 	if err != nil {
 		return nil, err
 	}
@@ -2243,7 +2308,7 @@ func (c *Client) ListConference(in *model.ListConferenceRequest) (ret []model.Co
 		g := pdebug.Marker("client.ListConference").BindError(&err)
 		defer g.End()
 	}
-	u, err := url.Parse(c.Endpoint + "/v1/conference/list")
+	u, err := url.Parse(c.Endpoint + "/v2/conference/list")
 	if err != nil {
 		return nil, err
 	}
@@ -2306,7 +2371,7 @@ func (c *Client) ListConferenceAdmin(in *model.ListConferenceAdminRequest) (ret 
 		g := pdebug.Marker("client.ListConferenceAdmin").BindError(&err)
 		defer g.End()
 	}
-	u, err := url.Parse(c.Endpoint + "/v1/conference/admin/list")
+	u, err := url.Parse(c.Endpoint + "/v2/conference/admin/list")
 	if err != nil {
 		return nil, err
 	}
@@ -2369,7 +2434,7 @@ func (c *Client) ListConferenceDate(in *model.ListConferenceDateRequest) (ret []
 		g := pdebug.Marker("client.ListConferenceDate").BindError(&err)
 		defer g.End()
 	}
-	u, err := url.Parse(c.Endpoint + "/v1/conference/date/list")
+	u, err := url.Parse(c.Endpoint + "/v2/conference/date/list")
 	if err != nil {
 		return nil, err
 	}
@@ -2432,7 +2497,7 @@ func (c *Client) ListConferenceSeries(in *model.ListConferenceSeriesRequest) (re
 		g := pdebug.Marker("client.ListConferenceSeries").BindError(&err)
 		defer g.End()
 	}
-	u, err := url.Parse(c.Endpoint + "/v1/conference_series/list")
+	u, err := url.Parse(c.Endpoint + "/v2/conference_series/list")
 	if err != nil {
 		return nil, err
 	}
@@ -2495,7 +2560,7 @@ func (c *Client) ListConferenceStaff(in *model.ListConferenceStaffRequest) (ret 
 		g := pdebug.Marker("client.ListConferenceStaff").BindError(&err)
 		defer g.End()
 	}
-	u, err := url.Parse(c.Endpoint + "/v1/conference/staff/list")
+	u, err := url.Parse(c.Endpoint + "/v2/conference/staff/list")
 	if err != nil {
 		return nil, err
 	}
@@ -2558,7 +2623,7 @@ func (c *Client) ListConferencesByOrganizer(in *model.ListConferencesByOrganizer
 		g := pdebug.Marker("client.ListConferencesByOrganizer").BindError(&err)
 		defer g.End()
 	}
-	u, err := url.Parse(c.Endpoint + "/v1/conference/list_by_organizer")
+	u, err := url.Parse(c.Endpoint + "/v2/conference/list_by_organizer")
 	if err != nil {
 		return nil, err
 	}
@@ -2621,7 +2686,7 @@ func (c *Client) ListExternalResource(in *model.ListExternalResourceRequest) (re
 		g := pdebug.Marker("client.ListExternalResource").BindError(&err)
 		defer g.End()
 	}
-	u, err := url.Parse(c.Endpoint + "/v1/external_resource/list")
+	u, err := url.Parse(c.Endpoint + "/v2/external_resource/list")
 	if err != nil {
 		return nil, err
 	}
@@ -2684,7 +2749,7 @@ func (c *Client) ListFeaturedSpeakers(in *model.ListFeaturedSpeakersRequest) (re
 		g := pdebug.Marker("client.ListFeaturedSpeakers").BindError(&err)
 		defer g.End()
 	}
-	u, err := url.Parse(c.Endpoint + "/v1/featured_speaker/list")
+	u, err := url.Parse(c.Endpoint + "/v2/featured_speaker/list")
 	if err != nil {
 		return nil, err
 	}
@@ -2747,7 +2812,7 @@ func (c *Client) ListQuestion(in *model.ListQuestionRequest) (ret []model.Questi
 		g := pdebug.Marker("client.ListQuestion").BindError(&err)
 		defer g.End()
 	}
-	u, err := url.Parse(c.Endpoint + "/v1/question/list")
+	u, err := url.Parse(c.Endpoint + "/v2/question/list")
 	if err != nil {
 		return nil, err
 	}
@@ -2810,7 +2875,7 @@ func (c *Client) ListRoom(in *model.ListRoomRequest) (ret []model.Room, err erro
 		g := pdebug.Marker("client.ListRoom").BindError(&err)
 		defer g.End()
 	}
-	u, err := url.Parse(c.Endpoint + "/v1/room/list")
+	u, err := url.Parse(c.Endpoint + "/v2/room/list")
 	if err != nil {
 		return nil, err
 	}
@@ -2873,7 +2938,7 @@ func (c *Client) ListSessionTypesByConference(in *model.ListSessionTypesByConfer
 		g := pdebug.Marker("client.ListSessionTypesByConference").BindError(&err)
 		defer g.End()
 	}
-	u, err := url.Parse(c.Endpoint + "/v1/session_type/list")
+	u, err := url.Parse(c.Endpoint + "/v2/session_type/list")
 	if err != nil {
 		return nil, err
 	}
@@ -2936,7 +3001,7 @@ func (c *Client) ListSessions(in *model.ListSessionsRequest) (ret []model.Sessio
 		g := pdebug.Marker("client.ListSessions").BindError(&err)
 		defer g.End()
 	}
-	u, err := url.Parse(c.Endpoint + "/v1/session/list")
+	u, err := url.Parse(c.Endpoint + "/v2/session/list")
 	if err != nil {
 		return nil, err
 	}
@@ -2999,7 +3064,7 @@ func (c *Client) ListSponsors(in *model.ListSponsorsRequest) (ret []model.Sponso
 		g := pdebug.Marker("client.ListSponsors").BindError(&err)
 		defer g.End()
 	}
-	u, err := url.Parse(c.Endpoint + "/v1/sponsor/list")
+	u, err := url.Parse(c.Endpoint + "/v2/sponsor/list")
 	if err != nil {
 		return nil, err
 	}
@@ -3062,7 +3127,7 @@ func (c *Client) ListUser(in *model.ListUserRequest) (ret []model.User, err erro
 		g := pdebug.Marker("client.ListUser").BindError(&err)
 		defer g.End()
 	}
-	u, err := url.Parse(c.Endpoint + "/v1/user/list")
+	u, err := url.Parse(c.Endpoint + "/v2/user/list")
 	if err != nil {
 		return nil, err
 	}
@@ -3125,7 +3190,7 @@ func (c *Client) ListVenue(in *model.ListVenueRequest) (ret []model.Venue, err e
 		g := pdebug.Marker("client.ListVenue").BindError(&err)
 		defer g.End()
 	}
-	u, err := url.Parse(c.Endpoint + "/v1/venue/list")
+	u, err := url.Parse(c.Endpoint + "/v2/venue/list")
 	if err != nil {
 		return nil, err
 	}
@@ -3188,7 +3253,7 @@ func (c *Client) LookupBlogEntry(in *model.LookupBlogEntryRequest) (ret *model.B
 		g := pdebug.Marker("client.LookupBlogEntry").BindError(&err)
 		defer g.End()
 	}
-	u, err := url.Parse(c.Endpoint + "/v1/blog_entry/lookup")
+	u, err := url.Parse(c.Endpoint + "/v2/blog_entry/lookup")
 	if err != nil {
 		return nil, err
 	}
@@ -3251,7 +3316,7 @@ func (c *Client) LookupConference(in *model.LookupConferenceRequest) (ret *model
 		g := pdebug.Marker("client.LookupConference").BindError(&err)
 		defer g.End()
 	}
-	u, err := url.Parse(c.Endpoint + "/v1/conference/lookup")
+	u, err := url.Parse(c.Endpoint + "/v2/conference/lookup")
 	if err != nil {
 		return nil, err
 	}
@@ -3314,7 +3379,7 @@ func (c *Client) LookupConferenceBySlug(in *model.LookupConferenceBySlugRequest)
 		g := pdebug.Marker("client.LookupConferenceBySlug").BindError(&err)
 		defer g.End()
 	}
-	u, err := url.Parse(c.Endpoint + "/v1/conference/lookup_by_slug")
+	u, err := url.Parse(c.Endpoint + "/v2/conference/lookup_by_slug")
 	if err != nil {
 		return nil, err
 	}
@@ -3377,7 +3442,7 @@ func (c *Client) LookupConferenceSeries(in *model.LookupConferenceSeriesRequest)
 		g := pdebug.Marker("client.LookupConferenceSeries").BindError(&err)
 		defer g.End()
 	}
-	u, err := url.Parse(c.Endpoint + "/v1/conference_series/lookup")
+	u, err := url.Parse(c.Endpoint + "/v2/conference_series/lookup")
 	if err != nil {
 		return nil, err
 	}
@@ -3440,7 +3505,7 @@ func (c *Client) LookupExternalResource(in *model.LookupExternalResourceRequest)
 		g := pdebug.Marker("client.LookupExternalResource").BindError(&err)
 		defer g.End()
 	}
-	u, err := url.Parse(c.Endpoint + "/v1/external_resource/lookup")
+	u, err := url.Parse(c.Endpoint + "/v2/external_resource/lookup")
 	if err != nil {
 		return nil, err
 	}
@@ -3503,7 +3568,7 @@ func (c *Client) LookupFeaturedSpeaker(in *model.LookupFeaturedSpeakerRequest) (
 		g := pdebug.Marker("client.LookupFeaturedSpeaker").BindError(&err)
 		defer g.End()
 	}
-	u, err := url.Parse(c.Endpoint + "/v1/featured_speaker/lookup")
+	u, err := url.Parse(c.Endpoint + "/v2/featured_speaker/lookup")
 	if err != nil {
 		return nil, err
 	}
@@ -3566,7 +3631,7 @@ func (c *Client) LookupRoom(in *model.LookupRoomRequest) (ret *model.Room, err e
 		g := pdebug.Marker("client.LookupRoom").BindError(&err)
 		defer g.End()
 	}
-	u, err := url.Parse(c.Endpoint + "/v1/room/lookup")
+	u, err := url.Parse(c.Endpoint + "/v2/room/lookup")
 	if err != nil {
 		return nil, err
 	}
@@ -3629,7 +3694,7 @@ func (c *Client) LookupSession(in *model.LookupSessionRequest) (ret *model.Sessi
 		g := pdebug.Marker("client.LookupSession").BindError(&err)
 		defer g.End()
 	}
-	u, err := url.Parse(c.Endpoint + "/v1/session/lookup")
+	u, err := url.Parse(c.Endpoint + "/v2/session/lookup")
 	if err != nil {
 		return nil, err
 	}
@@ -3692,7 +3757,7 @@ func (c *Client) LookupSessionType(in *model.LookupSessionTypeRequest) (ret *mod
 		g := pdebug.Marker("client.LookupSessionType").BindError(&err)
 		defer g.End()
 	}
-	u, err := url.Parse(c.Endpoint + "/v1/session_type/lookup")
+	u, err := url.Parse(c.Endpoint + "/v2/session_type/lookup")
 	if err != nil {
 		return nil, err
 	}
@@ -3755,7 +3820,7 @@ func (c *Client) LookupSponsor(in *model.LookupSponsorRequest) (ret *model.Spons
 		g := pdebug.Marker("client.LookupSponsor").BindError(&err)
 		defer g.End()
 	}
-	u, err := url.Parse(c.Endpoint + "/v1/sponsor/lookup")
+	u, err := url.Parse(c.Endpoint + "/v2/sponsor/lookup")
 	if err != nil {
 		return nil, err
 	}
@@ -3818,7 +3883,7 @@ func (c *Client) LookupTrack(in *model.LookupTrackRequest) (ret *model.Venue, er
 		g := pdebug.Marker("client.LookupTrack").BindError(&err)
 		defer g.End()
 	}
-	u, err := url.Parse(c.Endpoint + "/v1/track/lookup")
+	u, err := url.Parse(c.Endpoint + "/v2/track/lookup")
 	if err != nil {
 		return nil, err
 	}
@@ -3881,7 +3946,7 @@ func (c *Client) LookupUser(in *model.LookupUserRequest) (ret *model.User, err e
 		g := pdebug.Marker("client.LookupUser").BindError(&err)
 		defer g.End()
 	}
-	u, err := url.Parse(c.Endpoint + "/v1/user/lookup")
+	u, err := url.Parse(c.Endpoint + "/v2/user/lookup")
 	if err != nil {
 		return nil, err
 	}
@@ -3944,7 +4009,7 @@ func (c *Client) LookupUserByAuthUserID(in *model.LookupUserByAuthUserIDRequest)
 		g := pdebug.Marker("client.LookupUserByAuthUserID").BindError(&err)
 		defer g.End()
 	}
-	u, err := url.Parse(c.Endpoint + "/v1/user/lookup_user_by_auth_user_id")
+	u, err := url.Parse(c.Endpoint + "/v2/user/lookup_user_by_auth_user_id")
 	if err != nil {
 		return nil, err
 	}
@@ -4007,7 +4072,7 @@ func (c *Client) LookupVenue(in *model.LookupVenueRequest) (ret *model.Venue, er
 		g := pdebug.Marker("client.LookupVenue").BindError(&err)
 		defer g.End()
 	}
-	u, err := url.Parse(c.Endpoint + "/v1/venue/lookup")
+	u, err := url.Parse(c.Endpoint + "/v2/venue/lookup")
 	if err != nil {
 		return nil, err
 	}
@@ -4070,7 +4135,7 @@ func (c *Client) SendAllSelectionResultNotification(in *model.SendAllSelectionRe
 		g := pdebug.Marker("client.SendAllSelectionResultNotification").BindError(&err)
 		defer g.End()
 	}
-	u, err := url.Parse(c.Endpoint + "/v1/session/send_all_selection_result_notification")
+	u, err := url.Parse(c.Endpoint + "/v2/session/send_all_selection_result_notification")
 	if err != nil {
 		return nil, err
 	}
@@ -4135,7 +4200,7 @@ func (c *Client) SendSelectionResultNotification(in *model.SendSelectionResultNo
 		g := pdebug.Marker("client.SendSelectionResultNotification").BindError(&err)
 		defer g.End()
 	}
-	u, err := url.Parse(c.Endpoint + "/v1/session/send_selection_result_notification")
+	u, err := url.Parse(c.Endpoint + "/v2/session/send_selection_result_notification")
 	if err != nil {
 		return nil, err
 	}
@@ -4200,7 +4265,7 @@ func (c *Client) SetSessionVideoCover(in *model.SetSessionVideoCoverRequest, fil
 		g := pdebug.Marker("client.SetSessionVideoCover").BindError(&err)
 		defer g.End()
 	}
-	u, err := url.Parse(c.Endpoint + "/v1/session/video_cover")
+	u, err := url.Parse(c.Endpoint + "/v2/session/video_cover")
 	if err != nil {
 		return err
 	}
@@ -4267,7 +4332,7 @@ func (c *Client) TweetAsConference(in *model.TweetAsConferenceRequest) (err erro
 		g := pdebug.Marker("client.TweetAsConference").BindError(&err)
 		defer g.End()
 	}
-	u, err := url.Parse(c.Endpoint + "/v1/conference/tweet")
+	u, err := url.Parse(c.Endpoint + "/v2/conference/tweet")
 	if err != nil {
 		return err
 	}
@@ -4312,7 +4377,7 @@ func (c *Client) UpdateBlogEntry(in *model.UpdateBlogEntryRequest) (err error) {
 		g := pdebug.Marker("client.UpdateBlogEntry").BindError(&err)
 		defer g.End()
 	}
-	u, err := url.Parse(c.Endpoint + "/v1/blog_entry/update")
+	u, err := url.Parse(c.Endpoint + "/v2/blog_entry/update")
 	if err != nil {
 		return err
 	}
@@ -4357,7 +4422,7 @@ func (c *Client) UpdateConference(in *model.UpdateConferenceRequest, files map[s
 		g := pdebug.Marker("client.UpdateConference").BindError(&err)
 		defer g.End()
 	}
-	u, err := url.Parse(c.Endpoint + "/v1/conference/update")
+	u, err := url.Parse(c.Endpoint + "/v2/conference/update")
 	if err != nil {
 		return err
 	}
@@ -4424,7 +4489,7 @@ func (c *Client) UpdateExternalResource(in *model.UpdateExternalResourceRequest)
 		g := pdebug.Marker("client.UpdateExternalResource").BindError(&err)
 		defer g.End()
 	}
-	u, err := url.Parse(c.Endpoint + "/v1/external_resource/update")
+	u, err := url.Parse(c.Endpoint + "/v2/external_resource/update")
 	if err != nil {
 		return nil, err
 	}
@@ -4489,7 +4554,7 @@ func (c *Client) UpdateFeaturedSpeaker(in *model.UpdateFeaturedSpeakerRequest) (
 		g := pdebug.Marker("client.UpdateFeaturedSpeaker").BindError(&err)
 		defer g.End()
 	}
-	u, err := url.Parse(c.Endpoint + "/v1/featured_speaker/update")
+	u, err := url.Parse(c.Endpoint + "/v2/featured_speaker/update")
 	if err != nil {
 		return err
 	}
@@ -4534,7 +4599,7 @@ func (c *Client) UpdateRoom(in *model.UpdateRoomRequest) (err error) {
 		g := pdebug.Marker("client.UpdateRoom").BindError(&err)
 		defer g.End()
 	}
-	u, err := url.Parse(c.Endpoint + "/v1/room/update")
+	u, err := url.Parse(c.Endpoint + "/v2/room/update")
 	if err != nil {
 		return err
 	}
@@ -4579,7 +4644,7 @@ func (c *Client) UpdateSession(in *model.UpdateSessionRequest) (err error) {
 		g := pdebug.Marker("client.UpdateSession").BindError(&err)
 		defer g.End()
 	}
-	u, err := url.Parse(c.Endpoint + "/v1/session/update")
+	u, err := url.Parse(c.Endpoint + "/v2/session/update")
 	if err != nil {
 		return err
 	}
@@ -4624,7 +4689,7 @@ func (c *Client) UpdateSessionType(in *model.UpdateSessionTypeRequest) (err erro
 		g := pdebug.Marker("client.UpdateSessionType").BindError(&err)
 		defer g.End()
 	}
-	u, err := url.Parse(c.Endpoint + "/v1/session_type/update")
+	u, err := url.Parse(c.Endpoint + "/v2/session_type/update")
 	if err != nil {
 		return err
 	}
@@ -4669,7 +4734,7 @@ func (c *Client) UpdateSponsor(in *model.UpdateSponsorRequest) (err error) {
 		g := pdebug.Marker("client.UpdateSponsor").BindError(&err)
 		defer g.End()
 	}
-	u, err := url.Parse(c.Endpoint + "/v1/sponsor/update")
+	u, err := url.Parse(c.Endpoint + "/v2/sponsor/update")
 	if err != nil {
 		return err
 	}
@@ -4714,7 +4779,7 @@ func (c *Client) UpdateTrack(in *model.UpdateTrackRequest) (err error) {
 		g := pdebug.Marker("client.UpdateTrack").BindError(&err)
 		defer g.End()
 	}
-	u, err := url.Parse(c.Endpoint + "/v1/track/update")
+	u, err := url.Parse(c.Endpoint + "/v2/track/update")
 	if err != nil {
 		return err
 	}
@@ -4759,7 +4824,7 @@ func (c *Client) UpdateUser(in *model.UpdateUserRequest) (err error) {
 		g := pdebug.Marker("client.UpdateUser").BindError(&err)
 		defer g.End()
 	}
-	u, err := url.Parse(c.Endpoint + "/v1/user/update")
+	u, err := url.Parse(c.Endpoint + "/v2/user/update")
 	if err != nil {
 		return err
 	}
@@ -4804,7 +4869,7 @@ func (c *Client) UpdateVenue(in *model.UpdateVenueRequest) (err error) {
 		g := pdebug.Marker("client.UpdateVenue").BindError(&err)
 		defer g.End()
 	}
-	u, err := url.Parse(c.Endpoint + "/v1/venue/update")
+	u, err := url.Parse(c.Endpoint + "/v2/venue/update")
 	if err != nil {
 		return err
 	}
@@ -4849,7 +4914,7 @@ func (c *Client) VerifyUser(in *model.VerifyUserRequest) (err error) {
 		g := pdebug.Marker("client.VerifyUser").BindError(&err)
 		defer g.End()
 	}
-	u, err := url.Parse(c.Endpoint + "/v1/user/verify")
+	u, err := url.Parse(c.Endpoint + "/v2/user/verify")
 	if err != nil {
 		return err
 	}

@@ -1,11 +1,13 @@
 package db
 
 import (
+	"database/sql"
+
 	"github.com/builderscon/octav/octav/tools"
 	"github.com/pkg/errors"
 )
 
-func IsConferenceSeriesAdministrator(tx *Tx, sid, uid string) error {
+func IsConferenceSeriesAdministrator(tx *sql.Tx, sid, uid string) error {
 	stmt := tools.GetBuffer()
 	defer tools.ReleaseBuffer(stmt)
 	stmt.WriteString(`SELECT 1 FROM `)

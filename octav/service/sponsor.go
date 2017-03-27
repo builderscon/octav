@@ -1,9 +1,9 @@
 package service
 
 import (
-	"time"
-
 	"context"
+	"database/sql"
+	"time"
 
 	"github.com/builderscon/octav/octav/cache"
 	"github.com/builderscon/octav/octav/db"
@@ -74,19 +74,19 @@ func (ff finalizeFunc) Error() string {
 	return "operation needs finalization"
 }
 
-func (v *SponsorSvc) CreateFromPayload(ctx context.Context, tx *db.Tx, payload *model.AddSponsorRequest, result *model.Sponsor) (err error) {
+func (v *SponsorSvc) CreateFromPayload(ctx context.Context, tx *sql.Tx, payload *model.AddSponsorRequest, result *model.Sponsor) (err error) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("service.Sponsor.CreateFromPayload").BindError(&err)
 		defer g.End()
 	}
 
 	su := User()
-	if err := su.IsConferenceAdministrator(tx, payload.ConferenceID, payload.UserID); err != nil {
+	if err := su.IsConferenceAdministrator(ctx, tx, payload.ConferenceID, payload.UserID); err != nil {
 		return errors.Wrap(err, "creating a featured sponsor requires conference administrator privilege")
 	}
 
 	var vdb db.Sponsor
-	if err := v.Create(tx, &vdb, &model.CreateSponsorRequest{payload}); err != nil {
+	if err := v.Create(ctx, tx, &vdb, &model.CreateSponsorRequest{payload}); err != nil {
 		return errors.Wrap(err, "failed to store in database")
 	}
 
@@ -108,7 +108,7 @@ func (v *SponsorSvc) CreateFromPayload(ctx context.Context, tx *db.Tx, payload *
 }
 
 /*
-func (v *SponsorSvc) UpdateFromPayload(ctx context.Context, tx *db.Tx, payload *model.UpdateSponsorRequest) (err error) {
+func (v *SponsorSvc) UpdateFromPayload(ctx context.Context, tx *sql.Tx, payload *model.UpdateSponsorRequest) (err error) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("service.Sponsor.UpdateFromPayload").BindError(&err)
 		defer g.End()
@@ -120,7 +120,7 @@ func (v *SponsorSvc) UpdateFromPayload(ctx context.Context, tx *db.Tx, payload *
 	}
 
 	su := User()
-	if err := su.IsConferenceAdministrator(tx, vdb.ConferenceID, payload.UserID); err != nil {
+	if err := su.IsConferenceAdministrator(ctx, tx, vdb.ConferenceID, payload.UserID); err != nil {
 		return errors.Wrap(err, "updating a featured sponsor requires conference administrator privilege")
 	}
 
@@ -132,7 +132,7 @@ func (v *SponsorSvc) UpdateFromPayload(ctx context.Context, tx *db.Tx, payload *
 
 }*/
 
-func (v *SponsorSvc) DeleteFromPayload(ctx context.Context, tx *db.Tx, payload *model.DeleteSponsorRequest) (err error) {
+func (v *SponsorSvc) DeleteFromPayload(ctx context.Context, tx *sql.Tx, payload *model.DeleteSponsorRequest) (err error) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("service.Sponsor.DeleteFromPayload").BindError(&err)
 		defer g.End()
@@ -144,7 +144,7 @@ func (v *SponsorSvc) DeleteFromPayload(ctx context.Context, tx *db.Tx, payload *
 	}
 
 	su := User()
-	if err := su.IsConferenceAdministrator(tx, m.ConferenceID, payload.UserID); err != nil {
+	if err := su.IsConferenceAdministrator(ctx, tx, m.ConferenceID, payload.UserID); err != nil {
 		return errors.Wrap(err, "deleting venues require administrator privileges")
 	}
 
@@ -191,7 +191,7 @@ func (v *SponsorSvc) DeleteFromPayload(ctx context.Context, tx *db.Tx, payload *
 	return nil
 }
 
-func (v *SponsorSvc) ListFromPayload(tx *db.Tx, result *model.SponsorList, payload *model.ListSponsorsRequest) error {
+func (v *SponsorSvc) ListFromPayload(ctx context.Context, tx *sql.Tx, result *model.SponsorList, payload *model.ListSponsorsRequest) error {
 	var vdbl db.SponsorList
 	if err := vdbl.LoadByConferenceSinceEID(tx, payload.ConferenceID, payload.Since.String, int(payload.Limit.Int)); err != nil {
 		return errors.Wrap(err, "failed to load featured sponsor from database")
@@ -203,7 +203,7 @@ func (v *SponsorSvc) ListFromPayload(tx *db.Tx, result *model.SponsorList, paylo
 			return errors.Wrap(err, "failed to populate model from database")
 		}
 
-		if err := v.Decorate(tx, &l[i], payload.TrustedCall, payload.Lang.String); err != nil {
+		if err := v.Decorate(ctx, tx, &l[i], payload.TrustedCall, payload.Lang.String); err != nil {
 			return errors.Wrap(err, "failed to decorate venue with associated data")
 		}
 	}
@@ -212,7 +212,7 @@ func (v *SponsorSvc) ListFromPayload(tx *db.Tx, result *model.SponsorList, paylo
 	return nil
 }
 
-func (v *SponsorSvc) Decorate(tx *db.Tx, sponsor *model.Sponsor, trustedCall bool, lang string) (err error) {
+func (v *SponsorSvc) Decorate(ctx context.Context, tx *sql.Tx, sponsor *model.Sponsor, trustedCall bool, lang string) (err error) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("service.Sponsor.Decorate").BindError(&err)
 		defer g.End()
@@ -233,7 +233,7 @@ func (v *SponsorSvc) Decorate(tx *db.Tx, sponsor *model.Sponsor, trustedCall boo
 	return nil
 }
 
-func (v *SponsorSvc) LoadByConferenceID(tx *db.Tx, cdl *model.SponsorList, cid string) (err error) {
+func (v *SponsorSvc) LoadByConferenceID(ctx context.Context, tx *sql.Tx, cdl *model.SponsorList, cid string) (err error) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("serviec.Sponsor.LoadByConferenceID %s", cid).BindError(&err)
 		defer g.End()
@@ -248,7 +248,7 @@ func (v *SponsorSvc) LoadByConferenceID(tx *db.Tx, cdl *model.SponsorList, cid s
 		}
 		m := make(model.SponsorList, len(ids))
 		for i, id := range ids {
-			if err := v.Lookup(tx, &m[i], id); err != nil {
+			if err := v.Lookup(ctx, tx, &m[i], id); err != nil {
 				return errors.Wrap(err, "failed to load from database")
 			}
 		}

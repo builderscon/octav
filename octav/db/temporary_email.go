@@ -1,11 +1,13 @@
 package db
 
 import (
+	"database/sql"
+
 	"github.com/builderscon/octav/octav/tools"
 	"github.com/pkg/errors"
 )
 
-func (vdb *TemporaryEmail) LoadByUserIDAndConfirmationKey(tx *Tx, userID, confirmationKey string) error {
+func (vdb *TemporaryEmail) LoadByUserIDAndConfirmationKey(tx *sql.Tx, userID, confirmationKey string) error {
 	stmt := tools.GetBuffer()
 	defer tools.ReleaseBuffer(stmt)
 
@@ -23,7 +25,7 @@ func (vdb *TemporaryEmail) LoadByUserIDAndConfirmationKey(tx *Tx, userID, confir
 	return nil
 }
 
-func (vdb *TemporaryEmail) Upsert(tx *Tx) error {
+func (vdb *TemporaryEmail) Upsert(tx *sql.Tx) error {
 	stmt := tools.GetBuffer()
 	defer tools.ReleaseBuffer(stmt)
 

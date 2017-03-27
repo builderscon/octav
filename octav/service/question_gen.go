@@ -4,6 +4,7 @@ package service
 
 import (
 	"context"
+	"database/sql"
 	"sync"
 	"time"
 
@@ -21,6 +22,7 @@ var _ = context.Background
 var _ = errors.Wrap
 var _ = model.Question{}
 var _ = db.Question{}
+var _ = sql.ErrNoRows
 var _ = pdebug.Enabled
 
 var questionSvc QuestionSvc
@@ -31,18 +33,18 @@ func Question() *QuestionSvc {
 	return &questionSvc
 }
 
-func (v *QuestionSvc) LookupFromPayload(tx *db.Tx, m *model.Question, payload *model.LookupQuestionRequest) (err error) {
+func (v *QuestionSvc) LookupFromPayload(ctx context.Context, tx *sql.Tx, m *model.Question, payload *model.LookupQuestionRequest) (err error) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("service.Question.LookupFromPayload").BindError(&err)
 		defer g.End()
 	}
-	if err = v.Lookup(tx, m, payload.ID); err != nil {
+	if err = v.Lookup(ctx, tx, m, payload.ID); err != nil {
 		return errors.Wrap(err, "failed to load model.Question from database")
 	}
 	return nil
 }
 
-func (v *QuestionSvc) Lookup(tx *db.Tx, m *model.Question, id string) (err error) {
+func (v *QuestionSvc) Lookup(ctx context.Context, tx *sql.Tx, m *model.Question, id string) (err error) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("service.Question.Lookup").BindError(&err)
 		defer g.End()
@@ -75,7 +77,7 @@ func (v *QuestionSvc) Lookup(tx *db.Tx, m *model.Question, id string) (err error
 // Create takes in the transaction, the incoming payload, and a reference to
 // a database row. The database row is initialized/populated so that the
 // caller can use it afterwards.
-func (v *QuestionSvc) Create(tx *db.Tx, vdb *db.Question, payload *model.CreateQuestionRequest) (err error) {
+func (v *QuestionSvc) Create(ctx context.Context, tx *sql.Tx, vdb *db.Question, payload *model.CreateQuestionRequest) (err error) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("service.Question.Create").BindError(&err)
 		defer g.End()
@@ -92,7 +94,7 @@ func (v *QuestionSvc) Create(tx *db.Tx, vdb *db.Question, payload *model.CreateQ
 	return nil
 }
 
-func (v *QuestionSvc) Update(tx *db.Tx, vdb *db.Question) (err error) {
+func (v *QuestionSvc) Update(tx *sql.Tx, vdb *db.Question) (err error) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("service.Question.Update (%s)", vdb.EID).BindError(&err)
 		defer g.End()
@@ -119,7 +121,7 @@ func (v *QuestionSvc) Update(tx *db.Tx, vdb *db.Question) (err error) {
 	return nil
 }
 
-func (v *QuestionSvc) UpdateFromPayload(ctx context.Context, tx *db.Tx, payload *model.UpdateQuestionRequest) (err error) {
+func (v *QuestionSvc) UpdateFromPayload(ctx context.Context, tx *sql.Tx, payload *model.UpdateQuestionRequest) (err error) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("service.Question.UpdateFromPayload (%s)", payload.ID).BindError(&err)
 		defer g.End()
@@ -139,7 +141,7 @@ func (v *QuestionSvc) UpdateFromPayload(ctx context.Context, tx *db.Tx, payload 
 	return nil
 }
 
-func (v *QuestionSvc) Delete(tx *db.Tx, id string) error {
+func (v *QuestionSvc) Delete(tx *sql.Tx, id string) error {
 	if pdebug.Enabled {
 		g := pdebug.Marker("Question.Delete (%s)", id)
 		defer g.End()

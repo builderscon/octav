@@ -2,10 +2,11 @@ package db
 
 import (
 	"bytes"
+	"database/sql"
 	"strconv"
 )
 
-func (v *RoomList) LoadForVenueSinceEID(tx *Tx, venueID string, since string, limit int) error {
+func (v *RoomList) LoadForVenueSinceEID(tx *sql.Tx, venueID string, since string, limit int) error {
 	var s int64
 	if id := since; id != "" {
 		vdb := Room{}
@@ -18,7 +19,7 @@ func (v *RoomList) LoadForVenueSinceEID(tx *Tx, venueID string, since string, li
 	return v.LoadForVenueSince(tx, venueID, s, limit)
 }
 
-func (v *RoomList) LoadForVenueSince(tx *Tx, venueID string, since int64, limit int) error {
+func (v *RoomList) LoadForVenueSince(tx *sql.Tx, venueID string, since int64, limit int) error {
 	buf := bytes.Buffer{}
 	buf.WriteString("SELECT ")
 	buf.WriteString(RoomStdSelectColumns)
@@ -52,7 +53,7 @@ func (v *RoomList) LoadForVenueSince(tx *Tx, venueID string, since int64, limit 
 	return nil
 }
 
-func LoadVenueRooms(tx *Tx, rooms *RoomList, vid string) error {
+func LoadVenueRooms(tx *sql.Tx, rooms *RoomList, vid string) error {
 	stmt := bytes.Buffer{}
 	stmt.WriteString(`SELECT `)
 	stmt.WriteString(RoomStdSelectColumns)

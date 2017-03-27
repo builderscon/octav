@@ -3,13 +3,13 @@ package service
 import (
 	"bytes"
 	"context"
+	"database/sql"
 	"encoding/json"
 	"io"
 	"mime/multipart"
 
 	youtube "google.golang.org/api/youtube/v3"
 
-	"github.com/builderscon/octav/octav/db"
 	"github.com/builderscon/octav/octav/model"
 	"github.com/pkg/errors"
 	"golang.org/x/oauth2"
@@ -37,11 +37,11 @@ func (v *YoutubeSvc) Client(ctx context.Context, confID string) (*youtube.Servic
 	return youtube.New(client)
 }
 
-func (v *YoutubeSvc) UploadThumbnailFromPayload(ctx context.Context, tx *db.Tx, payload *model.SetSessionVideoCoverRequest) error {
+func (v *YoutubeSvc) UploadThumbnailFromPayload(ctx context.Context, tx *sql.Tx, payload *model.SetSessionVideoCoverRequest) error {
 	sv := Session()
 
 	var session model.Session
-	if err := sv.Lookup(tx, &session, payload.ID); err != nil {
+	if err := sv.Lookup(ctx, tx, &session, payload.ID); err != nil {
 		return errors.Wrap(err, `failed to lookup session`)
 	}
 

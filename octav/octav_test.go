@@ -1,6 +1,7 @@
 package octav_test
 
 import (
+	"context"
 	"flag"
 	"os"
 	"testing"
@@ -68,11 +69,13 @@ func TestVenueDB(t *testing.T) {
 }
 
 func testVenueDBDelete(t *testing.T, v *db.Venue) error {
-	tx, err := db.Begin()
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+
+	tx, err := db.BeginTx(ctx, nil)
 	if !assert.NoError(t, err, "Transaction starts") {
 		return err
 	}
-	defer tx.AutoRollback()
 
 	if err := v.Delete(tx); !assert.NoError(t, err, "Delete works") {
 		return err
@@ -84,11 +87,13 @@ func testVenueDBDelete(t *testing.T, v *db.Venue) error {
 }
 
 func testVenueDBCreate(t *testing.T, v *db.Venue) error {
-	tx, err := db.Begin()
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+
+	tx, err := db.BeginTx(ctx, nil)
 	if !assert.NoError(t, err, "Transaction starts") {
 		return err
 	}
-	defer tx.AutoRollback()
 
 	if err := v.Create(tx); !assert.NoError(t, err, "Create works") {
 		return err
@@ -271,5 +276,3 @@ func testUpdateUserPass(ctx *TestCtx, r *model.UpdateUserRequest) error {
 func testUpdateUserFail(ctx *TestCtx, r *model.UpdateUserRequest) error {
 	return testUpdateUser(ctx, r, true)
 }
-
-

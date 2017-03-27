@@ -1,11 +1,13 @@
 package db
 
 import (
+	"database/sql"
+
 	"github.com/builderscon/octav/octav/tools"
 	pdebug "github.com/lestrrat/go-pdebug"
 )
 
-func (v *BlogEntryList) LoadByConference(tx *Tx, confID string, status []string) (err error) {
+func (v *BlogEntryList) LoadByConference(tx *sql.Tx, confID string, status []string) (err error) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("BlogEntryList.LoadByConference %s,%s", confID, status).BindError(&err)
 		defer g.End()
