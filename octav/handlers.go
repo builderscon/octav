@@ -13,11 +13,11 @@ import (
 
 	"context"
 
-	"github.com/HDE/shobokunai/app/apiserver/tools"
 	"github.com/builderscon/octav/octav/db"
 	"github.com/builderscon/octav/octav/internal/errors"
 	"github.com/builderscon/octav/octav/model"
 	"github.com/builderscon/octav/octav/service"
+	"github.com/builderscon/octav/octav/tools"
 	"github.com/lestrrat/go-apache-logformat"
 	ical "github.com/lestrrat/go-ical"
 	"github.com/lestrrat/go-pdebug"
