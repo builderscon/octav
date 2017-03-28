@@ -25,10 +25,12 @@ type TestCtx struct {
 	APIClient  *db.Client
 	Superuser  *db.User
 	HTTPClient *client.Client
+	apiURL     string
+	sessions   map[string]*client.Session
 }
 
 func NewTestCtx(t *testing.T) (*TestCtx, error) {
-	client := db.Client{
+	cl := db.Client{
 		EID:    tools.UUID(),
 		Secret: tools.UUID(), // Todo
 		Name:   "Test Client",
@@ -50,7 +52,7 @@ func NewTestCtx(t *testing.T) (*TestCtx, error) {
 		return nil, errors.Wrap(err, "failed to start DB transaction")
 	}
 
-	if err = client.Create(tx); err != nil {
+	if err = cl.Create(tx); err != nil {
 		return nil, err
 	}
 
@@ -64,8 +66,9 @@ func NewTestCtx(t *testing.T) (*TestCtx, error) {
 
 	tctx := &TestCtx{
 		T:         t,
-		APIClient: &client,
+		APIClient: &cl,
 		Superuser: &superuser,
+		sessions:  make(map[string]*client.Session),
 	}
 
 	return tctx, nil
@@ -78,6 +81,8 @@ func (ctx *TestCtx) Subtest(name string, cb func(*TestCtx)) {
 			APIClient:  ctx.APIClient,
 			Superuser:  ctx.Superuser,
 			HTTPClient: ctx.HTTPClient,
+			apiURL:     ctx.apiURL,
+			sessions:   ctx.sessions,
 		}
 		cb(localctx)
 	})
@@ -110,10 +115,29 @@ func (tctx *TestCtx) Close() error {
 	return nil
 }
 
+func (ctx *TestCtx) getSession(userID string) (*client.Session, error) {
+	s, ok := ctx.sessions[userID]
+	if !ok {
+		return nil, errors.Errorf(`session for user %s not found`, userID)
+	}
+	return s, nil
+}
+
+func (ctx *TestCtx) newSession(token, userID string) (*client.Session, error) {
+	cl := client.New(ctx.apiURL)
+	cl.SetAuth(ctx.APIClient.EID, ctx.APIClient.Secret)
+	s, err := client.NewSession(cl, token, userID)
+	if err != nil {
+		return nil, errors.Wrap(err, `failed to create new session`)
+	}
+	ctx.sessions[userID] = s
+	return s, nil
+}
+
 func (ctx *TestCtx) SetAPIServer(ts *httptest.Server) {
+	ctx.apiURL = ts.URL
 	ctx.HTTPClient = client.New(ts.URL)
-	ctx.HTTPClient.BasicAuth.Username = ctx.APIClient.EID
-	ctx.HTTPClient.BasicAuth.Password = ctx.APIClient.Secret
+	ctx.HTTPClient.SetAuth(ctx.APIClient.EID, ctx.APIClient.Secret)
 }
 
 func bigsight(userID string) *model.CreateVenueRequest {
@@ -146,140 +170,6 @@ func intlConferenceRoom(venueID, userID string) *model.CreateRoomRequest {
 	return &r
 }
 
-func testAddConferenceAdmin(ctx *TestCtx, confID, adminID, userID string) error {
-	err := ctx.HTTPClient.AddConferenceAdmin(&model.AddConferenceAdminRequest{
-		ConferenceID: confID,
-		AdminID:      adminID,
-		UserID:       userID,
-	})
-	if !assert.NoError(ctx.T, err, "AddConferenceAdmin should succeed") {
-		return err
-	}
-	return nil
-}
-
-func testDeleteConferenceAdmin(ctx *TestCtx, confID, adminID, userID string) error {
-	err := ctx.HTTPClient.DeleteConferenceAdmin(&model.DeleteConferenceAdminRequest{
-		ConferenceID: confID,
-		AdminID:      adminID,
-		UserID:       userID,
-	})
-	if !assert.NoError(ctx.T, err, "DeleteConferenceAdmin should succeed") {
-		return err
-	}
-	return nil
-}
-
-func testAddConferenceVenue(ctx *TestCtx, confID, venueID, userID string) error {
-	req := model.AddConferenceVenueRequest{
-		ConferenceID: confID,
-		VenueID:      venueID,
-		UserID:       userID,
-	}
-	err := ctx.HTTPClient.AddConferenceVenue(&req)
-	if !assert.NoError(ctx.T, err, "AddConferenceVenue should succeed") {
-		return err
-	}
-	return nil
-}
-
-func testDeleteConferenceVenue(ctx *TestCtx, confID, venueID, userID string) error {
-	req := model.DeleteConferenceVenueRequest{
-		ConferenceID: confID,
-		VenueID:      venueID,
-		UserID:       userID,
-	}
-	err := ctx.HTTPClient.DeleteConferenceVenue(&req)
-	if !assert.NoError(ctx.T, err, "DeleteConferenceVenue should succeed") {
-		return err
-	}
-	return nil
-}
-
-func testLookupRoom(ctx *TestCtx, id, lang string) (*model.Room, error) {
-	r := &model.LookupRoomRequest{ID: id}
-	if lang != "" {
-		r.Lang.Set(lang)
-	}
-	venue, err := ctx.HTTPClient.LookupRoom(r)
-	if !assert.NoError(ctx.T, err, "LookupRoom succeeds") {
-		return nil, err
-	}
-	return venue, nil
-}
-
-func testCreateUser(ctx *TestCtx, in *model.CreateUserRequest) (*model.User, error) {
-	res, err := ctx.HTTPClient.CreateUser(in)
-	if !assert.NoError(ctx.T, err, "CreateUser should succeed") {
-		return nil, err
-	}
-	return res, nil
-}
-
-func testLookupUser(ctx *TestCtx, id, lang string) (*model.User, error) {
-	r := &model.LookupUserRequest{ID: id}
-	if lang != "" {
-		r.Lang.Set(lang)
-	}
-	user, err := ctx.HTTPClient.LookupUser(r)
-	if !assert.NoError(ctx.T, err, "LookupUser succeeds") {
-		return nil, err
-	}
-	return user, nil
-}
-
-func testDeleteUser(ctx *TestCtx, targetID, userID string) error {
-	err := ctx.HTTPClient.DeleteUser(&model.DeleteUserRequest{ID: targetID, UserID: userID})
-	if !assert.NoError(ctx.T, err, "DeleteUser should succeed") {
-		return err
-	}
-	return nil
-}
-
-func testLookupVenue(ctx *TestCtx, id, lang string) (*model.Venue, error) {
-	r := &model.LookupVenueRequest{ID: id}
-	if lang != "" {
-		r.Lang.Set(lang)
-	}
-	venue, err := ctx.HTTPClient.LookupVenue(r)
-	if !assert.NoError(ctx.T, err, "LookupVenue succeeds") {
-		return nil, err
-	}
-	return venue, nil
-}
-
-func testUpdateRoom(ctx *TestCtx, in *model.UpdateRoomRequest) error {
-	err := ctx.HTTPClient.UpdateRoom(in)
-	if !assert.NoError(ctx.T, err, "UpdateRoom succeeds") {
-		return err
-	}
-	return nil
-}
-
-func testDeleteRoom(ctx *TestCtx, roomID, userID string) error {
-	err := ctx.HTTPClient.DeleteRoom(&model.DeleteRoomRequest{ID: roomID, UserID: userID})
-	if !assert.NoError(ctx.T, err, "DeleteRoom should be successful") {
-		return err
-	}
-	return err
-}
-
-func testUpdateVenue(ctx *TestCtx, in *model.UpdateVenueRequest) error {
-	err := ctx.HTTPClient.UpdateVenue(in)
-	if !assert.NoError(ctx.T, err, "UpdateVenue succeeds") {
-		return err
-	}
-	return nil
-}
-
-func testDeleteVenue(ctx *TestCtx, venueID, userID string) error {
-	err := ctx.HTTPClient.DeleteVenue(&model.DeleteVenueRequest{ID: venueID, UserID: userID})
-	if !assert.NoError(ctx.T, err, "DeleteVenue should be successful") {
-		return err
-	}
-	return err
-}
-
 func yapcasia(uid string) *model.CreateConferenceSeriesRequest {
 	return &model.CreateConferenceSeriesRequest{
 		UserID: uid,
@@ -300,67 +190,6 @@ func yapcasiaTokyo(seriesID, userID string) *model.CreateConferenceRequest {
 	return r
 }
 
-func testCreateConferenceSeries(ctx *TestCtx, in *model.CreateConferenceSeriesRequest) (*model.ObjectID, error) {
-	res, err := ctx.HTTPClient.CreateConferenceSeries(in)
-	if !assert.NoError(ctx.T, err, "CreateConferenceSeries should succeed") {
-		return nil, err
-	}
-	return res, nil
-}
-
-func testDeleteConferenceSeries(ctx *TestCtx, id, userID string) error {
-	err := ctx.HTTPClient.DeleteConferenceSeries(&model.DeleteConferenceSeriesRequest{ID: id, UserID: userID})
-	if !assert.NoError(ctx.T, err, "DeleteConferenceSeries should be successful") {
-		return err
-	}
-	return err
-}
-
-func testAddConferenceSeriesAdmin(ctx *TestCtx, id, adminID, userID string) error {
-	err := ctx.HTTPClient.AddConferenceSeriesAdmin(&model.AddConferenceSeriesAdminRequest{SeriesID: id, AdminID: adminID, UserID: userID})
-	if !assert.NoError(ctx.T, err, "AddConferenceSeriesAdmin should be successful") {
-		return err
-	}
-	return err
-}
-
-func testLookupConference(ctx *TestCtx, id, lang string) (*model.Conference, error) {
-	r := &model.LookupConferenceRequest{ID: id}
-	if lang != "" {
-		r.Lang.Set(lang)
-	}
-	conference, err := ctx.HTTPClient.LookupConference(r)
-	if !assert.NoError(ctx.T, err, "LookupConference succeeds") {
-		return nil, err
-	}
-	return conference, nil
-}
-
-func testUpdateConference(ctx *TestCtx, in *model.UpdateConferenceRequest) error {
-	err := ctx.HTTPClient.UpdateConference(in, nil)
-	if !assert.NoError(ctx.T, err, "UpdateConference succeeds") {
-		return err
-	}
-	return nil
-}
-
-func testMakeConferencePublic(ctx *TestCtx, conferenceID, userID string) error {
-	r := model.UpdateConferenceRequest{
-		ID:     conferenceID,
-		UserID: userID,
-	}
-	r.Status.Set("public")
-	return testUpdateConference(ctx, &r)
-}
-
-func testDeleteConference(ctx *TestCtx, id string) error {
-	err := ctx.HTTPClient.DeleteConference(&model.DeleteConferenceRequest{ID: id})
-	if !assert.NoError(ctx.T, err, "DeleteConference should be successful") {
-		return err
-	}
-	return err
-}
-
 func larrywall(confID, userID string) *model.AddFeaturedSpeakerRequest {
 	r := &model.AddFeaturedSpeakerRequest{
 		ConferenceID: confID,
@@ -370,25 +199,6 @@ func larrywall(confID, userID string) *model.AddFeaturedSpeakerRequest {
 	}
 	r.AvatarURL.Set(`https://upload.wikimedia.org/wikipedia/commons/b/b3/Larry_Wall_YAPC_2007.jpg`)
 	return r
-}
-
-func testCreateFeaturedSpeaker(ctx *TestCtx, in *model.AddFeaturedSpeakerRequest) (*model.FeaturedSpeaker, error) {
-	res, err := ctx.HTTPClient.AddFeaturedSpeaker(in)
-	if !assert.NoError(ctx.T, err, "CreateFeaturedSpeaker should succeed") {
-		return nil, err
-	}
-	return res, nil
-}
-
-func testDeleteFeaturedSpeaker(ctx *TestCtx, id, userID string) error {
-	err := ctx.HTTPClient.DeleteFeaturedSpeaker(&model.DeleteFeaturedSpeakerRequest{
-		ID:     id,
-		UserID: userID,
-	})
-	if !assert.NoError(ctx.T, err, "DeleteFeaturedSpeaker should succeed") {
-		return err
-	}
-	return nil
 }
 
 func buildersconinc(confID, userID string) *model.AddSponsorRequest {
@@ -401,7 +211,6 @@ func buildersconinc(confID, userID string) *model.AddSponsorRequest {
 	}
 	return r
 }
-
 func TestSanity(t *testing.T) {
 	ctx, err := NewTestCtx(t)
 	if !assert.NoError(t, err, "failed to create test ctx") {
@@ -435,6 +244,11 @@ func TestConferenceCRUD(t *testing.T) {
 	}
 	defer testDeleteUser(ctx, user.ID, ctx.Superuser.EID)
 
+	_, err = ctx.newSession("", ctx.Superuser.EID)
+	if !assert.NoError(ctx.T, err, "session") {
+		return
+	}
+
 	series, err := testCreateConferenceSeries(ctx, yapcasia(ctx.Superuser.EID))
 	if err != nil {
 		return
@@ -445,11 +259,16 @@ func TestConferenceCRUD(t *testing.T) {
 		return
 	}
 
+	_, err = ctx.newSession("", user.ID)
+	if !assert.NoError(ctx.T, err, "session") {
+		return
+	}
+
 	res, err := testCreateConferencePass(ctx, yapcasiaTokyo(series.ID, user.ID))
 	if err != nil {
 		return
 	}
-	defer testDeleteConference(ctx, res.ID)
+	defer testDeleteConference(ctx, res.ID, user.ID)
 
 	if !assert.NoError(ctx.T, validator.HTTPCreateConferenceResponse.Validate(res), "Validation should succeed") {
 		return
@@ -574,6 +393,11 @@ func TestRoomCRUD(t *testing.T) {
 
 	ctx.SetAPIServer(ts)
 
+	_, err = ctx.newSession("", ctx.Superuser.EID)
+	if !assert.NoError(ctx.T, err, "session") {
+		return
+	}
+
 	venue, err := testCreateVenuePass(ctx, bigsight(ctx.Superuser.EID))
 	if err != nil {
 		return
@@ -667,17 +491,32 @@ func TestSessionCRUD(t *testing.T) {
 
 	ctx.SetAPIServer(ts)
 
+	_, err = ctx.newSession("", ctx.Superuser.EID)
+	if !assert.NoError(ctx.T, err, "session") {
+		return
+	}
+
 	organizer, err := testCreateUser(ctx, johndoe())
 	if err != nil {
 		return
 	}
 	defer testDeleteUser(ctx, organizer.ID, ctx.Superuser.EID)
 
+	_, err = ctx.newSession("", organizer.ID)
+	if !assert.NoError(ctx.T, err, "session") {
+		return
+	}
+
 	user, err := testCreateUser(ctx, johndoe())
 	if err != nil {
 		return
 	}
 	defer testDeleteUser(ctx, user.ID, ctx.Superuser.EID)
+
+	_, err = ctx.newSession("", user.ID)
+	if !assert.NoError(ctx.T, err, "session") {
+		return
+	}
 
 	series, err := testCreateConferenceSeries(ctx, yapcasia(ctx.Superuser.EID))
 	if err != nil {
@@ -693,7 +532,7 @@ func TestSessionCRUD(t *testing.T) {
 	if err != nil {
 		return
 	}
-	defer testDeleteConference(ctx, conference.ID)
+	defer testDeleteConference(ctx, conference.ID, organizer.ID)
 
 	// Make sure the conference is public
 	if err := testMakeConferencePublic(ctx, conference.ID, organizer.ID); err != nil {
@@ -889,12 +728,22 @@ func TestCreateUser(t *testing.T) {
 
 	ctx.SetAPIServer(ts)
 
+	_, err = ctx.newSession("", ctx.Superuser.EID)
+	if !assert.NoError(ctx.T, err, "session") {
+		return
+	}
+
 	res, err := testCreateUser(ctx, johndoe())
 	if err != nil {
 		return
 	}
 
 	if !assert.NotEmpty(ctx.T, res.ID, "Returned structure has ID") {
+		return
+	}
+
+	_, err = ctx.newSession("", res.ID)
+	if !assert.NoError(ctx.T, err, "session") {
 		return
 	}
 
@@ -937,9 +786,8 @@ func TestCreateUser(t *testing.T) {
 		return
 	}
 
-	clientID, clientSecret := ctx.HTTPClient.BasicAuth.Username, ctx.HTTPClient.BasicAuth.Password
-	ctx.HTTPClient.BasicAuth.Username = ""
-	ctx.HTTPClient.BasicAuth.Password = ""
+	clientID, clientSecret := ctx.HTTPClient.BasicAuth().Username(), ctx.HTTPClient.BasicAuth().Password()
+	ctx.HTTPClient.SetAuth("", "")
 	res5, err := testLookupUser(ctx, res.ID, "")
 	if err != nil {
 		return
@@ -953,8 +801,7 @@ func TestCreateUser(t *testing.T) {
 		return
 	}
 
-	ctx.HTTPClient.BasicAuth.Username = clientID
-	ctx.HTTPClient.BasicAuth.Password = clientSecret
+	ctx.HTTPClient.SetAuth(clientID, clientSecret)
 	if err := testDeleteUser(ctx, res.ID, ctx.Superuser.EID); err != nil {
 		return
 	}
@@ -972,6 +819,10 @@ func TestVenueCRUD(t *testing.T) {
 
 	ctx.SetAPIServer(ts)
 
+	_, err = ctx.newSession("", ctx.Superuser.EID)
+	if !assert.NoError(ctx.T, err, "session") {
+		return
+	}
 	res, err := testCreateVenuePass(ctx, bigsight(ctx.Superuser.EID))
 	if err != nil {
 		return
@@ -1031,11 +882,20 @@ func TestDeleteConferenceDate(t *testing.T) {
 
 	ctx.SetAPIServer(ts)
 
+	_, err = ctx.newSession("", ctx.Superuser.EID)
+	if !assert.NoError(ctx.T, err, "session") {
+		return
+	}
 	user, err := testCreateUser(ctx, johndoe())
 	if err != nil {
 		return
 	}
 	defer testDeleteUser(ctx, user.ID, ctx.Superuser.EID)
+
+	_, err = ctx.newSession("", user.ID)
+	if !assert.NoError(ctx.T, err, "session") {
+		return
+	}
 
 	series, err := testCreateConferenceSeries(ctx, &model.CreateConferenceSeriesRequest{
 		UserID: ctx.Superuser.EID,
@@ -1058,26 +918,34 @@ func TestDeleteConferenceDate(t *testing.T) {
 	if err != nil {
 		return
 	}
-	defer testDeleteConference(ctx, conf.ID)
+	defer testDeleteConference(ctx, conf.ID, user.ID)
 
-	d, err := ctx.HTTPClient.AddConferenceDate(&model.CreateConferenceDateRequest{
-		ConferenceID: conf.ID,
-		UserID:       user.ID,
-		Date: model.ConferenceDate{
-			Open:  time.Date(2016, 3, 22, 10, 0, 0, 0, time.UTC),
-			Close: time.Date(2016, 3, 22, 19, 0, 0, 0, time.UTC),
-		},
+	var d *model.ConferenceDate
+	err = withSession(ctx, user.ID, func(s *client.Session) error {
+		res, err := s.AddConferenceDate(&model.CreateConferenceDateRequest{
+			ConferenceID: conf.ID,
+			UserID:       user.ID,
+			Date: model.ConferenceDate{
+				Open:  time.Date(2016, 3, 22, 10, 0, 0, 0, time.UTC),
+				Close: time.Date(2016, 3, 22, 19, 0, 0, 0, time.UTC),
+			},
+		})
+		if err != nil {
+			return err
+		}
+		d = res
+		return nil
 	})
 	if !assert.NoError(ctx.T, err, "AddConferenceDate works") {
 		return
 	}
 
-	t.Logf("%#v", d)
-
-	err = ctx.HTTPClient.DeleteConferenceDate(&model.DeleteConferenceDateRequest{
-		ConferenceID: conf.ID,
-		Date:         d.ID,
-		UserID:       user.ID,
+	err = withSession(ctx, user.ID, func(s *client.Session) error {
+		return s.DeleteConferenceDate(&model.DeleteConferenceDateRequest{
+			ConferenceID: conf.ID,
+			Date:         d.ID,
+			UserID:       user.ID,
+		})
 	})
 	if !assert.NoError(ctx.T, err, "DeleteConferenceDate works") {
 		return
@@ -1088,7 +956,6 @@ func TestDeleteConferenceDate(t *testing.T) {
 		return
 	}
 
-	t.Logf("%#v", conf2.Dates)
 	if !assert.Len(ctx.T, conf2.Dates, 0, "There should be no dates set") {
 		return
 	}
@@ -1106,12 +973,20 @@ func TestConferenceAdmins(t *testing.T) {
 
 	ctx.SetAPIServer(ts)
 
+	_, err = ctx.newSession("", ctx.Superuser.EID)
+	if !assert.NoError(ctx.T, err, "session") {
+		return
+	}
 	user, err := testCreateUser(ctx, johndoe())
 	if err != nil {
 		return
 	}
 	defer testDeleteUser(ctx, user.ID, ctx.Superuser.EID)
 
+	_, err = ctx.newSession("", user.ID)
+	if !assert.NoError(ctx.T, err, "session") {
+		return
+	}
 	series, err := testCreateConferenceSeries(ctx, &model.CreateConferenceSeriesRequest{
 		UserID: ctx.Superuser.EID,
 		Slug:   tools.RandomString(8),
@@ -1133,7 +1008,7 @@ func TestConferenceAdmins(t *testing.T) {
 	if err != nil {
 		return
 	}
-	defer testDeleteConference(ctx, conf.ID)
+	defer testDeleteConference(ctx, conf.ID, user.ID)
 
 	for i := 0; i < 9; i++ {
 		extraAdmin, err := testCreateUser(ctx, johndoe())
@@ -1184,12 +1059,21 @@ func TestListConference(t *testing.T) {
 
 	ctx.SetAPIServer(ts)
 
+	_, err = ctx.newSession("", ctx.Superuser.EID)
+	if !assert.NoError(ctx.T, err, "session") {
+		return
+	}
+
 	user, err := testCreateUser(ctx, johndoe())
 	if err != nil {
 		return
 	}
 	defer testDeleteUser(ctx, user.ID, ctx.Superuser.EID)
 
+	_, err = ctx.newSession("", user.ID)
+	if !assert.NoError(ctx.T, err, "session") {
+		return
+	}
 	series, err := testCreateConferenceSeries(ctx, &model.CreateConferenceSeriesRequest{
 		UserID: ctx.Superuser.EID,
 		Slug:   tools.RandomString(8),
@@ -1220,19 +1104,22 @@ func TestListConference(t *testing.T) {
 		}
 		confs[i] = conf
 
-		_, err = ctx.HTTPClient.AddConferenceDate(&model.CreateConferenceDateRequest{
-			ConferenceID: conf.ID,
-			UserID:       user.ID,
-			Date: model.ConferenceDate{
-				Open:  time.Date(2016, 3, 22, 10, 0, 0, 0, time.UTC),
-				Close: time.Date(2016, 3, 22, 19, 0, 0, 0, time.UTC),
-			},
+		err = withSession(ctx, user.ID, func(s *client.Session) error {
+			_, err = s.AddConferenceDate(&model.CreateConferenceDateRequest{
+				ConferenceID: conf.ID,
+				UserID:       user.ID,
+				Date: model.ConferenceDate{
+					Open:  time.Date(2016, 3, 22, 10, 0, 0, 0, time.UTC),
+					Close: time.Date(2016, 3, 22, 19, 0, 0, 0, time.UTC),
+				},
+			})
+			return err
 		})
 		if !assert.NoError(ctx.T, err, "AddConferenceDate works") {
 			return
 		}
 
-		defer testDeleteConference(ctx, conf.ID)
+		defer testDeleteConference(ctx, conf.ID, user.ID)
 
 		req := &model.UpdateConferenceRequest{
 			ID:     confs[i].ID,
@@ -1313,6 +1200,10 @@ func TestListRoom(t *testing.T) {
 
 	ctx.SetAPIServer(ts)
 
+	_, err = ctx.newSession("", ctx.Superuser.EID)
+	if !assert.NoError(ctx.T, err, "session") {
+		return
+	}
 	venue, err := testCreateVenuePass(ctx, bigsight(ctx.Superuser.EID))
 	if err != nil {
 		return
@@ -1353,11 +1244,20 @@ func TestListSessions(t *testing.T) {
 
 	ctx.SetAPIServer(ts)
 
+	_, err = ctx.newSession("", ctx.Superuser.EID)
+	if !assert.NoError(ctx.T, err, "session") {
+		return
+	}
 	user, err := testCreateUser(ctx, johndoe())
 	if err != nil {
 		return
 	}
 	defer testDeleteUser(ctx, user.ID, ctx.Superuser.EID)
+
+	_, err = ctx.newSession("", user.ID)
+	if !assert.NoError(ctx.T, err, "session") {
+		return
+	}
 
 	series, err := testCreateConferenceSeries(ctx, yapcasia(ctx.Superuser.EID))
 	if err != nil {
@@ -1373,7 +1273,7 @@ func TestListSessions(t *testing.T) {
 	if err != nil {
 		return
 	}
-	defer testDeleteConference(ctx, conference.ID)
+	defer testDeleteConference(ctx, conference.ID, user.ID)
 
 	if err := testMakeConferencePublic(ctx, conference.ID, user.ID); err != nil {
 		return

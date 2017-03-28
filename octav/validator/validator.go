@@ -1564,13 +1564,17 @@ func init() {
 		SetConstraintMap(M).
 		SetRoot(
 			jsval.Object().
-				Required("slug", "title", "user_id").
+				Required("session", "slug", "title", "user_id").
 				AdditionalProperties(
 					jsval.EmptyConstraint,
 				).
 				AddProp(
 					"description",
 					jsval.Reference(M).RefersTo("#/definitions/string_en"),
+				).
+				AddProp(
+					"sid",
+					jsval.Reference(M).RefersTo("#/definitions/client_session_id"),
 				).
 				AddProp(
 					"slug",

@@ -265,6 +265,7 @@ type LookupConferenceSeriesRequest struct {
 // +transport
 type CreateConferenceSeriesRequest struct {
 	UserID          string `json:"user_id"`
+	SessionID       string `json:"sid"`
 	Slug            string `json:"slug"`
 	Title           string `json:"title"`
 	LocalizedFields `json:"-"`
@@ -1234,8 +1235,13 @@ type SetSessionVideoCoverRequest struct {
 	MultipartForm *multipart.Form `json:"-"`
 }
 
+// +transport
 type CreateClientSessionRequest struct {
 	AccessToken string `json:"access_token"`
 	UserID      string `json:"user_id"`
 }
-type CreateClientSessionResponse struct{}
+
+// +transport
+type CreateClientSessionResponse struct {
+	SessionID string `json:"sid"`
+}

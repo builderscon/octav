@@ -115,6 +115,10 @@ func (v *UserSvc) IsClaimedUser(ctx context.Context, tx *sql.Tx, token, uid stri
 		return errors.Wrap(err, `failed to lookup user`)
 	}
 
+	if InTesting {
+		return nil
+	}
+
 	switch u.AuthVia {
 	case "github":
 		r, err := http.NewRequest("GET", "https://api.github.com/users", nil)

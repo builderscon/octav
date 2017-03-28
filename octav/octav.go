@@ -4,3 +4,4 @@
 //go:generate genoctavctl -s ../spec/v1/api.json -t spec/octavctl.json -o cmd/octavctl/octavctl.go
 
 package octav
+

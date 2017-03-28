@@ -13,6 +13,7 @@ import (
 
 	"context"
 
+	"github.com/HDE/shobokunai/app/apiserver/tools"
 	"github.com/builderscon/octav/octav/db"
 	"github.com/builderscon/octav/octav/internal/errors"
 	"github.com/builderscon/octav/octav/model"
@@ -55,6 +56,9 @@ func httpWithBasicAuth(h HandlerWithContext) HandlerWithContext {
 
 func wrapBasicAuth(h HandlerWithContext, authIsOptional bool) HandlerWithContext {
 	return HandlerWithContext(func(ctx context.Context, w http.ResponseWriter, r *http.Request) {
+		if pdebug.Enabled {
+			pdebug.Printf("Validating basic authentication")
+		}
 		// Verify access token in the Basic-Auth
 		clientID, clientSecret, ok := r.BasicAuth()
 		if !ok {
@@ -86,7 +90,7 @@ func wrapBasicAuth(h HandlerWithContext, authIsOptional bool) HandlerWithContext
 		}
 
 		if pdebug.Enabled {
-			pdebug.Printf("Authentication succeeded, proceeding to call handler")
+			pdebug.Printf("Authentication for client `%s` succeeded, proceeding to call handler", clientID)
 		}
 		ctx = &requestCtx{
 			Context:     ctx,
@@ -110,6 +114,9 @@ func httpWithClientSession(h HandlerWithContext) HandlerWithContext {
 
 		sessionID := r.Header.Get(clientSessionHeaderKey)
 		if sessionID == "" {
+			if pdebug.Enabled {
+				pdebug.Printf("client session header `%s` not found", clientSessionHeaderKey)
+			}
 			httpError(w, http.StatusText(http.StatusBadRequest), http.StatusBadRequest, nil)
 			return
 		}
@@ -185,6 +192,9 @@ func doCreateConferenceSeries(ctx context.Context, w http.ResponseWriter, r *htt
 		httpError(w, `CreateConferenceSeries`, http.StatusInternalServerError, err)
 		return
 	}
+
+/*	su := service.User()
+	su.IsSessionValid(ctx, tx, payload.SessionID, */
 
 	s := service.ConferenceSeries()
 	var c model.ConferenceSeries
@@ -2151,5 +2161,16 @@ func doCreateClientSession(ctx context.Context, w http.ResponseWriter, r *http.R
 		return
 	}
 
-	// OK. generate an
+pdebug.Printf("%#v", ctx)
+	// OK. generate a session ID
+	sid := tools.UUID()
+	clientID := getClientID(ctx)
+
+	sc := service.Client()
+	if err := sc.CreateClientSession(ctx, tx, sid, clientID, payload.UserID); err != nil {
+		httpError(w, `create client session`, http.StatusInternalServerError, err)
+		return
+	}
+	
+	httpJSON(w, &model.CreateClientSessionResponse{SessionID: sid})
 }

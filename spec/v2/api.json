@@ -1,0 +1,2263 @@
+{
+  "hsup.transport_ns": "model",
+  "hsup.middlewares": [
+    "mwset"
+  ],
+  "hsup.client": {
+    "imports": [
+      "github.com/builderscon/octav/octav/model"
+    ]
+  },
+  "hsup.server": {
+    "imports": [
+      "github.com/builderscon/octav/octav/model"
+    ]
+  },
+  "definitions": {
+    "binary_permission": {
+      "type": "string",
+      "enum": ["allow","disallow"]
+    },
+    "binary_permission_default_allow": {
+      "type": "string",
+      "enum": ["allow","disallow"],
+      "default": "allow"
+    },
+    "boolean_default_false": {
+      "type": "boolean",
+      "default": false
+    },
+    "conference_date": {
+      "hsup.type": "model.ConferenceDate",
+      "type": "object",
+      "properties": {
+        "id": {"$ref": "#/definitions/uuid"},
+        "open": {"$ref": "#/definitions/rfc3339"},
+        "close": {"$ref": "#/definitions/rfc3339"}
+      }
+    },
+    "conference_date_array": {
+      "type": "array",
+      "items": { "$ref": "#/definitions/conference_date" }
+    },
+    "date": {
+      "type": "object",
+      "properties": {
+        "year": {"$ref":"#/definitions/positiveInteger"},
+        "month": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 12
+        },
+        "day": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 31
+        }
+      },
+      "required": ["year", "month", "day"],
+      "additionalProperties": false
+    },
+    "date_array": {
+      "type": "array",
+      "items": {"$ref": "#/definitions/date"}
+    },
+    "datestr": {
+      "type": "string",
+      "pattern": "\\d{4}-\\d{2}-\\d{2}",
+      "description": "date in YYYY-MM-DD format"
+    },
+    "datestr_array": {
+      "type": "array",
+      "items": {"$ref": "#/definitions/datestr"}
+    },
+    "datetime": {
+      "oneOf": [
+        { "type": "string", "format": "date-time" },
+        { "type": "object", "description": "implementation specific object representing time" }
+      ]
+    },
+    "external_resource": {
+      "hsup.type": "model.ExternalResource",
+      "type": "object",
+      "properties": {
+        "id": {"$ref": "#/definitions/uuid"},
+        "conference_id": {"$ref": "#/definitions/uuid"},
+        "description": {"$ref": "#/definitions/string_en"},
+        "image_url": {"$ref": "#/definitions/url"},
+        "title": {"$ref": "#/definitions/string_en"},
+        "url": {"$ref": "#/definitions/url"},
+        "sort_order": { "$ref": "#/definitions/positiveInteger" }
+      },
+      "patternProperties":{
+        "description#[a-z]+": {"$ref": "#/definitions/string_en"},
+        "title#[a-z]+": { "$ref": "#/definitions/string_i18n" }
+      }
+    },
+    "external_resource_array": {
+      "type": "array",
+      "items": { "$ref": "#/definitions/external_resource" }
+    },
+    "featured_speaker": {
+      "hsup.type": "model.FeaturedSpeaker",
+      "type": "object",
+      "properties": {
+        "id": {"$ref": "#/definitions/uuid"},
+        "avatar_url": {"$ref": "#/definitions/url" },
+        "conference_id": {"$ref": "#/definitions/uuid"},
+        "display_name": { "$ref": "#/definitions/string_en_not_empty" },
+        "description": { "$ref": "#/definitions/string_en_not_empty" },
+        "speaker_id": {"$ref": "#/definitions/uuid"}
+      },
+      "patternProperties": {
+        "display_name#[a-z]+": { "$ref": "#/definitions/string_i18n" },
+        "description#[a-z]+": { "$ref": "#/definitions/string_i18n" }
+      }
+    },
+    "featured_speaker_array": {
+      "type": "array",
+      "items": { "$ref": "#/definitions/featured_speaker" },
+      "hsup.type": "[]model.FeaturedSpeaker"
+    },
+    "object_id": {
+      "type": "object",
+      "hsup.type": "model.ObjectID",
+      "properties": {
+        "id": {"$ref": "#/definitions/uuid"},
+        "type": {"type":"string"}
+      }
+    },
+    "sponsor": {
+      "hsup.type": "model.Sponsor",
+      "type": "object",
+      "properties": {
+        "id": {"$ref": "#/definitions/uuid"},
+        "conference_id": {"$ref": "#/definitions/uuid"},
+        "logo_url": {"$ref": "#/definitions/url" },
+        "name": { "$ref": "#/definitions/string_en_not_empty" },
+        "group_name": { "$ref": "#/definitions/string_en_not_empty" },
+        "sort_order": { "$ref": "#/definitions/positiveInteger" },
+        "url": {"$ref": "#/definitions/url" }
+      },
+      "patternProperties": {
+        "name#[a-z]+": { "$ref": "#/definitions/string_i18n" }
+      }
+    },
+    "sponsor_array": {
+      "type": "array",
+      "items": { "$ref": "#/definitions/sponsor" },
+      "hsup.type": "[]model.Sponsor"
+    },
+    "idprovider_name": {
+      "type": "string",
+      "enum": ["github", "facebook", "twitter"]
+    },
+    "int_rating": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 10
+    },
+    "time": {
+      "type": "string",
+      "pattern": "^\\d\\d:\\d\\d$"
+    },
+    "timezone_default_utc": {
+      "type": "string",
+      "default": "UTC"
+    },
+    "email": {
+      "type": "string",
+      "format": "email"
+    },
+    "markdown_en": {
+      "description": "a string with markdown markup in English.",
+      "type": "string"
+    },
+    "markdown_i18n": {
+      "description": "a string with markdown markup for a particular language, where language is presented as the suffix of the property in the form of <foo>#<language>.",
+      "type": "string"
+    },
+    "string_en": {
+      "description": "a string in English.",
+      "type": "string"
+    },
+    "string_en_not_empty": {
+      "description": "a string in English, cannot be the empty string.",
+      "type": "string",
+      "minLength": 1
+    },
+    "string_i18n": {
+      "description": "a string for a particular language, where language is presented as the suffix of the property in the form of <foo>#<language>.",
+      "type": "string"
+    },
+    "slug_top": {
+      "description": "a string containing only safe characters for use in a slug (top level. must not contain a slash)",
+      "type": "string",
+      "minLength": 3,
+      "pattern": "^[a-zA-Z0-9]+$"
+    },
+    "slug": {
+      "description": "a string containing only safe characters for use in a slug",
+      "type": "string",
+      "minLength": 3,
+      "pattern": "^[a-zA-Z0-9/]+$"
+    },
+    "positiveInteger": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "positiveIntegerDefault10": {
+      "type": "integer",
+      "minimum": 0,
+      "default": 10
+    },
+    "material_level": {
+      "type": "string",
+      "enum": ["beginner", "intermediate", "advanced"],
+      "default": "beginner"
+    },
+    "url": {
+      "type": "string",
+      "format": "uri"
+    },
+    "uuid": {
+      "description": "an UUID, expressed as hexadecimal chars",
+      "type": "string",
+      "pattern": "^[a-fA-F0-9-]+$"
+    },
+    "uuidDefaultEmpty": {
+      "description": "an UUID, expressed as hexadecimal chars, but if not provided, the empty string is returned",
+      "type": "string",
+      "pattern": "^[a-fA-F0-9-]+$",
+      "default": ""
+    },
+    "language": {
+      "description": "a language tag",
+      "type": "string"
+    },
+    "latitude": {
+      "description": "latitude of an object",
+      "type": "number"
+    },
+    "longitude": {
+      "description": "longitude of an object",
+      "type": "number"
+    },
+    "conference_array": {
+      "type": "array",
+      "items": {"$ref": "#/definitions/conference" },
+      "hsup.type": "[]model.Conference"
+    },
+    "conference_series_array": {
+      "type": "array",
+      "items": {"$ref": "#/definitions/conference_series" },
+      "hsup.type": "[]model.ConferenceSeries"
+    },
+    "conference_series": {
+      "type": "object",
+      "hsup.type": "model.ConferenceSeries",
+      "properties": {
+        "id": { "$ref": "#/definitions/uuid" },
+        "slug": { "$ref": "#/definitions/slug_top" },
+        "title": { "type": "string" }
+      }
+    },
+    "conference_status": {
+      "type": "string",
+      "enum": ["public","public_inactive","private"]
+    },
+    "conference": {
+      "type": "object",
+      "hsup.type": "model.Conference",
+      "properties": {
+        "id": { "$ref": "#/definitions/uuid" },
+        "name": { "$ref": "#/definitions/string_en" },
+        "slug": { "$ref": "#/definitions/string_en" },
+        "description": { "$ref": "#/definitions/string_en" },
+        "status": { "$ref": "#/definitions/conference_status" },
+        "timetable_available": { "type": "boolean" },
+        "venue": { "$ref": "#/definitions/venue" },
+        "dates": { "$ref": "#/definitions/conference_date_array" },
+        "tracks": {
+          "type": "array",
+          "items": { "$ref": "#/definitions/track" }
+        },
+        "administrators": { "$ref": "#/definitions/user_array" },
+        "featured_speakers": { "$ref": "#/definitions/featured_speaker_array" },
+        "external_resources": { "$ref": "#/definitions/external_resource_array" }
+      },
+      "patternProperties": {
+        "title#[a-z]+": { "$ref": "#/definitions/string_i18n" },
+        "description#[a-z]+": { "$ref": "#/definitions/string_i18n" }
+      }
+    },
+    "track": {
+      "type": "object",
+      "hsup.type": "model.Venue",
+      "properties": {
+        "id": { "$ref": "#/definitions/uuid" },
+        "conference_id": { "$ref": "#/definitions/uuid" },
+        "room_id": { "$ref": "#/definitions/uuid" },
+        "name": { "type": "string" },
+        "sort_order": {"type": "integer"}
+      }
+    },
+    "venue": {
+      "type": "object",
+      "hsup.type": "model.Venue",
+      "properties": {
+        "id": { "$ref": "#/definitions/uuid" },
+        "name": { "type": "string" },
+        "place_id": {"type": "string"},
+        "url": {"$ref":"#/definitions/url"},
+        "rooms": { "$ref": "#/definitions/room_array" }
+      }
+    },
+    "room_array": {
+      "type": "array",
+      "hsup.type": "[]model.Room",
+      "items": { "$ref": "#/definitions/room" }
+    },
+    "room": {
+      "type": "object",
+      "hsup.type": "model.Room",
+      "properties": {
+        "id": { "$ref": "#/definitions/uuid" },
+        "venue_id": { "$ref": "#/definitions/uuid" },
+        "name": { "type": "string" },
+        "capcity": { "$ref": "#/definitions/positiveInteger" }
+      },
+      "patternProperties": {
+        "name#[a-z]+": { "$ref": "#/definitions/string_i18n" }
+      }
+    },
+    "tag": {
+      "type": "string"
+    },
+    "tag_array": {
+      "type": "array",
+      "items": { "$ref": "#/definitions/tag" }
+    },
+    "speaker": {
+      "type": "object",
+      "properties": {
+        "id": { "$ref": "#/definitions/uuid" },
+        "name": { "type": "string" },
+        "email": {
+          "oneOf": [
+            { "$ref": "#/definitions/email" },
+            { "type": "null" }
+          ]
+        }
+      },
+      "additionalProperties": {
+        "patternProperties": {
+          "^[a-z0-9-]+-profile": { "type": "object" }
+        }
+      }
+    },
+    "speaker_array": {
+      "type": "array",
+      "items": { "$ref": "#/definitions/speaker" }
+    },
+    "acceptance_status": {
+      "type": "string",
+      "enum": [ "pending", "accepted", "rejected" ]
+    },
+    "duration": {
+      "type": "integer"
+    },
+    "session_type_array": {
+      "type": "array",
+      "hsup.type": "[]model.SessionType",
+      "items": {"$ref": "#/definitions/session_type"}
+    },
+    "session_type": {
+      "type": "object",
+      "hsup.type": "model.SessionType",
+      "properties": {
+        "id": {"$ref": "#/definitions/uuid"},
+        "conference_id": {"$ref": "#/definitions/uuid"},
+        "name": {"$ref":"#/definitions/string_en"},
+        "abstract": {"$ref":"#/definitions/string_en"},
+        "duration": {"$ref":"#/definitions/positiveInteger"},
+        "submission_start": {"$ref":"#/definitions/rfc3339"},
+        "submission_end": {"$ref":"#/definitions/rfc3339"},
+        "is_accepting_submission": {"type":"boolean"}
+      },
+      "patternProperties":{
+        "name#[a-z]+": { "$ref": "#/definitions/string_i18n" },
+        "abstract#[a-z]+": { "$ref": "#/definitions/string_i18n" }
+      }
+    },
+    "session_array": {
+      "type": "array",
+      "hsup.type": "[]model.Session",
+      "items": { "$ref": "#/definitions/session" }
+    },
+    "session": {
+      "type": "object",
+      "hsup.type": "model.Session",
+      "properties": {
+        "conference": {
+          "oneOf": [
+            { "type": "null" },
+            { "$ref": "#/definitions/conference" }
+          ]
+        },
+        "room": {
+          "oneOf": [
+            { "type": "null" },
+            { "$ref": "#/definitions/room" }
+          ]
+        },
+        "session_type": {
+          "oneOf": [
+            { "type": "null" },
+            { "$ref": "#/definitions/session_type" }
+          ]
+        },
+        "speaker": {
+          "oneOf": [
+            { "type": "null" },
+            { "type": "object" },
+            { "$ref": "#/definitions/speaker_array" }
+          ]
+        },
+        "title": { "type": "string" },
+        "abstract": { "type": "string" },
+        "memo": { "type": "string" },
+        "starts_on": { "$ref": "#/definitions/datetime" },
+        "duration": { "$ref": "#/definitions/duration" },
+        "material_level": { "$ref": "#/definitions/material_level" },
+        "tags": {
+          "oneOf": [
+            { "type": "string" },
+            { "$ref": "#/definitions/tag_array" }
+          ]
+        },
+        "category": { "type": "string" },
+        "spoken_language": { "$ref": "#/definitions/language" },
+        "slide_language": { "$ref": "#/definitions/language" },
+        "slide_subtitles": { "$ref": "#/definitions/language" },
+        "slide_url": { "$ref": "#/definitions/url" },
+        "video_url": { "$ref": "#/definitions/url" },
+        "photo_release": { "$ref": "#/definitions/binary_permission" },
+        "recording_release": { "$ref": "#/definitions/binary_permission" },
+        "materials_release": { "$ref": "#/definitions/binary_permission" },
+        "has_interpretation": { "$ref": "#/definitions/boolean_default_false" },
+        "status": { "$ref": "#/definitions/acceptance_status" },
+        "confirmed": { "$ref": "#/definitions/boolean_default_false" }
+      }
+    },
+    "tshirt_size": {
+      "oneOf": [
+        {
+          "type": "string",
+          "enum": ["XXXL","XXL","XL","L","M","S","XS"]
+        },
+        {
+          "type": "null"
+        },
+        {
+          "type": "string",
+          "maxLength": 0
+        }
+      ]
+    },
+    "user_array": {
+      "type": "array",
+      "items": {"$ref": "#/definitions/user" }
+    },
+    "user": {
+      "type": "object",
+      "hsup.type": "model.User",
+      "properties": {
+        "id": { "$ref": "#/definitions/uuid" },
+        "first_name": { "$ref": "#/definitions/string_en" },
+        "last_name": { "$ref": "#/definitions/string_en" },
+        "nickname": { "$ref": "#/definitions/string_en" },
+        "email": {
+          "anyOf": [
+            { "$ref": "#/definitions/email" },
+            { "type": "null" },
+            { "type": "string", "maxLength": 0 }
+          ]
+        },
+        "lang": {"$ref": "#/definitions/language" },
+        "tshirt_size": { "$ref": "#/definitions/tshirt_size" },
+        "is_admin": { "type": "boolean" }
+      },
+      "patternProperties": {
+        "first_name#[a-z]+": { "$ref": "#/definitions/string_i18n" },
+        "last_name#[a-z]+": { "$ref": "#/definitions/string_i18n" }
+      }
+    },
+    "question": {
+      "type": "object",
+      "hsup.type": "model.Question",
+      "properties": {
+        "id": {"$ref": "#/definitions/uuid"},
+        "session_id": {"$ref": "#/definitions/uuid"},
+        "user_id": {"$ref": "#/definitions/uuid"},
+        "body": {"type": "string"}
+      }
+    },
+    "question_array": {
+      "type": "array",
+      "items": {"$ref": "#/definitions/question"},
+      "hsup.type": "[]model.Question"
+    },
+    "rfc3339": {
+      "oneOf": [
+        {
+          "type": "string",
+          "pattern": "^(\\d\\d\\d\\d)(-)?(\\d\\d)(-)?(\\d\\d)(T)?(\\d\\d)(:)?(\\d\\d)(:)?(\\d\\d)(\\.\\d+)?(Z|([+-])(\\d\\d)(:)?(\\d\\d))$"
+        },
+        {
+          "type": "object"
+        }
+      ]
+    },
+    "blog_entry": {
+      "hsup.type": "model.BlogEntry",
+      "type": "object",
+      "properties": {
+        "conference_id": {"$ref": "#/definitions/uuid"},
+        "id": {"$ref":"#/definitions/uuid"},
+        "status": {
+          "type": "string",
+          "enum": ["public", "private"]
+        },
+        "title": {"type": "string"},
+        "url": {"$ref":"#/definitions/url"}
+      }
+    },
+    "client_session_id": {
+      "type": "string"
+    }
+  },
+  "links": [
+    {
+      "title": "Health check",
+      "href": "/",
+      "rel": "index"
+    },
+    {
+      "title": "Create client session",
+      "description": "start a client session. the client sends us an access token, and we return a session id after we verify that the access token matches the information that we expect",
+      "hsup.wrapper": "httpWithBasicAuth",
+      "rel": "create",
+      "href": "/v2/client/session",
+      "method": "POST",
+      "encType": "application/json",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "access_token": { "type": "string" },
+          "user_id": { "$ref": "#/definitions/uuid" }
+        },
+        "required": ["access_token", "user_id"]
+      },
+      "targetSchema": {
+        "type": "object",
+        "properties": {
+          "sid": {"$ref": "#/definitions/client_session_id"}
+        }
+      }
+    },
+    {
+      "title": "Create user",
+      "description": "A user can be a staff/organizer, speaker, or a regular attendee. Information should be obtained from facebook/twitter/github",
+      "hsup.wrapper": "httpWithBasicAuth",
+      "rel": "create",
+      "href": "/v2/user/create",
+      "method": "POST",
+      "encType": "application/json",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "auth_via": { "$ref": "#/definitions/idprovider_name" },
+          "auth_user_id": { "type": "string" },
+          "avatar_url": { "$ref": "#/definitions/url" },
+          "first_name": { "$ref": "#/definitions/string_en_not_empty" },
+          "last_name": { "$ref": "#/definitions/string_en_not_empty" },
+          "nickname": { "$ref": "#/definitions/string_en_not_empty" },
+          "lang": { "$ref": "#/definitions/language" },
+          "email": { "$ref": "#/definitions/email" },
+          "tshirt_size": { "$ref": "#/definitions/tshirt_size" }
+        },
+        "patternProperties": {
+          "first_name#[a-z]+": { "$ref": "#/definitions/string_i18n" },
+          "last_name#[a-z]+": { "$ref": "#/definitions/string_i18n" }
+        },
+        "required": [ "nickname", "auth_via", "auth_user_id" ]
+      },
+      "targetSchema": { "$ref": "#/definitions/user" }
+    },
+    {
+      "title": "Lookup user",
+      "rel": "lookup",
+      "href": "/v2/user/lookup",
+      "hsup.cors": "*",
+      "hsup.wrapper": "httpWithOptionalBasicAuth",
+      "method": "GET",
+      "schema": {
+        "type": "object",
+        "required": ["id"],
+        "properties": {
+          "id": { "$ref": "#/definitions/uuid" },
+          "sid": { "$ref": "#/definitions/client_session_id" }
+        }
+      },
+      "targetSchema": { "$ref": "#/definitions/user" }
+    },
+    {
+      "title": "Lookup user by auth user ID",
+      "hsup.cors": "*",
+      "hsup.wrapper": "httpWithOptionalBasicAuth",
+      "rel": "lookup",
+      "href": "/v2/user/lookup_user_by_auth_user_id",
+      "method": "GET",
+      "schema": {
+        "type": "object",
+        "required": ["auth_via", "auth_user_id"],
+        "properties": {
+          "auth_via": { "$ref": "#/definitions/idprovider_name" },
+          "auth_user_id": { "type": "string" }
+        }
+      },
+      "targetSchema": { "$ref": "#/definitions/user" }
+    },
+    {
+      "title": "Verify user",
+      "hsup.wrapper": "httpWithBasicAuth",
+      "rel": "create",
+      "href": "/v2/user/verify",
+      "method": "POST",
+      "schema": {
+        "properties": {
+          "id": { "$ref": "#/definitions/uuid" },
+          "user_id": { "$ref": "#/definitions/uuid" }
+        },
+        "required": [ "id","user_id" ]
+      }
+    },
+    {
+      "title": "Update user",
+      "hsup.wrapper": "httpWithBasicAuth",
+      "description": "A user can be a staff/organizer, speaker, or a regular attendee. Information should be obtained from facebook/twitter/github",
+      "rel": "create",
+      "href": "/v2/user/update",
+      "method": "POST",
+      "encType": "application/json",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "id": { "$ref": "#/definitions/uuid" },
+          "first_name": { "$ref": "#/definitions/string_en" },
+          "last_name": { "$ref": "#/definitions/string_en" },
+          "lang": { "$ref": "#/definitions/language" },
+          "nickname": { "$ref": "#/definitions/string_en" },
+          "email": { "$ref": "#/definitions/email" },
+          "tshirt_size": { "$ref": "#/definitions/tshirt_size" },
+          "user_id": { "$ref": "#/definitions/uuid" }
+        },
+        "patternProperties": {
+          "first_name#[a-z]+": { "$ref": "#/definitions/string_i18n" },
+          "last_name#[a-z]+": { "$ref": "#/definitions/string_i18n" }
+        },
+        "required": [ "id","user_id" ]
+      }
+    },
+    {
+      "title": "Delete user",
+      "hsup.wrapper": ["httpWithBasicAuth", "httpWithClientSession"],
+      "rel": "delete",
+      "href": "/v2/user/delete",
+      "method": "POST",
+      "encType": "application/json",
+      "schema": {
+        "type": "object",
+        "required": ["id","user_id"],
+        "properties": {
+          "id": { "$ref": "#/definitions/uuid" },
+          "user_id": { "$ref": "#/definitions/uuid" }
+        }
+      }
+    },
+    {
+      "title": "List user",
+      "rel": "list",
+      "href": "/v2/user/list",
+      "hsup.wrapper": "httpWithOptionalBasicAuth",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "pattern": { "type": "string" },
+          "lang": { "$ref": "#/definitions/language" },
+          "limit": { "$ref": "#/definitions/positiveIntegerDefault10" },
+          "since": { "$ref": "#/definitions/uuid" }
+        }
+      },
+      "targetSchema": {
+        "hsup.type": "[]model.User",
+        "items": { "$ref": "#/definitions/user" }
+      }
+    },
+    {
+      "title": "Create venue",
+      "description": "venue describes the establishment in which the conference takes place. a venue contains multiple rooms",
+      "hsup.wrapper": "httpWithBasicAuth",
+      "rel": "create",
+      "href": "/v2/venue/create",
+      "method": "POST",
+      "encType": "application/json",
+      "schema": {
+        "properties": {
+          "name": { "$ref": "#/definitions/string_en" },
+          "address": { "$ref": "#/definitions/string_en" },
+          "place_id": {"type": "string"},
+          "url": {"$ref":"#/definitions/url"},
+          "latitude": { "$ref": "#/definitions/latitude" },
+          "longitude": { "$ref": "#/definitions/longitude" },
+          "user_id": { "$ref": "#/definitions/uuid" }
+        },
+        "required": ["name","address","user_id"],
+        "patternProperties": {
+          "name#[a-z]+": { "$ref": "#/definitions/string_i18n" },
+          "address#[a-z]+": { "$ref": "#/definitions/string_i18n" }
+        }
+      },
+      "targetSchema": {"$ref": "#/definitions/object_id"}
+    },
+    {
+      "title": "List venue",
+      "rel": "list",
+      "href": "/v2/venue/list",
+      "hsup.wrapper": "httpWithOptionalBasicAuth",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "lang": { "$ref": "#/definitions/language" },
+          "limit": { "$ref": "#/definitions/positiveIntegerDefault10" },
+          "since": { "$ref": "#/definitions/uuid" }
+        }
+      },
+      "targetSchema": {
+        "hsup.type": "[]model.Venue",
+        "items": { "$ref": "#/definitions/venue" }
+      }
+    },
+    {
+      "title": "Lookup venue",
+      "rel": "lookup",
+      "href": "/v2/venue/lookup",
+      "hsup.cors": "*",
+      "method": "GET",
+      "schema": {
+        "type": "object",
+        "required": ["id"],
+        "properties": {
+          "id": { "$ref": "#/definitions/uuid" },
+          "lang": { "$ref": "#/definitions/language" }
+        }
+      },
+      "targetSchema": { "$ref": "#/definitions/venue" }
+    },
+    {
+      "title": "Update venue",
+      "rel": "update",
+      "hsup.wrapper": "httpWithBasicAuth",
+      "href": "/v2/venue/update",
+      "method": "POST",
+      "encType": "application/json",
+      "schema": {
+        "type": "object",
+        "required": ["id", "user_id"],
+        "properties": {
+          "id": { "$ref": "#/definitions/uuid" },
+          "name": { "$ref": "#/definitions/string_en" },
+          "place_id": {"type": "string"},
+          "url": {"$ref":"#/definitions/url"},
+          "latitude": { "$ref": "#/definitions/latitude" },
+          "longitude": { "$ref": "#/definitions/longitude" },
+          "user_id": { "$ref": "#/definitions/uuid" }
+        }
+      }
+    },
+    {
+      "title": "Delete venue",
+      "rel": "delete",
+      "hsup.wrapper": ["httpWithBasicAuth", "httpWithClientSession"],
+      "href": "/v2/venue/delete",
+      "method": "POST",
+      "encType": "application/json",
+      "schema": {
+        "type": "object",
+        "required": ["id", "user_id"],
+        "properties": {
+          "id": { "$ref": "#/definitions/uuid" },
+          "user_id": { "$ref": "#/definitions/uuid" }
+        }
+      }
+    },
+    {
+      "title": "Create room",
+      "rel": "create",
+      "hsup.wrapper": "httpWithBasicAuth",
+      "href": "/v2/room/create",
+      "method": "POST",
+      "encType": "application/json",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "venue_id": { "$ref": "#/definitions/uuid" },
+          "name": { "$ref": "#/definitions/string_en" },
+          "capacity": { "$ref": "#/definitions/positiveInteger" },
+          "user_id": { "$ref": "#/definitions/uuid" }
+        },
+        "required": ["venue_id", "name", "user_id"],
+        "patternProperties": {
+          "name#[a-z]+": { "$ref": "#/definitions/string_i18n" }
+        }
+      },
+      "targetSchema": {"$ref": "#/definitions/object_id"}
+    },
+    {
+      "title": "Update room",
+      "rel": "update",
+      "hsup.wrapper": "httpWithBasicAuth",
+      "href": "/v2/room/update",
+      "method": "POST",
+      "encType": "application/json",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "id": { "$ref": "#/definitions/uuid" },
+          "venue_id": { "$ref": "#/definitions/uuid" },
+          "name": { "$ref": "#/definitions/string_en" },
+          "capacity": { "$ref": "#/definitions/positiveInteger" },
+          "user_id": { "$ref": "#/definitions/uuid" }
+        },
+        "required": ["id", "user_id"],
+        "patternProperties": {
+          "name#[a-z]+": { "$ref": "#/definitions/string_i18n" }
+        }
+      }
+    },
+    {
+      "title": "Lookup room",
+      "rel": "lookup",
+      "href": "/v2/room/lookup",
+      "hsup.cors": "*",
+      "method": "GET",
+      "schema": {
+        "type": "object",
+        "required": ["id"],
+        "properties": {
+          "id": { "$ref": "#/definitions/uuid" }
+        }
+      },
+      "targetSchema": { "$ref": "#/definitions/room" }
+    },
+    {
+      "title": "Delete room",
+      "rel": "delete",
+      "hsup.wrapper": ["httpWithBasicAuth", "httpWithClientSession"],
+      "href": "/v2/room/delete",
+      "method": "POST",
+      "encType": "application/json",
+      "schema": {
+        "type": "object",
+        "required": ["id", "user_id"],
+        "properties": {
+          "id": { "$ref": "#/definitions/uuid" },
+          "user_id": { "$ref": "#/definitions/uuid" }
+        }
+      }
+    },
+    {
+      "title": "List room",
+      "rel": "list",
+      "href": "/v2/room/list",
+      "method": "GET",
+      "hsup.cors": "*",
+      "hsup.wrapper": "httpWithOptionalBasicAuth",
+      "encType": "application/x-www-form-urlencoded",
+      "schema": {
+        "properties": {
+          "venue_id": { "$ref": "#/definitions/uuid" },
+          "lang": { "$ref": "#/definitions/language" },
+          "limit": { "$ref": "#/definitions/positiveIntegerDefault10" }
+        },
+        "required": [ "venue_id" ]
+      },
+      "targetSchema": { "$ref": "#/definitions/room_array" }
+    },
+    {
+      "title": "Create conference series",
+      "rel": "create",
+      "hsup.wrapper": ["httpWithBasicAuth","httpWithClientSession"],
+      "method": "POST",
+      "href": "/v2/conference_series/create",
+      "encType": "application/json",
+      "schema": {
+        "properties": {
+          "sid": { "$ref": "#/definitions/client_session_id" },
+          "user_id": { "$ref": "#/definitions/uuid" },
+          "slug": { "$ref": "#/definitions/slug_top" },
+          "title": { "$ref": "#/definitions/string_en" },
+          "description": { "$ref": "#/definitions/string_en" }
+        },
+        "required": ["user_id","slug","title", "session"]
+      },
+      "targetSchema": {"$ref": "#/definitions/object_id"}
+    },
+    {
+      "title": "Lookup conference series",
+      "href": "/v2/conference_series/lookup",
+      "rel": "lookup",
+      "hsup.cors": "*",
+      "method": "GET",
+      "schema": {
+        "required": ["id"],
+        "properties": {
+          "id": { "$ref": "#/definitions/uuid" },
+          "lang": { "$ref": "#/definitions/language" }
+        }
+      },
+      "targetSchema": { "$ref": "#/definitions/conference_series" }
+    },
+    {
+      "title": "List conference series",
+      "rel": "list",
+      "href": "/v2/conference_series/list",
+      "hsup.cors": "*",
+      "hsup.wrapper": "httpWithOptionalBasicAuth",
+      "method": "GET",
+      "encType": "application/x-www-form-urlencoded",
+      "schema": {
+        "properties": {
+          "limit": { "$ref": "#/definitions/positiveIntegerDefault10" },
+          "since": { "$ref": "#/definitions/uuid" }
+        }
+      },
+      "targetSchema": { "$ref": "#/definitions/conference_series_array" }
+    },
+    {
+      "title": "Add conference series admin",
+      "rel": "update",
+      "hsup.wrapper": ["httpWithBasicAuth","httpWithClientSession"],
+      "method": "POST",
+      "href": "/v2/conference_series/admin/add",
+      "encType": "application/json",
+      "schema": {
+        "properties": {
+          "series_id": {"$ref": "#/definitions/uuid"},
+          "admin_id": {"$ref": "#/definitions/uuid"},
+          "user_id": {"$ref":"#/definitions/uuid"}
+        },
+        "required": ["series_id","admin_id","user_id"]
+      }
+    },
+    {
+      "title": "Create conference",
+      "rel": "create",
+      "hsup.wrapper": ["httpWithBasicAuth","httpWithClientSession"],
+      "method": "POST",
+      "href": "/v2/conference/create",
+      "encType": "application/json",
+      "schema": {
+        "properties": {
+          "series_id": { "$ref": "#/definitions/uuid" },
+          "title": { "$ref": "#/definitions/string_en" },
+          "sub_title": { "$ref": "#/definitions/string_en" },
+          "slug": { "$ref": "#/definitions/slug" },
+          "description": { "$ref": "#/definitions/string_en" },
+          "cfp_lead_text": { "$ref": "#/definitions/string_en" },
+          "cfp_pre_submit_instructions": { "$ref": "#/definitions/string_en" },
+          "cfp_post_submit_instructions": { "$ref": "#/definitions/string_en" },
+          "contact_information": { "$ref": "#/definitions/string_en" },
+          "timezone": {"$ref": "#/definitions/timezone_default_utc" },
+          "user_id": { "$ref": "#/definitions/uuid"}
+        },
+        "patternProperties":{
+          "title#[a-z]+": { "$ref": "#/definitions/string_i18n" },
+          "sub_title#[a-z]+": { "$ref": "#/definitions/string_i18n" },
+          "description#[a-z]+": { "$ref": "#/definitions/string_i18n" },
+          "cfp_lead_text#[a-z]+": { "$ref": "#/definitions/string_i18n" },
+          "cfp_pre_submit_instructions#[a-z]+": { "$ref": "#/definitions/string_i18n" },
+          "cfp_post_submit_instructions#[a-z]+": { "$ref": "#/definitions/string_i18n" },
+          "contact_information#[a-z]+": { "$ref": "#/definitions/string_i18n" }
+        },
+        "required": ["series_id", "title", "slug", "user_id"]
+      },
+      "targetSchema": {"$ref": "#/definitions/object_id"}
+    },
+    {
+      "title": "Get conference schedule",
+      "rel": "list",
+      "hsup.cors": "*",
+      "method": "GET",
+      "href": "/v2/conference/schedule.ics",
+      "schema": {
+        "required": ["conference_id"],
+        "properties": {
+          "conference_id": {"$ref": "#/definitions/uuid"},
+          "lang": {"$ref": "#/definitions/language"}
+        }
+      }
+    },
+    {
+      "title": "Add conference credential",
+      "hsup.wrapper": ["httpWithBasicAuth","httpWithClientSession"],
+      "rel": "update",
+      "method": "POST",
+      "href": "/v2/conference/credentials/add",
+      "encType": "application/json",
+      "schema": {
+        "required": ["conference_id", "user_id", "type", "data"],
+        "properties": {
+          "conference_id": {"$ref": "#/definitions/uuid"},
+          "user_id": {"$ref": "#/definitions/uuid"},
+          "type": {"type":"string"},
+          "data": {"type":"string"}
+        }
+      }
+    },
+    {
+      "title": "Tweet as conference",
+      "hsup.wrapper": ["httpWithBasicAuth","httpWithClientSession"],
+      "rel": "create",
+      "method": "POST",
+      "href": "/v2/conference/tweet",
+      "encType": "application/json",
+      "schema": {
+        "required": ["conference_id", "user_id", "tweet"],
+        "properties": {
+          "conference_id": {"$ref": "#/definitions/uuid"},
+          "user_id": {"$ref": "#/definitions/uuid"},
+          "tweet": {"type":"string"}
+        }
+      }
+    },
+    {
+      "title": "List conference date",
+      "rel": "list",
+      "hsup.cors": "*",
+      "hsup.wrapper": "httpWithBasicAuth",
+      "method": "GET",
+      "href": "/v2/conference/date/list",
+      "encType": "application/json",
+      "schema": {
+        "properties": {
+          "conference_id": {"$ref": "#/definitions/uuid"},
+          "user_id": {"$ref":"#/definitions/uuid"}
+        },
+        "required": ["conference_id","user_id"]
+      },
+      "targetSchema": {
+        "type": "array",
+        "hsup.type": "[]model.ConferenceDate",
+        "items": { "$ref": "#/definitions/conference_date" }
+      }
+    },
+    {
+      "title": "Add conference date",
+      "hsup.wrapper": ["httpWithBasicAuth","httpWithClientSession"],
+      "rel": "update",
+      "method": "POST",
+      "href": "/v2/conference/date/add",
+      "encType": "application/json",
+      "schema": {
+        "hsup.type": "model.CreateConferenceDateRequest",
+        "properties": {
+          "conference_id": {"$ref": "#/definitions/uuid"},
+          "date": {"$ref":"#/definitions/conference_date"},
+          "user_id": {"$ref": "#/definitions/uuid"}
+        },
+        "required": ["conference_id","date","user_id"]
+      },
+      "targetSchema": { "$ref": "#/definitions/conference_date" }
+    },
+    {
+      "title": "Delete conference date",
+      "rel": "delete",
+      "hsup.wrapper": ["httpWithBasicAuth", "httpWithClientSession"],
+      "method": "POST",
+      "href": "/v2/conference/date/delete",
+      "encType": "application/json",
+      "schema": {
+        "properties": {
+          "conference_id": {"$ref": "#/definitions/uuid"},
+          "date": {"$ref":"#/definitions/uuid"},
+          "user_id": {"$ref": "#/definitions/uuid"}
+        },
+        "required": ["conference_id","date","user_id"]
+      }
+    },
+    {
+      "title": "List conference admin",
+      "rel": "list",
+      "hsup.cors": "*",
+      "hsup.wrapper": "httpWithBasicAuth",
+      "method": "GET",
+      "href": "/v2/conference/admin/list",
+      "encType": "application/json",
+      "schema": {
+        "properties": {
+          "conference_id": {"$ref": "#/definitions/uuid"},
+          "user_id": {"$ref":"#/definitions/uuid"}
+        },
+        "required": ["conference_id","user_id"]
+      },
+      "targetSchema": {
+        "type": "array",
+        "hsup.type": "[]model.User",
+        "items": { "$ref": "#/definitions/user" }
+      }
+    },
+    {
+      "title": "Add conference admin",
+      "rel": "update",
+      "hsup.wrapper": ["httpWithBasicAuth", "httpWithClientSession"],
+      "method": "POST",
+      "href": "/v2/conference/admin/add",
+      "encType": "application/json",
+      "schema": {
+        "properties": {
+          "conference_id": {"$ref": "#/definitions/uuid"},
+          "admin_id": {"$ref":"#/definitions/uuid"},
+          "user_id": {"$ref":"#/definitions/uuid"}
+        },
+        "required": ["conference_id","admin_id","user_id"]
+      }
+    },
+    {
+      "title": "Delete conference admin",
+      "rel": "delete",
+      "hsup.wrapper": ["httpWithBasicAuth", "httpWithClientSession"],
+      "method": "POST",
+      "href": "/v2/conference/admin/delete",
+      "encType": "application/json",
+      "schema": {
+        "properties": {
+          "conference_id": {"$ref": "#/definitions/uuid"},
+          "admin_id": {"$ref":"#/definitions/uuid"},
+          "user_id": {"$ref":"#/definitions/uuid"}
+        },
+        "required": ["conference_id","admin_id","user_id"]
+      }
+    },
+    {
+      "title": "Add conference venue",
+      "rel": "update",
+      "hsup.wrapper": "httpWithBasicAuth",
+      "method": "POST",
+      "href": "/v2/conference/venue/add",
+      "encType": "application/json",
+      "schema": {
+        "properties": {
+          "conference_id": {"$ref": "#/definitions/uuid"},
+          "venue_id": {"$ref":"#/definitions/uuid"},
+          "user_id": {"$ref":"#/definitions/uuid"}
+        },
+        "required": ["conference_id","venue_id","user_id"]
+      }
+    },
+    {
+      "title": "Delete conference venue",
+      "rel": "delete",
+      "hsup.wrapper": ["httpWithBasicAuth", "httpWithClientSession"],
+      "method": "POST",
+      "href": "/v2/conference/venue/delete",
+      "encType": "application/json",
+      "schema": {
+        "properties": {
+          "conference_id": {"$ref": "#/definitions/uuid"},
+          "venue_id": {"$ref":"#/definitions/uuid"},
+          "user_id": {"$ref":"#/definitions/uuid"}
+        },
+        "required": ["conference_id","venue_id","user_id"]
+      }
+    },
+    {
+      "title": "Add session type",
+      "rel": "update",
+      "hsup.wrapper": "httpWithBasicAuth",
+      "method": "POST",
+      "href": "/v2/conference/session_type/add",
+      "encType": "application/json",
+      "schema": {
+        "required": ["user_id","conference_id","name","abstract", "duration"],
+        "properties": {
+          "conference_id": {"$ref": "#/definitions/uuid"},
+          "name": {"$ref":"#/definitions/string_en"},
+          "abstract": {"$ref":"#/definitions/string_en"},
+          "duration": {"$ref":"#/definitions/positiveInteger"},
+          "user_id": {"$ref":"#/definitions/uuid"},
+          "submission_start": {"$ref":"#/definitions/rfc3339"},
+          "submission_end": {"$ref":"#/definitions/rfc3339"}
+        },
+        "patternProperties":{
+          "name#[a-z]+": { "$ref": "#/definitions/string_i18n" },
+          "abstract#[a-z]+": { "$ref": "#/definitions/string_i18n" }
+        }
+      }
+    },
+    {
+      "title": "Delete session type",
+      "rel": "delete",
+      "hsup.wrapper": ["httpWithBasicAuth", "httpWithClientSession"],
+      "method": "POST",
+      "href": "/v2/session_type/delete",
+      "encType": "application/json",
+      "schema": {
+        "properties": {
+          "id": {"$ref": "#/definitions/uuid"},
+          "user_id": {"$ref":"#/definitions/uuid"}
+        },
+        "required": ["id","user_id"]
+      }
+    },
+    {
+      "title": "Lookup session type",
+      "href": "/v2/session_type/lookup",
+      "hsup.cors": "*",
+      "hsup.wrapper": "httpWithOptionalBasicAuth",
+      "method": "GET",
+      "rel": "update",
+      "schema": {
+        "required": ["id"],
+        "properties": {
+          "id": {"$ref": "#/definitions/uuid"},
+          "lang": { "$ref": "#/definitions/language" }
+        }
+      },
+      "targetSchema": { "$ref": "#/definitions/session_type" }
+    },
+    {
+      "title": "Update session type",
+      "href": "/v2/session_type/update",
+      "encType": "application/json",
+      "hsup.wrapper": "httpWithBasicAuth",
+      "method": "POST",
+      "rel": "update",
+      "schema": {
+        "type": "object",
+        "required": ["id","user_id"],
+        "properties": {
+          "id": {"$ref": "#/definitions/uuid"},
+          "name": {"$ref":"#/definitions/string_en"},
+          "abstract": {"$ref":"#/definitions/string_en"},
+          "duration": {"$ref":"#/definitions/positiveInteger"},
+          "is_default": {"type": "boolean"},
+          "user_id": {"$ref":"#/definitions/uuid"},
+          "submission_start": {"$ref":"#/definitions/rfc3339"},
+          "submission_end": {"$ref":"#/definitions/rfc3339"}
+        },
+        "patternProperties":{
+          "name#[a-z]+": { "$ref": "#/definitions/string_i18n" },
+          "abstract#[a-z]+": { "$ref": "#/definitions/string_i18n" }
+        }
+      }
+    },
+    {
+      "title": "List session types by conference",
+      "href": "/v2/session_type/list",
+      "hsup.wrapper": "httpWithOptionalBasicAuth",
+      "rel": "list",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "conference_id": {"$ref": "#/definitions/uuid"},
+          "lang": { "$ref": "#/definitions/language" }
+        }
+      },
+      "targetSchema": { "$ref": "#/definitions/session_type_array" }
+    },
+    {
+      "title": "Lookup conference",
+      "href": "/v2/conference/lookup",
+      "rel": "lookup",
+      "hsup.cors": "*",
+      "method": "GET",
+      "schema": {
+        "required": ["id"],
+        "properties": {
+          "id": { "$ref": "#/definitions/uuid" },
+          "lang": { "$ref": "#/definitions/language" }
+        }
+      },
+      "targetSchema": { "$ref": "#/definitions/conference" }
+    },
+    {
+      "title": "Lookup conference by slug",
+      "href": "/v2/conference/lookup_by_slug",
+      "rel": "lookup",
+      "hsup.cors": "*",
+      "method": "GET",
+      "schema": {
+        "required": ["slug"],
+        "properties": {
+          "lang": { "$ref": "#/definitions/language" },
+          "slug": { "type": "string" }
+        }
+      },
+      "targetSchema": { "$ref": "#/definitions/conference" }
+    },
+    {
+      "title": "List conferences by organizer",
+      "href": "/v2/conference/list_by_organizer",
+      "rel": "list",
+      "hsup.wrapper": "httpWithOptionalBasicAuth",
+      "hsup.cors": "*",
+      "method": "GET",
+      "schema": {
+        "properties": {
+          "lang": {"$ref": "#/definitions/language"},
+          "limit": {"$ref": "#/definitions/positiveIntegerDefault10"},
+          "since": {"$ref": "#/definitions/uuid"},
+          "status": {
+            "type": "array",
+            "items": { "type": "string" }
+          },
+          "organizer_id": {
+            "type": "array",
+            "items": {"$ref": "#/definitions/uuid"}
+          }
+        }
+      },
+      "targetSchema": { "$ref": "#/definitions/conference_array" }
+    },
+    {
+      "title": "List conference",
+      "href": "/v2/conference/list",
+      "rel": "list",
+      "hsup.cors": "*",
+      "hsup.wrapper": "httpWithOptionalBasicAuth",
+      "schema": {
+        "properties": {
+          "lang": { "$ref": "#/definitions/language" },
+          "limit": { "$ref": "#/definitions/positiveIntegerDefault10" },
+          "organizers": {
+            "type": "array",
+            "items": {"$ref": "#/definitions/uuid"}
+          },
+          "range_end": {
+            "oneOf": [
+              {"$ref": "#/definitions/date" },
+              {"$ref": "#/definitions/datestr" }
+            ]
+          },
+          "range_start": {
+            "oneOf": [
+              {"$ref": "#/definitions/date" },
+              {"$ref": "#/definitions/datestr" }
+            ]
+          },
+          "since": { "$ref": "#/definitions/uuid" },
+          "status": {
+            "type": "array",
+            "items": { "type": "string" }
+          }
+        }
+      },
+      "targetSchema": { "$ref": "#/definitions/conference_array" }
+    },
+    {
+      "title": "Update conference",
+      "rel": "update",
+      "hsup.wrapper": ["httpWithBasicAuth","httpWithClientSession"],
+      "method": "POST",
+      "href": "/v2/conference/update",
+      "encType": "multipart/form-data",
+      "hsup.multipartFiles": ["cover"],
+      "schema": {
+        "properties": {
+          "id": { "$ref": "#/definitions/uuid" },
+          "description": { "$ref": "#/definitions/string_en" },
+          "cfp_lead_text": { "$ref": "#/definitions/string_en" },
+          "cfp_pre_submit_instructions": { "$ref": "#/definitions/string_en" },
+          "cfp_post_submit_instructions": { "$ref": "#/definitions/string_en" },
+          "contact_information": { "$ref": "#/definitions/string_en" },
+          "redirect_url": {"$ref": "#/definitions/url"},
+          "slug": { "$ref": "#/definitions/string_en" },
+          "status": { "$ref": "#/definitions/conference_status" },
+          "sub_title": { "$ref": "#/definitions/string_en" },
+          "title": { "$ref": "#/definitions/string_en" },
+          "timetable_available": { "type": "boolean" },
+          "timezone": {"$ref": "#/definitions/string_en" },
+          "user_id": { "$ref": "#/definitions/uuid" }
+        },
+        "patternProperties": {
+          "title#[a-z]+": { "$ref": "#/definitions/string_i18n" },
+          "sub_title#[a-z]+": { "$ref": "#/definitions/string_i18n" },
+          "description#[a-z]+": { "$ref": "#/definitions/string_i18n" },
+          "cfp_lead_text#[a-z]+": { "$ref": "#/definitions/string_i18n" },
+          "cfp_pre_submit_instructions#[a-z]+": { "$ref": "#/definitions/string_i18n" },
+          "cfp_post_submit_instructions#[a-z]+": { "$ref": "#/definitions/string_i18n" },
+          "contact_information#[a-z]+": { "$ref": "#/definitions/string_i18n" }
+        },
+        "required": ["id", "user_id"]
+      }
+    },
+    {
+      "title": "Delete conference series",
+      "rel": "delete",
+      "hsup.wrapper": ["httpWithBasicAuth", "httpWithClientSession"],
+      "href": "/v2/conference_series/delete",
+      "method": "POST",
+      "encType": "application/json",
+      "schema": {
+        "type": "object",
+        "required": ["id", "user_id"],
+        "properties": {
+          "id": { "$ref": "#/definitions/uuid" },
+          "user_id": { "$ref": "#/definitions/uuid" }
+        }
+      }
+    },
+    {
+      "title": "Delete conference",
+      "rel": "delete",
+      "hsup.wrapper": ["httpWithBasicAuth", "httpWithClientSession"],
+      "href": "/v2/conference/delete",
+      "method": "POST",
+      "encType": "application/json",
+      "schema": {
+        "type": "object",
+        "required": ["id"],
+        "properties": {
+          "id": { "$ref": "#/definitions/uuid" }
+        }
+      }
+    },
+    {
+      "title": "Create session",
+      "rel": "create",
+      "hsup.wrapper": ["httpWithBasicAuth", "httpWithClientSession"],
+      "method": "POST",
+      "href": "/v2/session/create",
+      "schema": {
+        "type": "object",
+        "required": ["conference_id", "speaker_id", "session_type_id", "user_id"],
+        "properties": {
+          "conference_id": { "$ref": "#/definitions/uuid" },
+          "speaker_id": { "$ref": "#/definitions/uuid" },
+          "session_type_id": { "$ref": "#/definitions/uuid" },
+          "title": { "$ref": "#/definitions/string_en" },
+          "abstract": { "$ref": "#/definitions/markdown_en" },
+          "memo": { "type": "string" },
+          "material_level": { "$ref": "#/definitions/material_level" },
+          "tags": { "type": "string" },
+          "category": { "type": "string" },
+          "spoken_language": { "$ref": "#/definitions/language" },
+          "slide_language": { "$ref": "#/definitions/language" },
+          "slide_subtitles": { "$ref": "#/definitions/language" },
+          "slide_url": { "$ref": "#/definitions/url" },
+          "video_url": { "$ref": "#/definitions/url" },
+          "photo_release": { "$ref": "#/definitions/binary_permission_default_allow" },
+          "recording_release": { "$ref": "#/definitions/binary_permission_default_allow" },
+          "materials_release": { "$ref": "#/definitions/binary_permission_default_allow" },
+          "user_id": { "$ref": "#/definitions/uuid" }
+        },
+        "patternProperties": {
+          "title#[a-z]+": { "$ref": "#/definitions/string_i18n" },
+          "abstract#[a-z]+": { "$ref": "#/definitions/markdown_i18n" }
+        }
+      },
+      "targetSchema": {"$ref": "#/definitions/object_id"}
+    },
+    {
+      "title": "Lookup session",
+      "href": "/v2/session/lookup",
+      "rel": "lookup",
+      "hsup.wrapper": "httpWithOptionalBasicAuth",
+      "hsup.cors": "*",
+      "method": "GET",
+      "schema": {
+        "required": ["id"],
+        "properties": {
+          "id": { "$ref": "#/definitions/uuid" },
+          "lang": { "$ref": "#/definitions/language" }
+        }
+      },
+      "targetSchema": { "$ref": "#/definitions/session" }
+    },
+    {
+      "title": "Delete session",
+      "href": "/v2/session/delete",
+      "hsup.wrapper": ["httpWithBasicAuth", "httpWithClientSession"],
+      "method": "POST",
+      "rel": "lookup",
+      "encType": "application/json",
+      "schema": {
+        "required": ["id", "user_id"],
+        "properties": {
+          "id": { "$ref": "#/definitions/uuid" },
+          "user_id": { "$ref": "#/definitions/uuid" }
+        }
+      }
+    },
+    {
+      "title": "Update session",
+      "rel": "update",
+      "hsup.wrapper": "httpWithBasicAuth",
+      "method": "POST",
+      "href": "/v2/session/update",
+      "schema": {
+        "type": "object",
+        "required": ["id", "user_id"],
+        "properties": {
+          "id": { "$ref": "#/definitions/uuid" },
+          "conference_id": { "$ref": "#/definitions/uuid" },
+          "speaker_id": { "$ref": "#/definitions/uuid" },
+          "session_type_id": { "$ref": "#/definitions/uuid" },
+          "title": { "$ref": "#/definitions/string_en" },
+          "abstract": { "$ref": "#/definitions/markdown_en" },
+          "memo": { "type": "string" },
+          "duration": { "$ref": "#/definitions/duration" },
+          "material_level": { "$ref": "#/definitions/material_level" },
+          "tags": { "type": "string" },
+          "category": { "type": "string" },
+          "spoken_language": { "$ref": "#/definitions/language" },
+          "slide_language": { "$ref": "#/definitions/language" },
+          "slide_subtitles": { "$ref": "#/definitions/language" },
+          "slide_url": { "$ref": "#/definitions/url" },
+          "starts_on": { "$ref": "#/definitions/datetime" },
+          "video_url": { "$ref": "#/definitions/url" },
+          "photo_release": { "$ref": "#/definitions/binary_permission" },
+          "recording_release": { "$ref": "#/definitions/binary_permission" },
+          "materials_release": { "$ref": "#/definitions/binary_permission" },
+          "has_interpretation": { "type": "boolean" },
+          "status": { "$ref": "#/definitions/acceptance_status" },
+          "sort_order": { "$ref": "#/definitions/positiveInteger" },
+          "confirmed": { "type": "boolean" },
+          "user_id": { "$ref": "#/definitions/uuid" }
+        },
+        "patternProperties": {
+          "title#[a-z]+": { "$ref": "#/definitions/string_i18n" },
+          "abstract#[a-z]+": { "$ref": "#/definitions/markdown_i18n" }
+        }
+      }
+    },
+    {
+      "title": "List sessions",
+      "href": "/v2/session/list",
+      "hsup.cors": "*",
+      "hsup.wrapper": "httpWithOptionalBasicAuth",
+      "method": "GET",
+      "rel": "list",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "confirmed": {"type": "array", "items": {"type": "boolean"} },
+          "conference_id": { "$ref": "#/definitions/uuid" },
+          "range_start": { "$ref": "#/definitions/rfc3339" },
+          "range_end": { "$ref": "#/definitions/rfc3339" },
+          "status": {
+            "type": "array",
+            "items": { "$ref": "#/definitions/acceptance_status" }
+          },
+          "speaker_id": { "$ref": "#/definitions/uuid" },
+          "lang": { "$ref": "#/definitions/language" },
+          "limit": { "$ref": "#/definitions/positiveInteger" },
+          "since": { "$ref": "#/definitions/uuid" }
+        }
+      },
+      "targetSchema": { "$ref": "#/definitions/session_array" }
+    },
+    {
+      "title": "Create question",
+      "hsup.wrapper": "httpWithBasicAuth",
+      "href": "/v2/question/create",
+      "rel": "create",
+      "schema": {
+        "type": "object",
+        "required": ["session_id", "user_id", "body"],
+        "properties": {
+          "session_id": {"$ref": "#/definitions/uuid"},
+          "user_id": {"$ref": "#/definitions/uuid"},
+          "body": {"type":"string"}
+        }
+      },
+      "targetSchema": {"$ref": "#/definitions/object_id"}
+    },
+    {
+      "title": "Delete question",
+      "hsup.wrapper": ["httpWithBasicAuth", "httpWithClientSession"],
+      "href": "/v2/question/delete",
+      "method": "POST",
+      "rel": "delete",
+      "schema": {
+        "type": "object",
+        "required": ["id"],
+        "properties": {
+          "id": {"$ref": "#/definitions/uuid"}
+        }
+      }
+    },
+    {
+      "title": "List question",
+      "href": "/v2/question/list",
+      "hsup.wrapper": "httpWithOptionalBasicAuth",
+      "rel": "list",
+      "schema": {
+        "type": "object",
+        "required": ["session_id"],
+        "properties": {
+          "limit": {"$ref": "#/definitions/positiveInteger"},
+          "session_id": {"$ref": "#/definitions/uuid"},
+          "since": {"$ref": "#/definitions/uuid"}
+        }
+      },
+      "targetSchema": { "$ref": "#/definitions/question_array" }
+    },
+    {
+      "title": "Create session survey response",
+      "hsup.wrapper": "httpWithBasicAuth",
+      "href": "/v2/survey_session_response/create",
+      "rel": "create",
+      "schema": {
+        "type": "object",
+        "required": ["session_id","user_id","user_prior_knowledge","speaker_knowledge","speaker_presentation","material_quality","overall_rating"],
+        "properties": {
+          "user_id": {"$ref": "#/definitions/uuid"},
+          "session_id": {"$ref": "#/definitions/uuid"},
+          "user_prior_knowledge": {"$ref": "#/definitions/int_rating"},
+          "speaker_knowledge": {"$ref": "#/definitions/int_rating"},
+          "speaker_presentation": {"$ref": "#/definitions/int_rating"},
+          "material_quality": {"$ref": "#/definitions/int_rating"},
+          "overall_rating": {"$ref": "#/definitions/int_rating"},
+          "comment_good": {"type": "string"},
+          "comment_improvement": {"type": "string"}
+        }
+      },
+      "targetSchema": {"$ref": "#/definitions/object_id"}
+    },
+    {
+      "title": "Add featured speaker",
+      "href": "/v2/featured_speaker/add",
+      "hsup.wrapper": ["httpWithBasicAuth", "httpWithClientSession"],
+      "method": "POST",
+      "rel": "create",
+      "schema": {
+        "type": "object",
+        "required": ["conference_id","display_name","description"],
+        "properties": {
+          "speaker_id": {"$ref": "#/definitions/uuid"},
+          "conference_id": {"$ref": "#/definitions/uuid"},
+          "avatar_url": {"$ref": "#/definitions/url" },
+          "display_name": { "$ref": "#/definitions/string_en_not_empty" },
+          "description": { "$ref": "#/definitions/string_en_not_empty" },
+          "user_id": {"$ref": "#/definitions/uuid"}
+        },
+        "patternProperties": {
+          "display_name#[a-z]+": { "$ref": "#/definitions/string_i18n" },
+          "description#[a-z]+": { "$ref": "#/definitions/string_i18n" }
+        }
+      },
+      "targetSchema": { "$ref": "#/definitions/featured_speaker" }
+    },
+    {
+      "title": "Lookup featured speaker",
+      "href": "/v2/featured_speaker/lookup",
+      "hsup.wrapper": "httpWithBasicAuth",
+      "hsup.cors": "*",
+      "method": "GET",
+      "rel": "update",
+      "schema": {
+        "type": "object",
+        "required": ["id"],
+        "properties": {
+          "id": {"$ref": "#/definitions/uuid"},
+          "lang": { "$ref": "#/definitions/language" }
+        }
+      },
+      "targetSchema": { "$ref": "#/definitions/featured_speaker" }
+    },
+    {
+      "title": "List featured speakers",
+      "href": "/v2/featured_speaker/list",
+      "hsup.wrapper": "httpWithOptionalBasicAuth",
+      "rel": "list",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "limit": {"$ref": "#/definitions/positiveIntegerDefault10"},
+          "conference_id": {"$ref": "#/definitions/uuid"},
+          "since": {"$ref": "#/definitions/uuid"},
+          "lang": { "$ref": "#/definitions/language" }
+        }
+      },
+      "targetSchema": { "$ref": "#/definitions/featured_speaker_array" }
+    },
+    {
+      "title": "Update featured speaker",
+      "href": "/v2/featured_speaker/update",
+      "hsup.wrapper": "httpWithBasicAuth",
+      "method": "POST",
+      "rel": "update",
+      "schema": {
+        "type": "object",
+        "required": ["id","user_id"],
+        "properties": {
+          "id": {"$ref": "#/definitions/uuid"},
+          "speaker_id": {"$ref": "#/definitions/uuid"},
+          "avatar_url": {"$ref": "#/definitions/url" },
+          "display_name": { "$ref": "#/definitions/string_en_not_empty" },
+          "description": { "$ref": "#/definitions/string_en_not_empty" },
+          "user_id": {"$ref": "#/definitions/uuid"}
+        },
+        "patternProperties": {
+          "display_name#[a-z]+": { "$ref": "#/definitions/string_i18n" },
+          "description#[a-z]+": { "$ref": "#/definitions/string_i18n" }
+        }
+      }
+    },
+    {
+      "title": "Delete featured speaker",
+      "href": "/v2/featured_speaker/delete",
+      "hsup.wrapper": ["httpWithBasicAuth", "httpWithClientSession"],
+      "method": "POST",
+      "rel": "delete",
+      "schema": {
+        "type": "object",
+        "required": ["id","user_id"],
+        "properties": {
+          "id": {"$ref": "#/definitions/uuid"},
+          "user_id": {"$ref": "#/definitions/uuid"}
+        }
+      }
+    },
+    {
+      "title": "Add sponsor",
+      "href": "/v2/sponsor/add",
+      "hsup.wrapper": "httpWithBasicAuth",
+      "method": "POST",
+      "rel": "create",
+      "schema": {
+        "type": "object",
+        "required": ["conference_id","name","url","group_name","user_id"],
+        "properties": {
+          "conference_id": {"$ref": "#/definitions/uuid"},
+          "name": { "$ref": "#/definitions/string_en_not_empty" },
+          "group_name": { "$ref": "#/definitions/string_en_not_empty" },
+          "sort_order": { "$ref": "#/definitions/positiveInteger" },
+          "logo_url": {"$ref": "#/definitions/url" },
+          "url": {"$ref": "#/definitions/url" },
+          "user_id": {"$ref": "#/definitions/uuid"}
+        },
+        "patternProperties": {
+          "name#[a-z]+": { "$ref": "#/definitions/string_i18n" }
+        }
+      },
+      "targetSchema": { "$ref": "#/definitions/sponsor" }
+    },
+    {
+      "title": "Lookup sponsor",
+      "href": "/v2/sponsor/lookup",
+      "hsup.wrapper": "httpWithOptionalBasicAuth",
+      "hsup.cors": "*",
+      "method": "GET",
+      "rel": "update",
+      "schema": {
+        "type": "object",
+        "required": ["id"],
+        "properties": {
+          "id": {"$ref": "#/definitions/uuid"},
+          "lang": { "$ref": "#/definitions/language" }
+        }
+      },
+      "targetSchema": { "$ref": "#/definitions/sponsor" }
+    },
+    {
+      "title": "List sponsors",
+      "href": "/v2/sponsor/list",
+      "hsup.wrapper": "httpWithOptionalBasicAuth",
+      "rel": "list",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "limit": {"$ref": "#/definitions/positiveIntegerDefault10"},
+          "conference_id": {"$ref": "#/definitions/uuid"},
+          "since": {"$ref": "#/definitions/uuid"},
+          "lang": { "$ref": "#/definitions/language" }
+        }
+      },
+      "targetSchema": { "$ref": "#/definitions/sponsor_array" }
+    },
+    {
+      "title": "Update sponsor",
+      "href": "/v2/sponsor/update",
+      "hsup.wrapper": "httpWithBasicAuth",
+      "method": "POST",
+      "rel": "update",
+      "schema": {
+        "type": "object",
+        "required": ["id","user_id"],
+        "properties": {
+          "id": {"$ref": "#/definitions/uuid"},
+          "name": { "$ref": "#/definitions/string_en_not_empty" },
+          "group_name": { "$ref": "#/definitions/string_en_not_empty" },
+          "sort_order": { "$ref": "#/definitions/positiveInteger" },
+          "logo_url": {"$ref": "#/definitions/url" },
+          "url": {"$ref": "#/definitions/url" },
+          "user_id": {"$ref": "#/definitions/uuid"}
+        },
+        "patternProperties": {
+          "name#[a-z]+": { "$ref": "#/definitions/string_i18n" }
+        }
+      }
+    },
+    {
+      "title": "Delete sponsor",
+      "href": "/v2/sponsor/delete",
+      "hsup.wrapper": ["httpWithBasicAuth", "httpWithClientSession"],
+      "method": "POST",
+      "rel": "delete",
+      "schema": {
+        "type": "object",
+        "required": ["id","user_id"],
+        "properties": {
+          "id": {"$ref": "#/definitions/uuid"},
+          "user_id": {"$ref": "#/definitions/uuid"}
+        }
+      }
+    },
+    {
+      "title": "Create temporary email",
+      "href": "/v2/email/create",
+      "hsup.wrapper": "httpWithBasicAuth",
+      "method": "POST",
+      "rel": "create",
+      "schema": {
+        "type": "object",
+        "required": ["target_id", "user_id", "email"],
+        "properties": {
+          "target_id": {"$ref": "#/definitions/uuid"},
+          "user_id": {"$ref": "#/definitions/uuid"},
+          "email": { "$ref": "#/definitions/email" }
+        }
+      },
+      "targetSchema": {
+        "type": "object",
+        "properties": {
+          "confirmation_key": {"$ref": "#/definitions/uuid"}
+        }
+      }
+    },
+    {
+      "title": "Confirm temporary email",
+      "href": "/v2/email/confirm",
+      "hsup.wrapper": "httpWithBasicAuth",
+      "method": "POST",
+      "rel": "update",
+      "schema": {
+        "type": "object",
+        "required": ["target_id", "user_id", "confirmation_key"],
+        "properties": {
+          "target_id": {"$ref": "#/definitions/uuid"},
+          "user_id": {"$ref": "#/definitions/uuid"},
+          "confirmation_key": { "$ref": "#/definitions/uuid" }
+        }
+      }
+    },
+    {
+      "title": "Send selection result notification",
+      "href": "/v2/session/send_selection_result_notification",
+      "hsup.wrapper": "httpWithBasicAuth",
+      "method": "POST",
+      "rel": "update",
+      "schema": {
+        "type": "object",
+        "required": ["id", "user_id"],
+        "properties": {
+          "force": {"type": "boolean"},
+          "session_id": {"$ref": "#/definitions/uuid"},
+          "user_id": {"$ref": "#/definitions/uuid"}
+        }
+      },
+      "targetSchema": {
+        "type": "object",
+        "properties": {
+          "message": {"type": "string"}
+        }
+      }
+    },
+    {
+      "title": "Send all selection result notification",
+      "href": "/v2/session/send_all_selection_result_notification",
+      "hsup.wrapper": "httpWithBasicAuth",
+      "method": "POST",
+      "rel": "update",
+      "schema": {
+        "type": "object",
+        "required": ["conference_id"],
+        "properties": {
+          "force": {"type": "boolean"},
+          "conference_id": {"$ref": "#/definitions/uuid"},
+          "user_id": {"$ref": "#/definitions/uuid"}
+        }
+      },
+      "targetSchema": {
+        "type": "object",
+        "properties": {
+          "message": {"type": "string"}
+        }
+      }
+    },
+    {
+      "title": "Create track",
+      "rel": "update",
+      "hsup.wrapper": "httpWithBasicAuth",
+      "method": "POST",
+      "href": "/v2/track/create",
+      "encType": "application/json",
+      "schema": {
+        "properties": {
+          "conference_id": {"$ref": "#/definitions/uuid"},
+          "room_id": {"$ref":"#/definitions/uuid"},
+          "name": {"$ref":"#/definitions/string_en"},
+          "sort_order": {"$ref":"#/definitions/positiveInteger"},
+          "user_id": {"$ref":"#/definitions/uuid"}
+        },
+        "patternProperties": {
+          "name#[a-z]+": { "$ref": "#/definitions/string_i18n" }
+        },
+        "required": ["conference_id","room_id","user_id"]
+      }
+    },
+    {
+      "title": "Update track",
+      "rel": "update",
+      "hsup.wrapper": "httpWithBasicAuth",
+      "method": "POST",
+      "href": "/v2/track/update",
+      "encType": "application/json",
+      "schema": {
+        "properties": {
+          "id": {"$ref": "#/definitions/uuid"},
+          "room_id": {"$ref":"#/definitions/uuid"},
+          "name": {"$ref":"#/definitions/string_en"},
+          "sort_order": {"$ref":"#/definitions/positiveInteger"},
+          "user_id": {"$ref":"#/definitions/uuid"}
+        },
+        "patternProperties": {
+          "name#[a-z]+": { "$ref": "#/definitions/string_i18n" }
+        },
+        "required": ["id","user_id"]
+      }
+    },
+    {
+      "title": "Delete track",
+      "rel": "delete",
+      "hsup.wrapper": ["httpWithBasicAuth", "httpWithClientSession"],
+      "method": "POST",
+      "href": "/v2/track/delete",
+      "encType": "application/json",
+      "schema": {
+        "properties": {
+          "id": {"$ref": "#/definitions/uuid"},
+          "user_id": {"$ref":"#/definitions/uuid"}
+        },
+        "required": ["id","user_id"]
+      }
+    },
+    {
+      "title": "Lookup track",
+      "rel": "lookup",
+      "href": "/v2/track/lookup",
+      "hsup.cors": "*",
+      "method": "GET",
+      "schema": {
+        "type": "object",
+        "required": ["id"],
+        "properties": {
+          "id": { "$ref": "#/definitions/uuid" },
+          "lang": { "$ref": "#/definitions/language" }
+        }
+      },
+      "targetSchema": { "$ref": "#/definitions/track" }
+    },
+    {
+      "title": "Create blog entry",
+      "rel": "update",
+      "hsup.wrapper": "httpWithBasicAuth",
+      "method": "POST",
+      "href": "/v2/blog_entry/create",
+      "encType": "application/json",
+      "schema": {
+        "properties": {
+          "conference_id": {"$ref": "#/definitions/uuid"},
+          "title": {"type": "string"},
+          "url": {"$ref": "#/definitions/url" },
+          "status": {
+            "type": "string",
+            "enum": ["public", "private"]
+          },
+          "user_id": {"$ref":"#/definitions/uuid"}
+        },
+        "required": ["conference_id","url"]
+      },
+      "targetSchema": {"$ref": "#/definitions/blog_entry"}
+    },
+    {
+      "title": "Update blog entry",
+      "rel": "update",
+      "hsup.wrapper": "httpWithBasicAuth",
+      "method": "POST",
+      "href": "/v2/blog_entry/update",
+      "encType": "application/json",
+      "schema": {
+        "properties": {
+          "id": {"$ref": "#/definitions/uuid"},
+          "status": {
+            "type": "string",
+            "enum": ["public", "private"]
+          },
+          "title": {"type": "string"},
+          "url": {"$ref": "#/definitions/url" },
+          "user_id": {"$ref":"#/definitions/uuid"}
+        },
+        "required": ["id","user_id"]
+      }
+    },
+    {
+      "title": "Delete blog entry",
+      "rel": "delete",
+      "hsup.wrapper": ["httpWithBasicAuth", "httpWithClientSession"],
+      "method": "POST",
+      "href": "/v2/blog_entry/delete",
+      "encType": "application/json",
+      "schema": {
+        "properties": {
+          "id": {"$ref": "#/definitions/uuid"},
+          "user_id": {"$ref":"#/definitions/uuid"}
+        },
+        "required": ["id","user_id"]
+      }
+    },
+    {
+      "title": "Lookup blog entry",
+      "rel": "lookup",
+      "href": "/v2/blog_entry/lookup",
+      "hsup.cors": "*",
+      "method": "GET",
+      "schema": {
+        "type": "object",
+        "required": ["id"],
+        "properties": {
+          "id": { "$ref": "#/definitions/uuid" },
+          "lang": { "$ref": "#/definitions/language" }
+        }
+      },
+      "targetSchema": { "$ref": "#/definitions/blog_entry" }
+    },
+    {
+      "title": "List blog entries",
+      "rel": "lookup",
+      "href": "/v2/blog_entry/list",
+      "hsup.cors": "*",
+      "method": "GET",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "conference_id": { "$ref": "#/definitions/uuid" },
+          "lang": { "$ref": "#/definitions/language" },
+          "status": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": ["public", "private"]
+            }
+          }
+        }
+      },
+      "targetSchema": {
+        "hsup.type": "[]model.BlogEntry",
+        "type": "array",
+        "items": { "$ref": "#/definitions/blog_entry" }
+      }
+    },
+    {
+      "title": "List conference staff",
+      "rel": "lookup",
+      "hsup.cors": "*",
+      "hsup.wrapper": "httpWithOptionalBasicAuth",
+      "href": "/v2/conference/staff/list",
+      "method": "GET",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "conference_id": { "$ref": "#/definitions/uuid" },
+          "lang": { "$ref": "#/definitions/language" }
+        }
+      },
+      "targetSchema": {
+        "hsup.type": "[]model.User",
+        "type": "array",
+        "items": { "$ref": "#/definitions/user" }
+      }
+    },
+    {
+      "title": "Add conference staff",
+      "rel": "update",
+      "hsup.wrapper": "httpWithBasicAuth",
+      "method": "POST",
+      "href": "/v2/conference/staff/add",
+      "encType": "application/json",
+      "schema": {
+        "properties": {
+          "conference_id": {"$ref": "#/definitions/uuid"},
+          "staff_id": {"$ref":"#/definitions/uuid"},
+          "user_id": {"$ref":"#/definitions/uuid"}
+        },
+        "required": ["conference_id","staff_id","user_id"]
+      }
+    },
+    {
+      "title": "Delete conference staff",
+      "rel": "delete",
+      "hsup.wrapper": ["httpWithBasicAuth","httpWithClientSession"],
+      "method": "POST",
+      "href": "/v2/conference/staff/delete",
+      "encType": "application/json",
+      "schema": {
+        "properties": {
+          "conference_id": {"$ref": "#/definitions/uuid"},
+          "staff_id": {"$ref":"#/definitions/uuid"},
+          "user_id": {"$ref":"#/definitions/uuid"}
+        },
+        "required": ["conference_id","staff_id","user_id"]
+      }
+    },
+    {
+      "title": "Lookup external resource",
+      "rel": "lookup",
+      "hsup.cors": "*",
+      "method": "GET",
+      "href": "/v2/external_resource/lookup",
+      "encType": "application/json",
+      "schema": {
+        "hsup.type": "model.LookupExternalResourceRequest",
+        "properties": {
+          "id": {"$ref": "#/definitions/uuid"},
+          "limit": { "$ref": "#/definitions/positiveIntegerDefault10" },
+          "since": { "$ref": "#/definitions/uuid" },
+          "lang": { "$ref": "#/definitions/language" }
+        },
+        "required": ["id"]
+      },
+      "targetSchema": { "$ref": "#/definitions/external_resource" }
+    },
+    {
+      "title": "List external resource",
+      "rel": "list",
+      "hsup.cors": "*",
+      "method": "GET",
+      "href": "/v2/external_resource/list",
+      "encType": "application/json",
+      "schema": {
+        "properties": {
+          "conference_id": {"$ref": "#/definitions/uuid"},
+          "limit": { "$ref": "#/definitions/positiveIntegerDefault10" },
+          "since": { "$ref": "#/definitions/uuid" },
+          "lang": { "$ref": "#/definitions/language" }
+        },
+        "required": ["conference_id","user_id"]
+      },
+      "targetSchema": {
+        "type": "array",
+        "hsup.type": "[]model.ExternalResource",
+        "items": { "$ref": "#/definitions/external_resource" }
+      }
+    },
+    {
+      "title": "Create external resource",
+      "hsup.wrapper": "httpWithBasicAuth",
+      "rel": "create",
+      "method": "POST",
+      "href": "/v2/external_resource/create",
+      "encType": "application/json",
+      "schema": {
+        "hsup.type": "model.CreateExternalResourceRequest",
+        "properties": {
+          "conference_id": {"$ref": "#/definitions/uuid"},
+          "description": {"$ref": "#/definitions/string_en"},
+          "image_url": {"$ref": "#/definitions/url"},
+          "title": {"$ref": "#/definitions/string_en_not_empty"},
+          "url": {"$ref": "#/definitions/url"},
+          "sort_order": { "$ref": "#/definitions/positiveInteger" },
+          "user_id": {"$ref":"#/definitions/uuid"}
+        },
+        "patternProperties": {
+          "description#[a-z]+": { "$ref": "#/definitions/string_i18n" },
+          "title#[a-z]+": { "$ref": "#/definitions/string_i18n" }
+        },
+        "required": ["conference_id", "title", "url", "user_id"]
+      },
+      "targetSchema": { "$ref": "#/definitions/external_resource" }
+    },
+    {
+      "title": "Update external resource",
+      "hsup.wrapper": "httpWithBasicAuth",
+      "rel": "update",
+      "method": "POST",
+      "href": "/v2/external_resource/update",
+      "encType": "application/json",
+      "schema": {
+        "hsup.type": "model.UpdateExternalResourceRequest",
+        "properties": {
+          "id": {"$ref": "#/definitions/uuid"},
+          "description": {"$ref": "#/definitions/string_en"},
+          "image_url": {"$ref": "#/definitions/url"},
+          "title": {"$ref": "#/definitions/string_en"},
+          "url": {"$ref": "#/definitions/url"},
+          "sort_order": { "$ref": "#/definitions/positiveInteger" },
+          "user_id": {"$ref":"#/definitions/uuid"}
+        },
+        "patternProperties": {
+          "description#[a-z]+": { "$ref": "#/definitions/string_i18n" },
+          "title#[a-z]+": { "$ref": "#/definitions/string_i18n" }
+        },
+        "required": ["id", "user_id"]
+      },
+      "targetSchema": { "$ref": "#/definitions/external_resource" }
+    },
+    {
+      "title": "Delete external resource",
+      "hsup.wrapper": ["httpWithBasicAuth","httpWithClientSession"],
+      "rel": "delete",
+      "method": "POST",
+      "href": "/v2/external_resource/delete",
+      "encType": "application/json",
+      "schema": {
+        "properties": {
+          "id": {"$ref": "#/definitions/uuid"},
+          "user_id": {"$ref": "#/definitions/uuid"}
+        },
+        "required": ["id","user_id"]
+      }
+    },
+    {
+      "title": "Set session video cover",
+      "href": "/v2/session/video_cover",
+      "hsup.multipartFiles": ["image"],
+      "hsup.wrapper": "httpWithBasicAuth",
+      "encType": "multipart/form-data",
+      "method": "POST",
+      "rel": "update",
+      "schema": {
+        "type": "object",
+        "required": ["id","user_id"],
+        "properties": {
+          "id": {"$ref": "#/definitions/uuid"},
+          "user_id": {"$ref": "#/definitions/uuid"}
+        }
+      }
+    }
+  ]
+}

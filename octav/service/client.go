@@ -4,7 +4,9 @@ import (
 	"context"
 	"database/sql"
 	"net/http"
+	"time"
 
+	"github.com/builderscon/octav/octav/cache"
 	"github.com/builderscon/octav/octav/db"
 	"github.com/builderscon/octav/octav/internal/errors"
 	"github.com/builderscon/octav/octav/model"
@@ -54,23 +56,23 @@ func clientSessionKey(sessionID, clientID string) string {
 	buf := tools.GetBuffer()
 	defer tools.ReleaseBuffer(buf)
 
-	buf.WriteString(`client.`)
+	buf.WriteString(`client-session.`)
 	buf.WriteString(clientID)
-	buf.WriteString(`.session`)
+	buf.WriteString(`.`)
 	buf.WriteString(sessionID)
 	return buf.String()
 }
 
 func (v *ClientSvc) LoadClientSession(ctx context.Context, tx *sql.Tx, sessionID, clientID string, u *model.User) (err error) {
+	key := clientSessionKey(sessionID, clientID)
 	if pdebug.Enabled {
-		g := pdebug.Marker("service.Client.LoadClientSession").BindError(&err)
+		g := pdebug.Marker("service.Client.LoadClientSession %s", key).BindError(&err)
 		defer g.End()
 	}
 
 	// load the session
 	cache := Cache()
 
-	key := clientSessionKey(sessionID, clientID)
 	var userID string
 	if err := cache.Get(key, &userID); err != nil {
 		return errors.Wrap(err, `failed to fetch session`)
@@ -81,5 +83,19 @@ func (v *ClientSvc) LoadClientSession(ctx context.Context, tx *sql.Tx, sessionID
 		return errors.Wrap(err, `failed to load user`)
 	}
 	return nil
+}
 
+func (v *ClientSvc) CreateClientSession(ctx context.Context, tx *sql.Tx, sessionID, clientID, userID string) (err error) {
+	key := clientSessionKey(sessionID, clientID)
+	if pdebug.Enabled {
+		g := pdebug.Marker("service.Client.CreateClientSession %s", key).BindError(&err)
+		defer g.End()
+	}
+
+	c := Cache()
+	if err := c.Set(key, userID, cache.WithExpires(time.Hour)); err != nil {
+		return errors.Wrap(err, `failed to fetch session`)
+	}
+
+	return nil
 }
