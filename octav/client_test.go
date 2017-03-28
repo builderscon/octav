@@ -465,20 +465,6 @@ func bconsession(cid, speakerID, userID, sessionTypeID string) *model.CreateSess
 	return &in
 }
 
-func testStartSubmission(ctx *TestCtx, sessionTypeID, userID string, ref time.Time) error {
-	r := &model.UpdateSessionTypeRequest{
-		ID:     sessionTypeID,
-		UserID: userID,
-	}
-	r.SubmissionStart.Set(ref.Add(-1 * 24 * time.Hour).Format(time.RFC3339))
-	r.SubmissionEnd.Set(ref.Add(24 * time.Hour).Format(time.RFC3339))
-	err := ctx.HTTPClient.UpdateSessionType(r)
-	if !assert.NoError(ctx.T, err, "StartSessionSubmission should be successful") {
-		return err
-	}
-	return err
-}
-
 func TestSessionCRUD(t *testing.T) {
 	ctx, err := NewTestCtx(t)
 	if !assert.NoError(t, err, "failed to create test ctx") {
@@ -669,11 +655,14 @@ func TestSessionCRUD(t *testing.T) {
 					UserID:    ctx.Superuser.EID,
 					Force:     true,
 				}
-				sendres, err := ctx.HTTPClient.SendSelectionResultNotification(&r)
+				err := withSession(ctx, ctx.Superuser.EID, func(s *client.Session) error {
+					sendres, err := s.SendSelectionResultNotification(&r)
+					ctx.T.Logf("%#v", sendres)
+					return err
+				})
 				if !assert.NoError(t, err, "Send selection result notification") {
 					return
 				}
-				ctx.T.Logf("%#v", sendres)
 			}
 		}
 

@@ -5,6 +5,7 @@ import (
 	"flag"
 	"os"
 	"testing"
+	"time"
 
 	"github.com/builderscon/octav/octav/client"
 	"github.com/builderscon/octav/octav/db"
@@ -141,17 +142,22 @@ func testCreateRoomFail(ctx *TestCtx, v *model.CreateRoomRequest) (*model.Object
 }
 
 func testCreateRoom(ctx *TestCtx, r *model.CreateRoomRequest, fail bool) (*model.ObjectID, error) {
-	res, err := ctx.HTTPClient.CreateRoom(r)
-	if fail {
-		if !assert.Error(ctx.T, err, "CreateRoom should fail") {
-			return nil, errors.New("expected operation to fail, but succeeded")
+	var id *model.ObjectID
+	err := withSession(ctx, r.UserID, func(s *client.Session) error {
+		res, err := s.Client.CreateRoom(r)
+		if fail {
+			if !assert.Error(ctx.T, err, "CreateRoom should fail") {
+				return errors.New("expected operation to fail, but succeeded")
+			}
+			return nil
 		}
-		return nil, nil
-	}
-	if !assert.NoError(ctx.T, err, "CreateRoom should succeed") {
-		return nil, err
-	}
-	return res, nil
+		if !assert.NoError(ctx.T, err, "CreateRoom should succeed") {
+			return err
+		}
+		id = res
+		return nil
+	})
+	return id, err
 }
 
 func testCreateConferencePass(ctx *TestCtx, in *model.CreateConferenceRequest) (*model.ObjectID, error) {
@@ -225,11 +231,16 @@ func testDeleteSponsor(ctx *TestCtx, id, userID string) error {
 }
 
 func testCreateSponsor(ctx *TestCtx, in *model.AddSponsorRequest) (*model.Sponsor, error) {
-	res, err := ctx.HTTPClient.AddSponsor(in)
-	if !assert.NoError(ctx.T, err, "CreateSponsor should succeed") {
-		return nil, err
-	}
-	return res, nil
+	var sponsor *model.Sponsor
+	err := withSession(ctx, in.UserID, func(s *client.Session) error {
+		res, err := s.AddSponsor(in)
+		if !assert.NoError(ctx.T, err, "CreateSponsor should succeed") {
+			return err
+		}
+		sponsor = res
+		return nil
+	})
+	return sponsor, err
 }
 
 func testLookupSession(ctx *TestCtx, id, lang string) (*model.Session, error) {
@@ -245,11 +256,13 @@ func testLookupSession(ctx *TestCtx, id, lang string) (*model.Session, error) {
 }
 
 func testUpdateSession(ctx *TestCtx, in *model.UpdateSessionRequest) error {
-	err := ctx.HTTPClient.UpdateSession(in)
-	if !assert.NoError(ctx.T, err, "UpdateSession succeeds") {
-		return err
-	}
-	return nil
+	return withSession(ctx, in.UserID, func(s *client.Session) error {
+		err := s.UpdateSession(in)
+		if !assert.NoError(ctx.T, err, "UpdateSession succeeds") {
+			return err
+		}
+		return nil
+	})
 }
 
 func testDeleteSession(ctx *TestCtx, sessionID, userID string, fail bool) error {
@@ -278,18 +291,20 @@ func testDeleteSessionFail(ctx *TestCtx, sessionID, userID string) error {
 }
 
 func testUpdateUser(ctx *TestCtx, r *model.UpdateUserRequest, fail bool) error {
-	err := ctx.HTTPClient.UpdateUser(r)
-	if fail {
-		if !assert.Error(ctx.T, err, "UpdateUser should fail") {
-			return errors.New("expected operation to fail, but succeeded")
+	return withSession(ctx, r.UserID, func(s *client.Session) error {
+		err := s.UpdateUser(r)
+		if fail {
+			if !assert.Error(ctx.T, err, "UpdateUser should fail") {
+				return errors.New("expected operation to fail, but succeeded")
+			}
+			return nil
+		}
+
+		if !assert.NoError(ctx.T, err, "UpdateUser should be successful") {
+			return err
 		}
 		return nil
-	}
-
-	if !assert.NoError(ctx.T, err, "UpdateUser should be successful") {
-		return err
-	}
-	return nil
+	})
 }
 
 func testUpdateUserPass(ctx *TestCtx, r *model.UpdateUserRequest) error {
@@ -376,15 +391,13 @@ func testMakeConferencePublic(ctx *TestCtx, conferenceID, userID string) error {
 }
 
 func testDeleteConference(ctx *TestCtx, id, userID string) error {
-	s, err := ctx.getSession(userID)
-	if !assert.NoError(ctx.T, err, `failed to get session`) {
-		return errors.New(`failed to get session`)
-	}
-	err = s.DeleteConference(&model.DeleteConferenceRequest{ID: id, UserID: userID})
-	if !assert.NoError(ctx.T, err, "DeleteConference should be successful") {
-		return err
-	}
-	return err
+	return withSession(ctx, userID, func(s *client.Session) error {
+		err := s.DeleteConference(&model.DeleteConferenceRequest{ID: id, UserID: userID})
+		if !assert.NoError(ctx.T, err, "DeleteConference should be successful") {
+			return err
+		}
+		return nil
+	})
 }
 
 func testCreateUser(ctx *TestCtx, in *model.CreateUserRequest) (*model.User, error) {
@@ -418,33 +431,33 @@ func testDeleteUser(ctx *TestCtx, targetID, userID string) error {
 }
 
 func testAddConferenceVenue(ctx *TestCtx, confID, venueID, userID string) error {
-	req := model.AddConferenceVenueRequest{
-		ConferenceID: confID,
-		VenueID:      venueID,
-		UserID:       userID,
-	}
-	err := ctx.HTTPClient.AddConferenceVenue(&req)
-	if !assert.NoError(ctx.T, err, "AddConferenceVenue should succeed") {
-		return err
-	}
-	return nil
+	return withSession(ctx, userID, func(s *client.Session) error {
+		req := model.AddConferenceVenueRequest{
+			ConferenceID: confID,
+			VenueID:      venueID,
+			UserID:       userID,
+		}
+		err := s.AddConferenceVenue(&req)
+		if !assert.NoError(ctx.T, err, "AddConferenceVenue should succeed") {
+			return err
+		}
+		return nil
+	})
 }
 
 func testDeleteConferenceVenue(ctx *TestCtx, confID, venueID, userID string) error {
-	req := model.DeleteConferenceVenueRequest{
-		ConferenceID: confID,
-		VenueID:      venueID,
-		UserID:       userID,
-	}
-	s, err := ctx.getSession(userID)
-	if !assert.NoError(ctx.T, err, `failed to get session`) {
-		return errors.New(`failed to get session`)
-	}
-	err = s.DeleteConferenceVenue(&req)
-	if !assert.NoError(ctx.T, err, "DeleteConferenceVenue should succeed") {
-		return err
-	}
-	return nil
+	return withSession(ctx, userID, func(s *client.Session) error {
+		req := model.DeleteConferenceVenueRequest{
+			ConferenceID: confID,
+			VenueID:      venueID,
+			UserID:       userID,
+		}
+		err := s.DeleteConferenceVenue(&req)
+		if !assert.NoError(ctx.T, err, "DeleteConferenceVenue should succeed") {
+			return err
+		}
+		return nil
+	})
 }
 
 func testLookupVenue(ctx *TestCtx, id, lang string) (*model.Venue, error) {
@@ -499,11 +512,13 @@ func testLookupRoom(ctx *TestCtx, id, lang string) (*model.Room, error) {
 }
 
 func testUpdateRoom(ctx *TestCtx, in *model.UpdateRoomRequest) error {
-	err := ctx.HTTPClient.UpdateRoom(in)
-	if !assert.NoError(ctx.T, err, "UpdateRoom succeeds") {
-		return err
-	}
-	return nil
+	return withSession(ctx, in.UserID, func(s *client.Session) error {
+		err := s.UpdateRoom(in)
+		if !assert.NoError(ctx.T, err, "UpdateRoom succeeds") {
+			return err
+		}
+		return nil
+	})
 }
 
 func testDeleteRoom(ctx *TestCtx, roomID, userID string) error {
@@ -545,17 +560,35 @@ func testDeleteConferenceAdmin(ctx *TestCtx, confID, adminID, userID string) err
 }
 
 func testUpdateVenue(ctx *TestCtx, in *model.UpdateVenueRequest) error {
-	err := ctx.HTTPClient.UpdateVenue(in)
-	if !assert.NoError(ctx.T, err, "UpdateVenue succeeds") {
-		return err
-	}
-	return nil
+	return withSession(ctx, in.UserID, func(s *client.Session) error {
+		err := s.UpdateVenue(in)
+		if !assert.NoError(ctx.T, err, "UpdateVenue succeeds") {
+			return err
+		}
+		return nil
+	})
 }
 
 func testDeleteVenue(ctx *TestCtx, venueID, userID string) error {
 	return withSession(ctx, userID, func(s *client.Session) error {
 		err := s.DeleteVenue(&model.DeleteVenueRequest{ID: venueID, UserID: userID})
 		if !assert.NoError(ctx.T, err, "DeleteVenue should be successful") {
+			return err
+		}
+		return nil
+	})
+}
+
+func testStartSubmission(ctx *TestCtx, sessionTypeID, userID string, ref time.Time) error {
+	return withSession(ctx, userID, func(s *client.Session) error {
+		r := &model.UpdateSessionTypeRequest{
+			ID:     sessionTypeID,
+			UserID: userID,
+		}
+		r.SubmissionStart.Set(ref.Add(-1 * 24 * time.Hour).Format(time.RFC3339))
+		r.SubmissionEnd.Set(ref.Add(24 * time.Hour).Format(time.RFC3339))
+		err := s.UpdateSessionType(r)
+		if !assert.NoError(ctx.T, err, "StartSessionSubmission should be successful") {
 			return err
 		}
 		return nil

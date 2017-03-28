@@ -645,7 +645,7 @@
     },
     {
       "title": "Update user",
-      "hsup.wrapper": "httpWithBasicAuth",
+      "hsup.wrapper": ["httpWithBasicAuth","httpWithClientSession"],
       "description": "A user can be a staff/organizer, speaker, or a regular attendee. Information should be obtained from facebook/twitter/github",
       "rel": "create",
       "href": "/v2/user/update",
@@ -708,7 +708,7 @@
     {
       "title": "Create venue",
       "description": "venue describes the establishment in which the conference takes place. a venue contains multiple rooms",
-      "hsup.wrapper": "httpWithBasicAuth",
+      "hsup.wrapper": ["httpWithBasicAuth","httpWithClientSession"],
       "rel": "create",
       "href": "/v2/venue/create",
       "method": "POST",
@@ -768,7 +768,7 @@
     {
       "title": "Update venue",
       "rel": "update",
-      "hsup.wrapper": "httpWithBasicAuth",
+      "hsup.wrapper": ["httpWithBasicAuth","httpWithClientSession"],
       "href": "/v2/venue/update",
       "method": "POST",
       "encType": "application/json",
@@ -805,7 +805,7 @@
     {
       "title": "Create room",
       "rel": "create",
-      "hsup.wrapper": "httpWithBasicAuth",
+      "hsup.wrapper": ["httpWithBasicAuth","httpWithClientSession"],
       "href": "/v2/room/create",
       "method": "POST",
       "encType": "application/json",
@@ -827,7 +827,7 @@
     {
       "title": "Update room",
       "rel": "update",
-      "hsup.wrapper": "httpWithBasicAuth",
+      "hsup.wrapper": ["httpWithBasicAuth","httpWithClientSession"],
       "href": "/v2/room/update",
       "method": "POST",
       "encType": "application/json",
@@ -1153,7 +1153,7 @@
     {
       "title": "Add conference venue",
       "rel": "update",
-      "hsup.wrapper": "httpWithBasicAuth",
+      "hsup.wrapper": ["httpWithBasicAuth","httpWithClientSession"],
       "method": "POST",
       "href": "/v2/conference/venue/add",
       "encType": "application/json",
@@ -1185,7 +1185,7 @@
     {
       "title": "Add session type",
       "rel": "update",
-      "hsup.wrapper": "httpWithBasicAuth",
+      "hsup.wrapper": ["httpWithBasicAuth","httpWithClientSession"],
       "method": "POST",
       "href": "/v2/conference/session_type/add",
       "encType": "application/json",
@@ -1241,7 +1241,7 @@
       "title": "Update session type",
       "href": "/v2/session_type/update",
       "encType": "application/json",
-      "hsup.wrapper": "httpWithBasicAuth",
+      "hsup.wrapper": ["httpWithBasicAuth","httpWithClientSession"],
       "method": "POST",
       "rel": "update",
       "schema": {
@@ -1504,7 +1504,7 @@
     {
       "title": "Update session",
       "rel": "update",
-      "hsup.wrapper": "httpWithBasicAuth",
+      "hsup.wrapper": ["httpWithBasicAuth","httpWithClientSession"],
       "method": "POST",
       "href": "/v2/session/update",
       "schema": {
@@ -1571,7 +1571,7 @@
     },
     {
       "title": "Create question",
-      "hsup.wrapper": "httpWithBasicAuth",
+      "hsup.wrapper": ["httpWithBasicAuth","httpWithClientSession"],
       "href": "/v2/question/create",
       "rel": "create",
       "schema": {
@@ -1617,7 +1617,7 @@
     },
     {
       "title": "Create session survey response",
-      "hsup.wrapper": "httpWithBasicAuth",
+      "hsup.wrapper": ["httpWithBasicAuth","httpWithClientSession"],
       "href": "/v2/survey_session_response/create",
       "rel": "create",
       "schema": {
@@ -1697,7 +1697,7 @@
     {
       "title": "Update featured speaker",
       "href": "/v2/featured_speaker/update",
-      "hsup.wrapper": "httpWithBasicAuth",
+      "hsup.wrapper": ["httpWithBasicAuth","httpWithClientSession"],
       "method": "POST",
       "rel": "update",
       "schema": {
@@ -1735,7 +1735,7 @@
     {
       "title": "Add sponsor",
       "href": "/v2/sponsor/add",
-      "hsup.wrapper": "httpWithBasicAuth",
+      "hsup.wrapper": ["httpWithBasicAuth","httpWithClientSession"],
       "method": "POST",
       "rel": "create",
       "schema": {
@@ -1792,7 +1792,7 @@
     {
       "title": "Update sponsor",
       "href": "/v2/sponsor/update",
-      "hsup.wrapper": "httpWithBasicAuth",
+      "hsup.wrapper": ["httpWithBasicAuth","httpWithClientSession"],
       "method": "POST",
       "rel": "update",
       "schema": {
@@ -1830,7 +1830,7 @@
     {
       "title": "Create temporary email",
       "href": "/v2/email/create",
-      "hsup.wrapper": "httpWithBasicAuth",
+      "hsup.wrapper": ["httpWithBasicAuth","httpWithClientSession"],
       "method": "POST",
       "rel": "create",
       "schema": {
@@ -1852,7 +1852,7 @@
     {
       "title": "Confirm temporary email",
       "href": "/v2/email/confirm",
-      "hsup.wrapper": "httpWithBasicAuth",
+      "hsup.wrapper": ["httpWithBasicAuth","httpWithClientSession"],
       "method": "POST",
       "rel": "update",
       "schema": {
@@ -1868,7 +1868,7 @@
     {
       "title": "Send selection result notification",
       "href": "/v2/session/send_selection_result_notification",
-      "hsup.wrapper": "httpWithBasicAuth",
+      "hsup.wrapper": ["httpWithBasicAuth","httpWithClientSession"],
       "method": "POST",
       "rel": "update",
       "schema": {
@@ -1890,7 +1890,7 @@
     {
       "title": "Send all selection result notification",
       "href": "/v2/session/send_all_selection_result_notification",
-      "hsup.wrapper": "httpWithBasicAuth",
+      "hsup.wrapper": ["httpWithBasicAuth","httpWithClientSession"],
       "method": "POST",
       "rel": "update",
       "schema": {
@@ -1912,7 +1912,7 @@
     {
       "title": "Create track",
       "rel": "update",
-      "hsup.wrapper": "httpWithBasicAuth",
+      "hsup.wrapper": ["httpWithBasicAuth","httpWithClientSession"],
       "method": "POST",
       "href": "/v2/track/create",
       "encType": "application/json",
@@ -1933,7 +1933,7 @@
     {
       "title": "Update track",
       "rel": "update",
-      "hsup.wrapper": "httpWithBasicAuth",
+      "hsup.wrapper": ["httpWithBasicAuth","httpWithClientSession"],
       "method": "POST",
       "href": "/v2/track/update",
       "encType": "application/json",
@@ -1985,7 +1985,7 @@
     {
       "title": "Create blog entry",
       "rel": "update",
-      "hsup.wrapper": "httpWithBasicAuth",
+      "hsup.wrapper": ["httpWithBasicAuth","httpWithClientSession"],
       "method": "POST",
       "href": "/v2/blog_entry/create",
       "encType": "application/json",
@@ -2007,7 +2007,7 @@
     {
       "title": "Update blog entry",
       "rel": "update",
-      "hsup.wrapper": "httpWithBasicAuth",
+      "hsup.wrapper": ["httpWithBasicAuth","httpWithClientSession"],
       "method": "POST",
       "href": "/v2/blog_entry/update",
       "encType": "application/json",
@@ -2105,7 +2105,7 @@
     {
       "title": "Add conference staff",
       "rel": "update",
-      "hsup.wrapper": "httpWithBasicAuth",
+      "hsup.wrapper": ["httpWithBasicAuth","httpWithClientSession"],
       "method": "POST",
       "href": "/v2/conference/staff/add",
       "encType": "application/json",
@@ -2177,7 +2177,7 @@
     },
     {
       "title": "Create external resource",
-      "hsup.wrapper": "httpWithBasicAuth",
+      "hsup.wrapper": ["httpWithBasicAuth","httpWithClientSession"],
       "rel": "create",
       "method": "POST",
       "href": "/v2/external_resource/create",
@@ -2203,7 +2203,7 @@
     },
     {
       "title": "Update external resource",
-      "hsup.wrapper": "httpWithBasicAuth",
+      "hsup.wrapper": ["httpWithBasicAuth","httpWithClientSession"],
       "rel": "update",
       "method": "POST",
       "href": "/v2/external_resource/update",
@@ -2246,7 +2246,7 @@
       "title": "Set session video cover",
       "href": "/v2/session/video_cover",
       "hsup.multipartFiles": ["image"],
-      "hsup.wrapper": "httpWithBasicAuth",
+      "hsup.wrapper": ["httpWithBasicAuth","httpWithClientSession"],
       "encType": "multipart/form-data",
       "method": "POST",
       "rel": "update",
