@@ -513,6 +513,7 @@ func (r *LookupConferenceSeriesRequest) Populate(m map[string]interface{}) error
 func (r CreateConferenceSeriesRequest) collectMarshalData() map[string]interface{} {
 	m := make(map[string]interface{})
 	m["user_id"] = r.UserID
+	m["sid"] = r.SessionID
 	m["slug"] = r.Slug
 	m["title"] = r.Title
 	return m
@@ -552,6 +553,15 @@ func (r *CreateConferenceSeriesRequest) Populate(m map[string]interface{}) error
 			delete(m, "user_id")
 		default:
 			return errors.Wrap(ErrInvalidJSONFieldType{Field: "user_id"}, "failed to populate fields for CreateConferenceSeriesRequest")
+		}
+	}
+	if jv, ok := m["sid"]; ok {
+		switch jv.(type) {
+		case string:
+			r.SessionID = jv.(string)
+			delete(m, "sid")
+		default:
+			return errors.Wrap(ErrInvalidJSONFieldType{Field: "sid"}, "failed to populate fields for CreateConferenceSeriesRequest")
 		}
 	}
 	if jv, ok := m["slug"]; ok {
@@ -8110,6 +8120,106 @@ func (r *SetSessionVideoCoverRequest) Populate(m map[string]interface{}) error {
 			delete(m, "user_id")
 		default:
 			return errors.Wrap(ErrInvalidJSONFieldType{Field: "user_id"}, "failed to populate fields for SetSessionVideoCoverRequest")
+		}
+	}
+	return nil
+}
+
+func (r CreateClientSessionRequest) collectMarshalData() map[string]interface{} {
+	m := make(map[string]interface{})
+	m["access_token"] = r.AccessToken
+	m["user_id"] = r.UserID
+	return m
+}
+
+func (r CreateClientSessionRequest) MarshalJSON() ([]byte, error) {
+	m := r.collectMarshalData()
+	buf, err := json.Marshal(m)
+	if err != nil {
+		return nil, err
+	}
+	return buf, nil
+}
+
+func (r CreateClientSessionRequest) MarshalURL() ([]byte, error) {
+	m := r.collectMarshalData()
+	buf, err := urlenc.Marshal(m)
+	if err != nil {
+		return nil, err
+	}
+	return buf, nil
+}
+
+func (r *CreateClientSessionRequest) UnmarshalJSON(data []byte) error {
+	m := make(map[string]interface{})
+	if err := json.Unmarshal(data, &m); err != nil {
+		return err
+	}
+	return r.Populate(m)
+}
+
+func (r *CreateClientSessionRequest) Populate(m map[string]interface{}) error {
+	if jv, ok := m["access_token"]; ok {
+		switch jv.(type) {
+		case string:
+			r.AccessToken = jv.(string)
+			delete(m, "access_token")
+		default:
+			return errors.Wrap(ErrInvalidJSONFieldType{Field: "access_token"}, "failed to populate fields for CreateClientSessionRequest")
+		}
+	}
+	if jv, ok := m["user_id"]; ok {
+		switch jv.(type) {
+		case string:
+			r.UserID = jv.(string)
+			delete(m, "user_id")
+		default:
+			return errors.Wrap(ErrInvalidJSONFieldType{Field: "user_id"}, "failed to populate fields for CreateClientSessionRequest")
+		}
+	}
+	return nil
+}
+
+func (r CreateClientSessionResponse) collectMarshalData() map[string]interface{} {
+	m := make(map[string]interface{})
+	m["sid"] = r.SessionID
+	return m
+}
+
+func (r CreateClientSessionResponse) MarshalJSON() ([]byte, error) {
+	m := r.collectMarshalData()
+	buf, err := json.Marshal(m)
+	if err != nil {
+		return nil, err
+	}
+	return buf, nil
+}
+
+func (r CreateClientSessionResponse) MarshalURL() ([]byte, error) {
+	m := r.collectMarshalData()
+	buf, err := urlenc.Marshal(m)
+	if err != nil {
+		return nil, err
+	}
+	return buf, nil
+}
+
+func (r *CreateClientSessionResponse) UnmarshalJSON(data []byte) error {
+	m := make(map[string]interface{})
+	if err := json.Unmarshal(data, &m); err != nil {
+		return err
+	}
+	return r.Populate(m)
+}
+
+func (r *CreateClientSessionResponse) Populate(m map[string]interface{}) error {
+	if jv, ok := m["sid"]; ok {
+		switch jv.(type) {
+		case string:
+			r.SessionID = jv.(string)
+			delete(m, "sid")
+		default:
+			return errors.Wrap(ErrInvalidJSONFieldType{Field: "sid"}, "failed to populate fields for CreateClientSessionResponse")
 		}
 	}
 	return nil
