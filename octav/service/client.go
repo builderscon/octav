@@ -85,7 +85,7 @@ func (v *ClientSvc) LoadClientSession(ctx context.Context, tx *sql.Tx, sessionID
 	return nil
 }
 
-func (v *ClientSvc) CreateClientSession(ctx context.Context, tx *sql.Tx, sessionID, clientID, userID string) (err error) {
+func (v *ClientSvc) CreateClientSession(ctx context.Context, tx *sql.Tx, sessionID, clientID, userID string, expires time.Time) (err error) {
 	key := clientSessionKey(sessionID, clientID)
 	if pdebug.Enabled {
 		g := pdebug.Marker("service.Client.CreateClientSession %s", key).BindError(&err)
@@ -93,7 +93,8 @@ func (v *ClientSvc) CreateClientSession(ctx context.Context, tx *sql.Tx, session
 	}
 
 	c := Cache()
-	if err := c.Set(key, userID, cache.WithExpires(time.Hour)); err != nil {
+	expiresDur := time.Until(expires) + 5*time.Minute
+	if err := c.Set(key, userID, cache.WithExpires(expiresDur)); err != nil {
 		return errors.Wrap(err, `failed to fetch session`)
 	}
 

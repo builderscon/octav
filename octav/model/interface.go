@@ -1244,4 +1244,5 @@ type CreateClientSessionRequest struct {
 // +transport
 type CreateClientSessionResponse struct {
 	SessionID string `json:"sid"`
+	Expires   string `json:"expires"`
 }

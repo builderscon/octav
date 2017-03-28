@@ -2161,16 +2161,18 @@ func doCreateClientSession(ctx context.Context, w http.ResponseWriter, r *http.R
 		return
 	}
 
-pdebug.Printf("%#v", ctx)
 	// OK. generate a session ID
 	sid := tools.UUID()
 	clientID := getClientID(ctx)
 
+	// let the client know when this session will expire
+	expires := time.Now().UTC().Add(30 * time.Minute)
+
 	sc := service.Client()
-	if err := sc.CreateClientSession(ctx, tx, sid, clientID, payload.UserID); err != nil {
+	if err := sc.CreateClientSession(ctx, tx, sid, clientID, payload.UserID, expires); err != nil {
 		httpError(w, `create client session`, http.StatusInternalServerError, err)
 		return
 	}
 	
-	httpJSON(w, &model.CreateClientSessionResponse{SessionID: sid})
+	httpJSON(w, &model.CreateClientSessionResponse{SessionID: sid, Expires: expires.Format(time.RFC3339)})
 }
