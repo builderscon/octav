@@ -1052,7 +1052,7 @@ func TestListConference(t *testing.T) {
 	}
 	series, err := testCreateConferenceSeries(ctx, &model.CreateConferenceSeriesRequest{
 		Slug:   tools.RandomString(8),
-	}, user.ID)
+	}, ctx.Superuser.EID)
 	if err != nil {
 		return
 	}
