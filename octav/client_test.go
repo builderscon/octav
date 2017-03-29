@@ -22,6 +22,7 @@ import (
 
 type TestCtx struct {
 	*testing.T
+	context.Context
 	APIClient  *db.Client
 	Superuser  *db.User
 	HTTPClient *client.Client
@@ -66,6 +67,7 @@ func NewTestCtx(t *testing.T) (*TestCtx, error) {
 
 	tctx := &TestCtx{
 		T:         t,
+		Context:   ctx,
 		APIClient: &cl,
 		Superuser: &superuser,
 		sessions:  make(map[string]*client.Session),
@@ -78,6 +80,7 @@ func (ctx *TestCtx) Subtest(name string, cb func(*TestCtx)) {
 	ctx.T.Run(name, func(t *testing.T) {
 		localctx := &TestCtx{
 			T:          t,
+			Context:    ctx.Context,
 			APIClient:  ctx.APIClient,
 			Superuser:  ctx.Superuser,
 			HTTPClient: ctx.HTTPClient,
@@ -126,7 +129,7 @@ func (ctx *TestCtx) getSession(userID string) (*client.Session, error) {
 func (ctx *TestCtx) newSession(token, userID string) (*client.Session, error) {
 	cl := client.New(ctx.apiURL)
 	cl.SetAuth(ctx.APIClient.EID, ctx.APIClient.Secret)
-	s, err := client.NewSession(cl, token, userID)
+	s, err := client.NewSession(ctx.Context, cl, token, userID)
 	if err != nil {
 		return nil, errors.Wrap(err, `failed to create new session`)
 	}
