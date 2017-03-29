@@ -499,7 +499,6 @@
       "properties": {
         "id": {"$ref": "#/definitions/uuid"},
         "session_id": {"$ref": "#/definitions/uuid"},
-        "user_id": {"$ref": "#/definitions/uuid"},
         "body": {"type": "string"}
       }
     },
@@ -658,8 +657,7 @@
           "lang": { "$ref": "#/definitions/language" },
           "nickname": { "$ref": "#/definitions/string_en" },
           "email": { "$ref": "#/definitions/email" },
-          "tshirt_size": { "$ref": "#/definitions/tshirt_size" },
-          "user_id": { "$ref": "#/definitions/uuid" }
+          "tshirt_size": { "$ref": "#/definitions/tshirt_size" }
         },
         "patternProperties": {
           "first_name#[a-z]+": { "$ref": "#/definitions/string_i18n" },
@@ -777,8 +775,7 @@
           "place_id": {"type": "string"},
           "url": {"$ref":"#/definitions/url"},
           "latitude": { "$ref": "#/definitions/latitude" },
-          "longitude": { "$ref": "#/definitions/longitude" },
-          "user_id": { "$ref": "#/definitions/uuid" }
+          "longitude": { "$ref": "#/definitions/longitude" }
         }
       }
     },
@@ -793,8 +790,7 @@
         "type": "object",
         "required": ["id"],
         "properties": {
-          "id": { "$ref": "#/definitions/uuid" },
-          "user_id": { "$ref": "#/definitions/uuid" }
+          "id": { "$ref": "#/definitions/uuid" }
         }
       }
     },
@@ -832,8 +828,7 @@
           "id": { "$ref": "#/definitions/uuid" },
           "venue_id": { "$ref": "#/definitions/uuid" },
           "name": { "$ref": "#/definitions/string_en" },
-          "capacity": { "$ref": "#/definitions/positiveInteger" },
-          "user_id": { "$ref": "#/definitions/uuid" }
+          "capacity": { "$ref": "#/definitions/positiveInteger" }
         },
         "required": ["id"],
         "patternProperties": {
@@ -867,8 +862,7 @@
         "type": "object",
         "required": ["id"],
         "properties": {
-          "id": { "$ref": "#/definitions/uuid" },
-          "user_id": { "$ref": "#/definitions/uuid" }
+          "id": { "$ref": "#/definitions/uuid" }
         }
       }
     },
@@ -1012,7 +1006,6 @@
         "required": ["conference_id", "type", "data"],
         "properties": {
           "conference_id": {"$ref": "#/definitions/uuid"},
-          "user_id": {"$ref": "#/definitions/uuid"},
           "type": {"type":"string"},
           "data": {"type":"string"}
         }
@@ -1029,7 +1022,6 @@
         "required": ["conference_id", "tweet"],
         "properties": {
           "conference_id": {"$ref": "#/definitions/uuid"},
-          "user_id": {"$ref": "#/definitions/uuid"},
           "tweet": {"type":"string"}
         }
       }
@@ -1044,8 +1036,7 @@
       "encType": "application/json",
       "schema": {
         "properties": {
-          "conference_id": {"$ref": "#/definitions/uuid"},
-          "user_id": {"$ref":"#/definitions/uuid"}
+          "conference_id": {"$ref": "#/definitions/uuid"}
         },
         "required": ["conference_id"]
       },
@@ -1066,8 +1057,7 @@
         "hsup.type": "model.CreateConferenceDateRequest",
         "properties": {
           "conference_id": {"$ref": "#/definitions/uuid"},
-          "date": {"$ref":"#/definitions/conference_date"},
-          "user_id": {"$ref": "#/definitions/uuid"}
+          "date": {"$ref":"#/definitions/conference_date"}
         },
         "required": ["conference_id","date"]
       },
@@ -1083,8 +1073,7 @@
       "schema": {
         "properties": {
           "conference_id": {"$ref": "#/definitions/uuid"},
-          "date": {"$ref":"#/definitions/uuid"},
-          "user_id": {"$ref": "#/definitions/uuid"}
+          "date": {"$ref":"#/definitions/uuid"}
         },
         "required": ["conference_id","date"]
       }
@@ -1099,8 +1088,7 @@
       "encType": "application/json",
       "schema": {
         "properties": {
-          "conference_id": {"$ref": "#/definitions/uuid"},
-          "user_id": {"$ref":"#/definitions/uuid"}
+          "conference_id": {"$ref": "#/definitions/uuid"}
         },
         "required": ["conference_id"]
       },
@@ -1120,8 +1108,7 @@
       "schema": {
         "properties": {
           "conference_id": {"$ref": "#/definitions/uuid"},
-          "admin_id": {"$ref":"#/definitions/uuid"},
-          "user_id": {"$ref":"#/definitions/uuid"}
+          "admin_id": {"$ref":"#/definitions/uuid"}
         },
         "required": ["conference_id","admin_id"]
       }
@@ -1136,8 +1123,7 @@
       "schema": {
         "properties": {
           "conference_id": {"$ref": "#/definitions/uuid"},
-          "admin_id": {"$ref":"#/definitions/uuid"},
-          "user_id": {"$ref":"#/definitions/uuid"}
+          "admin_id": {"$ref":"#/definitions/uuid"}
         },
         "required": ["conference_id","admin_id"]
       }
@@ -1152,8 +1138,7 @@
       "schema": {
         "properties": {
           "conference_id": {"$ref": "#/definitions/uuid"},
-          "venue_id": {"$ref":"#/definitions/uuid"},
-          "user_id": {"$ref":"#/definitions/uuid"}
+          "venue_id": {"$ref":"#/definitions/uuid"}
         },
         "required": ["conference_id","venue_id"]
       }
@@ -1168,8 +1153,7 @@
       "schema": {
         "properties": {
           "conference_id": {"$ref": "#/definitions/uuid"},
-          "venue_id": {"$ref":"#/definitions/uuid"},
-          "user_id": {"$ref":"#/definitions/uuid"}
+          "venue_id": {"$ref":"#/definitions/uuid"}
         },
         "required": ["conference_id","venue_id"]
       }
@@ -1188,7 +1172,6 @@
           "name": {"$ref":"#/definitions/string_en"},
           "abstract": {"$ref":"#/definitions/string_en"},
           "duration": {"$ref":"#/definitions/positiveInteger"},
-          "user_id": {"$ref":"#/definitions/uuid"},
           "submission_start": {"$ref":"#/definitions/rfc3339"},
           "submission_end": {"$ref":"#/definitions/rfc3339"}
         },
@@ -1207,8 +1190,7 @@
       "encType": "application/json",
       "schema": {
         "properties": {
-          "id": {"$ref": "#/definitions/uuid"},
-          "user_id": {"$ref":"#/definitions/uuid"}
+          "id": {"$ref": "#/definitions/uuid"}
         },
         "required": ["id"]
       }
@@ -1245,7 +1227,6 @@
           "abstract": {"$ref":"#/definitions/string_en"},
           "duration": {"$ref":"#/definitions/positiveInteger"},
           "is_default": {"type": "boolean"},
-          "user_id": {"$ref":"#/definitions/uuid"},
           "submission_start": {"$ref":"#/definitions/rfc3339"},
           "submission_end": {"$ref":"#/definitions/rfc3339"}
         },
@@ -1405,8 +1386,7 @@
         "type": "object",
         "required": ["id"],
         "properties": {
-          "id": { "$ref": "#/definitions/uuid" },
-          "user_id": { "$ref": "#/definitions/uuid" }
+          "id": { "$ref": "#/definitions/uuid" }
         }
       }
     },
@@ -1451,8 +1431,7 @@
           "video_url": { "$ref": "#/definitions/url" },
           "photo_release": { "$ref": "#/definitions/binary_permission_default_allow" },
           "recording_release": { "$ref": "#/definitions/binary_permission_default_allow" },
-          "materials_release": { "$ref": "#/definitions/binary_permission_default_allow" },
-          "user_id": { "$ref": "#/definitions/uuid" }
+          "materials_release": { "$ref": "#/definitions/binary_permission_default_allow" }
         },
         "patternProperties": {
           "title#[a-z]+": { "$ref": "#/definitions/string_i18n" },
@@ -1487,8 +1466,7 @@
       "schema": {
         "required": ["id"],
         "properties": {
-          "id": { "$ref": "#/definitions/uuid" },
-          "user_id": { "$ref": "#/definitions/uuid" }
+          "id": { "$ref": "#/definitions/uuid" }
         }
       }
     },
@@ -1525,8 +1503,7 @@
           "has_interpretation": { "type": "boolean" },
           "status": { "$ref": "#/definitions/acceptance_status" },
           "sort_order": { "$ref": "#/definitions/positiveInteger" },
-          "confirmed": { "type": "boolean" },
-          "user_id": { "$ref": "#/definitions/uuid" }
+          "confirmed": { "type": "boolean" }
         },
         "patternProperties": {
           "title#[a-z]+": { "$ref": "#/definitions/string_i18n" },
@@ -1570,7 +1547,6 @@
         "required": ["session_id", "body"],
         "properties": {
           "session_id": {"$ref": "#/definitions/uuid"},
-          "user_id": {"$ref": "#/definitions/uuid"},
           "body": {"type":"string"}
         }
       },
@@ -1615,7 +1591,6 @@
         "type": "object",
         "required": ["session_id","user_prior_knowledge","speaker_knowledge","speaker_presentation","material_quality","overall_rating"],
         "properties": {
-          "user_id": {"$ref": "#/definitions/uuid"},
           "session_id": {"$ref": "#/definitions/uuid"},
           "user_prior_knowledge": {"$ref": "#/definitions/int_rating"},
           "speaker_knowledge": {"$ref": "#/definitions/int_rating"},
@@ -1642,8 +1617,7 @@
           "conference_id": {"$ref": "#/definitions/uuid"},
           "avatar_url": {"$ref": "#/definitions/url" },
           "display_name": { "$ref": "#/definitions/string_en_not_empty" },
-          "description": { "$ref": "#/definitions/string_en_not_empty" },
-          "user_id": {"$ref": "#/definitions/uuid"}
+          "description": { "$ref": "#/definitions/string_en_not_empty" }
         },
         "patternProperties": {
           "display_name#[a-z]+": { "$ref": "#/definitions/string_i18n" },
@@ -1699,8 +1673,7 @@
           "speaker_id": {"$ref": "#/definitions/uuid"},
           "avatar_url": {"$ref": "#/definitions/url" },
           "display_name": { "$ref": "#/definitions/string_en_not_empty" },
-          "description": { "$ref": "#/definitions/string_en_not_empty" },
-          "user_id": {"$ref": "#/definitions/uuid"}
+          "description": { "$ref": "#/definitions/string_en_not_empty" }
         },
         "patternProperties": {
           "display_name#[a-z]+": { "$ref": "#/definitions/string_i18n" },
@@ -1718,8 +1691,7 @@
         "type": "object",
         "required": ["id"],
         "properties": {
-          "id": {"$ref": "#/definitions/uuid"},
-          "user_id": {"$ref": "#/definitions/uuid"}
+          "id": {"$ref": "#/definitions/uuid"}
         }
       }
     },
@@ -1738,8 +1710,7 @@
           "group_name": { "$ref": "#/definitions/string_en_not_empty" },
           "sort_order": { "$ref": "#/definitions/positiveInteger" },
           "logo_url": {"$ref": "#/definitions/url" },
-          "url": {"$ref": "#/definitions/url" },
-          "user_id": {"$ref": "#/definitions/uuid"}
+          "url": {"$ref": "#/definitions/url" }
         },
         "patternProperties": {
           "name#[a-z]+": { "$ref": "#/definitions/string_i18n" }
@@ -1795,8 +1766,7 @@
           "group_name": { "$ref": "#/definitions/string_en_not_empty" },
           "sort_order": { "$ref": "#/definitions/positiveInteger" },
           "logo_url": {"$ref": "#/definitions/url" },
-          "url": {"$ref": "#/definitions/url" },
-          "user_id": {"$ref": "#/definitions/uuid"}
+          "url": {"$ref": "#/definitions/url" }
         },
         "patternProperties": {
           "name#[a-z]+": { "$ref": "#/definitions/string_i18n" }
@@ -1813,8 +1783,7 @@
         "type": "object",
         "required": ["id"],
         "properties": {
-          "id": {"$ref": "#/definitions/uuid"},
-          "user_id": {"$ref": "#/definitions/uuid"}
+          "id": {"$ref": "#/definitions/uuid"}
         }
       }
     },
@@ -1829,7 +1798,6 @@
         "required": ["target_id", "email"],
         "properties": {
           "target_id": {"$ref": "#/definitions/uuid"},
-          "user_id": {"$ref": "#/definitions/uuid"},
           "email": { "$ref": "#/definitions/email" }
         }
       },
@@ -1851,7 +1819,6 @@
         "required": ["target_id", "confirmation_key"],
         "properties": {
           "target_id": {"$ref": "#/definitions/uuid"},
-          "user_id": {"$ref": "#/definitions/uuid"},
           "confirmation_key": { "$ref": "#/definitions/uuid" }
         }
       }
@@ -1867,8 +1834,7 @@
         "required": ["id"],
         "properties": {
           "force": {"type": "boolean"},
-          "session_id": {"$ref": "#/definitions/uuid"},
-          "user_id": {"$ref": "#/definitions/uuid"}
+          "session_id": {"$ref": "#/definitions/uuid"}
         }
       },
       "targetSchema": {
@@ -1889,8 +1855,7 @@
         "required": ["conference_id"],
         "properties": {
           "force": {"type": "boolean"},
-          "conference_id": {"$ref": "#/definitions/uuid"},
-          "user_id": {"$ref": "#/definitions/uuid"}
+          "conference_id": {"$ref": "#/definitions/uuid"}
         }
       },
       "targetSchema": {
@@ -1912,8 +1877,7 @@
           "conference_id": {"$ref": "#/definitions/uuid"},
           "room_id": {"$ref":"#/definitions/uuid"},
           "name": {"$ref":"#/definitions/string_en"},
-          "sort_order": {"$ref":"#/definitions/positiveInteger"},
-          "user_id": {"$ref":"#/definitions/uuid"}
+          "sort_order": {"$ref":"#/definitions/positiveInteger"}
         },
         "patternProperties": {
           "name#[a-z]+": { "$ref": "#/definitions/string_i18n" }
@@ -1933,8 +1897,7 @@
           "id": {"$ref": "#/definitions/uuid"},
           "room_id": {"$ref":"#/definitions/uuid"},
           "name": {"$ref":"#/definitions/string_en"},
-          "sort_order": {"$ref":"#/definitions/positiveInteger"},
-          "user_id": {"$ref":"#/definitions/uuid"}
+          "sort_order": {"$ref":"#/definitions/positiveInteger"}
         },
         "patternProperties": {
           "name#[a-z]+": { "$ref": "#/definitions/string_i18n" }
@@ -1951,8 +1914,7 @@
       "encType": "application/json",
       "schema": {
         "properties": {
-          "id": {"$ref": "#/definitions/uuid"},
-          "user_id": {"$ref":"#/definitions/uuid"}
+          "id": {"$ref": "#/definitions/uuid"}
         },
         "required": ["id"]
       }
@@ -1988,8 +1950,7 @@
           "status": {
             "type": "string",
             "enum": ["public", "private"]
-          },
-          "user_id": {"$ref":"#/definitions/uuid"}
+          }
         },
         "required": ["conference_id","url"]
       },
@@ -2010,8 +1971,7 @@
             "enum": ["public", "private"]
           },
           "title": {"type": "string"},
-          "url": {"$ref": "#/definitions/url" },
-          "user_id": {"$ref":"#/definitions/uuid"}
+          "url": {"$ref": "#/definitions/url" }
         },
         "required": ["id"]
       }
@@ -2025,8 +1985,7 @@
       "encType": "application/json",
       "schema": {
         "properties": {
-          "id": {"$ref": "#/definitions/uuid"},
-          "user_id": {"$ref":"#/definitions/uuid"}
+          "id": {"$ref": "#/definitions/uuid"}
         },
         "required": ["id"]
       }
@@ -2103,8 +2062,7 @@
       "schema": {
         "properties": {
           "conference_id": {"$ref": "#/definitions/uuid"},
-          "staff_id": {"$ref":"#/definitions/uuid"},
-          "user_id": {"$ref":"#/definitions/uuid"}
+          "staff_id": {"$ref":"#/definitions/uuid"}
         },
         "required": ["conference_id","staff_id"]
       }
@@ -2119,8 +2077,7 @@
       "schema": {
         "properties": {
           "conference_id": {"$ref": "#/definitions/uuid"},
-          "staff_id": {"$ref":"#/definitions/uuid"},
-          "user_id": {"$ref":"#/definitions/uuid"}
+          "staff_id": {"$ref":"#/definitions/uuid"}
         },
         "required": ["conference_id","staff_id"]
       }
@@ -2181,8 +2138,7 @@
           "image_url": {"$ref": "#/definitions/url"},
           "title": {"$ref": "#/definitions/string_en_not_empty"},
           "url": {"$ref": "#/definitions/url"},
-          "sort_order": { "$ref": "#/definitions/positiveInteger" },
-          "user_id": {"$ref":"#/definitions/uuid"}
+          "sort_order": { "$ref": "#/definitions/positiveInteger" }
         },
         "patternProperties": {
           "description#[a-z]+": { "$ref": "#/definitions/string_i18n" },
@@ -2207,8 +2163,7 @@
           "image_url": {"$ref": "#/definitions/url"},
           "title": {"$ref": "#/definitions/string_en"},
           "url": {"$ref": "#/definitions/url"},
-          "sort_order": { "$ref": "#/definitions/positiveInteger" },
-          "user_id": {"$ref":"#/definitions/uuid"}
+          "sort_order": { "$ref": "#/definitions/positiveInteger" }
         },
         "patternProperties": {
           "description#[a-z]+": { "$ref": "#/definitions/string_i18n" },
@@ -2227,8 +2182,7 @@
       "encType": "application/json",
       "schema": {
         "properties": {
-          "id": {"$ref": "#/definitions/uuid"},
-          "user_id": {"$ref": "#/definitions/uuid"}
+          "id": {"$ref": "#/definitions/uuid"}
         },
         "required": ["id"]
       }
@@ -2245,8 +2199,7 @@
         "type": "object",
         "required": ["id"],
         "properties": {
-          "id": {"$ref": "#/definitions/uuid"},
-          "user_id": {"$ref": "#/definitions/uuid"}
+          "id": {"$ref": "#/definitions/uuid"}
         }
       }
     }

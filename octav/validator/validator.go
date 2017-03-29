@@ -475,10 +475,6 @@ func init() {
 		AddProp(
 			"session_id",
 			jsval.Reference(M).RefersTo("#/definitions/uuid"),
-		).
-		AddProp(
-			"user_id",
-			jsval.Reference(M).RefersTo("#/definitions/uuid"),
 		)
 	R31 = jsval.OneOf().
 		Add(
@@ -976,10 +972,6 @@ func init() {
 				AddProp(
 					"conference_id",
 					jsval.Reference(M).RefersTo("#/definitions/uuid"),
-				).
-				AddProp(
-					"user_id",
-					jsval.Reference(M).RefersTo("#/definitions/uuid"),
 				),
 		)
 
@@ -1003,10 +995,6 @@ func init() {
 				AddProp(
 					"type",
 					jsval.String(),
-				).
-				AddProp(
-					"user_id",
-					jsval.Reference(M).RefersTo("#/definitions/uuid"),
 				),
 		)
 
@@ -1026,10 +1014,6 @@ func init() {
 				AddProp(
 					"date",
 					jsval.Reference(M).RefersTo("#/definitions/conference_date"),
-				).
-				AddProp(
-					"user_id",
-					jsval.Reference(M).RefersTo("#/definitions/uuid"),
 				),
 		)
 
@@ -1090,10 +1074,6 @@ func init() {
 				AddProp(
 					"staff_id",
 					jsval.Reference(M).RefersTo("#/definitions/uuid"),
-				).
-				AddProp(
-					"user_id",
-					jsval.Reference(M).RefersTo("#/definitions/uuid"),
 				),
 		)
 
@@ -1108,10 +1088,6 @@ func init() {
 				).
 				AddProp(
 					"conference_id",
-					jsval.Reference(M).RefersTo("#/definitions/uuid"),
-				).
-				AddProp(
-					"user_id",
 					jsval.Reference(M).RefersTo("#/definitions/uuid"),
 				).
 				AddProp(
@@ -1147,10 +1123,6 @@ func init() {
 				).
 				AddProp(
 					"speaker_id",
-					jsval.Reference(M).RefersTo("#/definitions/uuid"),
-				).
-				AddProp(
-					"user_id",
 					jsval.Reference(M).RefersTo("#/definitions/uuid"),
 				).
 				PatternPropertiesString(
@@ -1238,10 +1210,6 @@ func init() {
 					"submission_start",
 					jsval.Reference(M).RefersTo("#/definitions/rfc3339"),
 				).
-				AddProp(
-					"user_id",
-					jsval.Reference(M).RefersTo("#/definitions/uuid"),
-				).
 				PatternPropertiesString(
 					"abstract#[a-z]+",
 					jsval.Reference(M).RefersTo("#/definitions/string_i18n"),
@@ -1284,10 +1252,6 @@ func init() {
 				AddProp(
 					"url",
 					jsval.Reference(M).RefersTo("#/definitions/url"),
-				).
-				AddProp(
-					"user_id",
-					jsval.Reference(M).RefersTo("#/definitions/uuid"),
 				).
 				PatternPropertiesString(
 					"name#[a-z]+",
@@ -1353,10 +1317,6 @@ func init() {
 				AddProp(
 					"target_id",
 					jsval.Reference(M).RefersTo("#/definitions/uuid"),
-				).
-				AddProp(
-					"user_id",
-					jsval.Reference(M).RefersTo("#/definitions/uuid"),
 				),
 		)
 
@@ -1384,10 +1344,6 @@ func init() {
 				AddProp(
 					"url",
 					jsval.Reference(M).RefersTo("#/definitions/url"),
-				).
-				AddProp(
-					"user_id",
-					jsval.Reference(M).RefersTo("#/definitions/uuid"),
 				),
 		)
 
@@ -1625,10 +1581,6 @@ func init() {
 					"url",
 					jsval.Reference(M).RefersTo("#/definitions/url"),
 				).
-				AddProp(
-					"user_id",
-					jsval.Reference(M).RefersTo("#/definitions/uuid"),
-				).
 				PatternPropertiesString(
 					"description#[a-z]+",
 					jsval.Reference(M).RefersTo("#/definitions/string_i18n"),
@@ -1700,10 +1652,6 @@ func init() {
 				).
 				AddProp(
 					"session_id",
-					jsval.Reference(M).RefersTo("#/definitions/uuid"),
-				).
-				AddProp(
-					"user_id",
 					jsval.Reference(M).RefersTo("#/definitions/uuid"),
 				),
 		)
@@ -1845,10 +1793,6 @@ func init() {
 					jsval.Reference(M).RefersTo("#/definitions/string_en"),
 				).
 				AddProp(
-					"user_id",
-					jsval.Reference(M).RefersTo("#/definitions/uuid"),
-				).
-				AddProp(
 					"video_url",
 					jsval.Reference(M).RefersTo("#/definitions/url"),
 				).
@@ -1918,10 +1862,6 @@ func init() {
 					jsval.Reference(M).RefersTo("#/definitions/int_rating"),
 				).
 				AddProp(
-					"user_id",
-					jsval.Reference(M).RefersTo("#/definitions/uuid"),
-				).
-				AddProp(
 					"user_prior_knowledge",
 					jsval.Reference(M).RefersTo("#/definitions/int_rating"),
 				),
@@ -1960,10 +1900,6 @@ func init() {
 				).
 				AddProp(
 					"target_id",
-					jsval.Reference(M).RefersTo("#/definitions/uuid"),
-				).
-				AddProp(
-					"user_id",
 					jsval.Reference(M).RefersTo("#/definitions/uuid"),
 				),
 		)
@@ -2006,10 +1942,6 @@ func init() {
 				AddProp(
 					"sort_order",
 					jsval.Reference(M).RefersTo("#/definitions/positiveInteger"),
-				).
-				AddProp(
-					"user_id",
-					jsval.Reference(M).RefersTo("#/definitions/uuid"),
 				).
 				PatternPropertiesString(
 					"name#[a-z]+",
@@ -2204,10 +2136,6 @@ func init() {
 				AddProp(
 					"id",
 					jsval.Reference(M).RefersTo("#/definitions/uuid"),
-				).
-				AddProp(
-					"user_id",
-					jsval.Reference(M).RefersTo("#/definitions/uuid"),
 				),
 		)
 
@@ -2227,10 +2155,6 @@ func init() {
 				AddProp(
 					"conference_id",
 					jsval.Reference(M).RefersTo("#/definitions/uuid"),
-				).
-				AddProp(
-					"user_id",
-					jsval.Reference(M).RefersTo("#/definitions/uuid"),
 				),
 		)
 
@@ -2249,10 +2173,6 @@ func init() {
 				).
 				AddProp(
 					"date",
-					jsval.Reference(M).RefersTo("#/definitions/uuid"),
-				).
-				AddProp(
-					"user_id",
 					jsval.Reference(M).RefersTo("#/definitions/uuid"),
 				),
 		)
@@ -2284,10 +2204,6 @@ func init() {
 				AddProp(
 					"id",
 					jsval.Reference(M).RefersTo("#/definitions/uuid"),
-				).
-				AddProp(
-					"user_id",
-					jsval.Reference(M).RefersTo("#/definitions/uuid"),
 				),
 		)
 
@@ -2307,10 +2223,6 @@ func init() {
 				AddProp(
 					"staff_id",
 					jsval.Reference(M).RefersTo("#/definitions/uuid"),
-				).
-				AddProp(
-					"user_id",
-					jsval.Reference(M).RefersTo("#/definitions/uuid"),
 				),
 		)
 
@@ -2325,10 +2237,6 @@ func init() {
 				).
 				AddProp(
 					"conference_id",
-					jsval.Reference(M).RefersTo("#/definitions/uuid"),
-				).
-				AddProp(
-					"user_id",
 					jsval.Reference(M).RefersTo("#/definitions/uuid"),
 				).
 				AddProp(
@@ -2349,10 +2257,6 @@ func init() {
 				AddProp(
 					"id",
 					jsval.Reference(M).RefersTo("#/definitions/uuid"),
-				).
-				AddProp(
-					"user_id",
-					jsval.Reference(M).RefersTo("#/definitions/uuid"),
 				),
 		)
 
@@ -2367,10 +2271,6 @@ func init() {
 				).
 				AddProp(
 					"id",
-					jsval.Reference(M).RefersTo("#/definitions/uuid"),
-				).
-				AddProp(
-					"user_id",
 					jsval.Reference(M).RefersTo("#/definitions/uuid"),
 				),
 		)
@@ -2402,10 +2302,6 @@ func init() {
 				AddProp(
 					"id",
 					jsval.Reference(M).RefersTo("#/definitions/uuid"),
-				).
-				AddProp(
-					"user_id",
-					jsval.Reference(M).RefersTo("#/definitions/uuid"),
 				),
 		)
 
@@ -2420,10 +2316,6 @@ func init() {
 				).
 				AddProp(
 					"id",
-					jsval.Reference(M).RefersTo("#/definitions/uuid"),
-				).
-				AddProp(
-					"user_id",
 					jsval.Reference(M).RefersTo("#/definitions/uuid"),
 				),
 		)
@@ -2440,10 +2332,6 @@ func init() {
 				AddProp(
 					"id",
 					jsval.Reference(M).RefersTo("#/definitions/uuid"),
-				).
-				AddProp(
-					"user_id",
-					jsval.Reference(M).RefersTo("#/definitions/uuid"),
 				),
 		)
 
@@ -2459,10 +2347,6 @@ func init() {
 				AddProp(
 					"id",
 					jsval.Reference(M).RefersTo("#/definitions/uuid"),
-				).
-				AddProp(
-					"user_id",
-					jsval.Reference(M).RefersTo("#/definitions/uuid"),
 				),
 		)
 
@@ -2477,10 +2361,6 @@ func init() {
 				).
 				AddProp(
 					"id",
-					jsval.Reference(M).RefersTo("#/definitions/uuid"),
-				).
-				AddProp(
-					"user_id",
 					jsval.Reference(M).RefersTo("#/definitions/uuid"),
 				),
 		)
@@ -2511,10 +2391,6 @@ func init() {
 				).
 				AddProp(
 					"id",
-					jsval.Reference(M).RefersTo("#/definitions/uuid"),
-				).
-				AddProp(
-					"user_id",
 					jsval.Reference(M).RefersTo("#/definitions/uuid"),
 				),
 		)
@@ -2591,10 +2467,6 @@ func init() {
 				AddProp(
 					"conference_id",
 					jsval.Reference(M).RefersTo("#/definitions/uuid"),
-				).
-				AddProp(
-					"user_id",
-					jsval.Reference(M).RefersTo("#/definitions/uuid"),
 				),
 		)
 
@@ -2622,10 +2494,6 @@ func init() {
 				).
 				AddProp(
 					"conference_id",
-					jsval.Reference(M).RefersTo("#/definitions/uuid"),
-				).
-				AddProp(
-					"user_id",
 					jsval.Reference(M).RefersTo("#/definitions/uuid"),
 				),
 		)
@@ -4209,10 +4077,6 @@ func init() {
 				AddProp(
 					"force",
 					jsval.Boolean(),
-				).
-				AddProp(
-					"user_id",
-					jsval.Reference(M).RefersTo("#/definitions/uuid"),
 				),
 		)
 
@@ -4246,10 +4110,6 @@ func init() {
 				AddProp(
 					"session_id",
 					jsval.Reference(M).RefersTo("#/definitions/uuid"),
-				).
-				AddProp(
-					"user_id",
-					jsval.Reference(M).RefersTo("#/definitions/uuid"),
 				),
 		)
 
@@ -4279,10 +4139,6 @@ func init() {
 				AddProp(
 					"id",
 					jsval.Reference(M).RefersTo("#/definitions/uuid"),
-				).
-				AddProp(
-					"user_id",
-					jsval.Reference(M).RefersTo("#/definitions/uuid"),
 				),
 		)
 
@@ -4302,10 +4158,6 @@ func init() {
 				AddProp(
 					"tweet",
 					jsval.String(),
-				).
-				AddProp(
-					"user_id",
-					jsval.Reference(M).RefersTo("#/definitions/uuid"),
 				),
 		)
 
@@ -4333,10 +4185,6 @@ func init() {
 				AddProp(
 					"url",
 					jsval.Reference(M).RefersTo("#/definitions/url"),
-				).
-				AddProp(
-					"user_id",
-					jsval.Reference(M).RefersTo("#/definitions/uuid"),
 				),
 		)
 
@@ -4464,10 +4312,6 @@ func init() {
 					"url",
 					jsval.Reference(M).RefersTo("#/definitions/url"),
 				).
-				AddProp(
-					"user_id",
-					jsval.Reference(M).RefersTo("#/definitions/uuid"),
-				).
 				PatternPropertiesString(
 					"description#[a-z]+",
 					jsval.Reference(M).RefersTo("#/definitions/string_i18n"),
@@ -4553,10 +4397,6 @@ func init() {
 					"speaker_id",
 					jsval.Reference(M).RefersTo("#/definitions/uuid"),
 				).
-				AddProp(
-					"user_id",
-					jsval.Reference(M).RefersTo("#/definitions/uuid"),
-				).
 				PatternPropertiesString(
 					"description#[a-z]+",
 					jsval.Reference(M).RefersTo("#/definitions/string_i18n"),
@@ -4587,10 +4427,6 @@ func init() {
 				AddProp(
 					"name",
 					jsval.Reference(M).RefersTo("#/definitions/string_en"),
-				).
-				AddProp(
-					"user_id",
-					jsval.Reference(M).RefersTo("#/definitions/uuid"),
 				).
 				AddProp(
 					"venue_id",
@@ -4704,10 +4540,6 @@ func init() {
 					jsval.Reference(M).RefersTo("#/definitions/string_en"),
 				).
 				AddProp(
-					"user_id",
-					jsval.Reference(M).RefersTo("#/definitions/uuid"),
-				).
-				AddProp(
 					"video_url",
 					jsval.Reference(M).RefersTo("#/definitions/url"),
 				).
@@ -4758,10 +4590,6 @@ func init() {
 					"submission_start",
 					jsval.Reference(M).RefersTo("#/definitions/rfc3339"),
 				).
-				AddProp(
-					"user_id",
-					jsval.Reference(M).RefersTo("#/definitions/uuid"),
-				).
 				PatternPropertiesString(
 					"abstract#[a-z]+",
 					jsval.Reference(M).RefersTo("#/definitions/string_i18n"),
@@ -4805,10 +4633,6 @@ func init() {
 					"url",
 					jsval.Reference(M).RefersTo("#/definitions/url"),
 				).
-				AddProp(
-					"user_id",
-					jsval.Reference(M).RefersTo("#/definitions/uuid"),
-				).
 				PatternPropertiesString(
 					"name#[a-z]+",
 					jsval.Reference(M).RefersTo("#/definitions/string_i18n"),
@@ -4839,10 +4663,6 @@ func init() {
 				AddProp(
 					"sort_order",
 					jsval.Reference(M).RefersTo("#/definitions/positiveInteger"),
-				).
-				AddProp(
-					"user_id",
-					jsval.Reference(M).RefersTo("#/definitions/uuid"),
 				).
 				PatternPropertiesString(
 					"name#[a-z]+",
@@ -4887,10 +4707,6 @@ func init() {
 					"tshirt_size",
 					jsval.Reference(M).RefersTo("#/definitions/tshirt_size"),
 				).
-				AddProp(
-					"user_id",
-					jsval.Reference(M).RefersTo("#/definitions/uuid"),
-				).
 				PatternPropertiesString(
 					"first_name#[a-z]+",
 					jsval.Reference(M).RefersTo("#/definitions/string_i18n"),
@@ -4933,10 +4749,6 @@ func init() {
 				AddProp(
 					"url",
 					jsval.Reference(M).RefersTo("#/definitions/url"),
-				).
-				AddProp(
-					"user_id",
-					jsval.Reference(M).RefersTo("#/definitions/uuid"),
 				),
 		)
 
