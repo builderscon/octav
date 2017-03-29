@@ -2179,5 +2179,9 @@ func doCreateClientSession(ctx context.Context, w http.ResponseWriter, r *http.R
 		return
 	}
 	
-	httpJSON(w, &model.CreateClientSessionResponse{SessionID: sid, Expires: expires.Format(time.RFC3339)})
+	var res model.CreateClientSessionResponse
+	res.Expires = expires.Format(time.RFC3339)
+	res.SessionID = sid
+	res.UserID = payload.UserID
+	httpJSON(w, &res)
 }

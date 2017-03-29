@@ -8182,6 +8182,7 @@ func (r *CreateClientSessionRequest) Populate(m map[string]interface{}) error {
 
 func (r CreateClientSessionResponse) collectMarshalData() map[string]interface{} {
 	m := make(map[string]interface{})
+	m["user_id"] = r.UserID
 	m["sid"] = r.SessionID
 	m["expires"] = r.Expires
 	return m
@@ -8214,6 +8215,15 @@ func (r *CreateClientSessionResponse) UnmarshalJSON(data []byte) error {
 }
 
 func (r *CreateClientSessionResponse) Populate(m map[string]interface{}) error {
+	if jv, ok := m["user_id"]; ok {
+		switch jv.(type) {
+		case string:
+			r.UserID = jv.(string)
+			delete(m, "user_id")
+		default:
+			return errors.Wrap(ErrInvalidJSONFieldType{Field: "user_id"}, "failed to populate fields for CreateClientSessionResponse")
+		}
+	}
 	if jv, ok := m["sid"]; ok {
 		switch jv.(type) {
 		case string:

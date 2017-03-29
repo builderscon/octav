@@ -1243,6 +1243,7 @@ type CreateClientSessionRequest struct {
 
 // +transport
 type CreateClientSessionResponse struct {
+	UserID    string `json:"user_id"`
 	SessionID string `json:"sid"`
 	Expires   string `json:"expires"`
 }
