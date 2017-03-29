@@ -21,7 +21,6 @@ const sessionIDHeaderKey = "X-Octav-Session-ID"
 func (s *Session) newSessionID(token, userID string) (string, time.Time, error) {
 	in := model.CreateClientSessionRequest{
 		AccessToken: token,
-		UserID:      userID,
 	}
 
 	res, err := s.Client.CreateClientSession(&in)

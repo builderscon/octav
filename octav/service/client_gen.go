@@ -35,7 +35,7 @@ func Client() *ClientSvc {
 
 func (v *ClientSvc) LookupFromPayload(ctx context.Context, tx *sql.Tx, m *model.Client, payload *model.LookupClientRequest) (err error) {
 	if pdebug.Enabled {
-		g := pdebug.Marker("service.Client.LookupFromPayload").BindError(&err)
+		g := pdebug.Marker("service.Client.LookupFromPayload %s", payload.ID).BindError(&err)
 		defer g.End()
 	}
 	if err = v.Lookup(ctx, tx, m, payload.ID); err != nil {
@@ -46,7 +46,7 @@ func (v *ClientSvc) LookupFromPayload(ctx context.Context, tx *sql.Tx, m *model.
 
 func (v *ClientSvc) Lookup(ctx context.Context, tx *sql.Tx, m *model.Client, id string) (err error) {
 	if pdebug.Enabled {
-		g := pdebug.Marker("service.Client.Lookup").BindError(&err)
+		g := pdebug.Marker("service.Client.Lookup %s", id).BindError(&err)
 		defer g.End()
 	}
 

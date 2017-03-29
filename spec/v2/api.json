@@ -554,10 +554,9 @@
       "schema": {
         "type": "object",
         "properties": {
-          "access_token": { "type": "string" },
-          "user_id": { "$ref": "#/definitions/uuid" }
+          "access_token": { "type": "string" }
         },
-        "required": ["access_token", "user_id"]
+        "required": ["access_token"]
       },
       "targetSchema": {
         "type": "object",
@@ -637,10 +636,9 @@
       "method": "POST",
       "schema": {
         "properties": {
-          "id": { "$ref": "#/definitions/uuid" },
-          "user_id": { "$ref": "#/definitions/uuid" }
+          "id": { "$ref": "#/definitions/uuid" }
         },
-        "required": [ "id","user_id" ]
+        "required": ["id"]
       }
     },
     {
@@ -667,7 +665,7 @@
           "first_name#[a-z]+": { "$ref": "#/definitions/string_i18n" },
           "last_name#[a-z]+": { "$ref": "#/definitions/string_i18n" }
         },
-        "required": [ "id","user_id" ]
+        "required": ["id"]
       }
     },
     {
@@ -679,10 +677,9 @@
       "encType": "application/json",
       "schema": {
         "type": "object",
-        "required": ["id","user_id"],
+        "required": ["id"],
         "properties": {
-          "id": { "$ref": "#/definitions/uuid" },
-          "user_id": { "$ref": "#/definitions/uuid" }
+          "id": { "$ref": "#/definitions/uuid" }
         }
       }
     },
@@ -720,10 +717,9 @@
           "place_id": {"type": "string"},
           "url": {"$ref":"#/definitions/url"},
           "latitude": { "$ref": "#/definitions/latitude" },
-          "longitude": { "$ref": "#/definitions/longitude" },
-          "user_id": { "$ref": "#/definitions/uuid" }
+          "longitude": { "$ref": "#/definitions/longitude" }
         },
-        "required": ["name","address","user_id"],
+        "required": ["name","address"],
         "patternProperties": {
           "name#[a-z]+": { "$ref": "#/definitions/string_i18n" },
           "address#[a-z]+": { "$ref": "#/definitions/string_i18n" }
@@ -774,7 +770,7 @@
       "encType": "application/json",
       "schema": {
         "type": "object",
-        "required": ["id", "user_id"],
+        "required": ["id"],
         "properties": {
           "id": { "$ref": "#/definitions/uuid" },
           "name": { "$ref": "#/definitions/string_en" },
@@ -795,7 +791,7 @@
       "encType": "application/json",
       "schema": {
         "type": "object",
-        "required": ["id", "user_id"],
+        "required": ["id"],
         "properties": {
           "id": { "$ref": "#/definitions/uuid" },
           "user_id": { "$ref": "#/definitions/uuid" }
@@ -814,10 +810,9 @@
         "properties": {
           "venue_id": { "$ref": "#/definitions/uuid" },
           "name": { "$ref": "#/definitions/string_en" },
-          "capacity": { "$ref": "#/definitions/positiveInteger" },
-          "user_id": { "$ref": "#/definitions/uuid" }
+          "capacity": { "$ref": "#/definitions/positiveInteger" }
         },
-        "required": ["venue_id", "name", "user_id"],
+        "required": ["venue_id", "name"],
         "patternProperties": {
           "name#[a-z]+": { "$ref": "#/definitions/string_i18n" }
         }
@@ -840,7 +835,7 @@
           "capacity": { "$ref": "#/definitions/positiveInteger" },
           "user_id": { "$ref": "#/definitions/uuid" }
         },
-        "required": ["id", "user_id"],
+        "required": ["id"],
         "patternProperties": {
           "name#[a-z]+": { "$ref": "#/definitions/string_i18n" }
         }
@@ -870,7 +865,7 @@
       "encType": "application/json",
       "schema": {
         "type": "object",
-        "required": ["id", "user_id"],
+        "required": ["id"],
         "properties": {
           "id": { "$ref": "#/definitions/uuid" },
           "user_id": { "$ref": "#/definitions/uuid" }
@@ -905,12 +900,11 @@
       "schema": {
         "properties": {
           "sid": { "$ref": "#/definitions/client_session_id" },
-          "user_id": { "$ref": "#/definitions/uuid" },
           "slug": { "$ref": "#/definitions/slug_top" },
           "title": { "$ref": "#/definitions/string_en" },
           "description": { "$ref": "#/definitions/string_en" }
         },
-        "required": ["user_id","slug","title", "session"]
+        "required": ["slug","title", "session"]
       },
       "targetSchema": {"$ref": "#/definitions/object_id"}
     },
@@ -955,10 +949,9 @@
       "schema": {
         "properties": {
           "series_id": {"$ref": "#/definitions/uuid"},
-          "admin_id": {"$ref": "#/definitions/uuid"},
-          "user_id": {"$ref":"#/definitions/uuid"}
+          "admin_id": {"$ref": "#/definitions/uuid"}
         },
-        "required": ["series_id","admin_id","user_id"]
+        "required": ["series_id","admin_id"]
       }
     },
     {
@@ -979,8 +972,7 @@
           "cfp_pre_submit_instructions": { "$ref": "#/definitions/string_en" },
           "cfp_post_submit_instructions": { "$ref": "#/definitions/string_en" },
           "contact_information": { "$ref": "#/definitions/string_en" },
-          "timezone": {"$ref": "#/definitions/timezone_default_utc" },
-          "user_id": { "$ref": "#/definitions/uuid"}
+          "timezone": {"$ref": "#/definitions/timezone_default_utc" }
         },
         "patternProperties":{
           "title#[a-z]+": { "$ref": "#/definitions/string_i18n" },
@@ -991,7 +983,7 @@
           "cfp_post_submit_instructions#[a-z]+": { "$ref": "#/definitions/string_i18n" },
           "contact_information#[a-z]+": { "$ref": "#/definitions/string_i18n" }
         },
-        "required": ["series_id", "title", "slug", "user_id"]
+        "required": ["series_id", "title", "slug"]
       },
       "targetSchema": {"$ref": "#/definitions/object_id"}
     },
@@ -1017,7 +1009,7 @@
       "href": "/v2/conference/credentials/add",
       "encType": "application/json",
       "schema": {
-        "required": ["conference_id", "user_id", "type", "data"],
+        "required": ["conference_id", "type", "data"],
         "properties": {
           "conference_id": {"$ref": "#/definitions/uuid"},
           "user_id": {"$ref": "#/definitions/uuid"},
@@ -1034,7 +1026,7 @@
       "href": "/v2/conference/tweet",
       "encType": "application/json",
       "schema": {
-        "required": ["conference_id", "user_id", "tweet"],
+        "required": ["conference_id", "tweet"],
         "properties": {
           "conference_id": {"$ref": "#/definitions/uuid"},
           "user_id": {"$ref": "#/definitions/uuid"},
@@ -1055,7 +1047,7 @@
           "conference_id": {"$ref": "#/definitions/uuid"},
           "user_id": {"$ref":"#/definitions/uuid"}
         },
-        "required": ["conference_id","user_id"]
+        "required": ["conference_id"]
       },
       "targetSchema": {
         "type": "array",
@@ -1077,7 +1069,7 @@
           "date": {"$ref":"#/definitions/conference_date"},
           "user_id": {"$ref": "#/definitions/uuid"}
         },
-        "required": ["conference_id","date","user_id"]
+        "required": ["conference_id","date"]
       },
       "targetSchema": { "$ref": "#/definitions/conference_date" }
     },
@@ -1094,7 +1086,7 @@
           "date": {"$ref":"#/definitions/uuid"},
           "user_id": {"$ref": "#/definitions/uuid"}
         },
-        "required": ["conference_id","date","user_id"]
+        "required": ["conference_id","date"]
       }
     },
     {
@@ -1110,7 +1102,7 @@
           "conference_id": {"$ref": "#/definitions/uuid"},
           "user_id": {"$ref":"#/definitions/uuid"}
         },
-        "required": ["conference_id","user_id"]
+        "required": ["conference_id"]
       },
       "targetSchema": {
         "type": "array",
@@ -1131,7 +1123,7 @@
           "admin_id": {"$ref":"#/definitions/uuid"},
           "user_id": {"$ref":"#/definitions/uuid"}
         },
-        "required": ["conference_id","admin_id","user_id"]
+        "required": ["conference_id","admin_id"]
       }
     },
     {
@@ -1147,7 +1139,7 @@
           "admin_id": {"$ref":"#/definitions/uuid"},
           "user_id": {"$ref":"#/definitions/uuid"}
         },
-        "required": ["conference_id","admin_id","user_id"]
+        "required": ["conference_id","admin_id"]
       }
     },
     {
@@ -1163,7 +1155,7 @@
           "venue_id": {"$ref":"#/definitions/uuid"},
           "user_id": {"$ref":"#/definitions/uuid"}
         },
-        "required": ["conference_id","venue_id","user_id"]
+        "required": ["conference_id","venue_id"]
       }
     },
     {
@@ -1179,7 +1171,7 @@
           "venue_id": {"$ref":"#/definitions/uuid"},
           "user_id": {"$ref":"#/definitions/uuid"}
         },
-        "required": ["conference_id","venue_id","user_id"]
+        "required": ["conference_id","venue_id"]
       }
     },
     {
@@ -1190,7 +1182,7 @@
       "href": "/v2/conference/session_type/add",
       "encType": "application/json",
       "schema": {
-        "required": ["user_id","conference_id","name","abstract", "duration"],
+        "required": ["conference_id","name","abstract", "duration"],
         "properties": {
           "conference_id": {"$ref": "#/definitions/uuid"},
           "name": {"$ref":"#/definitions/string_en"},
@@ -1218,7 +1210,7 @@
           "id": {"$ref": "#/definitions/uuid"},
           "user_id": {"$ref":"#/definitions/uuid"}
         },
-        "required": ["id","user_id"]
+        "required": ["id"]
       }
     },
     {
@@ -1246,7 +1238,7 @@
       "rel": "update",
       "schema": {
         "type": "object",
-        "required": ["id","user_id"],
+        "required": ["id"],
         "properties": {
           "id": {"$ref": "#/definitions/uuid"},
           "name": {"$ref":"#/definitions/string_en"},
@@ -1388,8 +1380,7 @@
           "sub_title": { "$ref": "#/definitions/string_en" },
           "title": { "$ref": "#/definitions/string_en" },
           "timetable_available": { "type": "boolean" },
-          "timezone": {"$ref": "#/definitions/string_en" },
-          "user_id": { "$ref": "#/definitions/uuid" }
+          "timezone": {"$ref": "#/definitions/string_en" }
         },
         "patternProperties": {
           "title#[a-z]+": { "$ref": "#/definitions/string_i18n" },
@@ -1400,7 +1391,7 @@
           "cfp_post_submit_instructions#[a-z]+": { "$ref": "#/definitions/string_i18n" },
           "contact_information#[a-z]+": { "$ref": "#/definitions/string_i18n" }
         },
-        "required": ["id", "user_id"]
+        "required": ["id"]
       }
     },
     {
@@ -1412,7 +1403,7 @@
       "encType": "application/json",
       "schema": {
         "type": "object",
-        "required": ["id", "user_id"],
+        "required": ["id"],
         "properties": {
           "id": { "$ref": "#/definitions/uuid" },
           "user_id": { "$ref": "#/definitions/uuid" }
@@ -1442,7 +1433,7 @@
       "href": "/v2/session/create",
       "schema": {
         "type": "object",
-        "required": ["conference_id", "speaker_id", "session_type_id", "user_id"],
+        "required": ["conference_id", "speaker_id", "session_type_id"],
         "properties": {
           "conference_id": { "$ref": "#/definitions/uuid" },
           "speaker_id": { "$ref": "#/definitions/uuid" },
@@ -1494,7 +1485,7 @@
       "rel": "lookup",
       "encType": "application/json",
       "schema": {
-        "required": ["id", "user_id"],
+        "required": ["id"],
         "properties": {
           "id": { "$ref": "#/definitions/uuid" },
           "user_id": { "$ref": "#/definitions/uuid" }
@@ -1509,7 +1500,7 @@
       "href": "/v2/session/update",
       "schema": {
         "type": "object",
-        "required": ["id", "user_id"],
+        "required": ["id"],
         "properties": {
           "id": { "$ref": "#/definitions/uuid" },
           "conference_id": { "$ref": "#/definitions/uuid" },
@@ -1576,7 +1567,7 @@
       "rel": "create",
       "schema": {
         "type": "object",
-        "required": ["session_id", "user_id", "body"],
+        "required": ["session_id", "body"],
         "properties": {
           "session_id": {"$ref": "#/definitions/uuid"},
           "user_id": {"$ref": "#/definitions/uuid"},
@@ -1622,7 +1613,7 @@
       "rel": "create",
       "schema": {
         "type": "object",
-        "required": ["session_id","user_id","user_prior_knowledge","speaker_knowledge","speaker_presentation","material_quality","overall_rating"],
+        "required": ["session_id","user_prior_knowledge","speaker_knowledge","speaker_presentation","material_quality","overall_rating"],
         "properties": {
           "user_id": {"$ref": "#/definitions/uuid"},
           "session_id": {"$ref": "#/definitions/uuid"},
@@ -1702,7 +1693,7 @@
       "rel": "update",
       "schema": {
         "type": "object",
-        "required": ["id","user_id"],
+        "required": ["id"],
         "properties": {
           "id": {"$ref": "#/definitions/uuid"},
           "speaker_id": {"$ref": "#/definitions/uuid"},
@@ -1725,7 +1716,7 @@
       "rel": "delete",
       "schema": {
         "type": "object",
-        "required": ["id","user_id"],
+        "required": ["id"],
         "properties": {
           "id": {"$ref": "#/definitions/uuid"},
           "user_id": {"$ref": "#/definitions/uuid"}
@@ -1740,7 +1731,7 @@
       "rel": "create",
       "schema": {
         "type": "object",
-        "required": ["conference_id","name","url","group_name","user_id"],
+        "required": ["conference_id","name","url","group_name"],
         "properties": {
           "conference_id": {"$ref": "#/definitions/uuid"},
           "name": { "$ref": "#/definitions/string_en_not_empty" },
@@ -1797,7 +1788,7 @@
       "rel": "update",
       "schema": {
         "type": "object",
-        "required": ["id","user_id"],
+        "required": ["id"],
         "properties": {
           "id": {"$ref": "#/definitions/uuid"},
           "name": { "$ref": "#/definitions/string_en_not_empty" },
@@ -1820,7 +1811,7 @@
       "rel": "delete",
       "schema": {
         "type": "object",
-        "required": ["id","user_id"],
+        "required": ["id"],
         "properties": {
           "id": {"$ref": "#/definitions/uuid"},
           "user_id": {"$ref": "#/definitions/uuid"}
@@ -1835,7 +1826,7 @@
       "rel": "create",
       "schema": {
         "type": "object",
-        "required": ["target_id", "user_id", "email"],
+        "required": ["target_id", "email"],
         "properties": {
           "target_id": {"$ref": "#/definitions/uuid"},
           "user_id": {"$ref": "#/definitions/uuid"},
@@ -1857,7 +1848,7 @@
       "rel": "update",
       "schema": {
         "type": "object",
-        "required": ["target_id", "user_id", "confirmation_key"],
+        "required": ["target_id", "confirmation_key"],
         "properties": {
           "target_id": {"$ref": "#/definitions/uuid"},
           "user_id": {"$ref": "#/definitions/uuid"},
@@ -1873,7 +1864,7 @@
       "rel": "update",
       "schema": {
         "type": "object",
-        "required": ["id", "user_id"],
+        "required": ["id"],
         "properties": {
           "force": {"type": "boolean"},
           "session_id": {"$ref": "#/definitions/uuid"},
@@ -1927,7 +1918,7 @@
         "patternProperties": {
           "name#[a-z]+": { "$ref": "#/definitions/string_i18n" }
         },
-        "required": ["conference_id","room_id","user_id"]
+        "required": ["conference_id","room_id"]
       }
     },
     {
@@ -1948,7 +1939,7 @@
         "patternProperties": {
           "name#[a-z]+": { "$ref": "#/definitions/string_i18n" }
         },
-        "required": ["id","user_id"]
+        "required": ["id"]
       }
     },
     {
@@ -1963,7 +1954,7 @@
           "id": {"$ref": "#/definitions/uuid"},
           "user_id": {"$ref":"#/definitions/uuid"}
         },
-        "required": ["id","user_id"]
+        "required": ["id"]
       }
     },
     {
@@ -2022,7 +2013,7 @@
           "url": {"$ref": "#/definitions/url" },
           "user_id": {"$ref":"#/definitions/uuid"}
         },
-        "required": ["id","user_id"]
+        "required": ["id"]
       }
     },
     {
@@ -2037,7 +2028,7 @@
           "id": {"$ref": "#/definitions/uuid"},
           "user_id": {"$ref":"#/definitions/uuid"}
         },
-        "required": ["id","user_id"]
+        "required": ["id"]
       }
     },
     {
@@ -2115,7 +2106,7 @@
           "staff_id": {"$ref":"#/definitions/uuid"},
           "user_id": {"$ref":"#/definitions/uuid"}
         },
-        "required": ["conference_id","staff_id","user_id"]
+        "required": ["conference_id","staff_id"]
       }
     },
     {
@@ -2131,7 +2122,7 @@
           "staff_id": {"$ref":"#/definitions/uuid"},
           "user_id": {"$ref":"#/definitions/uuid"}
         },
-        "required": ["conference_id","staff_id","user_id"]
+        "required": ["conference_id","staff_id"]
       }
     },
     {
@@ -2167,7 +2158,7 @@
           "since": { "$ref": "#/definitions/uuid" },
           "lang": { "$ref": "#/definitions/language" }
         },
-        "required": ["conference_id","user_id"]
+        "required": ["conference_id"]
       },
       "targetSchema": {
         "type": "array",
@@ -2197,7 +2188,7 @@
           "description#[a-z]+": { "$ref": "#/definitions/string_i18n" },
           "title#[a-z]+": { "$ref": "#/definitions/string_i18n" }
         },
-        "required": ["conference_id", "title", "url", "user_id"]
+        "required": ["conference_id", "title", "url"]
       },
       "targetSchema": { "$ref": "#/definitions/external_resource" }
     },
@@ -2223,7 +2214,7 @@
           "description#[a-z]+": { "$ref": "#/definitions/string_i18n" },
           "title#[a-z]+": { "$ref": "#/definitions/string_i18n" }
         },
-        "required": ["id", "user_id"]
+        "required": ["id"]
       },
       "targetSchema": { "$ref": "#/definitions/external_resource" }
     },
@@ -2239,7 +2230,7 @@
           "id": {"$ref": "#/definitions/uuid"},
           "user_id": {"$ref": "#/definitions/uuid"}
         },
-        "required": ["id","user_id"]
+        "required": ["id"]
       }
     },
     {
@@ -2252,7 +2243,7 @@
       "rel": "update",
       "schema": {
         "type": "object",
-        "required": ["id","user_id"],
+        "required": ["id"],
         "properties": {
           "id": {"$ref": "#/definitions/uuid"},
           "user_id": {"$ref": "#/definitions/uuid"}

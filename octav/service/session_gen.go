@@ -35,7 +35,7 @@ func Session() *SessionSvc {
 
 func (v *SessionSvc) LookupFromPayload(ctx context.Context, tx *sql.Tx, m *model.Session, payload *model.LookupSessionRequest) (err error) {
 	if pdebug.Enabled {
-		g := pdebug.Marker("service.Session.LookupFromPayload").BindError(&err)
+		g := pdebug.Marker("service.Session.LookupFromPayload %s", payload.ID).BindError(&err)
 		defer g.End()
 	}
 	if err = v.Lookup(ctx, tx, m, payload.ID); err != nil {
@@ -49,7 +49,7 @@ func (v *SessionSvc) LookupFromPayload(ctx context.Context, tx *sql.Tx, m *model
 
 func (v *SessionSvc) Lookup(ctx context.Context, tx *sql.Tx, m *model.Session, id string) (err error) {
 	if pdebug.Enabled {
-		g := pdebug.Marker("service.Session.Lookup").BindError(&err)
+		g := pdebug.Marker("service.Session.Lookup %s", id).BindError(&err)
 		defer g.End()
 	}
 
@@ -86,7 +86,7 @@ func (v *SessionSvc) Create(ctx context.Context, tx *sql.Tx, vdb *db.Session, pa
 		defer g.End()
 	}
 
-	if err := v.populateRowForCreate(vdb, payload); err != nil {
+	if err := v.populateRowForCreate(ctx, vdb, payload); err != nil {
 		return errors.Wrap(err, `failed to populate row`)
 	}
 
@@ -141,7 +141,7 @@ func (v *SessionSvc) UpdateFromPayload(ctx context.Context, tx *sql.Tx, payload 
 		return errors.Wrap(err, `failed to execute PreUpdateFromPayloadHook`)
 	}
 
-	if err := v.populateRowForUpdate(&vdb, payload); err != nil {
+	if err := v.populateRowForUpdate(ctx, &vdb, payload); err != nil {
 		return errors.Wrap(err, `failed to populate row data`)
 	}
 

@@ -12,7 +12,7 @@ import (
 
 func (v *ConferenceDateSvc) Init() {}
 
-func (v *ConferenceDateSvc) populateRowForCreate(vdb *db.ConferenceDate, payload *model.CreateConferenceDateRequest) error {
+func (v *ConferenceDateSvc) populateRowForCreate(ctx context.Context, vdb *db.ConferenceDate, payload *model.CreateConferenceDateRequest) error {
 	vdb.EID = tools.UUID()
 	vdb.ConferenceID = payload.ConferenceID
 	vdb.Open.Time = payload.Date.Open

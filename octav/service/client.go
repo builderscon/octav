@@ -72,10 +72,12 @@ func (v *ClientSvc) LoadClientSession(ctx context.Context, tx *sql.Tx, sessionID
 
 	// load the session
 	cache := Cache()
-
 	var userID string
 	if err := cache.Get(key, &userID); err != nil {
 		return errors.Wrap(err, `failed to fetch session`)
+	}
+	if pdebug.Enabled {
+		pdebug.Printf("Loaded user ID %s for session", userID)
 	}
 
 	user := User()

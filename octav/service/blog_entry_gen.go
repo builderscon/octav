@@ -35,7 +35,7 @@ func BlogEntry() *BlogEntrySvc {
 
 func (v *BlogEntrySvc) LookupFromPayload(ctx context.Context, tx *sql.Tx, m *model.BlogEntry, payload *model.LookupBlogEntryRequest) (err error) {
 	if pdebug.Enabled {
-		g := pdebug.Marker("service.BlogEntry.LookupFromPayload").BindError(&err)
+		g := pdebug.Marker("service.BlogEntry.LookupFromPayload %s", payload.ID).BindError(&err)
 		defer g.End()
 	}
 	if err = v.Lookup(ctx, tx, m, payload.ID); err != nil {
@@ -46,7 +46,7 @@ func (v *BlogEntrySvc) LookupFromPayload(ctx context.Context, tx *sql.Tx, m *mod
 
 func (v *BlogEntrySvc) Lookup(ctx context.Context, tx *sql.Tx, m *model.BlogEntry, id string) (err error) {
 	if pdebug.Enabled {
-		g := pdebug.Marker("service.BlogEntry.Lookup").BindError(&err)
+		g := pdebug.Marker("service.BlogEntry.Lookup %s", id).BindError(&err)
 		defer g.End()
 	}
 
@@ -83,7 +83,7 @@ func (v *BlogEntrySvc) Create(ctx context.Context, tx *sql.Tx, vdb *db.BlogEntry
 		defer g.End()
 	}
 
-	if err := v.populateRowForCreate(vdb, payload); err != nil {
+	if err := v.populateRowForCreate(ctx, vdb, payload); err != nil {
 		return errors.Wrap(err, `failed to populate row`)
 	}
 
@@ -137,7 +137,7 @@ func (v *BlogEntrySvc) UpdateFromPayload(ctx context.Context, tx *sql.Tx, payloa
 		return errors.Wrap(err, `failed to load from database`)
 	}
 
-	if err := v.populateRowForUpdate(&vdb, payload); err != nil {
+	if err := v.populateRowForUpdate(ctx, &vdb, payload); err != nil {
 		return errors.Wrap(err, `failed to populate row data`)
 	}
 

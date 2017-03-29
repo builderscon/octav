@@ -35,7 +35,7 @@ func FeaturedSpeaker() *FeaturedSpeakerSvc {
 
 func (v *FeaturedSpeakerSvc) LookupFromPayload(ctx context.Context, tx *sql.Tx, m *model.FeaturedSpeaker, payload *model.LookupFeaturedSpeakerRequest) (err error) {
 	if pdebug.Enabled {
-		g := pdebug.Marker("service.FeaturedSpeaker.LookupFromPayload").BindError(&err)
+		g := pdebug.Marker("service.FeaturedSpeaker.LookupFromPayload %s", payload.ID).BindError(&err)
 		defer g.End()
 	}
 	if err = v.Lookup(ctx, tx, m, payload.ID); err != nil {
@@ -49,7 +49,7 @@ func (v *FeaturedSpeakerSvc) LookupFromPayload(ctx context.Context, tx *sql.Tx, 
 
 func (v *FeaturedSpeakerSvc) Lookup(ctx context.Context, tx *sql.Tx, m *model.FeaturedSpeaker, id string) (err error) {
 	if pdebug.Enabled {
-		g := pdebug.Marker("service.FeaturedSpeaker.Lookup").BindError(&err)
+		g := pdebug.Marker("service.FeaturedSpeaker.Lookup %s", id).BindError(&err)
 		defer g.End()
 	}
 
@@ -86,7 +86,7 @@ func (v *FeaturedSpeakerSvc) Create(ctx context.Context, tx *sql.Tx, vdb *db.Fea
 		defer g.End()
 	}
 
-	if err := v.populateRowForCreate(vdb, payload); err != nil {
+	if err := v.populateRowForCreate(ctx, vdb, payload); err != nil {
 		return errors.Wrap(err, `failed to populate row`)
 	}
 
@@ -141,7 +141,7 @@ func (v *FeaturedSpeakerSvc) UpdateFromPayload(ctx context.Context, tx *sql.Tx, 
 		return errors.Wrap(err, `failed to execute PreUpdateFromPayloadHook`)
 	}
 
-	if err := v.populateRowForUpdate(&vdb, payload); err != nil {
+	if err := v.populateRowForUpdate(ctx, &vdb, payload); err != nil {
 		return errors.Wrap(err, `failed to populate row data`)
 	}
 

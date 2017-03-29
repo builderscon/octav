@@ -35,7 +35,7 @@ func ConferenceSeries() *ConferenceSeriesSvc {
 
 func (v *ConferenceSeriesSvc) LookupFromPayload(ctx context.Context, tx *sql.Tx, m *model.ConferenceSeries, payload *model.LookupConferenceSeriesRequest) (err error) {
 	if pdebug.Enabled {
-		g := pdebug.Marker("service.ConferenceSeries.LookupFromPayload").BindError(&err)
+		g := pdebug.Marker("service.ConferenceSeries.LookupFromPayload %s", payload.ID).BindError(&err)
 		defer g.End()
 	}
 	if err = v.Lookup(ctx, tx, m, payload.ID); err != nil {
@@ -49,7 +49,7 @@ func (v *ConferenceSeriesSvc) LookupFromPayload(ctx context.Context, tx *sql.Tx,
 
 func (v *ConferenceSeriesSvc) Lookup(ctx context.Context, tx *sql.Tx, m *model.ConferenceSeries, id string) (err error) {
 	if pdebug.Enabled {
-		g := pdebug.Marker("service.ConferenceSeries.Lookup").BindError(&err)
+		g := pdebug.Marker("service.ConferenceSeries.Lookup %s", id).BindError(&err)
 		defer g.End()
 	}
 
@@ -86,7 +86,7 @@ func (v *ConferenceSeriesSvc) Create(ctx context.Context, tx *sql.Tx, vdb *db.Co
 		defer g.End()
 	}
 
-	if err := v.populateRowForCreate(vdb, payload); err != nil {
+	if err := v.populateRowForCreate(ctx, vdb, payload); err != nil {
 		return errors.Wrap(err, `failed to populate row`)
 	}
 
@@ -137,7 +137,7 @@ func (v *ConferenceSeriesSvc) UpdateFromPayload(ctx context.Context, tx *sql.Tx,
 		return errors.Wrap(err, `failed to load from database`)
 	}
 
-	if err := v.populateRowForUpdate(&vdb, payload); err != nil {
+	if err := v.populateRowForUpdate(ctx, &vdb, payload); err != nil {
 		return errors.Wrap(err, `failed to populate row data`)
 	}
 

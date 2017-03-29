@@ -12,12 +12,11 @@ import (
 	"regexp"
 	"time"
 
-	"context"
-
 	"cloud.google.com/go/storage"
 
 	"github.com/builderscon/octav/octav/cache"
 	"github.com/builderscon/octav/octav/db"
+	"github.com/builderscon/octav/octav/internal/context"
 	"github.com/builderscon/octav/octav/internal/errors"
 	"github.com/builderscon/octav/octav/model"
 	"github.com/builderscon/octav/octav/tools"
@@ -30,7 +29,7 @@ func (v *ConferenceSvc) Init() {
 	v.credentialStorage = CredentialStorage
 }
 
-func (v *ConferenceSvc) populateRowForCreate(vdb *db.Conference, payload *model.CreateConferenceRequest) error {
+func (v *ConferenceSvc) populateRowForCreate(ctx context.Context, vdb *db.Conference, payload *model.CreateConferenceRequest) error {
 	vdb.EID = tools.UUID()
 	vdb.Slug = payload.Slug
 	vdb.Title = payload.Title
@@ -138,7 +137,7 @@ func (v *ConferenceSvc) CreateDefaultSessionTypes(ctx context.Context, tx *sql.T
 
 func (v *ConferenceSvc) CreateFromPayload(ctx context.Context, tx *sql.Tx, payload *model.CreateConferenceRequest, result *model.Conference) error {
 	su := User()
-	if err := su.IsConferenceSeriesAdministrator(ctx, tx, payload.SeriesID, payload.UserID); err != nil {
+	if err := su.IsConferenceSeriesAdministrator(ctx, tx, payload.SeriesID, context.GetUserID(ctx)); err != nil {
 		return errors.Wrap(err, "creating a conference requires conference administrator privilege")
 	}
 
@@ -198,7 +197,7 @@ func (v *ConferenceSvc) CreateFromPayload(ctx context.Context, tx *sql.Tx, paylo
 		}
 	}
 
-	if err := v.AddAdministrator(tx, vdb.EID, payload.UserID); err != nil {
+	if err := v.AddAdministrator(tx, vdb.EID, context.GetUserID(ctx)); err != nil {
 		return errors.Wrap(err, "failed to associate administrators to conference")
 	}
 
@@ -247,7 +246,7 @@ func (v *ConferenceSvc) AddAdministrator(tx *sql.Tx, cid, uid string) error {
 
 func (v *ConferenceSvc) AddAdministratorFromPayload(ctx context.Context, tx *sql.Tx, payload *model.AddConferenceAdminRequest) error {
 	su := User()
-	if err := su.IsConferenceAdministrator(ctx, tx, payload.ConferenceID, payload.UserID); err != nil {
+	if err := su.IsConferenceAdministrator(ctx, tx, payload.ConferenceID, context.GetUserID(ctx)); err != nil {
 		return errors.Wrap(err, "adding a conference administrator requires conference administrator privilege")
 	}
 
@@ -289,7 +288,7 @@ func (v *ConferenceSvc) AddDatesFromPayload(ctx context.Context, tx *sql.Tx, pay
 	}
 
 	su := User()
-	if err := su.IsConferenceAdministrator(ctx, tx, payload.ConferenceID, payload.UserID); err != nil {
+	if err := su.IsConferenceAdministrator(ctx, tx, payload.ConferenceID, context.GetUserID(ctx)); err != nil {
 		return errors.Wrap(err, "adding conference dates requires conference administrator privilege")
 	}
 
@@ -304,7 +303,7 @@ func (v *ConferenceSvc) AddDatesFromPayload(ctx context.Context, tx *sql.Tx, pay
 
 func (v *ConferenceSvc) DeleteDateFromPayload(ctx context.Context, tx *sql.Tx, payload *model.DeleteConferenceDateRequest) error {
 	su := User()
-	if err := su.IsConferenceAdministrator(ctx, tx, payload.ConferenceID, payload.UserID); err != nil {
+	if err := su.IsConferenceAdministrator(ctx, tx, payload.ConferenceID, context.GetUserID(ctx)); err != nil {
 		return errors.Wrap(err, "deleting conference dates requires conference administrator privilege")
 	}
 
@@ -349,7 +348,7 @@ func (v *ConferenceSvc) DeleteAdministratorFromPayload(ctx context.Context, tx *
 	}
 
 	su := User()
-	if err := su.IsConferenceAdministrator(ctx, tx, payload.ConferenceID, payload.UserID); err != nil {
+	if err := su.IsConferenceAdministrator(ctx, tx, payload.ConferenceID, context.GetUserID(ctx)); err != nil {
 		return errors.Wrap(err, "deleting a conference administrator requires conference administrator privilege")
 	}
 
@@ -392,7 +391,7 @@ func (v *ConferenceSvc) AddVenueFromPayload(ctx context.Context, tx *sql.Tx, pay
 	}
 
 	su := User()
-	if err := su.IsConferenceAdministrator(ctx, tx, payload.ConferenceID, payload.UserID); err != nil {
+	if err := su.IsConferenceAdministrator(ctx, tx, payload.ConferenceID, context.GetUserID(ctx)); err != nil {
 		return errors.Wrap(err, "adding a conference venue requires conference administrator privilege")
 	}
 
@@ -427,7 +426,6 @@ func (v *ConferenceSvc) AddVenueFromPayload(ctx context.Context, tx *sql.Tx, pay
 	st := Track()
 	var r model.CreateTrackRequest
 	r.ConferenceID = payload.ConferenceID
-	r.UserID = payload.UserID
 	for _, room := range rooms {
 		r.RoomID = room.ID
 		r.Name.Set(room.Name)
@@ -454,7 +452,7 @@ func (v *ConferenceSvc) AddVenueFromPayload(ctx context.Context, tx *sql.Tx, pay
 
 func (v *ConferenceSvc) DeleteVenueFromPayload(ctx context.Context, tx *sql.Tx, payload *model.DeleteConferenceVenueRequest) error {
 	su := User()
-	if err := su.IsConferenceAdministrator(ctx, tx, payload.ConferenceID, payload.UserID); err != nil {
+	if err := su.IsConferenceAdministrator(ctx, tx, payload.ConferenceID, context.GetUserID(ctx)); err != nil {
 		return errors.Wrap(err, "deleting a conference venue requires conference administrator privilege")
 	}
 	if err := db.DeleteConferenceVenue(tx, payload.ConferenceID, payload.VenueID); err != nil {
@@ -692,7 +690,7 @@ func (v *ConferenceSvc) UpdateFromPayload(ctx context.Context, tx *sql.Tx, paylo
 	}
 
 	su := User()
-	if err := su.IsConferenceAdministrator(ctx, tx, payload.ID, payload.UserID); err != nil {
+	if err := su.IsConferenceAdministrator(ctx, tx, payload.ID, context.GetUserID(ctx)); err != nil {
 		return errors.Wrap(err, "updating a conference requires conference administrator privilege")
 	}
 
@@ -906,7 +904,7 @@ func (v *ConferenceSvc) TweetFromPayload(ctx context.Context, tx *sql.Tx, payloa
 
 	// You have to be conference admin to do this
 	su := User()
-	if err := su.IsConferenceAdministrator(ctx, tx, payload.ConferenceID, payload.UserID); err != nil {
+	if err := su.IsConferenceAdministrator(ctx, tx, payload.ConferenceID, context.GetUserID(ctx)); err != nil {
 		return errors.Wrap(err, "adding a conference credentials requires conference administrator privilege")
 	}
 
@@ -921,7 +919,7 @@ func (v *ConferenceSvc) AddCredentialFromPayload(ctx context.Context, tx *sql.Tx
 
 	// You have to be conference admin to do this
 	su := User()
-	if err := su.IsConferenceAdministrator(ctx, tx, payload.ConferenceID, payload.UserID); err != nil {
+	if err := su.IsConferenceAdministrator(ctx, tx, payload.ConferenceID, context.GetUserID(ctx)); err != nil {
 		return errors.Wrap(err, "adding a conference credentials requires conference administrator privilege")
 	}
 
@@ -952,7 +950,7 @@ func (v *ConferenceSvc) ListCredentialFromPayload(ctx context.Context, tx *sql.T
 
 	// Check if this is an administrator/organizer
 	su := User()
-	if err := su.IsConferenceAdministrator(ctx, tx, payload.ConferenceID, payload.UserID); err != nil {
+	if err := su.IsConferenceAdministrator(ctx, tx, payload.ConferenceID, context.GetUserID(ctx)); err != nil {
 		return errors.Wrap(err, "listing conference credentials requires conference administrator privilege")
 	}
 
@@ -1004,7 +1002,7 @@ func (v *ConferenceSvc) LoadStaff(ctx context.Context, tx *sql.Tx, users *model.
 
 func (v *ConferenceSvc) AddStaffFromPayload(ctx context.Context, tx *sql.Tx, payload *model.AddConferenceStaffRequest) error {
 	su := User()
-	if err := su.IsConferenceAdministrator(ctx, tx, payload.ConferenceID, payload.UserID); err != nil {
+	if err := su.IsConferenceAdministrator(ctx, tx, payload.ConferenceID, context.GetUserID(ctx)); err != nil {
 		return errors.Wrap(err, "adding a conference administrator requires conference administrator privilege")
 	}
 
@@ -1025,7 +1023,7 @@ func (v *ConferenceSvc) DeleteStaffFromPayload(ctx context.Context, tx *sql.Tx, 
 	}
 
 	su := User()
-	if err := su.IsConferenceAdministrator(ctx, tx, payload.ConferenceID, payload.UserID); err != nil {
+	if err := su.IsConferenceAdministrator(ctx, tx, payload.ConferenceID, context.GetUserID(ctx)); err != nil {
 		return errors.Wrap(err, "deleting a conference staff requires conference administrator privilege")
 	}
 

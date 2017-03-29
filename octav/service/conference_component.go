@@ -1,6 +1,7 @@
 package service
 
 import (
+	"context"
 	"database/sql"
 
 	"github.com/builderscon/octav/octav/db"
@@ -11,14 +12,14 @@ import (
 
 func (v *ConferenceComponentSvc) Init() {}
 
-func (v *ConferenceComponentSvc) populateRowForCreate(vdb *db.ConferenceComponent, payload *model.CreateConferenceComponentRequest) error {
+func (v *ConferenceComponentSvc) populateRowForCreate(ctx context.Context, vdb *db.ConferenceComponent, payload *model.CreateConferenceComponentRequest) error {
 	vdb.EID = tools.UUID()
 	vdb.Name = payload.Name
 	vdb.Value = payload.Value
 	return nil
 }
 
-func (v *ConferenceComponentSvc) populateRowForUpdate(vdb *db.ConferenceComponent, payload *model.UpdateConferenceComponentRequest) error {
+func (v *ConferenceComponentSvc) populateRowForUpdate(ctx context.Context, vdb *db.ConferenceComponent, payload *model.UpdateConferenceComponentRequest) error {
 	vdb.EID = tools.UUID()
 	if payload.Name.Valid() {
 		vdb.Name = payload.Name.String

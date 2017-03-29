@@ -148,7 +148,6 @@ type AddSessionTypeRequest struct {
 	SubmissionStart jsval.MaybeString `json:"submission_start,omitempty"`
 	SubmissionEnd   jsval.MaybeString `json:"submission_end,omitempty"`
 	LocalizedFields `json:"-"`
-	UserID          string            `json:"user_id"`
 	DatabaseOptions []db.InsertOption `json:"-"`
 }
 type CreateSessionTypeRequest struct {
@@ -158,7 +157,6 @@ type CreateSessionTypeRequest struct {
 // +transport
 type DeleteSessionTypeRequest struct {
 	ID     string `json:"id"`
-	UserID string `json:"user_id"`
 }
 
 // +transport
@@ -181,7 +179,6 @@ type UpdateSessionTypeRequest struct {
 	SubmissionStart jsval.MaybeString `json:"submission_start,omitempty"`
 	SubmissionEnd   jsval.MaybeString `json:"submission_end,omitempty"`
 	LocalizedFields `json:"-"`
-	UserID          string `json:"user_id"`
 }
 
 // +model
@@ -264,7 +261,6 @@ type LookupConferenceSeriesRequest struct {
 
 // +transport
 type CreateConferenceSeriesRequest struct {
-	UserID          string `json:"user_id"`
 	SessionID       string `json:"sid"`
 	Slug            string `json:"slug"`
 	Title           string `json:"title"`
@@ -283,7 +279,6 @@ type UpdateConferenceSeriesRequest struct {
 // +transport
 type DeleteConferenceSeriesRequest struct {
 	ID     string `json:"id"`
-	UserID string `json:"user_id"`
 }
 
 // +transport
@@ -297,7 +292,6 @@ type ListConferenceSeriesRequest struct {
 type AddConferenceSeriesAdminRequest struct {
 	SeriesID string `json:"series_id"`
 	AdminID  string `json:"admin_id"` // new ID to add
-	UserID   string `json:"user_id"`  // ID of the operator
 }
 
 // +transport
@@ -315,7 +309,6 @@ type CreateConferenceRequest struct {
 	SubTitle                  jsval.MaybeString `json:"sub_title" l10n:"true"`
 	Slug                      string            `json:"slug"`
 	Timezone                  jsval.MaybeString `json:"timezone"`
-	UserID                    string            `json:"user_id"`
 	LocalizedFields           `json:"-"`
 	DatabaseOptions           []db.InsertOption `json:"-"`
 }
@@ -354,7 +347,6 @@ type UpdateConferenceRequest struct {
 	BlogFeedbackAvailable     jsval.MaybeBool   `json:"blog_feedback_available,omitempty"`
 	TimetableAvailable        jsval.MaybeBool   `json:"timetable_available,omitempty"`
 	Timezone                  jsval.MaybeString `json:"timezone,omitempty"`
-	UserID                    string            `json:"user_id"`
 	LocalizedFields           `json:"-"`
 
 	// These fields are only used internally
@@ -387,21 +379,18 @@ type ConferenceDateList []ConferenceDate
 // +transport
 type ListConferenceDateRequest struct {
 	ConferenceID string `json:"conference_id"`
-	UserID       string `json:"user_id"`
 }
 
 // +transport
 type CreateConferenceDateRequest struct {
 	ConferenceID    string            `json:"conference_id"`
 	Date            ConferenceDate    `json:"date" extract:"true"`
-	UserID          string            `json:"user_id"`
 	DatabaseOptions []db.InsertOption `json:"-"`
 }
 
 // +transport
 type ListConferenceAdminRequest struct {
 	ConferenceID string            `json:"conference_id"`
-	UserID       string            `json:"user_id"`
 	Lang         jsval.MaybeString `json:"lang,omitempty" urlenc:"lang,omitempty,string"`
 }
 
@@ -409,14 +398,12 @@ type ListConferenceAdminRequest struct {
 type AddConferenceAdminRequest struct {
 	ConferenceID string `json:"conference_id"`
 	AdminID      string `json:"admin_id"`
-	UserID       string `json:"user_id"`
 }
 
 // +transport
 type AddConferenceVenueRequest struct {
 	ConferenceID    string            `json:"conference_id"`
 	VenueID         string            `json:"venue_id"`
-	UserID          string            `json:"user_id"`
 	DatabaseOptions []db.InsertOption `json:"-"`
 }
 
@@ -424,27 +411,23 @@ type AddConferenceVenueRequest struct {
 type DeleteConferenceDateRequest struct {
 	ConferenceID string `json:"conference_id"`
 	Date         string `json:"date"`
-	UserID       string `json:"user_id"`
 }
 
 // +transport
 type DeleteConferenceAdminRequest struct {
 	ConferenceID string `json:"conference_id"`
 	AdminID      string `json:"admin_id"`
-	UserID       string `json:"user_id"`
 }
 
 // +transport
 type DeleteConferenceVenueRequest struct {
 	ConferenceID string `json:"conference_id"`
 	VenueID      string `json:"venue_id"`
-	UserID       string `json:"user_id"`
 }
 
 // +transport
 type DeleteConferenceRequest struct {
 	ID     string `json:"id"`
-	UserID string `json:"user_id"`
 }
 
 // +transport
@@ -480,7 +463,6 @@ type CreateRoomRequest struct {
 	Name            jsval.MaybeString `json:"name" l10n:"true"`
 	Capacity        jsval.MaybeUint   `json:"capacity"`
 	LocalizedFields `json:"-"`
-	UserID          string            `json:"user_id"`
 	DatabaseOptions []db.InsertOption `json:"-"`
 }
 
@@ -499,13 +481,11 @@ type UpdateRoomRequest struct {
 	Name            jsval.MaybeString `json:"name,omitempty" l10n:"true"`
 	Capacity        jsval.MaybeUint   `json:"capacity,omitempty"`
 	LocalizedFields `json:"-"`
-	UserID          string `json:"user_id"`
 }
 
 // +transport
 type DeleteRoomRequest struct {
 	ID     string `json:"id" urlenc:"id"`
-	UserID string `json:"user_id"`
 }
 
 // +transport
@@ -538,7 +518,6 @@ type CreateSessionRequest struct {
 	RecordingRelease jsval.MaybeString `json:"recording_release,omitempty"`
 	MaterialsRelease jsval.MaybeString `json:"materials_release,omitempty"`
 	LocalizedFields  `json:"-"`
-	UserID           string            `json:"user_id"`
 	Duration         int               `json:"-"` // This is not sent from the client, but is used internally
 	DatabaseOptions  []db.InsertOption `json:"-"`
 }
@@ -580,13 +559,11 @@ type UpdateSessionRequest struct {
 	StartsOn            jsval.MaybeTime   `json:"starts_on,omitempty"`
 	Confirmed           jsval.MaybeBool   `json:"confirmed,omitempty"`
 	LocalizedFields     `json:"-"`
-	UserID              string `json:"user_id"`
 }
 
 // +transport
 type DeleteSessionRequest struct {
 	ID     string `json:"id" urlenc:"id"`
-	UserID string `json:"user_id"`
 }
 
 // +transport
@@ -615,7 +592,6 @@ type UpdateUserRequest struct {
 	AuthUserID      jsval.MaybeString `json:"auth_user_id,omitempty"`
 	AvatarURL       jsval.MaybeString `json:"avatar_url,omitempty"`
 	TshirtSize      jsval.MaybeString `json:"tshirt_size,omitempty"`
-	UserID          string            `json:"user_id"`
 	LocalizedFields `json:"-"`
 }
 
@@ -639,7 +615,6 @@ type LookupUserByAuthUserIDRequest struct {
 // +transport
 type DeleteUserRequest struct {
 	ID     string `json:"id"`
-	UserID string `json:"user_id"`
 }
 
 // +transport
@@ -659,7 +634,6 @@ type CreateVenueRequest struct {
 	Longitude       jsval.MaybeFloat  `json:"longitude,omitempty"`
 	Latitude        jsval.MaybeFloat  `json:"latitude,omitempty"`
 	LocalizedFields `json:"-"`
-	UserID          string            `json:"user_id"`
 	DatabaseOptions []db.InsertOption `json:"-"`
 }
 
@@ -671,13 +645,11 @@ type UpdateVenueRequest struct {
 	Longitude       jsval.MaybeFloat  `json:"longitude,omitempty"`
 	Latitude        jsval.MaybeFloat  `json:"latitude,omitempty"`
 	LocalizedFields `json:"-"`
-	UserID          string `json:"user_id"`
 }
 
 // +transport
 type DeleteVenueRequest struct {
 	ID     string `json:"id" urlenc:"id"`
-	UserID string `json:"user_id"`
 }
 
 // +transport
@@ -714,7 +686,6 @@ type ListSessionsRequest struct {
 type Question struct {
 	ID        string
 	SessionID string
-	UserID    string
 	Body      string
 }
 
@@ -728,7 +699,6 @@ type LookupQuestionRequest struct {
 // +transport
 type CreateQuestionRequest struct {
 	SessionID       string            `json:"session_id" urlenc:"session_id"`
-	UserID          string            `json:"user_id" urlenc:"user_id"`
 	Body            string            `json:"body" urlenc:"body"`
 	DatabaseOptions []db.InsertOption `json:"-"`
 }
@@ -737,7 +707,6 @@ type CreateQuestionRequest struct {
 type UpdateQuestionRequest struct {
 	ID        string            `json:"id" urlenc:"id"`
 	SessionID jsval.MaybeString `json:"session_id" urlenc:"session_id"`
-	UserID    jsval.MaybeString `json:"user_id" urlenc:"user_id"`
 	Body      jsval.MaybeString `json:"body" urlenc:"body"`
 }
 
@@ -755,7 +724,6 @@ type ListQuestionRequest struct {
 
 // +transport
 type CreateSessionSurveyResponseRequest struct {
-	UserID             jsval.MaybeString `json:"user_id"`
 	SessionID          jsval.MaybeString `json:"session_id"`
 	UserPriorKnowledge int               `json:"user_prior_knowledge"`
 	SpeakerKnowledge   int               `json:"speaker_knowledge"`
@@ -830,7 +798,6 @@ type AddFeaturedSpeakerRequest struct {
 	DisplayName     string            `json:"display_name" l10n:"true"`
 	Description     string            `json:"description" l10n:"true"`
 	LocalizedFields `json:"-"`
-	UserID          string            `json:"user_id"`
 	DatabaseOptions []db.InsertOption `json:"-"`
 }
 type CreateFeaturedSpeakerRequest struct {
@@ -845,13 +812,11 @@ type UpdateFeaturedSpeakerRequest struct {
 	DisplayName     jsval.MaybeString `json:"display_name,omitempty" l10n:"true"`
 	Description     jsval.MaybeString `json:"description,omitempty" l10n:"true"`
 	LocalizedFields `json:"-"`
-	UserID          string `json:"user_id"`
 }
 
 // +transport
 type DeleteFeaturedSpeakerRequest struct {
 	ID     string `json:"id"`
-	UserID string `json:"user_id"`
 }
 
 // +model
@@ -894,7 +859,6 @@ type AddSponsorRequest struct {
 	LogoURL         jsval.MaybeString `json:"logo_url"`
 	GroupName       string            `json:"group_name"`
 	SortOrder       int               `json:"sort_order"`
-	UserID          string            `json:"user_id"`
 	LocalizedFields `json:"-"`
 	DatabaseOptions []db.InsertOption `json:"-"`
 }
@@ -911,14 +875,12 @@ type UpdateSponsorRequest struct {
 	MultipartForm   *multipart.Form   `json:"-"`
 	SortOrder       jsval.MaybeInt    `json:"sort_order,omitempty"`
 	LocalizedFields `json:"-"`
-	UserID          string            `json:"user_id"`
 	LogoURL         jsval.MaybeString `json:"-"`
 }
 
 // +transport
 type DeleteSponsorRequest struct {
 	ID     string `json:"id"`
-	UserID string `json:"user_id"`
 }
 
 // +transport
@@ -939,7 +901,6 @@ type LocalizedFields struct {
 // +transport
 type CreateTemporaryEmailRequest struct {
 	TargetID string            `json:"target_id"` // ID of the user to register the email for
-	UserID   string            `json:"user_id"`   // ID of the user making this request
 	Email    string            `json:"email"`
 	Lang     jsval.MaybeString `json:"lang"`
 }
@@ -952,20 +913,17 @@ type CreateTemporaryEmailResponse struct {
 // +transport
 type ConfirmTemporaryEmailRequest struct {
 	TargetID        string `json:"target_id"` // ID of the user to register the email for
-	UserID          string `json:"user_id"`   // ID of the user making this request
 	ConfirmationKey string `json:"confirmation_key"`
 }
 
 // +transport
 type ListConferenceCredentialRequest struct {
 	ConferenceID string `json:"conference_id"`
-	UserID       string `json:"user_id"` // ID of the user making this request
 }
 
 // +transport
 type AddConferenceCredentialRequest struct {
 	ConferenceID string `json:"conference_id"`
-	UserID       string `json:"user_id"` // ID of the user making this request
 	Type         string `json:"type"`
 	Data         string `json:"data"`
 }
@@ -973,7 +931,6 @@ type AddConferenceCredentialRequest struct {
 // +transport
 type TweetAsConferenceRequest struct {
 	ConferenceID string `json:"conference_id"`
-	UserID       string `json:"user_id"` // ID of the user making this request
 	Tweet        string `json:"tweet"`
 }
 
@@ -989,14 +946,12 @@ type GetConferenceScheduleRequest struct {
 // +transport
 type VerifyUserRequest struct {
 	ID     string `json:"id"`      // ID of the user being verified
-	UserID string `json:"user_id"` // ID of the user making this request
 }
 
 // +transport
 type SendSelectionResultNotificationRequest struct {
 	Force     bool   `json:"force"`      // true to force sending notification after we have already done so for this session
 	SessionID string `json:"session_id"` // ID of the session to which we're making the notification
-	UserID    string `json:"user_id"`    // ID of the user making this request
 
 	TrustedCall bool `json:"-"`
 }
@@ -1005,7 +960,6 @@ type SendSelectionResultNotificationRequest struct {
 type SendAllSelectionResultNotificationRequest struct {
 	Force        bool   `json:"force"`         // true to force sending notification after we have already done so for this session
 	ConferenceID string `json:"conference_id"` // ID of the conference to which we're making the notification
-	UserID       string `json:"user_id"`       // ID of the user making this request
 
 	TrustedCall bool `json:"-"`
 }
@@ -1053,7 +1007,6 @@ type CreateTrackRequest struct {
 	RoomID          string            `json:"room_id"`
 	Name            jsval.MaybeString `json:"name,omitempty" l10n:"true"`
 	SortOrder       jsval.MaybeInt    `json:"sort_order,omitempty"`
-	UserID          string            `json:"user_id"` // ID of the user making this request
 	LocalizedFields `json:"-"`
 	DatabaseOptions []db.InsertOption `json:"-"`
 }
@@ -1064,14 +1017,12 @@ type UpdateTrackRequest struct {
 	Name            jsval.MaybeString `json:"name,omitempty" l10n:"true"`
 	RoomID          jsval.MaybeString `json:"room_id,omitempty"`
 	SortOrder       jsval.MaybeInt    `json:"sort_order,omitempty"`
-	UserID          string            `json:"user_id"` // ID of the user making this request
 	LocalizedFields `json:"-"`
 }
 
 // +transport
 type DeleteTrackRequest struct {
 	ID              string `json:"id"`
-	UserID          string `json:"user_id"` // ID of the user making this request
 	LocalizedFields `json:"-"`
 }
 
@@ -1111,7 +1062,6 @@ type CreateBlogEntryRequest struct {
 	Status          string            `json:"status"`
 	Title           string            `json:"title"`
 	URL             string            `json:"url"`
-	UserID          string            `json:"user_id"`
 	DatabaseOptions []db.InsertOption `json:"-"`
 }
 
@@ -1121,19 +1071,16 @@ type UpdateBlogEntryRequest struct {
 	Status jsval.MaybeString `json:"status,omitempty"`
 	Title  jsval.MaybeString `json:"title,omitempty"`
 	URL    jsval.MaybeString `json:"url,omitempty"`
-	UserID string            `json:"user_id"`
 }
 
 // +transport
 type LookupBlogEntryRequest struct {
 	ID     string `json:"id"`
-	UserID string `json:"user_id"`
 }
 
 // +transport
 type DeleteBlogEntryRequest struct {
 	ID     string `json:"id"`
-	UserID string `json:"user_id"`
 }
 
 // +transport
@@ -1148,20 +1095,17 @@ type ListBlogEntriesRequest struct {
 type AddConferenceStaffRequest struct {
 	ConferenceID string `json:"conference_id"`
 	StaffID      string `json:"staff_id"`
-	UserID       string `json:"user_id"`
 }
 
 // +transport
 type DeleteConferenceStaffRequest struct {
 	ConferenceID string `json:"conference_id"`
 	StaffID      string `json:"staff_id"`
-	UserID       string `json:"user_id"`
 }
 
 // +transport
 type ListConferenceStaffRequest struct {
 	ConferenceID string            `json:"conference_id"`
-	UserID       string            `json:"user_id"`
 	Lang         jsval.MaybeString `json:"lang,omitempty" urlenc:"lang,omitempty,string"`
 }
 
@@ -1191,7 +1135,6 @@ type LookupExternalResourceRequest struct {
 // +transport
 type ListExternalResourceRequest struct {
 	ConferenceID string            `json:"conference_id"`
-	UserID       string            `json:"user_id"`
 	Since        jsval.MaybeString `json:"since,omitempty" urlenc:"since,omitempty,string"`
 	Limit        jsval.MaybeInt    `json:"limit,omitempty" urlenc:"limit,omitempty,int64"`
 	Lang         jsval.MaybeString `json:"lang,omitempty" urlenc:"lang,omitempty,string"`
@@ -1206,7 +1149,6 @@ type CreateExternalResourceRequest struct {
 	Title           string            `json:"title" l10n:"true"`
 	URL             string            `json:"url"`
 	LocalizedFields `json:"-"`
-	UserID          string            `json:"user_id"`
 	SortOrder       jsval.MaybeInt    `json:"sort_order,omitempty"`
 	DatabaseOptions []db.InsertOption `json:"-"`
 }
@@ -1218,32 +1160,28 @@ type UpdateExternalResourceRequest struct {
 	Title           jsval.MaybeString `json:"title,omitempty" l10n:"true"`
 	URL             jsval.MaybeString `json:"url,omitempty"`
 	LocalizedFields `json:"-"`
-	UserID          string         `json:"user_id"`
 	SortOrder       jsval.MaybeInt `json:"sort_order,omitempty"`
 }
 
 // +transport
 type DeleteExternalResourceRequest struct {
 	ID     string `json:"id"`
-	UserID string `json:"user_id"`
 }
 
 // +transport
 type SetSessionVideoCoverRequest struct {
 	ID            string          `json:"id"`
-	UserID        string          `json:"user_id"`
 	MultipartForm *multipart.Form `json:"-"`
 }
 
 // +transport
 type CreateClientSessionRequest struct {
 	AccessToken string `json:"access_token"`
-	UserID      string `json:"user_id"`
+	AuthVia     string `json:"auth_via"`
 }
 
 // +transport
 type CreateClientSessionResponse struct {
-	UserID    string `json:"user_id"`
 	SessionID string `json:"sid"`
 	Expires   string `json:"expires"`
 }

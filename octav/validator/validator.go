@@ -965,7 +965,7 @@ func init() {
 		SetConstraintMap(M).
 		SetRoot(
 			jsval.Object().
-				Required("admin_id", "conference_id", "user_id").
+				Required("admin_id", "conference_id").
 				AdditionalProperties(
 					jsval.EmptyConstraint,
 				).
@@ -988,7 +988,7 @@ func init() {
 		SetConstraintMap(M).
 		SetRoot(
 			jsval.Object().
-				Required("conference_id", "data", "type", "user_id").
+				Required("conference_id", "data", "type").
 				AdditionalProperties(
 					jsval.EmptyConstraint,
 				).
@@ -1015,7 +1015,7 @@ func init() {
 		SetConstraintMap(M).
 		SetRoot(
 			jsval.Object().
-				Required("conference_id", "date", "user_id").
+				Required("conference_id", "date").
 				AdditionalProperties(
 					jsval.EmptyConstraint,
 				).
@@ -1060,7 +1060,7 @@ func init() {
 		SetConstraintMap(M).
 		SetRoot(
 			jsval.Object().
-				Required("admin_id", "series_id", "user_id").
+				Required("admin_id", "series_id").
 				AdditionalProperties(
 					jsval.EmptyConstraint,
 				).
@@ -1071,10 +1071,6 @@ func init() {
 				AddProp(
 					"series_id",
 					jsval.Reference(M).RefersTo("#/definitions/uuid"),
-				).
-				AddProp(
-					"user_id",
-					jsval.Reference(M).RefersTo("#/definitions/uuid"),
 				),
 		)
 
@@ -1083,7 +1079,7 @@ func init() {
 		SetConstraintMap(M).
 		SetRoot(
 			jsval.Object().
-				Required("conference_id", "staff_id", "user_id").
+				Required("conference_id", "staff_id").
 				AdditionalProperties(
 					jsval.EmptyConstraint,
 				).
@@ -1106,7 +1102,7 @@ func init() {
 		SetConstraintMap(M).
 		SetRoot(
 			jsval.Object().
-				Required("conference_id", "user_id", "venue_id").
+				Required("conference_id", "venue_id").
 				AdditionalProperties(
 					jsval.EmptyConstraint,
 				).
@@ -1214,7 +1210,7 @@ func init() {
 		SetConstraintMap(M).
 		SetRoot(
 			jsval.Object().
-				Required("abstract", "conference_id", "duration", "name", "user_id").
+				Required("abstract", "conference_id", "duration", "name").
 				AdditionalProperties(
 					jsval.EmptyConstraint,
 				).
@@ -1261,7 +1257,7 @@ func init() {
 		SetConstraintMap(M).
 		SetRoot(
 			jsval.Object().
-				Required("conference_id", "group_name", "name", "url", "user_id").
+				Required("conference_id", "group_name", "name", "url").
 				AdditionalProperties(
 					jsval.EmptyConstraint,
 				).
@@ -1346,7 +1342,7 @@ func init() {
 		SetConstraintMap(M).
 		SetRoot(
 			jsval.Object().
-				Required("confirmation_key", "target_id", "user_id").
+				Required("confirmation_key", "target_id").
 				AdditionalProperties(
 					jsval.EmptyConstraint,
 				).
@@ -1430,17 +1426,13 @@ func init() {
 		SetConstraintMap(M).
 		SetRoot(
 			jsval.Object().
-				Required("access_token", "user_id").
+				Required("access_token").
 				AdditionalProperties(
 					jsval.EmptyConstraint,
 				).
 				AddProp(
 					"access_token",
 					jsval.String(),
-				).
-				AddProp(
-					"user_id",
-					jsval.Reference(M).RefersTo("#/definitions/uuid"),
 				),
 		)
 
@@ -1463,7 +1455,7 @@ func init() {
 		SetConstraintMap(M).
 		SetRoot(
 			jsval.Object().
-				Required("series_id", "slug", "title", "user_id").
+				Required("series_id", "slug", "title").
 				AdditionalProperties(
 					jsval.EmptyConstraint,
 				).
@@ -1506,10 +1498,6 @@ func init() {
 				AddProp(
 					"title",
 					jsval.Reference(M).RefersTo("#/definitions/string_en"),
-				).
-				AddProp(
-					"user_id",
-					jsval.Reference(M).RefersTo("#/definitions/uuid"),
 				).
 				PatternPropertiesString(
 					"cfp_lead_text#[a-z]+",
@@ -1564,7 +1552,7 @@ func init() {
 		SetConstraintMap(M).
 		SetRoot(
 			jsval.Object().
-				Required("session", "slug", "title", "user_id").
+				Required("session", "slug", "title").
 				AdditionalProperties(
 					jsval.EmptyConstraint,
 				).
@@ -1583,10 +1571,6 @@ func init() {
 				AddProp(
 					"title",
 					jsval.Reference(M).RefersTo("#/definitions/string_en"),
-				).
-				AddProp(
-					"user_id",
-					jsval.Reference(M).RefersTo("#/definitions/uuid"),
 				),
 		)
 
@@ -1613,7 +1597,7 @@ func init() {
 		SetConstraintMap(M).
 		SetRoot(
 			jsval.Object().
-				Required("conference_id", "title", "url", "user_id").
+				Required("conference_id", "title", "url").
 				AdditionalProperties(
 					jsval.EmptyConstraint,
 				).
@@ -1706,7 +1690,7 @@ func init() {
 		SetConstraintMap(M).
 		SetRoot(
 			jsval.Object().
-				Required("body", "session_id", "user_id").
+				Required("body", "session_id").
 				AdditionalProperties(
 					jsval.EmptyConstraint,
 				).
@@ -1747,7 +1731,7 @@ func init() {
 		SetConstraintMap(M).
 		SetRoot(
 			jsval.Object().
-				Required("name", "user_id", "venue_id").
+				Required("name", "venue_id").
 				AdditionalProperties(
 					jsval.EmptyConstraint,
 				).
@@ -1758,10 +1742,6 @@ func init() {
 				AddProp(
 					"name",
 					jsval.Reference(M).RefersTo("#/definitions/string_en"),
-				).
-				AddProp(
-					"user_id",
-					jsval.Reference(M).RefersTo("#/definitions/uuid"),
 				).
 				AddProp(
 					"venue_id",
@@ -1796,7 +1776,7 @@ func init() {
 		SetConstraintMap(M).
 		SetRoot(
 			jsval.Object().
-				Required("conference_id", "session_type_id", "speaker_id", "user_id").
+				Required("conference_id", "session_type_id", "speaker_id").
 				AdditionalProperties(
 					jsval.EmptyConstraint,
 				).
@@ -1905,7 +1885,7 @@ func init() {
 		SetConstraintMap(M).
 		SetRoot(
 			jsval.Object().
-				Required("material_quality", "overall_rating", "session_id", "speaker_knowledge", "speaker_presentation", "user_id", "user_prior_knowledge").
+				Required("material_quality", "overall_rating", "session_id", "speaker_knowledge", "speaker_presentation", "user_prior_knowledge").
 				AdditionalProperties(
 					jsval.EmptyConstraint,
 				).
@@ -1970,7 +1950,7 @@ func init() {
 		SetConstraintMap(M).
 		SetRoot(
 			jsval.Object().
-				Required("email", "target_id", "user_id").
+				Required("email", "target_id").
 				AdditionalProperties(
 					jsval.EmptyConstraint,
 				).
@@ -2007,7 +1987,7 @@ func init() {
 		SetConstraintMap(M).
 		SetRoot(
 			jsval.Object().
-				Required("conference_id", "room_id", "user_id").
+				Required("conference_id", "room_id").
 				AdditionalProperties(
 					jsval.EmptyConstraint,
 				).
@@ -2156,7 +2136,7 @@ func init() {
 		SetConstraintMap(M).
 		SetRoot(
 			jsval.Object().
-				Required("address", "name", "user_id").
+				Required("address", "name").
 				AdditionalProperties(
 					jsval.EmptyConstraint,
 				).
@@ -2183,10 +2163,6 @@ func init() {
 				AddProp(
 					"url",
 					jsval.Reference(M).RefersTo("#/definitions/url"),
-				).
-				AddProp(
-					"user_id",
-					jsval.Reference(M).RefersTo("#/definitions/uuid"),
 				).
 				PatternPropertiesString(
 					"address#[a-z]+",
@@ -2221,7 +2197,7 @@ func init() {
 		SetConstraintMap(M).
 		SetRoot(
 			jsval.Object().
-				Required("id", "user_id").
+				Required("id").
 				AdditionalProperties(
 					jsval.EmptyConstraint,
 				).
@@ -2240,7 +2216,7 @@ func init() {
 		SetConstraintMap(M).
 		SetRoot(
 			jsval.Object().
-				Required("admin_id", "conference_id", "user_id").
+				Required("admin_id", "conference_id").
 				AdditionalProperties(
 					jsval.EmptyConstraint,
 				).
@@ -2263,7 +2239,7 @@ func init() {
 		SetConstraintMap(M).
 		SetRoot(
 			jsval.Object().
-				Required("conference_id", "date", "user_id").
+				Required("conference_id", "date").
 				AdditionalProperties(
 					jsval.EmptyConstraint,
 				).
@@ -2301,7 +2277,7 @@ func init() {
 		SetConstraintMap(M).
 		SetRoot(
 			jsval.Object().
-				Required("id", "user_id").
+				Required("id").
 				AdditionalProperties(
 					jsval.EmptyConstraint,
 				).
@@ -2320,7 +2296,7 @@ func init() {
 		SetConstraintMap(M).
 		SetRoot(
 			jsval.Object().
-				Required("conference_id", "staff_id", "user_id").
+				Required("conference_id", "staff_id").
 				AdditionalProperties(
 					jsval.EmptyConstraint,
 				).
@@ -2343,7 +2319,7 @@ func init() {
 		SetConstraintMap(M).
 		SetRoot(
 			jsval.Object().
-				Required("conference_id", "user_id", "venue_id").
+				Required("conference_id", "venue_id").
 				AdditionalProperties(
 					jsval.EmptyConstraint,
 				).
@@ -2366,7 +2342,7 @@ func init() {
 		SetConstraintMap(M).
 		SetRoot(
 			jsval.Object().
-				Required("id", "user_id").
+				Required("id").
 				AdditionalProperties(
 					jsval.EmptyConstraint,
 				).
@@ -2385,7 +2361,7 @@ func init() {
 		SetConstraintMap(M).
 		SetRoot(
 			jsval.Object().
-				Required("id", "user_id").
+				Required("id").
 				AdditionalProperties(
 					jsval.EmptyConstraint,
 				).
@@ -2419,7 +2395,7 @@ func init() {
 		SetConstraintMap(M).
 		SetRoot(
 			jsval.Object().
-				Required("id", "user_id").
+				Required("id").
 				AdditionalProperties(
 					jsval.EmptyConstraint,
 				).
@@ -2438,7 +2414,7 @@ func init() {
 		SetConstraintMap(M).
 		SetRoot(
 			jsval.Object().
-				Required("id", "user_id").
+				Required("id").
 				AdditionalProperties(
 					jsval.EmptyConstraint,
 				).
@@ -2457,7 +2433,7 @@ func init() {
 		SetConstraintMap(M).
 		SetRoot(
 			jsval.Object().
-				Required("id", "user_id").
+				Required("id").
 				AdditionalProperties(
 					jsval.EmptyConstraint,
 				).
@@ -2476,7 +2452,7 @@ func init() {
 		SetConstraintMap(M).
 		SetRoot(
 			jsval.Object().
-				Required("id", "user_id").
+				Required("id").
 				AdditionalProperties(
 					jsval.EmptyConstraint,
 				).
@@ -2495,7 +2471,7 @@ func init() {
 		SetConstraintMap(M).
 		SetRoot(
 			jsval.Object().
-				Required("id", "user_id").
+				Required("id").
 				AdditionalProperties(
 					jsval.EmptyConstraint,
 				).
@@ -2514,16 +2490,12 @@ func init() {
 		SetConstraintMap(M).
 		SetRoot(
 			jsval.Object().
-				Required("id", "user_id").
+				Required("id").
 				AdditionalProperties(
 					jsval.EmptyConstraint,
 				).
 				AddProp(
 					"id",
-					jsval.Reference(M).RefersTo("#/definitions/uuid"),
-				).
-				AddProp(
-					"user_id",
 					jsval.Reference(M).RefersTo("#/definitions/uuid"),
 				),
 		)
@@ -2533,7 +2505,7 @@ func init() {
 		SetConstraintMap(M).
 		SetRoot(
 			jsval.Object().
-				Required("id", "user_id").
+				Required("id").
 				AdditionalProperties(
 					jsval.EmptyConstraint,
 				).
@@ -2612,7 +2584,7 @@ func init() {
 		SetConstraintMap(M).
 		SetRoot(
 			jsval.Object().
-				Required("conference_id", "user_id").
+				Required("conference_id").
 				AdditionalProperties(
 					jsval.EmptyConstraint,
 				).
@@ -2644,7 +2616,7 @@ func init() {
 		SetConstraintMap(M).
 		SetRoot(
 			jsval.Object().
-				Required("conference_id", "user_id").
+				Required("conference_id").
 				AdditionalProperties(
 					jsval.EmptyConstraint,
 				).
@@ -2868,7 +2840,7 @@ func init() {
 		SetConstraintMap(M).
 		SetRoot(
 			jsval.Object().
-				Required("conference_id", "user_id").
+				Required("conference_id").
 				AdditionalProperties(
 					jsval.EmptyConstraint,
 				).
@@ -4263,7 +4235,7 @@ func init() {
 		SetConstraintMap(M).
 		SetRoot(
 			jsval.Object().
-				Required("id", "user_id").
+				Required("id").
 				AdditionalProperties(
 					jsval.EmptyConstraint,
 				).
@@ -4300,7 +4272,7 @@ func init() {
 		SetConstraintMap(M).
 		SetRoot(
 			jsval.Object().
-				Required("id", "user_id").
+				Required("id").
 				AdditionalProperties(
 					jsval.EmptyConstraint,
 				).
@@ -4319,7 +4291,7 @@ func init() {
 		SetConstraintMap(M).
 		SetRoot(
 			jsval.Object().
-				Required("conference_id", "tweet", "user_id").
+				Required("conference_id", "tweet").
 				AdditionalProperties(
 					jsval.EmptyConstraint,
 				).
@@ -4342,7 +4314,7 @@ func init() {
 		SetConstraintMap(M).
 		SetRoot(
 			jsval.Object().
-				Required("id", "user_id").
+				Required("id").
 				AdditionalProperties(
 					jsval.EmptyConstraint,
 				).
@@ -4373,7 +4345,7 @@ func init() {
 		SetConstraintMap(M).
 		SetRoot(
 			jsval.Object().
-				Required("id", "user_id").
+				Required("id").
 				AdditionalProperties(
 					jsval.EmptyConstraint,
 				).
@@ -4429,10 +4401,6 @@ func init() {
 					"title",
 					jsval.Reference(M).RefersTo("#/definitions/string_en"),
 				).
-				AddProp(
-					"user_id",
-					jsval.Reference(M).RefersTo("#/definitions/uuid"),
-				).
 				PatternPropertiesString(
 					"cfp_lead_text#[a-z]+",
 					jsval.Reference(M).RefersTo("#/definitions/string_i18n"),
@@ -4468,7 +4436,7 @@ func init() {
 		SetConstraintMap(M).
 		SetRoot(
 			jsval.Object().
-				Required("id", "user_id").
+				Required("id").
 				AdditionalProperties(
 					jsval.EmptyConstraint,
 				).
@@ -4561,7 +4529,7 @@ func init() {
 		SetConstraintMap(M).
 		SetRoot(
 			jsval.Object().
-				Required("id", "user_id").
+				Required("id").
 				AdditionalProperties(
 					jsval.EmptyConstraint,
 				).
@@ -4604,7 +4572,7 @@ func init() {
 		SetConstraintMap(M).
 		SetRoot(
 			jsval.Object().
-				Required("id", "user_id").
+				Required("id").
 				AdditionalProperties(
 					jsval.EmptyConstraint,
 				).
@@ -4639,7 +4607,7 @@ func init() {
 		SetConstraintMap(M).
 		SetRoot(
 			jsval.Object().
-				Required("id", "user_id").
+				Required("id").
 				AdditionalProperties(
 					jsval.EmptyConstraint,
 				).
@@ -4758,7 +4726,7 @@ func init() {
 		SetConstraintMap(M).
 		SetRoot(
 			jsval.Object().
-				Required("id", "user_id").
+				Required("id").
 				AdditionalProperties(
 					jsval.EmptyConstraint,
 				).
@@ -4809,7 +4777,7 @@ func init() {
 		SetConstraintMap(M).
 		SetRoot(
 			jsval.Object().
-				Required("id", "user_id").
+				Required("id").
 				AdditionalProperties(
 					jsval.EmptyConstraint,
 				).
@@ -4852,7 +4820,7 @@ func init() {
 		SetConstraintMap(M).
 		SetRoot(
 			jsval.Object().
-				Required("id", "user_id").
+				Required("id").
 				AdditionalProperties(
 					jsval.EmptyConstraint,
 				).
@@ -4887,7 +4855,7 @@ func init() {
 		SetConstraintMap(M).
 		SetRoot(
 			jsval.Object().
-				Required("id", "user_id").
+				Required("id").
 				AdditionalProperties(
 					jsval.EmptyConstraint,
 				).
@@ -4938,7 +4906,7 @@ func init() {
 		SetConstraintMap(M).
 		SetRoot(
 			jsval.Object().
-				Required("id", "user_id").
+				Required("id").
 				AdditionalProperties(
 					jsval.EmptyConstraint,
 				).
@@ -4977,16 +4945,12 @@ func init() {
 		SetConstraintMap(M).
 		SetRoot(
 			jsval.Object().
-				Required("id", "user_id").
+				Required("id").
 				AdditionalProperties(
 					jsval.EmptyConstraint,
 				).
 				AddProp(
 					"id",
-					jsval.Reference(M).RefersTo("#/definitions/uuid"),
-				).
-				AddProp(
-					"user_id",
 					jsval.Reference(M).RefersTo("#/definitions/uuid"),
 				),
 		)

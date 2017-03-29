@@ -1,13 +1,13 @@
 package service
 
 import (
-	"context"
 	"database/sql"
 	"net/url"
 	"time"
 
 	"github.com/builderscon/octav/octav/cache"
 	"github.com/builderscon/octav/octav/db"
+	"github.com/builderscon/octav/octav/internal/context"
 	"github.com/builderscon/octav/octav/model"
 	"github.com/builderscon/octav/octav/tools"
 	"github.com/pkg/errors"
@@ -17,7 +17,7 @@ import (
 
 func (v *ExternalResourceSvc) Init() {}
 
-func (v *ExternalResourceSvc) populateRowForCreate(vdb *db.ExternalResource, payload *model.CreateExternalResourceRequest) error {
+func (v *ExternalResourceSvc) populateRowForCreate(ctx context.Context, vdb *db.ExternalResource, payload *model.CreateExternalResourceRequest) error {
 	vdb.EID = tools.UUID()
 	vdb.ConferenceID = payload.ConferenceID
 	vdb.Title = payload.Title
@@ -41,7 +41,7 @@ func (v *ExternalResourceSvc) populateRowForCreate(vdb *db.ExternalResource, pay
 	return nil
 }
 
-func (v *ExternalResourceSvc) populateRowForUpdate(vdb *db.ExternalResource, payload *model.UpdateExternalResourceRequest) error {
+func (v *ExternalResourceSvc) populateRowForUpdate(ctx context.Context, vdb *db.ExternalResource, payload *model.UpdateExternalResourceRequest) error {
 	if payload.Description.Valid() {
 		vdb.Description = payload.Description.String
 	}
@@ -80,7 +80,7 @@ func (v *ExternalResourceSvc) CreateFromPayload(ctx context.Context, tx *sql.Tx,
 
 func (v *ExternalResourceSvc) DeleteFromPayload(ctx context.Context, tx *sql.Tx, payload *model.DeleteExternalResourceRequest) error {
 	su := User()
-	if err := su.IsAdministrator(ctx, tx, payload.UserID); err != nil {
+	if err := su.IsAdministrator(ctx, tx, context.GetUserID(ctx)); err != nil {
 		return errors.Wrap(err, "deleting exrernal resources require administrator privileges")
 	}
 

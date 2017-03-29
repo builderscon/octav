@@ -33,7 +33,6 @@ func (v *Question) Load(tx *sql.Tx, id string) (err error) {
 func (v *Question) FromRow(vdb *db.Question) error {
 	v.ID = vdb.EID
 	v.SessionID = vdb.SessionID
-	v.UserID = vdb.UserID
 	v.Body = vdb.Body
 	return nil
 }
@@ -41,7 +40,6 @@ func (v *Question) FromRow(vdb *db.Question) error {
 func (v *Question) ToRow(vdb *db.Question) error {
 	vdb.EID = v.ID
 	vdb.SessionID = v.SessionID
-	vdb.UserID = v.UserID
 	vdb.Body = v.Body
 	return nil
 }

@@ -1,12 +1,12 @@
 package service
 
 import (
-	"context"
 	"database/sql"
 	"time"
 
 	"github.com/builderscon/octav/octav/cache"
 	"github.com/builderscon/octav/octav/db"
+	"github.com/builderscon/octav/octav/internal/context"
 	"github.com/builderscon/octav/octav/model"
 	"github.com/builderscon/octav/octav/tools"
 	pdebug "github.com/lestrrat/go-pdebug"
@@ -15,7 +15,7 @@ import (
 
 func (v *VenueSvc) Init() {}
 
-func (v *VenueSvc) populateRowForCreate(vdb *db.Venue, payload *model.CreateVenueRequest) error {
+func (v *VenueSvc) populateRowForCreate(ctx context.Context, vdb *db.Venue, payload *model.CreateVenueRequest) error {
 	vdb.EID = tools.UUID()
 	vdb.Name = payload.Name.String
 	vdb.Address = payload.Address.String
@@ -24,7 +24,7 @@ func (v *VenueSvc) populateRowForCreate(vdb *db.Venue, payload *model.CreateVenu
 	return nil
 }
 
-func (v *VenueSvc) populateRowForUpdate(vdb *db.Venue, payload *model.UpdateVenueRequest) error {
+func (v *VenueSvc) populateRowForUpdate(ctx context.Context, vdb *db.Venue, payload *model.UpdateVenueRequest) error {
 	if payload.Name.Valid() {
 		vdb.Name = payload.Name.String
 	}
@@ -72,7 +72,7 @@ func (v *VenueSvc) Decorate(ctx context.Context, tx *sql.Tx, venue *model.Venue,
 
 func (v *VenueSvc) CreateFromPayload(ctx context.Context, tx *sql.Tx, venue *model.Venue, payload *model.CreateVenueRequest) error {
 	su := User()
-	if err := su.IsAdministrator(ctx, tx, payload.UserID); err != nil {
+	if err := su.IsAdministrator(ctx, tx, context.GetUserID(ctx)); err != nil {
 		return errors.Wrap(err, "creating venues require administrator privileges")
 	}
 
@@ -92,7 +92,7 @@ func (v *VenueSvc) CreateFromPayload(ctx context.Context, tx *sql.Tx, venue *mod
 
 func (v *VenueSvc) DeleteFromPayload(ctx context.Context, tx *sql.Tx, payload *model.DeleteVenueRequest) error {
 	su := User()
-	if err := su.IsAdministrator(ctx, tx, payload.UserID); err != nil {
+	if err := su.IsAdministrator(ctx, tx, context.GetUserID(ctx)); err != nil {
 		return errors.Wrap(err, "deleting venues require administrator privileges")
 	}
 

@@ -1,7 +1,6 @@
 package service
 
 import (
-	"context"
 	"crypto/sha1"
 	"database/sql"
 	"fmt"
@@ -12,6 +11,7 @@ import (
 
 	"github.com/builderscon/octav/octav/cache"
 	"github.com/builderscon/octav/octav/db"
+	"github.com/builderscon/octav/octav/internal/context"
 	"github.com/builderscon/octav/octav/model"
 	"github.com/builderscon/octav/octav/tools"
 	pdebug "github.com/lestrrat/go-pdebug"
@@ -21,7 +21,7 @@ import (
 
 func (v *BlogEntrySvc) Init() {}
 
-func (v *BlogEntrySvc) populateRowForCreate(vdb *db.BlogEntry, payload *model.CreateBlogEntryRequest) error {
+func (v *BlogEntrySvc) populateRowForCreate(ctx context.Context, vdb *db.BlogEntry, payload *model.CreateBlogEntryRequest) error {
 	vdb.EID = tools.UUID()
 	vdb.ConferenceID = payload.ConferenceID
 	vdb.Title = payload.Title
@@ -41,7 +41,7 @@ func (v *BlogEntrySvc) populateRowForCreate(vdb *db.BlogEntry, payload *model.Cr
 	return nil
 }
 
-func (v *BlogEntrySvc) populateRowForUpdate(vdb *db.BlogEntry, payload *model.UpdateBlogEntryRequest) error {
+func (v *BlogEntrySvc) populateRowForUpdate(ctx context.Context, vdb *db.BlogEntry, payload *model.UpdateBlogEntryRequest) error {
 	if payload.Title.Valid() {
 		vdb.Title = payload.Title.String
 	}
@@ -116,7 +116,7 @@ func (v *BlogEntrySvc) CreateFromPayload(ctx context.Context, tx *sql.Tx, result
 	}
 
 	su := User()
-	if err := su.IsConferenceAdministrator(ctx, tx, payload.ConferenceID, payload.UserID); err != nil {
+	if err := su.IsConferenceAdministrator(ctx, tx, payload.ConferenceID, context.GetUserID(ctx)); err != nil {
 		return errors.Wrap(err, "creating blog entries require conference administrator privileges")
 	}
 
@@ -148,7 +148,7 @@ func (v *BlogEntrySvc) DeleteFromPayload(ctx context.Context, tx *sql.Tx, payloa
 	}
 
 	su := User()
-	if err := su.IsConferenceAdministrator(ctx, tx, m.ConferenceID, payload.UserID); err != nil {
+	if err := su.IsConferenceAdministrator(ctx, tx, m.ConferenceID, context.GetUserID(ctx)); err != nil {
 		return errors.Wrap(err, "deleting blog entries requires conference administrator privilege")
 	}
 

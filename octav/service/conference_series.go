@@ -1,10 +1,10 @@
 package service
 
 import (
-	"context"
 	"database/sql"
 
 	"github.com/builderscon/octav/octav/db"
+	"github.com/builderscon/octav/octav/internal/context"
 	"github.com/builderscon/octav/octav/model"
 	"github.com/builderscon/octav/octav/tools"
 	"github.com/lestrrat/go-pdebug"
@@ -13,14 +13,14 @@ import (
 
 func (v *ConferenceSeriesSvc) Init() {}
 
-func (v *ConferenceSeriesSvc) populateRowForCreate(vdb *db.ConferenceSeries, payload *model.CreateConferenceSeriesRequest) error {
+func (v *ConferenceSeriesSvc) populateRowForCreate(ctx context.Context, vdb *db.ConferenceSeries, payload *model.CreateConferenceSeriesRequest) error {
 	vdb.EID = tools.UUID()
 	vdb.Slug = payload.Slug
 	vdb.Title = payload.Title
 	return nil
 }
 
-func (v *ConferenceSeriesSvc) populateRowForUpdate(vdb *db.ConferenceSeries, payload *model.UpdateConferenceSeriesRequest) error {
+func (v *ConferenceSeriesSvc) populateRowForUpdate(ctx context.Context, vdb *db.ConferenceSeries, payload *model.UpdateConferenceSeriesRequest) error {
 	if payload.Slug.Valid() {
 		vdb.Slug = payload.Slug.String
 	}
@@ -40,7 +40,7 @@ func (v *ConferenceSeriesSvc) DeleteFromPayload(ctx context.Context, tx *sql.Tx,
 
 	var u model.User
 	su := User()
-	if err := su.Lookup(ctx, tx, &u, payload.UserID); err != nil {
+	if err := su.Lookup(ctx, tx, &u, context.GetUserID(ctx)); err != nil {
 		return errors.Wrap(err, "failed to load user from database")
 	}
 
@@ -61,7 +61,7 @@ func (v *ConferenceSeriesSvc) CreateFromPayload(ctx context.Context, tx *sql.Tx,
 	}
 
 	su := User()
-	if err := su.IsSystemAdmin(ctx, tx, payload.UserID); err != nil {
+	if err := su.IsSystemAdmin(ctx, tx, context.GetUserID(ctx)); err != nil {
 		return errors.Wrap(err, "creating a conference series requires system administrator privilege")
 	}
 
@@ -72,7 +72,7 @@ func (v *ConferenceSeriesSvc) CreateFromPayload(ctx context.Context, tx *sql.Tx,
 
 	csa := db.ConferenceSeriesAdministrator{
 		SeriesID: vdb.EID,
-		UserID:   payload.UserID,
+		UserID:   context.GetUserID(ctx),
 	}
 	if err := csa.Create(tx); err != nil {
 		return errors.Wrap(err, "failed to store conference series administrator in database")
@@ -104,8 +104,8 @@ func (v *ConferenceSeriesSvc) LoadByRange(tx *sql.Tx, l *[]model.ConferenceSerie
 	return nil
 }
 
-func (v *ConferenceSeriesSvc) AddAdministratorFromPayload(tx *sql.Tx, payload *model.AddConferenceSeriesAdminRequest) error {
-	if err := db.IsConferenceSeriesAdministrator(tx, payload.SeriesID, payload.UserID); err != nil {
+func (v *ConferenceSeriesSvc) AddAdministratorFromPayload(ctx context.Context, tx *sql.Tx, payload *model.AddConferenceSeriesAdminRequest) error {
+	if err := db.IsConferenceSeriesAdministrator(tx, payload.SeriesID, context.GetUserID(ctx)); err != nil {
 		return errors.Wrap(err, "adding a conference series administrator requires conference series administrator privilege")
 	}
 	return errors.Wrap(v.AddAdministrator(tx, payload.SeriesID, payload.AdminID), "failed to add administrator")

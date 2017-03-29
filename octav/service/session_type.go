@@ -1,12 +1,12 @@
 package service
 
 import (
-	"context"
 	"database/sql"
 	"time"
 
 	"github.com/builderscon/octav/octav/cache"
 	"github.com/builderscon/octav/octav/db"
+	"github.com/builderscon/octav/octav/internal/context"
 	"github.com/builderscon/octav/octav/model"
 	"github.com/builderscon/octav/octav/tools"
 	pdebug "github.com/lestrrat/go-pdebug"
@@ -15,7 +15,7 @@ import (
 
 func (v *SessionTypeSvc) Init() {}
 
-func (v *SessionTypeSvc) populateRowForCreate(vdb *db.SessionType, payload *model.CreateSessionTypeRequest) error {
+func (v *SessionTypeSvc) populateRowForCreate(ctx context.Context, vdb *db.SessionType, payload *model.CreateSessionTypeRequest) error {
 	vdb.EID = tools.UUID()
 	vdb.Name = payload.Name
 	vdb.ConferenceID = payload.ConferenceID
@@ -43,7 +43,7 @@ func (v *SessionTypeSvc) populateRowForCreate(vdb *db.SessionType, payload *mode
 	return nil
 }
 
-func (v *SessionTypeSvc) populateRowForUpdate(vdb *db.SessionType, payload *model.UpdateSessionTypeRequest) error {
+func (v *SessionTypeSvc) populateRowForUpdate(ctx context.Context, vdb *db.SessionType, payload *model.UpdateSessionTypeRequest) error {
 	if payload.Name.Valid() {
 		vdb.Name = payload.Name.String
 	}
@@ -92,7 +92,7 @@ func (v *SessionTypeSvc) CreateFromPayload(ctx context.Context, tx *sql.Tx, payl
 	}
 
 	su := User()
-	if err := su.IsConferenceAdministrator(ctx, tx, payload.ConferenceID, payload.UserID); err != nil {
+	if err := su.IsConferenceAdministrator(ctx, tx, payload.ConferenceID, context.GetUserID(ctx)); err != nil {
 		return errors.Wrap(err, "creating a featured sponsor requires conference administrator privilege")
 	}
 
@@ -112,7 +112,7 @@ func (v *SessionTypeSvc) CreateFromPayload(ctx context.Context, tx *sql.Tx, payl
 
 func (v *SessionTypeSvc) PreUpdateFromPayloadHook(ctx context.Context, tx *sql.Tx, vdb *db.SessionType, payload *model.UpdateSessionTypeRequest) (err error) {
 	su := User()
-	if err := su.IsConferenceAdministrator(ctx, tx, vdb.ConferenceID, payload.UserID); err != nil {
+	if err := su.IsConferenceAdministrator(ctx, tx, vdb.ConferenceID, context.GetUserID(ctx)); err != nil {
 		return errors.Wrap(err, "updating a featured sponsor requires conference administrator privilege")
 	}
 	return nil
@@ -140,7 +140,7 @@ func (v *SessionTypeSvc) DeleteFromPayload(ctx context.Context, tx *sql.Tx, payl
 	}
 
 	su := User()
-	if err := su.IsConferenceAdministrator(ctx, tx, m.ConferenceID, payload.UserID); err != nil {
+	if err := su.IsConferenceAdministrator(ctx, tx, m.ConferenceID, context.GetUserID(ctx)); err != nil {
 		return errors.Wrap(err, "deleting venues require administrator privileges")
 	}
 

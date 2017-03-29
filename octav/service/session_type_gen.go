@@ -35,7 +35,7 @@ func SessionType() *SessionTypeSvc {
 
 func (v *SessionTypeSvc) LookupFromPayload(ctx context.Context, tx *sql.Tx, m *model.SessionType, payload *model.LookupSessionTypeRequest) (err error) {
 	if pdebug.Enabled {
-		g := pdebug.Marker("service.SessionType.LookupFromPayload").BindError(&err)
+		g := pdebug.Marker("service.SessionType.LookupFromPayload %s", payload.ID).BindError(&err)
 		defer g.End()
 	}
 	if err = v.Lookup(ctx, tx, m, payload.ID); err != nil {
@@ -49,7 +49,7 @@ func (v *SessionTypeSvc) LookupFromPayload(ctx context.Context, tx *sql.Tx, m *m
 
 func (v *SessionTypeSvc) Lookup(ctx context.Context, tx *sql.Tx, m *model.SessionType, id string) (err error) {
 	if pdebug.Enabled {
-		g := pdebug.Marker("service.SessionType.Lookup").BindError(&err)
+		g := pdebug.Marker("service.SessionType.Lookup %s", id).BindError(&err)
 		defer g.End()
 	}
 
@@ -86,7 +86,7 @@ func (v *SessionTypeSvc) Create(ctx context.Context, tx *sql.Tx, vdb *db.Session
 		defer g.End()
 	}
 
-	if err := v.populateRowForCreate(vdb, payload); err != nil {
+	if err := v.populateRowForCreate(ctx, vdb, payload); err != nil {
 		return errors.Wrap(err, `failed to populate row`)
 	}
 
@@ -140,7 +140,7 @@ func (v *SessionTypeSvc) UpdateFromPayload(ctx context.Context, tx *sql.Tx, payl
 		return errors.Wrap(err, `failed to load from database`)
 	}
 
-	if err := v.populateRowForUpdate(&vdb, payload); err != nil {
+	if err := v.populateRowForUpdate(ctx, &vdb, payload); err != nil {
 		return errors.Wrap(err, `failed to populate row data`)
 	}
 

@@ -35,7 +35,7 @@ func Room() *RoomSvc {
 
 func (v *RoomSvc) LookupFromPayload(ctx context.Context, tx *sql.Tx, m *model.Room, payload *model.LookupRoomRequest) (err error) {
 	if pdebug.Enabled {
-		g := pdebug.Marker("service.Room.LookupFromPayload").BindError(&err)
+		g := pdebug.Marker("service.Room.LookupFromPayload %s", payload.ID).BindError(&err)
 		defer g.End()
 	}
 	if err = v.Lookup(ctx, tx, m, payload.ID); err != nil {
@@ -49,7 +49,7 @@ func (v *RoomSvc) LookupFromPayload(ctx context.Context, tx *sql.Tx, m *model.Ro
 
 func (v *RoomSvc) Lookup(ctx context.Context, tx *sql.Tx, m *model.Room, id string) (err error) {
 	if pdebug.Enabled {
-		g := pdebug.Marker("service.Room.Lookup").BindError(&err)
+		g := pdebug.Marker("service.Room.Lookup %s", id).BindError(&err)
 		defer g.End()
 	}
 
@@ -86,7 +86,7 @@ func (v *RoomSvc) Create(ctx context.Context, tx *sql.Tx, vdb *db.Room, payload 
 		defer g.End()
 	}
 
-	if err := v.populateRowForCreate(vdb, payload); err != nil {
+	if err := v.populateRowForCreate(ctx, vdb, payload); err != nil {
 		return errors.Wrap(err, `failed to populate row`)
 	}
 
@@ -147,7 +147,7 @@ func (v *RoomSvc) UpdateFromPayload(ctx context.Context, tx *sql.Tx, payload *mo
 		return errors.Wrap(err, `failed to execute PreUpdateFromPayloadHook`)
 	}
 
-	if err := v.populateRowForUpdate(&vdb, payload); err != nil {
+	if err := v.populateRowForUpdate(ctx, &vdb, payload); err != nil {
 		return errors.Wrap(err, `failed to populate row data`)
 	}
 

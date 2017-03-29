@@ -11,7 +11,7 @@ import (
 
 func (v *ConferenceVenueSvc) Init() {}
 
-func (v *ConferenceVenueSvc) populateRowForCreate(vdb *db.ConferenceVenue, payload *model.CreateConferenceVenueRequest) error {
+func (v *ConferenceVenueSvc) populateRowForCreate(ctx context.Context, vdb *db.ConferenceVenue, payload *model.CreateConferenceVenueRequest) error {
 	vdb.ConferenceID = payload.ConferenceID
 	vdb.VenueID = payload.VenueID
 	return nil

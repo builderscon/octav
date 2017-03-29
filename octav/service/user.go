@@ -2,7 +2,6 @@ package service
 
 import (
 	"bytes"
-	"context"
 	"database/sql"
 	"encoding/json"
 	"net/http"
@@ -11,6 +10,7 @@ import (
 
 	"github.com/builderscon/octav/octav/db"
 	"github.com/builderscon/octav/octav/gettext"
+	"github.com/builderscon/octav/octav/internal/context"
 	"github.com/builderscon/octav/octav/internal/errors"
 	"github.com/builderscon/octav/octav/model"
 	"github.com/builderscon/octav/octav/tools"
@@ -18,11 +18,14 @@ import (
 	pdebug "github.com/lestrrat/go-pdebug"
 )
 
+// So ugly. Need to fix
+var TestClaimedUser *model.User
+
 func (v *UserSvc) Init() {
 	v.EnableVerify = true
 }
 
-func (v *UserSvc) populateRowForCreate(vdb *db.User, payload *model.CreateUserRequest) error {
+func (v *UserSvc) populateRowForCreate(ctx context.Context, vdb *db.User, payload *model.CreateUserRequest) error {
 	vdb.EID = tools.UUID()
 
 	vdb.Nickname = payload.Nickname
@@ -58,7 +61,7 @@ func (v *UserSvc) populateRowForCreate(vdb *db.User, payload *model.CreateUserRe
 	return nil
 }
 
-func (v *UserSvc) populateRowForUpdate(vdb *db.User, payload *model.UpdateUserRequest) error {
+func (v *UserSvc) populateRowForUpdate(ctx context.Context, vdb *db.User, payload *model.UpdateUserRequest) error {
 	if payload.Nickname.Valid() {
 		vdb.Nickname = payload.Nickname.String
 	}
@@ -103,28 +106,22 @@ func (v *UserSvc) populateRowForUpdate(vdb *db.User, payload *model.UpdateUserRe
 	return nil
 }
 
-// IsClaimedUser verifies if the claimed identity is indeed the
-// user that we have received from the payload
+// ClaimedUser loads the user claimed in the access token
 //
 // In order for this to work, the access token must be sent to
 // us once. there after, we shall use sessions to keep state.
-func (v *UserSvc) IsClaimedUser(ctx context.Context, tx *sql.Tx, token, uid string) (err error) {
+func (v *UserSvc) GetClaimedUser(ctx context.Context, tx *sql.Tx, token, authVia string, u *model.User) (err error) {
 	if pdebug.Enabled {
-		g := pdebug.Marker("service.User.IsClaimedUser %s", uid).BindError(&err)
+		g := pdebug.Marker("service.User.GetClaimedUser").BindError(&err)
 		defer g.End()
 	}
 
-	// Load the user by ID, and check where we authed it from
-	var u model.User
-	if err := v.Lookup(ctx, tx, &u, uid); err != nil {
-		return errors.Wrap(err, `failed to lookup user`)
-	}
-
 	if InTesting {
-		return nil
+		return v.Lookup(ctx, tx, u, token)
 	}
 
-	switch u.AuthVia {
+	var id string
+	switch authVia {
 	case "github":
 		r, err := http.NewRequest("GET", "https://api.github.com/user", nil)
 		if err != nil {
@@ -144,14 +141,12 @@ func (v *UserSvc) IsClaimedUser(ctx context.Context, tx *sql.Tx, token, uid stri
 			return errors.Wrap(err, `failed to decode JSON`)
 		}
 
-		if strconv.Itoa(data.ID) != u.AuthUserID {
-			return errors.New(`authentication information mismatch`)
-		}
+		id = strconv.Itoa(data.ID)
 	default:
 		return errors.New(`unimplemented`)
 	}
 
-	return nil
+	return v.LookupUserByAuthUserID(ctx, tx, u, authVia, id, "", false)
 }
 
 func (v *UserSvc) IsAdministrator(ctx context.Context, tx *sql.Tx, id string) error {
@@ -159,7 +154,12 @@ func (v *UserSvc) IsAdministrator(ctx context.Context, tx *sql.Tx, id string) er
 	return db.IsAdministrator(tx, id)
 }
 
-func (v *UserSvc) IsSystemAdmin(ctx context.Context, tx *sql.Tx, id string) error {
+func (v *UserSvc) IsSystemAdmin(ctx context.Context, tx *sql.Tx, id string) (err error) {
+	if pdebug.Enabled {
+		g := pdebug.Marker("service.User.IsSystemAdmin %s", id).BindError(&err)
+		defer g.End()
+	}
+
 	// TODO: cache
 	var u model.User
 	if err := v.Lookup(ctx, tx, &u, id); err != nil {
@@ -203,7 +203,12 @@ func (v *UserSvc) IsConferenceAdministrator(ctx context.Context, tx *sql.Tx, con
 	return errors.Errorf("user %s lacks conference administrator privileges for %s", userID, confID)
 }
 
-func (v *UserSvc) IsOwnerUser(ctx context.Context, tx *sql.Tx, targetID, userID string) error {
+func (v *UserSvc) IsOwnerUser(ctx context.Context, tx *sql.Tx, targetID, userID string) (err error) {
+	if pdebug.Enabled {
+		g := pdebug.Marker("service.User.IsOwnerUser target = %s, user = %s", targetID, userID).BindError(&err)
+		defer g.End()
+	}
+
 	if targetID == userID {
 		return nil
 	}
@@ -249,8 +254,13 @@ func (v *UserSvc) CreateFromPayload(ctx context.Context, tx *sql.Tx, result *mod
 	return nil
 }
 
-func (v *UserSvc) DeleteFromPayload(ctx context.Context, tx *sql.Tx, payload *model.DeleteUserRequest) error {
-	if err := v.IsOwnerUser(ctx, tx, payload.ID, payload.UserID); err != nil {
+func (v *UserSvc) DeleteFromPayload(ctx context.Context, tx *sql.Tx, payload *model.DeleteUserRequest) (err error) {
+	if pdebug.Enabled {
+		g := pdebug.Marker("service.User.DeleteFromPayload %s", payload.ID).BindError(&err)
+		defer g.End()
+	}
+
+	if err := v.IsOwnerUser(ctx, tx, payload.ID, context.GetUserID(ctx)); err != nil {
 		return errors.Wrap(err, "deleting a user requires to be the user themselves, or a system administrator")
 	}
 
@@ -259,7 +269,7 @@ func (v *UserSvc) DeleteFromPayload(ctx context.Context, tx *sql.Tx, payload *mo
 
 func (v *UserSvc) PreUpdateFromPayloadHook(ctx context.Context, tx *sql.Tx, _ *db.User, payload *model.UpdateUserRequest) error {
 	return errors.Wrap(
-		v.IsOwnerUser(ctx, tx, payload.ID, payload.UserID),
+		v.IsOwnerUser(ctx, tx, payload.ID, context.GetUserID(ctx)),
 		"updating a user requires to be the user themselves, or a system administrator",
 	)
 }
@@ -304,8 +314,12 @@ func (v *UserSvc) Decorate(ctx context.Context, tx *sql.Tx, user *model.User, tr
 }
 
 func (v *UserSvc) LookupUserByAuthUserIDFromPayload(ctx context.Context, tx *sql.Tx, result *model.User, payload *model.LookupUserByAuthUserIDRequest) error {
+	return v.LookupUserByAuthUserID(ctx, tx, result, payload.AuthVia, payload.AuthUserID, payload.Lang.String, payload.TrustedCall)
+}
+
+func (v *UserSvc) LookupUserByAuthUserID(ctx context.Context, tx *sql.Tx, result *model.User, authVia, authUserID, lang string, trustedCall bool) error {
 	var vdb db.User
-	if err := vdb.LoadByAuthUserID(tx, payload.AuthVia, payload.AuthUserID); err != nil {
+	if err := vdb.LoadByAuthUserID(tx, authVia, authUserID); err != nil {
 		return errors.Wrap(err, "failed to load from database")
 	}
 
@@ -314,7 +328,7 @@ func (v *UserSvc) LookupUserByAuthUserIDFromPayload(ctx context.Context, tx *sql
 		return errors.Wrap(err, "failed to populate mode from database")
 	}
 
-	if err := v.Decorate(ctx, tx, &r, payload.TrustedCall, payload.Lang.String); err != nil {
+	if err := v.Decorate(ctx, tx, &r, trustedCall, lang); err != nil {
 		return errors.Wrap(err, "failed to decorate with assocaited data")
 	}
 

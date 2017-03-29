@@ -2,6 +2,7 @@ package octav
 
 import (
 	"bytes"
+	nativectx "context"
 	"encoding/json"
 	"fmt"
 	"math"
@@ -11,9 +12,8 @@ import (
 	"strings"
 	"time"
 
-	"context"
-
 	"github.com/builderscon/octav/octav/db"
+	"github.com/builderscon/octav/octav/internal/context"
 	"github.com/builderscon/octav/octav/internal/errors"
 	"github.com/builderscon/octav/octav/model"
 	"github.com/builderscon/octav/octav/service"
@@ -55,7 +55,7 @@ func httpWithBasicAuth(h HandlerWithContext) HandlerWithContext {
 }
 
 func wrapBasicAuth(h HandlerWithContext, authIsOptional bool) HandlerWithContext {
-	return HandlerWithContext(func(ctx context.Context, w http.ResponseWriter, r *http.Request) {
+	return HandlerWithContext(func(ctx nativectx.Context, w http.ResponseWriter, r *http.Request) {
 		if pdebug.Enabled {
 			g := pdebug.Marker("Validating basic authentication for %s", r.URL.Path)
 			defer g.End()
@@ -105,7 +105,7 @@ func wrapBasicAuth(h HandlerWithContext, authIsOptional bool) HandlerWithContext
 const clientSessionHeaderKey = "X-Octav-Session-ID"
 
 func httpWithClientSession(h HandlerWithContext) HandlerWithContext {
-	return HandlerWithContext(func(octx context.Context, w http.ResponseWriter, r *http.Request) {
+	return HandlerWithContext(func(octx nativectx.Context, w http.ResponseWriter, r *http.Request) {
 		if pdebug.Enabled {
 			g := pdebug.Marker("Validating octav session for %s", r.URL.Path)
 			defer g.End()
@@ -125,6 +125,9 @@ func httpWithClientSession(h HandlerWithContext) HandlerWithContext {
 			httpError(w, http.StatusText(http.StatusBadRequest), http.StatusBadRequest, nil)
 			return
 		}
+		if pdebug.Enabled {
+			pdebug.Printf("Looking for session %s", sessionID)
+		}
 
 		tx, err := db.BeginTx(ctx, nil)
 		if err != nil {
@@ -137,6 +140,9 @@ func httpWithClientSession(h HandlerWithContext) HandlerWithContext {
 		if err := s.LoadClientSession(ctx, tx, sessionID, ctx.clientID, &u); err != nil {
 			httpError(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError, err)
 			return
+		}
+		if pdebug.Enabled {
+			pdebug.Printf("Successfully loaded assosicated user %s", u.ID)
 		}
 
 		ctx.sessionID = sessionID
@@ -286,7 +292,7 @@ func doAddConferenceSeriesAdmin(ctx context.Context, w http.ResponseWriter, r *h
 	}
 
 	s := service.ConferenceSeries()
-	if err := s.AddAdministratorFromPayload(tx, payload); err != nil {
+	if err := s.AddAdministratorFromPayload(ctx, tx, payload); err != nil {
 		httpError(w, `AddConferenceSeriesAdmin`, http.StatusInternalServerError, err)
 		return
 	}
@@ -505,7 +511,7 @@ func doDeleteConferenceAdmin(ctx context.Context, w http.ResponseWriter, r *http
 }
 
 func doListConferenceAdmin(ctx context.Context, w http.ResponseWriter, r *http.Request, payload *model.ListConferenceAdminRequest) {
-	trustedCall := isTrustedCall(ctx)
+	trustedCall := context.IsTrustedCall(ctx)
 
 	tx, err := db.BeginTx(ctx, nil)
 	if err != nil {
@@ -826,6 +832,8 @@ func doDeleteUser(ctx context.Context, w http.ResponseWriter, r *http.Request, p
 		defer g.End()
 	}
 
+	pdebug.Printf("doDeleteUser ctx = %#v", ctx)
+
 	tx, err := db.BeginTx(ctx, nil)
 	if err != nil {
 		httpError(w, `DeleteUser`, http.StatusInternalServerError, err)
@@ -853,7 +861,7 @@ func doListUser(ctx context.Context, w http.ResponseWriter, r *http.Request, pay
 
 	s := service.User()
 	var v model.UserList
-	payload.TrustedCall = isTrustedCall(ctx)
+	payload.TrustedCall = context.IsTrustedCall(ctx)
 	if err := s.ListFromPayload(ctx, tx, &v, payload); err != nil {
 		httpError(w, `ListUsers`, http.StatusInternalServerError, err)
 		return
@@ -875,7 +883,7 @@ func doLookupUserByAuthUserID(ctx context.Context, w http.ResponseWriter, r *htt
 
 	s := service.User()
 	var v model.User
-	payload.TrustedCall = isTrustedCall(ctx)
+	payload.TrustedCall = context.IsTrustedCall(ctx)
 	if err := s.LookupUserByAuthUserIDFromPayload(ctx, tx, &v, payload); err != nil {
 		httpError(w, `LookupUserByAuthUserID`, http.StatusInternalServerError, err)
 		return
@@ -897,7 +905,7 @@ func doLookupUser(ctx context.Context, w http.ResponseWriter, r *http.Request, p
 
 	s := service.User()
 	var v model.User
-	payload.TrustedCall = isTrustedCall(ctx)
+	payload.TrustedCall = context.IsTrustedCall(ctx)
 	if err := s.LookupFromPayload(ctx, tx, &v, payload); err != nil {
 		httpError(w, `LookupUser`, http.StatusInternalServerError, err)
 		return
@@ -1117,7 +1125,7 @@ func doLookupSession(ctx context.Context, w http.ResponseWriter, r *http.Request
 
 	s := service.Session()
 	var v model.Session
-	payload.TrustedCall = isTrustedCall(ctx)
+	payload.TrustedCall = context.IsTrustedCall(ctx)
 	if err := s.LookupFromPayload(ctx, tx, &v, payload); err != nil {
 		httpError(w, `LookupSession`, http.StatusInternalServerError, err)
 		return
@@ -1767,8 +1775,8 @@ func doVerifyUser(ctx context.Context, w http.ResponseWriter, r *http.Request, p
 	}
 
 	su := service.User()
-	if payload.UserID != payload.ID {
-		if err := su.IsAdministrator(ctx, tx, payload.UserID); err != nil {
+	if uid := context.GetUserID(ctx); uid != payload.ID {
+		if err := su.IsAdministrator(ctx, tx, uid); err != nil {
 			httpError(w, `doVerify`, http.StatusInternalServerError, err)
 			return
 		}
@@ -1794,7 +1802,7 @@ func doSendSelectionResultNotification(ctx context.Context, w http.ResponseWrite
 		return
 	}
 
-	payload.TrustedCall = isTrustedCall(ctx)
+	payload.TrustedCall = context.IsTrustedCall(ctx)
 
 	s := service.Session()
 	if err := s.SendSelectionResultNotificationFromPayload(ctx, tx, payload); err != nil {
@@ -1825,7 +1833,7 @@ func doSendAllSelectionResultNotification(ctx context.Context, w http.ResponseWr
 		return
 	}
 
-	trustedCall := isTrustedCall(ctx)
+	trustedCall := context.IsTrustedCall(ctx)
 
 	// Do this asynchronously
 	go func() {
@@ -1840,7 +1848,6 @@ func doSendAllSelectionResultNotification(ctx context.Context, w http.ResponseWr
 
 			req.SessionID = vdb.EID
 			req.Force = payload.Force
-			req.UserID = payload.UserID
 			req.TrustedCall = trustedCall
 
 			if err := s.SendSelectionResultNotificationFromPayload(ctx, tx, &req); err != nil {
@@ -1960,7 +1967,7 @@ func doListBlogEntries(ctx context.Context, w http.ResponseWriter, r *http.Reque
 }
 
 func doListConferenceStaff(ctx context.Context, w http.ResponseWriter, r *http.Request, payload *model.ListConferenceStaffRequest) {
-	trustedCall := isTrustedCall(ctx)
+	trustedCall := context.IsTrustedCall(ctx)
 
 	tx, err := db.BeginTx(ctx, nil)
 	if err != nil {
@@ -2165,21 +2172,22 @@ func doCreateClientSession(ctx context.Context, w http.ResponseWriter, r *http.R
 		return
 	}
 
+	var u model.User
 	su := service.User()
-	if err := su.IsClaimedUser(ctx, tx, payload.AccessToken, payload.UserID); err != nil {
-		httpError(w, `create client session`, http.StatusInternalServerError, err)
+	if err := su.GetClaimedUser(ctx, tx, payload.AccessToken, payload.AuthVia, &u); err != nil {
+		httpError(w, `failed to get claimed user`, http.StatusInternalServerError, err)
 		return
 	}
 
 	// OK. generate a session ID
 	sid := tools.UUID()
-	clientID := getClientID(ctx)
+	clientID := context.GetClientID(ctx)
 
 	// let the client know when this session will expire
 	expires := time.Now().UTC().Add(30 * time.Minute)
 
 	sc := service.Client()
-	if err := sc.CreateClientSession(ctx, tx, sid, clientID, payload.UserID, expires); err != nil {
+	if err := sc.CreateClientSession(ctx, tx, sid, clientID, u.ID, expires); err != nil {
 		httpError(w, `create client session`, http.StatusInternalServerError, err)
 		return
 	}
@@ -2187,6 +2195,5 @@ func doCreateClientSession(ctx context.Context, w http.ResponseWriter, r *http.R
 	var res model.CreateClientSessionResponse
 	res.Expires = expires.Format(time.RFC3339)
 	res.SessionID = sid
-	res.UserID = payload.UserID
 	httpJSON(w, &res)
 }

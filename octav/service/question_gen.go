@@ -35,7 +35,7 @@ func Question() *QuestionSvc {
 
 func (v *QuestionSvc) LookupFromPayload(ctx context.Context, tx *sql.Tx, m *model.Question, payload *model.LookupQuestionRequest) (err error) {
 	if pdebug.Enabled {
-		g := pdebug.Marker("service.Question.LookupFromPayload").BindError(&err)
+		g := pdebug.Marker("service.Question.LookupFromPayload %s", payload.ID).BindError(&err)
 		defer g.End()
 	}
 	if err = v.Lookup(ctx, tx, m, payload.ID); err != nil {
@@ -46,7 +46,7 @@ func (v *QuestionSvc) LookupFromPayload(ctx context.Context, tx *sql.Tx, m *mode
 
 func (v *QuestionSvc) Lookup(ctx context.Context, tx *sql.Tx, m *model.Question, id string) (err error) {
 	if pdebug.Enabled {
-		g := pdebug.Marker("service.Question.Lookup").BindError(&err)
+		g := pdebug.Marker("service.Question.Lookup %s", id).BindError(&err)
 		defer g.End()
 	}
 
@@ -83,7 +83,7 @@ func (v *QuestionSvc) Create(ctx context.Context, tx *sql.Tx, vdb *db.Question, 
 		defer g.End()
 	}
 
-	if err := v.populateRowForCreate(vdb, payload); err != nil {
+	if err := v.populateRowForCreate(ctx, vdb, payload); err != nil {
 		return errors.Wrap(err, `failed to populate row`)
 	}
 
@@ -131,7 +131,7 @@ func (v *QuestionSvc) UpdateFromPayload(ctx context.Context, tx *sql.Tx, payload
 		return errors.Wrap(err, `failed to load from database`)
 	}
 
-	if err := v.populateRowForUpdate(&vdb, payload); err != nil {
+	if err := v.populateRowForUpdate(ctx, &vdb, payload); err != nil {
 		return errors.Wrap(err, `failed to populate row data`)
 	}
 

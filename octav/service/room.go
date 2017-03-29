@@ -1,12 +1,12 @@
 package service
 
 import (
-	"context"
 	"database/sql"
 	"time"
 
 	"github.com/builderscon/octav/octav/cache"
 	"github.com/builderscon/octav/octav/db"
+	"github.com/builderscon/octav/octav/internal/context"
 	"github.com/builderscon/octav/octav/model"
 	"github.com/builderscon/octav/octav/tools"
 	pdebug "github.com/lestrrat/go-pdebug"
@@ -15,7 +15,7 @@ import (
 
 func (v *RoomSvc) Init() {}
 
-func (v *RoomSvc) populateRowForCreate(vdb *db.Room, payload *model.CreateRoomRequest) error {
+func (v *RoomSvc) populateRowForCreate(ctx context.Context, vdb *db.Room, payload *model.CreateRoomRequest) error {
 	vdb.EID = tools.UUID()
 
 	if payload.VenueID.Valid() {
@@ -33,7 +33,7 @@ func (v *RoomSvc) populateRowForCreate(vdb *db.Room, payload *model.CreateRoomRe
 	return nil
 }
 
-func (v *RoomSvc) populateRowForUpdate(vdb *db.Room, payload *model.UpdateRoomRequest) error {
+func (v *RoomSvc) populateRowForUpdate(ctx context.Context, vdb *db.Room, payload *model.UpdateRoomRequest) error {
 	if payload.VenueID.Valid() {
 		vdb.VenueID = payload.VenueID.String
 	}
@@ -51,7 +51,7 @@ func (v *RoomSvc) populateRowForUpdate(vdb *db.Room, payload *model.UpdateRoomRe
 
 func (v *RoomSvc) CreateFromPayload(ctx context.Context, tx *sql.Tx, result *model.Room, payload *model.CreateRoomRequest) error {
 	su := User()
-	if err := su.IsAdministrator(ctx, tx, payload.UserID); err != nil {
+	if err := su.IsAdministrator(ctx, tx, context.GetUserID(ctx)); err != nil {
 		return errors.Wrap(err, "creating a room requires conference administrator privilege")
 	}
 
@@ -87,7 +87,7 @@ func (v *RoomSvc) ListFromPayload(ctx context.Context, tx *sql.Tx, result *model
 
 func (v *RoomSvc) PreUpdateFromPayloadHook(ctx context.Context, tx *sql.Tx, vdb *db.Room, payload *model.UpdateRoomRequest) error {
 	su := User()
-	if err := su.IsAdministrator(ctx, tx, payload.UserID); err != nil {
+	if err := su.IsAdministrator(ctx, tx, context.GetUserID(ctx)); err != nil {
 		return errors.Wrap(err, "deleting rooms require administrator privileges")
 	}
 	return nil
@@ -113,7 +113,7 @@ func invalidateRoomLoadByVenueID(venueID string) error {
 
 func (v *RoomSvc) DeleteFromPayload(ctx context.Context, tx *sql.Tx, payload *model.DeleteRoomRequest) error {
 	su := User()
-	if err := su.IsAdministrator(ctx, tx, payload.UserID); err != nil {
+	if err := su.IsAdministrator(ctx, tx, context.GetUserID(ctx)); err != nil {
 		return errors.Wrap(err, "deleting rooms require administrator privileges")
 	}
 

@@ -1,12 +1,12 @@
 package service
 
 import (
-	"context"
 	"database/sql"
 	"time"
 
 	"github.com/builderscon/octav/octav/cache"
 	"github.com/builderscon/octav/octav/db"
+	"github.com/builderscon/octav/octav/internal/context"
 	"github.com/builderscon/octav/octav/model"
 	"github.com/builderscon/octav/octav/tools"
 	pdebug "github.com/lestrrat/go-pdebug"
@@ -15,7 +15,7 @@ import (
 
 func (v *FeaturedSpeakerSvc) Init() {}
 
-func (v *FeaturedSpeakerSvc) populateRowForCreate(vdb *db.FeaturedSpeaker, payload *model.CreateFeaturedSpeakerRequest) error {
+func (v *FeaturedSpeakerSvc) populateRowForCreate(ctx context.Context, vdb *db.FeaturedSpeaker, payload *model.CreateFeaturedSpeakerRequest) error {
 	vdb.EID = tools.UUID()
 	vdb.ConferenceID = payload.ConferenceID
 	vdb.DisplayName = payload.DisplayName
@@ -34,7 +34,7 @@ func (v *FeaturedSpeakerSvc) populateRowForCreate(vdb *db.FeaturedSpeaker, paylo
 	return nil
 }
 
-func (v *FeaturedSpeakerSvc) populateRowForUpdate(vdb *db.FeaturedSpeaker, payload *model.UpdateFeaturedSpeakerRequest) error {
+func (v *FeaturedSpeakerSvc) populateRowForUpdate(ctx context.Context, vdb *db.FeaturedSpeaker, payload *model.UpdateFeaturedSpeakerRequest) error {
 	if payload.DisplayName.Valid() {
 		vdb.DisplayName = payload.DisplayName.String
 	}
@@ -58,7 +58,7 @@ func (v *FeaturedSpeakerSvc) populateRowForUpdate(vdb *db.FeaturedSpeaker, paylo
 
 func (v *FeaturedSpeakerSvc) CreateFromPayload(ctx context.Context, tx *sql.Tx, payload *model.AddFeaturedSpeakerRequest, result *model.FeaturedSpeaker) error {
 	su := User()
-	if err := su.IsConferenceAdministrator(ctx, tx, payload.ConferenceID, payload.UserID); err != nil {
+	if err := su.IsConferenceAdministrator(ctx, tx, payload.ConferenceID, context.GetUserID(ctx)); err != nil {
 		return errors.Wrap(err, "creating a featured speaker requires conference administrator privilege")
 	}
 
@@ -85,7 +85,7 @@ func (v *FeaturedSpeakerSvc) CreateFromPayload(ctx context.Context, tx *sql.Tx, 
 
 func (v *FeaturedSpeakerSvc) PreUpdateFromPayloadHook(ctx context.Context, tx *sql.Tx, vdb *db.FeaturedSpeaker, payload *model.UpdateFeaturedSpeakerRequest) (err error) {
 	su := User()
-	if err := su.IsConferenceAdministrator(ctx, tx, vdb.ConferenceID, payload.UserID); err != nil {
+	if err := su.IsConferenceAdministrator(ctx, tx, vdb.ConferenceID, context.GetUserID(ctx)); err != nil {
 		return errors.Wrap(err, "updating a featured speaker requires conference administrator privilege")
 	}
 	return nil
@@ -98,7 +98,7 @@ func (v *FeaturedSpeakerSvc) DeleteFromPayload(ctx context.Context, tx *sql.Tx, 
 	}
 
 	su := User()
-	if err := su.IsConferenceAdministrator(ctx, tx, m.ConferenceID, payload.UserID); err != nil {
+	if err := su.IsConferenceAdministrator(ctx, tx, m.ConferenceID, context.GetUserID(ctx)); err != nil {
 		return errors.Wrap(err, "deleting venues require administrator privileges")
 	}
 

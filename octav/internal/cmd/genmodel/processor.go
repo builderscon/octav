@@ -925,7 +925,7 @@ func generateServiceFile(ctx *genctx, m Model) error {
 	if hasID && m.LookupRequest {
 		fmt.Fprintf(&buf, "\n\nfunc (v *%s) LookupFromPayload(ctx context.Context, tx *sql.Tx, m *model.%s, payload *model.Lookup%sRequest) (err error) {", svcname, m.Name, m.Name)
 		buf.WriteString("\nif pdebug.Enabled {")
-		fmt.Fprintf(&buf, "\n"+`g := pdebug.Marker("service.%s.LookupFromPayload").BindError(&err)`, m.Name)
+		fmt.Fprintf(&buf, "\n"+`g := pdebug.Marker("service.%s.LookupFromPayload %%s", payload.ID).BindError(&err)`, m.Name)
 		buf.WriteString("\ndefer g.End()")
 		buf.WriteString("\n}")
 		buf.WriteString("\nif err = v.Lookup(ctx, tx, m, payload.ID); err != nil {")
@@ -943,7 +943,7 @@ func generateServiceFile(ctx *genctx, m Model) error {
 	if hasID && m.Lookup {
 		fmt.Fprintf(&buf, "\n\nfunc (v *%s) Lookup(ctx context.Context, tx *sql.Tx, m *model.%s, id string) (err error) {", svcname, m.Name)
 		buf.WriteString("\nif pdebug.Enabled {")
-		fmt.Fprintf(&buf, "\n"+`g := pdebug.Marker("service.%s.Lookup").BindError(&err)`, m.Name)
+		fmt.Fprintf(&buf, "\n"+`g := pdebug.Marker("service.%s.Lookup %%s", id).BindError(&err)`, m.Name)
 		buf.WriteString("\ndefer g.End()")
 		buf.WriteString("\n}")
 		fmt.Fprintf(&buf, "\n\nvar r model.%s", m.Name)
@@ -987,7 +987,7 @@ func generateServiceFile(ctx *genctx, m Model) error {
 		fmt.Fprintf(&buf, "\n"+`g := pdebug.Marker("service.%s.Create").BindError(&err)`, m.Name)
 		buf.WriteString("\ndefer g.End()")
 		buf.WriteString("\n}")
-		buf.WriteString("\n\nif err := v.populateRowForCreate(vdb, payload); err != nil {")
+		buf.WriteString("\n\nif err := v.populateRowForCreate(ctx, vdb, payload); err != nil {")
 		buf.WriteString("\nreturn errors.Wrap(err, `failed to populate row`)")
 		buf.WriteString("\n}")
 		buf.WriteString("\n\nif err := vdb.Create(tx, payload.DatabaseOptions...); err != nil {")
@@ -1063,7 +1063,7 @@ func generateServiceFile(ctx *genctx, m Model) error {
 			buf.WriteString("\n}")
 		}
 
-		buf.WriteString("\n\nif err := v.populateRowForUpdate(&vdb, payload); err != nil {")
+		buf.WriteString("\n\nif err := v.populateRowForUpdate(ctx, &vdb, payload); err != nil {")
 		buf.WriteString("\nreturn errors.Wrap(err, `failed to populate row data`)")
 		buf.WriteString("\n}")
 		buf.WriteString("\n\nif err := v.Update(tx, &vdb); err != nil {")

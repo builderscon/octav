@@ -1,12 +1,12 @@
 package service
 
 import (
-	"context"
 	"database/sql"
 	"time"
 
 	"github.com/builderscon/octav/octav/cache"
 	"github.com/builderscon/octav/octav/db"
+	"github.com/builderscon/octav/octav/internal/context"
 	"github.com/builderscon/octav/octav/model"
 	"github.com/builderscon/octav/octav/tools"
 	pdebug "github.com/lestrrat/go-pdebug"
@@ -15,7 +15,7 @@ import (
 
 func (v *TrackSvc) Init() {}
 
-func (v *TrackSvc) populateRowForCreate(vdb *db.Track, payload *model.CreateTrackRequest) error {
+func (v *TrackSvc) populateRowForCreate(ctx context.Context, vdb *db.Track, payload *model.CreateTrackRequest) error {
 	vdb.EID = tools.UUID()
 	vdb.ConferenceID = payload.ConferenceID
 	vdb.RoomID = payload.RoomID
@@ -28,7 +28,7 @@ func (v *TrackSvc) populateRowForCreate(vdb *db.Track, payload *model.CreateTrac
 	return nil
 }
 
-func (v *TrackSvc) populateRowForUpdate(vdb *db.Track, payload *model.UpdateTrackRequest) error {
+func (v *TrackSvc) populateRowForUpdate(ctx context.Context, vdb *db.Track, payload *model.UpdateTrackRequest) error {
 	if payload.Name.Valid() {
 		vdb.Name = payload.Name.String
 	}
@@ -72,7 +72,7 @@ func (v *TrackSvc) CreateFromPayload(ctx context.Context, tx *sql.Tx, payload *m
 	}
 
 	su := User()
-	if err := su.IsConferenceAdministrator(ctx, tx, payload.ConferenceID, payload.UserID); err != nil {
+	if err := su.IsConferenceAdministrator(ctx, tx, payload.ConferenceID, context.GetUserID(ctx)); err != nil {
 		return errors.Wrap(err, "creating a track requires conference administrator privilege")
 	}
 
@@ -115,7 +115,7 @@ func (v *TrackSvc) DeleteFromPayload(ctx context.Context, tx *sql.Tx, payload *m
 	}
 
 	su := User()
-	if err := su.IsConferenceAdministrator(ctx, tx, vdb.ConferenceID, payload.UserID); err != nil {
+	if err := su.IsConferenceAdministrator(ctx, tx, vdb.ConferenceID, context.GetUserID(ctx)); err != nil {
 		return errors.Wrap(err, "deleting a track requires conference administrator privilege")
 	}
 

@@ -2,7 +2,6 @@ package service
 
 import (
 	"bytes"
-	"context"
 	"database/sql"
 	"fmt"
 	"regexp"
@@ -12,6 +11,7 @@ import (
 
 	"github.com/builderscon/octav/octav/cache"
 	"github.com/builderscon/octav/octav/db"
+	"github.com/builderscon/octav/octav/internal/context"
 	"github.com/builderscon/octav/octav/model"
 	"github.com/builderscon/octav/octav/tools"
 	"github.com/lestrrat/go-pdebug"
@@ -21,7 +21,7 @@ import (
 
 func (v *SessionSvc) Init() {}
 
-func (v *SessionSvc) populateRowForCreate(vdb *db.Session, payload *model.CreateSessionRequest) error {
+func (v *SessionSvc) populateRowForCreate(ctx context.Context, vdb *db.Session, payload *model.CreateSessionRequest) error {
 	vdb.EID = tools.UUID()
 	vdb.ConferenceID = payload.ConferenceID
 	vdb.SpeakerID = payload.SpeakerID.String
@@ -129,7 +129,7 @@ func (v *SessionSvc) populateRowForCreate(vdb *db.Session, payload *model.Create
 	return nil
 }
 
-func (v *SessionSvc) populateRowForUpdate(vdb *db.Session, payload *model.UpdateSessionRequest) error {
+func (v *SessionSvc) populateRowForUpdate(ctx context.Context, vdb *db.Session, payload *model.UpdateSessionRequest) error {
 	if vdb.EID != payload.ID {
 		return errors.New("ID mismatched for Session.populdateRowForUpdate")
 	}
@@ -336,8 +336,8 @@ func (v *SessionSvc) Decorate(ctx context.Context, tx *sql.Tx, session *model.Se
 func (v *SessionSvc) CreateFromPayload(ctx context.Context, tx *sql.Tx, result *model.Session, payload *model.CreateSessionRequest) error {
 	var u model.User
 	su := User()
-	if err := su.Lookup(ctx, tx, &u, payload.UserID); err != nil {
-		return errors.Wrapf(err, "failed to load user %s", payload.UserID)
+	if err := su.Lookup(ctx, tx, &u, context.GetUserID(ctx)); err != nil {
+		return errors.Wrapf(err, "failed to load user %s", context.GetUserID(ctx))
 	}
 
 	// Check if this session type is allowed to be submitted right now
@@ -370,14 +370,14 @@ func (v *SessionSvc) CreateFromPayload(ctx context.Context, tx *sql.Tx, result *
 
 func (v *SessionSvc) PreUpdateFromPayloadHook(ctx context.Context, tx *sql.Tx, vdb *db.Session, payload *model.UpdateSessionRequest) (err error) {
 	su := User()
-	if err := su.IsSessionOwner(ctx, tx, payload.ID, payload.UserID); err != nil {
+	if err := su.IsSessionOwner(ctx, tx, payload.ID, context.GetUserID(ctx)); err != nil {
 		return errors.Wrap(err, "updating sessions require session owner privileges")
 	}
 
 	// We must protect the API server from changing important
 	// fields like conference_id, speaker_id, room_id, etc from regular
 	// users, but allow administrators to do anything they want
-	if err := su.IsAdministrator(ctx, tx, payload.UserID); err != nil {
+	if err := su.IsAdministrator(ctx, tx, context.GetUserID(ctx)); err != nil {
 		// Reset the payload, whatever it is
 		payload.ConferenceID.Set(vdb.ConferenceID)
 		payload.SpeakerID.Set(vdb.SpeakerID)
@@ -493,17 +493,17 @@ func (v *SessionSvc) DeleteFromPayload(ctx context.Context, tx *sql.Tx, payload 
 		}
 		// The only user(s) that can delete an accepted session is an administrator.
 		su := User()
-		if err := su.IsConferenceAdministrator(ctx, tx, s.ConferenceID, payload.UserID); err != nil {
+		if err := su.IsConferenceAdministrator(ctx, tx, s.ConferenceID, context.GetUserID(ctx)); err != nil {
 			return errors.Wrap(err, "deleting accepted sessions require administrator privileges")
 		}
 	} else {
-		if s.SpeakerID != payload.UserID {
+		if s.SpeakerID != context.GetUserID(ctx) {
 			if pdebug.Enabled {
 				pdebug.Printf("User is not the owner of session, requires conference administrator privileges")
 			}
 
 			su := User()
-			if err := su.IsConferenceAdministrator(ctx, tx, s.ConferenceID, payload.UserID); err != nil {
+			if err := su.IsConferenceAdministrator(ctx, tx, s.ConferenceID, context.GetUserID(ctx)); err != nil {
 				return errors.Wrap(err, "deleting sessions require operation from speaker or user with administrator privileges")
 			}
 		}
@@ -609,7 +609,7 @@ func (v *SessionSvc) SendSelectionResultNotificationFromPayload(ctx context.Cont
 	// flag is specified
 	if m.SelectionResultSent {
 		if payload.Force {
-			if err := su.IsAdministrator(ctx, tx, payload.UserID); err != nil {
+			if err := su.IsAdministrator(ctx, tx, context.GetUserID(ctx)); err != nil {
 				return errors.New("must be administrator to force send notification")
 			}
 		} else {
@@ -672,7 +672,6 @@ func (v *SessionSvc) SendSelectionResultNotificationFromPayload(ctx context.Cont
 	// in the caller
 	var req model.UpdateSessionRequest
 	req.ID = payload.SessionID
-	req.UserID = payload.UserID
 	req.SelectionResultSent.Set(true)
 
 	if err := v.UpdateFromPayload(ctx, tx, &req); err != nil {

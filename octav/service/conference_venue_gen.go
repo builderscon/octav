@@ -42,7 +42,7 @@ func (v *ConferenceVenueSvc) Create(ctx context.Context, tx *sql.Tx, vdb *db.Con
 		defer g.End()
 	}
 
-	if err := v.populateRowForCreate(vdb, payload); err != nil {
+	if err := v.populateRowForCreate(ctx, vdb, payload); err != nil {
 		return errors.Wrap(err, `failed to populate row`)
 	}
 

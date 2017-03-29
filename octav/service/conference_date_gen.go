@@ -35,7 +35,7 @@ func ConferenceDate() *ConferenceDateSvc {
 
 func (v *ConferenceDateSvc) Lookup(ctx context.Context, tx *sql.Tx, m *model.ConferenceDate, id string) (err error) {
 	if pdebug.Enabled {
-		g := pdebug.Marker("service.ConferenceDate.Lookup").BindError(&err)
+		g := pdebug.Marker("service.ConferenceDate.Lookup %s", id).BindError(&err)
 		defer g.End()
 	}
 
@@ -72,7 +72,7 @@ func (v *ConferenceDateSvc) Create(ctx context.Context, tx *sql.Tx, vdb *db.Conf
 		defer g.End()
 	}
 
-	if err := v.populateRowForCreate(vdb, payload); err != nil {
+	if err := v.populateRowForCreate(ctx, vdb, payload); err != nil {
 		return errors.Wrap(err, `failed to populate row`)
 	}
 
