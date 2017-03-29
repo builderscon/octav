@@ -126,7 +126,7 @@ func (v *UserSvc) IsClaimedUser(ctx context.Context, tx *sql.Tx, token, uid stri
 
 	switch u.AuthVia {
 	case "github":
-		r, err := http.NewRequest("GET", "https://api.github.com/users", nil)
+		r, err := http.NewRequest("GET", "https://api.github.com/user", nil)
 		if err != nil {
 			return errors.Wrap(err, `failed to generate HTTP request`)
 		}
@@ -139,9 +139,11 @@ func (v *UserSvc) IsClaimedUser(ctx context.Context, tx *sql.Tx, token, uid stri
 		var data struct {
 			ID int `json:"id"`
 		}
+
 		if err := json.NewDecoder(resp.Body).Decode(&data); err != nil {
 			return errors.Wrap(err, `failed to decode JSON`)
 		}
+
 		if strconv.Itoa(data.ID) != u.AuthUserID {
 			return errors.New(`authentication information mismatch`)
 		}
