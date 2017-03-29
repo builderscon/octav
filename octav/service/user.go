@@ -108,7 +108,12 @@ func (v *UserSvc) populateRowForUpdate(vdb *db.User, payload *model.UpdateUserRe
 //
 // In order for this to work, the access token must be sent to
 // us once. there after, we shall use sessions to keep state.
-func (v *UserSvc) IsClaimedUser(ctx context.Context, tx *sql.Tx, token, uid string) error {
+func (v *UserSvc) IsClaimedUser(ctx context.Context, tx *sql.Tx, token, uid string) (err error) {
+	if pdebug.Enabled {
+		g := pdebug.Marker("service.User.IsClaimedUser %s", uid).BindError(&err)
+		defer g.End()
+	}
+
 	// Load the user by ID, and check where we authed it from
 	var u model.User
 	if err := v.Lookup(ctx, tx, &u, uid); err != nil {

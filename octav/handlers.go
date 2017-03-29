@@ -2149,6 +2149,11 @@ func doSetSessionVideoCover(ctx context.Context, w http.ResponseWriter, r *http.
 }
 
 func doCreateClientSession(ctx context.Context, w http.ResponseWriter, r *http.Request, payload *model.CreateClientSessionRequest) {
+	if pdebug.Enabled {
+		g := pdebug.Marker("doCreateClientSession")
+		defer g.End()
+	}
+
 	tx, err := db.BeginTx(ctx, nil)
 	if err != nil {
 		httpError(w, `create client session`, http.StatusInternalServerError, err)
