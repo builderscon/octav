@@ -57,7 +57,8 @@ func httpWithBasicAuth(h HandlerWithContext) HandlerWithContext {
 func wrapBasicAuth(h HandlerWithContext, authIsOptional bool) HandlerWithContext {
 	return HandlerWithContext(func(ctx context.Context, w http.ResponseWriter, r *http.Request) {
 		if pdebug.Enabled {
-			pdebug.Printf("Validating basic authentication")
+			g := pdebug.Marker("Validating basic authentication for %s", r.URL.Path)
+			defer g.End()
 		}
 		// Verify access token in the Basic-Auth
 		clientID, clientSecret, ok := r.BasicAuth()
@@ -105,6 +106,10 @@ const clientSessionHeaderKey = "X-Octav-Session-ID"
 
 func httpWithClientSession(h HandlerWithContext) HandlerWithContext {
 	return HandlerWithContext(func(octx context.Context, w http.ResponseWriter, r *http.Request) {
+		if pdebug.Enabled {
+			g := pdebug.Marker("Validating octav session for %s", r.URL.Path)
+			defer g.End()
+		}
 		// This ctx must be a requestCtx
 		ctx, ok := octx.(*requestCtx)
 		if !ok {
