@@ -1382,12 +1382,16 @@ func init() {
 		SetConstraintMap(M).
 		SetRoot(
 			jsval.Object().
-				Required("access_token").
+				Required("access_token", "auth_via").
 				AdditionalProperties(
 					jsval.EmptyConstraint,
 				).
 				AddProp(
 					"access_token",
+					jsval.String(),
+				).
+				AddProp(
+					"auth_via",
 					jsval.String(),
 				),
 		)

@@ -553,9 +553,10 @@
       "schema": {
         "type": "object",
         "properties": {
-          "access_token": { "type": "string" }
+          "access_token": { "type": "string" },
+          "auth_via": {"type":"string"}
         },
-        "required": ["access_token"]
+        "required": ["access_token","auth_via"]
       },
       "targetSchema": {
         "type": "object",
