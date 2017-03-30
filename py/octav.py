@@ -1,5 +1,5 @@
 """OCTAV Client Library"""
-"""DO NOT EDIT: This file was generated from ../spec/v2/api.json on Wed Mar 29 21:05:54 2017"""
+"""DO NOT EDIT: This file was generated from ../spec/v2/api.json on Thu Mar 30 10:47:28 2017"""
 
 import certifi
 import feedparser
@@ -101,9 +101,9 @@ class Session(object):
     self.renew()
     return self.client.create_blog_entry(conference_id, url, status=status, title=title, extra_headers={'X-Octav-Session-ID': self.sid})
 
-  def create_client_session (self, access_token, extra_headers=None):
+  def create_client_session (self, access_token, auth_via, extra_headers=None):
     self.renew()
-    return self.client.create_client_session(access_token, extra_headers={'X-Octav-Session-ID': self.sid})
+    return self.client.create_client_session(access_token, auth_via, extra_headers={'X-Octav-Session-ID': self.sid})
 
   def create_conference (self, series_id, slug, title, cfp_lead_text=None, cfp_post_submit_instructions=None, cfp_pre_submit_instructions=None, contact_information=None, description=None, sub_title=None, timezone=None, extra_headers=None, **args):
     self.renew()
@@ -425,13 +425,13 @@ class Octav(object):
     self.key = key
     self.secret = secret
 
-  def new_session(self, access_token, user_id):
+  def new_session(self, access_token, auth_via):
     if not access_token:
       raise MissingRequiredArgument('access_token is required')
-    if not user_id:
-      raise MissingRequiredArgument('user_id is required')
+    if not auth_via:
+      raise MissingRequiredArgument('auth_via is required')
 
-    f = functools.partial(self.create_client_session, access_token, user_id)
+    f = functools.partial(self.create_client_session, access_token, auth_via)
     s = f()
     if s is None:
         return None
@@ -931,15 +931,20 @@ class Octav(object):
         return None
 
 
-  def create_client_session (self, access_token, extra_headers=None):
+  def create_client_session (self, access_token, auth_via, extra_headers=None):
     try:
         payload = {}
         hdrs = {}
         if access_token is None:
             raise MissingRequiredArgument('property access_token must be provided')
         payload['access_token'] = access_token
+        if auth_via is None:
+            raise MissingRequiredArgument('property auth_via must be provided')
+        payload['auth_via'] = auth_via
         if access_token is not None:
             payload['access_token'] = access_token
+        if auth_via is not None:
+            payload['auth_via'] = auth_via
         uri = '%s/v2/client/session' % self.endpoint
         hdrs = urllib3.util.make_headers(
             basic_auth='%s:%s' % (self.key, self.secret),

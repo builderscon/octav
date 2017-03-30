@@ -254,13 +254,13 @@ class Octav(object):
     self.key = key
     self.secret = secret
 
-  def new_session(self, access_token, user_id):
+  def new_session(self, access_token, auth_via):
     if not access_token:
       raise MissingRequiredArgument('access_token is required')
-    if not user_id:
-      raise MissingRequiredArgument('user_id is required')
+    if not auth_via:
+      raise MissingRequiredArgument('auth_via is required')
 
-    f = functools.partial(self.create_client_session, access_token, user_id)
+    f = functools.partial(self.create_client_session, access_token, auth_via)
     s = f()
     if s is None:
         return None
