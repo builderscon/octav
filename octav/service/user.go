@@ -4,8 +4,10 @@ import (
 	"bytes"
 	"database/sql"
 	"encoding/json"
+	"log"
 	"net/http"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/builderscon/octav/octav/db"
@@ -15,6 +17,7 @@ import (
 	"github.com/builderscon/octav/octav/model"
 	"github.com/builderscon/octav/octav/tools"
 	"github.com/dghubble/go-twitter/twitter"
+	"github.com/dghubble/oauth1"
 	pdebug "github.com/lestrrat/go-pdebug"
 )
 
@@ -142,6 +145,58 @@ func (v *UserSvc) GetClaimedUser(ctx context.Context, tx *sql.Tx, token, authVia
 		}
 
 		id = strconv.Itoa(data.ID)
+	case "facebook":
+		r, err := http.NewRequest("GET", "https://graph.facebook.com/me", nil)
+		if err != nil {
+			return errors.Wrap(err, `failed to generate HTTP request`)
+		}
+
+		r.Header.Set("Authorization", "Bearer "+token)
+		resp, err := http.DefaultClient.Do(r)
+		if err != nil {
+			return errors.Wrap(err, `failed to make request to facebook`)
+		}
+		var data struct {
+			ID string `json:"id"`
+		}
+
+		if err := json.NewDecoder(resp.Body).Decode(&data); err != nil {
+			return errors.Wrap(err, `failed to decode JSON`)
+		}
+
+		id = data.ID
+	case "twitter":
+		// Twitter sucks like nothing else can. OAuth1 requires me to
+		// combine the consumer tokens and the oauth tokens in order to
+		// make a call on behalf of the oauthenticated user. suckers.
+		// I hate it, but I need it to work NOW.
+		list := strings.Split(token, ":")
+		otoken := list[0]
+		osecret := list[1]
+		ckey := list[2]
+		csecret := list[3]
+		log.Printf("token: %s", token)
+		log.Printf("otoken: '%s'", otoken)
+		log.Printf("osecret: '%s'", osecret)
+		// Consumer key and secret are from env vars
+		log.Printf("consumer key = '%s'", ckey)
+		log.Printf("consumer secret = '%s'", csecret)
+
+		config := oauth1.NewConfig(ckey, csecret)
+		tok := oauth1.NewToken(otoken, osecret)
+		httpClient := config.Client(oauth1.NoContext, tok)
+		client := twitter.NewClient(httpClient)
+		var vcFalse = false
+		var vcTrue = true
+		u, _, err := client.Accounts.VerifyCredentials(&twitter.AccountVerifyParams{
+			IncludeEntities: &vcFalse,
+			SkipStatus:      &vcTrue,
+			IncludeEmail:    &vcFalse,
+		})
+		if err != nil {
+			return errors.Wrap(err, `failed to make request to twitter`)
+		}
+		id = strconv.Itoa(int(u.ID))
 	default:
 		return errors.New(`unimplemented`)
 	}
