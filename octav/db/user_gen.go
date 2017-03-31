@@ -65,7 +65,7 @@ func init() {
 	})
 }
 
-func (u *User) LoadByEID(tx *Tx, eid string) (err error) {
+func (u *User) LoadByEID(tx *sql.Tx, eid string) (err error) {
 	if pdebug.Enabled {
 		g := pdebug.Marker(`User.LoadByEID %s`, eid).BindError(&err)
 		defer g.End()
@@ -81,7 +81,7 @@ func (u *User) LoadByEID(tx *Tx, eid string) (err error) {
 	return nil
 }
 
-func (u *User) Create(tx *Tx, opts ...InsertOption) (err error) {
+func (u *User) Create(tx *sql.Tx, opts ...InsertOption) (err error) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("db.User.Create").BindError(&err)
 		defer g.End()
@@ -122,7 +122,7 @@ func (u *User) Create(tx *Tx, opts ...InsertOption) (err error) {
 	return nil
 }
 
-func (u User) Update(tx *Tx) (err error) {
+func (u User) Update(tx *sql.Tx) (err error) {
 	if pdebug.Enabled {
 		g := pdebug.Marker(`User.Update`).BindError(&err)
 		defer g.End()
@@ -152,7 +152,7 @@ func (u User) Update(tx *Tx) (err error) {
 	return errors.New("either OID/EID must be filled")
 }
 
-func (u User) Delete(tx *Tx) error {
+func (u User) Delete(tx *sql.Tx) error {
 	if u.OID != 0 {
 		stmt, err := library.GetStmt("sqlUserDeleteByOIDKey")
 		if err != nil {
@@ -193,7 +193,7 @@ func (v *UserList) FromRows(rows *sql.Rows, capacity int) error {
 	return nil
 }
 
-func (v *UserList) LoadSinceEID(tx *Tx, since string, limit int) error {
+func (v *UserList) LoadSinceEID(tx *sql.Tx, since string, limit int) error {
 	var s int64
 	if id := since; id != "" {
 		vdb := User{}
@@ -206,7 +206,7 @@ func (v *UserList) LoadSinceEID(tx *Tx, since string, limit int) error {
 	return v.LoadSince(tx, s, limit)
 }
 
-func (v *UserList) LoadSince(tx *Tx, since int64, limit int) error {
+func (v *UserList) LoadSince(tx *sql.Tx, since int64, limit int) error {
 	rows, err := tx.Query(`SELECT `+UserStdSelectColumns+` FROM `+UserTable+` WHERE users.oid > ? ORDER BY oid ASC LIMIT `+strconv.Itoa(limit), since)
 	if err != nil {
 		return err

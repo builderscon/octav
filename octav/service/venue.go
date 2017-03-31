@@ -1,10 +1,12 @@
 package service
 
 import (
+	"database/sql"
 	"time"
 
 	"github.com/builderscon/octav/octav/cache"
 	"github.com/builderscon/octav/octav/db"
+	"github.com/builderscon/octav/octav/internal/context"
 	"github.com/builderscon/octav/octav/model"
 	"github.com/builderscon/octav/octav/tools"
 	pdebug "github.com/lestrrat/go-pdebug"
@@ -13,7 +15,7 @@ import (
 
 func (v *VenueSvc) Init() {}
 
-func (v *VenueSvc) populateRowForCreate(vdb *db.Venue, payload *model.CreateVenueRequest) error {
+func (v *VenueSvc) populateRowForCreate(ctx context.Context, vdb *db.Venue, payload *model.CreateVenueRequest) error {
 	vdb.EID = tools.UUID()
 	vdb.Name = payload.Name.String
 	vdb.Address = payload.Address.String
@@ -22,7 +24,7 @@ func (v *VenueSvc) populateRowForCreate(vdb *db.Venue, payload *model.CreateVenu
 	return nil
 }
 
-func (v *VenueSvc) populateRowForUpdate(vdb *db.Venue, payload *model.UpdateVenueRequest) error {
+func (v *VenueSvc) populateRowForUpdate(ctx context.Context, vdb *db.Venue, payload *model.UpdateVenueRequest) error {
 	if payload.Name.Valid() {
 		vdb.Name = payload.Name.String
 	}
@@ -41,19 +43,19 @@ func (v *VenueSvc) populateRowForUpdate(vdb *db.Venue, payload *model.UpdateVenu
 	return nil
 }
 
-func (v *VenueSvc) Decorate(tx *db.Tx, venue *model.Venue, trustedCall bool, lang string) (err error) {
+func (v *VenueSvc) Decorate(ctx context.Context, tx *sql.Tx, venue *model.Venue, trustedCall bool, lang string) (err error) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("service.Venue.Decorate (%s, %t, %s)", venue.ID, trustedCall, lang).BindError(&err)
 		defer g.End()
 	}
 
 	sr := Room()
-	if err := sr.LoadByVenueID(tx, &venue.Rooms, venue.ID); err != nil {
+	if err := sr.LoadByVenueID(ctx, tx, &venue.Rooms, venue.ID); err != nil {
 		return errors.Wrap(err, "failed to load rooms")
 	}
 
 	for i := range venue.Rooms {
-		if err := sr.Decorate(tx, &venue.Rooms[i], trustedCall, lang); err != nil {
+		if err := sr.Decorate(ctx, tx, &venue.Rooms[i], trustedCall, lang); err != nil {
 			return errors.Wrap(err, "failed to decorate room")
 		}
 	}
@@ -68,14 +70,14 @@ func (v *VenueSvc) Decorate(tx *db.Tx, venue *model.Venue, trustedCall bool, lan
 	return nil
 }
 
-func (v *VenueSvc) CreateFromPayload(tx *db.Tx, venue *model.Venue, payload *model.CreateVenueRequest) error {
+func (v *VenueSvc) CreateFromPayload(ctx context.Context, tx *sql.Tx, venue *model.Venue, payload *model.CreateVenueRequest) error {
 	su := User()
-	if err := su.IsAdministrator(tx, payload.UserID); err != nil {
+	if err := su.IsAdministrator(ctx, tx, context.GetUserID(ctx)); err != nil {
 		return errors.Wrap(err, "creating venues require administrator privileges")
 	}
 
 	var vdb db.Venue
-	if err := v.Create(tx, &vdb, payload); err != nil {
+	if err := v.Create(ctx, tx, &vdb, payload); err != nil {
 		return errors.Wrap(err, "failed to store in database")
 	}
 
@@ -88,16 +90,16 @@ func (v *VenueSvc) CreateFromPayload(tx *db.Tx, venue *model.Venue, payload *mod
 	return nil
 }
 
-func (v *VenueSvc) DeleteFromPayload(tx *db.Tx, payload *model.DeleteVenueRequest) error {
+func (v *VenueSvc) DeleteFromPayload(ctx context.Context, tx *sql.Tx, payload *model.DeleteVenueRequest) error {
 	su := User()
-	if err := su.IsAdministrator(tx, payload.UserID); err != nil {
+	if err := su.IsAdministrator(ctx, tx, context.GetUserID(ctx)); err != nil {
 		return errors.Wrap(err, "deleting venues require administrator privileges")
 	}
 
 	return errors.Wrap(v.Delete(tx, payload.ID), "failed to delete from database")
 }
 
-func (v *VenueSvc) ListFromPayload(tx *db.Tx, result *model.VenueList, payload *model.ListVenueRequest) error {
+func (v *VenueSvc) ListFromPayload(ctx context.Context, tx *sql.Tx, result *model.VenueList, payload *model.ListVenueRequest) error {
 	var vdbl db.VenueList
 	if err := vdbl.LoadSinceEID(tx, payload.Since.String, int(payload.Limit.Int)); err != nil {
 		return errors.Wrap(err, "failed to load from database")
@@ -109,7 +111,7 @@ func (v *VenueSvc) ListFromPayload(tx *db.Tx, result *model.VenueList, payload *
 			return errors.Wrap(err, "failed to populate model from database")
 		}
 
-		if err := v.Decorate(tx, &l[i], payload.TrustedCall, payload.Lang.String); err != nil {
+		if err := v.Decorate(ctx, tx, &l[i], payload.TrustedCall, payload.Lang.String); err != nil {
 			return errors.Wrap(err, "failed to decorate venue with associated data")
 		}
 	}
@@ -118,7 +120,7 @@ func (v *VenueSvc) ListFromPayload(tx *db.Tx, result *model.VenueList, payload *
 	return nil
 }
 
-func (v *VenueSvc) LoadByConferenceID(tx *db.Tx, cdl *model.VenueList, cid string) (err error) {
+func (v *VenueSvc) LoadByConferenceID(ctx context.Context, tx *sql.Tx, cdl *model.VenueList, cid string) (err error) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("service.Venue.LoadByConferenceID (%s)", cid).BindError(&err)
 		defer g.End()
@@ -136,7 +138,7 @@ func (v *VenueSvc) LoadByConferenceID(tx *db.Tx, cdl *model.VenueList, cid strin
 		}
 		m := make(model.VenueList, len(ids))
 		for i, id := range ids {
-			if err := v.Lookup(tx, &m[i], id); err != nil {
+			if err := v.Lookup(ctx, tx, &m[i], id); err != nil {
 				return errors.Wrap(err, "failed to lookup venue")
 			}
 		}

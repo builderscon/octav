@@ -1,6 +1,8 @@
 package db
 
 import (
+	"database/sql"
+
 	"github.com/builderscon/octav/octav/tools"
 	"github.com/lestrrat/go-pdebug"
 	"github.com/pkg/errors"
@@ -21,7 +23,7 @@ func init() {
 	})
 }
 
-func (v *ExternalResourceList) LoadByConference(tx *Tx, conferenceID string) (err error) {
+func (v *ExternalResourceList) LoadByConference(tx *sql.Tx, conferenceID string) (err error) {
 	if pdebug.Enabled {
 		g := pdebug.Marker(`ExternalResourceList.LoadByConference %s`, conferenceID).BindError(&err)
 		defer g.End()

@@ -1,6 +1,8 @@
 package db
 
 import (
+	"database/sql"
+
 	"github.com/builderscon/octav/octav/tools"
 	pdebug "github.com/lestrrat/go-pdebug"
 	"github.com/pkg/errors"
@@ -35,7 +37,7 @@ func init() {
 	})
 }
 
-func DeleteTracks(tx *Tx, conferenceID string) (err error) {
+func DeleteTracks(tx *sql.Tx, conferenceID string) (err error) {
 	if pdebug.Enabled {
 		g := pdebug.Marker(`DeleteTracks %s`, conferenceID).BindError(&err)
 		defer g.End()
@@ -51,7 +53,7 @@ func DeleteTracks(tx *Tx, conferenceID string) (err error) {
 	return nil
 }
 
-func (vdb *Track) Load(tx *Tx, conferenceID, roomID string) (err error) {
+func (vdb *Track) Load(tx *sql.Tx, conferenceID, roomID string) (err error) {
 	if pdebug.Enabled {
 		g := pdebug.Marker(`Track.Load %s, %s`, conferenceID, roomID).BindError(&err)
 		defer g.End()
@@ -69,7 +71,7 @@ func (vdb *Track) Load(tx *Tx, conferenceID, roomID string) (err error) {
 	return nil
 }
 
-func (v *TrackList) LoadByConferenceID(tx *Tx, conferenceID string) (err error) {
+func (v *TrackList) LoadByConferenceID(tx *sql.Tx, conferenceID string) (err error) {
 	if pdebug.Enabled {
 		g := pdebug.Marker(`TrackList.LoadByConferenceID %s`, conferenceID).BindError(&err)
 		defer g.End()

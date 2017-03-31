@@ -65,7 +65,7 @@ func init() {
 	})
 }
 
-func (r *Room) LoadByEID(tx *Tx, eid string) (err error) {
+func (r *Room) LoadByEID(tx *sql.Tx, eid string) (err error) {
 	if pdebug.Enabled {
 		g := pdebug.Marker(`Room.LoadByEID %s`, eid).BindError(&err)
 		defer g.End()
@@ -81,7 +81,7 @@ func (r *Room) LoadByEID(tx *Tx, eid string) (err error) {
 	return nil
 }
 
-func (r *Room) Create(tx *Tx, opts ...InsertOption) (err error) {
+func (r *Room) Create(tx *sql.Tx, opts ...InsertOption) (err error) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("db.Room.Create").BindError(&err)
 		defer g.End()
@@ -122,7 +122,7 @@ func (r *Room) Create(tx *Tx, opts ...InsertOption) (err error) {
 	return nil
 }
 
-func (r Room) Update(tx *Tx) (err error) {
+func (r Room) Update(tx *sql.Tx) (err error) {
 	if pdebug.Enabled {
 		g := pdebug.Marker(`Room.Update`).BindError(&err)
 		defer g.End()
@@ -152,7 +152,7 @@ func (r Room) Update(tx *Tx) (err error) {
 	return errors.New("either OID/EID must be filled")
 }
 
-func (r Room) Delete(tx *Tx) error {
+func (r Room) Delete(tx *sql.Tx) error {
 	if r.OID != 0 {
 		stmt, err := library.GetStmt("sqlRoomDeleteByOIDKey")
 		if err != nil {
@@ -193,7 +193,7 @@ func (v *RoomList) FromRows(rows *sql.Rows, capacity int) error {
 	return nil
 }
 
-func (v *RoomList) LoadSinceEID(tx *Tx, since string, limit int) error {
+func (v *RoomList) LoadSinceEID(tx *sql.Tx, since string, limit int) error {
 	var s int64
 	if id := since; id != "" {
 		vdb := Room{}
@@ -206,7 +206,7 @@ func (v *RoomList) LoadSinceEID(tx *Tx, since string, limit int) error {
 	return v.LoadSince(tx, s, limit)
 }
 
-func (v *RoomList) LoadSince(tx *Tx, since int64, limit int) error {
+func (v *RoomList) LoadSince(tx *sql.Tx, since int64, limit int) error {
 	rows, err := tx.Query(`SELECT `+RoomStdSelectColumns+` FROM `+RoomTable+` WHERE rooms.oid > ? ORDER BY oid ASC LIMIT `+strconv.Itoa(limit), since)
 	if err != nil {
 		return err

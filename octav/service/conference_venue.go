@@ -1,6 +1,9 @@
 package service
 
 import (
+	"context"
+	"database/sql"
+
 	"github.com/builderscon/octav/octav/db"
 	"github.com/builderscon/octav/octav/model"
 	pdebug "github.com/lestrrat/go-pdebug"
@@ -8,7 +11,7 @@ import (
 
 func (v *ConferenceVenueSvc) Init() {}
 
-func (v *ConferenceVenueSvc) populateRowForCreate(vdb *db.ConferenceVenue, payload *model.CreateConferenceVenueRequest) error {
+func (v *ConferenceVenueSvc) populateRowForCreate(ctx context.Context, vdb *db.ConferenceVenue, payload *model.CreateConferenceVenueRequest) error {
 	vdb.ConferenceID = payload.ConferenceID
 	vdb.VenueID = payload.VenueID
 	return nil
@@ -30,19 +33,19 @@ func invalidateVenueLoadByConferenceID(conferenceID string) error {
 	return nil
 }
 
-func (v *ConferenceVenueSvc) PostCreateHook(tx *db.Tx, vdb *db.ConferenceVenue) error {
+func (v *ConferenceVenueSvc) PostCreateHook(ctx context.Context, tx *sql.Tx, vdb *db.ConferenceVenue) error {
 	invalidateVenueLoadByConferenceID(vdb.ConferenceID)
 	invalidateRoomLoadByVenueID(vdb.VenueID)
 	return nil
 }
 
-func (v *ConferenceVenueSvc) PostUpdateHook(tx *db.Tx, vdb *db.ConferenceVenue) error {
+func (v *ConferenceVenueSvc) PostUpdateHook(tx *sql.Tx, vdb *db.ConferenceVenue) error {
 	invalidateVenueLoadByConferenceID(vdb.ConferenceID)
 	invalidateRoomLoadByVenueID(vdb.VenueID)
 	return nil
 }
 
-func (v *ConferenceVenueSvc) PostDeleteHook(tx *db.Tx, vdb *db.ConferenceVenue) error {
+func (v *ConferenceVenueSvc) PostDeleteHook(tx *sql.Tx, vdb *db.ConferenceVenue) error {
 	invalidateVenueLoadByConferenceID(vdb.ConferenceID)
 	invalidateRoomLoadByVenueID(vdb.VenueID)
 	return nil

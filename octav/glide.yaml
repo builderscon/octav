@@ -25,6 +25,7 @@ import:
 - package: google.golang.org/api
   subpackages:
   - urlshortener/v1
+  - youtube/v3
 - package: golang.org/x/sync
   subpackages:
   - errgroup

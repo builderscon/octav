@@ -1,8 +1,8 @@
 package service
 
 import (
-	"context"
 	"crypto/sha1"
+	"database/sql"
 	"fmt"
 	"io"
 	"net/url"
@@ -11,6 +11,7 @@ import (
 
 	"github.com/builderscon/octav/octav/cache"
 	"github.com/builderscon/octav/octav/db"
+	"github.com/builderscon/octav/octav/internal/context"
 	"github.com/builderscon/octav/octav/model"
 	"github.com/builderscon/octav/octav/tools"
 	pdebug "github.com/lestrrat/go-pdebug"
@@ -20,7 +21,7 @@ import (
 
 func (v *BlogEntrySvc) Init() {}
 
-func (v *BlogEntrySvc) populateRowForCreate(vdb *db.BlogEntry, payload *model.CreateBlogEntryRequest) error {
+func (v *BlogEntrySvc) populateRowForCreate(ctx context.Context, vdb *db.BlogEntry, payload *model.CreateBlogEntryRequest) error {
 	vdb.EID = tools.UUID()
 	vdb.ConferenceID = payload.ConferenceID
 	vdb.Title = payload.Title
@@ -40,7 +41,7 @@ func (v *BlogEntrySvc) populateRowForCreate(vdb *db.BlogEntry, payload *model.Cr
 	return nil
 }
 
-func (v *BlogEntrySvc) populateRowForUpdate(vdb *db.BlogEntry, payload *model.UpdateBlogEntryRequest) error {
+func (v *BlogEntrySvc) populateRowForUpdate(ctx context.Context, vdb *db.BlogEntry, payload *model.UpdateBlogEntryRequest) error {
 	if payload.Title.Valid() {
 		vdb.Title = payload.Title.String
 	}
@@ -86,19 +87,19 @@ func invalidateBlogEntryLoadByConferenceID(confID string) error {
 	return nil
 }
 
-func (v *BlogEntrySvc) PostCreateHook(_ *db.Tx, vdb *db.BlogEntry) error {
+func (v *BlogEntrySvc) PostCreateHook(ctx context.Context, _ *sql.Tx, vdb *db.BlogEntry) error {
 	return invalidateBlogEntryLoadByConferenceID(vdb.ConferenceID)
 }
 
-func (v *BlogEntrySvc) PostUpdateHook(_ *db.Tx, vdb *db.BlogEntry) error {
+func (v *BlogEntrySvc) PostUpdateHook(_ *sql.Tx, vdb *db.BlogEntry) error {
 	return invalidateBlogEntryLoadByConferenceID(vdb.ConferenceID)
 }
 
-func (v *BlogEntrySvc) PostDeleteHook(_ *db.Tx, vdb *db.BlogEntry) error {
+func (v *BlogEntrySvc) PostDeleteHook(_ *sql.Tx, vdb *db.BlogEntry) error {
 	return invalidateBlogEntryLoadByConferenceID(vdb.ConferenceID)
 }
 
-func (v *BlogEntrySvc) Decorate(tx *db.Tx, m *model.BlogEntry, trustedCall bool, lang string) (err error) {
+func (v *BlogEntrySvc) Decorate(tx *sql.Tx, m *model.BlogEntry, trustedCall bool, lang string) (err error) {
 	// If this is not a trustedCall, we don't want to send the conference_id, status, or the url_hash
 	if !trustedCall {
 		m.ConferenceID = ""
@@ -108,19 +109,19 @@ func (v *BlogEntrySvc) Decorate(tx *db.Tx, m *model.BlogEntry, trustedCall bool,
 	return nil
 }
 
-func (v *BlogEntrySvc) CreateFromPayload(ctx context.Context, tx *db.Tx, result *model.BlogEntry, payload *model.CreateBlogEntryRequest) (err error) {
+func (v *BlogEntrySvc) CreateFromPayload(ctx context.Context, tx *sql.Tx, result *model.BlogEntry, payload *model.CreateBlogEntryRequest) (err error) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("BlogEntrySvc.CreateFromPayload").BindError(&err)
 		defer g.End()
 	}
 
 	su := User()
-	if err := su.IsConferenceAdministrator(tx, payload.ConferenceID, payload.UserID); err != nil {
+	if err := su.IsConferenceAdministrator(ctx, tx, payload.ConferenceID, context.GetUserID(ctx)); err != nil {
 		return errors.Wrap(err, "creating blog entries require conference administrator privileges")
 	}
 
 	var vdb db.BlogEntry
-	if err := v.Create(tx, &vdb, payload); err != nil {
+	if err := v.Create(ctx, tx, &vdb, payload); err != nil {
 		return errors.Wrap(err, "failed to insert into database")
 	}
 
@@ -135,19 +136,19 @@ func (v *BlogEntrySvc) CreateFromPayload(ctx context.Context, tx *db.Tx, result 
 	return nil
 }
 
-func (v *BlogEntrySvc) DeleteFromPayload(ctx context.Context, tx *db.Tx, payload *model.DeleteBlogEntryRequest) (err error) {
+func (v *BlogEntrySvc) DeleteFromPayload(ctx context.Context, tx *sql.Tx, payload *model.DeleteBlogEntryRequest) (err error) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("BlogEntrySvc.DeleteFromPayload").BindError(&err)
 		defer g.End()
 	}
 
 	var m model.BlogEntry
-	if err := v.Lookup(tx, &m, payload.ID); err != nil {
+	if err := v.Lookup(ctx, tx, &m, payload.ID); err != nil {
 		return errors.Wrap(err, "failed to look up blog entry")
 	}
 
 	su := User()
-	if err := su.IsConferenceAdministrator(tx, m.ConferenceID, payload.UserID); err != nil {
+	if err := su.IsConferenceAdministrator(ctx, tx, m.ConferenceID, context.GetUserID(ctx)); err != nil {
 		return errors.Wrap(err, "deleting blog entries requires conference administrator privilege")
 	}
 
@@ -157,7 +158,7 @@ func (v *BlogEntrySvc) DeleteFromPayload(ctx context.Context, tx *db.Tx, payload
 	return nil
 }
 
-func (v *BlogEntrySvc) ListFromPayload(tx *db.Tx, result *model.BlogEntryList, payload *model.ListBlogEntriesRequest) (err error) {
+func (v *BlogEntrySvc) ListFromPayload(ctx context.Context, tx *sql.Tx, result *model.BlogEntryList, payload *model.ListBlogEntriesRequest) (err error) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("BlogEntrySvc.ListFromPayload").BindError(&err)
 		defer g.End()

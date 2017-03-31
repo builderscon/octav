@@ -1,8 +1,12 @@
 package db
 
-import "github.com/builderscon/octav/octav/tools"
+import (
+	"database/sql"
 
-func (cd *ConferenceDate) DeleteDate(tx *Tx, cid, eid string) error {
+	"github.com/builderscon/octav/octav/tools"
+)
+
+func (cd *ConferenceDate) DeleteDate(tx *sql.Tx, cid, eid string) error {
 	stmt := tools.GetBuffer()
 	defer tools.ReleaseBuffer(stmt)
 
@@ -13,7 +17,7 @@ func (cd *ConferenceDate) DeleteDate(tx *Tx, cid, eid string) error {
 	return err
 }
 
-func (cdl *ConferenceDateList) LoadByConferenceID(tx *Tx, cid string) error {
+func (cdl *ConferenceDateList) LoadByConferenceID(tx *sql.Tx, cid string) error {
 	stmt := tools.GetBuffer()
 	defer tools.ReleaseBuffer(stmt)
 

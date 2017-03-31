@@ -1,6 +1,7 @@
 package db
 
 import (
+	"database/sql"
 	"time"
 
 	"github.com/builderscon/octav/octav/tools"
@@ -8,7 +9,7 @@ import (
 	"github.com/pkg/errors"
 )
 
-func (v *SessionList) LoadByConference(tx *Tx, conferenceID, speakerID string, rangeStart, rangeEnd time.Time, status []string, confirmed []bool) (err error) {
+func (v *SessionList) LoadByConference(tx *sql.Tx, conferenceID, speakerID string, rangeStart, rangeEnd time.Time, status []string, confirmed []bool) (err error) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("db.SessionList.LoadByConference %s,%s,%s,%s,%s,%s", conferenceID, speakerID, rangeStart, rangeEnd, status, confirmed).BindError(&err)
 		defer g.End()
@@ -97,7 +98,7 @@ func (v *SessionList) LoadByConference(tx *Tx, conferenceID, speakerID string, r
 	return nil
 }
 
-func IsSessionOwner(tx *Tx, sessionID, userID string) (err error) {
+func IsSessionOwner(tx *sql.Tx, sessionID, userID string) (err error) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("db.IsSessionOwner %s %s", sessionID, userID).BindError(&err)
 		defer g.End()

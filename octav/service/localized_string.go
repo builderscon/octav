@@ -1,6 +1,7 @@
 package service
 
 import (
+	"database/sql"
 	"time"
 
 	"github.com/builderscon/octav/octav/cache"
@@ -12,7 +13,7 @@ import (
 
 func (v *LocalizedStringSvc) Init() {}
 
-func (v *LocalizedStringSvc) LookupFields(tx *db.Tx, parentType, parentID, lang string, list *[]db.LocalizedString) (err error) {
+func (v *LocalizedStringSvc) LookupFields(tx *sql.Tx, parentType, parentID, lang string, list *[]db.LocalizedString) (err error) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("service.LocalizedString.LookupFields (%s, %s, %s)", parentType, parentID, lang).BindError(&err)
 		defer g.End()
@@ -65,7 +66,7 @@ func (v *LocalizedStringSvc) LookupFields(tx *db.Tx, parentType, parentID, lang 
 	c.Set(key, *list, cache.WithExpires(time.Hour))
 	return nil
 }
-func (v *LocalizedStringSvc) UpdateFields(tx *db.Tx, parentType, parentID string, fields model.LocalizedFields) (err error) {
+func (v *LocalizedStringSvc) UpdateFields(tx *sql.Tx, parentType, parentID string, fields model.LocalizedFields) (err error) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("service.LocalizedString.UpdateFields (%s, %s)", parentType, parentID).BindError(&err)
 		defer g.End()

@@ -1,6 +1,8 @@
 package db
 
 import (
+	"database/sql"
+
 	"github.com/builderscon/octav/octav/tools"
 	"github.com/pkg/errors"
 )
@@ -47,7 +49,7 @@ func init() {
 	})
 }
 
-func (vdb *User) LoadByAuthUserID(tx *Tx, via, id string) error {
+func (vdb *User) LoadByAuthUserID(tx *sql.Tx, via, id string) error {
 	stmt, err := library.GetStmt("userLoadByAuthUserIDKey")
 	if err != nil {
 		return errors.Wrap(err, "failed to get statement")
@@ -60,7 +62,7 @@ func (vdb *User) LoadByAuthUserID(tx *Tx, via, id string) error {
 	return nil
 }
 
-func IsAdministrator(tx *Tx, userID string) error {
+func IsAdministrator(tx *sql.Tx, userID string) error {
 	stmt, err := library.GetStmt("userIsAdministratorKey")
 	if err != nil {
 		return errors.Wrap(err, "failed to get statement")
@@ -78,7 +80,7 @@ func IsAdministrator(tx *Tx, userID string) error {
 	return nil
 }
 
-func (vdbl *UserList) LoadFromQuery(tx *Tx, pattern, since string, limit int) error {
+func (vdbl *UserList) LoadFromQuery(tx *sql.Tx, pattern, since string, limit int) error {
 	if pattern == "" {
 		return vdbl.LoadSinceEID(tx, since, limit)
 	}

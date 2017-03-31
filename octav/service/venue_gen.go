@@ -4,6 +4,7 @@ package service
 
 import (
 	"context"
+	"database/sql"
 	"sync"
 	"time"
 
@@ -21,6 +22,7 @@ var _ = context.Background
 var _ = errors.Wrap
 var _ = model.Venue{}
 var _ = db.Venue{}
+var _ = sql.ErrNoRows
 var _ = pdebug.Enabled
 
 var venueSvc VenueSvc
@@ -31,23 +33,23 @@ func Venue() *VenueSvc {
 	return &venueSvc
 }
 
-func (v *VenueSvc) LookupFromPayload(tx *db.Tx, m *model.Venue, payload *model.LookupVenueRequest) (err error) {
+func (v *VenueSvc) LookupFromPayload(ctx context.Context, tx *sql.Tx, m *model.Venue, payload *model.LookupVenueRequest) (err error) {
 	if pdebug.Enabled {
-		g := pdebug.Marker("service.Venue.LookupFromPayload").BindError(&err)
+		g := pdebug.Marker("service.Venue.LookupFromPayload %s", payload.ID).BindError(&err)
 		defer g.End()
 	}
-	if err = v.Lookup(tx, m, payload.ID); err != nil {
+	if err = v.Lookup(ctx, tx, m, payload.ID); err != nil {
 		return errors.Wrap(err, "failed to load model.Venue from database")
 	}
-	if err := v.Decorate(tx, m, payload.TrustedCall, payload.Lang.String); err != nil {
+	if err := v.Decorate(ctx, tx, m, payload.TrustedCall, payload.Lang.String); err != nil {
 		return errors.Wrap(err, "failed to load associated data for model.Venue from database")
 	}
 	return nil
 }
 
-func (v *VenueSvc) Lookup(tx *db.Tx, m *model.Venue, id string) (err error) {
+func (v *VenueSvc) Lookup(ctx context.Context, tx *sql.Tx, m *model.Venue, id string) (err error) {
 	if pdebug.Enabled {
-		g := pdebug.Marker("service.Venue.Lookup").BindError(&err)
+		g := pdebug.Marker("service.Venue.Lookup %s", id).BindError(&err)
 		defer g.End()
 	}
 
@@ -78,13 +80,13 @@ func (v *VenueSvc) Lookup(tx *db.Tx, m *model.Venue, id string) (err error) {
 // Create takes in the transaction, the incoming payload, and a reference to
 // a database row. The database row is initialized/populated so that the
 // caller can use it afterwards.
-func (v *VenueSvc) Create(tx *db.Tx, vdb *db.Venue, payload *model.CreateVenueRequest) (err error) {
+func (v *VenueSvc) Create(ctx context.Context, tx *sql.Tx, vdb *db.Venue, payload *model.CreateVenueRequest) (err error) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("service.Venue.Create").BindError(&err)
 		defer g.End()
 	}
 
-	if err := v.populateRowForCreate(vdb, payload); err != nil {
+	if err := v.populateRowForCreate(ctx, vdb, payload); err != nil {
 		return errors.Wrap(err, `failed to populate row`)
 	}
 
@@ -98,7 +100,7 @@ func (v *VenueSvc) Create(tx *db.Tx, vdb *db.Venue, payload *model.CreateVenueRe
 	return nil
 }
 
-func (v *VenueSvc) Update(tx *db.Tx, vdb *db.Venue) (err error) {
+func (v *VenueSvc) Update(tx *sql.Tx, vdb *db.Venue) (err error) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("service.Venue.Update (%s)", vdb.EID).BindError(&err)
 		defer g.End()
@@ -125,7 +127,7 @@ func (v *VenueSvc) Update(tx *db.Tx, vdb *db.Venue) (err error) {
 	return nil
 }
 
-func (v *VenueSvc) UpdateFromPayload(ctx context.Context, tx *db.Tx, payload *model.UpdateVenueRequest) (err error) {
+func (v *VenueSvc) UpdateFromPayload(ctx context.Context, tx *sql.Tx, payload *model.UpdateVenueRequest) (err error) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("service.Venue.UpdateFromPayload (%s)", payload.ID).BindError(&err)
 		defer g.End()
@@ -135,7 +137,7 @@ func (v *VenueSvc) UpdateFromPayload(ctx context.Context, tx *db.Tx, payload *mo
 		return errors.Wrap(err, `failed to load from database`)
 	}
 
-	if err := v.populateRowForUpdate(&vdb, payload); err != nil {
+	if err := v.populateRowForUpdate(ctx, &vdb, payload); err != nil {
 		return errors.Wrap(err, `failed to populate row data`)
 	}
 
@@ -150,7 +152,7 @@ func (v *VenueSvc) UpdateFromPayload(ctx context.Context, tx *db.Tx, payload *mo
 	return nil
 }
 
-func (v *VenueSvc) ReplaceL10NStrings(tx *db.Tx, m *model.Venue, lang string) error {
+func (v *VenueSvc) ReplaceL10NStrings(tx *sql.Tx, m *model.Venue, lang string) error {
 	if pdebug.Enabled {
 		g := pdebug.Marker("service.Venue.ReplaceL10NStrings lang = %s", lang)
 		defer g.End()
@@ -228,7 +230,7 @@ func (v *VenueSvc) ReplaceL10NStrings(tx *db.Tx, m *model.Venue, lang string) er
 	return nil
 }
 
-func (v *VenueSvc) Delete(tx *db.Tx, id string) error {
+func (v *VenueSvc) Delete(tx *sql.Tx, id string) error {
 	if pdebug.Enabled {
 		g := pdebug.Marker("Venue.Delete (%s)", id)
 		defer g.End()

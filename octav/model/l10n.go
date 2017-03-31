@@ -2,6 +2,7 @@ package model
 
 import (
 	"bytes"
+	"database/sql"
 	"encoding/json"
 	"errors"
 	"regexp"
@@ -131,7 +132,7 @@ func (lf *LocalizedFields) Set(lang, key, value string) error {
 	return nil
 }
 
-func (lf *LocalizedFields) CreateLocalizedStrings(tx *db.Tx, parentType, parentID string) error {
+func (lf *LocalizedFields) CreateLocalizedStrings(tx *sql.Tx, parentType, parentID string) error {
 	if pdebug.Enabled {
 		g := pdebug.Marker("LocalizedFields.CreateLocalizedStrings (%s)", parentType)
 		defer g.End()

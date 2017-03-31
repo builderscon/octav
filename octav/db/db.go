@@ -1,6 +1,7 @@
 package db
 
 import (
+	"context"
 	"database/sql"
 	"os"
 	"strconv"
@@ -66,16 +67,10 @@ func Init(dsn string) (err error) {
 	return nil
 }
 
-// Begin creates a new transaction (`Tx`) from the current
-// global database connection
-func Begin() (*Tx, error) {
+func BeginTx(ctx context.Context, opt *sql.TxOptions) (*sql.Tx, error) {
 	if _db == nil {
 		return nil, errors.New("database has not been initialized")
 	}
 
-	tx, err := _db.Begin()
-	if err != nil {
-		return nil, err
-	}
-	return &Tx{tx}, nil
+	return _db.DB.BeginTx(ctx, opt)
 }

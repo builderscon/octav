@@ -1,6 +1,7 @@
 package service
 
 import (
+	"context"
 	"testing"
 
 	"github.com/builderscon/octav/octav/db"
@@ -9,6 +10,9 @@ import (
 )
 
 func TestSessionPopulateRowForUpdate(t *testing.T) {
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+
 	s := Session()
 
 	var vdb db.Session
@@ -18,7 +22,7 @@ func TestSessionPopulateRowForUpdate(t *testing.T) {
 	payload.Status.Set("accepted")
 	vdb.EID = payload.ID
 
-	if !assert.NoError(t, s.populateRowForUpdate(&vdb, &payload), "populateRowForUpdate should succeed") {
+	if !assert.NoError(t, s.populateRowForUpdate(ctx, &vdb, &payload), "populateRowForUpdate should succeed") {
 		return
 	}
 
@@ -44,7 +48,7 @@ func TestFormatSessionTweet(t *testing.T) {
 	}
 
 	session := model.Session{
-		ID: "ff8657cb-a751-4415-ad93-374fb9fda2b6",
+		ID:    "ff8657cb-a751-4415-ad93-374fb9fda2b6",
 		Title: "Highly available and scalable Kubernetes on AWS",
 	}
 

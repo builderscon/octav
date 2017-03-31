@@ -1,4 +1,4 @@
-SCHEMA=../spec/v1/api.json
+SCHEMA=../spec/v2/api.json
 SCRIPT=_internal_bin/generate.pl
 
 .PHONY: build

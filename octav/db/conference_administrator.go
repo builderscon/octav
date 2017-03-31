@@ -1,6 +1,8 @@
 package db
 
 import (
+	"database/sql"
+
 	"github.com/builderscon/octav/octav/tools"
 	"github.com/pkg/errors"
 )
@@ -46,7 +48,7 @@ func init() {
 	})
 }
 
-func IsConferenceAdministrator(tx *Tx, cid, uid string) error {
+func IsConferenceAdministrator(tx *sql.Tx, cid, uid string) error {
 	stmt, err := library.GetStmt(sqlConferenceAdminCheckKey)
 	if err != nil {
 		return errors.Wrap(err, `failed to get statement`)
@@ -66,7 +68,7 @@ func IsConferenceAdministrator(tx *Tx, cid, uid string) error {
 	return nil
 }
 
-func DeleteConferenceAdministrator(tx *Tx, cid, uid string) error {
+func DeleteConferenceAdministrator(tx *sql.Tx, cid, uid string) error {
 	stmt, err := library.GetStmt(sqlConferenceAdminDeleteKey)
 	if err != nil {
 		return errors.Wrap(err, `failed to get statement`)
@@ -75,7 +77,7 @@ func DeleteConferenceAdministrator(tx *Tx, cid, uid string) error {
 	return errors.Wrap(err, `failed to execute statements`)
 }
 
-func LoadConferenceAdministrators(tx *Tx, admins *UserList, cid string) error {
+func LoadConferenceAdministrators(tx *sql.Tx, admins *UserList, cid string) error {
 	stmt, err := library.GetStmt(sqlConferenceAdminLoadKey)
 	if err != nil {
 		return errors.Wrap(err, `failed to get statement`)

@@ -42,7 +42,7 @@ func init() {
 	})
 }
 
-func (c *ConferenceVenue) Create(tx *Tx, opts ...InsertOption) (err error) {
+func (c *ConferenceVenue) Create(tx *sql.Tx, opts ...InsertOption) (err error) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("db.ConferenceVenue.Create").BindError(&err)
 		defer g.End()
@@ -79,7 +79,7 @@ func (c *ConferenceVenue) Create(tx *Tx, opts ...InsertOption) (err error) {
 	return nil
 }
 
-func (c ConferenceVenue) Update(tx *Tx) (err error) {
+func (c ConferenceVenue) Update(tx *sql.Tx) (err error) {
 	if pdebug.Enabled {
 		g := pdebug.Marker(`ConferenceVenue.Update`).BindError(&err)
 		defer g.End()
@@ -98,7 +98,7 @@ func (c ConferenceVenue) Update(tx *Tx) (err error) {
 	return errors.New("OID must be filled")
 }
 
-func (c ConferenceVenue) Delete(tx *Tx) error {
+func (c ConferenceVenue) Delete(tx *sql.Tx) error {
 	if c.OID != 0 {
 		stmt, err := library.GetStmt("sqlConferenceVenueDeleteByOIDKey")
 		if err != nil {

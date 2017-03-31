@@ -4,6 +4,7 @@ package service
 
 import (
 	"context"
+	"database/sql"
 	"sync"
 	"time"
 
@@ -21,6 +22,7 @@ var _ = context.Background
 var _ = errors.Wrap
 var _ = model.ConferenceDate{}
 var _ = db.ConferenceDate{}
+var _ = sql.ErrNoRows
 var _ = pdebug.Enabled
 
 var conferenceDateSvc ConferenceDateSvc
@@ -31,9 +33,9 @@ func ConferenceDate() *ConferenceDateSvc {
 	return &conferenceDateSvc
 }
 
-func (v *ConferenceDateSvc) Lookup(tx *db.Tx, m *model.ConferenceDate, id string) (err error) {
+func (v *ConferenceDateSvc) Lookup(ctx context.Context, tx *sql.Tx, m *model.ConferenceDate, id string) (err error) {
 	if pdebug.Enabled {
-		g := pdebug.Marker("service.ConferenceDate.Lookup").BindError(&err)
+		g := pdebug.Marker("service.ConferenceDate.Lookup %s", id).BindError(&err)
 		defer g.End()
 	}
 
@@ -64,13 +66,13 @@ func (v *ConferenceDateSvc) Lookup(tx *db.Tx, m *model.ConferenceDate, id string
 // Create takes in the transaction, the incoming payload, and a reference to
 // a database row. The database row is initialized/populated so that the
 // caller can use it afterwards.
-func (v *ConferenceDateSvc) Create(tx *db.Tx, vdb *db.ConferenceDate, payload *model.CreateConferenceDateRequest) (err error) {
+func (v *ConferenceDateSvc) Create(ctx context.Context, tx *sql.Tx, vdb *db.ConferenceDate, payload *model.CreateConferenceDateRequest) (err error) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("service.ConferenceDate.Create").BindError(&err)
 		defer g.End()
 	}
 
-	if err := v.populateRowForCreate(vdb, payload); err != nil {
+	if err := v.populateRowForCreate(ctx, vdb, payload); err != nil {
 		return errors.Wrap(err, `failed to populate row`)
 	}
 
@@ -81,7 +83,7 @@ func (v *ConferenceDateSvc) Create(tx *db.Tx, vdb *db.ConferenceDate, payload *m
 	return nil
 }
 
-func (v *ConferenceDateSvc) Update(tx *db.Tx, vdb *db.ConferenceDate) (err error) {
+func (v *ConferenceDateSvc) Update(tx *sql.Tx, vdb *db.ConferenceDate) (err error) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("service.ConferenceDate.Update (%s)", vdb.EID).BindError(&err)
 		defer g.End()
@@ -108,7 +110,7 @@ func (v *ConferenceDateSvc) Update(tx *db.Tx, vdb *db.ConferenceDate) (err error
 	return nil
 }
 
-func (v *ConferenceDateSvc) Delete(tx *db.Tx, id string) error {
+func (v *ConferenceDateSvc) Delete(tx *sql.Tx, id string) error {
 	if pdebug.Enabled {
 		g := pdebug.Marker("ConferenceDate.Delete (%s)", id)
 		defer g.End()

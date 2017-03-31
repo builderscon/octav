@@ -129,7 +129,6 @@ func (r AddSessionTypeRequest) collectMarshalData() map[string]interface{} {
 	if r.SubmissionEnd.Valid() {
 		m["submission_end"] = r.SubmissionEnd.Value()
 	}
-	m["user_id"] = r.UserID
 	return m
 }
 
@@ -208,22 +207,12 @@ func (r *AddSessionTypeRequest) Populate(m map[string]interface{}) error {
 		}
 		delete(m, "submission_end")
 	}
-	if jv, ok := m["user_id"]; ok {
-		switch jv.(type) {
-		case string:
-			r.UserID = jv.(string)
-			delete(m, "user_id")
-		default:
-			return errors.Wrap(ErrInvalidJSONFieldType{Field: "user_id"}, "failed to populate fields for AddSessionTypeRequest")
-		}
-	}
 	return nil
 }
 
 func (r DeleteSessionTypeRequest) collectMarshalData() map[string]interface{} {
 	m := make(map[string]interface{})
 	m["id"] = r.ID
-	m["user_id"] = r.UserID
 	return m
 }
 
@@ -261,15 +250,6 @@ func (r *DeleteSessionTypeRequest) Populate(m map[string]interface{}) error {
 			delete(m, "id")
 		default:
 			return errors.Wrap(ErrInvalidJSONFieldType{Field: "id"}, "failed to populate fields for DeleteSessionTypeRequest")
-		}
-	}
-	if jv, ok := m["user_id"]; ok {
-		switch jv.(type) {
-		case string:
-			r.UserID = jv.(string)
-			delete(m, "user_id")
-		default:
-			return errors.Wrap(ErrInvalidJSONFieldType{Field: "user_id"}, "failed to populate fields for DeleteSessionTypeRequest")
 		}
 	}
 	return nil
@@ -368,7 +348,6 @@ func (r UpdateSessionTypeRequest) collectMarshalData() map[string]interface{} {
 	if r.SubmissionEnd.Valid() {
 		m["submission_end"] = r.SubmissionEnd.Value()
 	}
-	m["user_id"] = r.UserID
 	return m
 }
 
@@ -444,15 +423,6 @@ func (r *UpdateSessionTypeRequest) Populate(m map[string]interface{}) error {
 		}
 		delete(m, "submission_end")
 	}
-	if jv, ok := m["user_id"]; ok {
-		switch jv.(type) {
-		case string:
-			r.UserID = jv.(string)
-			delete(m, "user_id")
-		default:
-			return errors.Wrap(ErrInvalidJSONFieldType{Field: "user_id"}, "failed to populate fields for UpdateSessionTypeRequest")
-		}
-	}
 	return nil
 }
 
@@ -512,7 +482,7 @@ func (r *LookupConferenceSeriesRequest) Populate(m map[string]interface{}) error
 
 func (r CreateConferenceSeriesRequest) collectMarshalData() map[string]interface{} {
 	m := make(map[string]interface{})
-	m["user_id"] = r.UserID
+	m["sid"] = r.SessionID
 	m["slug"] = r.Slug
 	m["title"] = r.Title
 	return m
@@ -545,13 +515,13 @@ func (r *CreateConferenceSeriesRequest) UnmarshalJSON(data []byte) error {
 }
 
 func (r *CreateConferenceSeriesRequest) Populate(m map[string]interface{}) error {
-	if jv, ok := m["user_id"]; ok {
+	if jv, ok := m["sid"]; ok {
 		switch jv.(type) {
 		case string:
-			r.UserID = jv.(string)
-			delete(m, "user_id")
+			r.SessionID = jv.(string)
+			delete(m, "sid")
 		default:
-			return errors.Wrap(ErrInvalidJSONFieldType{Field: "user_id"}, "failed to populate fields for CreateConferenceSeriesRequest")
+			return errors.Wrap(ErrInvalidJSONFieldType{Field: "sid"}, "failed to populate fields for CreateConferenceSeriesRequest")
 		}
 	}
 	if jv, ok := m["slug"]; ok {
@@ -641,7 +611,6 @@ func (r *UpdateConferenceSeriesRequest) Populate(m map[string]interface{}) error
 func (r DeleteConferenceSeriesRequest) collectMarshalData() map[string]interface{} {
 	m := make(map[string]interface{})
 	m["id"] = r.ID
-	m["user_id"] = r.UserID
 	return m
 }
 
@@ -679,15 +648,6 @@ func (r *DeleteConferenceSeriesRequest) Populate(m map[string]interface{}) error
 			delete(m, "id")
 		default:
 			return errors.Wrap(ErrInvalidJSONFieldType{Field: "id"}, "failed to populate fields for DeleteConferenceSeriesRequest")
-		}
-	}
-	if jv, ok := m["user_id"]; ok {
-		switch jv.(type) {
-		case string:
-			r.UserID = jv.(string)
-			delete(m, "user_id")
-		default:
-			return errors.Wrap(ErrInvalidJSONFieldType{Field: "user_id"}, "failed to populate fields for DeleteConferenceSeriesRequest")
 		}
 	}
 	return nil
@@ -759,7 +719,6 @@ func (r AddConferenceSeriesAdminRequest) collectMarshalData() map[string]interfa
 	m := make(map[string]interface{})
 	m["series_id"] = r.SeriesID
 	m["admin_id"] = r.AdminID
-	m["user_id"] = r.UserID
 	return m
 }
 
@@ -808,15 +767,6 @@ func (r *AddConferenceSeriesAdminRequest) Populate(m map[string]interface{}) err
 			return errors.Wrap(ErrInvalidJSONFieldType{Field: "admin_id"}, "failed to populate fields for AddConferenceSeriesAdminRequest")
 		}
 	}
-	if jv, ok := m["user_id"]; ok {
-		switch jv.(type) {
-		case string:
-			r.UserID = jv.(string)
-			delete(m, "user_id")
-		default:
-			return errors.Wrap(ErrInvalidJSONFieldType{Field: "user_id"}, "failed to populate fields for AddConferenceSeriesAdminRequest")
-		}
-	}
 	return nil
 }
 
@@ -846,7 +796,6 @@ func (r CreateConferenceRequest) collectMarshalData() map[string]interface{} {
 	if r.Timezone.Valid() {
 		m["timezone"] = r.Timezone.Value()
 	}
-	m["user_id"] = r.UserID
 	return m
 }
 
@@ -946,15 +895,6 @@ func (r *CreateConferenceRequest) Populate(m map[string]interface{}) error {
 		}
 		delete(m, "timezone")
 	}
-	if jv, ok := m["user_id"]; ok {
-		switch jv.(type) {
-		case string:
-			r.UserID = jv.(string)
-			delete(m, "user_id")
-		default:
-			return errors.Wrap(ErrInvalidJSONFieldType{Field: "user_id"}, "failed to populate fields for CreateConferenceRequest")
-		}
-	}
 	if err := ExtractL10NFields(m, &r.LocalizedFields, []string{"title", "cfp_lead_text", "cfp_pre_submit_instructions", "cfp_post_submit_instructions", "contact_information", "description", "sub_title"}); err != nil {
 		return err
 	}
@@ -963,7 +903,7 @@ func (r *CreateConferenceRequest) Populate(m map[string]interface{}) error {
 
 func (r *CreateConferenceRequest) GetPropNames() ([]string, error) {
 	l, _ := r.LocalizedFields.GetPropNames()
-	return append(l, "title", "cfp_lead_text", "cfp_pre_submit_instructions", "cfp_post_submit_instructions", "contact_information", "description", "series_id", "sub_title", "slug", "timezone", "user_id"), nil
+	return append(l, "title", "cfp_lead_text", "cfp_pre_submit_instructions", "cfp_post_submit_instructions", "contact_information", "description", "series_id", "sub_title", "slug", "timezone"), nil
 }
 
 func (r *CreateConferenceRequest) SetPropValue(s string, v interface{}) error {
@@ -997,11 +937,6 @@ func (r *CreateConferenceRequest) SetPropValue(s string, v interface{}) error {
 		}
 	case "timezone":
 		return r.Timezone.Set(v)
-	case "user_id":
-		if jv, ok := v.(string); ok {
-			r.UserID = jv
-			return nil
-		}
 	default:
 		return errors.New("unknown column '" + s + "'")
 	}
@@ -1161,7 +1096,6 @@ func (r UpdateConferenceRequest) collectMarshalData() map[string]interface{} {
 	if r.Timezone.Valid() {
 		m["timezone"] = r.Timezone.Value()
 	}
-	m["user_id"] = r.UserID
 	return m
 }
 
@@ -1285,15 +1219,6 @@ func (r *UpdateConferenceRequest) Populate(m map[string]interface{}) error {
 		}
 		delete(m, "timezone")
 	}
-	if jv, ok := m["user_id"]; ok {
-		switch jv.(type) {
-		case string:
-			r.UserID = jv.(string)
-			delete(m, "user_id")
-		default:
-			return errors.Wrap(ErrInvalidJSONFieldType{Field: "user_id"}, "failed to populate fields for UpdateConferenceRequest")
-		}
-	}
 	if err := ExtractL10NFields(m, &r.LocalizedFields, []string{"title", "description", "cfp_lead_text", "cfp_pre_submit_instructions", "cfp_post_submit_instructions", "contact_information", "sub_title"}); err != nil {
 		return err
 	}
@@ -1302,7 +1227,7 @@ func (r *UpdateConferenceRequest) Populate(m map[string]interface{}) error {
 
 func (r *UpdateConferenceRequest) GetPropNames() ([]string, error) {
 	l, _ := r.LocalizedFields.GetPropNames()
-	return append(l, "id", "title", "description", "cfp_lead_text", "cfp_pre_submit_instructions", "cfp_post_submit_instructions", "contact_information", "redirect_url", "series_id", "slug", "sub_title", "status", "blog_feedback_available", "timetable_available", "timezone", "user_id"), nil
+	return append(l, "id", "title", "description", "cfp_lead_text", "cfp_pre_submit_instructions", "cfp_post_submit_instructions", "contact_information", "redirect_url", "series_id", "slug", "sub_title", "status", "blog_feedback_available", "timetable_available", "timezone"), nil
 }
 
 func (r *UpdateConferenceRequest) SetPropValue(s string, v interface{}) error {
@@ -1340,11 +1265,6 @@ func (r *UpdateConferenceRequest) SetPropValue(s string, v interface{}) error {
 		return r.TimetableAvailable.Set(v)
 	case "timezone":
 		return r.Timezone.Set(v)
-	case "user_id":
-		if jv, ok := v.(string); ok {
-			r.UserID = jv
-			return nil
-		}
 	default:
 		return errors.New("unknown column '" + s + "'")
 	}
@@ -1354,7 +1274,6 @@ func (r *UpdateConferenceRequest) SetPropValue(s string, v interface{}) error {
 func (r ListConferenceDateRequest) collectMarshalData() map[string]interface{} {
 	m := make(map[string]interface{})
 	m["conference_id"] = r.ConferenceID
-	m["user_id"] = r.UserID
 	return m
 }
 
@@ -1394,15 +1313,6 @@ func (r *ListConferenceDateRequest) Populate(m map[string]interface{}) error {
 			return errors.Wrap(ErrInvalidJSONFieldType{Field: "conference_id"}, "failed to populate fields for ListConferenceDateRequest")
 		}
 	}
-	if jv, ok := m["user_id"]; ok {
-		switch jv.(type) {
-		case string:
-			r.UserID = jv.(string)
-			delete(m, "user_id")
-		default:
-			return errors.Wrap(ErrInvalidJSONFieldType{Field: "user_id"}, "failed to populate fields for ListConferenceDateRequest")
-		}
-	}
 	return nil
 }
 
@@ -1410,7 +1320,6 @@ func (r CreateConferenceDateRequest) collectMarshalData() map[string]interface{}
 	m := make(map[string]interface{})
 	m["conference_id"] = r.ConferenceID
 	m["date"] = r.Date
-	m["user_id"] = r.UserID
 	return m
 }
 
@@ -1456,22 +1365,12 @@ func (r *CreateConferenceDateRequest) Populate(m map[string]interface{}) error {
 		}
 		delete(m, "date")
 	}
-	if jv, ok := m["user_id"]; ok {
-		switch jv.(type) {
-		case string:
-			r.UserID = jv.(string)
-			delete(m, "user_id")
-		default:
-			return errors.Wrap(ErrInvalidJSONFieldType{Field: "user_id"}, "failed to populate fields for CreateConferenceDateRequest")
-		}
-	}
 	return nil
 }
 
 func (r ListConferenceAdminRequest) collectMarshalData() map[string]interface{} {
 	m := make(map[string]interface{})
 	m["conference_id"] = r.ConferenceID
-	m["user_id"] = r.UserID
 	if r.Lang.Valid() {
 		m["lang"] = r.Lang.Value()
 	}
@@ -1514,15 +1413,6 @@ func (r *ListConferenceAdminRequest) Populate(m map[string]interface{}) error {
 			return errors.Wrap(ErrInvalidJSONFieldType{Field: "conference_id"}, "failed to populate fields for ListConferenceAdminRequest")
 		}
 	}
-	if jv, ok := m["user_id"]; ok {
-		switch jv.(type) {
-		case string:
-			r.UserID = jv.(string)
-			delete(m, "user_id")
-		default:
-			return errors.Wrap(ErrInvalidJSONFieldType{Field: "user_id"}, "failed to populate fields for ListConferenceAdminRequest")
-		}
-	}
 	if jv, ok := m["lang"]; ok {
 		if err := r.Lang.Set(jv); err != nil {
 			return errors.New("set field Lang failed: " + err.Error())
@@ -1536,7 +1426,6 @@ func (r AddConferenceAdminRequest) collectMarshalData() map[string]interface{} {
 	m := make(map[string]interface{})
 	m["conference_id"] = r.ConferenceID
 	m["admin_id"] = r.AdminID
-	m["user_id"] = r.UserID
 	return m
 }
 
@@ -1585,15 +1474,6 @@ func (r *AddConferenceAdminRequest) Populate(m map[string]interface{}) error {
 			return errors.Wrap(ErrInvalidJSONFieldType{Field: "admin_id"}, "failed to populate fields for AddConferenceAdminRequest")
 		}
 	}
-	if jv, ok := m["user_id"]; ok {
-		switch jv.(type) {
-		case string:
-			r.UserID = jv.(string)
-			delete(m, "user_id")
-		default:
-			return errors.Wrap(ErrInvalidJSONFieldType{Field: "user_id"}, "failed to populate fields for AddConferenceAdminRequest")
-		}
-	}
 	return nil
 }
 
@@ -1601,7 +1481,6 @@ func (r AddConferenceVenueRequest) collectMarshalData() map[string]interface{} {
 	m := make(map[string]interface{})
 	m["conference_id"] = r.ConferenceID
 	m["venue_id"] = r.VenueID
-	m["user_id"] = r.UserID
 	return m
 }
 
@@ -1650,15 +1529,6 @@ func (r *AddConferenceVenueRequest) Populate(m map[string]interface{}) error {
 			return errors.Wrap(ErrInvalidJSONFieldType{Field: "venue_id"}, "failed to populate fields for AddConferenceVenueRequest")
 		}
 	}
-	if jv, ok := m["user_id"]; ok {
-		switch jv.(type) {
-		case string:
-			r.UserID = jv.(string)
-			delete(m, "user_id")
-		default:
-			return errors.Wrap(ErrInvalidJSONFieldType{Field: "user_id"}, "failed to populate fields for AddConferenceVenueRequest")
-		}
-	}
 	return nil
 }
 
@@ -1666,7 +1536,6 @@ func (r DeleteConferenceDateRequest) collectMarshalData() map[string]interface{}
 	m := make(map[string]interface{})
 	m["conference_id"] = r.ConferenceID
 	m["date"] = r.Date
-	m["user_id"] = r.UserID
 	return m
 }
 
@@ -1715,15 +1584,6 @@ func (r *DeleteConferenceDateRequest) Populate(m map[string]interface{}) error {
 			return errors.Wrap(ErrInvalidJSONFieldType{Field: "date"}, "failed to populate fields for DeleteConferenceDateRequest")
 		}
 	}
-	if jv, ok := m["user_id"]; ok {
-		switch jv.(type) {
-		case string:
-			r.UserID = jv.(string)
-			delete(m, "user_id")
-		default:
-			return errors.Wrap(ErrInvalidJSONFieldType{Field: "user_id"}, "failed to populate fields for DeleteConferenceDateRequest")
-		}
-	}
 	return nil
 }
 
@@ -1731,7 +1591,6 @@ func (r DeleteConferenceAdminRequest) collectMarshalData() map[string]interface{
 	m := make(map[string]interface{})
 	m["conference_id"] = r.ConferenceID
 	m["admin_id"] = r.AdminID
-	m["user_id"] = r.UserID
 	return m
 }
 
@@ -1780,15 +1639,6 @@ func (r *DeleteConferenceAdminRequest) Populate(m map[string]interface{}) error 
 			return errors.Wrap(ErrInvalidJSONFieldType{Field: "admin_id"}, "failed to populate fields for DeleteConferenceAdminRequest")
 		}
 	}
-	if jv, ok := m["user_id"]; ok {
-		switch jv.(type) {
-		case string:
-			r.UserID = jv.(string)
-			delete(m, "user_id")
-		default:
-			return errors.Wrap(ErrInvalidJSONFieldType{Field: "user_id"}, "failed to populate fields for DeleteConferenceAdminRequest")
-		}
-	}
 	return nil
 }
 
@@ -1796,7 +1646,6 @@ func (r DeleteConferenceVenueRequest) collectMarshalData() map[string]interface{
 	m := make(map[string]interface{})
 	m["conference_id"] = r.ConferenceID
 	m["venue_id"] = r.VenueID
-	m["user_id"] = r.UserID
 	return m
 }
 
@@ -1845,22 +1694,12 @@ func (r *DeleteConferenceVenueRequest) Populate(m map[string]interface{}) error 
 			return errors.Wrap(ErrInvalidJSONFieldType{Field: "venue_id"}, "failed to populate fields for DeleteConferenceVenueRequest")
 		}
 	}
-	if jv, ok := m["user_id"]; ok {
-		switch jv.(type) {
-		case string:
-			r.UserID = jv.(string)
-			delete(m, "user_id")
-		default:
-			return errors.Wrap(ErrInvalidJSONFieldType{Field: "user_id"}, "failed to populate fields for DeleteConferenceVenueRequest")
-		}
-	}
 	return nil
 }
 
 func (r DeleteConferenceRequest) collectMarshalData() map[string]interface{} {
 	m := make(map[string]interface{})
 	m["id"] = r.ID
-	m["user_id"] = r.UserID
 	return m
 }
 
@@ -1898,15 +1737,6 @@ func (r *DeleteConferenceRequest) Populate(m map[string]interface{}) error {
 			delete(m, "id")
 		default:
 			return errors.Wrap(ErrInvalidJSONFieldType{Field: "id"}, "failed to populate fields for DeleteConferenceRequest")
-		}
-	}
-	if jv, ok := m["user_id"]; ok {
-		switch jv.(type) {
-		case string:
-			r.UserID = jv.(string)
-			delete(m, "user_id")
-		default:
-			return errors.Wrap(ErrInvalidJSONFieldType{Field: "user_id"}, "failed to populate fields for DeleteConferenceRequest")
 		}
 	}
 	return nil
@@ -2151,7 +1981,6 @@ func (r CreateRoomRequest) collectMarshalData() map[string]interface{} {
 	if r.Capacity.Valid() {
 		m["capacity"] = r.Capacity.Value()
 	}
-	m["user_id"] = r.UserID
 	return m
 }
 
@@ -2200,15 +2029,6 @@ func (r *CreateRoomRequest) Populate(m map[string]interface{}) error {
 		}
 		delete(m, "capacity")
 	}
-	if jv, ok := m["user_id"]; ok {
-		switch jv.(type) {
-		case string:
-			r.UserID = jv.(string)
-			delete(m, "user_id")
-		default:
-			return errors.Wrap(ErrInvalidJSONFieldType{Field: "user_id"}, "failed to populate fields for CreateRoomRequest")
-		}
-	}
 	if err := ExtractL10NFields(m, &r.LocalizedFields, []string{"name"}); err != nil {
 		return err
 	}
@@ -2217,7 +2037,7 @@ func (r *CreateRoomRequest) Populate(m map[string]interface{}) error {
 
 func (r *CreateRoomRequest) GetPropNames() ([]string, error) {
 	l, _ := r.LocalizedFields.GetPropNames()
-	return append(l, "venue_id", "name", "capacity", "user_id"), nil
+	return append(l, "venue_id", "name", "capacity"), nil
 }
 
 func (r *CreateRoomRequest) SetPropValue(s string, v interface{}) error {
@@ -2228,11 +2048,6 @@ func (r *CreateRoomRequest) SetPropValue(s string, v interface{}) error {
 		return r.Name.Set(v)
 	case "capacity":
 		return r.Capacity.Set(v)
-	case "user_id":
-		if jv, ok := v.(string); ok {
-			r.UserID = jv
-			return nil
-		}
 	default:
 		return errors.New("unknown column '" + s + "'")
 	}
@@ -2305,7 +2120,6 @@ func (r UpdateRoomRequest) collectMarshalData() map[string]interface{} {
 	if r.Capacity.Valid() {
 		m["capacity"] = r.Capacity.Value()
 	}
-	m["user_id"] = r.UserID
 	return m
 }
 
@@ -2363,15 +2177,6 @@ func (r *UpdateRoomRequest) Populate(m map[string]interface{}) error {
 		}
 		delete(m, "capacity")
 	}
-	if jv, ok := m["user_id"]; ok {
-		switch jv.(type) {
-		case string:
-			r.UserID = jv.(string)
-			delete(m, "user_id")
-		default:
-			return errors.Wrap(ErrInvalidJSONFieldType{Field: "user_id"}, "failed to populate fields for UpdateRoomRequest")
-		}
-	}
 	if err := ExtractL10NFields(m, &r.LocalizedFields, []string{"name"}); err != nil {
 		return err
 	}
@@ -2380,7 +2185,7 @@ func (r *UpdateRoomRequest) Populate(m map[string]interface{}) error {
 
 func (r *UpdateRoomRequest) GetPropNames() ([]string, error) {
 	l, _ := r.LocalizedFields.GetPropNames()
-	return append(l, "id", "venue_id", "name", "capacity", "user_id"), nil
+	return append(l, "id", "venue_id", "name", "capacity"), nil
 }
 
 func (r *UpdateRoomRequest) SetPropValue(s string, v interface{}) error {
@@ -2396,11 +2201,6 @@ func (r *UpdateRoomRequest) SetPropValue(s string, v interface{}) error {
 		return r.Name.Set(v)
 	case "capacity":
 		return r.Capacity.Set(v)
-	case "user_id":
-		if jv, ok := v.(string); ok {
-			r.UserID = jv
-			return nil
-		}
 	default:
 		return errors.New("unknown column '" + s + "'")
 	}
@@ -2410,7 +2210,6 @@ func (r *UpdateRoomRequest) SetPropValue(s string, v interface{}) error {
 func (r DeleteRoomRequest) collectMarshalData() map[string]interface{} {
 	m := make(map[string]interface{})
 	m["id"] = r.ID
-	m["user_id"] = r.UserID
 	return m
 }
 
@@ -2448,15 +2247,6 @@ func (r *DeleteRoomRequest) Populate(m map[string]interface{}) error {
 			delete(m, "id")
 		default:
 			return errors.Wrap(ErrInvalidJSONFieldType{Field: "id"}, "failed to populate fields for DeleteRoomRequest")
-		}
-	}
-	if jv, ok := m["user_id"]; ok {
-		switch jv.(type) {
-		case string:
-			r.UserID = jv.(string)
-			delete(m, "user_id")
-		default:
-			return errors.Wrap(ErrInvalidJSONFieldType{Field: "user_id"}, "failed to populate fields for DeleteRoomRequest")
 		}
 	}
 	return nil
@@ -2583,7 +2373,6 @@ func (r CreateSessionRequest) collectMarshalData() map[string]interface{} {
 	if r.MaterialsRelease.Valid() {
 		m["materials_release"] = r.MaterialsRelease.Value()
 	}
-	m["user_id"] = r.UserID
 	return m
 }
 
@@ -2722,15 +2511,6 @@ func (r *CreateSessionRequest) Populate(m map[string]interface{}) error {
 		}
 		delete(m, "materials_release")
 	}
-	if jv, ok := m["user_id"]; ok {
-		switch jv.(type) {
-		case string:
-			r.UserID = jv.(string)
-			delete(m, "user_id")
-		default:
-			return errors.Wrap(ErrInvalidJSONFieldType{Field: "user_id"}, "failed to populate fields for CreateSessionRequest")
-		}
-	}
 	if err := ExtractL10NFields(m, &r.LocalizedFields, []string{"title", "abstract"}); err != nil {
 		return err
 	}
@@ -2739,7 +2519,7 @@ func (r *CreateSessionRequest) Populate(m map[string]interface{}) error {
 
 func (r *CreateSessionRequest) GetPropNames() ([]string, error) {
 	l, _ := r.LocalizedFields.GetPropNames()
-	return append(l, "conference_id", "speaker_id", "session_type_id", "title", "abstract", "memo", "material_level", "tags", "category", "spoken_language", "slide_language", "slide_subtitles", "slide_url", "video_url", "photo_release", "recording_release", "materials_release", "user_id"), nil
+	return append(l, "conference_id", "speaker_id", "session_type_id", "title", "abstract", "memo", "material_level", "tags", "category", "spoken_language", "slide_language", "slide_subtitles", "slide_url", "video_url", "photo_release", "recording_release", "materials_release"), nil
 }
 
 func (r *CreateSessionRequest) SetPropValue(s string, v interface{}) error {
@@ -2784,11 +2564,6 @@ func (r *CreateSessionRequest) SetPropValue(s string, v interface{}) error {
 		return r.RecordingRelease.Set(v)
 	case "materials_release":
 		return r.MaterialsRelease.Set(v)
-	case "user_id":
-		if jv, ok := v.(string); ok {
-			r.UserID = jv
-			return nil
-		}
 	default:
 		return errors.New("unknown column '" + s + "'")
 	}
@@ -2927,7 +2702,6 @@ func (r UpdateSessionRequest) collectMarshalData() map[string]interface{} {
 	if r.Confirmed.Valid() {
 		m["confirmed"] = r.Confirmed.Value()
 	}
-	m["user_id"] = r.UserID
 	return m
 }
 
@@ -3117,15 +2891,6 @@ func (r *UpdateSessionRequest) Populate(m map[string]interface{}) error {
 		}
 		delete(m, "confirmed")
 	}
-	if jv, ok := m["user_id"]; ok {
-		switch jv.(type) {
-		case string:
-			r.UserID = jv.(string)
-			delete(m, "user_id")
-		default:
-			return errors.Wrap(ErrInvalidJSONFieldType{Field: "user_id"}, "failed to populate fields for UpdateSessionRequest")
-		}
-	}
 	if err := ExtractL10NFields(m, &r.LocalizedFields, []string{"title", "abstract"}); err != nil {
 		return err
 	}
@@ -3134,7 +2899,7 @@ func (r *UpdateSessionRequest) Populate(m map[string]interface{}) error {
 
 func (r *UpdateSessionRequest) GetPropNames() ([]string, error) {
 	l, _ := r.LocalizedFields.GetPropNames()
-	return append(l, "id", "conference_id", "speaker_id", "session_type_id", "room_id", "title", "abstract", "memo", "duration", "material_level", "tags", "category", "spoken_language", "slide_language", "slide_subtitles", "slide_url", "video_url", "photo_release", "recording_release", "materials_release", "sort_order", "has_interpretation", "selection_result_sent", "status", "starts_on", "confirmed", "user_id"), nil
+	return append(l, "id", "conference_id", "speaker_id", "session_type_id", "room_id", "title", "abstract", "memo", "duration", "material_level", "tags", "category", "spoken_language", "slide_language", "slide_subtitles", "slide_url", "video_url", "photo_release", "recording_release", "materials_release", "sort_order", "has_interpretation", "selection_result_sent", "status", "starts_on", "confirmed"), nil
 }
 
 func (r *UpdateSessionRequest) SetPropValue(s string, v interface{}) error {
@@ -3194,11 +2959,6 @@ func (r *UpdateSessionRequest) SetPropValue(s string, v interface{}) error {
 		return r.StartsOn.Set(v)
 	case "confirmed":
 		return r.Confirmed.Set(v)
-	case "user_id":
-		if jv, ok := v.(string); ok {
-			r.UserID = jv
-			return nil
-		}
 	default:
 		return errors.New("unknown column '" + s + "'")
 	}
@@ -3208,7 +2968,6 @@ func (r *UpdateSessionRequest) SetPropValue(s string, v interface{}) error {
 func (r DeleteSessionRequest) collectMarshalData() map[string]interface{} {
 	m := make(map[string]interface{})
 	m["id"] = r.ID
-	m["user_id"] = r.UserID
 	return m
 }
 
@@ -3246,15 +3005,6 @@ func (r *DeleteSessionRequest) Populate(m map[string]interface{}) error {
 			delete(m, "id")
 		default:
 			return errors.Wrap(ErrInvalidJSONFieldType{Field: "id"}, "failed to populate fields for DeleteSessionRequest")
-		}
-	}
-	if jv, ok := m["user_id"]; ok {
-		switch jv.(type) {
-		case string:
-			r.UserID = jv.(string)
-			delete(m, "user_id")
-		default:
-			return errors.Wrap(ErrInvalidJSONFieldType{Field: "user_id"}, "failed to populate fields for DeleteSessionRequest")
 		}
 	}
 	return nil
@@ -3441,7 +3191,6 @@ func (r UpdateUserRequest) collectMarshalData() map[string]interface{} {
 	if r.TshirtSize.Valid() {
 		m["tshirt_size"] = r.TshirtSize.Value()
 	}
-	m["user_id"] = r.UserID
 	return m
 }
 
@@ -3535,15 +3284,6 @@ func (r *UpdateUserRequest) Populate(m map[string]interface{}) error {
 		}
 		delete(m, "tshirt_size")
 	}
-	if jv, ok := m["user_id"]; ok {
-		switch jv.(type) {
-		case string:
-			r.UserID = jv.(string)
-			delete(m, "user_id")
-		default:
-			return errors.Wrap(ErrInvalidJSONFieldType{Field: "user_id"}, "failed to populate fields for UpdateUserRequest")
-		}
-	}
 	if err := ExtractL10NFields(m, &r.LocalizedFields, []string{"first_name", "last_name"}); err != nil {
 		return err
 	}
@@ -3552,7 +3292,7 @@ func (r *UpdateUserRequest) Populate(m map[string]interface{}) error {
 
 func (r *UpdateUserRequest) GetPropNames() ([]string, error) {
 	l, _ := r.LocalizedFields.GetPropNames()
-	return append(l, "id", "first_name", "last_name", "nickname", "lang", "email", "auth_via", "auth_user_id", "avatar_url", "tshirt_size", "user_id"), nil
+	return append(l, "id", "first_name", "last_name", "nickname", "lang", "email", "auth_via", "auth_user_id", "avatar_url", "tshirt_size"), nil
 }
 
 func (r *UpdateUserRequest) SetPropValue(s string, v interface{}) error {
@@ -3580,11 +3320,6 @@ func (r *UpdateUserRequest) SetPropValue(s string, v interface{}) error {
 		return r.AvatarURL.Set(v)
 	case "tshirt_size":
 		return r.TshirtSize.Set(v)
-	case "user_id":
-		if jv, ok := v.(string); ok {
-			r.UserID = jv
-			return nil
-		}
 	default:
 		return errors.New("unknown column '" + s + "'")
 	}
@@ -3712,7 +3447,6 @@ func (r *LookupUserByAuthUserIDRequest) Populate(m map[string]interface{}) error
 func (r DeleteUserRequest) collectMarshalData() map[string]interface{} {
 	m := make(map[string]interface{})
 	m["id"] = r.ID
-	m["user_id"] = r.UserID
 	return m
 }
 
@@ -3750,15 +3484,6 @@ func (r *DeleteUserRequest) Populate(m map[string]interface{}) error {
 			delete(m, "id")
 		default:
 			return errors.Wrap(ErrInvalidJSONFieldType{Field: "id"}, "failed to populate fields for DeleteUserRequest")
-		}
-	}
-	if jv, ok := m["user_id"]; ok {
-		switch jv.(type) {
-		case string:
-			r.UserID = jv.(string)
-			delete(m, "user_id")
-		default:
-			return errors.Wrap(ErrInvalidJSONFieldType{Field: "user_id"}, "failed to populate fields for DeleteUserRequest")
 		}
 	}
 	return nil
@@ -3849,7 +3574,6 @@ func (r CreateVenueRequest) collectMarshalData() map[string]interface{} {
 	if r.Latitude.Valid() {
 		m["latitude"] = r.Latitude.Value()
 	}
-	m["user_id"] = r.UserID
 	return m
 }
 
@@ -3904,15 +3628,6 @@ func (r *CreateVenueRequest) Populate(m map[string]interface{}) error {
 		}
 		delete(m, "latitude")
 	}
-	if jv, ok := m["user_id"]; ok {
-		switch jv.(type) {
-		case string:
-			r.UserID = jv.(string)
-			delete(m, "user_id")
-		default:
-			return errors.Wrap(ErrInvalidJSONFieldType{Field: "user_id"}, "failed to populate fields for CreateVenueRequest")
-		}
-	}
 	if err := ExtractL10NFields(m, &r.LocalizedFields, []string{"name", "address"}); err != nil {
 		return err
 	}
@@ -3921,7 +3636,7 @@ func (r *CreateVenueRequest) Populate(m map[string]interface{}) error {
 
 func (r *CreateVenueRequest) GetPropNames() ([]string, error) {
 	l, _ := r.LocalizedFields.GetPropNames()
-	return append(l, "name", "address", "longitude", "latitude", "user_id"), nil
+	return append(l, "name", "address", "longitude", "latitude"), nil
 }
 
 func (r *CreateVenueRequest) SetPropValue(s string, v interface{}) error {
@@ -3934,11 +3649,6 @@ func (r *CreateVenueRequest) SetPropValue(s string, v interface{}) error {
 		return r.Longitude.Set(v)
 	case "latitude":
 		return r.Latitude.Set(v)
-	case "user_id":
-		if jv, ok := v.(string); ok {
-			r.UserID = jv
-			return nil
-		}
 	default:
 		return errors.New("unknown column '" + s + "'")
 	}
@@ -3960,7 +3670,6 @@ func (r UpdateVenueRequest) collectMarshalData() map[string]interface{} {
 	if r.Latitude.Valid() {
 		m["latitude"] = r.Latitude.Value()
 	}
-	m["user_id"] = r.UserID
 	return m
 }
 
@@ -4024,15 +3733,6 @@ func (r *UpdateVenueRequest) Populate(m map[string]interface{}) error {
 		}
 		delete(m, "latitude")
 	}
-	if jv, ok := m["user_id"]; ok {
-		switch jv.(type) {
-		case string:
-			r.UserID = jv.(string)
-			delete(m, "user_id")
-		default:
-			return errors.Wrap(ErrInvalidJSONFieldType{Field: "user_id"}, "failed to populate fields for UpdateVenueRequest")
-		}
-	}
 	if err := ExtractL10NFields(m, &r.LocalizedFields, []string{"name", "address"}); err != nil {
 		return err
 	}
@@ -4041,7 +3741,7 @@ func (r *UpdateVenueRequest) Populate(m map[string]interface{}) error {
 
 func (r *UpdateVenueRequest) GetPropNames() ([]string, error) {
 	l, _ := r.LocalizedFields.GetPropNames()
-	return append(l, "id", "name", "address", "longitude", "latitude", "user_id"), nil
+	return append(l, "id", "name", "address", "longitude", "latitude"), nil
 }
 
 func (r *UpdateVenueRequest) SetPropValue(s string, v interface{}) error {
@@ -4059,11 +3759,6 @@ func (r *UpdateVenueRequest) SetPropValue(s string, v interface{}) error {
 		return r.Longitude.Set(v)
 	case "latitude":
 		return r.Latitude.Set(v)
-	case "user_id":
-		if jv, ok := v.(string); ok {
-			r.UserID = jv
-			return nil
-		}
 	default:
 		return errors.New("unknown column '" + s + "'")
 	}
@@ -4073,7 +3768,6 @@ func (r *UpdateVenueRequest) SetPropValue(s string, v interface{}) error {
 func (r DeleteVenueRequest) collectMarshalData() map[string]interface{} {
 	m := make(map[string]interface{})
 	m["id"] = r.ID
-	m["user_id"] = r.UserID
 	return m
 }
 
@@ -4111,15 +3805,6 @@ func (r *DeleteVenueRequest) Populate(m map[string]interface{}) error {
 			delete(m, "id")
 		default:
 			return errors.Wrap(ErrInvalidJSONFieldType{Field: "id"}, "failed to populate fields for DeleteVenueRequest")
-		}
-	}
-	if jv, ok := m["user_id"]; ok {
-		switch jv.(type) {
-		case string:
-			r.UserID = jv.(string)
-			delete(m, "user_id")
-		default:
-			return errors.Wrap(ErrInvalidJSONFieldType{Field: "user_id"}, "failed to populate fields for DeleteVenueRequest")
 		}
 	}
 	return nil
@@ -4407,7 +4092,6 @@ func (r *LookupQuestionRequest) Populate(m map[string]interface{}) error {
 func (r CreateQuestionRequest) collectMarshalData() map[string]interface{} {
 	m := make(map[string]interface{})
 	m["session_id"] = r.SessionID
-	m["user_id"] = r.UserID
 	m["body"] = r.Body
 	return m
 }
@@ -4448,15 +4132,6 @@ func (r *CreateQuestionRequest) Populate(m map[string]interface{}) error {
 			return errors.Wrap(ErrInvalidJSONFieldType{Field: "session_id"}, "failed to populate fields for CreateQuestionRequest")
 		}
 	}
-	if jv, ok := m["user_id"]; ok {
-		switch jv.(type) {
-		case string:
-			r.UserID = jv.(string)
-			delete(m, "user_id")
-		default:
-			return errors.Wrap(ErrInvalidJSONFieldType{Field: "user_id"}, "failed to populate fields for CreateQuestionRequest")
-		}
-	}
 	if jv, ok := m["body"]; ok {
 		switch jv.(type) {
 		case string:
@@ -4474,9 +4149,6 @@ func (r UpdateQuestionRequest) collectMarshalData() map[string]interface{} {
 	m["id"] = r.ID
 	if r.SessionID.Valid() {
 		m["session_id"] = r.SessionID.Value()
-	}
-	if r.UserID.Valid() {
-		m["user_id"] = r.UserID.Value()
 	}
 	if r.Body.Valid() {
 		m["body"] = r.Body.Value()
@@ -4525,12 +4197,6 @@ func (r *UpdateQuestionRequest) Populate(m map[string]interface{}) error {
 			return errors.New("set field SessionID failed: " + err.Error())
 		}
 		delete(m, "session_id")
-	}
-	if jv, ok := m["user_id"]; ok {
-		if err := r.UserID.Set(jv); err != nil {
-			return errors.New("set field UserID failed: " + err.Error())
-		}
-		delete(m, "user_id")
 	}
 	if jv, ok := m["body"]; ok {
 		if err := r.Body.Set(jv); err != nil {
@@ -4650,9 +4316,6 @@ func (r *ListQuestionRequest) Populate(m map[string]interface{}) error {
 
 func (r CreateSessionSurveyResponseRequest) collectMarshalData() map[string]interface{} {
 	m := make(map[string]interface{})
-	if r.UserID.Valid() {
-		m["user_id"] = r.UserID.Value()
-	}
 	if r.SessionID.Valid() {
 		m["session_id"] = r.SessionID.Value()
 	}
@@ -4696,12 +4359,6 @@ func (r *CreateSessionSurveyResponseRequest) UnmarshalJSON(data []byte) error {
 }
 
 func (r *CreateSessionSurveyResponseRequest) Populate(m map[string]interface{}) error {
-	if jv, ok := m["user_id"]; ok {
-		if err := r.UserID.Set(jv); err != nil {
-			return errors.New("set field UserID failed: " + err.Error())
-		}
-		delete(m, "user_id")
-	}
 	if jv, ok := m["session_id"]; ok {
 		if err := r.SessionID.Set(jv); err != nil {
 			return errors.New("set field SessionID failed: " + err.Error())
@@ -5061,7 +4718,6 @@ func (r AddFeaturedSpeakerRequest) collectMarshalData() map[string]interface{} {
 	}
 	m["display_name"] = r.DisplayName
 	m["description"] = r.Description
-	m["user_id"] = r.UserID
 	return m
 }
 
@@ -5131,15 +4787,6 @@ func (r *AddFeaturedSpeakerRequest) Populate(m map[string]interface{}) error {
 			return errors.Wrap(ErrInvalidJSONFieldType{Field: "description"}, "failed to populate fields for AddFeaturedSpeakerRequest")
 		}
 	}
-	if jv, ok := m["user_id"]; ok {
-		switch jv.(type) {
-		case string:
-			r.UserID = jv.(string)
-			delete(m, "user_id")
-		default:
-			return errors.Wrap(ErrInvalidJSONFieldType{Field: "user_id"}, "failed to populate fields for AddFeaturedSpeakerRequest")
-		}
-	}
 	if err := ExtractL10NFields(m, &r.LocalizedFields, []string{"display_name", "description"}); err != nil {
 		return err
 	}
@@ -5148,7 +4795,7 @@ func (r *AddFeaturedSpeakerRequest) Populate(m map[string]interface{}) error {
 
 func (r *AddFeaturedSpeakerRequest) GetPropNames() ([]string, error) {
 	l, _ := r.LocalizedFields.GetPropNames()
-	return append(l, "conference_id", "speaker_id", "avatar_url", "display_name", "description", "user_id"), nil
+	return append(l, "conference_id", "speaker_id", "avatar_url", "display_name", "description"), nil
 }
 
 func (r *AddFeaturedSpeakerRequest) SetPropValue(s string, v interface{}) error {
@@ -5172,11 +4819,6 @@ func (r *AddFeaturedSpeakerRequest) SetPropValue(s string, v interface{}) error 
 			r.Description = jv
 			return nil
 		}
-	case "user_id":
-		if jv, ok := v.(string); ok {
-			r.UserID = jv
-			return nil
-		}
 	default:
 		return errors.New("unknown column '" + s + "'")
 	}
@@ -5198,7 +4840,6 @@ func (r UpdateFeaturedSpeakerRequest) collectMarshalData() map[string]interface{
 	if r.Description.Valid() {
 		m["description"] = r.Description.Value()
 	}
-	m["user_id"] = r.UserID
 	return m
 }
 
@@ -5262,15 +4903,6 @@ func (r *UpdateFeaturedSpeakerRequest) Populate(m map[string]interface{}) error 
 		}
 		delete(m, "description")
 	}
-	if jv, ok := m["user_id"]; ok {
-		switch jv.(type) {
-		case string:
-			r.UserID = jv.(string)
-			delete(m, "user_id")
-		default:
-			return errors.Wrap(ErrInvalidJSONFieldType{Field: "user_id"}, "failed to populate fields for UpdateFeaturedSpeakerRequest")
-		}
-	}
 	if err := ExtractL10NFields(m, &r.LocalizedFields, []string{"display_name", "description"}); err != nil {
 		return err
 	}
@@ -5279,7 +4911,7 @@ func (r *UpdateFeaturedSpeakerRequest) Populate(m map[string]interface{}) error 
 
 func (r *UpdateFeaturedSpeakerRequest) GetPropNames() ([]string, error) {
 	l, _ := r.LocalizedFields.GetPropNames()
-	return append(l, "id", "speaker_id", "avatar_url", "display_name", "description", "user_id"), nil
+	return append(l, "id", "speaker_id", "avatar_url", "display_name", "description"), nil
 }
 
 func (r *UpdateFeaturedSpeakerRequest) SetPropValue(s string, v interface{}) error {
@@ -5297,11 +4929,6 @@ func (r *UpdateFeaturedSpeakerRequest) SetPropValue(s string, v interface{}) err
 		return r.DisplayName.Set(v)
 	case "description":
 		return r.Description.Set(v)
-	case "user_id":
-		if jv, ok := v.(string); ok {
-			r.UserID = jv
-			return nil
-		}
 	default:
 		return errors.New("unknown column '" + s + "'")
 	}
@@ -5311,7 +4938,6 @@ func (r *UpdateFeaturedSpeakerRequest) SetPropValue(s string, v interface{}) err
 func (r DeleteFeaturedSpeakerRequest) collectMarshalData() map[string]interface{} {
 	m := make(map[string]interface{})
 	m["id"] = r.ID
-	m["user_id"] = r.UserID
 	return m
 }
 
@@ -5349,15 +4975,6 @@ func (r *DeleteFeaturedSpeakerRequest) Populate(m map[string]interface{}) error 
 			delete(m, "id")
 		default:
 			return errors.Wrap(ErrInvalidJSONFieldType{Field: "id"}, "failed to populate fields for DeleteFeaturedSpeakerRequest")
-		}
-	}
-	if jv, ok := m["user_id"]; ok {
-		switch jv.(type) {
-		case string:
-			r.UserID = jv.(string)
-			delete(m, "user_id")
-		default:
-			return errors.Wrap(ErrInvalidJSONFieldType{Field: "user_id"}, "failed to populate fields for DeleteFeaturedSpeakerRequest")
 		}
 	}
 	return nil
@@ -5508,7 +5125,6 @@ func (r AddSponsorRequest) collectMarshalData() map[string]interface{} {
 	}
 	m["group_name"] = r.GroupName
 	m["sort_order"] = r.SortOrder
-	m["user_id"] = r.UserID
 	return m
 }
 
@@ -5590,15 +5206,6 @@ func (r *AddSponsorRequest) Populate(m map[string]interface{}) error {
 			return errors.Wrap(ErrInvalidJSONFieldType{Field: "sort_order"}, "failed to populate fields for AddSponsorRequest")
 		}
 	}
-	if jv, ok := m["user_id"]; ok {
-		switch jv.(type) {
-		case string:
-			r.UserID = jv.(string)
-			delete(m, "user_id")
-		default:
-			return errors.Wrap(ErrInvalidJSONFieldType{Field: "user_id"}, "failed to populate fields for AddSponsorRequest")
-		}
-	}
 	if err := ExtractL10NFields(m, &r.LocalizedFields, []string{"name"}); err != nil {
 		return err
 	}
@@ -5607,7 +5214,7 @@ func (r *AddSponsorRequest) Populate(m map[string]interface{}) error {
 
 func (r *AddSponsorRequest) GetPropNames() ([]string, error) {
 	l, _ := r.LocalizedFields.GetPropNames()
-	return append(l, "conference_id", "name", "url", "logo_url", "group_name", "sort_order", "user_id"), nil
+	return append(l, "conference_id", "name", "url", "logo_url", "group_name", "sort_order"), nil
 }
 
 func (r *AddSponsorRequest) SetPropValue(s string, v interface{}) error {
@@ -5639,11 +5246,6 @@ func (r *AddSponsorRequest) SetPropValue(s string, v interface{}) error {
 			r.SortOrder = jv
 			return nil
 		}
-	case "user_id":
-		if jv, ok := v.(string); ok {
-			r.UserID = jv
-			return nil
-		}
 	default:
 		return errors.New("unknown column '" + s + "'")
 	}
@@ -5665,7 +5267,6 @@ func (r UpdateSponsorRequest) collectMarshalData() map[string]interface{} {
 	if r.SortOrder.Valid() {
 		m["sort_order"] = r.SortOrder.Value()
 	}
-	m["user_id"] = r.UserID
 	return m
 }
 
@@ -5729,15 +5330,6 @@ func (r *UpdateSponsorRequest) Populate(m map[string]interface{}) error {
 		}
 		delete(m, "sort_order")
 	}
-	if jv, ok := m["user_id"]; ok {
-		switch jv.(type) {
-		case string:
-			r.UserID = jv.(string)
-			delete(m, "user_id")
-		default:
-			return errors.Wrap(ErrInvalidJSONFieldType{Field: "user_id"}, "failed to populate fields for UpdateSponsorRequest")
-		}
-	}
 	if err := ExtractL10NFields(m, &r.LocalizedFields, []string{"name"}); err != nil {
 		return err
 	}
@@ -5746,7 +5338,7 @@ func (r *UpdateSponsorRequest) Populate(m map[string]interface{}) error {
 
 func (r *UpdateSponsorRequest) GetPropNames() ([]string, error) {
 	l, _ := r.LocalizedFields.GetPropNames()
-	return append(l, "id", "name", "url", "group_name", "sort_order", "user_id"), nil
+	return append(l, "id", "name", "url", "group_name", "sort_order"), nil
 }
 
 func (r *UpdateSponsorRequest) SetPropValue(s string, v interface{}) error {
@@ -5764,11 +5356,6 @@ func (r *UpdateSponsorRequest) SetPropValue(s string, v interface{}) error {
 		return r.GroupName.Set(v)
 	case "sort_order":
 		return r.SortOrder.Set(v)
-	case "user_id":
-		if jv, ok := v.(string); ok {
-			r.UserID = jv
-			return nil
-		}
 	default:
 		return errors.New("unknown column '" + s + "'")
 	}
@@ -5778,7 +5365,6 @@ func (r *UpdateSponsorRequest) SetPropValue(s string, v interface{}) error {
 func (r DeleteSponsorRequest) collectMarshalData() map[string]interface{} {
 	m := make(map[string]interface{})
 	m["id"] = r.ID
-	m["user_id"] = r.UserID
 	return m
 }
 
@@ -5816,15 +5402,6 @@ func (r *DeleteSponsorRequest) Populate(m map[string]interface{}) error {
 			delete(m, "id")
 		default:
 			return errors.Wrap(ErrInvalidJSONFieldType{Field: "id"}, "failed to populate fields for DeleteSponsorRequest")
-		}
-	}
-	if jv, ok := m["user_id"]; ok {
-		switch jv.(type) {
-		case string:
-			r.UserID = jv.(string)
-			delete(m, "user_id")
-		default:
-			return errors.Wrap(ErrInvalidJSONFieldType{Field: "user_id"}, "failed to populate fields for DeleteSponsorRequest")
 		}
 	}
 	return nil
@@ -5933,7 +5510,6 @@ func (r *ListConferencesByOrganizerRequest) Populate(m map[string]interface{}) e
 func (r CreateTemporaryEmailRequest) collectMarshalData() map[string]interface{} {
 	m := make(map[string]interface{})
 	m["target_id"] = r.TargetID
-	m["user_id"] = r.UserID
 	m["email"] = r.Email
 	if r.Lang.Valid() {
 		m["lang"] = r.Lang.Value()
@@ -5975,15 +5551,6 @@ func (r *CreateTemporaryEmailRequest) Populate(m map[string]interface{}) error {
 			delete(m, "target_id")
 		default:
 			return errors.Wrap(ErrInvalidJSONFieldType{Field: "target_id"}, "failed to populate fields for CreateTemporaryEmailRequest")
-		}
-	}
-	if jv, ok := m["user_id"]; ok {
-		switch jv.(type) {
-		case string:
-			r.UserID = jv.(string)
-			delete(m, "user_id")
-		default:
-			return errors.Wrap(ErrInvalidJSONFieldType{Field: "user_id"}, "failed to populate fields for CreateTemporaryEmailRequest")
 		}
 	}
 	if jv, ok := m["email"]; ok {
@@ -6052,7 +5619,6 @@ func (r *CreateTemporaryEmailResponse) Populate(m map[string]interface{}) error 
 func (r ConfirmTemporaryEmailRequest) collectMarshalData() map[string]interface{} {
 	m := make(map[string]interface{})
 	m["target_id"] = r.TargetID
-	m["user_id"] = r.UserID
 	m["confirmation_key"] = r.ConfirmationKey
 	return m
 }
@@ -6093,15 +5659,6 @@ func (r *ConfirmTemporaryEmailRequest) Populate(m map[string]interface{}) error 
 			return errors.Wrap(ErrInvalidJSONFieldType{Field: "target_id"}, "failed to populate fields for ConfirmTemporaryEmailRequest")
 		}
 	}
-	if jv, ok := m["user_id"]; ok {
-		switch jv.(type) {
-		case string:
-			r.UserID = jv.(string)
-			delete(m, "user_id")
-		default:
-			return errors.Wrap(ErrInvalidJSONFieldType{Field: "user_id"}, "failed to populate fields for ConfirmTemporaryEmailRequest")
-		}
-	}
 	if jv, ok := m["confirmation_key"]; ok {
 		switch jv.(type) {
 		case string:
@@ -6114,10 +5671,54 @@ func (r *ConfirmTemporaryEmailRequest) Populate(m map[string]interface{}) error 
 	return nil
 }
 
+func (r ListConferenceCredentialRequest) collectMarshalData() map[string]interface{} {
+	m := make(map[string]interface{})
+	m["conference_id"] = r.ConferenceID
+	return m
+}
+
+func (r ListConferenceCredentialRequest) MarshalJSON() ([]byte, error) {
+	m := r.collectMarshalData()
+	buf, err := json.Marshal(m)
+	if err != nil {
+		return nil, err
+	}
+	return buf, nil
+}
+
+func (r ListConferenceCredentialRequest) MarshalURL() ([]byte, error) {
+	m := r.collectMarshalData()
+	buf, err := urlenc.Marshal(m)
+	if err != nil {
+		return nil, err
+	}
+	return buf, nil
+}
+
+func (r *ListConferenceCredentialRequest) UnmarshalJSON(data []byte) error {
+	m := make(map[string]interface{})
+	if err := json.Unmarshal(data, &m); err != nil {
+		return err
+	}
+	return r.Populate(m)
+}
+
+func (r *ListConferenceCredentialRequest) Populate(m map[string]interface{}) error {
+	if jv, ok := m["conference_id"]; ok {
+		switch jv.(type) {
+		case string:
+			r.ConferenceID = jv.(string)
+			delete(m, "conference_id")
+		default:
+			return errors.Wrap(ErrInvalidJSONFieldType{Field: "conference_id"}, "failed to populate fields for ListConferenceCredentialRequest")
+		}
+	}
+	return nil
+}
+
 func (r AddConferenceCredentialRequest) collectMarshalData() map[string]interface{} {
 	m := make(map[string]interface{})
 	m["conference_id"] = r.ConferenceID
-	m["user_id"] = r.UserID
 	m["type"] = r.Type
 	m["data"] = r.Data
 	return m
@@ -6159,15 +5760,6 @@ func (r *AddConferenceCredentialRequest) Populate(m map[string]interface{}) erro
 			return errors.Wrap(ErrInvalidJSONFieldType{Field: "conference_id"}, "failed to populate fields for AddConferenceCredentialRequest")
 		}
 	}
-	if jv, ok := m["user_id"]; ok {
-		switch jv.(type) {
-		case string:
-			r.UserID = jv.(string)
-			delete(m, "user_id")
-		default:
-			return errors.Wrap(ErrInvalidJSONFieldType{Field: "user_id"}, "failed to populate fields for AddConferenceCredentialRequest")
-		}
-	}
 	if jv, ok := m["type"]; ok {
 		switch jv.(type) {
 		case string:
@@ -6192,7 +5784,6 @@ func (r *AddConferenceCredentialRequest) Populate(m map[string]interface{}) erro
 func (r TweetAsConferenceRequest) collectMarshalData() map[string]interface{} {
 	m := make(map[string]interface{})
 	m["conference_id"] = r.ConferenceID
-	m["user_id"] = r.UserID
 	m["tweet"] = r.Tweet
 	return m
 }
@@ -6231,15 +5822,6 @@ func (r *TweetAsConferenceRequest) Populate(m map[string]interface{}) error {
 			delete(m, "conference_id")
 		default:
 			return errors.Wrap(ErrInvalidJSONFieldType{Field: "conference_id"}, "failed to populate fields for TweetAsConferenceRequest")
-		}
-	}
-	if jv, ok := m["user_id"]; ok {
-		switch jv.(type) {
-		case string:
-			r.UserID = jv.(string)
-			delete(m, "user_id")
-		default:
-			return errors.Wrap(ErrInvalidJSONFieldType{Field: "user_id"}, "failed to populate fields for TweetAsConferenceRequest")
 		}
 	}
 	if jv, ok := m["tweet"]; ok {
@@ -6311,7 +5893,6 @@ func (r *GetConferenceScheduleRequest) Populate(m map[string]interface{}) error 
 func (r VerifyUserRequest) collectMarshalData() map[string]interface{} {
 	m := make(map[string]interface{})
 	m["id"] = r.ID
-	m["user_id"] = r.UserID
 	return m
 }
 
@@ -6351,15 +5932,6 @@ func (r *VerifyUserRequest) Populate(m map[string]interface{}) error {
 			return errors.Wrap(ErrInvalidJSONFieldType{Field: "id"}, "failed to populate fields for VerifyUserRequest")
 		}
 	}
-	if jv, ok := m["user_id"]; ok {
-		switch jv.(type) {
-		case string:
-			r.UserID = jv.(string)
-			delete(m, "user_id")
-		default:
-			return errors.Wrap(ErrInvalidJSONFieldType{Field: "user_id"}, "failed to populate fields for VerifyUserRequest")
-		}
-	}
 	return nil
 }
 
@@ -6367,7 +5939,6 @@ func (r SendSelectionResultNotificationRequest) collectMarshalData() map[string]
 	m := make(map[string]interface{})
 	m["force"] = r.Force
 	m["session_id"] = r.SessionID
-	m["user_id"] = r.UserID
 	return m
 }
 
@@ -6416,15 +5987,6 @@ func (r *SendSelectionResultNotificationRequest) Populate(m map[string]interface
 			return errors.Wrap(ErrInvalidJSONFieldType{Field: "session_id"}, "failed to populate fields for SendSelectionResultNotificationRequest")
 		}
 	}
-	if jv, ok := m["user_id"]; ok {
-		switch jv.(type) {
-		case string:
-			r.UserID = jv.(string)
-			delete(m, "user_id")
-		default:
-			return errors.Wrap(ErrInvalidJSONFieldType{Field: "user_id"}, "failed to populate fields for SendSelectionResultNotificationRequest")
-		}
-	}
 	return nil
 }
 
@@ -6432,7 +5994,6 @@ func (r SendAllSelectionResultNotificationRequest) collectMarshalData() map[stri
 	m := make(map[string]interface{})
 	m["force"] = r.Force
 	m["conference_id"] = r.ConferenceID
-	m["user_id"] = r.UserID
 	return m
 }
 
@@ -6479,15 +6040,6 @@ func (r *SendAllSelectionResultNotificationRequest) Populate(m map[string]interf
 			delete(m, "conference_id")
 		default:
 			return errors.Wrap(ErrInvalidJSONFieldType{Field: "conference_id"}, "failed to populate fields for SendAllSelectionResultNotificationRequest")
-		}
-	}
-	if jv, ok := m["user_id"]; ok {
-		switch jv.(type) {
-		case string:
-			r.UserID = jv.(string)
-			delete(m, "user_id")
-		default:
-			return errors.Wrap(ErrInvalidJSONFieldType{Field: "user_id"}, "failed to populate fields for SendAllSelectionResultNotificationRequest")
 		}
 	}
 	return nil
@@ -6647,7 +6199,6 @@ func (r CreateTrackRequest) collectMarshalData() map[string]interface{} {
 	if r.SortOrder.Valid() {
 		m["sort_order"] = r.SortOrder.Value()
 	}
-	m["user_id"] = r.UserID
 	return m
 }
 
@@ -6708,15 +6259,6 @@ func (r *CreateTrackRequest) Populate(m map[string]interface{}) error {
 		}
 		delete(m, "sort_order")
 	}
-	if jv, ok := m["user_id"]; ok {
-		switch jv.(type) {
-		case string:
-			r.UserID = jv.(string)
-			delete(m, "user_id")
-		default:
-			return errors.Wrap(ErrInvalidJSONFieldType{Field: "user_id"}, "failed to populate fields for CreateTrackRequest")
-		}
-	}
 	if err := ExtractL10NFields(m, &r.LocalizedFields, []string{"name"}); err != nil {
 		return err
 	}
@@ -6725,7 +6267,7 @@ func (r *CreateTrackRequest) Populate(m map[string]interface{}) error {
 
 func (r *CreateTrackRequest) GetPropNames() ([]string, error) {
 	l, _ := r.LocalizedFields.GetPropNames()
-	return append(l, "conference_id", "room_id", "name", "sort_order", "user_id"), nil
+	return append(l, "conference_id", "room_id", "name", "sort_order"), nil
 }
 
 func (r *CreateTrackRequest) SetPropValue(s string, v interface{}) error {
@@ -6744,11 +6286,6 @@ func (r *CreateTrackRequest) SetPropValue(s string, v interface{}) error {
 		return r.Name.Set(v)
 	case "sort_order":
 		return r.SortOrder.Set(v)
-	case "user_id":
-		if jv, ok := v.(string); ok {
-			r.UserID = jv
-			return nil
-		}
 	default:
 		return errors.New("unknown column '" + s + "'")
 	}
@@ -6767,7 +6304,6 @@ func (r UpdateTrackRequest) collectMarshalData() map[string]interface{} {
 	if r.SortOrder.Valid() {
 		m["sort_order"] = r.SortOrder.Value()
 	}
-	m["user_id"] = r.UserID
 	return m
 }
 
@@ -6825,15 +6361,6 @@ func (r *UpdateTrackRequest) Populate(m map[string]interface{}) error {
 		}
 		delete(m, "sort_order")
 	}
-	if jv, ok := m["user_id"]; ok {
-		switch jv.(type) {
-		case string:
-			r.UserID = jv.(string)
-			delete(m, "user_id")
-		default:
-			return errors.Wrap(ErrInvalidJSONFieldType{Field: "user_id"}, "failed to populate fields for UpdateTrackRequest")
-		}
-	}
 	if err := ExtractL10NFields(m, &r.LocalizedFields, []string{"name"}); err != nil {
 		return err
 	}
@@ -6842,7 +6369,7 @@ func (r *UpdateTrackRequest) Populate(m map[string]interface{}) error {
 
 func (r *UpdateTrackRequest) GetPropNames() ([]string, error) {
 	l, _ := r.LocalizedFields.GetPropNames()
-	return append(l, "id", "name", "room_id", "sort_order", "user_id"), nil
+	return append(l, "id", "name", "room_id", "sort_order"), nil
 }
 
 func (r *UpdateTrackRequest) SetPropValue(s string, v interface{}) error {
@@ -6858,11 +6385,6 @@ func (r *UpdateTrackRequest) SetPropValue(s string, v interface{}) error {
 		return r.RoomID.Set(v)
 	case "sort_order":
 		return r.SortOrder.Set(v)
-	case "user_id":
-		if jv, ok := v.(string); ok {
-			r.UserID = jv
-			return nil
-		}
 	default:
 		return errors.New("unknown column '" + s + "'")
 	}
@@ -6872,7 +6394,6 @@ func (r *UpdateTrackRequest) SetPropValue(s string, v interface{}) error {
 func (r DeleteTrackRequest) collectMarshalData() map[string]interface{} {
 	m := make(map[string]interface{})
 	m["id"] = r.ID
-	m["user_id"] = r.UserID
 	return m
 }
 
@@ -6910,15 +6431,6 @@ func (r *DeleteTrackRequest) Populate(m map[string]interface{}) error {
 			delete(m, "id")
 		default:
 			return errors.Wrap(ErrInvalidJSONFieldType{Field: "id"}, "failed to populate fields for DeleteTrackRequest")
-		}
-	}
-	if jv, ok := m["user_id"]; ok {
-		switch jv.(type) {
-		case string:
-			r.UserID = jv.(string)
-			delete(m, "user_id")
-		default:
-			return errors.Wrap(ErrInvalidJSONFieldType{Field: "user_id"}, "failed to populate fields for DeleteTrackRequest")
 		}
 	}
 	return nil
@@ -7000,7 +6512,6 @@ func (r CreateBlogEntryRequest) collectMarshalData() map[string]interface{} {
 	m["status"] = r.Status
 	m["title"] = r.Title
 	m["url"] = r.URL
-	m["user_id"] = r.UserID
 	return m
 }
 
@@ -7067,15 +6578,6 @@ func (r *CreateBlogEntryRequest) Populate(m map[string]interface{}) error {
 			return errors.Wrap(ErrInvalidJSONFieldType{Field: "url"}, "failed to populate fields for CreateBlogEntryRequest")
 		}
 	}
-	if jv, ok := m["user_id"]; ok {
-		switch jv.(type) {
-		case string:
-			r.UserID = jv.(string)
-			delete(m, "user_id")
-		default:
-			return errors.Wrap(ErrInvalidJSONFieldType{Field: "user_id"}, "failed to populate fields for CreateBlogEntryRequest")
-		}
-	}
 	return nil
 }
 
@@ -7091,7 +6593,6 @@ func (r UpdateBlogEntryRequest) collectMarshalData() map[string]interface{} {
 	if r.URL.Valid() {
 		m["url"] = r.URL.Value()
 	}
-	m["user_id"] = r.UserID
 	return m
 }
 
@@ -7149,22 +6650,12 @@ func (r *UpdateBlogEntryRequest) Populate(m map[string]interface{}) error {
 		}
 		delete(m, "url")
 	}
-	if jv, ok := m["user_id"]; ok {
-		switch jv.(type) {
-		case string:
-			r.UserID = jv.(string)
-			delete(m, "user_id")
-		default:
-			return errors.Wrap(ErrInvalidJSONFieldType{Field: "user_id"}, "failed to populate fields for UpdateBlogEntryRequest")
-		}
-	}
 	return nil
 }
 
 func (r LookupBlogEntryRequest) collectMarshalData() map[string]interface{} {
 	m := make(map[string]interface{})
 	m["id"] = r.ID
-	m["user_id"] = r.UserID
 	return m
 }
 
@@ -7204,22 +6695,12 @@ func (r *LookupBlogEntryRequest) Populate(m map[string]interface{}) error {
 			return errors.Wrap(ErrInvalidJSONFieldType{Field: "id"}, "failed to populate fields for LookupBlogEntryRequest")
 		}
 	}
-	if jv, ok := m["user_id"]; ok {
-		switch jv.(type) {
-		case string:
-			r.UserID = jv.(string)
-			delete(m, "user_id")
-		default:
-			return errors.Wrap(ErrInvalidJSONFieldType{Field: "user_id"}, "failed to populate fields for LookupBlogEntryRequest")
-		}
-	}
 	return nil
 }
 
 func (r DeleteBlogEntryRequest) collectMarshalData() map[string]interface{} {
 	m := make(map[string]interface{})
 	m["id"] = r.ID
-	m["user_id"] = r.UserID
 	return m
 }
 
@@ -7257,15 +6738,6 @@ func (r *DeleteBlogEntryRequest) Populate(m map[string]interface{}) error {
 			delete(m, "id")
 		default:
 			return errors.Wrap(ErrInvalidJSONFieldType{Field: "id"}, "failed to populate fields for DeleteBlogEntryRequest")
-		}
-	}
-	if jv, ok := m["user_id"]; ok {
-		switch jv.(type) {
-		case string:
-			r.UserID = jv.(string)
-			delete(m, "user_id")
-		default:
-			return errors.Wrap(ErrInvalidJSONFieldType{Field: "user_id"}, "failed to populate fields for DeleteBlogEntryRequest")
 		}
 	}
 	return nil
@@ -7348,7 +6820,6 @@ func (r AddConferenceStaffRequest) collectMarshalData() map[string]interface{} {
 	m := make(map[string]interface{})
 	m["conference_id"] = r.ConferenceID
 	m["staff_id"] = r.StaffID
-	m["user_id"] = r.UserID
 	return m
 }
 
@@ -7397,15 +6868,6 @@ func (r *AddConferenceStaffRequest) Populate(m map[string]interface{}) error {
 			return errors.Wrap(ErrInvalidJSONFieldType{Field: "staff_id"}, "failed to populate fields for AddConferenceStaffRequest")
 		}
 	}
-	if jv, ok := m["user_id"]; ok {
-		switch jv.(type) {
-		case string:
-			r.UserID = jv.(string)
-			delete(m, "user_id")
-		default:
-			return errors.Wrap(ErrInvalidJSONFieldType{Field: "user_id"}, "failed to populate fields for AddConferenceStaffRequest")
-		}
-	}
 	return nil
 }
 
@@ -7413,7 +6875,6 @@ func (r DeleteConferenceStaffRequest) collectMarshalData() map[string]interface{
 	m := make(map[string]interface{})
 	m["conference_id"] = r.ConferenceID
 	m["staff_id"] = r.StaffID
-	m["user_id"] = r.UserID
 	return m
 }
 
@@ -7462,22 +6923,12 @@ func (r *DeleteConferenceStaffRequest) Populate(m map[string]interface{}) error 
 			return errors.Wrap(ErrInvalidJSONFieldType{Field: "staff_id"}, "failed to populate fields for DeleteConferenceStaffRequest")
 		}
 	}
-	if jv, ok := m["user_id"]; ok {
-		switch jv.(type) {
-		case string:
-			r.UserID = jv.(string)
-			delete(m, "user_id")
-		default:
-			return errors.Wrap(ErrInvalidJSONFieldType{Field: "user_id"}, "failed to populate fields for DeleteConferenceStaffRequest")
-		}
-	}
 	return nil
 }
 
 func (r ListConferenceStaffRequest) collectMarshalData() map[string]interface{} {
 	m := make(map[string]interface{})
 	m["conference_id"] = r.ConferenceID
-	m["user_id"] = r.UserID
 	if r.Lang.Valid() {
 		m["lang"] = r.Lang.Value()
 	}
@@ -7518,15 +6969,6 @@ func (r *ListConferenceStaffRequest) Populate(m map[string]interface{}) error {
 			delete(m, "conference_id")
 		default:
 			return errors.Wrap(ErrInvalidJSONFieldType{Field: "conference_id"}, "failed to populate fields for ListConferenceStaffRequest")
-		}
-	}
-	if jv, ok := m["user_id"]; ok {
-		switch jv.(type) {
-		case string:
-			r.UserID = jv.(string)
-			delete(m, "user_id")
-		default:
-			return errors.Wrap(ErrInvalidJSONFieldType{Field: "user_id"}, "failed to populate fields for ListConferenceStaffRequest")
 		}
 	}
 	if jv, ok := m["lang"]; ok {
@@ -7613,7 +7055,6 @@ func (r *LookupExternalResourceRequest) Populate(m map[string]interface{}) error
 func (r ListExternalResourceRequest) collectMarshalData() map[string]interface{} {
 	m := make(map[string]interface{})
 	m["conference_id"] = r.ConferenceID
-	m["user_id"] = r.UserID
 	if r.Since.Valid() {
 		m["since"] = r.Since.Value()
 	}
@@ -7662,15 +7103,6 @@ func (r *ListExternalResourceRequest) Populate(m map[string]interface{}) error {
 			return errors.Wrap(ErrInvalidJSONFieldType{Field: "conference_id"}, "failed to populate fields for ListExternalResourceRequest")
 		}
 	}
-	if jv, ok := m["user_id"]; ok {
-		switch jv.(type) {
-		case string:
-			r.UserID = jv.(string)
-			delete(m, "user_id")
-		default:
-			return errors.Wrap(ErrInvalidJSONFieldType{Field: "user_id"}, "failed to populate fields for ListExternalResourceRequest")
-		}
-	}
 	if jv, ok := m["since"]; ok {
 		if err := r.Since.Set(jv); err != nil {
 			return errors.New("set field Since failed: " + err.Error())
@@ -7700,7 +7132,6 @@ func (r CreateExternalResourceRequest) collectMarshalData() map[string]interface
 	}
 	m["title"] = r.Title
 	m["url"] = r.URL
-	m["user_id"] = r.UserID
 	if r.SortOrder.Valid() {
 		m["sort_order"] = r.SortOrder.Value()
 	}
@@ -7767,15 +7198,6 @@ func (r *CreateExternalResourceRequest) Populate(m map[string]interface{}) error
 			return errors.Wrap(ErrInvalidJSONFieldType{Field: "url"}, "failed to populate fields for CreateExternalResourceRequest")
 		}
 	}
-	if jv, ok := m["user_id"]; ok {
-		switch jv.(type) {
-		case string:
-			r.UserID = jv.(string)
-			delete(m, "user_id")
-		default:
-			return errors.Wrap(ErrInvalidJSONFieldType{Field: "user_id"}, "failed to populate fields for CreateExternalResourceRequest")
-		}
-	}
 	if jv, ok := m["sort_order"]; ok {
 		if err := r.SortOrder.Set(jv); err != nil {
 			return errors.New("set field SortOrder failed: " + err.Error())
@@ -7790,7 +7212,7 @@ func (r *CreateExternalResourceRequest) Populate(m map[string]interface{}) error
 
 func (r *CreateExternalResourceRequest) GetPropNames() ([]string, error) {
 	l, _ := r.LocalizedFields.GetPropNames()
-	return append(l, "conference_id", "description", "title", "url", "user_id", "sort_order"), nil
+	return append(l, "conference_id", "description", "title", "url", "sort_order"), nil
 }
 
 func (r *CreateExternalResourceRequest) SetPropValue(s string, v interface{}) error {
@@ -7810,11 +7232,6 @@ func (r *CreateExternalResourceRequest) SetPropValue(s string, v interface{}) er
 	case "url":
 		if jv, ok := v.(string); ok {
 			r.URL = jv
-			return nil
-		}
-	case "user_id":
-		if jv, ok := v.(string); ok {
-			r.UserID = jv
 			return nil
 		}
 	case "sort_order":
@@ -7837,7 +7254,6 @@ func (r UpdateExternalResourceRequest) collectMarshalData() map[string]interface
 	if r.URL.Valid() {
 		m["url"] = r.URL.Value()
 	}
-	m["user_id"] = r.UserID
 	if r.SortOrder.Valid() {
 		m["sort_order"] = r.SortOrder.Value()
 	}
@@ -7898,15 +7314,6 @@ func (r *UpdateExternalResourceRequest) Populate(m map[string]interface{}) error
 		}
 		delete(m, "url")
 	}
-	if jv, ok := m["user_id"]; ok {
-		switch jv.(type) {
-		case string:
-			r.UserID = jv.(string)
-			delete(m, "user_id")
-		default:
-			return errors.Wrap(ErrInvalidJSONFieldType{Field: "user_id"}, "failed to populate fields for UpdateExternalResourceRequest")
-		}
-	}
 	if jv, ok := m["sort_order"]; ok {
 		if err := r.SortOrder.Set(jv); err != nil {
 			return errors.New("set field SortOrder failed: " + err.Error())
@@ -7921,7 +7328,7 @@ func (r *UpdateExternalResourceRequest) Populate(m map[string]interface{}) error
 
 func (r *UpdateExternalResourceRequest) GetPropNames() ([]string, error) {
 	l, _ := r.LocalizedFields.GetPropNames()
-	return append(l, "id", "description", "title", "url", "user_id", "sort_order"), nil
+	return append(l, "id", "description", "title", "url", "sort_order"), nil
 }
 
 func (r *UpdateExternalResourceRequest) SetPropValue(s string, v interface{}) error {
@@ -7937,11 +7344,6 @@ func (r *UpdateExternalResourceRequest) SetPropValue(s string, v interface{}) er
 		return r.Title.Set(v)
 	case "url":
 		return r.URL.Set(v)
-	case "user_id":
-		if jv, ok := v.(string); ok {
-			r.UserID = jv
-			return nil
-		}
 	case "sort_order":
 		return r.SortOrder.Set(v)
 	default:
@@ -7953,7 +7355,6 @@ func (r *UpdateExternalResourceRequest) SetPropValue(s string, v interface{}) er
 func (r DeleteExternalResourceRequest) collectMarshalData() map[string]interface{} {
 	m := make(map[string]interface{})
 	m["id"] = r.ID
-	m["user_id"] = r.UserID
 	return m
 }
 
@@ -7993,13 +7394,159 @@ func (r *DeleteExternalResourceRequest) Populate(m map[string]interface{}) error
 			return errors.Wrap(ErrInvalidJSONFieldType{Field: "id"}, "failed to populate fields for DeleteExternalResourceRequest")
 		}
 	}
-	if jv, ok := m["user_id"]; ok {
+	return nil
+}
+
+func (r SetSessionVideoCoverRequest) collectMarshalData() map[string]interface{} {
+	m := make(map[string]interface{})
+	m["id"] = r.ID
+	return m
+}
+
+func (r SetSessionVideoCoverRequest) MarshalJSON() ([]byte, error) {
+	m := r.collectMarshalData()
+	buf, err := json.Marshal(m)
+	if err != nil {
+		return nil, err
+	}
+	return buf, nil
+}
+
+func (r SetSessionVideoCoverRequest) MarshalURL() ([]byte, error) {
+	m := r.collectMarshalData()
+	buf, err := urlenc.Marshal(m)
+	if err != nil {
+		return nil, err
+	}
+	return buf, nil
+}
+
+func (r *SetSessionVideoCoverRequest) UnmarshalJSON(data []byte) error {
+	m := make(map[string]interface{})
+	if err := json.Unmarshal(data, &m); err != nil {
+		return err
+	}
+	return r.Populate(m)
+}
+
+func (r *SetSessionVideoCoverRequest) Populate(m map[string]interface{}) error {
+	if jv, ok := m["id"]; ok {
 		switch jv.(type) {
 		case string:
-			r.UserID = jv.(string)
-			delete(m, "user_id")
+			r.ID = jv.(string)
+			delete(m, "id")
 		default:
-			return errors.Wrap(ErrInvalidJSONFieldType{Field: "user_id"}, "failed to populate fields for DeleteExternalResourceRequest")
+			return errors.Wrap(ErrInvalidJSONFieldType{Field: "id"}, "failed to populate fields for SetSessionVideoCoverRequest")
+		}
+	}
+	return nil
+}
+
+func (r CreateClientSessionRequest) collectMarshalData() map[string]interface{} {
+	m := make(map[string]interface{})
+	m["access_token"] = r.AccessToken
+	m["auth_via"] = r.AuthVia
+	return m
+}
+
+func (r CreateClientSessionRequest) MarshalJSON() ([]byte, error) {
+	m := r.collectMarshalData()
+	buf, err := json.Marshal(m)
+	if err != nil {
+		return nil, err
+	}
+	return buf, nil
+}
+
+func (r CreateClientSessionRequest) MarshalURL() ([]byte, error) {
+	m := r.collectMarshalData()
+	buf, err := urlenc.Marshal(m)
+	if err != nil {
+		return nil, err
+	}
+	return buf, nil
+}
+
+func (r *CreateClientSessionRequest) UnmarshalJSON(data []byte) error {
+	m := make(map[string]interface{})
+	if err := json.Unmarshal(data, &m); err != nil {
+		return err
+	}
+	return r.Populate(m)
+}
+
+func (r *CreateClientSessionRequest) Populate(m map[string]interface{}) error {
+	if jv, ok := m["access_token"]; ok {
+		switch jv.(type) {
+		case string:
+			r.AccessToken = jv.(string)
+			delete(m, "access_token")
+		default:
+			return errors.Wrap(ErrInvalidJSONFieldType{Field: "access_token"}, "failed to populate fields for CreateClientSessionRequest")
+		}
+	}
+	if jv, ok := m["auth_via"]; ok {
+		switch jv.(type) {
+		case string:
+			r.AuthVia = jv.(string)
+			delete(m, "auth_via")
+		default:
+			return errors.Wrap(ErrInvalidJSONFieldType{Field: "auth_via"}, "failed to populate fields for CreateClientSessionRequest")
+		}
+	}
+	return nil
+}
+
+func (r CreateClientSessionResponse) collectMarshalData() map[string]interface{} {
+	m := make(map[string]interface{})
+	m["sid"] = r.SessionID
+	m["expires"] = r.Expires
+	return m
+}
+
+func (r CreateClientSessionResponse) MarshalJSON() ([]byte, error) {
+	m := r.collectMarshalData()
+	buf, err := json.Marshal(m)
+	if err != nil {
+		return nil, err
+	}
+	return buf, nil
+}
+
+func (r CreateClientSessionResponse) MarshalURL() ([]byte, error) {
+	m := r.collectMarshalData()
+	buf, err := urlenc.Marshal(m)
+	if err != nil {
+		return nil, err
+	}
+	return buf, nil
+}
+
+func (r *CreateClientSessionResponse) UnmarshalJSON(data []byte) error {
+	m := make(map[string]interface{})
+	if err := json.Unmarshal(data, &m); err != nil {
+		return err
+	}
+	return r.Populate(m)
+}
+
+func (r *CreateClientSessionResponse) Populate(m map[string]interface{}) error {
+	if jv, ok := m["sid"]; ok {
+		switch jv.(type) {
+		case string:
+			r.SessionID = jv.(string)
+			delete(m, "sid")
+		default:
+			return errors.Wrap(ErrInvalidJSONFieldType{Field: "sid"}, "failed to populate fields for CreateClientSessionResponse")
+		}
+	}
+	if jv, ok := m["expires"]; ok {
+		switch jv.(type) {
+		case string:
+			r.Expires = jv.(string)
+			delete(m, "expires")
+		default:
+			return errors.Wrap(ErrInvalidJSONFieldType{Field: "expires"}, "failed to populate fields for CreateClientSessionResponse")
 		}
 	}
 	return nil

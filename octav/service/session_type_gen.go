@@ -4,6 +4,7 @@ package service
 
 import (
 	"context"
+	"database/sql"
 	"sync"
 	"time"
 
@@ -21,6 +22,7 @@ var _ = context.Background
 var _ = errors.Wrap
 var _ = model.SessionType{}
 var _ = db.SessionType{}
+var _ = sql.ErrNoRows
 var _ = pdebug.Enabled
 
 var sessionTypeSvc SessionTypeSvc
@@ -31,23 +33,23 @@ func SessionType() *SessionTypeSvc {
 	return &sessionTypeSvc
 }
 
-func (v *SessionTypeSvc) LookupFromPayload(tx *db.Tx, m *model.SessionType, payload *model.LookupSessionTypeRequest) (err error) {
+func (v *SessionTypeSvc) LookupFromPayload(ctx context.Context, tx *sql.Tx, m *model.SessionType, payload *model.LookupSessionTypeRequest) (err error) {
 	if pdebug.Enabled {
-		g := pdebug.Marker("service.SessionType.LookupFromPayload").BindError(&err)
+		g := pdebug.Marker("service.SessionType.LookupFromPayload %s", payload.ID).BindError(&err)
 		defer g.End()
 	}
-	if err = v.Lookup(tx, m, payload.ID); err != nil {
+	if err = v.Lookup(ctx, tx, m, payload.ID); err != nil {
 		return errors.Wrap(err, "failed to load model.SessionType from database")
 	}
-	if err := v.Decorate(tx, m, payload.TrustedCall, payload.Lang.String); err != nil {
+	if err := v.Decorate(ctx, tx, m, payload.TrustedCall, payload.Lang.String); err != nil {
 		return errors.Wrap(err, "failed to load associated data for model.SessionType from database")
 	}
 	return nil
 }
 
-func (v *SessionTypeSvc) Lookup(tx *db.Tx, m *model.SessionType, id string) (err error) {
+func (v *SessionTypeSvc) Lookup(ctx context.Context, tx *sql.Tx, m *model.SessionType, id string) (err error) {
 	if pdebug.Enabled {
-		g := pdebug.Marker("service.SessionType.Lookup").BindError(&err)
+		g := pdebug.Marker("service.SessionType.Lookup %s", id).BindError(&err)
 		defer g.End()
 	}
 
@@ -78,13 +80,13 @@ func (v *SessionTypeSvc) Lookup(tx *db.Tx, m *model.SessionType, id string) (err
 // Create takes in the transaction, the incoming payload, and a reference to
 // a database row. The database row is initialized/populated so that the
 // caller can use it afterwards.
-func (v *SessionTypeSvc) Create(tx *db.Tx, vdb *db.SessionType, payload *model.CreateSessionTypeRequest) (err error) {
+func (v *SessionTypeSvc) Create(ctx context.Context, tx *sql.Tx, vdb *db.SessionType, payload *model.CreateSessionTypeRequest) (err error) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("service.SessionType.Create").BindError(&err)
 		defer g.End()
 	}
 
-	if err := v.populateRowForCreate(vdb, payload); err != nil {
+	if err := v.populateRowForCreate(ctx, vdb, payload); err != nil {
 		return errors.Wrap(err, `failed to populate row`)
 	}
 
@@ -98,7 +100,7 @@ func (v *SessionTypeSvc) Create(tx *db.Tx, vdb *db.SessionType, payload *model.C
 	return nil
 }
 
-func (v *SessionTypeSvc) Update(tx *db.Tx, vdb *db.SessionType) (err error) {
+func (v *SessionTypeSvc) Update(tx *sql.Tx, vdb *db.SessionType) (err error) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("service.SessionType.Update (%s)", vdb.EID).BindError(&err)
 		defer g.End()
@@ -128,7 +130,7 @@ func (v *SessionTypeSvc) Update(tx *db.Tx, vdb *db.SessionType) (err error) {
 	return nil
 }
 
-func (v *SessionTypeSvc) UpdateFromPayload(ctx context.Context, tx *db.Tx, payload *model.UpdateSessionTypeRequest) (err error) {
+func (v *SessionTypeSvc) UpdateFromPayload(ctx context.Context, tx *sql.Tx, payload *model.UpdateSessionTypeRequest) (err error) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("service.SessionType.UpdateFromPayload (%s)", payload.ID).BindError(&err)
 		defer g.End()
@@ -138,7 +140,7 @@ func (v *SessionTypeSvc) UpdateFromPayload(ctx context.Context, tx *db.Tx, paylo
 		return errors.Wrap(err, `failed to load from database`)
 	}
 
-	if err := v.populateRowForUpdate(&vdb, payload); err != nil {
+	if err := v.populateRowForUpdate(ctx, &vdb, payload); err != nil {
 		return errors.Wrap(err, `failed to populate row data`)
 	}
 
@@ -153,7 +155,7 @@ func (v *SessionTypeSvc) UpdateFromPayload(ctx context.Context, tx *db.Tx, paylo
 	return nil
 }
 
-func (v *SessionTypeSvc) ReplaceL10NStrings(tx *db.Tx, m *model.SessionType, lang string) error {
+func (v *SessionTypeSvc) ReplaceL10NStrings(tx *sql.Tx, m *model.SessionType, lang string) error {
 	if pdebug.Enabled {
 		g := pdebug.Marker("service.SessionType.ReplaceL10NStrings lang = %s", lang)
 		defer g.End()
@@ -231,7 +233,7 @@ func (v *SessionTypeSvc) ReplaceL10NStrings(tx *db.Tx, m *model.SessionType, lan
 	return nil
 }
 
-func (v *SessionTypeSvc) Delete(tx *db.Tx, id string) error {
+func (v *SessionTypeSvc) Delete(tx *sql.Tx, id string) error {
 	if pdebug.Enabled {
 		g := pdebug.Marker("SessionType.Delete (%s)", id)
 		defer g.End()

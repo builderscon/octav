@@ -2,20 +2,21 @@ package service
 
 import (
 	"bytes"
+	"database/sql"
 	"encoding/base64"
 	"fmt"
 	"io"
 	"mime/multipart"
 	"net/http"
+	"path/filepath"
 	"regexp"
 	"time"
-
-	"context"
 
 	"cloud.google.com/go/storage"
 
 	"github.com/builderscon/octav/octav/cache"
 	"github.com/builderscon/octav/octav/db"
+	"github.com/builderscon/octav/octav/internal/context"
 	"github.com/builderscon/octav/octav/internal/errors"
 	"github.com/builderscon/octav/octav/model"
 	"github.com/builderscon/octav/octav/tools"
@@ -28,7 +29,7 @@ func (v *ConferenceSvc) Init() {
 	v.credentialStorage = CredentialStorage
 }
 
-func (v *ConferenceSvc) populateRowForCreate(vdb *db.Conference, payload *model.CreateConferenceRequest) error {
+func (v *ConferenceSvc) populateRowForCreate(ctx context.Context, vdb *db.Conference, payload *model.CreateConferenceRequest) error {
 	vdb.EID = tools.UUID()
 	vdb.Slug = payload.Slug
 	vdb.Title = payload.Title
@@ -98,7 +99,7 @@ func (v *ConferenceSvc) populateRowForUpdate(vdb *db.Conference, payload *model.
 	return nil
 }
 
-func (v *ConferenceSvc) CreateDefaultSessionTypes(tx *db.Tx, c *model.Conference) (err error) {
+func (v *ConferenceSvc) CreateDefaultSessionTypes(ctx context.Context, tx *sql.Tx, c *model.Conference) (err error) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("service.Conference.CreateDefaultSessionTypes").BindError(&err)
 		defer g.End()
@@ -127,21 +128,21 @@ func (v *ConferenceSvc) CreateDefaultSessionTypes(tx *db.Tx, c *model.Conference
 	for _, r := range stocktypes {
 		var vdb db.SessionType
 		r.ConferenceID = c.ID
-		if err := sst.Create(tx, &vdb, &model.CreateSessionTypeRequest{&r}); err != nil {
+		if err := sst.Create(ctx, tx, &vdb, &model.CreateSessionTypeRequest{&r}); err != nil {
 			return errors.Wrap(err, "failed to create default session type")
 		}
 	}
 	return nil
 }
 
-func (v *ConferenceSvc) CreateFromPayload(tx *db.Tx, payload *model.CreateConferenceRequest, result *model.Conference) error {
+func (v *ConferenceSvc) CreateFromPayload(ctx context.Context, tx *sql.Tx, payload *model.CreateConferenceRequest, result *model.Conference) error {
 	su := User()
-	if err := su.IsConferenceSeriesAdministrator(tx, payload.SeriesID, payload.UserID); err != nil {
+	if err := su.IsConferenceSeriesAdministrator(ctx, tx, payload.SeriesID, context.GetUserID(ctx)); err != nil {
 		return errors.Wrap(err, "creating a conference requires conference administrator privilege")
 	}
 
 	var vdb db.Conference
-	if err := v.Create(tx, &vdb, payload); err != nil {
+	if err := v.Create(ctx, tx, &vdb, payload); err != nil {
 		return errors.Wrap(err, "failed to store in database")
 	}
 
@@ -196,7 +197,7 @@ func (v *ConferenceSvc) CreateFromPayload(tx *db.Tx, payload *model.CreateConfer
 		}
 	}
 
-	if err := v.AddAdministrator(tx, vdb.EID, payload.UserID); err != nil {
+	if err := v.AddAdministrator(tx, vdb.EID, context.GetUserID(ctx)); err != nil {
 		return errors.Wrap(err, "failed to associate administrators to conference")
 	}
 
@@ -205,7 +206,7 @@ func (v *ConferenceSvc) CreateFromPayload(tx *db.Tx, payload *model.CreateConfer
 		return errors.Wrap(err, "failed to populate model from database")
 	}
 
-	if err := v.CreateDefaultSessionTypes(tx, &c); err != nil {
+	if err := v.CreateDefaultSessionTypes(ctx, tx, &c); err != nil {
 		return errors.Wrap(err, "failed to create default session types")
 	}
 
@@ -215,7 +216,7 @@ func (v *ConferenceSvc) CreateFromPayload(tx *db.Tx, payload *model.CreateConfer
 
 var slugSplitRx = regexp.MustCompile(`^/([^/]+)/(.+)$`)
 
-func (v *ConferenceSvc) LookupBySlug(tx *db.Tx, c *model.Conference, payload *model.LookupConferenceBySlugRequest) error {
+func (v *ConferenceSvc) LookupBySlug(ctx context.Context, tx *sql.Tx, c *model.Conference, payload *model.LookupConferenceBySlugRequest) error {
 	matches := slugSplitRx.FindStringSubmatch(payload.Slug)
 	if matches == nil {
 		return errors.New("invalid slug pattern")
@@ -232,10 +233,10 @@ func (v *ConferenceSvc) LookupBySlug(tx *db.Tx, c *model.Conference, payload *mo
 		return errors.Wrap(err, "failed to select conference id from slug")
 	}
 
-	return v.LookupFromPayload(tx, c, &model.LookupConferenceRequest{ID: eid, Lang: payload.Lang})
+	return v.LookupFromPayload(ctx, tx, c, &model.LookupConferenceRequest{ID: eid, Lang: payload.Lang})
 }
 
-func (v *ConferenceSvc) AddAdministrator(tx *db.Tx, cid, uid string) error {
+func (v *ConferenceSvc) AddAdministrator(tx *sql.Tx, cid, uid string) error {
 	c := db.ConferenceAdministrator{
 		ConferenceID: cid,
 		UserID:       uid,
@@ -243,9 +244,9 @@ func (v *ConferenceSvc) AddAdministrator(tx *db.Tx, cid, uid string) error {
 	return c.Create(tx, db.WithInsertIgnore(true))
 }
 
-func (v *ConferenceSvc) AddAdministratorFromPayload(tx *db.Tx, payload *model.AddConferenceAdminRequest) error {
+func (v *ConferenceSvc) AddAdministratorFromPayload(ctx context.Context, tx *sql.Tx, payload *model.AddConferenceAdminRequest) error {
 	su := User()
-	if err := su.IsConferenceAdministrator(tx, payload.ConferenceID, payload.UserID); err != nil {
+	if err := su.IsConferenceAdministrator(ctx, tx, payload.ConferenceID, context.GetUserID(ctx)); err != nil {
 		return errors.Wrap(err, "adding a conference administrator requires conference administrator privilege")
 	}
 
@@ -254,7 +255,7 @@ func (v *ConferenceSvc) AddAdministratorFromPayload(tx *db.Tx, payload *model.Ad
 
 const datefmt = `2006-01-02`
 
-func (v *ConferenceSvc) LoadByRange(tx *db.Tx, vdbl *db.ConferenceList, since, rangeStart, rangeEnd string, limit int) error {
+func (v *ConferenceSvc) LoadByRange(tx *sql.Tx, vdbl *db.ConferenceList, since, rangeStart, rangeEnd string, limit int) error {
 	var rs time.Time
 	var re time.Time
 	var err error
@@ -280,29 +281,29 @@ func (v *ConferenceSvc) LoadByRange(tx *db.Tx, vdbl *db.ConferenceList, since, r
 	return nil
 }
 
-func (v *ConferenceSvc) AddDatesFromPayload(tx *db.Tx, payload *model.CreateConferenceDateRequest) (err error) {
+func (v *ConferenceSvc) AddDatesFromPayload(ctx context.Context, tx *sql.Tx, payload *model.CreateConferenceDateRequest) (err error) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("service.Conference.AddDatesFromPayload").BindError(&err)
 		defer g.End()
 	}
 
 	su := User()
-	if err := su.IsConferenceAdministrator(tx, payload.ConferenceID, payload.UserID); err != nil {
+	if err := su.IsConferenceAdministrator(ctx, tx, payload.ConferenceID, context.GetUserID(ctx)); err != nil {
 		return errors.Wrap(err, "adding conference dates requires conference administrator privilege")
 	}
 
 	var vdb db.ConferenceDate
 	s := ConferenceDate()
-	if err := s.Create(tx, &vdb, payload); err != nil {
+	if err := s.Create(ctx, tx, &vdb, payload); err != nil {
 		return errors.Wrap(err, "failed to insert into database")
 	}
 
 	return nil
 }
 
-func (v *ConferenceSvc) DeleteDateFromPayload(tx *db.Tx, payload *model.DeleteConferenceDateRequest) error {
+func (v *ConferenceSvc) DeleteDateFromPayload(ctx context.Context, tx *sql.Tx, payload *model.DeleteConferenceDateRequest) error {
 	su := User()
-	if err := su.IsConferenceAdministrator(tx, payload.ConferenceID, payload.UserID); err != nil {
+	if err := su.IsConferenceAdministrator(ctx, tx, payload.ConferenceID, context.GetUserID(ctx)); err != nil {
 		return errors.Wrap(err, "deleting conference dates requires conference administrator privilege")
 	}
 
@@ -310,7 +311,7 @@ func (v *ConferenceSvc) DeleteDateFromPayload(tx *db.Tx, payload *model.DeleteCo
 	return vdb.DeleteDate(tx, payload.ConferenceID, payload.Date)
 }
 
-func (v *ConferenceSvc) LoadDates(tx *db.Tx, cdl *model.ConferenceDateList, cid string) (err error) {
+func (v *ConferenceSvc) LoadDates(ctx context.Context, tx *sql.Tx, cdl *model.ConferenceDateList, cid string) (err error) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("service.Conference.LoadDates").BindError(&err)
 		defer g.End()
@@ -340,21 +341,21 @@ func (v *ConferenceSvc) LoadDates(tx *db.Tx, cdl *model.ConferenceDateList, cid 
 	return nil
 }
 
-func (v *ConferenceSvc) DeleteAdministratorFromPayload(tx *db.Tx, payload *model.DeleteConferenceAdminRequest) (err error) {
+func (v *ConferenceSvc) DeleteAdministratorFromPayload(ctx context.Context, tx *sql.Tx, payload *model.DeleteConferenceAdminRequest) (err error) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("service.Conference.DeleteAdministratorFromPayload").BindError(&err)
 		defer g.End()
 	}
 
 	su := User()
-	if err := su.IsConferenceAdministrator(tx, payload.ConferenceID, payload.UserID); err != nil {
+	if err := su.IsConferenceAdministrator(ctx, tx, payload.ConferenceID, context.GetUserID(ctx)); err != nil {
 		return errors.Wrap(err, "deleting a conference administrator requires conference administrator privilege")
 	}
 
 	return db.DeleteConferenceAdministrator(tx, payload.ConferenceID, payload.AdminID)
 }
 
-func (v *ConferenceSvc) LoadAdmins(tx *db.Tx, cdl *model.UserList, trustedCall bool, cid, lang string) (err error) {
+func (v *ConferenceSvc) LoadAdmins(ctx context.Context, tx *sql.Tx, cdl *model.UserList, trustedCall bool, cid, lang string) (err error) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("service.Conference.LoadAdmins").BindError(&err)
 		defer g.End()
@@ -375,7 +376,7 @@ func (v *ConferenceSvc) LoadAdmins(tx *db.Tx, cdl *model.UserList, trustedCall b
 		if err := res[i].FromRow(&vdb); err != nil {
 			return errors.Wrap(err, "failed to map database to model")
 		}
-		if err := su.Decorate(tx, &res[i], trustedCall, lang); err != nil {
+		if err := su.Decorate(ctx, tx, &res[i], trustedCall, lang); err != nil {
 			return errors.Wrap(err, "failed to decorate administrator")
 		}
 	}
@@ -383,14 +384,14 @@ func (v *ConferenceSvc) LoadAdmins(tx *db.Tx, cdl *model.UserList, trustedCall b
 	return nil
 }
 
-func (v *ConferenceSvc) AddVenueFromPayload(tx *db.Tx, payload *model.AddConferenceVenueRequest) (err error) {
+func (v *ConferenceSvc) AddVenueFromPayload(ctx context.Context, tx *sql.Tx, payload *model.AddConferenceVenueRequest) (err error) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("service.Conference.AddVenueFromPayload").BindError(&err)
 		defer g.End()
 	}
 
 	su := User()
-	if err := su.IsConferenceAdministrator(tx, payload.ConferenceID, payload.UserID); err != nil {
+	if err := su.IsConferenceAdministrator(ctx, tx, payload.ConferenceID, context.GetUserID(ctx)); err != nil {
 		return errors.Wrap(err, "adding a conference venue requires conference administrator privilege")
 	}
 
@@ -401,7 +402,7 @@ func (v *ConferenceSvc) AddVenueFromPayload(tx *db.Tx, payload *model.AddConfere
 		VenueID:         payload.VenueID,
 		DatabaseOptions: []db.InsertOption{db.WithInsertIgnore(true)},
 	}
-	if err := scv.Create(tx, &cd, &cvr); err != nil {
+	if err := scv.Create(ctx, tx, &cd, &cvr); err != nil {
 		return errors.Wrap(err, "failed to insert new conference/venue relation")
 	}
 
@@ -409,11 +410,11 @@ func (v *ConferenceSvc) AddVenueFromPayload(tx *db.Tx, payload *model.AddConfere
 	// Decorate it so that we can get the localized strings too
 	var rooms model.RoomList
 	sr := Room()
-	if err := sr.LoadByVenueID(tx, &rooms, payload.VenueID); err != nil {
+	if err := sr.LoadByVenueID(ctx, tx, &rooms, payload.VenueID); err != nil {
 		return errors.Wrap(err, "failed to load rooms for venue")
 	}
 	for i := range rooms {
-		if err := sr.Decorate(tx, &rooms[i], true, "all"); err != nil {
+		if err := sr.Decorate(ctx, tx, &rooms[i], true, "all"); err != nil {
 			return errors.Wrap(err, "failed to decorate room")
 		}
 	}
@@ -425,12 +426,11 @@ func (v *ConferenceSvc) AddVenueFromPayload(tx *db.Tx, payload *model.AddConfere
 	st := Track()
 	var r model.CreateTrackRequest
 	r.ConferenceID = payload.ConferenceID
-	r.UserID = payload.UserID
 	for _, room := range rooms {
 		r.RoomID = room.ID
 		r.Name.Set(room.Name)
 		r.LocalizedFields = room.LocalizedFields
-		if err := st.CreateFromPayload(tx, &r, nil); err != nil {
+		if err := st.CreateFromPayload(ctx, tx, &r, nil); err != nil {
 			return errors.Wrap(err, "failed to create track")
 		}
 	}
@@ -450,9 +450,9 @@ func (v *ConferenceSvc) AddVenueFromPayload(tx *db.Tx, payload *model.AddConfere
 	return nil
 }
 
-func (v *ConferenceSvc) DeleteVenueFromPayload(tx *db.Tx, payload *model.DeleteConferenceVenueRequest) error {
+func (v *ConferenceSvc) DeleteVenueFromPayload(ctx context.Context, tx *sql.Tx, payload *model.DeleteConferenceVenueRequest) error {
 	su := User()
-	if err := su.IsConferenceAdministrator(tx, payload.ConferenceID, payload.UserID); err != nil {
+	if err := su.IsConferenceAdministrator(ctx, tx, payload.ConferenceID, context.GetUserID(ctx)); err != nil {
 		return errors.Wrap(err, "deleting a conference venue requires conference administrator privilege")
 	}
 	if err := db.DeleteConferenceVenue(tx, payload.ConferenceID, payload.VenueID); err != nil {
@@ -477,7 +477,7 @@ func (v *ConferenceSvc) DeleteVenueFromPayload(tx *db.Tx, payload *model.DeleteC
 	return nil
 }
 
-func (v *ConferenceSvc) LoadTextComponents(tx *db.Tx, c *model.Conference) error {
+func (v *ConferenceSvc) LoadTextComponents(tx *sql.Tx, c *model.Conference) error {
 	var ccl db.ConferenceComponentList
 
 	if err := ccl.LoadByConferenceID(tx, c.ID); err != nil {
@@ -501,7 +501,7 @@ func (v *ConferenceSvc) LoadTextComponents(tx *db.Tx, c *model.Conference) error
 	return nil
 }
 
-func (v *ConferenceSvc) Decorate(tx *db.Tx, c *model.Conference, trustedCall bool, lang string) (err error) {
+func (v *ConferenceSvc) Decorate(ctx context.Context, tx *sql.Tx, c *model.Conference, trustedCall bool, lang string) (err error) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("service.Conference.Decorate").BindError(&err)
 		defer g.End()
@@ -515,7 +515,7 @@ func (v *ConferenceSvc) Decorate(tx *db.Tx, c *model.Conference, trustedCall boo
 			TrustedCall: trustedCall,
 		}
 		r.Lang.Set(lang)
-		if err := css.LookupFromPayload(tx, &s, &r); err != nil {
+		if err := css.LookupFromPayload(ctx, tx, &s, &r); err != nil {
 			return errors.Wrap(err, "failed to load conference series")
 		}
 		c.Series = &s
@@ -531,61 +531,61 @@ func (v *ConferenceSvc) Decorate(tx *db.Tx, c *model.Conference, trustedCall boo
 		return errors.Wrapf(err, "failed to load conference text components for '%s'", c.ID)
 	}
 
-	if err := v.LoadDates(tx, &c.Dates, c.ID); err != nil {
+	if err := v.LoadDates(ctx, tx, &c.Dates, c.ID); err != nil {
 		return errors.Wrapf(err, "failed to load conference date for '%s'", c.ID)
 	}
 
-	if err := v.LoadAdmins(tx, &c.Administrators, trustedCall, c.ID, lang); err != nil {
+	if err := v.LoadAdmins(ctx, tx, &c.Administrators, trustedCall, c.ID, lang); err != nil {
 		return errors.Wrapf(err, "failed to load administrators for '%s'", c.ID)
 	}
 
 	sv := Venue()
-	if err := sv.LoadByConferenceID(tx, &c.Venues, c.ID); err != nil {
+	if err := sv.LoadByConferenceID(ctx, tx, &c.Venues, c.ID); err != nil {
 		return errors.Wrapf(err, "failed to load venues for '%s'", c.ID)
 	}
 	for i := range c.Venues {
-		if err := sv.Decorate(tx, &c.Venues[i], trustedCall, lang); err != nil {
+		if err := sv.Decorate(ctx, tx, &c.Venues[i], trustedCall, lang); err != nil {
 			return errors.Wrap(err, "failed to decorate venues")
 		}
 	}
 
 	st := Track()
-	if err := st.LoadByConferenceID(tx, &c.Tracks, c.ID); err != nil {
+	if err := st.LoadByConferenceID(ctx, tx, &c.Tracks, c.ID); err != nil {
 		return errors.Wrap(err, "failed to load by conference")
 	}
 	for i := range c.Tracks {
-		if err := st.Decorate(tx, &c.Tracks[i], trustedCall, lang); err != nil {
+		if err := st.Decorate(ctx, tx, &c.Tracks[i], trustedCall, lang); err != nil {
 			return errors.Wrap(err, "failed to decorate tracks with associated data")
 		}
 		c.Tracks[i].ConferenceID = ""
 	}
 
 	sfs := FeaturedSpeaker()
-	if err := sfs.LoadByConferenceID(tx, &c.FeaturedSpeakers, c.ID); err != nil {
+	if err := sfs.LoadByConferenceID(ctx, tx, &c.FeaturedSpeakers, c.ID); err != nil {
 		return errors.Wrapf(err, "failed to load featured speakers for '%s'", c.ID)
 	}
 	for i := range c.FeaturedSpeakers {
-		if err := sfs.Decorate(tx, &c.FeaturedSpeakers[i], trustedCall, lang); err != nil {
+		if err := sfs.Decorate(ctx, tx, &c.FeaturedSpeakers[i], trustedCall, lang); err != nil {
 			return errors.Wrap(err, "failed to decorate featured speakers with associated data")
 		}
 	}
 
 	sps := Sponsor()
-	if err := sps.LoadByConferenceID(tx, &c.Sponsors, c.ID); err != nil {
+	if err := sps.LoadByConferenceID(ctx, tx, &c.Sponsors, c.ID); err != nil {
 		return errors.Wrapf(err, "failed to load sponsors for '%s'", c.ID)
 	}
 	for i := range c.Sponsors {
-		if err := sps.Decorate(tx, &c.Sponsors[i], trustedCall, lang); err != nil {
+		if err := sps.Decorate(ctx, tx, &c.Sponsors[i], trustedCall, lang); err != nil {
 			return errors.Wrap(err, "failed to decorate sponsors with associated data")
 		}
 	}
 
 	sts := SessionType()
-	if err := sts.LoadByConferenceID(tx, &c.SessionTypes, c.ID); err != nil {
+	if err := sts.LoadByConferenceID(ctx, tx, &c.SessionTypes, c.ID); err != nil {
 		return errors.Wrapf(err, "failed to load session types for '%s'", c.ID)
 	}
 	for i := range c.SessionTypes {
-		if err := sts.Decorate(tx, &c.SessionTypes[i], trustedCall, lang); err != nil {
+		if err := sts.Decorate(ctx, tx, &c.SessionTypes[i], trustedCall, lang); err != nil {
 			return errors.Wrap(err, "failed to decorate session types with associated data")
 		}
 	}
@@ -595,11 +595,10 @@ func (v *ConferenceSvc) Decorate(tx *db.Tx, c *model.Conference, trustedCall boo
 		return errors.Wrapf(err, "failed to load external resources for '%s'", c.ID)
 	}
 	for i := range c.ExternalResources {
-		if err := ers.Decorate(tx, &c.ExternalResources[i], trustedCall, lang); err != nil {
+		if err := ers.Decorate(ctx, tx, &c.ExternalResources[i], trustedCall, lang); err != nil {
 			return errors.Wrap(err, "failed to decorate external resources with associated data")
 		}
 	}
-
 
 	switch lang {
 	case "", "en":
@@ -612,7 +611,7 @@ func (v *ConferenceSvc) Decorate(tx *db.Tx, c *model.Conference, trustedCall boo
 	return nil
 }
 
-func (v *ConferenceSvc) UploadImagesFromPayload(ctx context.Context, tx *db.Tx, payload *model.UpdateConferenceRequest) (err error) {
+func (v *ConferenceSvc) UploadImagesFromPayload(ctx context.Context, tx *sql.Tx, payload *model.UpdateConferenceRequest) (err error) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("service.Conference.UploadImagesFromPayload").BindError(&err)
 		defer g.End()
@@ -684,14 +683,14 @@ func (v *ConferenceSvc) UploadImagesFromPayload(ctx context.Context, tx *db.Tx, 
 	})
 }
 
-func (v *ConferenceSvc) UpdateFromPayload(ctx context.Context, tx *db.Tx, payload *model.UpdateConferenceRequest) (err error) {
+func (v *ConferenceSvc) UpdateFromPayload(ctx context.Context, tx *sql.Tx, payload *model.UpdateConferenceRequest) (err error) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("service.Conference.UpdateFromPayload (%s)", payload.ID).BindError(&err)
 		defer g.End()
 	}
 
 	su := User()
-	if err := su.IsConferenceAdministrator(tx, payload.ID, payload.UserID); err != nil {
+	if err := su.IsConferenceAdministrator(ctx, tx, payload.ID, context.GetUserID(ctx)); err != nil {
 		return errors.Wrap(err, "updating a conference requires conference administrator privilege")
 	}
 
@@ -789,7 +788,7 @@ func (v *ConferenceSvc) UpdateFromPayload(ctx context.Context, tx *db.Tx, payloa
 	return nil
 }
 
-func (v *ConferenceSvc) ListFromPayload(tx *db.Tx, l *model.ConferenceList, payload *model.ListConferenceRequest) (err error) {
+func (v *ConferenceSvc) ListFromPayload(ctx context.Context, tx *sql.Tx, l *model.ConferenceList, payload *model.ListConferenceRequest) (err error) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("service.Conference.ListFromPayload").BindError(&err)
 		defer g.End()
@@ -813,7 +812,7 @@ func (v *ConferenceSvc) ListFromPayload(tx *db.Tx, l *model.ConferenceList, payl
 		}
 		for i, id := range ids {
 			r.ID = id
-			if err := v.LookupFromPayload(tx, &m[i], &r); err != nil {
+			if err := v.LookupFromPayload(ctx, tx, &m[i], &r); err != nil {
 				return errors.Wrapf(err, "failed to load %s", id)
 			}
 		}
@@ -862,7 +861,7 @@ func (v *ConferenceSvc) ListFromPayload(tx *db.Tx, l *model.ConferenceList, payl
 		if err := (r[i]).FromRow(&vdb); err != nil {
 			return errors.Wrap(err, "failed populate model from database")
 		}
-		if err := v.Decorate(tx, &r[i], false, payload.Lang.String); err != nil {
+		if err := v.Decorate(ctx, tx, &r[i], false, payload.Lang.String); err != nil {
 			return errors.Wrap(err, "failed to decorate venue with associated data")
 		}
 	}
@@ -877,7 +876,7 @@ func (v *ConferenceSvc) ListFromPayload(tx *db.Tx, l *model.ConferenceList, payl
 	return nil
 }
 
-func (v *ConferenceSvc) ListByOrganizerFromPayload(tx *db.Tx, l *model.ConferenceList, payload *model.ListConferencesByOrganizerRequest) (err error) {
+func (v *ConferenceSvc) ListByOrganizerFromPayload(ctx context.Context, tx *sql.Tx, l *model.ConferenceList, payload *model.ListConferencesByOrganizerRequest) (err error) {
 	var vdbl db.ConferenceList
 	if err := vdbl.LoadFromQuery(tx, payload.Status, payload.OrganizerID, time.Time{}, time.Time{}, payload.Since.String, int(payload.Limit.Int)); err != nil {
 		return err
@@ -888,7 +887,7 @@ func (v *ConferenceSvc) ListByOrganizerFromPayload(tx *db.Tx, l *model.Conferenc
 		if err := (res[i]).FromRow(&vdb); err != nil {
 			return errors.Wrap(err, "failed populate model from database")
 		}
-		if err := v.Decorate(tx, &res[i], false, payload.Lang.String); err != nil {
+		if err := v.Decorate(ctx, tx, &res[i], false, payload.Lang.String); err != nil {
 			return errors.Wrap(err, "failed to decorate conference with associated data")
 		}
 	}
@@ -897,7 +896,7 @@ func (v *ConferenceSvc) ListByOrganizerFromPayload(tx *db.Tx, l *model.Conferenc
 
 }
 
-func (v *ConferenceSvc) TweetFromPayload(ctx context.Context, tx *db.Tx, payload *model.TweetAsConferenceRequest) (err error) {
+func (v *ConferenceSvc) TweetFromPayload(ctx context.Context, tx *sql.Tx, payload *model.TweetAsConferenceRequest) (err error) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("service.Conference.Tweet").BindError(&err)
 		defer g.End()
@@ -905,14 +904,14 @@ func (v *ConferenceSvc) TweetFromPayload(ctx context.Context, tx *db.Tx, payload
 
 	// You have to be conference admin to do this
 	su := User()
-	if err := su.IsConferenceAdministrator(tx, payload.ConferenceID, payload.UserID); err != nil {
+	if err := su.IsConferenceAdministrator(ctx, tx, payload.ConferenceID, context.GetUserID(ctx)); err != nil {
 		return errors.Wrap(err, "adding a conference credentials requires conference administrator privilege")
 	}
 
 	return Twitter().TweetAsConference(payload.ConferenceID, payload.Tweet)
 }
 
-func (v *ConferenceSvc) AddCredentialFromPayload(ctx context.Context, tx *db.Tx, payload *model.AddConferenceCredentialRequest) (err error) {
+func (v *ConferenceSvc) AddCredentialFromPayload(ctx context.Context, tx *sql.Tx, payload *model.AddConferenceCredentialRequest) (err error) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("service.Conference.AddCredentialFromPayload").BindError(&err)
 		defer g.End()
@@ -920,7 +919,7 @@ func (v *ConferenceSvc) AddCredentialFromPayload(ctx context.Context, tx *db.Tx,
 
 	// You have to be conference admin to do this
 	su := User()
-	if err := su.IsConferenceAdministrator(tx, payload.ConferenceID, payload.UserID); err != nil {
+	if err := su.IsConferenceAdministrator(ctx, tx, payload.ConferenceID, context.GetUserID(ctx)); err != nil {
 		return errors.Wrap(err, "adding a conference credentials requires conference administrator privilege")
 	}
 
@@ -943,7 +942,36 @@ func (v *ConferenceSvc) AddCredentialFromPayload(ctx context.Context, tx *db.Tx,
 	return nil
 }
 
-func (v *ConferenceSvc) LoadStaff(tx *db.Tx, users *model.UserList, trustedCall bool, confID, lang string) (err error) {
+func (v *ConferenceSvc) ListCredentialFromPayload(ctx context.Context, tx *sql.Tx, names *[]string, payload *model.ListConferenceCredentialRequest) (err error) {
+	if pdebug.Enabled {
+		g := pdebug.Marker("service.Conference.ListCredentialFromPayload").BindError(&err)
+		defer g.End()
+	}
+
+	// Check if this is an administrator/organizer
+	su := User()
+	if err := su.IsConferenceAdministrator(ctx, tx, payload.ConferenceID, context.GetUserID(ctx)); err != nil {
+		return errors.Wrap(err, "listing conference credentials requires conference administrator privilege")
+	}
+
+	prefix := "conferences/" + payload.ConferenceID + "/credentials/"
+	cl := v.credentialStorage
+	list, err := cl.List(ctx, WithQueryPrefix(prefix))
+	if err != nil {
+		return errors.Wrap(err, `failed to list credentials`)
+	}
+
+	for list.Next() {
+		attrs, ok := list.Object().(*storage.ObjectAttrs)
+		if !ok {
+			continue
+		}
+		*names = append(*names, filepath.Base(attrs.Name))
+	}
+	return nil
+}
+
+func (v *ConferenceSvc) LoadStaff(ctx context.Context, tx *sql.Tx, users *model.UserList, trustedCall bool, confID, lang string) (err error) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("service.Conference.LoadStaff").BindError(&err)
 		defer g.End()
@@ -964,7 +992,7 @@ func (v *ConferenceSvc) LoadStaff(tx *db.Tx, users *model.UserList, trustedCall 
 		if err := res[i].FromRow(&vdb); err != nil {
 			return errors.Wrap(err, "failed to map database to model")
 		}
-		if err := su.Decorate(tx, &res[i], trustedCall, lang); err != nil {
+		if err := su.Decorate(ctx, tx, &res[i], trustedCall, lang); err != nil {
 			return errors.Wrap(err, "failed to decorate administrator")
 		}
 	}
@@ -972,9 +1000,9 @@ func (v *ConferenceSvc) LoadStaff(tx *db.Tx, users *model.UserList, trustedCall 
 	return nil
 }
 
-func (v *ConferenceSvc) AddStaffFromPayload(tx *db.Tx, payload *model.AddConferenceStaffRequest) error {
+func (v *ConferenceSvc) AddStaffFromPayload(ctx context.Context, tx *sql.Tx, payload *model.AddConferenceStaffRequest) error {
 	su := User()
-	if err := su.IsConferenceAdministrator(tx, payload.ConferenceID, payload.UserID); err != nil {
+	if err := su.IsConferenceAdministrator(ctx, tx, payload.ConferenceID, context.GetUserID(ctx)); err != nil {
 		return errors.Wrap(err, "adding a conference administrator requires conference administrator privilege")
 	}
 
@@ -988,17 +1016,16 @@ func (v *ConferenceSvc) AddStaffFromPayload(tx *db.Tx, payload *model.AddConfere
 	)
 }
 
-func (v *ConferenceSvc) DeleteStaffFromPayload(tx *db.Tx, payload *model.DeleteConferenceStaffRequest) (err error) {
+func (v *ConferenceSvc) DeleteStaffFromPayload(ctx context.Context, tx *sql.Tx, payload *model.DeleteConferenceStaffRequest) (err error) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("service.Conference.DeleteStaffFromPayload").BindError(&err)
 		defer g.End()
 	}
 
 	su := User()
-	if err := su.IsConferenceAdministrator(tx, payload.ConferenceID, payload.UserID); err != nil {
+	if err := su.IsConferenceAdministrator(ctx, tx, payload.ConferenceID, context.GetUserID(ctx)); err != nil {
 		return errors.Wrap(err, "deleting a conference staff requires conference administrator privilege")
 	}
 
 	return db.DeleteConferenceStaff(tx, payload.ConferenceID, payload.StaffID)
 }
-

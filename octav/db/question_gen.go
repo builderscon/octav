@@ -65,7 +65,7 @@ func init() {
 	})
 }
 
-func (q *Question) LoadByEID(tx *Tx, eid string) (err error) {
+func (q *Question) LoadByEID(tx *sql.Tx, eid string) (err error) {
 	if pdebug.Enabled {
 		g := pdebug.Marker(`Question.LoadByEID %s`, eid).BindError(&err)
 		defer g.End()
@@ -81,7 +81,7 @@ func (q *Question) LoadByEID(tx *Tx, eid string) (err error) {
 	return nil
 }
 
-func (q *Question) Create(tx *Tx, opts ...InsertOption) (err error) {
+func (q *Question) Create(tx *sql.Tx, opts ...InsertOption) (err error) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("db.Question.Create").BindError(&err)
 		defer g.End()
@@ -122,7 +122,7 @@ func (q *Question) Create(tx *Tx, opts ...InsertOption) (err error) {
 	return nil
 }
 
-func (q Question) Update(tx *Tx) (err error) {
+func (q Question) Update(tx *sql.Tx) (err error) {
 	if pdebug.Enabled {
 		g := pdebug.Marker(`Question.Update`).BindError(&err)
 		defer g.End()
@@ -152,7 +152,7 @@ func (q Question) Update(tx *Tx) (err error) {
 	return errors.New("either OID/EID must be filled")
 }
 
-func (q Question) Delete(tx *Tx) error {
+func (q Question) Delete(tx *sql.Tx) error {
 	if q.OID != 0 {
 		stmt, err := library.GetStmt("sqlQuestionDeleteByOIDKey")
 		if err != nil {
@@ -193,7 +193,7 @@ func (v *QuestionList) FromRows(rows *sql.Rows, capacity int) error {
 	return nil
 }
 
-func (v *QuestionList) LoadSinceEID(tx *Tx, since string, limit int) error {
+func (v *QuestionList) LoadSinceEID(tx *sql.Tx, since string, limit int) error {
 	var s int64
 	if id := since; id != "" {
 		vdb := Question{}
@@ -206,7 +206,7 @@ func (v *QuestionList) LoadSinceEID(tx *Tx, since string, limit int) error {
 	return v.LoadSince(tx, s, limit)
 }
 
-func (v *QuestionList) LoadSince(tx *Tx, since int64, limit int) error {
+func (v *QuestionList) LoadSince(tx *sql.Tx, since int64, limit int) error {
 	rows, err := tx.Query(`SELECT `+QuestionStdSelectColumns+` FROM `+QuestionTable+` WHERE questions.oid > ? ORDER BY oid ASC LIMIT `+strconv.Itoa(limit), since)
 	if err != nil {
 		return err

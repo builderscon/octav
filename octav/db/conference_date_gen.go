@@ -64,7 +64,7 @@ func init() {
 	})
 }
 
-func (c *ConferenceDate) LoadByEID(tx *Tx, eid string) (err error) {
+func (c *ConferenceDate) LoadByEID(tx *sql.Tx, eid string) (err error) {
 	if pdebug.Enabled {
 		g := pdebug.Marker(`ConferenceDate.LoadByEID %s`, eid).BindError(&err)
 		defer g.End()
@@ -80,7 +80,7 @@ func (c *ConferenceDate) LoadByEID(tx *Tx, eid string) (err error) {
 	return nil
 }
 
-func (c *ConferenceDate) Create(tx *Tx, opts ...InsertOption) (err error) {
+func (c *ConferenceDate) Create(tx *sql.Tx, opts ...InsertOption) (err error) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("db.ConferenceDate.Create").BindError(&err)
 		defer g.End()
@@ -120,7 +120,7 @@ func (c *ConferenceDate) Create(tx *Tx, opts ...InsertOption) (err error) {
 	return nil
 }
 
-func (c ConferenceDate) Update(tx *Tx) (err error) {
+func (c ConferenceDate) Update(tx *sql.Tx) (err error) {
 	if pdebug.Enabled {
 		g := pdebug.Marker(`ConferenceDate.Update`).BindError(&err)
 		defer g.End()
@@ -150,7 +150,7 @@ func (c ConferenceDate) Update(tx *Tx) (err error) {
 	return errors.New("either OID/EID must be filled")
 }
 
-func (c ConferenceDate) Delete(tx *Tx) error {
+func (c ConferenceDate) Delete(tx *sql.Tx) error {
 	if c.OID != 0 {
 		stmt, err := library.GetStmt("sqlConferenceDateDeleteByOIDKey")
 		if err != nil {
@@ -191,7 +191,7 @@ func (v *ConferenceDateList) FromRows(rows *sql.Rows, capacity int) error {
 	return nil
 }
 
-func (v *ConferenceDateList) LoadSinceEID(tx *Tx, since string, limit int) error {
+func (v *ConferenceDateList) LoadSinceEID(tx *sql.Tx, since string, limit int) error {
 	var s int64
 	if id := since; id != "" {
 		vdb := ConferenceDate{}
@@ -204,7 +204,7 @@ func (v *ConferenceDateList) LoadSinceEID(tx *Tx, since string, limit int) error
 	return v.LoadSince(tx, s, limit)
 }
 
-func (v *ConferenceDateList) LoadSince(tx *Tx, since int64, limit int) error {
+func (v *ConferenceDateList) LoadSince(tx *sql.Tx, since int64, limit int) error {
 	rows, err := tx.Query(`SELECT `+ConferenceDateStdSelectColumns+` FROM `+ConferenceDateTable+` WHERE conference_dates.oid > ? ORDER BY oid ASC LIMIT `+strconv.Itoa(limit), since)
 	if err != nil {
 		return err

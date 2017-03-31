@@ -193,12 +193,23 @@ func (c *GoogleStorageClient) List(ctx context.Context, options ...CallOption) (
 		defer close(out)
 		storagecl := c.GetClient(ctx)
 		b := storagecl.Bucket(c.bucketName)
-		for objects := b.Objects(ctx, q); ; {
-			object, err := objects.Next()
-			if err != nil {
+		for {
+			select {
+			case <-ctx.Done():
 				return
 			}
-			out <- object
+
+			for objects := b.Objects(ctx, q); ; {
+				object, err := objects.Next()
+				if err != nil {
+					return
+				}
+				select {
+				case out <- object:
+				case <-ctx.Done():
+					return
+				}
+			}
 		}
 	}()
 

@@ -1,6 +1,8 @@
 package db
 
 import (
+	"database/sql"
+
 	"github.com/builderscon/octav/octav/tools"
 	"github.com/pkg/errors"
 )
@@ -39,7 +41,7 @@ func init() {
 	})
 }
 
-func DeleteConferenceStaff(tx *Tx, cid, uid string) error {
+func DeleteConferenceStaff(tx *sql.Tx, cid, uid string) error {
 	stmt, err := library.GetStmt(sqlConferenceStaffDeleteKey)
 	if err != nil {
 		return errors.Wrap(err, `failed to get statement`)
@@ -48,7 +50,7 @@ func DeleteConferenceStaff(tx *Tx, cid, uid string) error {
 	return errors.Wrap(err, `failed to execute statements`)
 }
 
-func LoadConferenceStaff(tx *Tx, admins *UserList, cid string) error {
+func LoadConferenceStaff(tx *sql.Tx, admins *UserList, cid string) error {
 	stmt, err := library.GetStmt(sqlConferenceStaffLoadKey)
 	if err != nil {
 		return errors.Wrap(err, `failed to get statement`)

@@ -65,7 +65,7 @@ func init() {
 	})
 }
 
-func (f *FeaturedSpeaker) LoadByEID(tx *Tx, eid string) (err error) {
+func (f *FeaturedSpeaker) LoadByEID(tx *sql.Tx, eid string) (err error) {
 	if pdebug.Enabled {
 		g := pdebug.Marker(`FeaturedSpeaker.LoadByEID %s`, eid).BindError(&err)
 		defer g.End()
@@ -81,7 +81,7 @@ func (f *FeaturedSpeaker) LoadByEID(tx *Tx, eid string) (err error) {
 	return nil
 }
 
-func (f *FeaturedSpeaker) Create(tx *Tx, opts ...InsertOption) (err error) {
+func (f *FeaturedSpeaker) Create(tx *sql.Tx, opts ...InsertOption) (err error) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("db.FeaturedSpeaker.Create").BindError(&err)
 		defer g.End()
@@ -122,7 +122,7 @@ func (f *FeaturedSpeaker) Create(tx *Tx, opts ...InsertOption) (err error) {
 	return nil
 }
 
-func (f FeaturedSpeaker) Update(tx *Tx) (err error) {
+func (f FeaturedSpeaker) Update(tx *sql.Tx) (err error) {
 	if pdebug.Enabled {
 		g := pdebug.Marker(`FeaturedSpeaker.Update`).BindError(&err)
 		defer g.End()
@@ -152,7 +152,7 @@ func (f FeaturedSpeaker) Update(tx *Tx) (err error) {
 	return errors.New("either OID/EID must be filled")
 }
 
-func (f FeaturedSpeaker) Delete(tx *Tx) error {
+func (f FeaturedSpeaker) Delete(tx *sql.Tx) error {
 	if f.OID != 0 {
 		stmt, err := library.GetStmt("sqlFeaturedSpeakerDeleteByOIDKey")
 		if err != nil {
@@ -193,7 +193,7 @@ func (v *FeaturedSpeakerList) FromRows(rows *sql.Rows, capacity int) error {
 	return nil
 }
 
-func (v *FeaturedSpeakerList) LoadSinceEID(tx *Tx, since string, limit int) error {
+func (v *FeaturedSpeakerList) LoadSinceEID(tx *sql.Tx, since string, limit int) error {
 	var s int64
 	if id := since; id != "" {
 		vdb := FeaturedSpeaker{}
@@ -206,7 +206,7 @@ func (v *FeaturedSpeakerList) LoadSinceEID(tx *Tx, since string, limit int) erro
 	return v.LoadSince(tx, s, limit)
 }
 
-func (v *FeaturedSpeakerList) LoadSince(tx *Tx, since int64, limit int) error {
+func (v *FeaturedSpeakerList) LoadSince(tx *sql.Tx, since int64, limit int) error {
 	rows, err := tx.Query(`SELECT `+FeaturedSpeakerStdSelectColumns+` FROM `+FeaturedSpeakerTable+` WHERE featured_speakers.oid > ? ORDER BY oid ASC LIMIT `+strconv.Itoa(limit), since)
 	if err != nil {
 		return err

@@ -4,6 +4,7 @@ package service
 
 import (
 	"context"
+	"database/sql"
 	"sync"
 	"time"
 
@@ -21,6 +22,7 @@ var _ = context.Background
 var _ = errors.Wrap
 var _ = model.ConferenceSeries{}
 var _ = db.ConferenceSeries{}
+var _ = sql.ErrNoRows
 var _ = pdebug.Enabled
 
 var conferenceSeriesSvc ConferenceSeriesSvc
@@ -31,23 +33,23 @@ func ConferenceSeries() *ConferenceSeriesSvc {
 	return &conferenceSeriesSvc
 }
 
-func (v *ConferenceSeriesSvc) LookupFromPayload(tx *db.Tx, m *model.ConferenceSeries, payload *model.LookupConferenceSeriesRequest) (err error) {
+func (v *ConferenceSeriesSvc) LookupFromPayload(ctx context.Context, tx *sql.Tx, m *model.ConferenceSeries, payload *model.LookupConferenceSeriesRequest) (err error) {
 	if pdebug.Enabled {
-		g := pdebug.Marker("service.ConferenceSeries.LookupFromPayload").BindError(&err)
+		g := pdebug.Marker("service.ConferenceSeries.LookupFromPayload %s", payload.ID).BindError(&err)
 		defer g.End()
 	}
-	if err = v.Lookup(tx, m, payload.ID); err != nil {
+	if err = v.Lookup(ctx, tx, m, payload.ID); err != nil {
 		return errors.Wrap(err, "failed to load model.ConferenceSeries from database")
 	}
-	if err := v.Decorate(tx, m, payload.TrustedCall, payload.Lang.String); err != nil {
+	if err := v.Decorate(ctx, tx, m, payload.TrustedCall, payload.Lang.String); err != nil {
 		return errors.Wrap(err, "failed to load associated data for model.ConferenceSeries from database")
 	}
 	return nil
 }
 
-func (v *ConferenceSeriesSvc) Lookup(tx *db.Tx, m *model.ConferenceSeries, id string) (err error) {
+func (v *ConferenceSeriesSvc) Lookup(ctx context.Context, tx *sql.Tx, m *model.ConferenceSeries, id string) (err error) {
 	if pdebug.Enabled {
-		g := pdebug.Marker("service.ConferenceSeries.Lookup").BindError(&err)
+		g := pdebug.Marker("service.ConferenceSeries.Lookup %s", id).BindError(&err)
 		defer g.End()
 	}
 
@@ -78,13 +80,13 @@ func (v *ConferenceSeriesSvc) Lookup(tx *db.Tx, m *model.ConferenceSeries, id st
 // Create takes in the transaction, the incoming payload, and a reference to
 // a database row. The database row is initialized/populated so that the
 // caller can use it afterwards.
-func (v *ConferenceSeriesSvc) Create(tx *db.Tx, vdb *db.ConferenceSeries, payload *model.CreateConferenceSeriesRequest) (err error) {
+func (v *ConferenceSeriesSvc) Create(ctx context.Context, tx *sql.Tx, vdb *db.ConferenceSeries, payload *model.CreateConferenceSeriesRequest) (err error) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("service.ConferenceSeries.Create").BindError(&err)
 		defer g.End()
 	}
 
-	if err := v.populateRowForCreate(vdb, payload); err != nil {
+	if err := v.populateRowForCreate(ctx, vdb, payload); err != nil {
 		return errors.Wrap(err, `failed to populate row`)
 	}
 
@@ -98,7 +100,7 @@ func (v *ConferenceSeriesSvc) Create(tx *db.Tx, vdb *db.ConferenceSeries, payloa
 	return nil
 }
 
-func (v *ConferenceSeriesSvc) Update(tx *db.Tx, vdb *db.ConferenceSeries) (err error) {
+func (v *ConferenceSeriesSvc) Update(tx *sql.Tx, vdb *db.ConferenceSeries) (err error) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("service.ConferenceSeries.Update (%s)", vdb.EID).BindError(&err)
 		defer g.End()
@@ -125,7 +127,7 @@ func (v *ConferenceSeriesSvc) Update(tx *db.Tx, vdb *db.ConferenceSeries) (err e
 	return nil
 }
 
-func (v *ConferenceSeriesSvc) UpdateFromPayload(ctx context.Context, tx *db.Tx, payload *model.UpdateConferenceSeriesRequest) (err error) {
+func (v *ConferenceSeriesSvc) UpdateFromPayload(ctx context.Context, tx *sql.Tx, payload *model.UpdateConferenceSeriesRequest) (err error) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("service.ConferenceSeries.UpdateFromPayload (%s)", payload.ID).BindError(&err)
 		defer g.End()
@@ -135,7 +137,7 @@ func (v *ConferenceSeriesSvc) UpdateFromPayload(ctx context.Context, tx *db.Tx, 
 		return errors.Wrap(err, `failed to load from database`)
 	}
 
-	if err := v.populateRowForUpdate(&vdb, payload); err != nil {
+	if err := v.populateRowForUpdate(ctx, &vdb, payload); err != nil {
 		return errors.Wrap(err, `failed to populate row data`)
 	}
 
@@ -150,7 +152,7 @@ func (v *ConferenceSeriesSvc) UpdateFromPayload(ctx context.Context, tx *db.Tx, 
 	return nil
 }
 
-func (v *ConferenceSeriesSvc) ReplaceL10NStrings(tx *db.Tx, m *model.ConferenceSeries, lang string) error {
+func (v *ConferenceSeriesSvc) ReplaceL10NStrings(tx *sql.Tx, m *model.ConferenceSeries, lang string) error {
 	if pdebug.Enabled {
 		g := pdebug.Marker("service.ConferenceSeries.ReplaceL10NStrings lang = %s", lang)
 		defer g.End()
@@ -216,7 +218,7 @@ func (v *ConferenceSeriesSvc) ReplaceL10NStrings(tx *db.Tx, m *model.ConferenceS
 	return nil
 }
 
-func (v *ConferenceSeriesSvc) Delete(tx *db.Tx, id string) error {
+func (v *ConferenceSeriesSvc) Delete(tx *sql.Tx, id string) error {
 	if pdebug.Enabled {
 		g := pdebug.Marker("ConferenceSeries.Delete (%s)", id)
 		defer g.End()

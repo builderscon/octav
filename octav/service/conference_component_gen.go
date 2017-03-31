@@ -4,6 +4,7 @@ package service
 
 import (
 	"context"
+	"database/sql"
 	"sync"
 	"time"
 
@@ -21,6 +22,7 @@ var _ = context.Background
 var _ = errors.Wrap
 var _ = model.ConferenceComponent{}
 var _ = db.ConferenceComponent{}
+var _ = sql.ErrNoRows
 var _ = pdebug.Enabled
 
 var conferenceComponentSvc ConferenceComponentSvc
@@ -31,20 +33,20 @@ func ConferenceComponent() *ConferenceComponentSvc {
 	return &conferenceComponentSvc
 }
 
-func (v *ConferenceComponentSvc) LookupFromPayload(tx *db.Tx, m *model.ConferenceComponent, payload *model.LookupConferenceComponentRequest) (err error) {
+func (v *ConferenceComponentSvc) LookupFromPayload(ctx context.Context, tx *sql.Tx, m *model.ConferenceComponent, payload *model.LookupConferenceComponentRequest) (err error) {
 	if pdebug.Enabled {
-		g := pdebug.Marker("service.ConferenceComponent.LookupFromPayload").BindError(&err)
+		g := pdebug.Marker("service.ConferenceComponent.LookupFromPayload %s", payload.ID).BindError(&err)
 		defer g.End()
 	}
-	if err = v.Lookup(tx, m, payload.ID); err != nil {
+	if err = v.Lookup(ctx, tx, m, payload.ID); err != nil {
 		return errors.Wrap(err, "failed to load model.ConferenceComponent from database")
 	}
 	return nil
 }
 
-func (v *ConferenceComponentSvc) Lookup(tx *db.Tx, m *model.ConferenceComponent, id string) (err error) {
+func (v *ConferenceComponentSvc) Lookup(ctx context.Context, tx *sql.Tx, m *model.ConferenceComponent, id string) (err error) {
 	if pdebug.Enabled {
-		g := pdebug.Marker("service.ConferenceComponent.Lookup").BindError(&err)
+		g := pdebug.Marker("service.ConferenceComponent.Lookup %s", id).BindError(&err)
 		defer g.End()
 	}
 
@@ -75,13 +77,13 @@ func (v *ConferenceComponentSvc) Lookup(tx *db.Tx, m *model.ConferenceComponent,
 // Create takes in the transaction, the incoming payload, and a reference to
 // a database row. The database row is initialized/populated so that the
 // caller can use it afterwards.
-func (v *ConferenceComponentSvc) Create(tx *db.Tx, vdb *db.ConferenceComponent, payload *model.CreateConferenceComponentRequest) (err error) {
+func (v *ConferenceComponentSvc) Create(ctx context.Context, tx *sql.Tx, vdb *db.ConferenceComponent, payload *model.CreateConferenceComponentRequest) (err error) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("service.ConferenceComponent.Create").BindError(&err)
 		defer g.End()
 	}
 
-	if err := v.populateRowForCreate(vdb, payload); err != nil {
+	if err := v.populateRowForCreate(ctx, vdb, payload); err != nil {
 		return errors.Wrap(err, `failed to populate row`)
 	}
 
@@ -92,7 +94,7 @@ func (v *ConferenceComponentSvc) Create(tx *db.Tx, vdb *db.ConferenceComponent, 
 	return nil
 }
 
-func (v *ConferenceComponentSvc) Update(tx *db.Tx, vdb *db.ConferenceComponent) (err error) {
+func (v *ConferenceComponentSvc) Update(tx *sql.Tx, vdb *db.ConferenceComponent) (err error) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("service.ConferenceComponent.Update (%s)", vdb.EID).BindError(&err)
 		defer g.End()
@@ -119,7 +121,7 @@ func (v *ConferenceComponentSvc) Update(tx *db.Tx, vdb *db.ConferenceComponent) 
 	return nil
 }
 
-func (v *ConferenceComponentSvc) UpdateFromPayload(ctx context.Context, tx *db.Tx, payload *model.UpdateConferenceComponentRequest) (err error) {
+func (v *ConferenceComponentSvc) UpdateFromPayload(ctx context.Context, tx *sql.Tx, payload *model.UpdateConferenceComponentRequest) (err error) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("service.ConferenceComponent.UpdateFromPayload (%s)", payload.ID).BindError(&err)
 		defer g.End()
@@ -129,7 +131,7 @@ func (v *ConferenceComponentSvc) UpdateFromPayload(ctx context.Context, tx *db.T
 		return errors.Wrap(err, `failed to load from database`)
 	}
 
-	if err := v.populateRowForUpdate(&vdb, payload); err != nil {
+	if err := v.populateRowForUpdate(ctx, &vdb, payload); err != nil {
 		return errors.Wrap(err, `failed to populate row data`)
 	}
 
@@ -139,7 +141,7 @@ func (v *ConferenceComponentSvc) UpdateFromPayload(ctx context.Context, tx *db.T
 	return nil
 }
 
-func (v *ConferenceComponentSvc) Delete(tx *db.Tx, id string) error {
+func (v *ConferenceComponentSvc) Delete(tx *sql.Tx, id string) error {
 	if pdebug.Enabled {
 		g := pdebug.Marker("ConferenceComponent.Delete (%s)", id)
 		defer g.End()

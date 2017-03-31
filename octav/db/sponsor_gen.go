@@ -65,7 +65,7 @@ func init() {
 	})
 }
 
-func (s *Sponsor) LoadByEID(tx *Tx, eid string) (err error) {
+func (s *Sponsor) LoadByEID(tx *sql.Tx, eid string) (err error) {
 	if pdebug.Enabled {
 		g := pdebug.Marker(`Sponsor.LoadByEID %s`, eid).BindError(&err)
 		defer g.End()
@@ -81,7 +81,7 @@ func (s *Sponsor) LoadByEID(tx *Tx, eid string) (err error) {
 	return nil
 }
 
-func (s *Sponsor) Create(tx *Tx, opts ...InsertOption) (err error) {
+func (s *Sponsor) Create(tx *sql.Tx, opts ...InsertOption) (err error) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("db.Sponsor.Create").BindError(&err)
 		defer g.End()
@@ -122,7 +122,7 @@ func (s *Sponsor) Create(tx *Tx, opts ...InsertOption) (err error) {
 	return nil
 }
 
-func (s Sponsor) Update(tx *Tx) (err error) {
+func (s Sponsor) Update(tx *sql.Tx) (err error) {
 	if pdebug.Enabled {
 		g := pdebug.Marker(`Sponsor.Update`).BindError(&err)
 		defer g.End()
@@ -152,7 +152,7 @@ func (s Sponsor) Update(tx *Tx) (err error) {
 	return errors.New("either OID/EID must be filled")
 }
 
-func (s Sponsor) Delete(tx *Tx) error {
+func (s Sponsor) Delete(tx *sql.Tx) error {
 	if s.OID != 0 {
 		stmt, err := library.GetStmt("sqlSponsorDeleteByOIDKey")
 		if err != nil {
@@ -193,7 +193,7 @@ func (v *SponsorList) FromRows(rows *sql.Rows, capacity int) error {
 	return nil
 }
 
-func (v *SponsorList) LoadSinceEID(tx *Tx, since string, limit int) error {
+func (v *SponsorList) LoadSinceEID(tx *sql.Tx, since string, limit int) error {
 	var s int64
 	if id := since; id != "" {
 		vdb := Sponsor{}
@@ -206,7 +206,7 @@ func (v *SponsorList) LoadSinceEID(tx *Tx, since string, limit int) error {
 	return v.LoadSince(tx, s, limit)
 }
 
-func (v *SponsorList) LoadSince(tx *Tx, since int64, limit int) error {
+func (v *SponsorList) LoadSince(tx *sql.Tx, since int64, limit int) error {
 	rows, err := tx.Query(`SELECT `+SponsorStdSelectColumns+` FROM `+SponsorTable+` WHERE sponsors.oid > ? ORDER BY oid ASC LIMIT `+strconv.Itoa(limit), since)
 	if err != nil {
 		return err

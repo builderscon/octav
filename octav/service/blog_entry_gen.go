@@ -4,6 +4,7 @@ package service
 
 import (
 	"context"
+	"database/sql"
 	"sync"
 	"time"
 
@@ -21,6 +22,7 @@ var _ = context.Background
 var _ = errors.Wrap
 var _ = model.BlogEntry{}
 var _ = db.BlogEntry{}
+var _ = sql.ErrNoRows
 var _ = pdebug.Enabled
 
 var blogEntrySvc BlogEntrySvc
@@ -31,20 +33,20 @@ func BlogEntry() *BlogEntrySvc {
 	return &blogEntrySvc
 }
 
-func (v *BlogEntrySvc) LookupFromPayload(tx *db.Tx, m *model.BlogEntry, payload *model.LookupBlogEntryRequest) (err error) {
+func (v *BlogEntrySvc) LookupFromPayload(ctx context.Context, tx *sql.Tx, m *model.BlogEntry, payload *model.LookupBlogEntryRequest) (err error) {
 	if pdebug.Enabled {
-		g := pdebug.Marker("service.BlogEntry.LookupFromPayload").BindError(&err)
+		g := pdebug.Marker("service.BlogEntry.LookupFromPayload %s", payload.ID).BindError(&err)
 		defer g.End()
 	}
-	if err = v.Lookup(tx, m, payload.ID); err != nil {
+	if err = v.Lookup(ctx, tx, m, payload.ID); err != nil {
 		return errors.Wrap(err, "failed to load model.BlogEntry from database")
 	}
 	return nil
 }
 
-func (v *BlogEntrySvc) Lookup(tx *db.Tx, m *model.BlogEntry, id string) (err error) {
+func (v *BlogEntrySvc) Lookup(ctx context.Context, tx *sql.Tx, m *model.BlogEntry, id string) (err error) {
 	if pdebug.Enabled {
-		g := pdebug.Marker("service.BlogEntry.Lookup").BindError(&err)
+		g := pdebug.Marker("service.BlogEntry.Lookup %s", id).BindError(&err)
 		defer g.End()
 	}
 
@@ -75,13 +77,13 @@ func (v *BlogEntrySvc) Lookup(tx *db.Tx, m *model.BlogEntry, id string) (err err
 // Create takes in the transaction, the incoming payload, and a reference to
 // a database row. The database row is initialized/populated so that the
 // caller can use it afterwards.
-func (v *BlogEntrySvc) Create(tx *db.Tx, vdb *db.BlogEntry, payload *model.CreateBlogEntryRequest) (err error) {
+func (v *BlogEntrySvc) Create(ctx context.Context, tx *sql.Tx, vdb *db.BlogEntry, payload *model.CreateBlogEntryRequest) (err error) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("service.BlogEntry.Create").BindError(&err)
 		defer g.End()
 	}
 
-	if err := v.populateRowForCreate(vdb, payload); err != nil {
+	if err := v.populateRowForCreate(ctx, vdb, payload); err != nil {
 		return errors.Wrap(err, `failed to populate row`)
 	}
 
@@ -89,13 +91,13 @@ func (v *BlogEntrySvc) Create(tx *db.Tx, vdb *db.BlogEntry, payload *model.Creat
 		return errors.Wrap(err, `failed to insert into database`)
 	}
 
-	if err := v.PostCreateHook(tx, vdb); err != nil {
+	if err := v.PostCreateHook(ctx, tx, vdb); err != nil {
 		return errors.Wrap(err, `post create hook failed`)
 	}
 	return nil
 }
 
-func (v *BlogEntrySvc) Update(tx *db.Tx, vdb *db.BlogEntry) (err error) {
+func (v *BlogEntrySvc) Update(tx *sql.Tx, vdb *db.BlogEntry) (err error) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("service.BlogEntry.Update (%s)", vdb.EID).BindError(&err)
 		defer g.End()
@@ -125,7 +127,7 @@ func (v *BlogEntrySvc) Update(tx *db.Tx, vdb *db.BlogEntry) (err error) {
 	return nil
 }
 
-func (v *BlogEntrySvc) UpdateFromPayload(ctx context.Context, tx *db.Tx, payload *model.UpdateBlogEntryRequest) (err error) {
+func (v *BlogEntrySvc) UpdateFromPayload(ctx context.Context, tx *sql.Tx, payload *model.UpdateBlogEntryRequest) (err error) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("service.BlogEntry.UpdateFromPayload (%s)", payload.ID).BindError(&err)
 		defer g.End()
@@ -135,7 +137,7 @@ func (v *BlogEntrySvc) UpdateFromPayload(ctx context.Context, tx *db.Tx, payload
 		return errors.Wrap(err, `failed to load from database`)
 	}
 
-	if err := v.populateRowForUpdate(&vdb, payload); err != nil {
+	if err := v.populateRowForUpdate(ctx, &vdb, payload); err != nil {
 		return errors.Wrap(err, `failed to populate row data`)
 	}
 
@@ -145,7 +147,7 @@ func (v *BlogEntrySvc) UpdateFromPayload(ctx context.Context, tx *db.Tx, payload
 	return nil
 }
 
-func (v *BlogEntrySvc) Delete(tx *db.Tx, id string) error {
+func (v *BlogEntrySvc) Delete(tx *sql.Tx, id string) error {
 	if pdebug.Enabled {
 		g := pdebug.Marker("BlogEntry.Delete (%s)", id)
 		defer g.End()

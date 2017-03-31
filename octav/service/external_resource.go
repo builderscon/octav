@@ -1,11 +1,13 @@
 package service
 
 import (
-	"time"
+	"database/sql"
 	"net/url"
+	"time"
 
 	"github.com/builderscon/octav/octav/cache"
 	"github.com/builderscon/octav/octav/db"
+	"github.com/builderscon/octav/octav/internal/context"
 	"github.com/builderscon/octav/octav/model"
 	"github.com/builderscon/octav/octav/tools"
 	"github.com/pkg/errors"
@@ -15,7 +17,7 @@ import (
 
 func (v *ExternalResourceSvc) Init() {}
 
-func (v *ExternalResourceSvc) populateRowForCreate(vdb *db.ExternalResource, payload *model.CreateExternalResourceRequest) error {
+func (v *ExternalResourceSvc) populateRowForCreate(ctx context.Context, vdb *db.ExternalResource, payload *model.CreateExternalResourceRequest) error {
 	vdb.EID = tools.UUID()
 	vdb.ConferenceID = payload.ConferenceID
 	vdb.Title = payload.Title
@@ -39,7 +41,7 @@ func (v *ExternalResourceSvc) populateRowForCreate(vdb *db.ExternalResource, pay
 	return nil
 }
 
-func (v *ExternalResourceSvc) populateRowForUpdate(vdb *db.ExternalResource, payload *model.UpdateExternalResourceRequest) error {
+func (v *ExternalResourceSvc) populateRowForUpdate(ctx context.Context, vdb *db.ExternalResource, payload *model.UpdateExternalResourceRequest) error {
 	if payload.Description.Valid() {
 		vdb.Description = payload.Description.String
 	}
@@ -61,9 +63,9 @@ func (v *ExternalResourceSvc) populateRowForUpdate(vdb *db.ExternalResource, pay
 	return nil
 }
 
-func (v *ExternalResourceSvc) CreateFromPayload(tx *db.Tx, result *model.ExternalResource, payload *model.CreateExternalResourceRequest) error {
+func (v *ExternalResourceSvc) CreateFromPayload(ctx context.Context, tx *sql.Tx, result *model.ExternalResource, payload *model.CreateExternalResourceRequest) error {
 	var vdb db.ExternalResource
-	if err := v.Create(tx, &vdb, payload); err != nil {
+	if err := v.Create(ctx, tx, &vdb, payload); err != nil {
 		return errors.Wrap(err, "failed to insert into database")
 	}
 
@@ -76,16 +78,16 @@ func (v *ExternalResourceSvc) CreateFromPayload(tx *db.Tx, result *model.Externa
 	return nil
 }
 
-func (v *ExternalResourceSvc) DeleteFromPayload(tx *db.Tx, payload *model.DeleteExternalResourceRequest) error {
+func (v *ExternalResourceSvc) DeleteFromPayload(ctx context.Context, tx *sql.Tx, payload *model.DeleteExternalResourceRequest) error {
 	su := User()
-	if err := su.IsAdministrator(tx, payload.UserID); err != nil {
+	if err := su.IsAdministrator(ctx, tx, context.GetUserID(ctx)); err != nil {
 		return errors.Wrap(err, "deleting exrernal resources require administrator privileges")
 	}
 
 	return errors.Wrap(v.Delete(tx, payload.ID), "failed to delete from database")
 }
 
-func (v *ExternalResourceSvc) ListFromPayload(tx *db.Tx, result *model.ExternalResourceList, payload *model.ListExternalResourceRequest) error {
+func (v *ExternalResourceSvc) ListFromPayload(ctx context.Context, tx *sql.Tx, result *model.ExternalResourceList, payload *model.ListExternalResourceRequest) error {
 	var vdbl db.ExternalResourceList
 	if err := vdbl.LoadSinceEID(tx, payload.Since.String, int(payload.Limit.Int)); err != nil {
 		return errors.Wrap(err, "failed to load from database")
@@ -97,7 +99,7 @@ func (v *ExternalResourceSvc) ListFromPayload(tx *db.Tx, result *model.ExternalR
 			return errors.Wrap(err, "failed to populate model from database")
 		}
 
-		if err := v.Decorate(tx, &l[i], payload.TrustedCall, payload.Lang.String); err != nil {
+		if err := v.Decorate(ctx, tx, &l[i], payload.TrustedCall, payload.Lang.String); err != nil {
 			return errors.Wrap(err, "failed to decorate exrernal resource with associated data")
 		}
 	}
@@ -116,19 +118,19 @@ func invalidateExternalResourceLoadByConferenceID(conferenceID string) error {
 	return nil
 }
 
-func (v *ExternalResourceSvc) PostCreateHook(_ *db.Tx, vdb *db.ExternalResource) error {
+func (v *ExternalResourceSvc) PostCreateHook(ctx context.Context, _ *sql.Tx, vdb *db.ExternalResource) error {
 	return invalidateExternalResourceLoadByConferenceID(vdb.ConferenceID)
 }
 
-func (v *ExternalResourceSvc) PostUpdateHook(_ *db.Tx, vdb *db.ExternalResource) error {
+func (v *ExternalResourceSvc) PostUpdateHook(_ *sql.Tx, vdb *db.ExternalResource) error {
 	return invalidateExternalResourceLoadByConferenceID(vdb.ConferenceID)
 }
 
-func (v *ExternalResourceSvc) PostDeleteHook(_ *db.Tx, vdb *db.ExternalResource) error {
+func (v *ExternalResourceSvc) PostDeleteHook(_ *sql.Tx, vdb *db.ExternalResource) error {
 	return invalidateExternalResourceLoadByConferenceID(vdb.ConferenceID)
 }
 
-func (v *ExternalResourceSvc) Decorate(tx *db.Tx, c *model.ExternalResource, trustedCall bool, lang string) error {
+func (v *ExternalResourceSvc) Decorate(ctx context.Context, tx *sql.Tx, c *model.ExternalResource, trustedCall bool, lang string) error {
 	if lang == "" {
 		return nil
 	}
@@ -138,7 +140,7 @@ func (v *ExternalResourceSvc) Decorate(tx *db.Tx, c *model.ExternalResource, tru
 	return nil
 }
 
-func (v *ExternalResourceSvc) LoadByConferenceID(tx *db.Tx, result *model.ExternalResourceList, cid string, trustedCall bool, lang string) (err error) {
+func (v *ExternalResourceSvc) LoadByConferenceID(tx *sql.Tx, result *model.ExternalResourceList, cid string, trustedCall bool, lang string) (err error) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("service.ExternalResource.LoadByConferenceID %s", cid).BindError(&err)
 		defer g.End()

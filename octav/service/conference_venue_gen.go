@@ -4,6 +4,7 @@ package service
 
 import (
 	"context"
+	"database/sql"
 	"sync"
 	"time"
 
@@ -21,6 +22,7 @@ var _ = context.Background
 var _ = errors.Wrap
 var _ = model.ConferenceVenue{}
 var _ = db.ConferenceVenue{}
+var _ = sql.ErrNoRows
 var _ = pdebug.Enabled
 
 var conferenceVenueSvc ConferenceVenueSvc
@@ -34,13 +36,13 @@ func ConferenceVenue() *ConferenceVenueSvc {
 // Create takes in the transaction, the incoming payload, and a reference to
 // a database row. The database row is initialized/populated so that the
 // caller can use it afterwards.
-func (v *ConferenceVenueSvc) Create(tx *db.Tx, vdb *db.ConferenceVenue, payload *model.CreateConferenceVenueRequest) (err error) {
+func (v *ConferenceVenueSvc) Create(ctx context.Context, tx *sql.Tx, vdb *db.ConferenceVenue, payload *model.CreateConferenceVenueRequest) (err error) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("service.ConferenceVenue.Create").BindError(&err)
 		defer g.End()
 	}
 
-	if err := v.populateRowForCreate(vdb, payload); err != nil {
+	if err := v.populateRowForCreate(ctx, vdb, payload); err != nil {
 		return errors.Wrap(err, `failed to populate row`)
 	}
 
@@ -48,7 +50,7 @@ func (v *ConferenceVenueSvc) Create(tx *db.Tx, vdb *db.ConferenceVenue, payload 
 		return errors.Wrap(err, `failed to insert into database`)
 	}
 
-	if err := v.PostCreateHook(tx, vdb); err != nil {
+	if err := v.PostCreateHook(ctx, tx, vdb); err != nil {
 		return errors.Wrap(err, `post create hook failed`)
 	}
 	return nil

@@ -50,7 +50,7 @@ type Server struct {
 // function to something that create a context, and then sets
 // the appengine context to it so it can be referred to later.
 var NewContext func(*http.Request) context.Context = func(r *http.Request) context.Context {
-	return context.Background()
+	return r.Context()
 }
 
 func Run(l string) error {
@@ -617,6 +617,52 @@ func httpCreateBlogEntry(ctx context.Context, w http.ResponseWriter, r *http.Req
 		return
 	}
 	doCreateBlogEntry(ctx, w, r, &payload)
+}
+
+func httpCreateClientSession(ctx context.Context, w http.ResponseWriter, r *http.Request) {
+	if pdebug.Enabled {
+		g := pdebug.Marker("httpCreateClientSession")
+		defer g.End()
+	}
+	method := strings.ToLower(r.Method)
+	if method != `post` {
+		w.Header().Set("Allow", "post")
+		msgbuf := getBytesBuffer()
+		defer releaseBytesBuffer(msgbuf)
+		msgbuf.WriteString(`Method was `)
+		msgbuf.WriteString(r.Method)
+		msgbuf.WriteString(`, expected 'post'`)
+		httpError(w, msgbuf.String(), http.StatusNotFound, nil)
+		return
+	}
+
+	var payload model.CreateClientSessionRequest
+	jsonbuf := getBytesBuffer()
+	defer releaseBytesBuffer(jsonbuf)
+
+	switch ct := r.Header.Get("Content-Type"); {
+	case ct == "application/json":
+		if _, err := io.Copy(jsonbuf, io.LimitReader(r.Body, MaxPostSize)); err != nil {
+			httpError(w, `Failed to read request body`, http.StatusInternalServerError, err)
+			return
+		}
+	default:
+		httpError(w, `Invalid content-type`, http.StatusInternalServerError, nil)
+		return
+	}
+	if pdebug.Enabled {
+		pdebug.Printf(`-----> %s`, jsonbuf.Bytes())
+	}
+	if err := json.Unmarshal(jsonbuf.Bytes(), &payload); err != nil {
+		httpError(w, `Invalid JSON input`, http.StatusInternalServerError, err)
+		return
+	}
+
+	if err := validator.HTTPCreateClientSessionRequest.Validate(&payload); err != nil {
+		httpError(w, `Invalid input (validation failed)`, http.StatusInternalServerError, err)
+		return
+	}
+	doCreateClientSession(ctx, w, r, &payload)
 }
 
 func httpCreateConference(ctx context.Context, w http.ResponseWriter, r *http.Request) {
@@ -3041,6 +3087,65 @@ func httpSendSelectionResultNotification(ctx context.Context, w http.ResponseWri
 	doSendSelectionResultNotification(ctx, w, r, &payload)
 }
 
+func httpSetSessionVideoCover(ctx context.Context, w http.ResponseWriter, r *http.Request) {
+	if pdebug.Enabled {
+		g := pdebug.Marker("httpSetSessionVideoCover")
+		defer g.End()
+	}
+	method := strings.ToLower(r.Method)
+	if method != `post` {
+		w.Header().Set("Allow", "post")
+		msgbuf := getBytesBuffer()
+		defer releaseBytesBuffer(msgbuf)
+		msgbuf.WriteString(`Method was `)
+		msgbuf.WriteString(r.Method)
+		msgbuf.WriteString(`, expected 'post'`)
+		httpError(w, msgbuf.String(), http.StatusNotFound, nil)
+		return
+	}
+
+	var payload model.SetSessionVideoCoverRequest
+	jsonbuf := getBytesBuffer()
+	defer releaseBytesBuffer(jsonbuf)
+
+	switch ct := r.Header.Get("Content-Type"); {
+	case ct == "application/json":
+		if _, err := io.Copy(jsonbuf, io.LimitReader(r.Body, MaxPostSize)); err != nil {
+			httpError(w, `Failed to read request body`, http.StatusInternalServerError, err)
+			return
+		}
+	case strings.HasPrefix(ct, "multipart/"):
+		if err := r.ParseMultipartForm(MaxPostSize); err != nil {
+			httpError(w, `Invalid multipart data`, http.StatusInternalServerError, err)
+			return
+		}
+		vals, ok := r.MultipartForm.Value["payload"]
+		if ok && len(vals) > 0 {
+			if _, err := jsonbuf.WriteString(vals[0]); err != nil {
+				httpError(w, `Failed to read payload`, http.StatusInternalServerError, err)
+				return
+			}
+		}
+		payload.MultipartForm = r.MultipartForm
+	default:
+		httpError(w, `Invalid content-type`, http.StatusInternalServerError, nil)
+		return
+	}
+	if pdebug.Enabled {
+		pdebug.Printf(`-----> %s`, jsonbuf.Bytes())
+	}
+	if err := json.Unmarshal(jsonbuf.Bytes(), &payload); err != nil {
+		httpError(w, `Invalid JSON input`, http.StatusInternalServerError, err)
+		return
+	}
+
+	if err := validator.HTTPSetSessionVideoCoverRequest.Validate(&payload); err != nil {
+		httpError(w, `Invalid input (validation failed)`, http.StatusInternalServerError, err)
+		return
+	}
+	doSetSessionVideoCover(ctx, w, r, &payload)
+}
+
 func httpTweetAsConference(ctx context.Context, w http.ResponseWriter, r *http.Request) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("httpTweetAsConference")
@@ -3449,19 +3554,6 @@ func httpUpdateSponsor(ctx context.Context, w http.ResponseWriter, r *http.Reque
 			httpError(w, `Failed to read request body`, http.StatusInternalServerError, err)
 			return
 		}
-	case strings.HasPrefix(ct, "multipart/"):
-		if err := r.ParseMultipartForm(MaxPostSize); err != nil {
-			httpError(w, `Invalid multipart data`, http.StatusInternalServerError, err)
-			return
-		}
-		vals, ok := r.MultipartForm.Value["payload"]
-		if ok && len(vals) > 0 {
-			if _, err := jsonbuf.WriteString(vals[0]); err != nil {
-				httpError(w, `Failed to read payload`, http.StatusInternalServerError, err)
-				return
-			}
-		}
-		payload.MultipartForm = r.MultipartForm
 	default:
 		httpError(w, `Invalid content-type`, http.StatusInternalServerError, nil)
 		return
@@ -3668,89 +3760,91 @@ func httpVerifyUser(ctx context.Context, w http.ResponseWriter, r *http.Request)
 func (s *Server) SetupRoutes() {
 	r := s.Router
 	r.HandleFunc(`/`, httpWithContext(httpHealthCheck))
-	r.HandleFunc(`/v1/blog_entry/create`, httpWithContext(httpWithBasicAuth(httpCreateBlogEntry)))
-	r.HandleFunc(`/v1/blog_entry/delete`, httpWithContext(httpWithBasicAuth(httpDeleteBlogEntry)))
-	r.HandleFunc(`/v1/blog_entry/list`, httpWithContext(httpListBlogEntries))
-	r.HandleFunc(`/v1/blog_entry/lookup`, httpWithContext(httpLookupBlogEntry))
-	r.HandleFunc(`/v1/blog_entry/update`, httpWithContext(httpWithBasicAuth(httpUpdateBlogEntry)))
-	r.HandleFunc(`/v1/conference/admin/add`, httpWithContext(httpWithBasicAuth(httpAddConferenceAdmin)))
-	r.HandleFunc(`/v1/conference/admin/delete`, httpWithContext(httpWithBasicAuth(httpDeleteConferenceAdmin)))
-	r.HandleFunc(`/v1/conference/admin/list`, httpWithContext(httpWithBasicAuth(httpListConferenceAdmin)))
-	r.HandleFunc(`/v1/conference/create`, httpWithContext(httpWithBasicAuth(httpCreateConference)))
-	r.HandleFunc(`/v1/conference/credentials/add`, httpWithContext(httpWithBasicAuth(httpAddConferenceCredential)))
-	r.HandleFunc(`/v1/conference/date/add`, httpWithContext(httpWithBasicAuth(httpAddConferenceDate)))
-	r.HandleFunc(`/v1/conference/date/delete`, httpWithContext(httpDeleteConferenceDate))
-	r.HandleFunc(`/v1/conference/date/list`, httpWithContext(httpWithBasicAuth(httpListConferenceDate)))
-	r.HandleFunc(`/v1/conference/delete`, httpWithContext(httpWithBasicAuth(httpDeleteConference)))
-	r.HandleFunc(`/v1/conference/list`, httpWithContext(httpWithOptionalBasicAuth(httpListConference)))
-	r.HandleFunc(`/v1/conference/list_by_organizer`, httpWithContext(httpWithOptionalBasicAuth(httpListConferencesByOrganizer)))
-	r.HandleFunc(`/v1/conference/lookup`, httpWithContext(httpLookupConference))
-	r.HandleFunc(`/v1/conference/lookup_by_slug`, httpWithContext(httpLookupConferenceBySlug))
-	r.HandleFunc(`/v1/conference/schedule.ics`, httpWithContext(httpGetConferenceSchedule))
-	r.HandleFunc(`/v1/conference/session_type/add`, httpWithContext(httpWithBasicAuth(httpAddSessionType)))
-	r.HandleFunc(`/v1/conference/staff/add`, httpWithContext(httpWithBasicAuth(httpAddConferenceStaff)))
-	r.HandleFunc(`/v1/conference/staff/delete`, httpWithContext(httpWithBasicAuth(httpDeleteConferenceStaff)))
-	r.HandleFunc(`/v1/conference/staff/list`, httpWithContext(httpWithOptionalBasicAuth(httpListConferenceStaff)))
-	r.HandleFunc(`/v1/conference/tweet`, httpWithContext(httpWithBasicAuth(httpTweetAsConference)))
-	r.HandleFunc(`/v1/conference/update`, httpWithContext(httpWithBasicAuth(httpUpdateConference)))
-	r.HandleFunc(`/v1/conference/venue/add`, httpWithContext(httpWithBasicAuth(httpAddConferenceVenue)))
-	r.HandleFunc(`/v1/conference/venue/delete`, httpWithContext(httpWithBasicAuth(httpDeleteConferenceVenue)))
-	r.HandleFunc(`/v1/conference_series/admin/add`, httpWithContext(httpWithBasicAuth(httpAddConferenceSeriesAdmin)))
-	r.HandleFunc(`/v1/conference_series/create`, httpWithContext(httpWithBasicAuth(httpCreateConferenceSeries)))
-	r.HandleFunc(`/v1/conference_series/delete`, httpWithContext(httpWithBasicAuth(httpDeleteConferenceSeries)))
-	r.HandleFunc(`/v1/conference_series/list`, httpWithContext(httpWithOptionalBasicAuth(httpListConferenceSeries)))
-	r.HandleFunc(`/v1/conference_series/lookup`, httpWithContext(httpLookupConferenceSeries))
-	r.HandleFunc(`/v1/email/confirm`, httpWithContext(httpWithBasicAuth(httpConfirmTemporaryEmail)))
-	r.HandleFunc(`/v1/email/create`, httpWithContext(httpWithBasicAuth(httpCreateTemporaryEmail)))
-	r.HandleFunc(`/v1/external_resource/create`, httpWithContext(httpWithBasicAuth(httpCreateExternalResource)))
-	r.HandleFunc(`/v1/external_resource/delete`, httpWithContext(httpWithBasicAuth(httpDeleteExternalResource)))
-	r.HandleFunc(`/v1/external_resource/list`, httpWithContext(httpListExternalResource))
-	r.HandleFunc(`/v1/external_resource/lookup`, httpWithContext(httpLookupExternalResource))
-	r.HandleFunc(`/v1/external_resource/update`, httpWithContext(httpWithBasicAuth(httpUpdateExternalResource)))
-	r.HandleFunc(`/v1/featured_speaker/add`, httpWithContext(httpWithBasicAuth(httpAddFeaturedSpeaker)))
-	r.HandleFunc(`/v1/featured_speaker/delete`, httpWithContext(httpWithBasicAuth(httpDeleteFeaturedSpeaker)))
-	r.HandleFunc(`/v1/featured_speaker/list`, httpWithContext(httpWithOptionalBasicAuth(httpListFeaturedSpeakers)))
-	r.HandleFunc(`/v1/featured_speaker/lookup`, httpWithContext(httpWithBasicAuth(httpLookupFeaturedSpeaker)))
-	r.HandleFunc(`/v1/featured_speaker/update`, httpWithContext(httpWithBasicAuth(httpUpdateFeaturedSpeaker)))
-	r.HandleFunc(`/v1/question/create`, httpWithContext(httpWithBasicAuth(httpCreateQuestion)))
-	r.HandleFunc(`/v1/question/delete`, httpWithContext(httpWithBasicAuth(httpDeleteQuestion)))
-	r.HandleFunc(`/v1/question/list`, httpWithContext(httpWithOptionalBasicAuth(httpListQuestion)))
-	r.HandleFunc(`/v1/room/create`, httpWithContext(httpWithBasicAuth(httpCreateRoom)))
-	r.HandleFunc(`/v1/room/delete`, httpWithContext(httpWithBasicAuth(httpDeleteRoom)))
-	r.HandleFunc(`/v1/room/list`, httpWithContext(httpWithOptionalBasicAuth(httpListRoom)))
-	r.HandleFunc(`/v1/room/lookup`, httpWithContext(httpLookupRoom))
-	r.HandleFunc(`/v1/room/update`, httpWithContext(httpWithBasicAuth(httpUpdateRoom)))
-	r.HandleFunc(`/v1/session/create`, httpWithContext(httpWithBasicAuth(httpCreateSession)))
-	r.HandleFunc(`/v1/session/delete`, httpWithContext(httpWithBasicAuth(httpDeleteSession)))
-	r.HandleFunc(`/v1/session/list`, httpWithContext(httpWithOptionalBasicAuth(httpListSessions)))
-	r.HandleFunc(`/v1/session/lookup`, httpWithContext(httpWithOptionalBasicAuth(httpLookupSession)))
-	r.HandleFunc(`/v1/session/send_all_selection_result_notification`, httpWithContext(httpWithBasicAuth(httpSendAllSelectionResultNotification)))
-	r.HandleFunc(`/v1/session/send_selection_result_notification`, httpWithContext(httpWithBasicAuth(httpSendSelectionResultNotification)))
-	r.HandleFunc(`/v1/session/update`, httpWithContext(httpWithBasicAuth(httpUpdateSession)))
-	r.HandleFunc(`/v1/session_type/delete`, httpWithContext(httpWithBasicAuth(httpDeleteSessionType)))
-	r.HandleFunc(`/v1/session_type/list`, httpWithContext(httpWithOptionalBasicAuth(httpListSessionTypesByConference)))
-	r.HandleFunc(`/v1/session_type/lookup`, httpWithContext(httpWithOptionalBasicAuth(httpLookupSessionType)))
-	r.HandleFunc(`/v1/session_type/update`, httpWithContext(httpWithBasicAuth(httpUpdateSessionType)))
-	r.HandleFunc(`/v1/sponsor/add`, httpWithContext(httpWithBasicAuth(httpAddSponsor)))
-	r.HandleFunc(`/v1/sponsor/delete`, httpWithContext(httpWithBasicAuth(httpDeleteSponsor)))
-	r.HandleFunc(`/v1/sponsor/list`, httpWithContext(httpWithOptionalBasicAuth(httpListSponsors)))
-	r.HandleFunc(`/v1/sponsor/lookup`, httpWithContext(httpWithOptionalBasicAuth(httpLookupSponsor)))
-	r.HandleFunc(`/v1/sponsor/update`, httpWithContext(httpWithBasicAuth(httpUpdateSponsor)))
-	r.HandleFunc(`/v1/survey_session_response/create`, httpWithContext(httpWithBasicAuth(httpCreateSessionSurveyResponse)))
-	r.HandleFunc(`/v1/track/create`, httpWithContext(httpWithBasicAuth(httpCreateTrack)))
-	r.HandleFunc(`/v1/track/delete`, httpWithContext(httpWithBasicAuth(httpDeleteTrack)))
-	r.HandleFunc(`/v1/track/lookup`, httpWithContext(httpLookupTrack))
-	r.HandleFunc(`/v1/track/update`, httpWithContext(httpWithBasicAuth(httpUpdateTrack)))
-	r.HandleFunc(`/v1/user/create`, httpWithContext(httpWithBasicAuth(httpCreateUser)))
-	r.HandleFunc(`/v1/user/delete`, httpWithContext(httpWithBasicAuth(httpDeleteUser)))
-	r.HandleFunc(`/v1/user/list`, httpWithContext(httpWithOptionalBasicAuth(httpListUser)))
-	r.HandleFunc(`/v1/user/lookup`, httpWithContext(httpWithOptionalBasicAuth(httpLookupUser)))
-	r.HandleFunc(`/v1/user/lookup_user_by_auth_user_id`, httpWithContext(httpWithOptionalBasicAuth(httpLookupUserByAuthUserID)))
-	r.HandleFunc(`/v1/user/update`, httpWithContext(httpWithBasicAuth(httpUpdateUser)))
-	r.HandleFunc(`/v1/user/verify`, httpWithContext(httpWithBasicAuth(httpVerifyUser)))
-	r.HandleFunc(`/v1/venue/create`, httpWithContext(httpWithBasicAuth(httpCreateVenue)))
-	r.HandleFunc(`/v1/venue/delete`, httpWithContext(httpWithBasicAuth(httpDeleteVenue)))
-	r.HandleFunc(`/v1/venue/list`, httpWithContext(httpWithOptionalBasicAuth(httpListVenue)))
-	r.HandleFunc(`/v1/venue/lookup`, httpWithContext(httpLookupVenue))
-	r.HandleFunc(`/v1/venue/update`, httpWithContext(httpWithBasicAuth(httpUpdateVenue)))
+	r.HandleFunc(`/v2/blog_entry/create`, httpWithContext(httpWithBasicAuth(httpWithClientSession(httpCreateBlogEntry))))
+	r.HandleFunc(`/v2/blog_entry/delete`, httpWithContext(httpWithBasicAuth(httpWithClientSession(httpDeleteBlogEntry))))
+	r.HandleFunc(`/v2/blog_entry/list`, httpWithContext(httpListBlogEntries))
+	r.HandleFunc(`/v2/blog_entry/lookup`, httpWithContext(httpLookupBlogEntry))
+	r.HandleFunc(`/v2/blog_entry/update`, httpWithContext(httpWithBasicAuth(httpWithClientSession(httpUpdateBlogEntry))))
+	r.HandleFunc(`/v2/client/session`, httpWithContext(httpWithBasicAuth(httpCreateClientSession)))
+	r.HandleFunc(`/v2/conference/admin/add`, httpWithContext(httpWithBasicAuth(httpWithClientSession(httpAddConferenceAdmin))))
+	r.HandleFunc(`/v2/conference/admin/delete`, httpWithContext(httpWithBasicAuth(httpWithClientSession(httpDeleteConferenceAdmin))))
+	r.HandleFunc(`/v2/conference/admin/list`, httpWithContext(httpWithBasicAuth(httpListConferenceAdmin)))
+	r.HandleFunc(`/v2/conference/create`, httpWithContext(httpWithBasicAuth(httpWithClientSession(httpCreateConference))))
+	r.HandleFunc(`/v2/conference/credentials/add`, httpWithContext(httpWithBasicAuth(httpWithClientSession(httpAddConferenceCredential))))
+	r.HandleFunc(`/v2/conference/date/add`, httpWithContext(httpWithBasicAuth(httpWithClientSession(httpAddConferenceDate))))
+	r.HandleFunc(`/v2/conference/date/delete`, httpWithContext(httpWithBasicAuth(httpWithClientSession(httpDeleteConferenceDate))))
+	r.HandleFunc(`/v2/conference/date/list`, httpWithContext(httpWithBasicAuth(httpListConferenceDate)))
+	r.HandleFunc(`/v2/conference/delete`, httpWithContext(httpWithBasicAuth(httpWithClientSession(httpDeleteConference))))
+	r.HandleFunc(`/v2/conference/list`, httpWithContext(httpWithOptionalBasicAuth(httpListConference)))
+	r.HandleFunc(`/v2/conference/list_by_organizer`, httpWithContext(httpWithOptionalBasicAuth(httpListConferencesByOrganizer)))
+	r.HandleFunc(`/v2/conference/lookup`, httpWithContext(httpLookupConference))
+	r.HandleFunc(`/v2/conference/lookup_by_slug`, httpWithContext(httpLookupConferenceBySlug))
+	r.HandleFunc(`/v2/conference/schedule.ics`, httpWithContext(httpGetConferenceSchedule))
+	r.HandleFunc(`/v2/conference/session_type/add`, httpWithContext(httpWithBasicAuth(httpWithClientSession(httpAddSessionType))))
+	r.HandleFunc(`/v2/conference/staff/add`, httpWithContext(httpWithBasicAuth(httpWithClientSession(httpAddConferenceStaff))))
+	r.HandleFunc(`/v2/conference/staff/delete`, httpWithContext(httpWithBasicAuth(httpWithClientSession(httpDeleteConferenceStaff))))
+	r.HandleFunc(`/v2/conference/staff/list`, httpWithContext(httpWithOptionalBasicAuth(httpListConferenceStaff)))
+	r.HandleFunc(`/v2/conference/tweet`, httpWithContext(httpWithBasicAuth(httpWithClientSession(httpTweetAsConference))))
+	r.HandleFunc(`/v2/conference/update`, httpWithContext(httpWithBasicAuth(httpWithClientSession(httpUpdateConference))))
+	r.HandleFunc(`/v2/conference/venue/add`, httpWithContext(httpWithBasicAuth(httpWithClientSession(httpAddConferenceVenue))))
+	r.HandleFunc(`/v2/conference/venue/delete`, httpWithContext(httpWithBasicAuth(httpWithClientSession(httpDeleteConferenceVenue))))
+	r.HandleFunc(`/v2/conference_series/admin/add`, httpWithContext(httpWithBasicAuth(httpWithClientSession(httpAddConferenceSeriesAdmin))))
+	r.HandleFunc(`/v2/conference_series/create`, httpWithContext(httpWithBasicAuth(httpWithClientSession(httpCreateConferenceSeries))))
+	r.HandleFunc(`/v2/conference_series/delete`, httpWithContext(httpWithBasicAuth(httpWithClientSession(httpDeleteConferenceSeries))))
+	r.HandleFunc(`/v2/conference_series/list`, httpWithContext(httpWithOptionalBasicAuth(httpListConferenceSeries)))
+	r.HandleFunc(`/v2/conference_series/lookup`, httpWithContext(httpLookupConferenceSeries))
+	r.HandleFunc(`/v2/email/confirm`, httpWithContext(httpWithBasicAuth(httpWithClientSession(httpConfirmTemporaryEmail))))
+	r.HandleFunc(`/v2/email/create`, httpWithContext(httpWithBasicAuth(httpWithClientSession(httpCreateTemporaryEmail))))
+	r.HandleFunc(`/v2/external_resource/create`, httpWithContext(httpWithBasicAuth(httpWithClientSession(httpCreateExternalResource))))
+	r.HandleFunc(`/v2/external_resource/delete`, httpWithContext(httpWithBasicAuth(httpWithClientSession(httpDeleteExternalResource))))
+	r.HandleFunc(`/v2/external_resource/list`, httpWithContext(httpListExternalResource))
+	r.HandleFunc(`/v2/external_resource/lookup`, httpWithContext(httpLookupExternalResource))
+	r.HandleFunc(`/v2/external_resource/update`, httpWithContext(httpWithBasicAuth(httpWithClientSession(httpUpdateExternalResource))))
+	r.HandleFunc(`/v2/featured_speaker/add`, httpWithContext(httpWithBasicAuth(httpWithClientSession(httpAddFeaturedSpeaker))))
+	r.HandleFunc(`/v2/featured_speaker/delete`, httpWithContext(httpWithBasicAuth(httpWithClientSession(httpDeleteFeaturedSpeaker))))
+	r.HandleFunc(`/v2/featured_speaker/list`, httpWithContext(httpWithOptionalBasicAuth(httpListFeaturedSpeakers)))
+	r.HandleFunc(`/v2/featured_speaker/lookup`, httpWithContext(httpWithBasicAuth(httpLookupFeaturedSpeaker)))
+	r.HandleFunc(`/v2/featured_speaker/update`, httpWithContext(httpWithBasicAuth(httpWithClientSession(httpUpdateFeaturedSpeaker))))
+	r.HandleFunc(`/v2/question/create`, httpWithContext(httpWithBasicAuth(httpWithClientSession(httpCreateQuestion))))
+	r.HandleFunc(`/v2/question/delete`, httpWithContext(httpWithBasicAuth(httpWithClientSession(httpDeleteQuestion))))
+	r.HandleFunc(`/v2/question/list`, httpWithContext(httpWithOptionalBasicAuth(httpListQuestion)))
+	r.HandleFunc(`/v2/room/create`, httpWithContext(httpWithBasicAuth(httpWithClientSession(httpCreateRoom))))
+	r.HandleFunc(`/v2/room/delete`, httpWithContext(httpWithBasicAuth(httpWithClientSession(httpDeleteRoom))))
+	r.HandleFunc(`/v2/room/list`, httpWithContext(httpWithOptionalBasicAuth(httpListRoom)))
+	r.HandleFunc(`/v2/room/lookup`, httpWithContext(httpLookupRoom))
+	r.HandleFunc(`/v2/room/update`, httpWithContext(httpWithBasicAuth(httpWithClientSession(httpUpdateRoom))))
+	r.HandleFunc(`/v2/session/create`, httpWithContext(httpWithBasicAuth(httpWithClientSession(httpCreateSession))))
+	r.HandleFunc(`/v2/session/delete`, httpWithContext(httpWithBasicAuth(httpWithClientSession(httpDeleteSession))))
+	r.HandleFunc(`/v2/session/list`, httpWithContext(httpWithOptionalBasicAuth(httpListSessions)))
+	r.HandleFunc(`/v2/session/lookup`, httpWithContext(httpWithOptionalBasicAuth(httpLookupSession)))
+	r.HandleFunc(`/v2/session/send_all_selection_result_notification`, httpWithContext(httpWithBasicAuth(httpWithClientSession(httpSendAllSelectionResultNotification))))
+	r.HandleFunc(`/v2/session/send_selection_result_notification`, httpWithContext(httpWithBasicAuth(httpWithClientSession(httpSendSelectionResultNotification))))
+	r.HandleFunc(`/v2/session/update`, httpWithContext(httpWithBasicAuth(httpWithClientSession(httpUpdateSession))))
+	r.HandleFunc(`/v2/session/video_cover`, httpWithContext(httpWithBasicAuth(httpWithClientSession(httpSetSessionVideoCover))))
+	r.HandleFunc(`/v2/session_type/delete`, httpWithContext(httpWithBasicAuth(httpWithClientSession(httpDeleteSessionType))))
+	r.HandleFunc(`/v2/session_type/list`, httpWithContext(httpWithOptionalBasicAuth(httpListSessionTypesByConference)))
+	r.HandleFunc(`/v2/session_type/lookup`, httpWithContext(httpWithOptionalBasicAuth(httpLookupSessionType)))
+	r.HandleFunc(`/v2/session_type/update`, httpWithContext(httpWithBasicAuth(httpWithClientSession(httpUpdateSessionType))))
+	r.HandleFunc(`/v2/sponsor/add`, httpWithContext(httpWithBasicAuth(httpWithClientSession(httpAddSponsor))))
+	r.HandleFunc(`/v2/sponsor/delete`, httpWithContext(httpWithBasicAuth(httpWithClientSession(httpDeleteSponsor))))
+	r.HandleFunc(`/v2/sponsor/list`, httpWithContext(httpWithOptionalBasicAuth(httpListSponsors)))
+	r.HandleFunc(`/v2/sponsor/lookup`, httpWithContext(httpWithOptionalBasicAuth(httpLookupSponsor)))
+	r.HandleFunc(`/v2/sponsor/update`, httpWithContext(httpWithBasicAuth(httpWithClientSession(httpUpdateSponsor))))
+	r.HandleFunc(`/v2/survey_session_response/create`, httpWithContext(httpWithBasicAuth(httpWithClientSession(httpCreateSessionSurveyResponse))))
+	r.HandleFunc(`/v2/track/create`, httpWithContext(httpWithBasicAuth(httpWithClientSession(httpCreateTrack))))
+	r.HandleFunc(`/v2/track/delete`, httpWithContext(httpWithBasicAuth(httpWithClientSession(httpDeleteTrack))))
+	r.HandleFunc(`/v2/track/lookup`, httpWithContext(httpLookupTrack))
+	r.HandleFunc(`/v2/track/update`, httpWithContext(httpWithBasicAuth(httpWithClientSession(httpUpdateTrack))))
+	r.HandleFunc(`/v2/user/create`, httpWithContext(httpWithBasicAuth(httpCreateUser)))
+	r.HandleFunc(`/v2/user/delete`, httpWithContext(httpWithBasicAuth(httpWithClientSession(httpDeleteUser))))
+	r.HandleFunc(`/v2/user/list`, httpWithContext(httpWithOptionalBasicAuth(httpListUser)))
+	r.HandleFunc(`/v2/user/lookup`, httpWithContext(httpWithOptionalBasicAuth(httpLookupUser)))
+	r.HandleFunc(`/v2/user/lookup_user_by_auth_user_id`, httpWithContext(httpWithOptionalBasicAuth(httpLookupUserByAuthUserID)))
+	r.HandleFunc(`/v2/user/update`, httpWithContext(httpWithBasicAuth(httpWithClientSession(httpUpdateUser))))
+	r.HandleFunc(`/v2/user/verify`, httpWithContext(httpWithBasicAuth(httpVerifyUser)))
+	r.HandleFunc(`/v2/venue/create`, httpWithContext(httpWithBasicAuth(httpWithClientSession(httpCreateVenue))))
+	r.HandleFunc(`/v2/venue/delete`, httpWithContext(httpWithBasicAuth(httpWithClientSession(httpDeleteVenue))))
+	r.HandleFunc(`/v2/venue/list`, httpWithContext(httpWithOptionalBasicAuth(httpListVenue)))
+	r.HandleFunc(`/v2/venue/lookup`, httpWithContext(httpLookupVenue))
+	r.HandleFunc(`/v2/venue/update`, httpWithContext(httpWithBasicAuth(httpWithClientSession(httpUpdateVenue))))
 }

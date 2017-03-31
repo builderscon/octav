@@ -65,7 +65,7 @@ func init() {
 	})
 }
 
-func (c *Conference) LoadByEID(tx *Tx, eid string) (err error) {
+func (c *Conference) LoadByEID(tx *sql.Tx, eid string) (err error) {
 	if pdebug.Enabled {
 		g := pdebug.Marker(`Conference.LoadByEID %s`, eid).BindError(&err)
 		defer g.End()
@@ -81,7 +81,7 @@ func (c *Conference) LoadByEID(tx *Tx, eid string) (err error) {
 	return nil
 }
 
-func (c *Conference) Create(tx *Tx, opts ...InsertOption) (err error) {
+func (c *Conference) Create(tx *sql.Tx, opts ...InsertOption) (err error) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("db.Conference.Create").BindError(&err)
 		defer g.End()
@@ -122,7 +122,7 @@ func (c *Conference) Create(tx *Tx, opts ...InsertOption) (err error) {
 	return nil
 }
 
-func (c Conference) Update(tx *Tx) (err error) {
+func (c Conference) Update(tx *sql.Tx) (err error) {
 	if pdebug.Enabled {
 		g := pdebug.Marker(`Conference.Update`).BindError(&err)
 		defer g.End()
@@ -152,7 +152,7 @@ func (c Conference) Update(tx *Tx) (err error) {
 	return errors.New("either OID/EID must be filled")
 }
 
-func (c Conference) Delete(tx *Tx) error {
+func (c Conference) Delete(tx *sql.Tx) error {
 	if c.OID != 0 {
 		stmt, err := library.GetStmt("sqlConferenceDeleteByOIDKey")
 		if err != nil {
@@ -193,7 +193,7 @@ func (v *ConferenceList) FromRows(rows *sql.Rows, capacity int) error {
 	return nil
 }
 
-func (v *ConferenceList) LoadSinceEID(tx *Tx, since string, limit int) error {
+func (v *ConferenceList) LoadSinceEID(tx *sql.Tx, since string, limit int) error {
 	var s int64
 	if id := since; id != "" {
 		vdb := Conference{}
@@ -206,7 +206,7 @@ func (v *ConferenceList) LoadSinceEID(tx *Tx, since string, limit int) error {
 	return v.LoadSince(tx, s, limit)
 }
 
-func (v *ConferenceList) LoadSince(tx *Tx, since int64, limit int) error {
+func (v *ConferenceList) LoadSince(tx *sql.Tx, since int64, limit int) error {
 	rows, err := tx.Query(`SELECT `+ConferenceStdSelectColumns+` FROM `+ConferenceTable+` WHERE conferences.oid > ? ORDER BY oid ASC LIMIT `+strconv.Itoa(limit), since)
 	if err != nil {
 		return err

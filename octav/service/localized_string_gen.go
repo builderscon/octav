@@ -4,6 +4,7 @@ package service
 
 import (
 	"context"
+	"database/sql"
 	"sync"
 	"time"
 
@@ -21,6 +22,7 @@ var _ = context.Background
 var _ = errors.Wrap
 var _ = model.LocalizedString{}
 var _ = db.LocalizedString{}
+var _ = sql.ErrNoRows
 var _ = pdebug.Enabled
 
 var localizedStringSvc LocalizedStringSvc

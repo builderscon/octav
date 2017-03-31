@@ -1,7 +1,10 @@
 package service
 
 import (
+	"database/sql"
+
 	"github.com/builderscon/octav/octav/db"
+	"github.com/builderscon/octav/octav/internal/context"
 	"github.com/builderscon/octav/octav/model"
 	"github.com/builderscon/octav/octav/tools"
 	"github.com/lestrrat/go-pdebug"
@@ -10,14 +13,14 @@ import (
 
 func (v *ConferenceSeriesSvc) Init() {}
 
-func (v *ConferenceSeriesSvc) populateRowForCreate(vdb *db.ConferenceSeries, payload *model.CreateConferenceSeriesRequest) error {
+func (v *ConferenceSeriesSvc) populateRowForCreate(ctx context.Context, vdb *db.ConferenceSeries, payload *model.CreateConferenceSeriesRequest) error {
 	vdb.EID = tools.UUID()
 	vdb.Slug = payload.Slug
 	vdb.Title = payload.Title
 	return nil
 }
 
-func (v *ConferenceSeriesSvc) populateRowForUpdate(vdb *db.ConferenceSeries, payload *model.UpdateConferenceSeriesRequest) error {
+func (v *ConferenceSeriesSvc) populateRowForUpdate(ctx context.Context, vdb *db.ConferenceSeries, payload *model.UpdateConferenceSeriesRequest) error {
 	if payload.Slug.Valid() {
 		vdb.Slug = payload.Slug.String
 	}
@@ -29,7 +32,7 @@ func (v *ConferenceSeriesSvc) populateRowForUpdate(vdb *db.ConferenceSeries, pay
 	return nil
 }
 
-func (v *ConferenceSeriesSvc) DeleteFromPayload(tx *db.Tx, payload *model.DeleteConferenceSeriesRequest) (err error) {
+func (v *ConferenceSeriesSvc) DeleteFromPayload(ctx context.Context, tx *sql.Tx, payload *model.DeleteConferenceSeriesRequest) (err error) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("service.ConferenceSeries.DeleteFromPayload").BindError(&err)
 		defer g.End()
@@ -37,7 +40,7 @@ func (v *ConferenceSeriesSvc) DeleteFromPayload(tx *db.Tx, payload *model.Delete
 
 	var u model.User
 	su := User()
-	if err := su.Lookup(tx, &u, payload.UserID); err != nil {
+	if err := su.Lookup(ctx, tx, &u, context.GetUserID(ctx)); err != nil {
 		return errors.Wrap(err, "failed to load user from database")
 	}
 
@@ -51,25 +54,25 @@ func (v *ConferenceSeriesSvc) DeleteFromPayload(tx *db.Tx, payload *model.Delete
 
 // CreateFromPayload adds extra logic around Create to verify data
 // and create accessory data.
-func (v *ConferenceSeriesSvc) CreateFromPayload(tx *db.Tx, result *model.ConferenceSeries, payload *model.CreateConferenceSeriesRequest) (err error) {
+func (v *ConferenceSeriesSvc) CreateFromPayload(ctx context.Context, tx *sql.Tx, result *model.ConferenceSeries, payload *model.CreateConferenceSeriesRequest) (err error) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("service.ConferenceSeries.CreateFromPayload").BindError(&err)
 		defer g.End()
 	}
 
 	su := User()
-	if err := su.IsSystemAdmin(tx, payload.UserID); err != nil {
+	if err := su.IsSystemAdmin(ctx, tx, context.GetUserID(ctx)); err != nil {
 		return errors.Wrap(err, "creating a conference series requires system administrator privilege")
 	}
 
 	vdb := db.ConferenceSeries{}
-	if err := v.Create(tx, &vdb, payload); err != nil {
+	if err := v.Create(ctx, tx, &vdb, payload); err != nil {
 		return errors.Wrap(err, "failed to store conference series in database")
 	}
 
 	csa := db.ConferenceSeriesAdministrator{
 		SeriesID: vdb.EID,
-		UserID:   payload.UserID,
+		UserID:   context.GetUserID(ctx),
 	}
 	if err := csa.Create(tx); err != nil {
 		return errors.Wrap(err, "failed to store conference series administrator in database")
@@ -84,7 +87,7 @@ func (v *ConferenceSeriesSvc) CreateFromPayload(tx *db.Tx, result *model.Confere
 	return nil
 }
 
-func (v *ConferenceSeriesSvc) LoadByRange(tx *db.Tx, l *[]model.ConferenceSeries, since string, limit int) error {
+func (v *ConferenceSeriesSvc) LoadByRange(tx *sql.Tx, l *[]model.ConferenceSeries, since string, limit int) error {
 	vdbl := db.ConferenceSeriesList{}
 	if err := vdbl.LoadSinceEID(tx, since, limit); err != nil {
 		return errors.Wrap(err, "failed to load list of conference series")
@@ -101,14 +104,14 @@ func (v *ConferenceSeriesSvc) LoadByRange(tx *db.Tx, l *[]model.ConferenceSeries
 	return nil
 }
 
-func (v *ConferenceSeriesSvc) AddAdministratorFromPayload(tx *db.Tx, payload *model.AddConferenceSeriesAdminRequest) error {
-	if err := db.IsConferenceSeriesAdministrator(tx, payload.SeriesID, payload.UserID); err != nil {
+func (v *ConferenceSeriesSvc) AddAdministratorFromPayload(ctx context.Context, tx *sql.Tx, payload *model.AddConferenceSeriesAdminRequest) error {
+	if err := db.IsConferenceSeriesAdministrator(tx, payload.SeriesID, context.GetUserID(ctx)); err != nil {
 		return errors.Wrap(err, "adding a conference series administrator requires conference series administrator privilege")
 	}
 	return errors.Wrap(v.AddAdministrator(tx, payload.SeriesID, payload.AdminID), "failed to add administrator")
 }
 
-func (v *ConferenceSeriesSvc) AddAdministrator(tx *db.Tx, seriesID, userID string) error {
+func (v *ConferenceSeriesSvc) AddAdministrator(tx *sql.Tx, seriesID, userID string) error {
 	c := db.ConferenceSeriesAdministrator{
 		SeriesID: seriesID,
 		UserID:   userID,
@@ -116,7 +119,7 @@ func (v *ConferenceSeriesSvc) AddAdministrator(tx *db.Tx, seriesID, userID strin
 	return c.Create(tx, db.WithInsertIgnore(true))
 }
 
-func (v *ConferenceSeriesSvc) Decorate(tx *db.Tx, c *model.ConferenceSeries, trustedCall bool, lang string) error {
+func (v *ConferenceSeriesSvc) Decorate(ctx context.Context, tx *sql.Tx, c *model.ConferenceSeries, trustedCall bool, lang string) error {
 	if lang == "" {
 		return nil
 	}

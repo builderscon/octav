@@ -104,7 +104,7 @@ type TemplateSvc struct {
 	box *tmplbox.Box
 }
 type TwitterSvc struct {
-	*twitter.Client
+	client *twitter.Client
 }
 
 // +PreUpdateFromPayloadHook
@@ -118,14 +118,17 @@ type VenueSvc struct{}
 // +PostCreateHook
 // +PostUpdateHook
 // +PostDeleteHook
-type TrackSvc struct {}
+type TrackSvc struct{}
 
 // +PostCreateHook
 // +PostUpdateHook
 // +PostDeleteHook
-type BlogEntrySvc struct {}
+type BlogEntrySvc struct{}
 
 // +PostCreateHook
 // +PostUpdateHook
 // +PostDeleteHook
 type ExternalResourceSvc struct{}
+
+type YoutubeSvc struct {
+}
