@@ -55,6 +55,10 @@ func (v *SponsorSvc) populateRowForUpdate(ctx context.Context, vdb *db.Sponsor, 
 		vdb.SortOrder = int(payload.SortOrder.Int)
 	}
 
+	if payload.LogoURL.Valid() {
+		vdb.LogoURL.Valid = true
+		vdb.LogoURL.String = payload.LogoURL.String
+	}
 	return nil
 }
 
