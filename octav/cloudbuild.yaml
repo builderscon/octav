@@ -3,8 +3,8 @@ steps:
   dir: 'octav'
   env: ['PROJECT_ROOT=github.com/builderscon/octav/octav']
   args: ['install']
-- name: 'gcr.io/cloud-builders/golang-project:alpine'
+- name: 'gcr.io/cloud-builders/go:alpine'
   dir: 'octav'
   env: ['PROJECT_ROOT=github.com/builderscon/octav/octav']
-  args: ['apiserver', '--tag=asia.gcr.io/$PROJECT_ID/cloudbuild_test']
+  args: ['build', '-tags', 'debug0', '-o', 'apiserver', 'cmd/octav/octav.go']
 images: ['asia.gcr.io/$PROJECT_ID/cloudbuild_test']
