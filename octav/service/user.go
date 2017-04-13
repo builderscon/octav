@@ -557,7 +557,9 @@ func (v *UserSvc) Verify(ctx context.Context, m *model.User) (err error) {
 
 func (v *UserSvc) PostLookupFromPayloadHook(ctx context.Context, tx *sql.Tx, m *model.User) error {
 	if v.ShouldVerify(m) {
-		go v.Verify(ctx, m)
+		// This context should be separate from ctx, as it usually comes from
+		// http.Request
+		go v.Verify(context.Background(), m)
 	}
 	return nil
 }
