@@ -1,9 +1,10 @@
 steps:
 - name: 'gcr.io/cloud-builders/glide'
   dir: 'octav'
-  env: ['PROJECT_ROOT=github.com/Masterminds/glide']
+  env: ['PROJECT_ROOT=github.com/builderscon/octav/octav']
   args: ['install']
 - name: 'gcr.io/cloud-builders/golang-project:alpine'
   dir: 'octav'
+  env: ['PROJECT_ROOT=github.com/builderscon/octav/octav']
   args: ['apiserver', '--tag=asia.gcr.io/$PROJECT_ID/cloudbuild_test']
 images: ['asia.gcr.io/$PROJECT_ID/cloudbuild_test']
