@@ -8,5 +8,7 @@ steps:
   env: ['PROJECT_ROOT=github.com/builderscon/octav/octav']
   args: ['build', '-tags', 'debug0', '-o', 'apiserver', 'cmd/octav/octav.go']
 - name: 'gcr.io/cloud-builders/docker'
+  dir: 'octav'
+  env: ['PROJECT_ROOT=github.com/builderscon/octav/octav']
   args: ['build', '--tag=asia.gcr.io/$PROJECT_ID/cloudbuild_test', '.']
 images: ['asia.gcr.io/$PROJECT_ID/cloudbuild_test']
