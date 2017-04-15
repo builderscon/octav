@@ -530,7 +530,7 @@ func (v *UserSvc) Verify(ctx context.Context, m *model.User) (err error) {
 			pdebug.Printf("%s\n", buf)
 		}
 
-		newAvatarURL = strings.Replace(u.ProfileImageURLHttps, "_normal.", "_400x400.")
+		newAvatarURL = strings.Replace(u.ProfileImageURLHttps, "_normal.", "_400x400.", -1)
 	case "github":
 		newAvatarURL = "https://avatars.githubusercontent.com/u/" + m.AuthUserID
 	}
