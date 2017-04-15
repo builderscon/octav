@@ -41,7 +41,7 @@ func (v *SessionTypeSvc) LookupFromPayload(ctx context.Context, tx *sql.Tx, m *m
 	if err = v.Lookup(ctx, tx, m, payload.ID); err != nil {
 		return errors.Wrap(err, "failed to load model.SessionType from database")
 	}
-	if err := v.Decorate(ctx, tx, m, payload.TrustedCall, payload.Lang.String); err != nil {
+	if err := v.Decorate(ctx, tx, m, payload.VerifiedCall, payload.Lang.String); err != nil {
 		return errors.Wrap(err, "failed to load associated data for model.SessionType from database")
 	}
 	return nil

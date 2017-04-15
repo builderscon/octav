@@ -119,7 +119,7 @@ func (v *ConferenceSeriesSvc) AddAdministrator(tx *sql.Tx, seriesID, userID stri
 	return c.Create(tx, db.WithInsertIgnore(true))
 }
 
-func (v *ConferenceSeriesSvc) Decorate(ctx context.Context, tx *sql.Tx, c *model.ConferenceSeries, trustedCall bool, lang string) error {
+func (v *ConferenceSeriesSvc) Decorate(ctx context.Context, tx *sql.Tx, c *model.ConferenceSeries, verifiedCall bool, lang string) error {
 	if lang == "" {
 		return nil
 	}

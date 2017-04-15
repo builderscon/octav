@@ -59,7 +59,7 @@ func invalidateBlogEntryLoadByConferenceID(confID string) error {
 
 	var keys []string
 	for _, status := range [][]string{{"private"}, {"public"}, {"private", "public"}} {
-		for _, trustedCall := range []bool{true, false} {
+		for _, verifiedCall := range []bool{true, false} {
 			for _, lang := range []string{"ja", "en", ""} {
 				if lang == "" {
 					r.Lang.ValidFlag = false
@@ -69,7 +69,7 @@ func invalidateBlogEntryLoadByConferenceID(confID string) error {
 				}
 
 				r.Status = status
-				r.TrustedCall = trustedCall
+				r.VerifiedCall = verifiedCall
 				keybytes, err := urlenc.Marshal(r)
 				if err != nil {
 					return errors.Wrap(err, "failed to marshal payload")
@@ -99,9 +99,9 @@ func (v *BlogEntrySvc) PostDeleteHook(_ *sql.Tx, vdb *db.BlogEntry) error {
 	return invalidateBlogEntryLoadByConferenceID(vdb.ConferenceID)
 }
 
-func (v *BlogEntrySvc) Decorate(tx *sql.Tx, m *model.BlogEntry, trustedCall bool, lang string) (err error) {
-	// If this is not a trustedCall, we don't want to send the conference_id, status, or the url_hash
-	if !trustedCall {
+func (v *BlogEntrySvc) Decorate(tx *sql.Tx, m *model.BlogEntry, verifiedCall bool, lang string) (err error) {
+	// If this is not a verifiedCall, we don't want to send the conference_id, status, or the url_hash
+	if !verifiedCall {
 		m.ConferenceID = ""
 		m.Status = ""
 		m.URLHash = ""
@@ -192,7 +192,7 @@ func (v *BlogEntrySvc) ListFromPayload(ctx context.Context, tx *sql.Tx, result *
 				return nil, errors.Wrap(err, "failed to populate model from database")
 			}
 
-			if err := v.Decorate(tx, &l[i], payload.TrustedCall, payload.Lang.String); err != nil {
+			if err := v.Decorate(tx, &l[i], payload.VerifiedCall, payload.Lang.String); err != nil {
 				return nil, errors.Wrap(err, "failed to decorate session with associated data")
 			}
 		}

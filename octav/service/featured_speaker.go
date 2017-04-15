@@ -127,7 +127,7 @@ func (v *FeaturedSpeakerSvc) ListFromPayload(ctx context.Context, tx *sql.Tx, re
 			return errors.Wrap(err, "failed to populate model from database")
 		}
 
-		if err := v.Decorate(ctx, tx, &l[i], payload.TrustedCall, payload.Lang.String); err != nil {
+		if err := v.Decorate(ctx, tx, &l[i], payload.VerifiedCall, payload.Lang.String); err != nil {
 			return errors.Wrap(err, "failed to decorate venue with associated data")
 		}
 	}
@@ -136,7 +136,7 @@ func (v *FeaturedSpeakerSvc) ListFromPayload(ctx context.Context, tx *sql.Tx, re
 	return nil
 }
 
-func (v *FeaturedSpeakerSvc) Decorate(ctx context.Context, tx *sql.Tx, speaker *model.FeaturedSpeaker, trustedCall bool, lang string) error {
+func (v *FeaturedSpeakerSvc) Decorate(ctx context.Context, tx *sql.Tx, speaker *model.FeaturedSpeaker, verifiedCall bool, lang string) error {
 	if lang == "" {
 		return nil
 	}
