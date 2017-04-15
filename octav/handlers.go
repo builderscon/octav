@@ -93,11 +93,8 @@ func wrapBasicAuth(h HandlerWithContext, authIsOptional bool) HandlerWithContext
 		if pdebug.Enabled {
 			pdebug.Printf("Authentication for client `%s` succeeded, proceeding to call handler", clientID)
 		}
-		ctx = &requestCtx{
-			Context:     ctx,
-			clientID:    clientID,
-			trustedCall: true,
-		}
+
+		ctx = context.NewRequestCtx(ctx, clientID)
 		h(ctx, w, r)
 	})
 }
@@ -105,14 +102,16 @@ func wrapBasicAuth(h HandlerWithContext, authIsOptional bool) HandlerWithContext
 const clientSessionHeaderKey = "X-Octav-Session-ID"
 
 func httpWithClientSession(h HandlerWithContext) HandlerWithContext {
-	return HandlerWithContext(func(octx nativectx.Context, w http.ResponseWriter, r *http.Request) {
+	return HandlerWithContext(func(ctx nativectx.Context, w http.ResponseWriter, r *http.Request) {
 		if pdebug.Enabled {
 			g := pdebug.Marker("Validating octav session for %s", r.URL.Path)
 			defer g.End()
 		}
-		// This ctx must be a requestCtx
-		ctx, ok := octx.(*requestCtx)
-		if !ok {
+		// This ctx must verified
+		if !context.IsVerifiedCall(ctx) {
+			if pdebug.Enabled {
+				pdebug.Printf("IsVerifiedCall() returns false, bailing out")
+			}
 			httpError(w, http.StatusText(http.StatusBadRequest), http.StatusBadRequest, nil)
 			return
 		}
@@ -137,7 +136,7 @@ func httpWithClientSession(h HandlerWithContext) HandlerWithContext {
 
 		var u model.User
 		s := service.Client()
-		if err := s.LoadClientSession(ctx, tx, sessionID, ctx.clientID, &u); err != nil {
+		if err := s.LoadClientSession(ctx, tx, sessionID, context.GetClientID(ctx), &u); err != nil {
 			httpError(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError, err)
 			return
 		}
@@ -145,8 +144,7 @@ func httpWithClientSession(h HandlerWithContext) HandlerWithContext {
 			pdebug.Printf("Successfully loaded assosicated user %s", u.ID)
 		}
 
-		ctx.sessionID = sessionID
-		ctx.user = &u
+		ctx = context.WithUser(ctx, sessionID, &u)
 		h(ctx, w, r)
 	})
 }
@@ -204,8 +202,8 @@ func doCreateConferenceSeries(ctx context.Context, w http.ResponseWriter, r *htt
 		return
 	}
 
-/*	su := service.User()
-	su.IsSessionValid(ctx, tx, payload.SessionID, */
+	/*	su := service.User()
+		su.IsSessionValid(ctx, tx, payload.SessionID, */
 
 	s := service.ConferenceSeries()
 	var c model.ConferenceSeries
@@ -511,7 +509,7 @@ func doDeleteConferenceAdmin(ctx context.Context, w http.ResponseWriter, r *http
 }
 
 func doListConferenceAdmin(ctx context.Context, w http.ResponseWriter, r *http.Request, payload *model.ListConferenceAdminRequest) {
-	trustedCall := context.IsTrustedCall(ctx)
+	verifiedCall := context.IsVerifiedCall(ctx)
 
 	tx, err := db.BeginTx(ctx, nil)
 	if err != nil {
@@ -521,7 +519,7 @@ func doListConferenceAdmin(ctx context.Context, w http.ResponseWriter, r *http.R
 
 	s := service.Conference()
 	var cdl model.UserList
-	if err := s.LoadAdmins(ctx, tx, &cdl, trustedCall, payload.ConferenceID, payload.Lang.String); err != nil {
+	if err := s.LoadAdmins(ctx, tx, &cdl, verifiedCall, payload.ConferenceID, payload.Lang.String); err != nil {
 		httpError(w, `ListConferenceAdmin`, http.StatusInternalServerError, err)
 		return
 	}
@@ -861,7 +859,7 @@ func doListUser(ctx context.Context, w http.ResponseWriter, r *http.Request, pay
 
 	s := service.User()
 	var v model.UserList
-	payload.TrustedCall = context.IsTrustedCall(ctx)
+	payload.VerifiedCall = context.IsVerifiedCall(ctx)
 	if err := s.ListFromPayload(ctx, tx, &v, payload); err != nil {
 		httpError(w, `ListUsers`, http.StatusInternalServerError, err)
 		return
@@ -883,7 +881,7 @@ func doLookupUserByAuthUserID(ctx context.Context, w http.ResponseWriter, r *htt
 
 	s := service.User()
 	var v model.User
-	payload.TrustedCall = context.IsTrustedCall(ctx)
+	payload.VerifiedCall = context.IsVerifiedCall(ctx)
 	if err := s.LookupUserByAuthUserIDFromPayload(ctx, tx, &v, payload); err != nil {
 		httpError(w, `LookupUserByAuthUserID`, http.StatusInternalServerError, err)
 		return
@@ -905,7 +903,7 @@ func doLookupUser(ctx context.Context, w http.ResponseWriter, r *http.Request, p
 
 	s := service.User()
 	var v model.User
-	payload.TrustedCall = context.IsTrustedCall(ctx)
+	payload.VerifiedCall = context.IsVerifiedCall(ctx)
 	if err := s.LookupFromPayload(ctx, tx, &v, payload); err != nil {
 		httpError(w, `LookupUser`, http.StatusInternalServerError, err)
 		return
@@ -1125,7 +1123,7 @@ func doLookupSession(ctx context.Context, w http.ResponseWriter, r *http.Request
 
 	s := service.Session()
 	var v model.Session
-	payload.TrustedCall = context.IsTrustedCall(ctx)
+	payload.VerifiedCall = context.IsVerifiedCall(ctx)
 	if err := s.LookupFromPayload(ctx, tx, &v, payload); err != nil {
 		httpError(w, `LookupSession`, http.StatusInternalServerError, err)
 		return
@@ -1802,7 +1800,7 @@ func doSendSelectionResultNotification(ctx context.Context, w http.ResponseWrite
 		return
 	}
 
-	payload.TrustedCall = context.IsTrustedCall(ctx)
+	payload.VerifiedCall = context.IsVerifiedCall(ctx)
 
 	s := service.Session()
 	if err := s.SendSelectionResultNotificationFromPayload(ctx, tx, payload); err != nil {
@@ -1833,7 +1831,7 @@ func doSendAllSelectionResultNotification(ctx context.Context, w http.ResponseWr
 		return
 	}
 
-	trustedCall := context.IsTrustedCall(ctx)
+	verifiedCall := context.IsVerifiedCall(ctx)
 
 	// Do this asynchronously
 	go func() {
@@ -1848,7 +1846,7 @@ func doSendAllSelectionResultNotification(ctx context.Context, w http.ResponseWr
 
 			req.SessionID = vdb.EID
 			req.Force = payload.Force
-			req.TrustedCall = trustedCall
+			req.VerifiedCall = verifiedCall
 
 			if err := s.SendSelectionResultNotificationFromPayload(ctx, tx, &req); err != nil {
 				tx.Rollback()
@@ -1967,7 +1965,7 @@ func doListBlogEntries(ctx context.Context, w http.ResponseWriter, r *http.Reque
 }
 
 func doListConferenceStaff(ctx context.Context, w http.ResponseWriter, r *http.Request, payload *model.ListConferenceStaffRequest) {
-	trustedCall := context.IsTrustedCall(ctx)
+	verifiedCall := context.IsVerifiedCall(ctx)
 
 	tx, err := db.BeginTx(ctx, nil)
 	if err != nil {
@@ -1977,7 +1975,7 @@ func doListConferenceStaff(ctx context.Context, w http.ResponseWriter, r *http.R
 
 	s := service.Conference()
 	var cdl model.UserList
-	if err := s.LoadStaff(ctx, tx, &cdl, trustedCall, payload.ConferenceID, payload.Lang.String); err != nil {
+	if err := s.LoadStaff(ctx, tx, &cdl, verifiedCall, payload.ConferenceID, payload.Lang.String); err != nil {
 		httpError(w, `ListConferenceStaff`, http.StatusInternalServerError, err)
 		return
 	}
@@ -2191,7 +2189,7 @@ func doCreateClientSession(ctx context.Context, w http.ResponseWriter, r *http.R
 		httpError(w, `create client session`, http.StatusInternalServerError, err)
 		return
 	}
-	
+
 	var res model.CreateClientSessionResponse
 	res.Expires = expires.Format(time.RFC3339)
 	res.SessionID = sid

@@ -264,6 +264,10 @@ func (v *UserSvc) IsOwnerUser(ctx context.Context, tx *sql.Tx, targetID, userID 
 		defer g.End()
 	}
 
+	if context.IsInternalCall(ctx) {
+		return nil
+	}
+
 	if targetID == userID {
 		return nil
 	}
@@ -283,7 +287,7 @@ func (v *UserSvc) ListFromPayload(ctx context.Context, tx *sql.Tx, result *model
 			return errors.Wrap(err, "failed to populate model from database")
 		}
 
-		if err := v.Decorate(ctx, tx, &l[i], payload.TrustedCall, payload.Lang.String); err != nil {
+		if err := v.Decorate(ctx, tx, &l[i], payload.VerifiedCall, payload.Lang.String); err != nil {
 			return errors.Wrap(err, "failed to decorate user with associated data")
 		}
 	}
@@ -352,8 +356,8 @@ func (v *UserSvc) IsSessionOwner(ctx context.Context, tx *sql.Tx, sessionID, use
 	return errors.Errorf("user %s lacks session owner privileges for %s", userID, sessionID)
 }
 
-func (v *UserSvc) Decorate(ctx context.Context, tx *sql.Tx, user *model.User, trustedCall bool, lang string) error {
-	if !trustedCall {
+func (v *UserSvc) Decorate(ctx context.Context, tx *sql.Tx, user *model.User, verifiedCall bool, lang string) error {
+	if !verifiedCall {
 		user.Email = ""
 		user.TshirtSize = ""
 		user.AuthVia = ""
@@ -369,10 +373,10 @@ func (v *UserSvc) Decorate(ctx context.Context, tx *sql.Tx, user *model.User, tr
 }
 
 func (v *UserSvc) LookupUserByAuthUserIDFromPayload(ctx context.Context, tx *sql.Tx, result *model.User, payload *model.LookupUserByAuthUserIDRequest) error {
-	return v.LookupUserByAuthUserID(ctx, tx, result, payload.AuthVia, payload.AuthUserID, payload.Lang.String, payload.TrustedCall)
+	return v.LookupUserByAuthUserID(ctx, tx, result, payload.AuthVia, payload.AuthUserID, payload.Lang.String, payload.VerifiedCall)
 }
 
-func (v *UserSvc) LookupUserByAuthUserID(ctx context.Context, tx *sql.Tx, result *model.User, authVia, authUserID, lang string, trustedCall bool) error {
+func (v *UserSvc) LookupUserByAuthUserID(ctx context.Context, tx *sql.Tx, result *model.User, authVia, authUserID, lang string, verifiedCall bool) error {
 	var vdb db.User
 	if err := vdb.LoadByAuthUserID(tx, authVia, authUserID); err != nil {
 		return errors.Wrap(err, "failed to load from database")
@@ -383,7 +387,7 @@ func (v *UserSvc) LookupUserByAuthUserID(ctx context.Context, tx *sql.Tx, result
 		return errors.Wrap(err, "failed to populate mode from database")
 	}
 
-	if err := v.Decorate(ctx, tx, &r, trustedCall, lang); err != nil {
+	if err := v.Decorate(ctx, tx, &r, verifiedCall, lang); err != nil {
 		return errors.Wrap(err, "failed to decorate with assocaited data")
 	}
 
@@ -521,6 +525,10 @@ func (v *UserSvc) Verify(ctx context.Context, m *model.User) (err error) {
 		if err != nil {
 			return errors.Wrap(err, "failed to fetch twitter user information via users/show")
 		}
+		if pdebug.Enabled {
+			buf, _ := json.MarshalIndent(u, "", "  ")
+			pdebug.Printf("%s\n", buf)
+		}
 		newAvatarURL = u.ProfileImageURLHttps
 	case "github":
 		newAvatarURL = "https://avatars.githubusercontent.com/u/" + m.AuthUserID
@@ -539,13 +547,13 @@ func (v *UserSvc) Verify(ctx context.Context, m *model.User) (err error) {
 		ID: m.ID,
 	}
 	payload.AvatarURL.Set(newAvatarURL)
-
 	var vdb db.User
 	if err := vdb.LoadByEID(tx, payload.ID); err != nil {
 		return errors.Wrap(err, "failed to load from database")
 	}
 
-	if err := v.Update(tx, &vdb); err != nil {
+	// Set the IsInternal flaf so we can just update the user
+	if err := v.UpdateFromPayload(context.WithInternalCall(ctx, true), tx, &payload); err != nil {
 		return errors.Wrap(err, "failed to update database")
 	}
 

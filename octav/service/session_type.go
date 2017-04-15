@@ -168,7 +168,7 @@ func (v *SessionTypeSvc) ListFromPayload(ctx context.Context, tx *sql.Tx, result
 			return errors.Wrap(err, "failed to populate model from database")
 		}
 
-		if err := v.Decorate(ctx, tx, &l[i], payload.TrustedCall, payload.Lang.String); err != nil {
+		if err := v.Decorate(ctx, tx, &l[i], payload.VerifiedCall, payload.Lang.String); err != nil {
 			return errors.Wrap(err, "failed to decorate venue with associated data")
 		}
 	}
@@ -177,7 +177,7 @@ func (v *SessionTypeSvc) ListFromPayload(ctx context.Context, tx *sql.Tx, result
 	return nil
 }
 
-func (v *SessionTypeSvc) Decorate(ctx context.Context, tx *sql.Tx, st *model.SessionType, trustedCall bool, lang string) (err error) {
+func (v *SessionTypeSvc) Decorate(ctx context.Context, tx *sql.Tx, st *model.SessionType, verifiedCall bool, lang string) (err error) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("service.SessionType.Decorate").BindError(&err)
 		defer g.End()

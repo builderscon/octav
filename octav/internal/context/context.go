@@ -27,13 +27,24 @@ func WithTimeout(ctx context.Context, t time.Duration) (context.Context, func())
 	return context.WithTimeout(ctx, t)
 }
 
-type isTrustedCaller interface {
-	IsTrustedCall() bool
+type isInternalCaller interface {
+	IsInternalCall() bool
 }
 
-func IsTrustedCall(ctx context.Context) bool {
-	if tc, ok := ctx.(isTrustedCaller); ok {
-		return tc.IsTrustedCall()
+func IsInternalCall(ctx context.Context) bool {
+	if tc, ok := ctx.(isInternalCaller); ok {
+		return tc.IsInternalCall()
+	}
+	return false
+}
+
+type isVerifiedCaller interface {
+	IsVerifiedCall() bool
+}
+
+func IsVerifiedCall(ctx context.Context) bool {
+	if tc, ok := ctx.(isVerifiedCaller); ok {
+		return tc.IsVerifiedCall()
 	}
 	return false
 }
@@ -54,7 +65,6 @@ type withUser interface {
 }
 
 func GetUser(ctx context.Context) *model.User {
-	pdebug.Printf("GetUser ctx = %#v", ctx)
 	if c, ok := ctx.(withUser); ok {
 		pdebug.Printf("withUser is true")
 		return c.User()
@@ -64,8 +74,73 @@ func GetUser(ctx context.Context) *model.User {
 
 func GetUserID(ctx context.Context) string {
 	if u := GetUser(ctx); u != nil {
-pdebug.Printf("GetUser returns %#v", u)
 		return u.ID
 	}
 	return ""
+}
+
+type requestCtx struct {
+	context.Context
+	clientID     string
+	internalCall bool
+	sessionID    string
+	user         *model.User
+}
+
+func NewRequestCtx(ctx context.Context, clientID string) context.Context {
+	return &requestCtx{Context: ctx, clientID: clientID}
+}
+
+func (ctx *requestCtx) ClientID() string {
+	return ctx.clientID
+}
+
+func (ctx *requestCtx) IsVerifiedCall() bool {
+	return ctx.clientID != ""
+}
+
+func (ctx *requestCtx) IsInternalCall() bool {
+	return ctx.internalCall
+}
+
+func (ctx *requestCtx) User() *model.User {
+	return ctx.user
+}
+
+func WithUser(ctx context.Context, sessionID string, user *model.User) context.Context {
+	switch ctx.(type) {
+	case *requestCtx:
+		rctx := ctx.(*requestCtx)
+		return &requestCtx{
+			Context:      ctx,
+			clientID:     rctx.clientID,
+			internalCall: rctx.internalCall,
+			sessionID:    sessionID,
+			user:         user,
+		}
+	default:
+		return &requestCtx{
+			Context:   ctx,
+			sessionID: sessionID,
+			user:      user,
+		}
+	}
+}
+func WithInternalCall(ctx context.Context, b bool) context.Context {
+	switch ctx.(type) {
+	case *requestCtx:
+		rctx := ctx.(*requestCtx)
+		return &requestCtx{
+			Context:      ctx,
+			clientID:     rctx.clientID,
+			internalCall: b,
+			sessionID:    rctx.sessionID,
+			user:         rctx.user,
+		}
+	default:
+		return &requestCtx{
+			Context:      ctx,
+			internalCall: b,
+		}
+	}
 }

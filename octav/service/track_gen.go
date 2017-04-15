@@ -41,7 +41,7 @@ func (v *TrackSvc) LookupFromPayload(ctx context.Context, tx *sql.Tx, m *model.T
 	if err = v.Lookup(ctx, tx, m, payload.ID); err != nil {
 		return errors.Wrap(err, "failed to load model.Track from database")
 	}
-	if err := v.Decorate(ctx, tx, m, payload.TrustedCall, payload.Lang.String); err != nil {
+	if err := v.Decorate(ctx, tx, m, payload.VerifiedCall, payload.Lang.String); err != nil {
 		return errors.Wrap(err, "failed to load associated data for model.Track from database")
 	}
 	return nil

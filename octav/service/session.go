@@ -262,7 +262,7 @@ func (v *SessionSvc) LoadByConference(tx *sql.Tx, vdbl *db.SessionList, cid stri
 }
 */
 
-func (v *SessionSvc) Decorate(ctx context.Context, tx *sql.Tx, session *model.Session, trustedCall bool, lang string) error {
+func (v *SessionSvc) Decorate(ctx context.Context, tx *sql.Tx, session *model.Session, verifiedCall bool, lang string) error {
 	if pdebug.Enabled {
 		g := pdebug.Marker("service.Session.Decorate")
 		defer g.End()
@@ -274,7 +274,7 @@ func (v *SessionSvc) Decorate(ctx context.Context, tx *sql.Tx, session *model.Se
 		if err := cs.Lookup(ctx, tx, &mc, session.ConferenceID); err != nil {
 			return errors.Wrap(err, "failed to load conference")
 		}
-		if err := cs.Decorate(ctx, tx, &mc, trustedCall, lang); err != nil {
+		if err := cs.Decorate(ctx, tx, &mc, verifiedCall, lang); err != nil {
 			return errors.Wrap(err, "failed to decorate conference")
 		}
 		session.Conference = &mc
@@ -294,7 +294,7 @@ func (v *SessionSvc) Decorate(ctx context.Context, tx *sql.Tx, session *model.Se
 		if err := rs.Lookup(ctx, tx, &room, session.RoomID); err != nil {
 			return errors.Wrap(err, "failed to load room")
 		}
-		if err := rs.Decorate(ctx, tx, &room, trustedCall, lang); err != nil {
+		if err := rs.Decorate(ctx, tx, &room, verifiedCall, lang); err != nil {
 			return errors.Wrap(err, "failed to decorate room")
 		}
 		session.Room = &room
@@ -306,7 +306,7 @@ func (v *SessionSvc) Decorate(ctx context.Context, tx *sql.Tx, session *model.Se
 		if err := su.Lookup(ctx, tx, &speaker, session.SpeakerID); err != nil {
 			return errors.Wrapf(err, "failed to load speaker '%s'", session.SpeakerID)
 		}
-		if err := su.Decorate(ctx, tx, &speaker, trustedCall, lang); err != nil {
+		if err := su.Decorate(ctx, tx, &speaker, verifiedCall, lang); err != nil {
 			return errors.Wrap(err, "failed to decorate speaker")
 		}
 		session.Speaker = &speaker
@@ -318,7 +318,7 @@ func (v *SessionSvc) Decorate(ctx context.Context, tx *sql.Tx, session *model.Se
 		if err := sts.Lookup(ctx, tx, &sessionType, session.SessionTypeID); err != nil {
 			return errors.Wrapf(err, "failed to load session type '%s'", session.SessionTypeID)
 		}
-		if err := sts.Decorate(ctx, tx, &sessionType, trustedCall, lang); err != nil {
+		if err := sts.Decorate(ctx, tx, &sessionType, verifiedCall, lang); err != nil {
 			return errors.Wrap(err, "failed to decorate session type")
 		}
 		session.SessionType = &sessionType
@@ -455,7 +455,7 @@ func (v *SessionSvc) ListFromPayload(ctx context.Context, tx *sql.Tx, result *mo
 				return nil, errors.Wrap(err, "failed to populate model from database")
 			}
 
-			if err := v.Decorate(ctx, tx, &l[i], payload.TrustedCall, payload.Lang.String); err != nil {
+			if err := v.Decorate(ctx, tx, &l[i], payload.VerifiedCall, payload.Lang.String); err != nil {
 				return nil, errors.Wrap(err, "failed to decorate session with associated data")
 			}
 		}
@@ -624,7 +624,7 @@ func (v *SessionSvc) SendSelectionResultNotificationFromPayload(ctx context.Cont
 	}
 
 	// Now, based on the user's language, decorate the session
-	if err := v.Decorate(ctx, tx, &m, payload.TrustedCall, u.Lang); err != nil {
+	if err := v.Decorate(ctx, tx, &m, payload.VerifiedCall, u.Lang); err != nil {
 		return errors.Wrap(err, "failed to declorate mode.Session")
 	}
 

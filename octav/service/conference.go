@@ -355,7 +355,7 @@ func (v *ConferenceSvc) DeleteAdministratorFromPayload(ctx context.Context, tx *
 	return db.DeleteConferenceAdministrator(tx, payload.ConferenceID, payload.AdminID)
 }
 
-func (v *ConferenceSvc) LoadAdmins(ctx context.Context, tx *sql.Tx, cdl *model.UserList, trustedCall bool, cid, lang string) (err error) {
+func (v *ConferenceSvc) LoadAdmins(ctx context.Context, tx *sql.Tx, cdl *model.UserList, verifiedCall bool, cid, lang string) (err error) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("service.Conference.LoadAdmins").BindError(&err)
 		defer g.End()
@@ -376,7 +376,7 @@ func (v *ConferenceSvc) LoadAdmins(ctx context.Context, tx *sql.Tx, cdl *model.U
 		if err := res[i].FromRow(&vdb); err != nil {
 			return errors.Wrap(err, "failed to map database to model")
 		}
-		if err := su.Decorate(ctx, tx, &res[i], trustedCall, lang); err != nil {
+		if err := su.Decorate(ctx, tx, &res[i], verifiedCall, lang); err != nil {
 			return errors.Wrap(err, "failed to decorate administrator")
 		}
 	}
@@ -501,7 +501,7 @@ func (v *ConferenceSvc) LoadTextComponents(tx *sql.Tx, c *model.Conference) erro
 	return nil
 }
 
-func (v *ConferenceSvc) Decorate(ctx context.Context, tx *sql.Tx, c *model.Conference, trustedCall bool, lang string) (err error) {
+func (v *ConferenceSvc) Decorate(ctx context.Context, tx *sql.Tx, c *model.Conference, verifiedCall bool, lang string) (err error) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("service.Conference.Decorate").BindError(&err)
 		defer g.End()
@@ -512,7 +512,7 @@ func (v *ConferenceSvc) Decorate(ctx context.Context, tx *sql.Tx, c *model.Confe
 		css := ConferenceSeries()
 		r := model.LookupConferenceSeriesRequest{
 			ID:          seriesID,
-			TrustedCall: trustedCall,
+			VerifiedCall: verifiedCall,
 		}
 		r.Lang.Set(lang)
 		if err := css.LookupFromPayload(ctx, tx, &s, &r); err != nil {
@@ -535,7 +535,7 @@ func (v *ConferenceSvc) Decorate(ctx context.Context, tx *sql.Tx, c *model.Confe
 		return errors.Wrapf(err, "failed to load conference date for '%s'", c.ID)
 	}
 
-	if err := v.LoadAdmins(ctx, tx, &c.Administrators, trustedCall, c.ID, lang); err != nil {
+	if err := v.LoadAdmins(ctx, tx, &c.Administrators, verifiedCall, c.ID, lang); err != nil {
 		return errors.Wrapf(err, "failed to load administrators for '%s'", c.ID)
 	}
 
@@ -544,7 +544,7 @@ func (v *ConferenceSvc) Decorate(ctx context.Context, tx *sql.Tx, c *model.Confe
 		return errors.Wrapf(err, "failed to load venues for '%s'", c.ID)
 	}
 	for i := range c.Venues {
-		if err := sv.Decorate(ctx, tx, &c.Venues[i], trustedCall, lang); err != nil {
+		if err := sv.Decorate(ctx, tx, &c.Venues[i], verifiedCall, lang); err != nil {
 			return errors.Wrap(err, "failed to decorate venues")
 		}
 	}
@@ -554,7 +554,7 @@ func (v *ConferenceSvc) Decorate(ctx context.Context, tx *sql.Tx, c *model.Confe
 		return errors.Wrap(err, "failed to load by conference")
 	}
 	for i := range c.Tracks {
-		if err := st.Decorate(ctx, tx, &c.Tracks[i], trustedCall, lang); err != nil {
+		if err := st.Decorate(ctx, tx, &c.Tracks[i], verifiedCall, lang); err != nil {
 			return errors.Wrap(err, "failed to decorate tracks with associated data")
 		}
 		c.Tracks[i].ConferenceID = ""
@@ -565,7 +565,7 @@ func (v *ConferenceSvc) Decorate(ctx context.Context, tx *sql.Tx, c *model.Confe
 		return errors.Wrapf(err, "failed to load featured speakers for '%s'", c.ID)
 	}
 	for i := range c.FeaturedSpeakers {
-		if err := sfs.Decorate(ctx, tx, &c.FeaturedSpeakers[i], trustedCall, lang); err != nil {
+		if err := sfs.Decorate(ctx, tx, &c.FeaturedSpeakers[i], verifiedCall, lang); err != nil {
 			return errors.Wrap(err, "failed to decorate featured speakers with associated data")
 		}
 	}
@@ -575,7 +575,7 @@ func (v *ConferenceSvc) Decorate(ctx context.Context, tx *sql.Tx, c *model.Confe
 		return errors.Wrapf(err, "failed to load sponsors for '%s'", c.ID)
 	}
 	for i := range c.Sponsors {
-		if err := sps.Decorate(ctx, tx, &c.Sponsors[i], trustedCall, lang); err != nil {
+		if err := sps.Decorate(ctx, tx, &c.Sponsors[i], verifiedCall, lang); err != nil {
 			return errors.Wrap(err, "failed to decorate sponsors with associated data")
 		}
 	}
@@ -585,17 +585,17 @@ func (v *ConferenceSvc) Decorate(ctx context.Context, tx *sql.Tx, c *model.Confe
 		return errors.Wrapf(err, "failed to load session types for '%s'", c.ID)
 	}
 	for i := range c.SessionTypes {
-		if err := sts.Decorate(ctx, tx, &c.SessionTypes[i], trustedCall, lang); err != nil {
+		if err := sts.Decorate(ctx, tx, &c.SessionTypes[i], verifiedCall, lang); err != nil {
 			return errors.Wrap(err, "failed to decorate session types with associated data")
 		}
 	}
 
 	ers := ExternalResource()
-	if err := ers.LoadByConferenceID(tx, &c.ExternalResources, c.ID, trustedCall, lang); err != nil {
+	if err := ers.LoadByConferenceID(tx, &c.ExternalResources, c.ID, verifiedCall, lang); err != nil {
 		return errors.Wrapf(err, "failed to load external resources for '%s'", c.ID)
 	}
 	for i := range c.ExternalResources {
-		if err := ers.Decorate(ctx, tx, &c.ExternalResources[i], trustedCall, lang); err != nil {
+		if err := ers.Decorate(ctx, tx, &c.ExternalResources[i], verifiedCall, lang); err != nil {
 			return errors.Wrap(err, "failed to decorate external resources with associated data")
 		}
 	}
@@ -807,7 +807,7 @@ func (v *ConferenceSvc) ListFromPayload(ctx context.Context, tx *sql.Tx, l *mode
 		}
 		m := make(model.ConferenceList, len(ids))
 		r := model.LookupConferenceRequest{
-			// TrustedCall: payload.TrustedCall, // shouldn't we have this?
+			// VerifiedCall: payload.VerifiedCall, // shouldn't we have this?
 			Lang: payload.Lang,
 		}
 		for i, id := range ids {
@@ -971,7 +971,7 @@ func (v *ConferenceSvc) ListCredentialFromPayload(ctx context.Context, tx *sql.T
 	return nil
 }
 
-func (v *ConferenceSvc) LoadStaff(ctx context.Context, tx *sql.Tx, users *model.UserList, trustedCall bool, confID, lang string) (err error) {
+func (v *ConferenceSvc) LoadStaff(ctx context.Context, tx *sql.Tx, users *model.UserList, verifiedCall bool, confID, lang string) (err error) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("service.Conference.LoadStaff").BindError(&err)
 		defer g.End()
@@ -992,7 +992,7 @@ func (v *ConferenceSvc) LoadStaff(ctx context.Context, tx *sql.Tx, users *model.
 		if err := res[i].FromRow(&vdb); err != nil {
 			return errors.Wrap(err, "failed to map database to model")
 		}
-		if err := su.Decorate(ctx, tx, &res[i], trustedCall, lang); err != nil {
+		if err := su.Decorate(ctx, tx, &res[i], verifiedCall, lang); err != nil {
 			return errors.Wrap(err, "failed to decorate administrator")
 		}
 	}

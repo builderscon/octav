@@ -195,9 +195,9 @@ func (v *TrackSvc) LoadByConferenceID(ctx context.Context, tx *sql.Tx, result *m
 	return nil
 }
 
-func (v *TrackSvc) Decorate(ctx context.Context, tx *sql.Tx, track *model.Track, trustedCall bool, lang string) (err error) {
+func (v *TrackSvc) Decorate(ctx context.Context, tx *sql.Tx, track *model.Track, verifiedCall bool, lang string) (err error) {
 	if pdebug.Enabled {
-		g := pdebug.Marker("service.Track.Decorate (%s, %s, %t, %s)", track.ConferenceID, track.RoomID, trustedCall, lang).BindError(&err)
+		g := pdebug.Marker("service.Track.Decorate (%s, %s, %t, %s)", track.ConferenceID, track.RoomID, verifiedCall, lang).BindError(&err)
 		defer g.End()
 	}
 

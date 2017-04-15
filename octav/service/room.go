@@ -76,7 +76,7 @@ func (v *RoomSvc) ListFromPayload(ctx context.Context, tx *sql.Tx, result *model
 	}
 
 	for i := range m {
-		if err := v.Decorate(ctx, tx, &m[i], payload.TrustedCall, payload.Lang.String); err != nil {
+		if err := v.Decorate(ctx, tx, &m[i], payload.VerifiedCall, payload.Lang.String); err != nil {
 			return errors.Wrap(err, "failed to associate data to model")
 		}
 	}
@@ -120,9 +120,9 @@ func (v *RoomSvc) DeleteFromPayload(ctx context.Context, tx *sql.Tx, payload *mo
 	return errors.Wrap(v.Delete(tx, payload.ID), "failed to delete from ddatabase")
 }
 
-func (v *RoomSvc) Decorate(ctx context.Context, tx *sql.Tx, room *model.Room, trustedCall bool, lang string) (err error) {
+func (v *RoomSvc) Decorate(ctx context.Context, tx *sql.Tx, room *model.Room, verifiedCall bool, lang string) (err error) {
 	if pdebug.Enabled {
-		g := pdebug.Marker("service.Room.Decorate (%s, %t, %s)", room.ID, trustedCall, lang).BindError(&err)
+		g := pdebug.Marker("service.Room.Decorate (%s, %t, %s)", room.ID, verifiedCall, lang).BindError(&err)
 		defer g.End()
 	}
 

@@ -99,7 +99,7 @@ func (v *ExternalResourceSvc) ListFromPayload(ctx context.Context, tx *sql.Tx, r
 			return errors.Wrap(err, "failed to populate model from database")
 		}
 
-		if err := v.Decorate(ctx, tx, &l[i], payload.TrustedCall, payload.Lang.String); err != nil {
+		if err := v.Decorate(ctx, tx, &l[i], payload.VerifiedCall, payload.Lang.String); err != nil {
 			return errors.Wrap(err, "failed to decorate exrernal resource with associated data")
 		}
 	}
@@ -130,7 +130,7 @@ func (v *ExternalResourceSvc) PostDeleteHook(_ *sql.Tx, vdb *db.ExternalResource
 	return invalidateExternalResourceLoadByConferenceID(vdb.ConferenceID)
 }
 
-func (v *ExternalResourceSvc) Decorate(ctx context.Context, tx *sql.Tx, c *model.ExternalResource, trustedCall bool, lang string) error {
+func (v *ExternalResourceSvc) Decorate(ctx context.Context, tx *sql.Tx, c *model.ExternalResource, verifiedCall bool, lang string) error {
 	if lang == "" {
 		return nil
 	}
@@ -140,7 +140,7 @@ func (v *ExternalResourceSvc) Decorate(ctx context.Context, tx *sql.Tx, c *model
 	return nil
 }
 
-func (v *ExternalResourceSvc) LoadByConferenceID(tx *sql.Tx, result *model.ExternalResourceList, cid string, trustedCall bool, lang string) (err error) {
+func (v *ExternalResourceSvc) LoadByConferenceID(tx *sql.Tx, result *model.ExternalResourceList, cid string, verifiedCall bool, lang string) (err error) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("service.ExternalResource.LoadByConferenceID %s", cid).BindError(&err)
 		defer g.End()

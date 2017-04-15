@@ -43,9 +43,9 @@ func (v *VenueSvc) populateRowForUpdate(ctx context.Context, vdb *db.Venue, payl
 	return nil
 }
 
-func (v *VenueSvc) Decorate(ctx context.Context, tx *sql.Tx, venue *model.Venue, trustedCall bool, lang string) (err error) {
+func (v *VenueSvc) Decorate(ctx context.Context, tx *sql.Tx, venue *model.Venue, verifiedCall bool, lang string) (err error) {
 	if pdebug.Enabled {
-		g := pdebug.Marker("service.Venue.Decorate (%s, %t, %s)", venue.ID, trustedCall, lang).BindError(&err)
+		g := pdebug.Marker("service.Venue.Decorate (%s, %t, %s)", venue.ID, verifiedCall, lang).BindError(&err)
 		defer g.End()
 	}
 
@@ -55,7 +55,7 @@ func (v *VenueSvc) Decorate(ctx context.Context, tx *sql.Tx, venue *model.Venue,
 	}
 
 	for i := range venue.Rooms {
-		if err := sr.Decorate(ctx, tx, &venue.Rooms[i], trustedCall, lang); err != nil {
+		if err := sr.Decorate(ctx, tx, &venue.Rooms[i], verifiedCall, lang); err != nil {
 			return errors.Wrap(err, "failed to decorate room")
 		}
 	}
@@ -111,7 +111,7 @@ func (v *VenueSvc) ListFromPayload(ctx context.Context, tx *sql.Tx, result *mode
 			return errors.Wrap(err, "failed to populate model from database")
 		}
 
-		if err := v.Decorate(ctx, tx, &l[i], payload.TrustedCall, payload.Lang.String); err != nil {
+		if err := v.Decorate(ctx, tx, &l[i], payload.VerifiedCall, payload.Lang.String); err != nil {
 			return errors.Wrap(err, "failed to decorate venue with associated data")
 		}
 	}
