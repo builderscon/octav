@@ -1,5 +1,5 @@
 """OCTAV Client Library"""
-"""DO NOT EDIT: This file was generated from ../spec/v2/api.json on Thu Mar 30 10:47:28 2017"""
+"""DO NOT EDIT: This file was generated from ../spec/v2/api.json on Fri Apr 21 07:10:38 2017"""
 
 import certifi
 import feedparser
@@ -43,6 +43,9 @@ class Session(object):
     self.sid = sid
     self.expires = expires
     self.client = client
+
+  def last_error(self):
+    return self.client.last_error()
 
   # renews the octav session. returns false if there was no need to
   # renew, true if the session was renewed. None is returned if

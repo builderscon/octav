@@ -215,6 +215,9 @@ class Session(object):
     self.expires = expires
     self.client = client
 
+  def last_error(self):
+    return self.client.last_error()
+
   # renews the octav session. returns false if there was no need to
   # renew, true if the session was renewed. None is returned if
   # there was an error
