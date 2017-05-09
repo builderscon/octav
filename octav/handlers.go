@@ -2223,7 +2223,9 @@ func doLookupUserAvatar(ctx context.Context, w http.ResponseWriter, r *http.Requ
 		return
 	}
 
+	defer res.Body.Close()
 	w.Header().Set("content-type", res.Header.Get("content-type"))
+	w.Header().Set("content-length", res.Header.Get("content-length"))
 	w.WriteHeader(res.StatusCode)
 	io.Copy(w, res.Body)
 }
