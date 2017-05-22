@@ -1,4 +1,4 @@
-{{ gettext "Thank you for registering yoru email with builderscon!" }}
+{{ gettext "Thank you for registering your email with builderscon!" }}
 
 {{ gettext "Please click on the link below to confirm your email address" }}
 
