@@ -5,6 +5,7 @@ import (
 	nativectx "context"
 	"encoding/json"
 	"fmt"
+	"io"
 	"math"
 	"net/http"
 	"os"
@@ -2194,4 +2195,37 @@ func doCreateClientSession(ctx context.Context, w http.ResponseWriter, r *http.R
 	res.Expires = expires.Format(time.RFC3339)
 	res.SessionID = sid
 	httpJSON(w, &res)
+}
+
+func doLookupUserAvatar(ctx context.Context, w http.ResponseWriter, r *http.Request, payload *model.LookupUserAvatarRequest) {
+	tx, err := db.BeginTx(ctx, nil)
+	if err != nil {
+		httpError(w, `doLookupUserAvatar`, http.StatusInternalServerError, err)
+		return
+	}
+
+	su := service.User()
+
+	var m model.User
+	if err := su.Lookup(ctx, tx, &m, payload.ID); err != nil {
+		httpError(w, `doLookupUserAvatar`, http.StatusInternalServerError, err)
+		return
+	}
+
+	res, err := http.Get(m.AvatarURL)
+	if err != nil {
+		httpError(w, `doLookupUserAvatar`, http.StatusInternalServerError, err)
+		return
+	}
+
+	if res.StatusCode != http.StatusOK {
+		w.WriteHeader(res.StatusCode)
+		return
+	}
+
+	defer res.Body.Close()
+	w.Header().Set("content-type", res.Header.Get("content-type"))
+	w.Header().Set("content-length", res.Header.Get("content-length"))
+	w.WriteHeader(res.StatusCode)
+	io.Copy(w, res.Body)
 }

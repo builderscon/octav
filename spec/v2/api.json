@@ -629,6 +629,18 @@
       "targetSchema": { "$ref": "#/definitions/user" }
     },
     {
+      "title": "Lookup user avatar",
+      "rel": "lookup",
+      "href": "/v2/user/avatar",
+      "schema": {
+        "type": "object",
+        "required": ["id"],
+        "properties": {
+          "id": {"$ref": "#/definitions/uuid"}
+        }
+      }
+    },
+    {
       "title": "Verify user",
       "hsup.wrapper": "httpWithBasicAuth",
       "rel": "create",

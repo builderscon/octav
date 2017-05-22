@@ -115,6 +115,7 @@ var HTTPLookupSponsorRequest *jsval.JSVal
 var HTTPLookupSponsorResponse *jsval.JSVal
 var HTTPLookupTrackRequest *jsval.JSVal
 var HTTPLookupTrackResponse *jsval.JSVal
+var HTTPLookupUserAvatarRequest *jsval.JSVal
 var HTTPLookupUserByAuthUserIDRequest *jsval.JSVal
 var HTTPLookupUserByAuthUserIDResponse *jsval.JSVal
 var HTTPLookupUserRequest *jsval.JSVal
@@ -3857,6 +3858,21 @@ func init() {
 				AddProp(
 					"sort_order",
 					jsval.Integer(),
+				),
+		)
+
+	HTTPLookupUserAvatarRequest = jsval.New().
+		SetName("HTTPLookupUserAvatarRequest").
+		SetConstraintMap(M).
+		SetRoot(
+			jsval.Object().
+				Required("id").
+				AdditionalProperties(
+					jsval.EmptyConstraint,
+				).
+				AddProp(
+					"id",
+					jsval.Reference(M).RefersTo("#/definitions/uuid"),
 				),
 		)
 

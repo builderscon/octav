@@ -2927,6 +2927,39 @@ func httpLookupUser(ctx context.Context, w http.ResponseWriter, r *http.Request)
 	doLookupUser(ctx, w, r, &payload)
 }
 
+func httpLookupUserAvatar(ctx context.Context, w http.ResponseWriter, r *http.Request) {
+	if pdebug.Enabled {
+		g := pdebug.Marker("httpLookupUserAvatar")
+		defer g.End()
+	}
+	method := strings.ToLower(r.Method)
+	if method != `get` {
+		w.Header().Set("Allow", "get")
+		msgbuf := getBytesBuffer()
+		defer releaseBytesBuffer(msgbuf)
+		msgbuf.WriteString(`Method was `)
+		msgbuf.WriteString(r.Method)
+		msgbuf.WriteString(`, expected 'get'`)
+		httpError(w, msgbuf.String(), http.StatusNotFound, nil)
+		return
+	}
+
+	var payload model.LookupUserAvatarRequest
+	qbuf := getBytesBuffer()
+	defer releaseBytesBuffer(qbuf)
+	qbuf.WriteString(r.URL.RawQuery)
+	if err := urlenc.Unmarshal(qbuf.Bytes(), &payload); err != nil {
+		httpError(w, `Failed to parse url query string`, http.StatusInternalServerError, err)
+		return
+	}
+
+	if err := validator.HTTPLookupUserAvatarRequest.Validate(&payload); err != nil {
+		httpError(w, `Invalid input (validation failed)`, http.StatusInternalServerError, err)
+		return
+	}
+	doLookupUserAvatar(ctx, w, r, &payload)
+}
+
 func httpLookupUserByAuthUserID(ctx context.Context, w http.ResponseWriter, r *http.Request) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("httpLookupUserByAuthUserID")
@@ -3835,6 +3868,7 @@ func (s *Server) SetupRoutes() {
 	r.HandleFunc(`/v2/track/delete`, httpWithContext(httpWithBasicAuth(httpWithClientSession(httpDeleteTrack))))
 	r.HandleFunc(`/v2/track/lookup`, httpWithContext(httpLookupTrack))
 	r.HandleFunc(`/v2/track/update`, httpWithContext(httpWithBasicAuth(httpWithClientSession(httpUpdateTrack))))
+	r.HandleFunc(`/v2/user/avatar`, httpWithContext(httpLookupUserAvatar))
 	r.HandleFunc(`/v2/user/create`, httpWithContext(httpWithBasicAuth(httpCreateUser)))
 	r.HandleFunc(`/v2/user/delete`, httpWithContext(httpWithBasicAuth(httpWithClientSession(httpDeleteUser))))
 	r.HandleFunc(`/v2/user/list`, httpWithContext(httpWithOptionalBasicAuth(httpListUser)))

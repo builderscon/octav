@@ -1185,3 +1185,8 @@ type CreateClientSessionResponse struct {
 	SessionID string `json:"sid"`
 	Expires   string `json:"expires"`
 }
+
+// +transport
+type LookupUserAvatarRequest struct {
+	ID string `json:"id"`
+}
