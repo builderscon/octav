@@ -23,7 +23,7 @@ hsupsrc:
 	@go get -d github.com/lestrrat/go-hsup
 
 bindatasrc:
-	@go get -d github.com/lestrrat/go-bindata
+	@go get -d github.com/lestrrat/go-packasset
 
 $(INTERNAL_BIN_DIR):
 	@mkdir -p $(INTERNAL_BIN_DIR)
@@ -38,10 +38,10 @@ $(INTERNAL_BIN_DIR)/hsup:
 	@echo "Building hsup..."
 	@cd $(shell go list -f '{{ .Dir }}' github.com/lestrrat/go-hsup) && PATH=$(INTERNAL_BIN_DIR):$(PATH) glide install && go build -o $@ cmd/hsup/*.go
 
-$(INTERNAL_BIN_DIR)/go-bindata:
+$(INTERNAL_BIN_DIR)/go-packasset:
 	@$(MAKE) $(INTERNAL_BIN_DIR)
 	@echo "Building bindata..."
-	@cd $(shell go list -f '{{ .Dir }}' github.com/lestrrat/go-bindata) && PATH=$(INTERNAL_BIN_DIR):$(PATH) go build -o $@ ./go-bindata
+	@cd $(shell go list -f '{{ .Dir }}' github.com/lestrrat/go-packasset) && PATH=$(INTERNAL_BIN_DIR):$(PATH) go build -o $@ ./cmd/packasset/packasset.go
 
 glide: $(INTERNAL_BIN_DIR)/glide
 
@@ -57,7 +57,7 @@ $(INTERNAL_BIN_DIR)/glide-$(GOOS)-$(GOARCH):
 
 build_internal_cmd: $(patsubst %,$(INTERNAL_BIN_DIR)/%, $(INTERNAL_CMDS))
 
-generate: build_internal_cmd $(INTERNAL_BIN_DIR)/go-bindata buildspec
+generate: build_internal_cmd $(INTERNAL_BIN_DIR)/go-packasset buildspec
 	@echo "go generate ."
 	@PATH=$(CURDIR)/_internal_bin:$(PATH) go generate .
 
@@ -95,7 +95,7 @@ clean:
 initdb:
 	$(MAKE) -C ../ initdb
 
-assets: $(INTERNAL_BIN_DIR)/go-bindata
+assets: $(INTERNAL_BIN_DIR)/go-packasset
 	@echo "Regenerating assets"
-	@cd assets; PATH=$(CURDIR)/_internal_bin:$(PATH) go-bindata -o=assets.go -pkg=assets -ignore=assets.go -ignore=\\.swp templates/...
+	@cd assets; sh -c "find templates -type f | PATH=$(CURDIR)/_internal_bin:$(PATH) go-packasset -output=assets.go -package=assets"
 
