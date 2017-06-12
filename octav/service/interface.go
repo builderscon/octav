@@ -93,6 +93,7 @@ type QuestionSvc struct{}
 type RoomSvc struct{}
 
 // +PreUpdateFromPayloadHook
+// +PostUpdateFromPayloadHook
 type SessionSvc struct{}
 
 // +PostUpdateHook

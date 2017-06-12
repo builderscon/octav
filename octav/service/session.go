@@ -387,6 +387,13 @@ func (v *SessionSvc) PreUpdateFromPayloadHook(ctx context.Context, tx *sql.Tx, v
 	return nil
 }
 
+func (v *SessionSvc) PostUpdateFromPayloadHook(_ context.Context, _ *sql.Tx, vdb *db.Session, _ *model.UpdateSessionRequest) error {
+	c := Cache()
+	key := c.Key("Session", vdb.EID)
+	c.Delete(key)
+	return nil
+}
+
 func (v *SessionSvc) ListFromPayload(ctx context.Context, tx *sql.Tx, result *model.SessionList, payload *model.ListSessionsRequest) (err error) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("service.Session.ListFromPayload").BindError(&err)
