@@ -1,5 +1,5 @@
 """OCTAV Client Library"""
-"""DO NOT EDIT: This file was generated from ../spec/v2/api.json on Fri Apr 21 07:10:38 2017"""
+"""DO NOT EDIT: This file was generated from ../spec/v2/api.json on Mon Jun 12 19:30:30 2017"""
 
 import certifi
 import feedparser
@@ -340,6 +340,10 @@ class Session(object):
     self.renew()
     return self.client.lookup_user(id, sid=sid, extra_headers={'X-Octav-Session-ID': self.sid})
 
+  def lookup_user_avatar (self, id, extra_headers=None):
+    self.renew()
+    return self.client.lookup_user_avatar(id, extra_headers={'X-Octav-Session-ID': self.sid})
+
   def lookup_user_by_auth_user_id (self, auth_user_id, auth_via, extra_headers=None):
     self.renew()
     return self.client.lookup_user_by_auth_user_id(auth_user_id, auth_via, extra_headers={'X-Octav-Session-ID': self.sid})
@@ -384,9 +388,9 @@ class Session(object):
     self.renew()
     return self.client.update_room(id, capacity=capacity, name=name, venue_id=venue_id, extra_headers={'X-Octav-Session-ID': self.sid}, **args)
 
-  def update_session (self, id, abstract=None, category=None, conference_id=None, confirmed=None, duration=None, has_interpretation=None, material_level=None, materials_release=None, memo=None, photo_release=None, recording_release=None, session_type_id=None, slide_language=None, slide_subtitles=None, slide_url=None, sort_order=None, speaker_id=None, spoken_language=None, starts_on=None, status=None, tags=None, title=None, video_url=None, extra_headers=None, **args):
+  def update_session (self, id, abstract=None, category=None, conference_id=None, confirmed=None, duration=None, has_interpretation=None, material_level=None, materials_release=None, memo=None, photo_release=None, recording_release=None, room_id=None, session_type_id=None, slide_language=None, slide_subtitles=None, slide_url=None, sort_order=None, speaker_id=None, spoken_language=None, starts_on=None, status=None, tags=None, title=None, video_url=None, extra_headers=None, **args):
     self.renew()
-    return self.client.update_session(id, abstract=abstract, category=category, conference_id=conference_id, confirmed=confirmed, duration=duration, has_interpretation=has_interpretation, material_level=material_level, materials_release=materials_release, memo=memo, photo_release=photo_release, recording_release=recording_release, session_type_id=session_type_id, slide_language=slide_language, slide_subtitles=slide_subtitles, slide_url=slide_url, sort_order=sort_order, speaker_id=speaker_id, spoken_language=spoken_language, starts_on=starts_on, status=status, tags=tags, title=title, video_url=video_url, extra_headers={'X-Octav-Session-ID': self.sid}, **args)
+    return self.client.update_session(id, abstract=abstract, category=category, conference_id=conference_id, confirmed=confirmed, duration=duration, has_interpretation=has_interpretation, material_level=material_level, materials_release=materials_release, memo=memo, photo_release=photo_release, recording_release=recording_release, room_id=room_id, session_type_id=session_type_id, slide_language=slide_language, slide_subtitles=slide_subtitles, slide_url=slide_url, sort_order=sort_order, speaker_id=speaker_id, spoken_language=spoken_language, starts_on=starts_on, status=status, tags=tags, title=title, video_url=video_url, extra_headers={'X-Octav-Session-ID': self.sid}, **args)
 
   def update_session_type (self, id, abstract=None, duration=None, is_default=None, name=None, submission_end=None, submission_start=None, extra_headers=None, **args):
     self.renew()
@@ -3160,6 +3164,36 @@ class Octav(object):
         return None
 
 
+  def lookup_user_avatar (self, id, extra_headers=None):
+    try:
+        payload = {}
+        hdrs = {}
+        if id is None:
+            raise MissingRequiredArgument('property id must be provided')
+        payload['id'] = id
+        if id is not None:
+            payload['id'] = id
+        uri = '%s/v2/user/avatar' % self.endpoint
+        qs = urlencode(payload, True)
+        if self.debug:
+            print('GET %s?%s' % (uri, qs))
+        if extra_headers:
+            hdrs.update(extra_headers)
+        res = self.http.request('GET', '%s?%s' % (uri, qs), headers=hdrs)
+        if self.debug:
+            print(res)
+        self.res = res
+        if res.status != 200:
+            self.extract_error(res)
+            return None
+        return True
+    except BaseException as e:
+        if self.debug:
+            print("error during http access: " + repr(e))
+        self.error = repr(e)
+        return None
+
+
   def lookup_user_by_auth_user_id (self, auth_user_id, auth_via, extra_headers=None):
     try:
         payload = {}
@@ -3610,7 +3644,7 @@ class Octav(object):
         return None
 
 
-  def update_session (self, id, abstract=None, category=None, conference_id=None, confirmed=None, duration=None, has_interpretation=None, material_level=None, materials_release=None, memo=None, photo_release=None, recording_release=None, session_type_id=None, slide_language=None, slide_subtitles=None, slide_url=None, sort_order=None, speaker_id=None, spoken_language=None, starts_on=None, status=None, tags=None, title=None, video_url=None, extra_headers=None, **args):
+  def update_session (self, id, abstract=None, category=None, conference_id=None, confirmed=None, duration=None, has_interpretation=None, material_level=None, materials_release=None, memo=None, photo_release=None, recording_release=None, room_id=None, session_type_id=None, slide_language=None, slide_subtitles=None, slide_url=None, sort_order=None, speaker_id=None, spoken_language=None, starts_on=None, status=None, tags=None, title=None, video_url=None, extra_headers=None, **args):
     try:
         payload = {}
         hdrs = {}
@@ -3641,6 +3675,8 @@ class Octav(object):
             payload['photo_release'] = photo_release
         if recording_release is not None:
             payload['recording_release'] = recording_release
+        if room_id is not None:
+            payload['room_id'] = room_id
         if session_type_id is not None:
             payload['session_type_id'] = session_type_id
         if slide_language is not None:

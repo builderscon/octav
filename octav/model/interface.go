@@ -210,7 +210,6 @@ type Session struct {
 	HasInterpretation   bool         `json:"has_interpretation"`
 	Status              string       `json:"status"`
 	Confirmed           bool         `json:"confirmed"`
-	Conference          *Conference  `json:"conference,omitempy" decorate:"true"`    // only populated for JSON response
 	Room                *Room        `json:"room,omitempty" decorate:"true"`         // only populated for JSON response
 	Speaker             *User        `json:"speaker,omitempty" decorate:"true"`      // only populated for JSON response
 	SessionType         *SessionType `json:"session_type,omitempty" decorate:"true"` // only populated for JSON response
