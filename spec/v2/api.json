@@ -1497,6 +1497,7 @@
           "conference_id": { "$ref": "#/definitions/uuid" },
           "speaker_id": { "$ref": "#/definitions/uuid" },
           "session_type_id": { "$ref": "#/definitions/uuid" },
+          "room_id": { "$ref": "#/definitions/uuid" },
           "title": { "$ref": "#/definitions/string_en" },
           "abstract": { "$ref": "#/definitions/markdown_en" },
           "memo": { "type": "string" },

@@ -4516,6 +4516,10 @@ func init() {
 					jsval.Reference(M).RefersTo("#/definitions/binary_permission"),
 				).
 				AddProp(
+					"room_id",
+					jsval.Reference(M).RefersTo("#/definitions/uuid"),
+				).
+				AddProp(
 					"session_type_id",
 					jsval.Reference(M).RefersTo("#/definitions/uuid"),
 				).
