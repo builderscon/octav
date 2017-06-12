@@ -149,6 +149,10 @@ func (v *SessionSvc) UpdateFromPayload(ctx context.Context, tx *sql.Tx, payload 
 		return errors.Wrap(err, `failed to update row in database`)
 	}
 
+	if err := v.PostUpdateFromPayloadHook(ctx, tx, &vdb, payload); err != nil {
+		return errors.Wrap(err, `failed to execute PostUpdateFromPayloadHook`)
+	}
+
 	ls := LocalizedString()
 	if err := ls.UpdateFields(tx, "Session", vdb.EID, payload.LocalizedFields); err != nil {
 		return errors.Wrap(err, `failed to update localized fields`)
