@@ -267,6 +267,7 @@ func (v *SessionSvc) Decorate(ctx context.Context, tx *sql.Tx, session *model.Se
 		g := pdebug.Marker("service.Session.Decorate")
 		defer g.End()
 	}
+
 	// session must be associated with a conference
 	if session.ConferenceID != "" {
 		var cs ConferenceSvc
@@ -274,10 +275,6 @@ func (v *SessionSvc) Decorate(ctx context.Context, tx *sql.Tx, session *model.Se
 		if err := cs.Lookup(ctx, tx, &mc, session.ConferenceID); err != nil {
 			return errors.Wrap(err, "failed to load conference")
 		}
-		if err := cs.Decorate(ctx, tx, &mc, verifiedCall, lang); err != nil {
-			return errors.Wrap(err, "failed to decorate conference")
-		}
-		session.Conference = &mc
 
 		if mc.Timezone != "" && !session.StartsOn.IsZero() {
 			loc, err := time.LoadLocation(mc.Timezone)
@@ -610,6 +607,12 @@ func (v *SessionSvc) SendSelectionResultNotificationFromPayload(ctx context.Cont
 		return errors.Wrap(err, "failed to load model.Session from database")
 	}
 
+	var conference model.Conference
+	cs := Conference()
+	if err := cs.Lookup(ctx, tx, &conference, m.ConferenceID); err != nil {
+		return errors.Wrap(err, "failed to load model.Conference from database")
+	}
+
 	su := User()
 
 	// We don't send email if it has been sent before, UNLESS the force
@@ -632,17 +635,22 @@ func (v *SessionSvc) SendSelectionResultNotificationFromPayload(ctx context.Cont
 
 	// Now, based on the user's language, decorate the session
 	if err := v.Decorate(ctx, tx, &m, payload.VerifiedCall, u.Lang); err != nil {
-		return errors.Wrap(err, "failed to declorate mode.Session")
+		return errors.Wrap(err, "failed to declorate model.Session")
+	}
+
+	// Now, based on the user's language, decorate the conference
+	if err := cs.Decorate(ctx, tx, &conference, payload.VerifiedCall, u.Lang); err != nil {
+		return errors.Wrap(err, "failed to declorate model.Conference")
 	}
 
 	var subject string
 	var tname string
 	switch m.Status {
 	case model.StatusAccepted:
-		subject = "[" + m.Conference.Title + "] Your proposal has been accepted"
+		subject = "[" + conference.Title + "] Your proposal has been accepted"
 		tname = "templates/" + u.Lang + "/eml/proposal-accepted.eml"
 	case model.StatusRejected:
-		subject = "[" + m.Conference.Title + "] Your proposal was not accepted"
+		subject = "[" + conference.Title + "] Your proposal was not accepted"
 		tname = "templates/" + u.Lang + "/eml/proposal-rejected.eml"
 	default:
 		return errors.New("can only send email for accepted/rejected sessions")
@@ -654,14 +662,16 @@ func (v *SessionSvc) SendSelectionResultNotificationFromPayload(ctx context.Cont
 	}
 
 	tz := time.UTC
-	if xtz, err := time.LoadLocation(m.Conference.Timezone); err != nil {
+	if xtz, err := time.LoadLocation(conference.Timezone); err != nil {
 		tz = xtz
 	}
 
 	vars := struct {
+		Conference *model.Conference
 		Session  *model.Session
 		Timezone *time.Location
 	}{
+		Conference: &conference,
 		Session:  &m,
 		Timezone: tz,
 	}

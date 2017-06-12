@@ -41,7 +41,6 @@ type rawSession struct {
 	HasInterpretation   bool         `json:"has_interpretation"`
 	Status              string       `json:"status"`
 	Confirmed           bool         `json:"confirmed"`
-	Conference          *Conference  `json:"conference,omitempy" decorate:"true"`
 	Room                *Room        `json:"room,omitempty" decorate:"true"`
 	Speaker             *User        `json:"speaker,omitempty" decorate:"true"`
 	SessionType         *SessionType `json:"session_type,omitempty" decorate:"true"`
@@ -76,7 +75,6 @@ func (v Session) MarshalJSON() ([]byte, error) {
 	raw.HasInterpretation = v.HasInterpretation
 	raw.Status = v.Status
 	raw.Confirmed = v.Confirmed
-	raw.Conference = v.Conference
 	raw.Room = v.Room
 	raw.Speaker = v.Speaker
 	raw.SessionType = v.SessionType

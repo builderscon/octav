@@ -7,7 +7,7 @@ proposal process. Please visit the following page, and CONFIRM that you are
 able to attend and present your session at the schedule that we have
 presented to you:
 
-  https://builderscon.io/{{ .Session.Conference.Series.Slug }}/{{ .Session.Conference.Slug }}/session/confirm
+  https://builderscon.io/{{ .Conference.Series.Slug }}/{{ .Conference.Slug }}/session/confirm
 
 You MUST confirm your session in order to complete the proposal process.
 If you DO NOT confirm your attendance WITHIN ONE WEEK, we reserve the right
@@ -18,9 +18,9 @@ Should you have any conflicts with the schedule that we have presented, please
 visit the conference page and contact the organizers as soon as possible, so
 that we may attempt to adjust the schedule.
 
-  URL: https://builderscon.io/{{ .Session.Conference.Series.Slug }}/{{ .Session.Conference.Slug }}/session/{{ .Session.ID }}
+  URL: https://builderscon.io/{{ .Conference.Series.Slug }}/{{ .Conference.Slug }}/session/{{ .Session.ID }}
   Title: {{ .Session.Title }}
   Date/Time: {{ with .Session.StartsOn.In .Timezone }}{{ .Format "2006-01-02 15:04" }}{{ end }}
 
 Regards,
-{{ .Session.Conference.Title }} Team
+{{ .Conference.Title }} Team
