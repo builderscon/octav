@@ -156,7 +156,7 @@ type CreateSessionTypeRequest struct {
 
 // +transport
 type DeleteSessionTypeRequest struct {
-	ID     string `json:"id"`
+	ID string `json:"id"`
 }
 
 // +transport
@@ -208,6 +208,7 @@ type Session struct {
 	MaterialsRelease    string       `json:"materials_release"`
 	SortOrder           int          `json:"-"`
 	HasInterpretation   bool         `json:"has_interpretation"`
+	IsVoteTarget        bool         `json:"is_vote_target"`
 	Status              string       `json:"status"`
 	Confirmed           bool         `json:"confirmed"`
 	Room                *Room        `json:"room,omitempty" decorate:"true"`         // only populated for JSON response
@@ -277,7 +278,7 @@ type UpdateConferenceSeriesRequest struct {
 
 // +transport
 type DeleteConferenceSeriesRequest struct {
-	ID     string `json:"id"`
+	ID string `json:"id"`
 }
 
 // +transport
@@ -426,7 +427,7 @@ type DeleteConferenceVenueRequest struct {
 
 // +transport
 type DeleteConferenceRequest struct {
-	ID     string `json:"id"`
+	ID string `json:"id"`
 }
 
 // +transport
@@ -484,7 +485,7 @@ type UpdateRoomRequest struct {
 
 // +transport
 type DeleteRoomRequest struct {
-	ID     string `json:"id" urlenc:"id"`
+	ID string `json:"id" urlenc:"id"`
 }
 
 // +transport
@@ -553,6 +554,7 @@ type UpdateSessionRequest struct {
 	MaterialsRelease    jsval.MaybeString `json:"materials_release,omitempty"`
 	SortOrder           jsval.MaybeInt    `json:"sort_order,omitempty"`
 	HasInterpretation   jsval.MaybeBool   `json:"has_interpretation,omitempty"`
+	IsVoteTarget        jsval.MaybeBool   `json:"is_vote_target,omitempty"`
 	SelectionResultSent jsval.MaybeBool   `json:"selection_result_sent,omitempty"`
 	Status              jsval.MaybeString `json:"status,omitempty"`
 	StartsOn            jsval.MaybeTime   `json:"starts_on,omitempty"`
@@ -562,7 +564,7 @@ type UpdateSessionRequest struct {
 
 // +transport
 type DeleteSessionRequest struct {
-	ID     string `json:"id" urlenc:"id"`
+	ID string `json:"id" urlenc:"id"`
 }
 
 // +transport
@@ -613,7 +615,7 @@ type LookupUserByAuthUserIDRequest struct {
 
 // +transport
 type DeleteUserRequest struct {
-	ID     string `json:"id"`
+	ID string `json:"id"`
 }
 
 // +transport
@@ -648,7 +650,7 @@ type UpdateVenueRequest struct {
 
 // +transport
 type DeleteVenueRequest struct {
-	ID     string `json:"id" urlenc:"id"`
+	ID string `json:"id" urlenc:"id"`
 }
 
 // +transport
@@ -815,7 +817,7 @@ type UpdateFeaturedSpeakerRequest struct {
 
 // +transport
 type DeleteFeaturedSpeakerRequest struct {
-	ID     string `json:"id"`
+	ID string `json:"id"`
 }
 
 // +model
@@ -879,7 +881,7 @@ type UpdateSponsorRequest struct {
 
 // +transport
 type DeleteSponsorRequest struct {
-	ID     string `json:"id"`
+	ID string `json:"id"`
 }
 
 // +transport
@@ -944,7 +946,7 @@ type GetConferenceScheduleRequest struct {
 
 // +transport
 type VerifyUserRequest struct {
-	ID     string `json:"id"`      // ID of the user being verified
+	ID string `json:"id"` // ID of the user being verified
 }
 
 // +transport
@@ -995,8 +997,8 @@ type TrackList []Track
 
 // +transport
 type LookupTrackRequest struct {
-	ID          string            `json:"id"`
-	Lang        jsval.MaybeString `json:"lang" urlenc:"lang,omitempty,string"`
+	ID           string            `json:"id"`
+	Lang         jsval.MaybeString `json:"lang" urlenc:"lang,omitempty,string"`
 	VerifiedCall bool              `json:"-"`
 }
 
@@ -1074,12 +1076,12 @@ type UpdateBlogEntryRequest struct {
 
 // +transport
 type LookupBlogEntryRequest struct {
-	ID     string `json:"id"`
+	ID string `json:"id"`
 }
 
 // +transport
 type DeleteBlogEntryRequest struct {
-	ID     string `json:"id"`
+	ID string `json:"id"`
 }
 
 // +transport
@@ -1087,7 +1089,7 @@ type ListBlogEntriesRequest struct {
 	ConferenceID string            `json:"conference_id"`
 	Status       []string          `json:"status" urlenc:"status,omitempty"`
 	Lang         jsval.MaybeString `json:"lang,omitempty" urlenc:"lang,omitempty,string"`
-	VerifiedCall  bool              `json:"-"`
+	VerifiedCall bool              `json:"-"`
 }
 
 // +transport
@@ -1164,7 +1166,7 @@ type UpdateExternalResourceRequest struct {
 
 // +transport
 type DeleteExternalResourceRequest struct {
-	ID     string `json:"id"`
+	ID string `json:"id"`
 }
 
 // +transport

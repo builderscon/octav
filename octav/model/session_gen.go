@@ -39,6 +39,7 @@ type rawSession struct {
 	RecordingRelease    string       `json:"recording_release"`
 	MaterialsRelease    string       `json:"materials_release"`
 	HasInterpretation   bool         `json:"has_interpretation"`
+	IsVoteTarget        bool         `json:"is_vote_target"`
 	Status              string       `json:"status"`
 	Confirmed           bool         `json:"confirmed"`
 	Room                *Room        `json:"room,omitempty" decorate:"true"`
@@ -73,6 +74,7 @@ func (v Session) MarshalJSON() ([]byte, error) {
 	raw.RecordingRelease = v.RecordingRelease
 	raw.MaterialsRelease = v.MaterialsRelease
 	raw.HasInterpretation = v.HasInterpretation
+	raw.IsVoteTarget = v.IsVoteTarget
 	raw.Status = v.Status
 	raw.Confirmed = v.Confirmed
 	raw.Room = v.Room
