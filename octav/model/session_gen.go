@@ -159,6 +159,7 @@ func (v *Session) FromRow(vdb *db.Session) error {
 		v.MaterialsRelease = vdb.MaterialsRelease.String
 	}
 	v.HasInterpretation = vdb.HasInterpretation
+	v.IsVoteTarget = vdb.IsVoteTarget
 	v.Status = vdb.Status
 	v.Confirmed = vdb.Confirmed
 	return nil
@@ -204,6 +205,7 @@ func (v *Session) ToRow(vdb *db.Session) error {
 	vdb.MaterialsRelease.Valid = true
 	vdb.MaterialsRelease.String = v.MaterialsRelease
 	vdb.HasInterpretation = v.HasInterpretation
+	vdb.IsVoteTarget = v.IsVoteTarget
 	vdb.Status = v.Status
 	vdb.Confirmed = v.Confirmed
 	return nil

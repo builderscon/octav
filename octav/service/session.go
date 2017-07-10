@@ -164,6 +164,10 @@ func (v *SessionSvc) populateRowForUpdate(ctx context.Context, vdb *db.Session, 
 		vdb.HasInterpretation = payload.HasInterpretation.Bool
 	}
 
+	if payload.IsVoteTarget.Valid() {
+		vdb.IsVoteTarget = payload.IsVoteTarget.Bool
+	}
+
 	if payload.Status.Valid() {
 		vdb.Status = payload.Status.String
 	}
