@@ -45,7 +45,7 @@ type Server struct {
 	*mux.Router
 }
 
-// NewContext creates a cteonxt.Context object from the request.
+// NewContext creates a context.Context object from the request.
 // If you are using appengine, for example, you probably want to set this
 // function to something that create a context, and then sets
 // the appengine context to it so it can be referred to later.
