@@ -1515,6 +1515,7 @@
           "recording_release": { "$ref": "#/definitions/binary_permission" },
           "materials_release": { "$ref": "#/definitions/binary_permission" },
           "has_interpretation": { "type": "boolean" },
+          "is_vote_target": { "type": "boolean" },
           "status": { "$ref": "#/definitions/acceptance_status" },
           "sort_order": { "$ref": "#/definitions/positiveInteger" },
           "confirmed": { "type": "boolean" }

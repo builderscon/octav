@@ -13,7 +13,7 @@ import (
 	"github.com/pkg/errors"
 )
 
-const SessionStdSelectColumns = "sessions.oid, sessions.eid, sessions.conference_id, sessions.room_id, sessions.speaker_id, sessions.session_type_id, sessions.title, sessions.abstract, sessions.memo, sessions.starts_on, sessions.duration, sessions.material_level, sessions.tags, sessions.category, sessions.selection_result_sent, sessions.spoken_language, sessions.slide_language, sessions.slide_subtitles, sessions.slide_url, sessions.video_url, sessions.photo_release, sessions.recording_release, sessions.materials_release, sessions.has_interpretation, sessions.status, sessions.sort_order, sessions.confirmed, sessions.created_on, sessions.modified_on"
+const SessionStdSelectColumns = "sessions.oid, sessions.eid, sessions.conference_id, sessions.room_id, sessions.speaker_id, sessions.session_type_id, sessions.title, sessions.abstract, sessions.memo, sessions.starts_on, sessions.duration, sessions.material_level, sessions.tags, sessions.category, sessions.selection_result_sent, sessions.spoken_language, sessions.slide_language, sessions.slide_subtitles, sessions.slide_url, sessions.video_url, sessions.photo_release, sessions.recording_release, sessions.materials_release, sessions.has_interpretation, sessions.is_vote_target, sessions.status, sessions.sort_order, sessions.confirmed, sessions.created_on, sessions.modified_on"
 const SessionTable = "sessions"
 
 type SessionList []Session
@@ -21,7 +21,7 @@ type SessionList []Session
 func (s *Session) Scan(scanner interface {
 	Scan(...interface{}) error
 }) error {
-	return scanner.Scan(&s.OID, &s.EID, &s.ConferenceID, &s.RoomID, &s.SpeakerID, &s.SessionTypeID, &s.Title, &s.Abstract, &s.Memo, &s.StartsOn, &s.Duration, &s.MaterialLevel, &s.Tags, &s.Category, &s.SelectionResultSent, &s.SpokenLanguage, &s.SlideLanguage, &s.SlideSubtitles, &s.SlideURL, &s.VideoURL, &s.PhotoRelease, &s.RecordingRelease, &s.MaterialsRelease, &s.HasInterpretation, &s.Status, &s.SortOrder, &s.Confirmed, &s.CreatedOn, &s.ModifiedOn)
+	return scanner.Scan(&s.OID, &s.EID, &s.ConferenceID, &s.RoomID, &s.SpeakerID, &s.SessionTypeID, &s.Title, &s.Abstract, &s.Memo, &s.StartsOn, &s.Duration, &s.MaterialLevel, &s.Tags, &s.Category, &s.SelectionResultSent, &s.SpokenLanguage, &s.SlideLanguage, &s.SlideSubtitles, &s.SlideURL, &s.VideoURL, &s.PhotoRelease, &s.RecordingRelease, &s.MaterialsRelease, &s.HasInterpretation, &s.IsVoteTarget, &s.Status, &s.SortOrder, &s.Confirmed, &s.CreatedOn, &s.ModifiedOn)
 }
 
 func init() {
@@ -38,7 +38,7 @@ func init() {
 		stmt.Reset()
 		stmt.WriteString(`UPDATE `)
 		stmt.WriteString(SessionTable)
-		stmt.WriteString(` SET eid = ?, conference_id = ?, room_id = ?, speaker_id = ?, session_type_id = ?, title = ?, abstract = ?, memo = ?, starts_on = ?, duration = ?, material_level = ?, tags = ?, category = ?, selection_result_sent = ?, spoken_language = ?, slide_language = ?, slide_subtitles = ?, slide_url = ?, video_url = ?, photo_release = ?, recording_release = ?, materials_release = ?, has_interpretation = ?, status = ?, sort_order = ?, confirmed = ? WHERE oid = ?`)
+		stmt.WriteString(` SET eid = ?, conference_id = ?, room_id = ?, speaker_id = ?, session_type_id = ?, title = ?, abstract = ?, memo = ?, starts_on = ?, duration = ?, material_level = ?, tags = ?, category = ?, selection_result_sent = ?, spoken_language = ?, slide_language = ?, slide_subtitles = ?, slide_url = ?, video_url = ?, photo_release = ?, recording_release = ?, materials_release = ?, has_interpretation = ?, is_vote_target = ?, status = ?, sort_order = ?, confirmed = ? WHERE oid = ?`)
 		library.Register("sqlSessionUpdateByOIDKey", stmt.String())
 
 		stmt.Reset()
@@ -60,7 +60,7 @@ func init() {
 		stmt.Reset()
 		stmt.WriteString(`UPDATE `)
 		stmt.WriteString(SessionTable)
-		stmt.WriteString(` SET eid = ?, conference_id = ?, room_id = ?, speaker_id = ?, session_type_id = ?, title = ?, abstract = ?, memo = ?, starts_on = ?, duration = ?, material_level = ?, tags = ?, category = ?, selection_result_sent = ?, spoken_language = ?, slide_language = ?, slide_subtitles = ?, slide_url = ?, video_url = ?, photo_release = ?, recording_release = ?, materials_release = ?, has_interpretation = ?, status = ?, sort_order = ?, confirmed = ? WHERE eid = ?`)
+		stmt.WriteString(` SET eid = ?, conference_id = ?, room_id = ?, speaker_id = ?, session_type_id = ?, title = ?, abstract = ?, memo = ?, starts_on = ?, duration = ?, material_level = ?, tags = ?, category = ?, selection_result_sent = ?, spoken_language = ?, slide_language = ?, slide_subtitles = ?, slide_url = ?, video_url = ?, photo_release = ?, recording_release = ?, materials_release = ?, has_interpretation = ?, is_vote_target = ?, status = ?, sort_order = ?, confirmed = ? WHERE eid = ?`)
 		library.Register("sqlSessionUpdateByEIDKey", stmt.String())
 	})
 }
@@ -107,8 +107,8 @@ func (s *Session) Create(tx *sql.Tx, opts ...InsertOption) (err error) {
 	}
 	stmt.WriteString("INTO ")
 	stmt.WriteString(SessionTable)
-	stmt.WriteString(` (eid, conference_id, room_id, speaker_id, session_type_id, title, abstract, memo, starts_on, duration, material_level, tags, category, selection_result_sent, spoken_language, slide_language, slide_subtitles, slide_url, video_url, photo_release, recording_release, materials_release, has_interpretation, status, sort_order, confirmed, created_on, modified_on) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`)
-	result, err := tx.Exec(stmt.String(), s.EID, s.ConferenceID, s.RoomID, s.SpeakerID, s.SessionTypeID, s.Title, s.Abstract, s.Memo, s.StartsOn, s.Duration, s.MaterialLevel, s.Tags, s.Category, s.SelectionResultSent, s.SpokenLanguage, s.SlideLanguage, s.SlideSubtitles, s.SlideURL, s.VideoURL, s.PhotoRelease, s.RecordingRelease, s.MaterialsRelease, s.HasInterpretation, s.Status, s.SortOrder, s.Confirmed, s.CreatedOn, s.ModifiedOn)
+	stmt.WriteString(` (eid, conference_id, room_id, speaker_id, session_type_id, title, abstract, memo, starts_on, duration, material_level, tags, category, selection_result_sent, spoken_language, slide_language, slide_subtitles, slide_url, video_url, photo_release, recording_release, materials_release, has_interpretation, is_vote_target, status, sort_order, confirmed, created_on, modified_on) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`)
+	result, err := tx.Exec(stmt.String(), s.EID, s.ConferenceID, s.RoomID, s.SpeakerID, s.SessionTypeID, s.Title, s.Abstract, s.Memo, s.StartsOn, s.Duration, s.MaterialLevel, s.Tags, s.Category, s.SelectionResultSent, s.SpokenLanguage, s.SlideLanguage, s.SlideSubtitles, s.SlideURL, s.VideoURL, s.PhotoRelease, s.RecordingRelease, s.MaterialsRelease, s.HasInterpretation, s.IsVoteTarget, s.Status, s.SortOrder, s.Confirmed, s.CreatedOn, s.ModifiedOn)
 	if err != nil {
 		return err
 	}
@@ -135,7 +135,7 @@ func (s Session) Update(tx *sql.Tx) (err error) {
 		if err != nil {
 			return errors.Wrap(err, `failed to get statement`)
 		}
-		_, err = tx.Stmt(stmt).Exec(s.EID, s.ConferenceID, s.RoomID, s.SpeakerID, s.SessionTypeID, s.Title, s.Abstract, s.Memo, s.StartsOn, s.Duration, s.MaterialLevel, s.Tags, s.Category, s.SelectionResultSent, s.SpokenLanguage, s.SlideLanguage, s.SlideSubtitles, s.SlideURL, s.VideoURL, s.PhotoRelease, s.RecordingRelease, s.MaterialsRelease, s.HasInterpretation, s.Status, s.SortOrder, s.Confirmed, s.OID)
+		_, err = tx.Stmt(stmt).Exec(s.EID, s.ConferenceID, s.RoomID, s.SpeakerID, s.SessionTypeID, s.Title, s.Abstract, s.Memo, s.StartsOn, s.Duration, s.MaterialLevel, s.Tags, s.Category, s.SelectionResultSent, s.SpokenLanguage, s.SlideLanguage, s.SlideSubtitles, s.SlideURL, s.VideoURL, s.PhotoRelease, s.RecordingRelease, s.MaterialsRelease, s.HasInterpretation, s.IsVoteTarget, s.Status, s.SortOrder, s.Confirmed, s.OID)
 		return err
 	}
 	if s.EID != "" {
@@ -146,7 +146,7 @@ func (s Session) Update(tx *sql.Tx) (err error) {
 		if err != nil {
 			return errors.Wrap(err, `failed to get statement`)
 		}
-		_, err = tx.Stmt(stmt).Exec(s.EID, s.ConferenceID, s.RoomID, s.SpeakerID, s.SessionTypeID, s.Title, s.Abstract, s.Memo, s.StartsOn, s.Duration, s.MaterialLevel, s.Tags, s.Category, s.SelectionResultSent, s.SpokenLanguage, s.SlideLanguage, s.SlideSubtitles, s.SlideURL, s.VideoURL, s.PhotoRelease, s.RecordingRelease, s.MaterialsRelease, s.HasInterpretation, s.Status, s.SortOrder, s.Confirmed, s.EID)
+		_, err = tx.Stmt(stmt).Exec(s.EID, s.ConferenceID, s.RoomID, s.SpeakerID, s.SessionTypeID, s.Title, s.Abstract, s.Memo, s.StartsOn, s.Duration, s.MaterialLevel, s.Tags, s.Category, s.SelectionResultSent, s.SpokenLanguage, s.SlideLanguage, s.SlideSubtitles, s.SlideURL, s.VideoURL, s.PhotoRelease, s.RecordingRelease, s.MaterialsRelease, s.HasInterpretation, s.IsVoteTarget, s.Status, s.SortOrder, s.Confirmed, s.EID)
 		return err
 	}
 	return errors.New("either OID/EID must be filled")

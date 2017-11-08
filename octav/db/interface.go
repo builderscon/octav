@@ -177,6 +177,7 @@ type Session struct {
 	RecordingRelease    sql.NullString
 	MaterialsRelease    sql.NullString
 	HasInterpretation   bool
+	IsVoteTarget        bool
 	Status              string
 	SortOrder           int
 	Confirmed           bool

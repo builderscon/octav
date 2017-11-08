@@ -215,6 +215,7 @@ CREATE TABLE sessions (
     recording_release CHAR(16) NOT NULL DEFAULT "allow",
     materials_release CHAR(16) NOT NULL DEFAULT "allow",
     has_interpretation TINYINT(1) NOT NULL DEFAULT 0,
+    is_vote_target TINYINT(1) NOT NULL DEFAULT 0,
     status CHAR(16) NOT NULL DEFAULT "pending",
     sort_order INTEGER NOT NULL DEFAULT 0,
     confirmed TINYINT(1) NOT NULL DEFAULT 0,

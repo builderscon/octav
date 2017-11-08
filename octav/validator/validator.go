@@ -4496,6 +4496,10 @@ func init() {
 					jsval.Reference(M).RefersTo("#/definitions/uuid"),
 				).
 				AddProp(
+					"is_vote_target",
+					jsval.Boolean(),
+				).
+				AddProp(
 					"material_level",
 					jsval.Reference(M).RefersTo("#/definitions/material_level"),
 				).

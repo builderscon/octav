@@ -39,6 +39,7 @@ type rawSession struct {
 	RecordingRelease    string       `json:"recording_release"`
 	MaterialsRelease    string       `json:"materials_release"`
 	HasInterpretation   bool         `json:"has_interpretation"`
+	IsVoteTarget        bool         `json:"is_vote_target"`
 	Status              string       `json:"status"`
 	Confirmed           bool         `json:"confirmed"`
 	Room                *Room        `json:"room,omitempty" decorate:"true"`
@@ -73,6 +74,7 @@ func (v Session) MarshalJSON() ([]byte, error) {
 	raw.RecordingRelease = v.RecordingRelease
 	raw.MaterialsRelease = v.MaterialsRelease
 	raw.HasInterpretation = v.HasInterpretation
+	raw.IsVoteTarget = v.IsVoteTarget
 	raw.Status = v.Status
 	raw.Confirmed = v.Confirmed
 	raw.Room = v.Room
@@ -157,6 +159,7 @@ func (v *Session) FromRow(vdb *db.Session) error {
 		v.MaterialsRelease = vdb.MaterialsRelease.String
 	}
 	v.HasInterpretation = vdb.HasInterpretation
+	v.IsVoteTarget = vdb.IsVoteTarget
 	v.Status = vdb.Status
 	v.Confirmed = vdb.Confirmed
 	return nil
@@ -202,6 +205,7 @@ func (v *Session) ToRow(vdb *db.Session) error {
 	vdb.MaterialsRelease.Valid = true
 	vdb.MaterialsRelease.String = v.MaterialsRelease
 	vdb.HasInterpretation = v.HasInterpretation
+	vdb.IsVoteTarget = v.IsVoteTarget
 	vdb.Status = v.Status
 	vdb.Confirmed = v.Confirmed
 	return nil
