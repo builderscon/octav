@@ -8,7 +8,6 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/builderscon/octav/octav/tools"
 	"github.com/lestrrat/go-pdebug"
 	"github.com/pkg/errors"
 )
@@ -24,57 +23,16 @@ func (s *Session) Scan(scanner interface {
 	return scanner.Scan(&s.OID, &s.EID, &s.ConferenceID, &s.RoomID, &s.SpeakerID, &s.SessionTypeID, &s.Title, &s.Abstract, &s.Memo, &s.StartsOn, &s.Duration, &s.MaterialLevel, &s.Tags, &s.Category, &s.SelectionResultSent, &s.SpokenLanguage, &s.SlideLanguage, &s.SlideSubtitles, &s.SlideURL, &s.VideoURL, &s.PhotoRelease, &s.RecordingRelease, &s.MaterialsRelease, &s.HasInterpretation, &s.IsVoteTarget, &s.Status, &s.SortOrder, &s.Confirmed, &s.CreatedOn, &s.ModifiedOn)
 }
 
-func init() {
-	hooks = append(hooks, func() {
-		stmt := tools.GetBuffer()
-		defer tools.ReleaseBuffer(stmt)
-
-		stmt.Reset()
-		stmt.WriteString(`DELETE FROM `)
-		stmt.WriteString(SessionTable)
-		stmt.WriteString(` WHERE oid = ?`)
-		library.Register("sqlSessionDeleteByOIDKey", stmt.String())
-
-		stmt.Reset()
-		stmt.WriteString(`UPDATE `)
-		stmt.WriteString(SessionTable)
-		stmt.WriteString(` SET eid = ?, conference_id = ?, room_id = ?, speaker_id = ?, session_type_id = ?, title = ?, abstract = ?, memo = ?, starts_on = ?, duration = ?, material_level = ?, tags = ?, category = ?, selection_result_sent = ?, spoken_language = ?, slide_language = ?, slide_subtitles = ?, slide_url = ?, video_url = ?, photo_release = ?, recording_release = ?, materials_release = ?, has_interpretation = ?, is_vote_target = ?, status = ?, sort_order = ?, confirmed = ? WHERE oid = ?`)
-		library.Register("sqlSessionUpdateByOIDKey", stmt.String())
-
-		stmt.Reset()
-		stmt.WriteString(`SELECT `)
-		stmt.WriteString(SessionStdSelectColumns)
-		stmt.WriteString(` FROM `)
-		stmt.WriteString(SessionTable)
-		stmt.WriteString(` WHERE `)
-		stmt.WriteString(SessionTable)
-		stmt.WriteString(`.eid = ?`)
-		library.Register("sqlSessionLoadByEIDKey", stmt.String())
-
-		stmt.Reset()
-		stmt.WriteString(`DELETE FROM `)
-		stmt.WriteString(SessionTable)
-		stmt.WriteString(` WHERE eid = ?`)
-		library.Register("sqlSessionDeleteByEIDKey", stmt.String())
-
-		stmt.Reset()
-		stmt.WriteString(`UPDATE `)
-		stmt.WriteString(SessionTable)
-		stmt.WriteString(` SET eid = ?, conference_id = ?, room_id = ?, speaker_id = ?, session_type_id = ?, title = ?, abstract = ?, memo = ?, starts_on = ?, duration = ?, material_level = ?, tags = ?, category = ?, selection_result_sent = ?, spoken_language = ?, slide_language = ?, slide_subtitles = ?, slide_url = ?, video_url = ?, photo_release = ?, recording_release = ?, materials_release = ?, has_interpretation = ?, is_vote_target = ?, status = ?, sort_order = ?, confirmed = ? WHERE eid = ?`)
-		library.Register("sqlSessionUpdateByEIDKey", stmt.String())
-	})
-}
-
 func (s *Session) LoadByEID(tx *sql.Tx, eid string) (err error) {
 	if pdebug.Enabled {
 		g := pdebug.Marker(`Session.LoadByEID %s`, eid).BindError(&err)
 		defer g.End()
 	}
-	stmt, err := library.GetStmt("sqlSessionLoadByEIDKey")
+	const sqltext = `SELECT sessions.oid, sessions.eid, sessions.conference_id, sessions.room_id, sessions.speaker_id, sessions.session_type_id, sessions.title, sessions.abstract, sessions.memo, sessions.starts_on, sessions.duration, sessions.material_level, sessions.tags, sessions.category, sessions.selection_result_sent, sessions.spoken_language, sessions.slide_language, sessions.slide_subtitles, sessions.slide_url, sessions.video_url, sessions.photo_release, sessions.recording_release, sessions.materials_release, sessions.has_interpretation, sessions.is_vote_target, sessions.status, sessions.sort_order, sessions.confirmed, sessions.created_on, sessions.modified_on FROM sessions WHERE sessions.eid = ?`
+	row, err := QueryRow(tx, sqltext, eid)
 	if err != nil {
-		return errors.Wrap(err, `failed to get statement`)
+		return errors.Wrap(err, `failed to query row`)
 	}
-	row := tx.Stmt(stmt).QueryRow(eid)
 	if err := s.Scan(row); err != nil {
 		return err
 	}
@@ -108,14 +66,14 @@ func (s *Session) Create(tx *sql.Tx, opts ...InsertOption) (err error) {
 	stmt.WriteString("INTO ")
 	stmt.WriteString(SessionTable)
 	stmt.WriteString(` (eid, conference_id, room_id, speaker_id, session_type_id, title, abstract, memo, starts_on, duration, material_level, tags, category, selection_result_sent, spoken_language, slide_language, slide_subtitles, slide_url, video_url, photo_release, recording_release, materials_release, has_interpretation, is_vote_target, status, sort_order, confirmed, created_on, modified_on) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`)
-	result, err := tx.Exec(stmt.String(), s.EID, s.ConferenceID, s.RoomID, s.SpeakerID, s.SessionTypeID, s.Title, s.Abstract, s.Memo, s.StartsOn, s.Duration, s.MaterialLevel, s.Tags, s.Category, s.SelectionResultSent, s.SpokenLanguage, s.SlideLanguage, s.SlideSubtitles, s.SlideURL, s.VideoURL, s.PhotoRelease, s.RecordingRelease, s.MaterialsRelease, s.HasInterpretation, s.IsVoteTarget, s.Status, s.SortOrder, s.Confirmed, s.CreatedOn, s.ModifiedOn)
+	result, err := Exec(tx, stmt.String(), s.EID, s.ConferenceID, s.RoomID, s.SpeakerID, s.SessionTypeID, s.Title, s.Abstract, s.Memo, s.StartsOn, s.Duration, s.MaterialLevel, s.Tags, s.Category, s.SelectionResultSent, s.SpokenLanguage, s.SlideLanguage, s.SlideSubtitles, s.SlideURL, s.VideoURL, s.PhotoRelease, s.RecordingRelease, s.MaterialsRelease, s.HasInterpretation, s.IsVoteTarget, s.Status, s.SortOrder, s.Confirmed, s.CreatedOn, s.ModifiedOn)
 	if err != nil {
-		return err
+		return errors.Wrap(err, `failed to execute statement`)
 	}
 
 	lii, err := result.LastInsertId()
 	if err != nil {
-		return err
+		return errors.Wrap(err, `failed to fetch last insert ID`)
 	}
 
 	s.OID = lii
@@ -131,46 +89,42 @@ func (s Session) Update(tx *sql.Tx) (err error) {
 		if pdebug.Enabled {
 			pdebug.Printf(`Using OID (%d) as key`, s.OID)
 		}
-		stmt, err := library.GetStmt("sqlSessionUpdateByOIDKey")
-		if err != nil {
-			return errors.Wrap(err, `failed to get statement`)
+		const sqltext = `UPDATE sessions SET eid = ?, conference_id = ?, room_id = ?, speaker_id = ?, session_type_id = ?, title = ?, abstract = ?, memo = ?, starts_on = ?, duration = ?, material_level = ?, tags = ?, category = ?, selection_result_sent = ?, spoken_language = ?, slide_language = ?, slide_subtitles = ?, slide_url = ?, video_url = ?, photo_release = ?, recording_release = ?, materials_release = ?, has_interpretation = ?, is_vote_target = ?, status = ?, sort_order = ?, confirmed = ? WHERE oid = ?`
+		if _, err := Exec(tx, sqltext, s.EID, s.ConferenceID, s.RoomID, s.SpeakerID, s.SessionTypeID, s.Title, s.Abstract, s.Memo, s.StartsOn, s.Duration, s.MaterialLevel, s.Tags, s.Category, s.SelectionResultSent, s.SpokenLanguage, s.SlideLanguage, s.SlideSubtitles, s.SlideURL, s.VideoURL, s.PhotoRelease, s.RecordingRelease, s.MaterialsRelease, s.HasInterpretation, s.IsVoteTarget, s.Status, s.SortOrder, s.Confirmed, s.OID); err != nil {
+			return errors.Wrap(err, `failed to execute statement`)
 		}
-		_, err = tx.Stmt(stmt).Exec(s.EID, s.ConferenceID, s.RoomID, s.SpeakerID, s.SessionTypeID, s.Title, s.Abstract, s.Memo, s.StartsOn, s.Duration, s.MaterialLevel, s.Tags, s.Category, s.SelectionResultSent, s.SpokenLanguage, s.SlideLanguage, s.SlideSubtitles, s.SlideURL, s.VideoURL, s.PhotoRelease, s.RecordingRelease, s.MaterialsRelease, s.HasInterpretation, s.IsVoteTarget, s.Status, s.SortOrder, s.Confirmed, s.OID)
-		return err
+		return nil
 	}
+
 	if s.EID != "" {
 		if pdebug.Enabled {
 			pdebug.Printf(`Using EID (%s) as key`, s.EID)
 		}
-		stmt, err := library.GetStmt("sqlSessionUpdateByEIDKey")
-		if err != nil {
-			return errors.Wrap(err, `failed to get statement`)
+		const sqltext = `UPDATE sessions SET eid = ?, conference_id = ?, room_id = ?, speaker_id = ?, session_type_id = ?, title = ?, abstract = ?, memo = ?, starts_on = ?, duration = ?, material_level = ?, tags = ?, category = ?, selection_result_sent = ?, spoken_language = ?, slide_language = ?, slide_subtitles = ?, slide_url = ?, video_url = ?, photo_release = ?, recording_release = ?, materials_release = ?, has_interpretation = ?, is_vote_target = ?, status = ?, sort_order = ?, confirmed = ? WHERE eid = ?`
+		if _, err := Exec(tx, sqltext, s.EID, s.ConferenceID, s.RoomID, s.SpeakerID, s.SessionTypeID, s.Title, s.Abstract, s.Memo, s.StartsOn, s.Duration, s.MaterialLevel, s.Tags, s.Category, s.SelectionResultSent, s.SpokenLanguage, s.SlideLanguage, s.SlideSubtitles, s.SlideURL, s.VideoURL, s.PhotoRelease, s.RecordingRelease, s.MaterialsRelease, s.HasInterpretation, s.IsVoteTarget, s.Status, s.SortOrder, s.Confirmed, s.EID); err != nil {
+			return errors.Wrap(err, `failed to execute statement`)
 		}
-		_, err = tx.Stmt(stmt).Exec(s.EID, s.ConferenceID, s.RoomID, s.SpeakerID, s.SessionTypeID, s.Title, s.Abstract, s.Memo, s.StartsOn, s.Duration, s.MaterialLevel, s.Tags, s.Category, s.SelectionResultSent, s.SpokenLanguage, s.SlideLanguage, s.SlideSubtitles, s.SlideURL, s.VideoURL, s.PhotoRelease, s.RecordingRelease, s.MaterialsRelease, s.HasInterpretation, s.IsVoteTarget, s.Status, s.SortOrder, s.Confirmed, s.EID)
-		return err
+		return nil
 	}
 	return errors.New("either OID/EID must be filled")
 }
 
 func (s Session) Delete(tx *sql.Tx) error {
 	if s.OID != 0 {
-		stmt, err := library.GetStmt("sqlSessionDeleteByOIDKey")
-		if err != nil {
-			return errors.Wrap(err, `failed to get statement`)
+		const sqltext = `DELETE FROM sessions WHERE oid = ?`
+		if _, err := Exec(tx, sqltext, s.OID); err != nil {
+			return errors.Wrap(err, `failed to execute statement`)
 		}
-		_, err = tx.Stmt(stmt).Exec(s.OID)
-		return err
+		return nil
 	}
 
 	if s.EID != "" {
-		stmt, err := library.GetStmt("sqlSessionDeleteByEIDKey")
-		if err != nil {
+		const sqltext = `DELETE FROM sessions WHERE eid = ?`
+		if _, err := Exec(tx, sqltext, s.EID); err != nil {
 			return errors.Wrap(err, `failed to get statement`)
 		}
-		_, err = tx.Stmt(stmt).Exec(s.EID)
-		return err
+		return nil
 	}
-
 	return errors.New("either OID/EID must be filled")
 }
 
@@ -207,10 +161,11 @@ func (v *SessionList) LoadSinceEID(tx *sql.Tx, since string, limit int) error {
 }
 
 func (v *SessionList) LoadSince(tx *sql.Tx, since int64, limit int) error {
-	rows, err := tx.Query(`SELECT `+SessionStdSelectColumns+` FROM `+SessionTable+` WHERE sessions.oid > ? ORDER BY oid ASC LIMIT `+strconv.Itoa(limit), since)
+	rows, err := Query(tx, `SELECT `+SessionStdSelectColumns+` FROM `+SessionTable+` WHERE sessions.oid > ? ORDER BY oid ASC LIMIT `+strconv.Itoa(limit), since)
 	if err != nil {
 		return err
 	}
+	defer rows.Close()
 
 	if err := v.FromRows(rows, limit); err != nil {
 		return err

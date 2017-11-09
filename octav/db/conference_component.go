@@ -5,10 +5,16 @@ import (
 	"time"
 
 	"github.com/builderscon/octav/octav/tools"
+	pdebug "github.com/lestrrat/go-pdebug"
 	"github.com/pkg/errors"
 )
 
-func DeleteConferenceComponentsByIDAndName(tx *sql.Tx, conferenceID string, names ...string) error {
+func DeleteConferenceComponentsByIDAndName(tx *sql.Tx, conferenceID string, names ...string) (err error) {
+	if pdebug.Enabled {
+		g := pdebug.Marker("db.DeleteConferenceComponentsByIDAndName conference = %s, names = %#v", conferenceID, names).BindError(&err)
+		defer g.End()
+	}
+
 	stmt := tools.GetBuffer()
 	defer tools.ReleaseBuffer(stmt)
 
@@ -33,14 +39,18 @@ func DeleteConferenceComponentsByIDAndName(tx *sql.Tx, conferenceID string, name
 	for i, name := range names {
 		args[i+1] = name
 	}
-	if _, err := tx.Exec(stmt.String(), args...); err != nil {
+	if _, err := Exec(tx, stmt.String(), args...); err != nil {
 		return errors.Wrap(err, "failed to execute delete statement")
 	}
 
 	return nil
 }
 
-func UpsertConferenceComponentsByIDAndName(tx *sql.Tx, conferenceID string, values map[string]string) error {
+func UpsertConferenceComponentsByIDAndName(tx *sql.Tx, conferenceID string, values map[string]string) (err error) {
+	if pdebug.Enabled {
+		g := pdebug.Marker("db.UpsertConferenceComponentsByIDAndName conference = %s, values = %#v", conferenceID, values).BindError(&err)
+		defer g.End()
+	}
 	stmt := tools.GetBuffer()
 	defer tools.ReleaseBuffer(stmt)
 
@@ -66,14 +76,18 @@ func UpsertConferenceComponentsByIDAndName(tx *sql.Tx, conferenceID string, valu
 	}
 
 	stmt.WriteString(` ON DUPLICATE KEY UPDATE value = VALUES(value)`)
-	if _, err := tx.Exec(stmt.String(), args...); err != nil {
+	if _, err := Exec(tx, stmt.String(), args...); err != nil {
 		return errors.Wrap(err, "failed to execute insert statement")
 	}
 
 	return nil
 }
 
-func (ccl *ConferenceComponentList) LoadByConferenceID(tx *sql.Tx, cid string) error {
+func (ccl *ConferenceComponentList) LoadByConferenceID(tx *sql.Tx, cid string) (err error) {
+	if pdebug.Enabled {
+		g := pdebug.Marker("db.ConferenceComponentList.LoadByaConferenceID conference = %s", cid).BindError(&err)
+		defer g.End()
+	}
 	stmt := tools.GetBuffer()
 	defer tools.ReleaseBuffer(stmt)
 
@@ -83,10 +97,11 @@ func (ccl *ConferenceComponentList) LoadByConferenceID(tx *sql.Tx, cid string) e
 	stmt.WriteString(ConferenceComponentTable)
 	stmt.WriteString(` WHERE conference_id = ?`)
 
-	rows, err := tx.Query(stmt.String(), cid)
+	rows, err := Query(tx, stmt.String(), cid)
 	if err != nil {
 		return errors.Wrap(err, "failed to execute query for conference component")
 	}
+	defer rows.Close()
 
 	var res ConferenceComponentList
 	for rows.Next() {

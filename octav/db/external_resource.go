@@ -8,19 +8,21 @@ import (
 	"github.com/pkg/errors"
 )
 
-func init() {
-	hooks = append(hooks, func() {
-		stmt := tools.GetBuffer()
-		defer tools.ReleaseBuffer(stmt)
+var (
+	sqlExternalResourceLoadByConference string
+)
 
-		stmt.Reset()
-		stmt.WriteString(`SELECT `)
-		stmt.WriteString(ExternalResourceStdSelectColumns)
-		stmt.WriteString(` FROM `)
-		stmt.WriteString(ExternalResourceTable)
-		stmt.WriteString(` WHERE conference_id = ? ORDER BY sort_order ASC`)
-		library.Register("sqlExternalResourceLoadByConferenceID", stmt.String())
-	})
+func init() {
+	stmt := tools.GetBuffer()
+	defer tools.ReleaseBuffer(stmt)
+
+	stmt.Reset()
+	stmt.WriteString(`SELECT `)
+	stmt.WriteString(ExternalResourceStdSelectColumns)
+	stmt.WriteString(` FROM `)
+	stmt.WriteString(ExternalResourceTable)
+	stmt.WriteString(` WHERE conference_id = ? ORDER BY sort_order ASC`)
+	sqlExternalResourceLoadByConference = stmt.String()
 }
 
 func (v *ExternalResourceList) LoadByConference(tx *sql.Tx, conferenceID string) (err error) {
@@ -29,11 +31,12 @@ func (v *ExternalResourceList) LoadByConference(tx *sql.Tx, conferenceID string)
 		defer g.End()
 	}
 
-	stmt, err := library.GetStmt("sqlExternalResourceLoadByConferenceID")
+	rows, err := Query(tx, sqlExternalResourceLoadByConference, conferenceID)
 	if err != nil {
-		return errors.Wrap(err, `failed to get statement`)
+		return errors.Wrap(err, `failed to execute statement`)
 	}
-	rows, err := tx.Stmt(stmt).Query(conferenceID)
+	defer rows.Close()
+
 	if err := v.FromRows(rows, 0); err != nil {
 		return errors.Wrap(err, `failed select from database`)
 	}

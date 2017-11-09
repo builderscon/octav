@@ -7,7 +7,6 @@ import (
 	"database/sql"
 	"time"
 
-	"github.com/builderscon/octav/octav/tools"
 	"github.com/lestrrat/go-pdebug"
 	"github.com/pkg/errors"
 )
@@ -21,25 +20,6 @@ func (c *ConferenceVenue) Scan(scanner interface {
 	Scan(...interface{}) error
 }) error {
 	return scanner.Scan(&c.OID, &c.ConferenceID, &c.VenueID, &c.CreatedOn, &c.ModifiedOn)
-}
-
-func init() {
-	hooks = append(hooks, func() {
-		stmt := tools.GetBuffer()
-		defer tools.ReleaseBuffer(stmt)
-
-		stmt.Reset()
-		stmt.WriteString(`DELETE FROM `)
-		stmt.WriteString(ConferenceVenueTable)
-		stmt.WriteString(` WHERE oid = ?`)
-		library.Register("sqlConferenceVenueDeleteByOIDKey", stmt.String())
-
-		stmt.Reset()
-		stmt.WriteString(`UPDATE `)
-		stmt.WriteString(ConferenceVenueTable)
-		stmt.WriteString(` SET conference_id = ?, venue_id = ? WHERE oid = ?`)
-		library.Register("sqlConferenceVenueUpdateByOIDKey", stmt.String())
-	})
 }
 
 func (c *ConferenceVenue) Create(tx *sql.Tx, opts ...InsertOption) (err error) {
@@ -65,14 +45,14 @@ func (c *ConferenceVenue) Create(tx *sql.Tx, opts ...InsertOption) (err error) {
 	stmt.WriteString("INTO ")
 	stmt.WriteString(ConferenceVenueTable)
 	stmt.WriteString(` (conference_id, venue_id, created_on, modified_on) VALUES (?, ?, ?, ?)`)
-	result, err := tx.Exec(stmt.String(), c.ConferenceID, c.VenueID, c.CreatedOn, c.ModifiedOn)
+	result, err := Exec(tx, stmt.String(), c.ConferenceID, c.VenueID, c.CreatedOn, c.ModifiedOn)
 	if err != nil {
-		return err
+		return errors.Wrap(err, `failed to execute statement`)
 	}
 
 	lii, err := result.LastInsertId()
 	if err != nil {
-		return err
+		return errors.Wrap(err, `failed to fetch last insert ID`)
 	}
 
 	c.OID = lii
@@ -88,26 +68,23 @@ func (c ConferenceVenue) Update(tx *sql.Tx) (err error) {
 		if pdebug.Enabled {
 			pdebug.Printf(`Using OID (%d) as key`, c.OID)
 		}
-		stmt, err := library.GetStmt("sqlConferenceVenueUpdateByOIDKey")
-		if err != nil {
-			return errors.Wrap(err, `failed to get statement`)
+		const sqltext = `UPDATE conference_venues SET conference_id = ?, venue_id = ? WHERE oid = ?`
+		if _, err := Exec(tx, sqltext, c.ConferenceID, c.VenueID, c.OID); err != nil {
+			return errors.Wrap(err, `failed to execute statement`)
 		}
-		_, err = tx.Stmt(stmt).Exec(c.ConferenceID, c.VenueID, c.OID)
-		return err
+		return nil
 	}
 	return errors.New("OID must be filled")
 }
 
 func (c ConferenceVenue) Delete(tx *sql.Tx) error {
 	if c.OID != 0 {
-		stmt, err := library.GetStmt("sqlConferenceVenueDeleteByOIDKey")
-		if err != nil {
-			return errors.Wrap(err, `failed to get statement`)
+		const sqltext = `DELETE FROM conference_venues WHERE oid = ?`
+		if _, err := Exec(tx, sqltext, c.OID); err != nil {
+			return errors.Wrap(err, `failed to execute statement`)
 		}
-		_, err = tx.Stmt(stmt).Exec(c.OID)
-		return err
+		return nil
 	}
-
 	return errors.New("column OID must be filled")
 }
 

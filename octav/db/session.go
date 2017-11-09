@@ -9,6 +9,20 @@ import (
 	"github.com/pkg/errors"
 )
 
+var (
+	sqlSessionIsSessionOwner string
+)
+
+func init() {
+	stmt := tools.GetBuffer()
+	defer tools.ReleaseBuffer(stmt)
+
+	stmt.WriteString(`SELECT 1 FROM `)
+	stmt.WriteString(SessionTable)
+	stmt.WriteString(` WHERE eid = ? AND speaker_id = ?`)
+	sqlSessionIsSessionOwner = stmt.String()
+}
+
 func (v *SessionList) LoadByConference(tx *sql.Tx, conferenceID, speakerID string, rangeStart, rangeEnd time.Time, status []string, confirmed []bool) (err error) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("db.SessionList.LoadByConference %s,%s,%s,%s,%s,%s", conferenceID, speakerID, rangeStart, rangeEnd, status, confirmed).BindError(&err)
@@ -87,10 +101,11 @@ func (v *SessionList) LoadByConference(tx *sql.Tx, conferenceID, speakerID strin
 
 	where.WriteTo(stmt)
 
-	rows, err := tx.Query(stmt.String(), args...)
+	rows, err := Query(tx, stmt.String(), args...)
 	if err != nil {
-		return err
+		return errors.Wrap(err, `failed to execute statement`)
 	}
+	defer rows.Close()
 
 	if err := v.FromRows(rows, 0); err != nil {
 		return err
@@ -104,13 +119,11 @@ func IsSessionOwner(tx *sql.Tx, sessionID, userID string) (err error) {
 		defer g.End()
 	}
 
-	stmt := tools.GetBuffer()
-	defer tools.ReleaseBuffer(stmt)
+	row, err := QueryRow(tx, sqlSessionIsSessionOwner, sessionID, userID)
+	if err != nil {
+		return errors.Wrap(err, `failed to execute statement`)
+	}
 
-	stmt.WriteString(`SELECT 1 FROM `)
-	stmt.WriteString(SessionTable)
-	stmt.WriteString(` WHERE eid = ? AND speaker_id = ?`)
-	row := tx.QueryRow(stmt.String(), sessionID, userID)
 	var r int
 
 	if err := row.Scan(&r); err != nil {

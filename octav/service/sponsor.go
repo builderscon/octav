@@ -265,7 +265,7 @@ func (v *SponsorSvc) LoadByConferenceID(ctx context.Context, tx *sql.Tx, cdl *mo
 		pdebug.Printf("CACHE MISS: %s", key)
 	}
 	var vdbl db.SponsorList
-	if err := db.LoadSponsors(tx, &vdbl, cid); err != nil {
+	if err := vdbl.LoadByConferenceID(tx, cid); err != nil {
 		return err
 	}
 

@@ -4,56 +4,56 @@ import (
 	"database/sql"
 
 	"github.com/builderscon/octav/octav/tools"
+	pdebug "github.com/lestrrat/go-pdebug"
 	"github.com/pkg/errors"
 )
 
-const (
-	sqlConferenceAdminLoadKey   = "sqlConferenceAdminLoad"
-	sqlConferenceAdminCheckKey  = "sqlConferenceAdminCheck"
-	sqlConferenceAdminDeleteKey = "sqlConferenceAdminDelete"
+var (
+	sqlConferenceAdminLoad   string
+	sqlConferenceAdminCheck  string
+	sqlConferenceAdminDelete string
 )
 
 func init() {
-	hooks = append(hooks, func() {
-		stmt := tools.GetBuffer()
-		defer tools.ReleaseBuffer(stmt)
+	stmt := tools.GetBuffer()
+	defer tools.ReleaseBuffer(stmt)
 
-		stmt.Reset()
-		stmt.WriteString(`SELECT `)
-		stmt.WriteString(UserStdSelectColumns)
-		stmt.WriteString(` FROM `)
-		stmt.WriteString(ConferenceAdministratorTable)
-		stmt.WriteString(` JOIN `)
-		stmt.WriteString(UserTable)
-		stmt.WriteString(` ON `)
-		stmt.WriteString(ConferenceAdministratorTable)
-		stmt.WriteString(`.user_id = `)
-		stmt.WriteString(UserTable)
-		stmt.WriteString(`.eid WHERE `)
-		stmt.WriteString(ConferenceAdministratorTable)
-		stmt.WriteString(`.conference_id = ? ORDER BY sort_order ASC`)
-		library.Register(sqlConferenceAdminLoadKey, stmt.String())
+	stmt.Reset()
+	stmt.WriteString(`SELECT `)
+	stmt.WriteString(UserStdSelectColumns)
+	stmt.WriteString(` FROM `)
+	stmt.WriteString(ConferenceAdministratorTable)
+	stmt.WriteString(` JOIN `)
+	stmt.WriteString(UserTable)
+	stmt.WriteString(` ON `)
+	stmt.WriteString(ConferenceAdministratorTable)
+	stmt.WriteString(`.user_id = `)
+	stmt.WriteString(UserTable)
+	stmt.WriteString(`.eid WHERE `)
+	stmt.WriteString(ConferenceAdministratorTable)
+	stmt.WriteString(`.conference_id = ? ORDER BY sort_order ASC`)
+	sqlConferenceAdminLoad = stmt.String()
 
-		stmt.Reset()
-		stmt.WriteString(`SELECT 1 FROM `)
-		stmt.WriteString(ConferenceAdministratorTable)
-		stmt.WriteString(` WHERE conference_id = ? AND user_id = ?`)
-		library.Register(sqlConferenceAdminCheckKey, stmt.String())
+	stmt.Reset()
+	stmt.WriteString(`SELECT 1 FROM `)
+	stmt.WriteString(ConferenceAdministratorTable)
+	stmt.WriteString(` WHERE conference_id = ? AND user_id = ?`)
+	sqlConferenceAdminCheck = stmt.String()
 
-		stmt.Reset()
-		stmt.WriteString(`DELETE FROM `)
-		stmt.WriteString(ConferenceAdministratorTable)
-		stmt.WriteString(` WHERE conference_id = ? AND user_id = ?`)
-		library.Register(sqlConferenceAdminDeleteKey, stmt.String())
-	})
+	stmt.Reset()
+	stmt.WriteString(`DELETE FROM `)
+	stmt.WriteString(ConferenceAdministratorTable)
+	stmt.WriteString(` WHERE conference_id = ? AND user_id = ?`)
+	sqlConferenceAdminDelete = stmt.String()
 }
 
-func IsConferenceAdministrator(tx *sql.Tx, cid, uid string) error {
-	stmt, err := library.GetStmt(sqlConferenceAdminCheckKey)
-	if err != nil {
-		return errors.Wrap(err, `failed to get statement`)
+func IsConferenceAdministrator(tx *sql.Tx, cid, uid string) (err error) {
+	if pdebug.Enabled {
+		g := pdebug.Marker("db.IsConferenceAdministrator conference = %s, user = %s", cid, uid).BindError(&err)
+		defer g.End()
 	}
-	row := tx.Stmt(stmt).QueryRow(cid, uid)
+
+	row, err := QueryRow(tx, sqlConferenceAdminCheck, cid, uid)
 	if err != nil {
 		return errors.Wrap(err, `failed to execute statement`)
 	}
@@ -68,30 +68,33 @@ func IsConferenceAdministrator(tx *sql.Tx, cid, uid string) error {
 	return nil
 }
 
-func DeleteConferenceAdministrator(tx *sql.Tx, cid, uid string) error {
-	stmt, err := library.GetStmt(sqlConferenceAdminDeleteKey)
-	if err != nil {
-		return errors.Wrap(err, `failed to get statement`)
+func DeleteConferenceAdministrator(tx *sql.Tx, cid, uid string) (err error) {
+	if pdebug.Enabled {
+		g := pdebug.Marker("db.DeleteConferenceAdministrator conference = %s, user = %s", cid, uid).BindError(&err)
+		defer g.End()
 	}
-	_, err = tx.Stmt(stmt).Exec(cid, uid)
-	return errors.Wrap(err, `failed to execute statements`)
+	if _, err := Exec(tx, sqlConferenceAdminDelete, cid, uid); err != nil {
+		return errors.Wrap(err, `failed to execute statement`)
+	}
+	return nil
 }
 
-func LoadConferenceAdministrators(tx *sql.Tx, admins *UserList, cid string) error {
-	stmt, err := library.GetStmt(sqlConferenceAdminLoadKey)
-	if err != nil {
-		return errors.Wrap(err, `failed to get statement`)
+func LoadConferenceAdministrators(tx *sql.Tx, admins *UserList, cid string) (err error) {
+	if pdebug.Enabled {
+		g := pdebug.Marker("db.LoadConferenceAdministrators conference = %s", cid).BindError(&err)
+		defer g.End()
 	}
-	rows, err := tx.Stmt(stmt).Query(cid)
+	rows, err := Query(tx, sqlConferenceAdminLoad, cid)
 	if err != nil {
-		return err
+		return errors.Wrap(err, `failed to execute statement`)
 	}
+	defer rows.Close()
 
 	var res UserList
 	for rows.Next() {
 		var u User
 		if err := u.Scan(rows); err != nil {
-			return err
+			return errors.Wrap(err, `failed to scan row`)
 		}
 
 		res = append(res, u)

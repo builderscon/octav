@@ -8,7 +8,6 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/builderscon/octav/octav/tools"
 	"github.com/lestrrat/go-pdebug"
 	"github.com/pkg/errors"
 )
@@ -24,57 +23,16 @@ func (c *Client) Scan(scanner interface {
 	return scanner.Scan(&c.OID, &c.EID, &c.Secret, &c.Name, &c.CreatedOn, &c.ModifiedOn)
 }
 
-func init() {
-	hooks = append(hooks, func() {
-		stmt := tools.GetBuffer()
-		defer tools.ReleaseBuffer(stmt)
-
-		stmt.Reset()
-		stmt.WriteString(`DELETE FROM `)
-		stmt.WriteString(ClientTable)
-		stmt.WriteString(` WHERE oid = ?`)
-		library.Register("sqlClientDeleteByOIDKey", stmt.String())
-
-		stmt.Reset()
-		stmt.WriteString(`UPDATE `)
-		stmt.WriteString(ClientTable)
-		stmt.WriteString(` SET eid = ?, secret = ?, name = ? WHERE oid = ?`)
-		library.Register("sqlClientUpdateByOIDKey", stmt.String())
-
-		stmt.Reset()
-		stmt.WriteString(`SELECT `)
-		stmt.WriteString(ClientStdSelectColumns)
-		stmt.WriteString(` FROM `)
-		stmt.WriteString(ClientTable)
-		stmt.WriteString(` WHERE `)
-		stmt.WriteString(ClientTable)
-		stmt.WriteString(`.eid = ?`)
-		library.Register("sqlClientLoadByEIDKey", stmt.String())
-
-		stmt.Reset()
-		stmt.WriteString(`DELETE FROM `)
-		stmt.WriteString(ClientTable)
-		stmt.WriteString(` WHERE eid = ?`)
-		library.Register("sqlClientDeleteByEIDKey", stmt.String())
-
-		stmt.Reset()
-		stmt.WriteString(`UPDATE `)
-		stmt.WriteString(ClientTable)
-		stmt.WriteString(` SET eid = ?, secret = ?, name = ? WHERE eid = ?`)
-		library.Register("sqlClientUpdateByEIDKey", stmt.String())
-	})
-}
-
 func (c *Client) LoadByEID(tx *sql.Tx, eid string) (err error) {
 	if pdebug.Enabled {
 		g := pdebug.Marker(`Client.LoadByEID %s`, eid).BindError(&err)
 		defer g.End()
 	}
-	stmt, err := library.GetStmt("sqlClientLoadByEIDKey")
+	const sqltext = `SELECT clients.oid, clients.eid, clients.secret, clients.name, clients.created_on, clients.modified_on FROM clients WHERE clients.eid = ?`
+	row, err := QueryRow(tx, sqltext, eid)
 	if err != nil {
-		return errors.Wrap(err, `failed to get statement`)
+		return errors.Wrap(err, `failed to query row`)
 	}
-	row := tx.Stmt(stmt).QueryRow(eid)
 	if err := c.Scan(row); err != nil {
 		return err
 	}
@@ -108,14 +66,14 @@ func (c *Client) Create(tx *sql.Tx, opts ...InsertOption) (err error) {
 	stmt.WriteString("INTO ")
 	stmt.WriteString(ClientTable)
 	stmt.WriteString(` (eid, secret, name, created_on, modified_on) VALUES (?, ?, ?, ?, ?)`)
-	result, err := tx.Exec(stmt.String(), c.EID, c.Secret, c.Name, c.CreatedOn, c.ModifiedOn)
+	result, err := Exec(tx, stmt.String(), c.EID, c.Secret, c.Name, c.CreatedOn, c.ModifiedOn)
 	if err != nil {
-		return err
+		return errors.Wrap(err, `failed to execute statement`)
 	}
 
 	lii, err := result.LastInsertId()
 	if err != nil {
-		return err
+		return errors.Wrap(err, `failed to fetch last insert ID`)
 	}
 
 	c.OID = lii
@@ -131,46 +89,42 @@ func (c Client) Update(tx *sql.Tx) (err error) {
 		if pdebug.Enabled {
 			pdebug.Printf(`Using OID (%d) as key`, c.OID)
 		}
-		stmt, err := library.GetStmt("sqlClientUpdateByOIDKey")
-		if err != nil {
-			return errors.Wrap(err, `failed to get statement`)
+		const sqltext = `UPDATE clients SET eid = ?, secret = ?, name = ? WHERE oid = ?`
+		if _, err := Exec(tx, sqltext, c.EID, c.Secret, c.Name, c.OID); err != nil {
+			return errors.Wrap(err, `failed to execute statement`)
 		}
-		_, err = tx.Stmt(stmt).Exec(c.EID, c.Secret, c.Name, c.OID)
-		return err
+		return nil
 	}
+
 	if c.EID != "" {
 		if pdebug.Enabled {
 			pdebug.Printf(`Using EID (%s) as key`, c.EID)
 		}
-		stmt, err := library.GetStmt("sqlClientUpdateByEIDKey")
-		if err != nil {
-			return errors.Wrap(err, `failed to get statement`)
+		const sqltext = `UPDATE clients SET eid = ?, secret = ?, name = ? WHERE eid = ?`
+		if _, err := Exec(tx, sqltext, c.EID, c.Secret, c.Name, c.EID); err != nil {
+			return errors.Wrap(err, `failed to execute statement`)
 		}
-		_, err = tx.Stmt(stmt).Exec(c.EID, c.Secret, c.Name, c.EID)
-		return err
+		return nil
 	}
 	return errors.New("either OID/EID must be filled")
 }
 
 func (c Client) Delete(tx *sql.Tx) error {
 	if c.OID != 0 {
-		stmt, err := library.GetStmt("sqlClientDeleteByOIDKey")
-		if err != nil {
-			return errors.Wrap(err, `failed to get statement`)
+		const sqltext = `DELETE FROM clients WHERE oid = ?`
+		if _, err := Exec(tx, sqltext, c.OID); err != nil {
+			return errors.Wrap(err, `failed to execute statement`)
 		}
-		_, err = tx.Stmt(stmt).Exec(c.OID)
-		return err
+		return nil
 	}
 
 	if c.EID != "" {
-		stmt, err := library.GetStmt("sqlClientDeleteByEIDKey")
-		if err != nil {
+		const sqltext = `DELETE FROM clients WHERE eid = ?`
+		if _, err := Exec(tx, sqltext, c.EID); err != nil {
 			return errors.Wrap(err, `failed to get statement`)
 		}
-		_, err = tx.Stmt(stmt).Exec(c.EID)
-		return err
+		return nil
 	}
-
 	return errors.New("either OID/EID must be filled")
 }
 
@@ -207,10 +161,11 @@ func (v *ClientList) LoadSinceEID(tx *sql.Tx, since string, limit int) error {
 }
 
 func (v *ClientList) LoadSince(tx *sql.Tx, since int64, limit int) error {
-	rows, err := tx.Query(`SELECT `+ClientStdSelectColumns+` FROM `+ClientTable+` WHERE clients.oid > ? ORDER BY oid ASC LIMIT `+strconv.Itoa(limit), since)
+	rows, err := Query(tx, `SELECT `+ClientStdSelectColumns+` FROM `+ClientTable+` WHERE clients.oid > ? ORDER BY oid ASC LIMIT `+strconv.Itoa(limit), since)
 	if err != nil {
 		return err
 	}
+	defer rows.Close()
 
 	if err := v.FromRows(rows, limit); err != nil {
 		return err

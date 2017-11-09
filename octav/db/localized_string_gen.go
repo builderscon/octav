@@ -6,7 +6,6 @@ import (
 	"bytes"
 	"database/sql"
 
-	"github.com/builderscon/octav/octav/tools"
 	"github.com/lestrrat/go-pdebug"
 	"github.com/pkg/errors"
 )
@@ -20,25 +19,6 @@ func (l *LocalizedString) Scan(scanner interface {
 	Scan(...interface{}) error
 }) error {
 	return scanner.Scan(&l.OID, &l.ParentID, &l.ParentType, &l.Name, &l.Language, &l.Localized)
-}
-
-func init() {
-	hooks = append(hooks, func() {
-		stmt := tools.GetBuffer()
-		defer tools.ReleaseBuffer(stmt)
-
-		stmt.Reset()
-		stmt.WriteString(`DELETE FROM `)
-		stmt.WriteString(LocalizedStringTable)
-		stmt.WriteString(` WHERE oid = ?`)
-		library.Register("sqlLocalizedStringDeleteByOIDKey", stmt.String())
-
-		stmt.Reset()
-		stmt.WriteString(`UPDATE `)
-		stmt.WriteString(LocalizedStringTable)
-		stmt.WriteString(` SET parent_id = ?, parent_type = ?, name = ?, language = ?, localized = ? WHERE oid = ?`)
-		library.Register("sqlLocalizedStringUpdateByOIDKey", stmt.String())
-	})
 }
 
 func (l *LocalizedString) Create(tx *sql.Tx, opts ...InsertOption) (err error) {
@@ -63,14 +43,14 @@ func (l *LocalizedString) Create(tx *sql.Tx, opts ...InsertOption) (err error) {
 	stmt.WriteString("INTO ")
 	stmt.WriteString(LocalizedStringTable)
 	stmt.WriteString(` (parent_id, parent_type, name, language, localized) VALUES (?, ?, ?, ?, ?)`)
-	result, err := tx.Exec(stmt.String(), l.ParentID, l.ParentType, l.Name, l.Language, l.Localized)
+	result, err := Exec(tx, stmt.String(), l.ParentID, l.ParentType, l.Name, l.Language, l.Localized)
 	if err != nil {
-		return err
+		return errors.Wrap(err, `failed to execute statement`)
 	}
 
 	lii, err := result.LastInsertId()
 	if err != nil {
-		return err
+		return errors.Wrap(err, `failed to fetch last insert ID`)
 	}
 
 	l.OID = lii
@@ -86,26 +66,23 @@ func (l LocalizedString) Update(tx *sql.Tx) (err error) {
 		if pdebug.Enabled {
 			pdebug.Printf(`Using OID (%d) as key`, l.OID)
 		}
-		stmt, err := library.GetStmt("sqlLocalizedStringUpdateByOIDKey")
-		if err != nil {
-			return errors.Wrap(err, `failed to get statement`)
+		const sqltext = `UPDATE localized_strings SET parent_id = ?, parent_type = ?, name = ?, language = ?, localized = ? WHERE oid = ?`
+		if _, err := Exec(tx, sqltext, l.ParentID, l.ParentType, l.Name, l.Language, l.Localized, l.OID); err != nil {
+			return errors.Wrap(err, `failed to execute statement`)
 		}
-		_, err = tx.Stmt(stmt).Exec(l.ParentID, l.ParentType, l.Name, l.Language, l.Localized, l.OID)
-		return err
+		return nil
 	}
 	return errors.New("OID must be filled")
 }
 
 func (l LocalizedString) Delete(tx *sql.Tx) error {
 	if l.OID != 0 {
-		stmt, err := library.GetStmt("sqlLocalizedStringDeleteByOIDKey")
-		if err != nil {
-			return errors.Wrap(err, `failed to get statement`)
+		const sqltext = `DELETE FROM localized_strings WHERE oid = ?`
+		if _, err := Exec(tx, sqltext, l.OID); err != nil {
+			return errors.Wrap(err, `failed to execute statement`)
 		}
-		_, err = tx.Stmt(stmt).Exec(l.OID)
-		return err
+		return nil
 	}
-
 	return errors.New("column OID must be filled")
 }
 

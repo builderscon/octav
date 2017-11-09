@@ -5,27 +5,24 @@ import (
 
 	"github.com/builderscon/octav/octav/tools"
 	pdebug "github.com/lestrrat/go-pdebug"
+	"github.com/pkg/errors"
 )
 
-func DeleteConferenceVenue(tx *sql.Tx, cid, vid string) error {
+var (
+	sqlConferenceVenueDelete string
+	sqlConferenceVenueLoad   string
+)
+
+func init() {
 	stmt := tools.GetBuffer()
 	defer tools.ReleaseBuffer(stmt)
+
 	stmt.WriteString(`DELETE FROM `)
 	stmt.WriteString(ConferenceVenueTable)
 	stmt.WriteString(` WHERE conference_id = ? AND venue_id = ?`)
+	sqlConferenceVenueDelete = stmt.String()
 
-	_, err := tx.Exec(stmt.String(), cid, vid)
-	return err
-}
-
-func LoadConferenceVenues(tx *sql.Tx, venues *VenueList, cid string) (err error) {
-	if pdebug.Enabled {
-		g := pdebug.Marker("db.LoadConferenceVenues %s", cid).BindError(&err)
-		defer g.End()
-	}
-
-	stmt := tools.GetBuffer()
-	defer tools.ReleaseBuffer(stmt)
+	stmt.Reset()
 	stmt.WriteString(`SELECT `)
 	stmt.WriteString(VenueStdSelectColumns)
 	stmt.WriteString(` FROM `)
@@ -39,11 +36,29 @@ func LoadConferenceVenues(tx *sql.Tx, venues *VenueList, cid string) (err error)
 	stmt.WriteString(`.eid WHERE `)
 	stmt.WriteString(ConferenceVenueTable)
 	stmt.WriteString(`.conference_id = ?`)
+	sqlConferenceVenueLoad = stmt.String()
+}
 
-	rows, err := tx.Query(stmt.String(), cid)
-	if err != nil {
-		return err
+func DeleteConferenceVenue(tx *sql.Tx, cid, vid string) (err error) {
+	if pdebug.Enabled {
+		g := pdebug.Marker("db.DeleteConferenceVenues conference %s, venue %s", cid, vid).BindError(&err)
+		defer g.End()
 	}
+	_, err = Exec(tx, sqlConferenceVenueDelete, cid, vid)
+	return err
+}
+
+func LoadConferenceVenues(tx *sql.Tx, venues *VenueList, cid string) (err error) {
+	if pdebug.Enabled {
+		g := pdebug.Marker("db.LoadConferenceVenues %s", cid).BindError(&err)
+		defer g.End()
+	}
+
+	rows, err := Query(tx, sqlConferenceVenueLoad, cid)
+	if err != nil {
+		return errors.Wrap(err, `failed to execute statement`)
+	}
+	defer rows.Close()
 
 	var res VenueList
 	for rows.Next() {

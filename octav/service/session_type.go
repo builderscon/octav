@@ -158,7 +158,7 @@ func (v *SessionTypeSvc) ListFromPayload(ctx context.Context, tx *sql.Tx, result
 	}
 
 	var vdbl db.SessionTypeList
-	if err := db.LoadSessionTypes(tx, &vdbl, payload.ConferenceID); err != nil {
+	if err := vdbl.LoadByConferenceID(tx, payload.ConferenceID); err != nil {
 		return errors.Wrap(err, "failed to load session type from database")
 	}
 
@@ -239,7 +239,7 @@ func (v *SessionTypeSvc) LoadByConferenceID(ctx context.Context, tx *sql.Tx, cdl
 		pdebug.Printf("CACHE MISS: %s", key)
 	}
 	var vdbl db.SessionTypeList
-	if err := db.LoadSessionTypes(tx, &vdbl, cid); err != nil {
+	if err := vdbl.LoadByConferenceID(tx, cid); err != nil {
 		return err
 	}
 

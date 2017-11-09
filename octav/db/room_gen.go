@@ -8,7 +8,6 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/builderscon/octav/octav/tools"
 	"github.com/lestrrat/go-pdebug"
 	"github.com/pkg/errors"
 )
@@ -24,57 +23,16 @@ func (r *Room) Scan(scanner interface {
 	return scanner.Scan(&r.OID, &r.EID, &r.VenueID, &r.Name, &r.Capacity, &r.CreatedOn, &r.ModifiedOn)
 }
 
-func init() {
-	hooks = append(hooks, func() {
-		stmt := tools.GetBuffer()
-		defer tools.ReleaseBuffer(stmt)
-
-		stmt.Reset()
-		stmt.WriteString(`DELETE FROM `)
-		stmt.WriteString(RoomTable)
-		stmt.WriteString(` WHERE oid = ?`)
-		library.Register("sqlRoomDeleteByOIDKey", stmt.String())
-
-		stmt.Reset()
-		stmt.WriteString(`UPDATE `)
-		stmt.WriteString(RoomTable)
-		stmt.WriteString(` SET eid = ?, venue_id = ?, name = ?, capacity = ? WHERE oid = ?`)
-		library.Register("sqlRoomUpdateByOIDKey", stmt.String())
-
-		stmt.Reset()
-		stmt.WriteString(`SELECT `)
-		stmt.WriteString(RoomStdSelectColumns)
-		stmt.WriteString(` FROM `)
-		stmt.WriteString(RoomTable)
-		stmt.WriteString(` WHERE `)
-		stmt.WriteString(RoomTable)
-		stmt.WriteString(`.eid = ?`)
-		library.Register("sqlRoomLoadByEIDKey", stmt.String())
-
-		stmt.Reset()
-		stmt.WriteString(`DELETE FROM `)
-		stmt.WriteString(RoomTable)
-		stmt.WriteString(` WHERE eid = ?`)
-		library.Register("sqlRoomDeleteByEIDKey", stmt.String())
-
-		stmt.Reset()
-		stmt.WriteString(`UPDATE `)
-		stmt.WriteString(RoomTable)
-		stmt.WriteString(` SET eid = ?, venue_id = ?, name = ?, capacity = ? WHERE eid = ?`)
-		library.Register("sqlRoomUpdateByEIDKey", stmt.String())
-	})
-}
-
 func (r *Room) LoadByEID(tx *sql.Tx, eid string) (err error) {
 	if pdebug.Enabled {
 		g := pdebug.Marker(`Room.LoadByEID %s`, eid).BindError(&err)
 		defer g.End()
 	}
-	stmt, err := library.GetStmt("sqlRoomLoadByEIDKey")
+	const sqltext = `SELECT rooms.oid, rooms.eid, rooms.venue_id, rooms.name, rooms.capacity, rooms.created_on, rooms.modified_on FROM rooms WHERE rooms.eid = ?`
+	row, err := QueryRow(tx, sqltext, eid)
 	if err != nil {
-		return errors.Wrap(err, `failed to get statement`)
+		return errors.Wrap(err, `failed to query row`)
 	}
-	row := tx.Stmt(stmt).QueryRow(eid)
 	if err := r.Scan(row); err != nil {
 		return err
 	}
@@ -108,14 +66,14 @@ func (r *Room) Create(tx *sql.Tx, opts ...InsertOption) (err error) {
 	stmt.WriteString("INTO ")
 	stmt.WriteString(RoomTable)
 	stmt.WriteString(` (eid, venue_id, name, capacity, created_on, modified_on) VALUES (?, ?, ?, ?, ?, ?)`)
-	result, err := tx.Exec(stmt.String(), r.EID, r.VenueID, r.Name, r.Capacity, r.CreatedOn, r.ModifiedOn)
+	result, err := Exec(tx, stmt.String(), r.EID, r.VenueID, r.Name, r.Capacity, r.CreatedOn, r.ModifiedOn)
 	if err != nil {
-		return err
+		return errors.Wrap(err, `failed to execute statement`)
 	}
 
 	lii, err := result.LastInsertId()
 	if err != nil {
-		return err
+		return errors.Wrap(err, `failed to fetch last insert ID`)
 	}
 
 	r.OID = lii
@@ -131,46 +89,42 @@ func (r Room) Update(tx *sql.Tx) (err error) {
 		if pdebug.Enabled {
 			pdebug.Printf(`Using OID (%d) as key`, r.OID)
 		}
-		stmt, err := library.GetStmt("sqlRoomUpdateByOIDKey")
-		if err != nil {
-			return errors.Wrap(err, `failed to get statement`)
+		const sqltext = `UPDATE rooms SET eid = ?, venue_id = ?, name = ?, capacity = ? WHERE oid = ?`
+		if _, err := Exec(tx, sqltext, r.EID, r.VenueID, r.Name, r.Capacity, r.OID); err != nil {
+			return errors.Wrap(err, `failed to execute statement`)
 		}
-		_, err = tx.Stmt(stmt).Exec(r.EID, r.VenueID, r.Name, r.Capacity, r.OID)
-		return err
+		return nil
 	}
+
 	if r.EID != "" {
 		if pdebug.Enabled {
 			pdebug.Printf(`Using EID (%s) as key`, r.EID)
 		}
-		stmt, err := library.GetStmt("sqlRoomUpdateByEIDKey")
-		if err != nil {
-			return errors.Wrap(err, `failed to get statement`)
+		const sqltext = `UPDATE rooms SET eid = ?, venue_id = ?, name = ?, capacity = ? WHERE eid = ?`
+		if _, err := Exec(tx, sqltext, r.EID, r.VenueID, r.Name, r.Capacity, r.EID); err != nil {
+			return errors.Wrap(err, `failed to execute statement`)
 		}
-		_, err = tx.Stmt(stmt).Exec(r.EID, r.VenueID, r.Name, r.Capacity, r.EID)
-		return err
+		return nil
 	}
 	return errors.New("either OID/EID must be filled")
 }
 
 func (r Room) Delete(tx *sql.Tx) error {
 	if r.OID != 0 {
-		stmt, err := library.GetStmt("sqlRoomDeleteByOIDKey")
-		if err != nil {
-			return errors.Wrap(err, `failed to get statement`)
+		const sqltext = `DELETE FROM rooms WHERE oid = ?`
+		if _, err := Exec(tx, sqltext, r.OID); err != nil {
+			return errors.Wrap(err, `failed to execute statement`)
 		}
-		_, err = tx.Stmt(stmt).Exec(r.OID)
-		return err
+		return nil
 	}
 
 	if r.EID != "" {
-		stmt, err := library.GetStmt("sqlRoomDeleteByEIDKey")
-		if err != nil {
+		const sqltext = `DELETE FROM rooms WHERE eid = ?`
+		if _, err := Exec(tx, sqltext, r.EID); err != nil {
 			return errors.Wrap(err, `failed to get statement`)
 		}
-		_, err = tx.Stmt(stmt).Exec(r.EID)
-		return err
+		return nil
 	}
-
 	return errors.New("either OID/EID must be filled")
 }
 
@@ -207,10 +161,11 @@ func (v *RoomList) LoadSinceEID(tx *sql.Tx, since string, limit int) error {
 }
 
 func (v *RoomList) LoadSince(tx *sql.Tx, since int64, limit int) error {
-	rows, err := tx.Query(`SELECT `+RoomStdSelectColumns+` FROM `+RoomTable+` WHERE rooms.oid > ? ORDER BY oid ASC LIMIT `+strconv.Itoa(limit), since)
+	rows, err := Query(tx, `SELECT `+RoomStdSelectColumns+` FROM `+RoomTable+` WHERE rooms.oid > ? ORDER BY oid ASC LIMIT `+strconv.Itoa(limit), since)
 	if err != nil {
 		return err
 	}
+	defer rows.Close()
 
 	if err := v.FromRows(rows, limit); err != nil {
 		return err

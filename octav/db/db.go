@@ -48,9 +48,12 @@ func Init(dsn string) (err error) {
 	}
 
 	dn := driverName()
+	if pdebug.Enabled {
+		pdebug.Printf("Connecting to %s://%s", dn, dsn)
+	}
 	conn, err := sql.Open(dn, dsn)
 	if err != nil {
-		return err
+		return errors.Wrap(err, `failed to connect to database`)
 	}
 
 	if err := onConnect(conn); err != nil {

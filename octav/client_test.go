@@ -174,7 +174,7 @@ func intlConferenceRoom(venueID string) *model.CreateRoomRequest {
 
 func yapcasia() *model.CreateConferenceSeriesRequest {
 	return &model.CreateConferenceSeriesRequest{
-		Slug:   "yapcasia",
+		Slug: "yapcasia",
 	}
 }
 
@@ -396,7 +396,7 @@ func TestRoomCRUD(t *testing.T) {
 		return
 	}
 
-	venue, err := testCreateVenuePass(ctx, bigsight(),ctx.Superuser.EID)
+	venue, err := testCreateVenuePass(ctx, bigsight(), ctx.Superuser.EID)
 	if err != nil {
 		return
 	}
@@ -600,7 +600,7 @@ func TestSessionCRUD(t *testing.T) {
 		}
 
 		in := model.UpdateSessionRequest{
-			ID:     res.ID,
+			ID: res.ID,
 		}
 		in.Status.Set(model.StatusAccepted)
 		if err := testUpdateSession(ctx, &in, user.ID); err != nil {
@@ -625,7 +625,7 @@ func TestSessionCRUD(t *testing.T) {
 
 		for _, status := range []string{model.StatusAccepted, model.StatusRejected} {
 			in := model.UpdateSessionRequest{
-				ID:     res.ID,
+				ID: res.ID,
 			}
 			in.Status.Set(status)
 			loc, _ := time.LoadLocation("Asia/Tokyo")
@@ -637,7 +637,7 @@ func TestSessionCRUD(t *testing.T) {
 
 			for _, lang := range []string{"en", "ja"} {
 				uur := model.UpdateUserRequest{
-					ID:     user.ID,
+					ID: user.ID,
 				}
 				uur.Lang.Set(lang)
 				if err := testUpdateUserPass(ctx, &uur, user.ID); err != nil {
@@ -880,7 +880,7 @@ func TestDeleteConferenceDate(t *testing.T) {
 	}
 
 	series, err := testCreateConferenceSeries(ctx, &model.CreateConferenceSeriesRequest{
-		Slug:   tools.RandomString(8),
+		Slug: tools.RandomString(8),
 	}, ctx.Superuser.EID)
 	if err != nil {
 		return
@@ -966,7 +966,7 @@ func TestConferenceAdmins(t *testing.T) {
 		return
 	}
 	series, err := testCreateConferenceSeries(ctx, &model.CreateConferenceSeriesRequest{
-		Slug:   tools.RandomString(8),
+		Slug: tools.RandomString(8),
 	}, ctx.Superuser.EID)
 	if err != nil {
 		return
@@ -1051,7 +1051,7 @@ func TestListConference(t *testing.T) {
 		return
 	}
 	series, err := testCreateConferenceSeries(ctx, &model.CreateConferenceSeriesRequest{
-		Slug:   tools.RandomString(8),
+		Slug: tools.RandomString(8),
 	}, ctx.Superuser.EID)
 	if err != nil {
 		return
@@ -1071,7 +1071,7 @@ func TestListConference(t *testing.T) {
 			LocalizedFields: lf,
 			SeriesID:        series.ID,
 			Slug:            tools.RandomString(8),
-			Title:           "ListConference Test",
+			Title:           "ListConference Test " + strconv.Itoa(i),
 		}, user.ID)
 		if err != nil {
 			return
@@ -1095,7 +1095,7 @@ func TestListConference(t *testing.T) {
 		defer testDeleteConference(ctx, conf.ID, user.ID)
 
 		req := &model.UpdateConferenceRequest{
-			ID:     confs[i].ID,
+			ID: confs[i].ID,
 		}
 		req.Status.Set("public")
 		if err := testUpdateConference(ctx, req, user.ID); err != nil {
@@ -1130,7 +1130,7 @@ func TestListConference(t *testing.T) {
 	// Make some of them private
 	for i := 0; i < 5; i++ {
 		req := &model.UpdateConferenceRequest{
-			ID:     confs[i*2].ID,
+			ID: confs[i*2].ID,
 		}
 		req.Status.Set("private")
 		if err := testUpdateConference(ctx, req, user.ID); err != nil {

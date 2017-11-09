@@ -8,7 +8,6 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/builderscon/octav/octav/tools"
 	"github.com/lestrrat/go-pdebug"
 	"github.com/pkg/errors"
 )
@@ -24,57 +23,16 @@ func (q *Question) Scan(scanner interface {
 	return scanner.Scan(&q.OID, &q.EID, &q.SessionID, &q.UserID, &q.Body, &q.CreatedOn, &q.ModifiedOn)
 }
 
-func init() {
-	hooks = append(hooks, func() {
-		stmt := tools.GetBuffer()
-		defer tools.ReleaseBuffer(stmt)
-
-		stmt.Reset()
-		stmt.WriteString(`DELETE FROM `)
-		stmt.WriteString(QuestionTable)
-		stmt.WriteString(` WHERE oid = ?`)
-		library.Register("sqlQuestionDeleteByOIDKey", stmt.String())
-
-		stmt.Reset()
-		stmt.WriteString(`UPDATE `)
-		stmt.WriteString(QuestionTable)
-		stmt.WriteString(` SET eid = ?, session_id = ?, user_id = ?, body = ? WHERE oid = ?`)
-		library.Register("sqlQuestionUpdateByOIDKey", stmt.String())
-
-		stmt.Reset()
-		stmt.WriteString(`SELECT `)
-		stmt.WriteString(QuestionStdSelectColumns)
-		stmt.WriteString(` FROM `)
-		stmt.WriteString(QuestionTable)
-		stmt.WriteString(` WHERE `)
-		stmt.WriteString(QuestionTable)
-		stmt.WriteString(`.eid = ?`)
-		library.Register("sqlQuestionLoadByEIDKey", stmt.String())
-
-		stmt.Reset()
-		stmt.WriteString(`DELETE FROM `)
-		stmt.WriteString(QuestionTable)
-		stmt.WriteString(` WHERE eid = ?`)
-		library.Register("sqlQuestionDeleteByEIDKey", stmt.String())
-
-		stmt.Reset()
-		stmt.WriteString(`UPDATE `)
-		stmt.WriteString(QuestionTable)
-		stmt.WriteString(` SET eid = ?, session_id = ?, user_id = ?, body = ? WHERE eid = ?`)
-		library.Register("sqlQuestionUpdateByEIDKey", stmt.String())
-	})
-}
-
 func (q *Question) LoadByEID(tx *sql.Tx, eid string) (err error) {
 	if pdebug.Enabled {
 		g := pdebug.Marker(`Question.LoadByEID %s`, eid).BindError(&err)
 		defer g.End()
 	}
-	stmt, err := library.GetStmt("sqlQuestionLoadByEIDKey")
+	const sqltext = `SELECT questions.oid, questions.eid, questions.session_id, questions.user_id, questions.body, questions.created_on, questions.modified_on FROM questions WHERE questions.eid = ?`
+	row, err := QueryRow(tx, sqltext, eid)
 	if err != nil {
-		return errors.Wrap(err, `failed to get statement`)
+		return errors.Wrap(err, `failed to query row`)
 	}
-	row := tx.Stmt(stmt).QueryRow(eid)
 	if err := q.Scan(row); err != nil {
 		return err
 	}
@@ -108,14 +66,14 @@ func (q *Question) Create(tx *sql.Tx, opts ...InsertOption) (err error) {
 	stmt.WriteString("INTO ")
 	stmt.WriteString(QuestionTable)
 	stmt.WriteString(` (eid, session_id, user_id, body, created_on, modified_on) VALUES (?, ?, ?, ?, ?, ?)`)
-	result, err := tx.Exec(stmt.String(), q.EID, q.SessionID, q.UserID, q.Body, q.CreatedOn, q.ModifiedOn)
+	result, err := Exec(tx, stmt.String(), q.EID, q.SessionID, q.UserID, q.Body, q.CreatedOn, q.ModifiedOn)
 	if err != nil {
-		return err
+		return errors.Wrap(err, `failed to execute statement`)
 	}
 
 	lii, err := result.LastInsertId()
 	if err != nil {
-		return err
+		return errors.Wrap(err, `failed to fetch last insert ID`)
 	}
 
 	q.OID = lii
@@ -131,46 +89,42 @@ func (q Question) Update(tx *sql.Tx) (err error) {
 		if pdebug.Enabled {
 			pdebug.Printf(`Using OID (%d) as key`, q.OID)
 		}
-		stmt, err := library.GetStmt("sqlQuestionUpdateByOIDKey")
-		if err != nil {
-			return errors.Wrap(err, `failed to get statement`)
+		const sqltext = `UPDATE questions SET eid = ?, session_id = ?, user_id = ?, body = ? WHERE oid = ?`
+		if _, err := Exec(tx, sqltext, q.EID, q.SessionID, q.UserID, q.Body, q.OID); err != nil {
+			return errors.Wrap(err, `failed to execute statement`)
 		}
-		_, err = tx.Stmt(stmt).Exec(q.EID, q.SessionID, q.UserID, q.Body, q.OID)
-		return err
+		return nil
 	}
+
 	if q.EID != "" {
 		if pdebug.Enabled {
 			pdebug.Printf(`Using EID (%s) as key`, q.EID)
 		}
-		stmt, err := library.GetStmt("sqlQuestionUpdateByEIDKey")
-		if err != nil {
-			return errors.Wrap(err, `failed to get statement`)
+		const sqltext = `UPDATE questions SET eid = ?, session_id = ?, user_id = ?, body = ? WHERE eid = ?`
+		if _, err := Exec(tx, sqltext, q.EID, q.SessionID, q.UserID, q.Body, q.EID); err != nil {
+			return errors.Wrap(err, `failed to execute statement`)
 		}
-		_, err = tx.Stmt(stmt).Exec(q.EID, q.SessionID, q.UserID, q.Body, q.EID)
-		return err
+		return nil
 	}
 	return errors.New("either OID/EID must be filled")
 }
 
 func (q Question) Delete(tx *sql.Tx) error {
 	if q.OID != 0 {
-		stmt, err := library.GetStmt("sqlQuestionDeleteByOIDKey")
-		if err != nil {
-			return errors.Wrap(err, `failed to get statement`)
+		const sqltext = `DELETE FROM questions WHERE oid = ?`
+		if _, err := Exec(tx, sqltext, q.OID); err != nil {
+			return errors.Wrap(err, `failed to execute statement`)
 		}
-		_, err = tx.Stmt(stmt).Exec(q.OID)
-		return err
+		return nil
 	}
 
 	if q.EID != "" {
-		stmt, err := library.GetStmt("sqlQuestionDeleteByEIDKey")
-		if err != nil {
+		const sqltext = `DELETE FROM questions WHERE eid = ?`
+		if _, err := Exec(tx, sqltext, q.EID); err != nil {
 			return errors.Wrap(err, `failed to get statement`)
 		}
-		_, err = tx.Stmt(stmt).Exec(q.EID)
-		return err
+		return nil
 	}
-
 	return errors.New("either OID/EID must be filled")
 }
 
@@ -207,10 +161,11 @@ func (v *QuestionList) LoadSinceEID(tx *sql.Tx, since string, limit int) error {
 }
 
 func (v *QuestionList) LoadSince(tx *sql.Tx, since int64, limit int) error {
-	rows, err := tx.Query(`SELECT `+QuestionStdSelectColumns+` FROM `+QuestionTable+` WHERE questions.oid > ? ORDER BY oid ASC LIMIT `+strconv.Itoa(limit), since)
+	rows, err := Query(tx, `SELECT `+QuestionStdSelectColumns+` FROM `+QuestionTable+` WHERE questions.oid > ? ORDER BY oid ASC LIMIT `+strconv.Itoa(limit), since)
 	if err != nil {
 		return err
 	}
+	defer rows.Close()
 
 	if err := v.FromRows(rows, limit); err != nil {
 		return err

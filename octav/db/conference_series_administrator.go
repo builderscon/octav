@@ -3,19 +3,23 @@ package db
 import (
 	"database/sql"
 
-	"github.com/builderscon/octav/octav/tools"
+	pdebug "github.com/lestrrat/go-pdebug"
 	"github.com/pkg/errors"
 )
 
-func IsConferenceSeriesAdministrator(tx *sql.Tx, sid, uid string) error {
-	stmt := tools.GetBuffer()
-	defer tools.ReleaseBuffer(stmt)
-	stmt.WriteString(`SELECT 1 FROM `)
-	stmt.WriteString(ConferenceSeriesAdministratorTable)
-	stmt.WriteString(` WHERE series_id = ? AND user_id = ?`)
+func IsConferenceSeriesAdministrator(tx *sql.Tx, sid, uid string) (err error) {
+	if pdebug.Enabled {
+		g := pdebug.Marker("db.IsConferenceSeriesAdministrator series %s, user %s", sid, uid).BindError(&err)
+		defer g.End()
+	}
+	sqltext := `SELECT 1 FROM ` + ConferenceSeriesAdministratorTable + ` WHERE series_id = ? AND user_id = ?`
 
 	var v int
-	row := tx.QueryRow(stmt.String(), sid, uid)
+	row, err := QueryRow(tx, sqltext, sid, uid)
+	if err != nil {
+		return errors.Wrap(err, `failed to execute statement`)
+	}
+
 	if err := row.Scan(&v); err != nil {
 		return errors.Wrap(err, "failed to scan row")
 	}

@@ -8,7 +8,6 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/builderscon/octav/octav/tools"
 	"github.com/lestrrat/go-pdebug"
 	"github.com/pkg/errors"
 )
@@ -24,57 +23,16 @@ func (u *User) Scan(scanner interface {
 	return scanner.Scan(&u.OID, &u.EID, &u.AuthVia, &u.AuthUserID, &u.AvatarURL, &u.FirstName, &u.LastName, &u.Lang, &u.Nickname, &u.Email, &u.TshirtSize, &u.IsAdmin, &u.Timezone, &u.CreatedOn, &u.ModifiedOn)
 }
 
-func init() {
-	hooks = append(hooks, func() {
-		stmt := tools.GetBuffer()
-		defer tools.ReleaseBuffer(stmt)
-
-		stmt.Reset()
-		stmt.WriteString(`DELETE FROM `)
-		stmt.WriteString(UserTable)
-		stmt.WriteString(` WHERE oid = ?`)
-		library.Register("sqlUserDeleteByOIDKey", stmt.String())
-
-		stmt.Reset()
-		stmt.WriteString(`UPDATE `)
-		stmt.WriteString(UserTable)
-		stmt.WriteString(` SET eid = ?, auth_via = ?, auth_user_id = ?, avatar_url = ?, first_name = ?, last_name = ?, lang = ?, nickname = ?, email = ?, tshirt_size = ?, is_admin = ?, timezone = ? WHERE oid = ?`)
-		library.Register("sqlUserUpdateByOIDKey", stmt.String())
-
-		stmt.Reset()
-		stmt.WriteString(`SELECT `)
-		stmt.WriteString(UserStdSelectColumns)
-		stmt.WriteString(` FROM `)
-		stmt.WriteString(UserTable)
-		stmt.WriteString(` WHERE `)
-		stmt.WriteString(UserTable)
-		stmt.WriteString(`.eid = ?`)
-		library.Register("sqlUserLoadByEIDKey", stmt.String())
-
-		stmt.Reset()
-		stmt.WriteString(`DELETE FROM `)
-		stmt.WriteString(UserTable)
-		stmt.WriteString(` WHERE eid = ?`)
-		library.Register("sqlUserDeleteByEIDKey", stmt.String())
-
-		stmt.Reset()
-		stmt.WriteString(`UPDATE `)
-		stmt.WriteString(UserTable)
-		stmt.WriteString(` SET eid = ?, auth_via = ?, auth_user_id = ?, avatar_url = ?, first_name = ?, last_name = ?, lang = ?, nickname = ?, email = ?, tshirt_size = ?, is_admin = ?, timezone = ? WHERE eid = ?`)
-		library.Register("sqlUserUpdateByEIDKey", stmt.String())
-	})
-}
-
 func (u *User) LoadByEID(tx *sql.Tx, eid string) (err error) {
 	if pdebug.Enabled {
 		g := pdebug.Marker(`User.LoadByEID %s`, eid).BindError(&err)
 		defer g.End()
 	}
-	stmt, err := library.GetStmt("sqlUserLoadByEIDKey")
+	const sqltext = `SELECT users.oid, users.eid, users.auth_via, users.auth_user_id, users.avatar_url, users.first_name, users.last_name, users.lang, users.nickname, users.email, users.tshirt_size, users.is_admin, users.timezone, users.created_on, users.modified_on FROM users WHERE users.eid = ?`
+	row, err := QueryRow(tx, sqltext, eid)
 	if err != nil {
-		return errors.Wrap(err, `failed to get statement`)
+		return errors.Wrap(err, `failed to query row`)
 	}
-	row := tx.Stmt(stmt).QueryRow(eid)
 	if err := u.Scan(row); err != nil {
 		return err
 	}
@@ -108,14 +66,14 @@ func (u *User) Create(tx *sql.Tx, opts ...InsertOption) (err error) {
 	stmt.WriteString("INTO ")
 	stmt.WriteString(UserTable)
 	stmt.WriteString(` (eid, auth_via, auth_user_id, avatar_url, first_name, last_name, lang, nickname, email, tshirt_size, is_admin, timezone, created_on, modified_on) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`)
-	result, err := tx.Exec(stmt.String(), u.EID, u.AuthVia, u.AuthUserID, u.AvatarURL, u.FirstName, u.LastName, u.Lang, u.Nickname, u.Email, u.TshirtSize, u.IsAdmin, u.Timezone, u.CreatedOn, u.ModifiedOn)
+	result, err := Exec(tx, stmt.String(), u.EID, u.AuthVia, u.AuthUserID, u.AvatarURL, u.FirstName, u.LastName, u.Lang, u.Nickname, u.Email, u.TshirtSize, u.IsAdmin, u.Timezone, u.CreatedOn, u.ModifiedOn)
 	if err != nil {
-		return err
+		return errors.Wrap(err, `failed to execute statement`)
 	}
 
 	lii, err := result.LastInsertId()
 	if err != nil {
-		return err
+		return errors.Wrap(err, `failed to fetch last insert ID`)
 	}
 
 	u.OID = lii
@@ -131,46 +89,42 @@ func (u User) Update(tx *sql.Tx) (err error) {
 		if pdebug.Enabled {
 			pdebug.Printf(`Using OID (%d) as key`, u.OID)
 		}
-		stmt, err := library.GetStmt("sqlUserUpdateByOIDKey")
-		if err != nil {
-			return errors.Wrap(err, `failed to get statement`)
+		const sqltext = `UPDATE users SET eid = ?, auth_via = ?, auth_user_id = ?, avatar_url = ?, first_name = ?, last_name = ?, lang = ?, nickname = ?, email = ?, tshirt_size = ?, is_admin = ?, timezone = ? WHERE oid = ?`
+		if _, err := Exec(tx, sqltext, u.EID, u.AuthVia, u.AuthUserID, u.AvatarURL, u.FirstName, u.LastName, u.Lang, u.Nickname, u.Email, u.TshirtSize, u.IsAdmin, u.Timezone, u.OID); err != nil {
+			return errors.Wrap(err, `failed to execute statement`)
 		}
-		_, err = tx.Stmt(stmt).Exec(u.EID, u.AuthVia, u.AuthUserID, u.AvatarURL, u.FirstName, u.LastName, u.Lang, u.Nickname, u.Email, u.TshirtSize, u.IsAdmin, u.Timezone, u.OID)
-		return err
+		return nil
 	}
+
 	if u.EID != "" {
 		if pdebug.Enabled {
 			pdebug.Printf(`Using EID (%s) as key`, u.EID)
 		}
-		stmt, err := library.GetStmt("sqlUserUpdateByEIDKey")
-		if err != nil {
-			return errors.Wrap(err, `failed to get statement`)
+		const sqltext = `UPDATE users SET eid = ?, auth_via = ?, auth_user_id = ?, avatar_url = ?, first_name = ?, last_name = ?, lang = ?, nickname = ?, email = ?, tshirt_size = ?, is_admin = ?, timezone = ? WHERE eid = ?`
+		if _, err := Exec(tx, sqltext, u.EID, u.AuthVia, u.AuthUserID, u.AvatarURL, u.FirstName, u.LastName, u.Lang, u.Nickname, u.Email, u.TshirtSize, u.IsAdmin, u.Timezone, u.EID); err != nil {
+			return errors.Wrap(err, `failed to execute statement`)
 		}
-		_, err = tx.Stmt(stmt).Exec(u.EID, u.AuthVia, u.AuthUserID, u.AvatarURL, u.FirstName, u.LastName, u.Lang, u.Nickname, u.Email, u.TshirtSize, u.IsAdmin, u.Timezone, u.EID)
-		return err
+		return nil
 	}
 	return errors.New("either OID/EID must be filled")
 }
 
 func (u User) Delete(tx *sql.Tx) error {
 	if u.OID != 0 {
-		stmt, err := library.GetStmt("sqlUserDeleteByOIDKey")
-		if err != nil {
-			return errors.Wrap(err, `failed to get statement`)
+		const sqltext = `DELETE FROM users WHERE oid = ?`
+		if _, err := Exec(tx, sqltext, u.OID); err != nil {
+			return errors.Wrap(err, `failed to execute statement`)
 		}
-		_, err = tx.Stmt(stmt).Exec(u.OID)
-		return err
+		return nil
 	}
 
 	if u.EID != "" {
-		stmt, err := library.GetStmt("sqlUserDeleteByEIDKey")
-		if err != nil {
+		const sqltext = `DELETE FROM users WHERE eid = ?`
+		if _, err := Exec(tx, sqltext, u.EID); err != nil {
 			return errors.Wrap(err, `failed to get statement`)
 		}
-		_, err = tx.Stmt(stmt).Exec(u.EID)
-		return err
+		return nil
 	}
-
 	return errors.New("either OID/EID must be filled")
 }
 
@@ -207,10 +161,11 @@ func (v *UserList) LoadSinceEID(tx *sql.Tx, since string, limit int) error {
 }
 
 func (v *UserList) LoadSince(tx *sql.Tx, since int64, limit int) error {
-	rows, err := tx.Query(`SELECT `+UserStdSelectColumns+` FROM `+UserTable+` WHERE users.oid > ? ORDER BY oid ASC LIMIT `+strconv.Itoa(limit), since)
+	rows, err := Query(tx, `SELECT `+UserStdSelectColumns+` FROM `+UserTable+` WHERE users.oid > ? ORDER BY oid ASC LIMIT `+strconv.Itoa(limit), since)
 	if err != nil {
 		return err
 	}
+	defer rows.Close()
 
 	if err := v.FromRows(rows, limit); err != nil {
 		return err

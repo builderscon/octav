@@ -8,7 +8,6 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/builderscon/octav/octav/tools"
 	"github.com/lestrrat/go-pdebug"
 	"github.com/pkg/errors"
 )
@@ -24,57 +23,16 @@ func (t *Track) Scan(scanner interface {
 	return scanner.Scan(&t.OID, &t.EID, &t.ConferenceID, &t.RoomID, &t.Name, &t.SortOrder, &t.CreatedOn, &t.ModifiedOn)
 }
 
-func init() {
-	hooks = append(hooks, func() {
-		stmt := tools.GetBuffer()
-		defer tools.ReleaseBuffer(stmt)
-
-		stmt.Reset()
-		stmt.WriteString(`DELETE FROM `)
-		stmt.WriteString(TrackTable)
-		stmt.WriteString(` WHERE oid = ?`)
-		library.Register("sqlTrackDeleteByOIDKey", stmt.String())
-
-		stmt.Reset()
-		stmt.WriteString(`UPDATE `)
-		stmt.WriteString(TrackTable)
-		stmt.WriteString(` SET eid = ?, conference_id = ?, room_id = ?, name = ?, sort_order = ? WHERE oid = ?`)
-		library.Register("sqlTrackUpdateByOIDKey", stmt.String())
-
-		stmt.Reset()
-		stmt.WriteString(`SELECT `)
-		stmt.WriteString(TrackStdSelectColumns)
-		stmt.WriteString(` FROM `)
-		stmt.WriteString(TrackTable)
-		stmt.WriteString(` WHERE `)
-		stmt.WriteString(TrackTable)
-		stmt.WriteString(`.eid = ?`)
-		library.Register("sqlTrackLoadByEIDKey", stmt.String())
-
-		stmt.Reset()
-		stmt.WriteString(`DELETE FROM `)
-		stmt.WriteString(TrackTable)
-		stmt.WriteString(` WHERE eid = ?`)
-		library.Register("sqlTrackDeleteByEIDKey", stmt.String())
-
-		stmt.Reset()
-		stmt.WriteString(`UPDATE `)
-		stmt.WriteString(TrackTable)
-		stmt.WriteString(` SET eid = ?, conference_id = ?, room_id = ?, name = ?, sort_order = ? WHERE eid = ?`)
-		library.Register("sqlTrackUpdateByEIDKey", stmt.String())
-	})
-}
-
 func (t *Track) LoadByEID(tx *sql.Tx, eid string) (err error) {
 	if pdebug.Enabled {
 		g := pdebug.Marker(`Track.LoadByEID %s`, eid).BindError(&err)
 		defer g.End()
 	}
-	stmt, err := library.GetStmt("sqlTrackLoadByEIDKey")
+	const sqltext = `SELECT tracks.oid, tracks.eid, tracks.conference_id, tracks.room_id, tracks.name, tracks.sort_order, tracks.created_on, tracks.modified_on FROM tracks WHERE tracks.eid = ?`
+	row, err := QueryRow(tx, sqltext, eid)
 	if err != nil {
-		return errors.Wrap(err, `failed to get statement`)
+		return errors.Wrap(err, `failed to query row`)
 	}
-	row := tx.Stmt(stmt).QueryRow(eid)
 	if err := t.Scan(row); err != nil {
 		return err
 	}
@@ -108,14 +66,14 @@ func (t *Track) Create(tx *sql.Tx, opts ...InsertOption) (err error) {
 	stmt.WriteString("INTO ")
 	stmt.WriteString(TrackTable)
 	stmt.WriteString(` (eid, conference_id, room_id, name, sort_order, created_on, modified_on) VALUES (?, ?, ?, ?, ?, ?, ?)`)
-	result, err := tx.Exec(stmt.String(), t.EID, t.ConferenceID, t.RoomID, t.Name, t.SortOrder, t.CreatedOn, t.ModifiedOn)
+	result, err := Exec(tx, stmt.String(), t.EID, t.ConferenceID, t.RoomID, t.Name, t.SortOrder, t.CreatedOn, t.ModifiedOn)
 	if err != nil {
-		return err
+		return errors.Wrap(err, `failed to execute statement`)
 	}
 
 	lii, err := result.LastInsertId()
 	if err != nil {
-		return err
+		return errors.Wrap(err, `failed to fetch last insert ID`)
 	}
 
 	t.OID = lii
@@ -131,46 +89,42 @@ func (t Track) Update(tx *sql.Tx) (err error) {
 		if pdebug.Enabled {
 			pdebug.Printf(`Using OID (%d) as key`, t.OID)
 		}
-		stmt, err := library.GetStmt("sqlTrackUpdateByOIDKey")
-		if err != nil {
-			return errors.Wrap(err, `failed to get statement`)
+		const sqltext = `UPDATE tracks SET eid = ?, conference_id = ?, room_id = ?, name = ?, sort_order = ? WHERE oid = ?`
+		if _, err := Exec(tx, sqltext, t.EID, t.ConferenceID, t.RoomID, t.Name, t.SortOrder, t.OID); err != nil {
+			return errors.Wrap(err, `failed to execute statement`)
 		}
-		_, err = tx.Stmt(stmt).Exec(t.EID, t.ConferenceID, t.RoomID, t.Name, t.SortOrder, t.OID)
-		return err
+		return nil
 	}
+
 	if t.EID != "" {
 		if pdebug.Enabled {
 			pdebug.Printf(`Using EID (%s) as key`, t.EID)
 		}
-		stmt, err := library.GetStmt("sqlTrackUpdateByEIDKey")
-		if err != nil {
-			return errors.Wrap(err, `failed to get statement`)
+		const sqltext = `UPDATE tracks SET eid = ?, conference_id = ?, room_id = ?, name = ?, sort_order = ? WHERE eid = ?`
+		if _, err := Exec(tx, sqltext, t.EID, t.ConferenceID, t.RoomID, t.Name, t.SortOrder, t.EID); err != nil {
+			return errors.Wrap(err, `failed to execute statement`)
 		}
-		_, err = tx.Stmt(stmt).Exec(t.EID, t.ConferenceID, t.RoomID, t.Name, t.SortOrder, t.EID)
-		return err
+		return nil
 	}
 	return errors.New("either OID/EID must be filled")
 }
 
 func (t Track) Delete(tx *sql.Tx) error {
 	if t.OID != 0 {
-		stmt, err := library.GetStmt("sqlTrackDeleteByOIDKey")
-		if err != nil {
-			return errors.Wrap(err, `failed to get statement`)
+		const sqltext = `DELETE FROM tracks WHERE oid = ?`
+		if _, err := Exec(tx, sqltext, t.OID); err != nil {
+			return errors.Wrap(err, `failed to execute statement`)
 		}
-		_, err = tx.Stmt(stmt).Exec(t.OID)
-		return err
+		return nil
 	}
 
 	if t.EID != "" {
-		stmt, err := library.GetStmt("sqlTrackDeleteByEIDKey")
-		if err != nil {
+		const sqltext = `DELETE FROM tracks WHERE eid = ?`
+		if _, err := Exec(tx, sqltext, t.EID); err != nil {
 			return errors.Wrap(err, `failed to get statement`)
 		}
-		_, err = tx.Stmt(stmt).Exec(t.EID)
-		return err
+		return nil
 	}
-
 	return errors.New("either OID/EID must be filled")
 }
 
@@ -207,10 +161,11 @@ func (v *TrackList) LoadSinceEID(tx *sql.Tx, since string, limit int) error {
 }
 
 func (v *TrackList) LoadSince(tx *sql.Tx, since int64, limit int) error {
-	rows, err := tx.Query(`SELECT `+TrackStdSelectColumns+` FROM `+TrackTable+` WHERE tracks.oid > ? ORDER BY oid ASC LIMIT `+strconv.Itoa(limit), since)
+	rows, err := Query(tx, `SELECT `+TrackStdSelectColumns+` FROM `+TrackTable+` WHERE tracks.oid > ? ORDER BY oid ASC LIMIT `+strconv.Itoa(limit), since)
 	if err != nil {
 		return err
 	}
+	defer rows.Close()
 
 	if err := v.FromRows(rows, limit); err != nil {
 		return err

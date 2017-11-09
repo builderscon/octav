@@ -176,7 +176,7 @@ func (v *FeaturedSpeakerSvc) LoadByConferenceID(ctx context.Context, tx *sql.Tx,
 		pdebug.Printf("CACHE MISS: %s", key)
 	}
 	var vdbl db.FeaturedSpeakerList
-	if err := db.LoadFeaturedSpeakers(tx, &vdbl, cid); err != nil {
+	if err := vdbl.LoadByConferenceID(tx, cid); err != nil {
 		return err
 	}
 

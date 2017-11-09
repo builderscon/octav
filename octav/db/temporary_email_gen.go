@@ -6,7 +6,6 @@ import (
 	"bytes"
 	"database/sql"
 
-	"github.com/builderscon/octav/octav/tools"
 	"github.com/lestrrat/go-pdebug"
 	"github.com/pkg/errors"
 )
@@ -20,25 +19,6 @@ func (t *TemporaryEmail) Scan(scanner interface {
 	Scan(...interface{}) error
 }) error {
 	return scanner.Scan(&t.OID, &t.UserID, &t.ConfirmationKey, &t.Email, &t.ExpiresOn)
-}
-
-func init() {
-	hooks = append(hooks, func() {
-		stmt := tools.GetBuffer()
-		defer tools.ReleaseBuffer(stmt)
-
-		stmt.Reset()
-		stmt.WriteString(`DELETE FROM `)
-		stmt.WriteString(TemporaryEmailTable)
-		stmt.WriteString(` WHERE oid = ?`)
-		library.Register("sqlTemporaryEmailDeleteByOIDKey", stmt.String())
-
-		stmt.Reset()
-		stmt.WriteString(`UPDATE `)
-		stmt.WriteString(TemporaryEmailTable)
-		stmt.WriteString(` SET user_id = ?, confirmation_key = ?, email = ?, expires_on = ? WHERE oid = ?`)
-		library.Register("sqlTemporaryEmailUpdateByOIDKey", stmt.String())
-	})
 }
 
 func (t *TemporaryEmail) Create(tx *sql.Tx, opts ...InsertOption) (err error) {
@@ -63,14 +43,14 @@ func (t *TemporaryEmail) Create(tx *sql.Tx, opts ...InsertOption) (err error) {
 	stmt.WriteString("INTO ")
 	stmt.WriteString(TemporaryEmailTable)
 	stmt.WriteString(` (user_id, confirmation_key, email, expires_on) VALUES (?, ?, ?, ?)`)
-	result, err := tx.Exec(stmt.String(), t.UserID, t.ConfirmationKey, t.Email, t.ExpiresOn)
+	result, err := Exec(tx, stmt.String(), t.UserID, t.ConfirmationKey, t.Email, t.ExpiresOn)
 	if err != nil {
-		return err
+		return errors.Wrap(err, `failed to execute statement`)
 	}
 
 	lii, err := result.LastInsertId()
 	if err != nil {
-		return err
+		return errors.Wrap(err, `failed to fetch last insert ID`)
 	}
 
 	t.OID = lii
@@ -86,26 +66,23 @@ func (t TemporaryEmail) Update(tx *sql.Tx) (err error) {
 		if pdebug.Enabled {
 			pdebug.Printf(`Using OID (%d) as key`, t.OID)
 		}
-		stmt, err := library.GetStmt("sqlTemporaryEmailUpdateByOIDKey")
-		if err != nil {
-			return errors.Wrap(err, `failed to get statement`)
+		const sqltext = `UPDATE temporary_emails SET user_id = ?, confirmation_key = ?, email = ?, expires_on = ? WHERE oid = ?`
+		if _, err := Exec(tx, sqltext, t.UserID, t.ConfirmationKey, t.Email, t.ExpiresOn, t.OID); err != nil {
+			return errors.Wrap(err, `failed to execute statement`)
 		}
-		_, err = tx.Stmt(stmt).Exec(t.UserID, t.ConfirmationKey, t.Email, t.ExpiresOn, t.OID)
-		return err
+		return nil
 	}
 	return errors.New("OID must be filled")
 }
 
 func (t TemporaryEmail) Delete(tx *sql.Tx) error {
 	if t.OID != 0 {
-		stmt, err := library.GetStmt("sqlTemporaryEmailDeleteByOIDKey")
-		if err != nil {
-			return errors.Wrap(err, `failed to get statement`)
+		const sqltext = `DELETE FROM temporary_emails WHERE oid = ?`
+		if _, err := Exec(tx, sqltext, t.OID); err != nil {
+			return errors.Wrap(err, `failed to execute statement`)
 		}
-		_, err = tx.Stmt(stmt).Exec(t.OID)
-		return err
+		return nil
 	}
-
 	return errors.New("column OID must be filled")
 }
 

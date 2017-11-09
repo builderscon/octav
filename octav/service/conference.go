@@ -281,7 +281,7 @@ func (v *ConferenceSvc) LoadByRange(tx *sql.Tx, vdbl *db.ConferenceList, since, 
 	return nil
 }
 
-func (v *ConferenceSvc) AddDatesFromPayload(ctx context.Context, tx *sql.Tx, payload *model.CreateConferenceDateRequest) (err error) {
+func (v *ConferenceSvc) AddDatesFromPayload(ctx context.Context, tx *sql.Tx, payload *model.CreateConferenceDateRequest, date *model.ConferenceDate) (err error) {
 	if pdebug.Enabled {
 		g := pdebug.Marker("service.Conference.AddDatesFromPayload").BindError(&err)
 		defer g.End()
@@ -292,10 +292,16 @@ func (v *ConferenceSvc) AddDatesFromPayload(ctx context.Context, tx *sql.Tx, pay
 		return errors.Wrap(err, "adding conference dates requires conference administrator privilege")
 	}
 
-	var vdb db.ConferenceDate
 	s := ConferenceDate()
-	if err := s.Create(ctx, tx, &vdb, payload); err != nil {
+	if err := s.CreateFromPayload(ctx, tx, payload, date); err != nil {
 		return errors.Wrap(err, "failed to insert into database")
+	}
+
+	if pdebug.Enabled {
+		var c model.Conference
+		if err := v.Lookup(ctx, tx, &c, payload.ConferenceID); err == nil { // better be true
+			pdebug.Printf("Added date %s to conference %s", payload.Date, c.Title)
+		}
 	}
 
 	return nil
@@ -511,7 +517,7 @@ func (v *ConferenceSvc) Decorate(ctx context.Context, tx *sql.Tx, c *model.Confe
 		var s model.ConferenceSeries
 		css := ConferenceSeries()
 		r := model.LookupConferenceSeriesRequest{
-			ID:          seriesID,
+			ID:           seriesID,
 			VerifiedCall: verifiedCall,
 		}
 		r.Lang.Set(lang)

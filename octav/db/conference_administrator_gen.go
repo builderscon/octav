@@ -7,7 +7,6 @@ import (
 	"database/sql"
 	"time"
 
-	"github.com/builderscon/octav/octav/tools"
 	"github.com/lestrrat/go-pdebug"
 	"github.com/pkg/errors"
 )
@@ -21,25 +20,6 @@ func (c *ConferenceAdministrator) Scan(scanner interface {
 	Scan(...interface{}) error
 }) error {
 	return scanner.Scan(&c.OID, &c.ConferenceID, &c.UserID, &c.SortOrder, &c.CreatedOn, &c.ModifiedOn)
-}
-
-func init() {
-	hooks = append(hooks, func() {
-		stmt := tools.GetBuffer()
-		defer tools.ReleaseBuffer(stmt)
-
-		stmt.Reset()
-		stmt.WriteString(`DELETE FROM `)
-		stmt.WriteString(ConferenceAdministratorTable)
-		stmt.WriteString(` WHERE oid = ?`)
-		library.Register("sqlConferenceAdministratorDeleteByOIDKey", stmt.String())
-
-		stmt.Reset()
-		stmt.WriteString(`UPDATE `)
-		stmt.WriteString(ConferenceAdministratorTable)
-		stmt.WriteString(` SET conference_id = ?, user_id = ?, sort_order = ? WHERE oid = ?`)
-		library.Register("sqlConferenceAdministratorUpdateByOIDKey", stmt.String())
-	})
 }
 
 func (c *ConferenceAdministrator) Create(tx *sql.Tx, opts ...InsertOption) (err error) {
@@ -65,14 +45,14 @@ func (c *ConferenceAdministrator) Create(tx *sql.Tx, opts ...InsertOption) (err 
 	stmt.WriteString("INTO ")
 	stmt.WriteString(ConferenceAdministratorTable)
 	stmt.WriteString(` (conference_id, user_id, sort_order, created_on, modified_on) VALUES (?, ?, ?, ?, ?)`)
-	result, err := tx.Exec(stmt.String(), c.ConferenceID, c.UserID, c.SortOrder, c.CreatedOn, c.ModifiedOn)
+	result, err := Exec(tx, stmt.String(), c.ConferenceID, c.UserID, c.SortOrder, c.CreatedOn, c.ModifiedOn)
 	if err != nil {
-		return err
+		return errors.Wrap(err, `failed to execute statement`)
 	}
 
 	lii, err := result.LastInsertId()
 	if err != nil {
-		return err
+		return errors.Wrap(err, `failed to fetch last insert ID`)
 	}
 
 	c.OID = lii
@@ -88,26 +68,23 @@ func (c ConferenceAdministrator) Update(tx *sql.Tx) (err error) {
 		if pdebug.Enabled {
 			pdebug.Printf(`Using OID (%d) as key`, c.OID)
 		}
-		stmt, err := library.GetStmt("sqlConferenceAdministratorUpdateByOIDKey")
-		if err != nil {
-			return errors.Wrap(err, `failed to get statement`)
+		const sqltext = `UPDATE conference_administrators SET conference_id = ?, user_id = ?, sort_order = ? WHERE oid = ?`
+		if _, err := Exec(tx, sqltext, c.ConferenceID, c.UserID, c.SortOrder, c.OID); err != nil {
+			return errors.Wrap(err, `failed to execute statement`)
 		}
-		_, err = tx.Stmt(stmt).Exec(c.ConferenceID, c.UserID, c.SortOrder, c.OID)
-		return err
+		return nil
 	}
 	return errors.New("OID must be filled")
 }
 
 func (c ConferenceAdministrator) Delete(tx *sql.Tx) error {
 	if c.OID != 0 {
-		stmt, err := library.GetStmt("sqlConferenceAdministratorDeleteByOIDKey")
-		if err != nil {
-			return errors.Wrap(err, `failed to get statement`)
+		const sqltext = `DELETE FROM conference_administrators WHERE oid = ?`
+		if _, err := Exec(tx, sqltext, c.OID); err != nil {
+			return errors.Wrap(err, `failed to execute statement`)
 		}
-		_, err = tx.Stmt(stmt).Exec(c.OID)
-		return err
+		return nil
 	}
-
 	return errors.New("column OID must be filled")
 }
 

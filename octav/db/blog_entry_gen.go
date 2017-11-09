@@ -8,7 +8,6 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/builderscon/octav/octav/tools"
 	"github.com/lestrrat/go-pdebug"
 	"github.com/pkg/errors"
 )
@@ -24,57 +23,16 @@ func (b *BlogEntry) Scan(scanner interface {
 	return scanner.Scan(&b.OID, &b.EID, &b.ConferenceID, &b.Title, &b.URL, &b.URLHash, &b.Status, &b.CreatedOn, &b.ModifiedOn)
 }
 
-func init() {
-	hooks = append(hooks, func() {
-		stmt := tools.GetBuffer()
-		defer tools.ReleaseBuffer(stmt)
-
-		stmt.Reset()
-		stmt.WriteString(`DELETE FROM `)
-		stmt.WriteString(BlogEntryTable)
-		stmt.WriteString(` WHERE oid = ?`)
-		library.Register("sqlBlogEntryDeleteByOIDKey", stmt.String())
-
-		stmt.Reset()
-		stmt.WriteString(`UPDATE `)
-		stmt.WriteString(BlogEntryTable)
-		stmt.WriteString(` SET eid = ?, conference_id = ?, title = ?, url = ?, url_hash = ?, status = ? WHERE oid = ?`)
-		library.Register("sqlBlogEntryUpdateByOIDKey", stmt.String())
-
-		stmt.Reset()
-		stmt.WriteString(`SELECT `)
-		stmt.WriteString(BlogEntryStdSelectColumns)
-		stmt.WriteString(` FROM `)
-		stmt.WriteString(BlogEntryTable)
-		stmt.WriteString(` WHERE `)
-		stmt.WriteString(BlogEntryTable)
-		stmt.WriteString(`.eid = ?`)
-		library.Register("sqlBlogEntryLoadByEIDKey", stmt.String())
-
-		stmt.Reset()
-		stmt.WriteString(`DELETE FROM `)
-		stmt.WriteString(BlogEntryTable)
-		stmt.WriteString(` WHERE eid = ?`)
-		library.Register("sqlBlogEntryDeleteByEIDKey", stmt.String())
-
-		stmt.Reset()
-		stmt.WriteString(`UPDATE `)
-		stmt.WriteString(BlogEntryTable)
-		stmt.WriteString(` SET eid = ?, conference_id = ?, title = ?, url = ?, url_hash = ?, status = ? WHERE eid = ?`)
-		library.Register("sqlBlogEntryUpdateByEIDKey", stmt.String())
-	})
-}
-
 func (b *BlogEntry) LoadByEID(tx *sql.Tx, eid string) (err error) {
 	if pdebug.Enabled {
 		g := pdebug.Marker(`BlogEntry.LoadByEID %s`, eid).BindError(&err)
 		defer g.End()
 	}
-	stmt, err := library.GetStmt("sqlBlogEntryLoadByEIDKey")
+	const sqltext = `SELECT blog_entries.oid, blog_entries.eid, blog_entries.conference_id, blog_entries.title, blog_entries.url, blog_entries.url_hash, blog_entries.status, blog_entries.created_on, blog_entries.modified_on FROM blog_entries WHERE blog_entries.eid = ?`
+	row, err := QueryRow(tx, sqltext, eid)
 	if err != nil {
-		return errors.Wrap(err, `failed to get statement`)
+		return errors.Wrap(err, `failed to query row`)
 	}
-	row := tx.Stmt(stmt).QueryRow(eid)
 	if err := b.Scan(row); err != nil {
 		return err
 	}
@@ -108,14 +66,14 @@ func (b *BlogEntry) Create(tx *sql.Tx, opts ...InsertOption) (err error) {
 	stmt.WriteString("INTO ")
 	stmt.WriteString(BlogEntryTable)
 	stmt.WriteString(` (eid, conference_id, title, url, url_hash, status, created_on, modified_on) VALUES (?, ?, ?, ?, ?, ?, ?, ?)`)
-	result, err := tx.Exec(stmt.String(), b.EID, b.ConferenceID, b.Title, b.URL, b.URLHash, b.Status, b.CreatedOn, b.ModifiedOn)
+	result, err := Exec(tx, stmt.String(), b.EID, b.ConferenceID, b.Title, b.URL, b.URLHash, b.Status, b.CreatedOn, b.ModifiedOn)
 	if err != nil {
-		return err
+		return errors.Wrap(err, `failed to execute statement`)
 	}
 
 	lii, err := result.LastInsertId()
 	if err != nil {
-		return err
+		return errors.Wrap(err, `failed to fetch last insert ID`)
 	}
 
 	b.OID = lii
@@ -131,46 +89,42 @@ func (b BlogEntry) Update(tx *sql.Tx) (err error) {
 		if pdebug.Enabled {
 			pdebug.Printf(`Using OID (%d) as key`, b.OID)
 		}
-		stmt, err := library.GetStmt("sqlBlogEntryUpdateByOIDKey")
-		if err != nil {
-			return errors.Wrap(err, `failed to get statement`)
+		const sqltext = `UPDATE blog_entries SET eid = ?, conference_id = ?, title = ?, url = ?, url_hash = ?, status = ? WHERE oid = ?`
+		if _, err := Exec(tx, sqltext, b.EID, b.ConferenceID, b.Title, b.URL, b.URLHash, b.Status, b.OID); err != nil {
+			return errors.Wrap(err, `failed to execute statement`)
 		}
-		_, err = tx.Stmt(stmt).Exec(b.EID, b.ConferenceID, b.Title, b.URL, b.URLHash, b.Status, b.OID)
-		return err
+		return nil
 	}
+
 	if b.EID != "" {
 		if pdebug.Enabled {
 			pdebug.Printf(`Using EID (%s) as key`, b.EID)
 		}
-		stmt, err := library.GetStmt("sqlBlogEntryUpdateByEIDKey")
-		if err != nil {
-			return errors.Wrap(err, `failed to get statement`)
+		const sqltext = `UPDATE blog_entries SET eid = ?, conference_id = ?, title = ?, url = ?, url_hash = ?, status = ? WHERE eid = ?`
+		if _, err := Exec(tx, sqltext, b.EID, b.ConferenceID, b.Title, b.URL, b.URLHash, b.Status, b.EID); err != nil {
+			return errors.Wrap(err, `failed to execute statement`)
 		}
-		_, err = tx.Stmt(stmt).Exec(b.EID, b.ConferenceID, b.Title, b.URL, b.URLHash, b.Status, b.EID)
-		return err
+		return nil
 	}
 	return errors.New("either OID/EID must be filled")
 }
 
 func (b BlogEntry) Delete(tx *sql.Tx) error {
 	if b.OID != 0 {
-		stmt, err := library.GetStmt("sqlBlogEntryDeleteByOIDKey")
-		if err != nil {
-			return errors.Wrap(err, `failed to get statement`)
+		const sqltext = `DELETE FROM blog_entries WHERE oid = ?`
+		if _, err := Exec(tx, sqltext, b.OID); err != nil {
+			return errors.Wrap(err, `failed to execute statement`)
 		}
-		_, err = tx.Stmt(stmt).Exec(b.OID)
-		return err
+		return nil
 	}
 
 	if b.EID != "" {
-		stmt, err := library.GetStmt("sqlBlogEntryDeleteByEIDKey")
-		if err != nil {
+		const sqltext = `DELETE FROM blog_entries WHERE eid = ?`
+		if _, err := Exec(tx, sqltext, b.EID); err != nil {
 			return errors.Wrap(err, `failed to get statement`)
 		}
-		_, err = tx.Stmt(stmt).Exec(b.EID)
-		return err
+		return nil
 	}
-
 	return errors.New("either OID/EID must be filled")
 }
 
@@ -207,10 +161,11 @@ func (v *BlogEntryList) LoadSinceEID(tx *sql.Tx, since string, limit int) error 
 }
 
 func (v *BlogEntryList) LoadSince(tx *sql.Tx, since int64, limit int) error {
-	rows, err := tx.Query(`SELECT `+BlogEntryStdSelectColumns+` FROM `+BlogEntryTable+` WHERE blog_entries.oid > ? ORDER BY oid ASC LIMIT `+strconv.Itoa(limit), since)
+	rows, err := Query(tx, `SELECT `+BlogEntryStdSelectColumns+` FROM `+BlogEntryTable+` WHERE blog_entries.oid > ? ORDER BY oid ASC LIMIT `+strconv.Itoa(limit), since)
 	if err != nil {
 		return err
 	}
+	defer rows.Close()
 
 	if err := v.FromRows(rows, limit); err != nil {
 		return err

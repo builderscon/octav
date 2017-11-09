@@ -8,7 +8,6 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/builderscon/octav/octav/tools"
 	"github.com/lestrrat/go-pdebug"
 	"github.com/pkg/errors"
 )
@@ -24,57 +23,16 @@ func (c *Conference) Scan(scanner interface {
 	return scanner.Scan(&c.OID, &c.EID, &c.CoverURL, &c.RedirectURL, &c.SeriesID, &c.Slug, &c.Status, &c.SubTitle, &c.Title, &c.BlogFeedbackAvailable, &c.TimetableAvailable, &c.Timezone, &c.CreatedBy, &c.CreatedOn, &c.ModifiedOn)
 }
 
-func init() {
-	hooks = append(hooks, func() {
-		stmt := tools.GetBuffer()
-		defer tools.ReleaseBuffer(stmt)
-
-		stmt.Reset()
-		stmt.WriteString(`DELETE FROM `)
-		stmt.WriteString(ConferenceTable)
-		stmt.WriteString(` WHERE oid = ?`)
-		library.Register("sqlConferenceDeleteByOIDKey", stmt.String())
-
-		stmt.Reset()
-		stmt.WriteString(`UPDATE `)
-		stmt.WriteString(ConferenceTable)
-		stmt.WriteString(` SET eid = ?, cover_url = ?, redirect_url = ?, series_id = ?, slug = ?, status = ?, sub_title = ?, title = ?, blog_feedback_available = ?, timetable_available = ?, timezone = ?, created_by = ? WHERE oid = ?`)
-		library.Register("sqlConferenceUpdateByOIDKey", stmt.String())
-
-		stmt.Reset()
-		stmt.WriteString(`SELECT `)
-		stmt.WriteString(ConferenceStdSelectColumns)
-		stmt.WriteString(` FROM `)
-		stmt.WriteString(ConferenceTable)
-		stmt.WriteString(` WHERE `)
-		stmt.WriteString(ConferenceTable)
-		stmt.WriteString(`.eid = ?`)
-		library.Register("sqlConferenceLoadByEIDKey", stmt.String())
-
-		stmt.Reset()
-		stmt.WriteString(`DELETE FROM `)
-		stmt.WriteString(ConferenceTable)
-		stmt.WriteString(` WHERE eid = ?`)
-		library.Register("sqlConferenceDeleteByEIDKey", stmt.String())
-
-		stmt.Reset()
-		stmt.WriteString(`UPDATE `)
-		stmt.WriteString(ConferenceTable)
-		stmt.WriteString(` SET eid = ?, cover_url = ?, redirect_url = ?, series_id = ?, slug = ?, status = ?, sub_title = ?, title = ?, blog_feedback_available = ?, timetable_available = ?, timezone = ?, created_by = ? WHERE eid = ?`)
-		library.Register("sqlConferenceUpdateByEIDKey", stmt.String())
-	})
-}
-
 func (c *Conference) LoadByEID(tx *sql.Tx, eid string) (err error) {
 	if pdebug.Enabled {
 		g := pdebug.Marker(`Conference.LoadByEID %s`, eid).BindError(&err)
 		defer g.End()
 	}
-	stmt, err := library.GetStmt("sqlConferenceLoadByEIDKey")
+	const sqltext = `SELECT conferences.oid, conferences.eid, conferences.cover_url, conferences.redirect_url, conferences.series_id, conferences.slug, conferences.status, conferences.sub_title, conferences.title, conferences.blog_feedback_available, conferences.timetable_available, conferences.timezone, conferences.created_by, conferences.created_on, conferences.modified_on FROM conferences WHERE conferences.eid = ?`
+	row, err := QueryRow(tx, sqltext, eid)
 	if err != nil {
-		return errors.Wrap(err, `failed to get statement`)
+		return errors.Wrap(err, `failed to query row`)
 	}
-	row := tx.Stmt(stmt).QueryRow(eid)
 	if err := c.Scan(row); err != nil {
 		return err
 	}
@@ -108,14 +66,14 @@ func (c *Conference) Create(tx *sql.Tx, opts ...InsertOption) (err error) {
 	stmt.WriteString("INTO ")
 	stmt.WriteString(ConferenceTable)
 	stmt.WriteString(` (eid, cover_url, redirect_url, series_id, slug, status, sub_title, title, blog_feedback_available, timetable_available, timezone, created_by, created_on, modified_on) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`)
-	result, err := tx.Exec(stmt.String(), c.EID, c.CoverURL, c.RedirectURL, c.SeriesID, c.Slug, c.Status, c.SubTitle, c.Title, c.BlogFeedbackAvailable, c.TimetableAvailable, c.Timezone, c.CreatedBy, c.CreatedOn, c.ModifiedOn)
+	result, err := Exec(tx, stmt.String(), c.EID, c.CoverURL, c.RedirectURL, c.SeriesID, c.Slug, c.Status, c.SubTitle, c.Title, c.BlogFeedbackAvailable, c.TimetableAvailable, c.Timezone, c.CreatedBy, c.CreatedOn, c.ModifiedOn)
 	if err != nil {
-		return err
+		return errors.Wrap(err, `failed to execute statement`)
 	}
 
 	lii, err := result.LastInsertId()
 	if err != nil {
-		return err
+		return errors.Wrap(err, `failed to fetch last insert ID`)
 	}
 
 	c.OID = lii
@@ -131,46 +89,42 @@ func (c Conference) Update(tx *sql.Tx) (err error) {
 		if pdebug.Enabled {
 			pdebug.Printf(`Using OID (%d) as key`, c.OID)
 		}
-		stmt, err := library.GetStmt("sqlConferenceUpdateByOIDKey")
-		if err != nil {
-			return errors.Wrap(err, `failed to get statement`)
+		const sqltext = `UPDATE conferences SET eid = ?, cover_url = ?, redirect_url = ?, series_id = ?, slug = ?, status = ?, sub_title = ?, title = ?, blog_feedback_available = ?, timetable_available = ?, timezone = ?, created_by = ? WHERE oid = ?`
+		if _, err := Exec(tx, sqltext, c.EID, c.CoverURL, c.RedirectURL, c.SeriesID, c.Slug, c.Status, c.SubTitle, c.Title, c.BlogFeedbackAvailable, c.TimetableAvailable, c.Timezone, c.CreatedBy, c.OID); err != nil {
+			return errors.Wrap(err, `failed to execute statement`)
 		}
-		_, err = tx.Stmt(stmt).Exec(c.EID, c.CoverURL, c.RedirectURL, c.SeriesID, c.Slug, c.Status, c.SubTitle, c.Title, c.BlogFeedbackAvailable, c.TimetableAvailable, c.Timezone, c.CreatedBy, c.OID)
-		return err
+		return nil
 	}
+
 	if c.EID != "" {
 		if pdebug.Enabled {
 			pdebug.Printf(`Using EID (%s) as key`, c.EID)
 		}
-		stmt, err := library.GetStmt("sqlConferenceUpdateByEIDKey")
-		if err != nil {
-			return errors.Wrap(err, `failed to get statement`)
+		const sqltext = `UPDATE conferences SET eid = ?, cover_url = ?, redirect_url = ?, series_id = ?, slug = ?, status = ?, sub_title = ?, title = ?, blog_feedback_available = ?, timetable_available = ?, timezone = ?, created_by = ? WHERE eid = ?`
+		if _, err := Exec(tx, sqltext, c.EID, c.CoverURL, c.RedirectURL, c.SeriesID, c.Slug, c.Status, c.SubTitle, c.Title, c.BlogFeedbackAvailable, c.TimetableAvailable, c.Timezone, c.CreatedBy, c.EID); err != nil {
+			return errors.Wrap(err, `failed to execute statement`)
 		}
-		_, err = tx.Stmt(stmt).Exec(c.EID, c.CoverURL, c.RedirectURL, c.SeriesID, c.Slug, c.Status, c.SubTitle, c.Title, c.BlogFeedbackAvailable, c.TimetableAvailable, c.Timezone, c.CreatedBy, c.EID)
-		return err
+		return nil
 	}
 	return errors.New("either OID/EID must be filled")
 }
 
 func (c Conference) Delete(tx *sql.Tx) error {
 	if c.OID != 0 {
-		stmt, err := library.GetStmt("sqlConferenceDeleteByOIDKey")
-		if err != nil {
-			return errors.Wrap(err, `failed to get statement`)
+		const sqltext = `DELETE FROM conferences WHERE oid = ?`
+		if _, err := Exec(tx, sqltext, c.OID); err != nil {
+			return errors.Wrap(err, `failed to execute statement`)
 		}
-		_, err = tx.Stmt(stmt).Exec(c.OID)
-		return err
+		return nil
 	}
 
 	if c.EID != "" {
-		stmt, err := library.GetStmt("sqlConferenceDeleteByEIDKey")
-		if err != nil {
+		const sqltext = `DELETE FROM conferences WHERE eid = ?`
+		if _, err := Exec(tx, sqltext, c.EID); err != nil {
 			return errors.Wrap(err, `failed to get statement`)
 		}
-		_, err = tx.Stmt(stmt).Exec(c.EID)
-		return err
+		return nil
 	}
-
 	return errors.New("either OID/EID must be filled")
 }
 
@@ -207,10 +161,11 @@ func (v *ConferenceList) LoadSinceEID(tx *sql.Tx, since string, limit int) error
 }
 
 func (v *ConferenceList) LoadSince(tx *sql.Tx, since int64, limit int) error {
-	rows, err := tx.Query(`SELECT `+ConferenceStdSelectColumns+` FROM `+ConferenceTable+` WHERE conferences.oid > ? ORDER BY oid ASC LIMIT `+strconv.Itoa(limit), since)
+	rows, err := Query(tx, `SELECT `+ConferenceStdSelectColumns+` FROM `+ConferenceTable+` WHERE conferences.oid > ? ORDER BY oid ASC LIMIT `+strconv.Itoa(limit), since)
 	if err != nil {
 		return err
 	}
+	defer rows.Close()
 
 	if err := v.FromRows(rows, limit); err != nil {
 		return err

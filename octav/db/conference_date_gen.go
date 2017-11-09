@@ -7,7 +7,6 @@ import (
 	"database/sql"
 	"strconv"
 
-	"github.com/builderscon/octav/octav/tools"
 	"github.com/lestrrat/go-pdebug"
 	"github.com/pkg/errors"
 )
@@ -23,57 +22,16 @@ func (c *ConferenceDate) Scan(scanner interface {
 	return scanner.Scan(&c.OID, &c.EID, &c.ConferenceID, &c.Open, &c.Close)
 }
 
-func init() {
-	hooks = append(hooks, func() {
-		stmt := tools.GetBuffer()
-		defer tools.ReleaseBuffer(stmt)
-
-		stmt.Reset()
-		stmt.WriteString(`DELETE FROM `)
-		stmt.WriteString(ConferenceDateTable)
-		stmt.WriteString(` WHERE oid = ?`)
-		library.Register("sqlConferenceDateDeleteByOIDKey", stmt.String())
-
-		stmt.Reset()
-		stmt.WriteString(`UPDATE `)
-		stmt.WriteString(ConferenceDateTable)
-		stmt.WriteString(` SET eid = ?, conference_id = ?, open = ?, close = ? WHERE oid = ?`)
-		library.Register("sqlConferenceDateUpdateByOIDKey", stmt.String())
-
-		stmt.Reset()
-		stmt.WriteString(`SELECT `)
-		stmt.WriteString(ConferenceDateStdSelectColumns)
-		stmt.WriteString(` FROM `)
-		stmt.WriteString(ConferenceDateTable)
-		stmt.WriteString(` WHERE `)
-		stmt.WriteString(ConferenceDateTable)
-		stmt.WriteString(`.eid = ?`)
-		library.Register("sqlConferenceDateLoadByEIDKey", stmt.String())
-
-		stmt.Reset()
-		stmt.WriteString(`DELETE FROM `)
-		stmt.WriteString(ConferenceDateTable)
-		stmt.WriteString(` WHERE eid = ?`)
-		library.Register("sqlConferenceDateDeleteByEIDKey", stmt.String())
-
-		stmt.Reset()
-		stmt.WriteString(`UPDATE `)
-		stmt.WriteString(ConferenceDateTable)
-		stmt.WriteString(` SET eid = ?, conference_id = ?, open = ?, close = ? WHERE eid = ?`)
-		library.Register("sqlConferenceDateUpdateByEIDKey", stmt.String())
-	})
-}
-
 func (c *ConferenceDate) LoadByEID(tx *sql.Tx, eid string) (err error) {
 	if pdebug.Enabled {
 		g := pdebug.Marker(`ConferenceDate.LoadByEID %s`, eid).BindError(&err)
 		defer g.End()
 	}
-	stmt, err := library.GetStmt("sqlConferenceDateLoadByEIDKey")
+	const sqltext = `SELECT conference_dates.oid, conference_dates.eid, conference_dates.conference_id, conference_dates.open, conference_dates.close FROM conference_dates WHERE conference_dates.eid = ?`
+	row, err := QueryRow(tx, sqltext, eid)
 	if err != nil {
-		return errors.Wrap(err, `failed to get statement`)
+		return errors.Wrap(err, `failed to query row`)
 	}
-	row := tx.Stmt(stmt).QueryRow(eid)
 	if err := c.Scan(row); err != nil {
 		return err
 	}
@@ -106,14 +64,14 @@ func (c *ConferenceDate) Create(tx *sql.Tx, opts ...InsertOption) (err error) {
 	stmt.WriteString("INTO ")
 	stmt.WriteString(ConferenceDateTable)
 	stmt.WriteString(` (eid, conference_id, open, close) VALUES (?, ?, ?, ?)`)
-	result, err := tx.Exec(stmt.String(), c.EID, c.ConferenceID, c.Open, c.Close)
+	result, err := Exec(tx, stmt.String(), c.EID, c.ConferenceID, c.Open, c.Close)
 	if err != nil {
-		return err
+		return errors.Wrap(err, `failed to execute statement`)
 	}
 
 	lii, err := result.LastInsertId()
 	if err != nil {
-		return err
+		return errors.Wrap(err, `failed to fetch last insert ID`)
 	}
 
 	c.OID = lii
@@ -129,46 +87,42 @@ func (c ConferenceDate) Update(tx *sql.Tx) (err error) {
 		if pdebug.Enabled {
 			pdebug.Printf(`Using OID (%d) as key`, c.OID)
 		}
-		stmt, err := library.GetStmt("sqlConferenceDateUpdateByOIDKey")
-		if err != nil {
-			return errors.Wrap(err, `failed to get statement`)
+		const sqltext = `UPDATE conference_dates SET eid = ?, conference_id = ?, open = ?, close = ? WHERE oid = ?`
+		if _, err := Exec(tx, sqltext, c.EID, c.ConferenceID, c.Open, c.Close, c.OID); err != nil {
+			return errors.Wrap(err, `failed to execute statement`)
 		}
-		_, err = tx.Stmt(stmt).Exec(c.EID, c.ConferenceID, c.Open, c.Close, c.OID)
-		return err
+		return nil
 	}
+
 	if c.EID != "" {
 		if pdebug.Enabled {
 			pdebug.Printf(`Using EID (%s) as key`, c.EID)
 		}
-		stmt, err := library.GetStmt("sqlConferenceDateUpdateByEIDKey")
-		if err != nil {
-			return errors.Wrap(err, `failed to get statement`)
+		const sqltext = `UPDATE conference_dates SET eid = ?, conference_id = ?, open = ?, close = ? WHERE eid = ?`
+		if _, err := Exec(tx, sqltext, c.EID, c.ConferenceID, c.Open, c.Close, c.EID); err != nil {
+			return errors.Wrap(err, `failed to execute statement`)
 		}
-		_, err = tx.Stmt(stmt).Exec(c.EID, c.ConferenceID, c.Open, c.Close, c.EID)
-		return err
+		return nil
 	}
 	return errors.New("either OID/EID must be filled")
 }
 
 func (c ConferenceDate) Delete(tx *sql.Tx) error {
 	if c.OID != 0 {
-		stmt, err := library.GetStmt("sqlConferenceDateDeleteByOIDKey")
-		if err != nil {
-			return errors.Wrap(err, `failed to get statement`)
+		const sqltext = `DELETE FROM conference_dates WHERE oid = ?`
+		if _, err := Exec(tx, sqltext, c.OID); err != nil {
+			return errors.Wrap(err, `failed to execute statement`)
 		}
-		_, err = tx.Stmt(stmt).Exec(c.OID)
-		return err
+		return nil
 	}
 
 	if c.EID != "" {
-		stmt, err := library.GetStmt("sqlConferenceDateDeleteByEIDKey")
-		if err != nil {
+		const sqltext = `DELETE FROM conference_dates WHERE eid = ?`
+		if _, err := Exec(tx, sqltext, c.EID); err != nil {
 			return errors.Wrap(err, `failed to get statement`)
 		}
-		_, err = tx.Stmt(stmt).Exec(c.EID)
-		return err
+		return nil
 	}
-
 	return errors.New("either OID/EID must be filled")
 }
 
@@ -205,10 +159,11 @@ func (v *ConferenceDateList) LoadSinceEID(tx *sql.Tx, since string, limit int) e
 }
 
 func (v *ConferenceDateList) LoadSince(tx *sql.Tx, since int64, limit int) error {
-	rows, err := tx.Query(`SELECT `+ConferenceDateStdSelectColumns+` FROM `+ConferenceDateTable+` WHERE conference_dates.oid > ? ORDER BY oid ASC LIMIT `+strconv.Itoa(limit), since)
+	rows, err := Query(tx, `SELECT `+ConferenceDateStdSelectColumns+` FROM `+ConferenceDateTable+` WHERE conference_dates.oid > ? ORDER BY oid ASC LIMIT `+strconv.Itoa(limit), since)
 	if err != nil {
 		return err
 	}
+	defer rows.Close()
 
 	if err := v.FromRows(rows, limit); err != nil {
 		return err

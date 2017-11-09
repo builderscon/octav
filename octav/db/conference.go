@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/builderscon/octav/octav/tools"
+	pdebug "github.com/lestrrat/go-pdebug"
 	"github.com/pkg/errors"
 )
 
@@ -47,7 +48,12 @@ func compileRangeWhere(dst io.Writer, args *[]interface{}, since int64, rangeSta
 	return nil
 }
 
-func (v *ConferenceList) LoadFromQuery(tx *sql.Tx, status, organizerID []string, rangeStart, rangeEnd time.Time, since string, limit int) error {
+func (v *ConferenceList) LoadFromQuery(tx *sql.Tx, status, organizerID []string, rangeStart, rangeEnd time.Time, since string, limit int) (err error) {
+	if pdebug.Enabled {
+		g := pdebug.Marker("db.ConferenceList.LoadFromQuery").BindError(&err)
+		defer g.End()
+	}
+
 	// We need the oid of "since"
 	var sinceOID int64
 	if since != "" {
@@ -195,11 +201,12 @@ func (v *ConferenceList) LoadByRange(tx *sql.Tx, since string, rangeStart, range
 	return v.execSQLAndExtract(tx, qbuf.String(), limit, args...)
 }
 
-func (v *ConferenceList) execSQLAndExtract(tx *sql.Tx, sql string, limit int, args ...interface{}) error {
-	rows, err := tx.Query(sql, args...)
+func (v *ConferenceList) execSQLAndExtract(tx *sql.Tx, sqltext string, limit int, args ...interface{}) error {
+	rows, err := Query(tx, sqltext, args...)
 	if err != nil {
-		return err
+		return errors.Wrap(err, `failed to execute statement`)
 	}
+	defer rows.Close()
 
 	res := make(ConferenceList, 0, limit)
 	for rows.Next() {
@@ -210,6 +217,10 @@ func (v *ConferenceList) execSQLAndExtract(tx *sql.Tx, sql string, limit int, ar
 		res = append(res, row)
 	}
 	*v = res
+
+	if pdebug.Enabled {
+		pdebug.Printf("loaded %d conferences", len(*v))
+	}
 	return nil
 }
 
@@ -250,13 +261,15 @@ func ListConferencesByOrganizer(tx *sql.Tx, l *ConferenceList, orgID string, sta
 		// Unimplemented
 	}
 
-	rows, err := tx.Query(stmt.String(), orgID)
+	rows, err := Query(tx, stmt.String(), orgID)
 	if err != nil {
 		return errors.Wrap(err, "failed to execute query")
 	}
+	defer rows.Close()
+
 	res := make(ConferenceList, 0, limit)
 	for rows.Next() {
-		row := Conference{}
+		var row Conference
 		if err := row.Scan(rows); err != nil {
 			return err
 		}

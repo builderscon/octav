@@ -8,7 +8,6 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/builderscon/octav/octav/tools"
 	"github.com/lestrrat/go-pdebug"
 	"github.com/pkg/errors"
 )
@@ -24,57 +23,16 @@ func (s *Sponsor) Scan(scanner interface {
 	return scanner.Scan(&s.OID, &s.EID, &s.ConferenceID, &s.Name, &s.LogoURL, &s.URL, &s.GroupName, &s.SortOrder, &s.CreatedOn, &s.ModifiedOn)
 }
 
-func init() {
-	hooks = append(hooks, func() {
-		stmt := tools.GetBuffer()
-		defer tools.ReleaseBuffer(stmt)
-
-		stmt.Reset()
-		stmt.WriteString(`DELETE FROM `)
-		stmt.WriteString(SponsorTable)
-		stmt.WriteString(` WHERE oid = ?`)
-		library.Register("sqlSponsorDeleteByOIDKey", stmt.String())
-
-		stmt.Reset()
-		stmt.WriteString(`UPDATE `)
-		stmt.WriteString(SponsorTable)
-		stmt.WriteString(` SET eid = ?, conference_id = ?, name = ?, logo_url = ?, url = ?, group_name = ?, sort_order = ? WHERE oid = ?`)
-		library.Register("sqlSponsorUpdateByOIDKey", stmt.String())
-
-		stmt.Reset()
-		stmt.WriteString(`SELECT `)
-		stmt.WriteString(SponsorStdSelectColumns)
-		stmt.WriteString(` FROM `)
-		stmt.WriteString(SponsorTable)
-		stmt.WriteString(` WHERE `)
-		stmt.WriteString(SponsorTable)
-		stmt.WriteString(`.eid = ?`)
-		library.Register("sqlSponsorLoadByEIDKey", stmt.String())
-
-		stmt.Reset()
-		stmt.WriteString(`DELETE FROM `)
-		stmt.WriteString(SponsorTable)
-		stmt.WriteString(` WHERE eid = ?`)
-		library.Register("sqlSponsorDeleteByEIDKey", stmt.String())
-
-		stmt.Reset()
-		stmt.WriteString(`UPDATE `)
-		stmt.WriteString(SponsorTable)
-		stmt.WriteString(` SET eid = ?, conference_id = ?, name = ?, logo_url = ?, url = ?, group_name = ?, sort_order = ? WHERE eid = ?`)
-		library.Register("sqlSponsorUpdateByEIDKey", stmt.String())
-	})
-}
-
 func (s *Sponsor) LoadByEID(tx *sql.Tx, eid string) (err error) {
 	if pdebug.Enabled {
 		g := pdebug.Marker(`Sponsor.LoadByEID %s`, eid).BindError(&err)
 		defer g.End()
 	}
-	stmt, err := library.GetStmt("sqlSponsorLoadByEIDKey")
+	const sqltext = `SELECT sponsors.oid, sponsors.eid, sponsors.conference_id, sponsors.name, sponsors.logo_url, sponsors.url, sponsors.group_name, sponsors.sort_order, sponsors.created_on, sponsors.modified_on FROM sponsors WHERE sponsors.eid = ?`
+	row, err := QueryRow(tx, sqltext, eid)
 	if err != nil {
-		return errors.Wrap(err, `failed to get statement`)
+		return errors.Wrap(err, `failed to query row`)
 	}
-	row := tx.Stmt(stmt).QueryRow(eid)
 	if err := s.Scan(row); err != nil {
 		return err
 	}
@@ -108,14 +66,14 @@ func (s *Sponsor) Create(tx *sql.Tx, opts ...InsertOption) (err error) {
 	stmt.WriteString("INTO ")
 	stmt.WriteString(SponsorTable)
 	stmt.WriteString(` (eid, conference_id, name, logo_url, url, group_name, sort_order, created_on, modified_on) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`)
-	result, err := tx.Exec(stmt.String(), s.EID, s.ConferenceID, s.Name, s.LogoURL, s.URL, s.GroupName, s.SortOrder, s.CreatedOn, s.ModifiedOn)
+	result, err := Exec(tx, stmt.String(), s.EID, s.ConferenceID, s.Name, s.LogoURL, s.URL, s.GroupName, s.SortOrder, s.CreatedOn, s.ModifiedOn)
 	if err != nil {
-		return err
+		return errors.Wrap(err, `failed to execute statement`)
 	}
 
 	lii, err := result.LastInsertId()
 	if err != nil {
-		return err
+		return errors.Wrap(err, `failed to fetch last insert ID`)
 	}
 
 	s.OID = lii
@@ -131,46 +89,42 @@ func (s Sponsor) Update(tx *sql.Tx) (err error) {
 		if pdebug.Enabled {
 			pdebug.Printf(`Using OID (%d) as key`, s.OID)
 		}
-		stmt, err := library.GetStmt("sqlSponsorUpdateByOIDKey")
-		if err != nil {
-			return errors.Wrap(err, `failed to get statement`)
+		const sqltext = `UPDATE sponsors SET eid = ?, conference_id = ?, name = ?, logo_url = ?, url = ?, group_name = ?, sort_order = ? WHERE oid = ?`
+		if _, err := Exec(tx, sqltext, s.EID, s.ConferenceID, s.Name, s.LogoURL, s.URL, s.GroupName, s.SortOrder, s.OID); err != nil {
+			return errors.Wrap(err, `failed to execute statement`)
 		}
-		_, err = tx.Stmt(stmt).Exec(s.EID, s.ConferenceID, s.Name, s.LogoURL, s.URL, s.GroupName, s.SortOrder, s.OID)
-		return err
+		return nil
 	}
+
 	if s.EID != "" {
 		if pdebug.Enabled {
 			pdebug.Printf(`Using EID (%s) as key`, s.EID)
 		}
-		stmt, err := library.GetStmt("sqlSponsorUpdateByEIDKey")
-		if err != nil {
-			return errors.Wrap(err, `failed to get statement`)
+		const sqltext = `UPDATE sponsors SET eid = ?, conference_id = ?, name = ?, logo_url = ?, url = ?, group_name = ?, sort_order = ? WHERE eid = ?`
+		if _, err := Exec(tx, sqltext, s.EID, s.ConferenceID, s.Name, s.LogoURL, s.URL, s.GroupName, s.SortOrder, s.EID); err != nil {
+			return errors.Wrap(err, `failed to execute statement`)
 		}
-		_, err = tx.Stmt(stmt).Exec(s.EID, s.ConferenceID, s.Name, s.LogoURL, s.URL, s.GroupName, s.SortOrder, s.EID)
-		return err
+		return nil
 	}
 	return errors.New("either OID/EID must be filled")
 }
 
 func (s Sponsor) Delete(tx *sql.Tx) error {
 	if s.OID != 0 {
-		stmt, err := library.GetStmt("sqlSponsorDeleteByOIDKey")
-		if err != nil {
-			return errors.Wrap(err, `failed to get statement`)
+		const sqltext = `DELETE FROM sponsors WHERE oid = ?`
+		if _, err := Exec(tx, sqltext, s.OID); err != nil {
+			return errors.Wrap(err, `failed to execute statement`)
 		}
-		_, err = tx.Stmt(stmt).Exec(s.OID)
-		return err
+		return nil
 	}
 
 	if s.EID != "" {
-		stmt, err := library.GetStmt("sqlSponsorDeleteByEIDKey")
-		if err != nil {
+		const sqltext = `DELETE FROM sponsors WHERE eid = ?`
+		if _, err := Exec(tx, sqltext, s.EID); err != nil {
 			return errors.Wrap(err, `failed to get statement`)
 		}
-		_, err = tx.Stmt(stmt).Exec(s.EID)
-		return err
+		return nil
 	}
-
 	return errors.New("either OID/EID must be filled")
 }
 
@@ -207,10 +161,11 @@ func (v *SponsorList) LoadSinceEID(tx *sql.Tx, since string, limit int) error {
 }
 
 func (v *SponsorList) LoadSince(tx *sql.Tx, since int64, limit int) error {
-	rows, err := tx.Query(`SELECT `+SponsorStdSelectColumns+` FROM `+SponsorTable+` WHERE sponsors.oid > ? ORDER BY oid ASC LIMIT `+strconv.Itoa(limit), since)
+	rows, err := Query(tx, `SELECT `+SponsorStdSelectColumns+` FROM `+SponsorTable+` WHERE sponsors.oid > ? ORDER BY oid ASC LIMIT `+strconv.Itoa(limit), since)
 	if err != nil {
 		return err
 	}
+	defer rows.Close()
 
 	if err := v.FromRows(rows, limit); err != nil {
 		return err

@@ -4,61 +4,62 @@ import (
 	"database/sql"
 
 	"github.com/builderscon/octav/octav/tools"
+	pdebug "github.com/lestrrat/go-pdebug"
 	"github.com/pkg/errors"
 )
 
-const (
-	sqlConferenceStaffLoadKey   = "sqlConferenceStaffLoad"
-	sqlConferenceStaffDeleteKey = "sqlConferenceStaffDelete"
+var (
+	sqlConferenceStaffLoad   string
+	sqlConferenceStaffDelete string
 )
 
 func init() {
-	hooks = append(hooks, func() {
-		stmt := tools.GetBuffer()
-		defer tools.ReleaseBuffer(stmt)
+	stmt := tools.GetBuffer()
+	defer tools.ReleaseBuffer(stmt)
 
-		stmt.Reset()
-		stmt.WriteString(`SELECT `)
-		stmt.WriteString(UserStdSelectColumns)
-		stmt.WriteString(` FROM `)
-		stmt.WriteString(ConferenceStaffTable)
-		stmt.WriteString(` JOIN `)
-		stmt.WriteString(UserTable)
-		stmt.WriteString(` ON `)
-		stmt.WriteString(ConferenceStaffTable)
-		stmt.WriteString(`.user_id = `)
-		stmt.WriteString(UserTable)
-		stmt.WriteString(`.eid WHERE `)
-		stmt.WriteString(ConferenceStaffTable)
-		stmt.WriteString(`.conference_id = ? ORDER BY sort_order ASC`)
-		library.Register(sqlConferenceStaffLoadKey, stmt.String())
+	stmt.Reset()
+	stmt.WriteString(`SELECT `)
+	stmt.WriteString(UserStdSelectColumns)
+	stmt.WriteString(` FROM `)
+	stmt.WriteString(ConferenceStaffTable)
+	stmt.WriteString(` JOIN `)
+	stmt.WriteString(UserTable)
+	stmt.WriteString(` ON `)
+	stmt.WriteString(ConferenceStaffTable)
+	stmt.WriteString(`.user_id = `)
+	stmt.WriteString(UserTable)
+	stmt.WriteString(`.eid WHERE `)
+	stmt.WriteString(ConferenceStaffTable)
+	stmt.WriteString(`.conference_id = ? ORDER BY sort_order ASC`)
+	sqlConferenceStaffLoad = stmt.String()
 
-		stmt.Reset()
-		stmt.WriteString(`DELETE FROM `)
-		stmt.WriteString(ConferenceStaffTable)
-		stmt.WriteString(` WHERE conference_id = ? AND user_id = ?`)
-		library.Register(sqlConferenceStaffDeleteKey, stmt.String())
-	})
+	stmt.Reset()
+	stmt.WriteString(`DELETE FROM `)
+	stmt.WriteString(ConferenceStaffTable)
+	stmt.WriteString(` WHERE conference_id = ? AND user_id = ?`)
+	sqlConferenceStaffDelete = stmt.String()
 }
 
-func DeleteConferenceStaff(tx *sql.Tx, cid, uid string) error {
-	stmt, err := library.GetStmt(sqlConferenceStaffDeleteKey)
-	if err != nil {
-		return errors.Wrap(err, `failed to get statement`)
+func DeleteConferenceStaff(tx *sql.Tx, cid, uid string) (err error) {
+	if pdebug.Enabled {
+		g := pdebug.Marker("db.DeleteConferenceStaff conference %s, user %s", cid, uid).BindError(&err)
+		defer g.End()
 	}
-	_, err = tx.Stmt(stmt).Exec(cid, uid)
+
+	_, err = Exec(tx, sqlConferenceStaffDelete, cid, uid)
 	return errors.Wrap(err, `failed to execute statements`)
 }
 
-func LoadConferenceStaff(tx *sql.Tx, admins *UserList, cid string) error {
-	stmt, err := library.GetStmt(sqlConferenceStaffLoadKey)
-	if err != nil {
-		return errors.Wrap(err, `failed to get statement`)
+func LoadConferenceStaff(tx *sql.Tx, admins *UserList, cid string) (err error) {
+	if pdebug.Enabled {
+		g := pdebug.Marker("db.LoadConferenceStaff conference %s", cid).BindError(&err)
+		defer g.End()
 	}
-	rows, err := tx.Stmt(stmt).Query(cid)
+	rows, err := Query(tx, sqlConferenceStaffLoad, cid)
 	if err != nil {
 		return errors.Wrap(err, `failed to execute statement`)
 	}
+	defer rows.Close()
 
 	var res UserList
 	for rows.Next() {

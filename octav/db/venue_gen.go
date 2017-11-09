@@ -8,7 +8,6 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/builderscon/octav/octav/tools"
 	"github.com/lestrrat/go-pdebug"
 	"github.com/pkg/errors"
 )
@@ -24,57 +23,16 @@ func (v *Venue) Scan(scanner interface {
 	return scanner.Scan(&v.OID, &v.EID, &v.Name, &v.Address, &v.PlaceID, &v.URL, &v.Latitude, &v.Longitude, &v.CreatedOn, &v.ModifiedOn)
 }
 
-func init() {
-	hooks = append(hooks, func() {
-		stmt := tools.GetBuffer()
-		defer tools.ReleaseBuffer(stmt)
-
-		stmt.Reset()
-		stmt.WriteString(`DELETE FROM `)
-		stmt.WriteString(VenueTable)
-		stmt.WriteString(` WHERE oid = ?`)
-		library.Register("sqlVenueDeleteByOIDKey", stmt.String())
-
-		stmt.Reset()
-		stmt.WriteString(`UPDATE `)
-		stmt.WriteString(VenueTable)
-		stmt.WriteString(` SET eid = ?, name = ?, address = ?, place_id = ?, url = ?, latitude = ?, longitude = ? WHERE oid = ?`)
-		library.Register("sqlVenueUpdateByOIDKey", stmt.String())
-
-		stmt.Reset()
-		stmt.WriteString(`SELECT `)
-		stmt.WriteString(VenueStdSelectColumns)
-		stmt.WriteString(` FROM `)
-		stmt.WriteString(VenueTable)
-		stmt.WriteString(` WHERE `)
-		stmt.WriteString(VenueTable)
-		stmt.WriteString(`.eid = ?`)
-		library.Register("sqlVenueLoadByEIDKey", stmt.String())
-
-		stmt.Reset()
-		stmt.WriteString(`DELETE FROM `)
-		stmt.WriteString(VenueTable)
-		stmt.WriteString(` WHERE eid = ?`)
-		library.Register("sqlVenueDeleteByEIDKey", stmt.String())
-
-		stmt.Reset()
-		stmt.WriteString(`UPDATE `)
-		stmt.WriteString(VenueTable)
-		stmt.WriteString(` SET eid = ?, name = ?, address = ?, place_id = ?, url = ?, latitude = ?, longitude = ? WHERE eid = ?`)
-		library.Register("sqlVenueUpdateByEIDKey", stmt.String())
-	})
-}
-
 func (v *Venue) LoadByEID(tx *sql.Tx, eid string) (err error) {
 	if pdebug.Enabled {
 		g := pdebug.Marker(`Venue.LoadByEID %s`, eid).BindError(&err)
 		defer g.End()
 	}
-	stmt, err := library.GetStmt("sqlVenueLoadByEIDKey")
+	const sqltext = `SELECT venues.oid, venues.eid, venues.name, venues.address, venues.place_id, venues.url, venues.latitude, venues.longitude, venues.created_on, venues.modified_on FROM venues WHERE venues.eid = ?`
+	row, err := QueryRow(tx, sqltext, eid)
 	if err != nil {
-		return errors.Wrap(err, `failed to get statement`)
+		return errors.Wrap(err, `failed to query row`)
 	}
-	row := tx.Stmt(stmt).QueryRow(eid)
 	if err := v.Scan(row); err != nil {
 		return err
 	}
@@ -108,14 +66,14 @@ func (v *Venue) Create(tx *sql.Tx, opts ...InsertOption) (err error) {
 	stmt.WriteString("INTO ")
 	stmt.WriteString(VenueTable)
 	stmt.WriteString(` (eid, name, address, place_id, url, latitude, longitude, created_on, modified_on) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`)
-	result, err := tx.Exec(stmt.String(), v.EID, v.Name, v.Address, v.PlaceID, v.URL, v.Latitude, v.Longitude, v.CreatedOn, v.ModifiedOn)
+	result, err := Exec(tx, stmt.String(), v.EID, v.Name, v.Address, v.PlaceID, v.URL, v.Latitude, v.Longitude, v.CreatedOn, v.ModifiedOn)
 	if err != nil {
-		return err
+		return errors.Wrap(err, `failed to execute statement`)
 	}
 
 	lii, err := result.LastInsertId()
 	if err != nil {
-		return err
+		return errors.Wrap(err, `failed to fetch last insert ID`)
 	}
 
 	v.OID = lii
@@ -131,46 +89,42 @@ func (v Venue) Update(tx *sql.Tx) (err error) {
 		if pdebug.Enabled {
 			pdebug.Printf(`Using OID (%d) as key`, v.OID)
 		}
-		stmt, err := library.GetStmt("sqlVenueUpdateByOIDKey")
-		if err != nil {
-			return errors.Wrap(err, `failed to get statement`)
+		const sqltext = `UPDATE venues SET eid = ?, name = ?, address = ?, place_id = ?, url = ?, latitude = ?, longitude = ? WHERE oid = ?`
+		if _, err := Exec(tx, sqltext, v.EID, v.Name, v.Address, v.PlaceID, v.URL, v.Latitude, v.Longitude, v.OID); err != nil {
+			return errors.Wrap(err, `failed to execute statement`)
 		}
-		_, err = tx.Stmt(stmt).Exec(v.EID, v.Name, v.Address, v.PlaceID, v.URL, v.Latitude, v.Longitude, v.OID)
-		return err
+		return nil
 	}
+
 	if v.EID != "" {
 		if pdebug.Enabled {
 			pdebug.Printf(`Using EID (%s) as key`, v.EID)
 		}
-		stmt, err := library.GetStmt("sqlVenueUpdateByEIDKey")
-		if err != nil {
-			return errors.Wrap(err, `failed to get statement`)
+		const sqltext = `UPDATE venues SET eid = ?, name = ?, address = ?, place_id = ?, url = ?, latitude = ?, longitude = ? WHERE eid = ?`
+		if _, err := Exec(tx, sqltext, v.EID, v.Name, v.Address, v.PlaceID, v.URL, v.Latitude, v.Longitude, v.EID); err != nil {
+			return errors.Wrap(err, `failed to execute statement`)
 		}
-		_, err = tx.Stmt(stmt).Exec(v.EID, v.Name, v.Address, v.PlaceID, v.URL, v.Latitude, v.Longitude, v.EID)
-		return err
+		return nil
 	}
 	return errors.New("either OID/EID must be filled")
 }
 
 func (v Venue) Delete(tx *sql.Tx) error {
 	if v.OID != 0 {
-		stmt, err := library.GetStmt("sqlVenueDeleteByOIDKey")
-		if err != nil {
-			return errors.Wrap(err, `failed to get statement`)
+		const sqltext = `DELETE FROM venues WHERE oid = ?`
+		if _, err := Exec(tx, sqltext, v.OID); err != nil {
+			return errors.Wrap(err, `failed to execute statement`)
 		}
-		_, err = tx.Stmt(stmt).Exec(v.OID)
-		return err
+		return nil
 	}
 
 	if v.EID != "" {
-		stmt, err := library.GetStmt("sqlVenueDeleteByEIDKey")
-		if err != nil {
+		const sqltext = `DELETE FROM venues WHERE eid = ?`
+		if _, err := Exec(tx, sqltext, v.EID); err != nil {
 			return errors.Wrap(err, `failed to get statement`)
 		}
-		_, err = tx.Stmt(stmt).Exec(v.EID)
-		return err
+		return nil
 	}
-
 	return errors.New("either OID/EID must be filled")
 }
 
@@ -207,10 +161,11 @@ func (v *VenueList) LoadSinceEID(tx *sql.Tx, since string, limit int) error {
 }
 
 func (v *VenueList) LoadSince(tx *sql.Tx, since int64, limit int) error {
-	rows, err := tx.Query(`SELECT `+VenueStdSelectColumns+` FROM `+VenueTable+` WHERE venues.oid > ? ORDER BY oid ASC LIMIT `+strconv.Itoa(limit), since)
+	rows, err := Query(tx, `SELECT `+VenueStdSelectColumns+` FROM `+VenueTable+` WHERE venues.oid > ? ORDER BY oid ASC LIMIT `+strconv.Itoa(limit), since)
 	if err != nil {
 		return err
 	}
+	defer rows.Close()
 
 	if err := v.FromRows(rows, limit); err != nil {
 		return err

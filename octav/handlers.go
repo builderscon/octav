@@ -475,8 +475,8 @@ func doAddConferenceDate(ctx context.Context, w http.ResponseWriter, r *http.Req
 	}
 
 	var v model.ConferenceDate
-	s := service.ConferenceDate()
-	if err := s.CreateFromPayload(ctx, tx, payload, &v); err != nil {
+	s := service.Conference()
+	if err := s.AddDatesFromPayload(ctx, tx, payload, &v); err != nil {
 		httpError(w, `AddConferenceDates`, http.StatusInternalServerError, err)
 		return
 	}

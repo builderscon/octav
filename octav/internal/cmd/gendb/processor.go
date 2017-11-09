@@ -55,7 +55,6 @@ func snakeCase(s string) string {
 	return string(ret)
 }
 
-
 type Processor struct {
 	Types []string
 	Dir   string
@@ -191,9 +190,6 @@ func (p *Processor) ProcessStruct(s Struct) error {
 	}
 	buf.WriteString("\n\n" + `"github.com/lestrrat/go-pdebug"`)
 	buf.WriteString("\n" + `"github.com/pkg/errors"`)
-	if hasEID || hasOID {
-		buf.WriteString("\n" + `"github.com/builderscon/octav/octav/tools"`)
-	}
 	buf.WriteString("\n)")
 
 	for i, f := range updateFields {
@@ -252,61 +248,17 @@ func (p *Processor) ProcessStruct(s Struct) error {
 	fmt.Fprintf(&buf, "\nreturn scanner.Scan(%s)", sfields.String())
 	buf.WriteString("\n}\n")
 
-	buf.WriteString("\nfunc init() {")
-	buf.WriteString("\nhooks = append(hooks, func() {")
-	buf.WriteString("\nstmt := tools.GetBuffer()")
-	buf.WriteString("\ndefer tools.ReleaseBuffer(stmt)")
-
-	if hasOID {
-		buf.WriteString("\n\nstmt.Reset()")
-		buf.WriteString("\nstmt.WriteString(`DELETE FROM `)")
-		fmt.Fprintf(&buf, "\nstmt.WriteString(%sTable)", s.Name)
-		buf.WriteString("\nstmt.WriteString(` WHERE oid = ?`)")
-		fmt.Fprintf(&buf, "\nlibrary.Register(%s, stmt.String())", strconv.Quote(s.sqlKeyName("DeleteByOID")))
-
-		buf.WriteString("\n\nstmt.Reset()")
-		buf.WriteString("\nstmt.WriteString(`UPDATE `)")
-		fmt.Fprintf(&buf, "\nstmt.WriteString(%sTable)", s.Name)
-		fmt.Fprintf(&buf, "\nstmt.WriteString(` SET %s WHERE oid = ?`)", setCols.String())
-		fmt.Fprintf(&buf, "\nlibrary.Register(%s, stmt.String())", strconv.Quote(s.sqlKeyName("UpdateByOID")))
-	}
-
-	if hasEID {
-		buf.WriteString("\n\nstmt.Reset()")
-		buf.WriteString("\nstmt.WriteString(`SELECT `)")
-		fmt.Fprintf(&buf, "\nstmt.WriteString(%sStdSelectColumns)", s.Name)
-		buf.WriteString("\nstmt.WriteString(` FROM `)")
-		fmt.Fprintf(&buf, "\nstmt.WriteString(%sTable)", s.Name)
-		buf.WriteString("\nstmt.WriteString(` WHERE `)")
-		fmt.Fprintf(&buf, "\nstmt.WriteString(%sTable)", s.Name)
-		buf.WriteString("\nstmt.WriteString(`.eid = ?`)")
-		fmt.Fprintf(&buf, "\nlibrary.Register(%s, stmt.String())", strconv.Quote(s.sqlKeyName("LoadByEID")))
-
-		buf.WriteString("\n\nstmt.Reset()")
-		buf.WriteString("\nstmt.WriteString(`DELETE FROM `)")
-		fmt.Fprintf(&buf, "\nstmt.WriteString(%sTable)", s.Name)
-		buf.WriteString("\nstmt.WriteString(` WHERE eid = ?`)")
-		fmt.Fprintf(&buf, "\nlibrary.Register(%s, stmt.String())", strconv.Quote(s.sqlKeyName("DeleteByEID")))
-
-		buf.WriteString("\n\nstmt.Reset()")
-		buf.WriteString("\nstmt.WriteString(`UPDATE `)")
-		fmt.Fprintf(&buf, "\nstmt.WriteString(%sTable)", s.Name)
-		fmt.Fprintf(&buf, "\nstmt.WriteString(` SET %s WHERE eid = ?`)", setCols.String())
-		fmt.Fprintf(&buf, "\nlibrary.Register(%s, stmt.String())", strconv.Quote(s.sqlKeyName("UpdateByEID")))
-	}
-
-	buf.WriteString("\n})")
-	buf.WriteString("\n}")
-
 	if hasEID {
 		fmt.Fprintf(&buf, "\n\nfunc (%c *%s) LoadByEID(tx *sql.Tx, eid string) (err error) {", varname, s.Name)
 		buf.WriteString("\nif pdebug.Enabled {")
 		fmt.Fprintf(&buf, "\ng := pdebug.Marker(`%s.LoadByEID %%s`, eid).BindError(&err)", s.Name)
 		buf.WriteString("\ndefer g.End()")
 		buf.WriteString("\n}")
-		fmt.Fprintf(&buf, "\nstmt, err := library.GetStmt(%s)", strconv.Quote(s.sqlKeyName("LoadByEID")))
-		buf.WriteString("\nif err != nil {\nreturn errors.Wrap(err, `failed to get statement`)\n}")
-		buf.WriteString("\nrow := tx.Stmt(stmt).QueryRow(eid)")
+		fmt.Fprintf(&buf, "\nconst sqltext = `SELECT %s FROM %s WHERE %s.eid = ?`", scols.String(), s.Tablename, s.Tablename)
+		fmt.Fprintf(&buf, "\nrow, err := QueryRow(tx, sqltext, eid)")
+		fmt.Fprintf(&buf, "\nif err != nil {")
+		buf.WriteString("\nreturn errors.Wrap(err, `failed to query row`)")
+		buf.WriteString("\n}")
 		fmt.Fprintf(&buf, "\nif err := %c.Scan(row); err != nil {", varname)
 		buf.WriteString("\nreturn err")
 		buf.WriteString("\n}")
@@ -345,13 +297,13 @@ func (p *Processor) ProcessStruct(s Struct) error {
 	fmt.Fprintf(&buf, "\nstmt.WriteString(%sTable)", s.Name)
 	fmt.Fprintf(&buf, "\nstmt.WriteString(` (%s) VALUES (%s)`)", icols.String(), ipholders.String())
 
-	fmt.Fprintf(&buf, "\nresult, err := tx.Exec(stmt.String(), %s)", ifields.String())
+	fmt.Fprintf(&buf, "\nresult, err := Exec(tx, stmt.String(), %s)", ifields.String())
 	buf.WriteString("\nif err != nil {")
-	buf.WriteString("\nreturn err")
+	buf.WriteString("\nreturn errors.Wrap(err, `failed to execute statement`)")
 	buf.WriteString("\n}\n")
 	buf.WriteString("\nlii, err := result.LastInsertId()")
 	buf.WriteString("\nif err != nil {")
-	buf.WriteString("\nreturn err")
+	buf.WriteString("\nreturn errors.Wrap(err, `failed to fetch last insert ID`)")
 	buf.WriteString("\n}\n")
 	fmt.Fprintf(&buf, "\n%c.OID = lii", varname)
 	buf.WriteString("\nreturn nil")
@@ -364,24 +316,26 @@ func (p *Processor) ProcessStruct(s Struct) error {
 	buf.WriteString("\ndefer g.End()")
 	buf.WriteString("\n}")
 	fmt.Fprintf(&buf, "\nif %c.OID != 0 {", varname)
-	buf.WriteString("\nif pdebug.Enabled {")
+	fmt.Fprintf(&buf, "\nif pdebug.Enabled {")
 	fmt.Fprintf(&buf, "\npdebug.Printf(`Using OID (%%d) as key`, %c.OID)", varname)
-	buf.WriteString("\n}")
-	fmt.Fprintf(&buf, "\nstmt, err := library.GetStmt(%s)", strconv.Quote(s.sqlKeyName("UpdateByOID")))
-	buf.WriteString("\nif err != nil {\nreturn errors.Wrap(err, `failed to get statement`)\n}")
-	fmt.Fprintf(&buf, "\n_, err = tx.Stmt(stmt).Exec(%s, %c.OID)", setParams.String(), varname)
-	buf.WriteString("\nreturn err")
-	buf.WriteString("\n}")
+	fmt.Fprintf(&buf, "\n}")
+	fmt.Fprintf(&buf, "\nconst sqltext = `UPDATE %s SET %s WHERE oid = ?`", s.Tablename, setCols.String())
+	fmt.Fprintf(&buf, "\nif _, err := Exec(tx, sqltext, %s, %c.OID); err != nil {", setParams.String(), varname)
+	fmt.Fprintf(&buf, "\nreturn errors.Wrap(err, `failed to execute statement`)")
+	fmt.Fprintf(&buf, "\n}")
+	fmt.Fprintf(&buf, "\nreturn nil")
+	fmt.Fprintf(&buf, "\n}")
 	if hasEID {
-		fmt.Fprintf(&buf, "\n"+`if %c.EID != "" {`, varname)
-	buf.WriteString("\nif pdebug.Enabled {")
-	fmt.Fprintf(&buf, "\npdebug.Printf(`Using EID (%%s) as key`, %c.EID)", varname)
-	buf.WriteString("\n}")
-		fmt.Fprintf(&buf, "\nstmt, err := library.GetStmt(%s)", strconv.Quote(s.sqlKeyName("UpdateByEID")))
-		buf.WriteString("\nif err != nil {\nreturn errors.Wrap(err, `failed to get statement`)\n}")
-		fmt.Fprintf(&buf, "\n_, err = tx.Stmt(stmt).Exec(%s, %c.EID)", setParams.String(), varname)
-		buf.WriteString("\nreturn err")
-		buf.WriteString("\n}")
+		fmt.Fprintf(&buf, "\n\nif %c.EID != %s {", varname, `""`)
+		fmt.Fprintf(&buf, "\nif pdebug.Enabled {")
+		fmt.Fprintf(&buf, "\npdebug.Printf(`Using EID (%%s) as key`, %c.EID)", varname)
+		fmt.Fprintf(&buf, "\n}")
+		fmt.Fprintf(&buf, "\nconst sqltext = `UPDATE %s SET %s WHERE eid = ?`", s.Tablename, setCols.String())
+		fmt.Fprintf(&buf, "\nif _, err := Exec(tx, sqltext, %s, %c.EID); err != nil {", setParams.String(), varname)
+		fmt.Fprintf(&buf, "\nreturn errors.Wrap(err, `failed to execute statement`)")
+		fmt.Fprintf(&buf, "\n}")
+		fmt.Fprintf(&buf, "\nreturn nil")
+		fmt.Fprintf(&buf, "\n}")
 	}
 
 	if hasEID {
@@ -393,18 +347,20 @@ func (p *Processor) ProcessStruct(s Struct) error {
 
 	fmt.Fprintf(&buf, "\n\nfunc (%c %s) Delete(tx *sql.Tx) error {", varname, s.Name)
 	fmt.Fprintf(&buf, "\nif %c.OID != 0 {", varname)
-	fmt.Fprintf(&buf, "\nstmt, err := library.GetStmt(%s)", strconv.Quote(s.sqlKeyName("DeleteByOID")))
-	buf.WriteString("\nif err != nil {\nreturn errors.Wrap(err, `failed to get statement`)\n}")
-	fmt.Fprintf(&buf, "\n_, err = tx.Stmt(stmt).Exec(%c.OID)", varname)
-	buf.WriteString("\nreturn err")
-	buf.WriteString("\n}\n")
+	fmt.Fprintf(&buf, "\nconst sqltext = `DELETE FROM %s WHERE oid = ?`", s.Tablename)
+	fmt.Fprintf(&buf, "\nif _, err := Exec(tx, sqltext, %c.OID); err != nil {", varname)
+	fmt.Fprintf(&buf, "\nreturn errors.Wrap(err, `failed to execute statement`)")
+	fmt.Fprintf(&buf, "\n}")
+	fmt.Fprintf(&buf, "\nreturn nil")
+	fmt.Fprintf(&buf, "\n}")
 	if hasEID {
-		fmt.Fprintf(&buf, "\nif %c.EID != %s {", varname, `""`)
-		fmt.Fprintf(&buf, "\nstmt, err := library.GetStmt(%s)", strconv.Quote(s.sqlKeyName("DeleteByEID")))
-		buf.WriteString("\nif err != nil {\nreturn errors.Wrap(err, `failed to get statement`)\n}")
-		fmt.Fprintf(&buf, "\n_, err = tx.Stmt(stmt).Exec(%c.EID)", varname)
-		buf.WriteString("\nreturn err")
-		buf.WriteString("\n}\n")
+		fmt.Fprintf(&buf, "\n\nif %c.EID != %s {", varname, `""`)
+		fmt.Fprintf(&buf, "\nconst sqltext = `DELETE FROM %s WHERE eid = ?`", s.Tablename)
+		fmt.Fprintf(&buf, "\nif _, err := Exec(tx, sqltext, %c.EID); err != nil {", varname)
+		fmt.Fprintf(&buf, "\nreturn errors.Wrap(err, `failed to get statement`)")
+		fmt.Fprintf(&buf, "\n}") // if _, err := ...
+		fmt.Fprintf(&buf, "\nreturn nil")
+		fmt.Fprintf(&buf, "\n}") // if %c.EID != ...
 	}
 
 	if hasEID {
@@ -447,10 +403,11 @@ func (p *Processor) ProcessStruct(s Struct) error {
 		buf.WriteString("\n}\n")
 
 		fmt.Fprintf(&buf, "\n\nfunc (v *%sList) LoadSince(tx *sql.Tx, since int64, limit int) error {", s.Name)
-		fmt.Fprintf(&buf, "\nrows, err := tx.Query(`SELECT ` + %sStdSelectColumns + ` FROM ` + %sTable + ` WHERE %s.oid > ? ORDER BY oid ASC LIMIT ` + strconv.Itoa(limit), since)", s.Name, s.Name, s.Tablename)
+		fmt.Fprintf(&buf, "\nrows, err := Query(tx, `SELECT ` + %sStdSelectColumns + ` FROM ` + %sTable + ` WHERE %s.oid > ? ORDER BY oid ASC LIMIT ` + strconv.Itoa(limit), since)", s.Name, s.Name, s.Tablename)
 		buf.WriteString("\nif err != nil {")
 		buf.WriteString("\nreturn err")
 		buf.WriteString("\n}")
+		buf.WriteString("\ndefer rows.Close()")
 		buf.WriteString("\n\nif err := v.FromRows(rows, limit); err != nil {")
 		buf.WriteString("\nreturn err")
 		buf.WriteString("\n}")

@@ -52,7 +52,7 @@ func (v *BlogEntryList) LoadByConference(tx *sql.Tx, confID string, status []str
 
 	where.WriteTo(stmt)
 
-	rows, err := tx.Query(stmt.String(), args...)
+	rows, err := Query(tx, stmt.String(), args...)
 	if err != nil {
 		return err
 	}

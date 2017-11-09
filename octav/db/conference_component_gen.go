@@ -8,7 +8,6 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/builderscon/octav/octav/tools"
 	"github.com/lestrrat/go-pdebug"
 	"github.com/pkg/errors"
 )
@@ -24,57 +23,16 @@ func (c *ConferenceComponent) Scan(scanner interface {
 	return scanner.Scan(&c.OID, &c.EID, &c.ConferenceID, &c.Name, &c.Value, &c.CreatedOn, &c.ModifiedOn)
 }
 
-func init() {
-	hooks = append(hooks, func() {
-		stmt := tools.GetBuffer()
-		defer tools.ReleaseBuffer(stmt)
-
-		stmt.Reset()
-		stmt.WriteString(`DELETE FROM `)
-		stmt.WriteString(ConferenceComponentTable)
-		stmt.WriteString(` WHERE oid = ?`)
-		library.Register("sqlConferenceComponentDeleteByOIDKey", stmt.String())
-
-		stmt.Reset()
-		stmt.WriteString(`UPDATE `)
-		stmt.WriteString(ConferenceComponentTable)
-		stmt.WriteString(` SET eid = ?, conference_id = ?, name = ?, value = ? WHERE oid = ?`)
-		library.Register("sqlConferenceComponentUpdateByOIDKey", stmt.String())
-
-		stmt.Reset()
-		stmt.WriteString(`SELECT `)
-		stmt.WriteString(ConferenceComponentStdSelectColumns)
-		stmt.WriteString(` FROM `)
-		stmt.WriteString(ConferenceComponentTable)
-		stmt.WriteString(` WHERE `)
-		stmt.WriteString(ConferenceComponentTable)
-		stmt.WriteString(`.eid = ?`)
-		library.Register("sqlConferenceComponentLoadByEIDKey", stmt.String())
-
-		stmt.Reset()
-		stmt.WriteString(`DELETE FROM `)
-		stmt.WriteString(ConferenceComponentTable)
-		stmt.WriteString(` WHERE eid = ?`)
-		library.Register("sqlConferenceComponentDeleteByEIDKey", stmt.String())
-
-		stmt.Reset()
-		stmt.WriteString(`UPDATE `)
-		stmt.WriteString(ConferenceComponentTable)
-		stmt.WriteString(` SET eid = ?, conference_id = ?, name = ?, value = ? WHERE eid = ?`)
-		library.Register("sqlConferenceComponentUpdateByEIDKey", stmt.String())
-	})
-}
-
 func (c *ConferenceComponent) LoadByEID(tx *sql.Tx, eid string) (err error) {
 	if pdebug.Enabled {
 		g := pdebug.Marker(`ConferenceComponent.LoadByEID %s`, eid).BindError(&err)
 		defer g.End()
 	}
-	stmt, err := library.GetStmt("sqlConferenceComponentLoadByEIDKey")
+	const sqltext = `SELECT conference_components.oid, conference_components.eid, conference_components.conference_id, conference_components.name, conference_components.value, conference_components.created_on, conference_components.modified_on FROM conference_components WHERE conference_components.eid = ?`
+	row, err := QueryRow(tx, sqltext, eid)
 	if err != nil {
-		return errors.Wrap(err, `failed to get statement`)
+		return errors.Wrap(err, `failed to query row`)
 	}
-	row := tx.Stmt(stmt).QueryRow(eid)
 	if err := c.Scan(row); err != nil {
 		return err
 	}
@@ -108,14 +66,14 @@ func (c *ConferenceComponent) Create(tx *sql.Tx, opts ...InsertOption) (err erro
 	stmt.WriteString("INTO ")
 	stmt.WriteString(ConferenceComponentTable)
 	stmt.WriteString(` (eid, conference_id, name, value, created_on, modified_on) VALUES (?, ?, ?, ?, ?, ?)`)
-	result, err := tx.Exec(stmt.String(), c.EID, c.ConferenceID, c.Name, c.Value, c.CreatedOn, c.ModifiedOn)
+	result, err := Exec(tx, stmt.String(), c.EID, c.ConferenceID, c.Name, c.Value, c.CreatedOn, c.ModifiedOn)
 	if err != nil {
-		return err
+		return errors.Wrap(err, `failed to execute statement`)
 	}
 
 	lii, err := result.LastInsertId()
 	if err != nil {
-		return err
+		return errors.Wrap(err, `failed to fetch last insert ID`)
 	}
 
 	c.OID = lii
@@ -131,46 +89,42 @@ func (c ConferenceComponent) Update(tx *sql.Tx) (err error) {
 		if pdebug.Enabled {
 			pdebug.Printf(`Using OID (%d) as key`, c.OID)
 		}
-		stmt, err := library.GetStmt("sqlConferenceComponentUpdateByOIDKey")
-		if err != nil {
-			return errors.Wrap(err, `failed to get statement`)
+		const sqltext = `UPDATE conference_components SET eid = ?, conference_id = ?, name = ?, value = ? WHERE oid = ?`
+		if _, err := Exec(tx, sqltext, c.EID, c.ConferenceID, c.Name, c.Value, c.OID); err != nil {
+			return errors.Wrap(err, `failed to execute statement`)
 		}
-		_, err = tx.Stmt(stmt).Exec(c.EID, c.ConferenceID, c.Name, c.Value, c.OID)
-		return err
+		return nil
 	}
+
 	if c.EID != "" {
 		if pdebug.Enabled {
 			pdebug.Printf(`Using EID (%s) as key`, c.EID)
 		}
-		stmt, err := library.GetStmt("sqlConferenceComponentUpdateByEIDKey")
-		if err != nil {
-			return errors.Wrap(err, `failed to get statement`)
+		const sqltext = `UPDATE conference_components SET eid = ?, conference_id = ?, name = ?, value = ? WHERE eid = ?`
+		if _, err := Exec(tx, sqltext, c.EID, c.ConferenceID, c.Name, c.Value, c.EID); err != nil {
+			return errors.Wrap(err, `failed to execute statement`)
 		}
-		_, err = tx.Stmt(stmt).Exec(c.EID, c.ConferenceID, c.Name, c.Value, c.EID)
-		return err
+		return nil
 	}
 	return errors.New("either OID/EID must be filled")
 }
 
 func (c ConferenceComponent) Delete(tx *sql.Tx) error {
 	if c.OID != 0 {
-		stmt, err := library.GetStmt("sqlConferenceComponentDeleteByOIDKey")
-		if err != nil {
-			return errors.Wrap(err, `failed to get statement`)
+		const sqltext = `DELETE FROM conference_components WHERE oid = ?`
+		if _, err := Exec(tx, sqltext, c.OID); err != nil {
+			return errors.Wrap(err, `failed to execute statement`)
 		}
-		_, err = tx.Stmt(stmt).Exec(c.OID)
-		return err
+		return nil
 	}
 
 	if c.EID != "" {
-		stmt, err := library.GetStmt("sqlConferenceComponentDeleteByEIDKey")
-		if err != nil {
+		const sqltext = `DELETE FROM conference_components WHERE eid = ?`
+		if _, err := Exec(tx, sqltext, c.EID); err != nil {
 			return errors.Wrap(err, `failed to get statement`)
 		}
-		_, err = tx.Stmt(stmt).Exec(c.EID)
-		return err
+		return nil
 	}
-
 	return errors.New("either OID/EID must be filled")
 }
 
@@ -207,10 +161,11 @@ func (v *ConferenceComponentList) LoadSinceEID(tx *sql.Tx, since string, limit i
 }
 
 func (v *ConferenceComponentList) LoadSince(tx *sql.Tx, since int64, limit int) error {
-	rows, err := tx.Query(`SELECT `+ConferenceComponentStdSelectColumns+` FROM `+ConferenceComponentTable+` WHERE conference_components.oid > ? ORDER BY oid ASC LIMIT `+strconv.Itoa(limit), since)
+	rows, err := Query(tx, `SELECT `+ConferenceComponentStdSelectColumns+` FROM `+ConferenceComponentTable+` WHERE conference_components.oid > ? ORDER BY oid ASC LIMIT `+strconv.Itoa(limit), since)
 	if err != nil {
 		return err
 	}
+	defer rows.Close()
 
 	if err := v.FromRows(rows, limit); err != nil {
 		return err

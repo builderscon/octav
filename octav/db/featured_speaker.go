@@ -8,21 +8,23 @@ import (
 	"github.com/pkg/errors"
 )
 
+var (
+	sqlFeaturedSpeakerListLoadByConferenceID string
+)
+
 func init() {
-	hooks = append(hooks, func() {
-		buf := tools.GetBuffer()
-		defer tools.ReleaseBuffer(buf)
+	stmt := tools.GetBuffer()
+	defer tools.ReleaseBuffer(stmt)
 
-		buf.WriteString(`SELECT `)
-		buf.WriteString(FeaturedSpeakerStdSelectColumns)
-		buf.WriteString(` FROM `)
-		buf.WriteString(FeaturedSpeakerTable)
-		buf.WriteString(` WHERE `)
-		buf.WriteString(FeaturedSpeakerTable)
-		buf.WriteString(`.conference_id = ?`)
+	stmt.WriteString(`SELECT `)
+	stmt.WriteString(FeaturedSpeakerStdSelectColumns)
+	stmt.WriteString(` FROM `)
+	stmt.WriteString(FeaturedSpeakerTable)
+	stmt.WriteString(` WHERE `)
+	stmt.WriteString(FeaturedSpeakerTable)
+	stmt.WriteString(`.conference_id = ?`)
 
-		library.Register("sqlFeaturedSpeakerLoadFeaturedSpeakersKey", buf.String())
-	})
+	sqlFeaturedSpeakerListLoadByConferenceID = stmt.String()
 }
 
 func (v *FeaturedSpeakerList) LoadByConferenceSinceEID(tx *sql.Tx, confID, since string, limit int) error {
@@ -39,10 +41,11 @@ func (v *FeaturedSpeakerList) LoadByConferenceSinceEID(tx *sql.Tx, confID, since
 }
 
 func (v *FeaturedSpeakerList) LoadByConferenceSince(tx *sql.Tx, confID string, since int64, limit int) error {
-	rows, err := tx.Query(`SELECT `+FeaturedSpeakerStdSelectColumns+` FROM `+FeaturedSpeakerTable+` WHERE conference_id = ? AND featured_speakers.oid > ? ORDER BY oid ASC LIMIT `+strconv.Itoa(limit), confID, since)
+	rows, err := Query(tx, `SELECT `+FeaturedSpeakerStdSelectColumns+` FROM `+FeaturedSpeakerTable+` WHERE conference_id = ? AND featured_speakers.oid > ? ORDER BY oid ASC LIMIT `+strconv.Itoa(limit), confID, since)
 	if err != nil {
-		return err
+		return errors.Wrap(err, `failed to execute statement`)
 	}
+	defer rows.Close()
 
 	if err := v.FromRows(rows, limit); err != nil {
 		return err
@@ -50,27 +53,23 @@ func (v *FeaturedSpeakerList) LoadByConferenceSince(tx *sql.Tx, confID string, s
 	return nil
 }
 
-func LoadFeaturedSpeakers(tx *sql.Tx, venues *FeaturedSpeakerList, cid string) error {
-	stmt, err := library.GetStmt("sqlFeaturedSpeakerLoadFeaturedSpeakersKey")
+func (v *FeaturedSpeakerList) LoadByConferenceID(tx *sql.Tx, cid string) error {
+	rows, err := Query(tx, sqlFeaturedSpeakerListLoadByConferenceID, cid)
 	if err != nil {
-		return errors.Wrap(err, "failed to get statement")
+		return errors.Wrap(err, `failed to execute statement`)
 	}
-
-	rows, err := tx.Stmt(stmt).Query(cid)
-	if err != nil {
-		return err
-	}
+	defer rows.Close()
 
 	var res FeaturedSpeakerList
 	for rows.Next() {
 		var u FeaturedSpeaker
 		if err := u.Scan(rows); err != nil {
-			return err
+			return errors.Wrap(err, `failed to scan row`)
 		}
 
 		res = append(res, u)
 	}
 
-	*venues = res
+	*v = res
 	return nil
 }

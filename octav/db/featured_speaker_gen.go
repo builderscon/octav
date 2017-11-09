@@ -8,7 +8,6 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/builderscon/octav/octav/tools"
 	"github.com/lestrrat/go-pdebug"
 	"github.com/pkg/errors"
 )
@@ -24,57 +23,16 @@ func (f *FeaturedSpeaker) Scan(scanner interface {
 	return scanner.Scan(&f.OID, &f.EID, &f.ConferenceID, &f.SpeakerID, &f.AvatarURL, &f.DisplayName, &f.Description, &f.CreatedOn, &f.ModifiedOn)
 }
 
-func init() {
-	hooks = append(hooks, func() {
-		stmt := tools.GetBuffer()
-		defer tools.ReleaseBuffer(stmt)
-
-		stmt.Reset()
-		stmt.WriteString(`DELETE FROM `)
-		stmt.WriteString(FeaturedSpeakerTable)
-		stmt.WriteString(` WHERE oid = ?`)
-		library.Register("sqlFeaturedSpeakerDeleteByOIDKey", stmt.String())
-
-		stmt.Reset()
-		stmt.WriteString(`UPDATE `)
-		stmt.WriteString(FeaturedSpeakerTable)
-		stmt.WriteString(` SET eid = ?, conference_id = ?, speaker_id = ?, avatar_url = ?, display_name = ?, description = ? WHERE oid = ?`)
-		library.Register("sqlFeaturedSpeakerUpdateByOIDKey", stmt.String())
-
-		stmt.Reset()
-		stmt.WriteString(`SELECT `)
-		stmt.WriteString(FeaturedSpeakerStdSelectColumns)
-		stmt.WriteString(` FROM `)
-		stmt.WriteString(FeaturedSpeakerTable)
-		stmt.WriteString(` WHERE `)
-		stmt.WriteString(FeaturedSpeakerTable)
-		stmt.WriteString(`.eid = ?`)
-		library.Register("sqlFeaturedSpeakerLoadByEIDKey", stmt.String())
-
-		stmt.Reset()
-		stmt.WriteString(`DELETE FROM `)
-		stmt.WriteString(FeaturedSpeakerTable)
-		stmt.WriteString(` WHERE eid = ?`)
-		library.Register("sqlFeaturedSpeakerDeleteByEIDKey", stmt.String())
-
-		stmt.Reset()
-		stmt.WriteString(`UPDATE `)
-		stmt.WriteString(FeaturedSpeakerTable)
-		stmt.WriteString(` SET eid = ?, conference_id = ?, speaker_id = ?, avatar_url = ?, display_name = ?, description = ? WHERE eid = ?`)
-		library.Register("sqlFeaturedSpeakerUpdateByEIDKey", stmt.String())
-	})
-}
-
 func (f *FeaturedSpeaker) LoadByEID(tx *sql.Tx, eid string) (err error) {
 	if pdebug.Enabled {
 		g := pdebug.Marker(`FeaturedSpeaker.LoadByEID %s`, eid).BindError(&err)
 		defer g.End()
 	}
-	stmt, err := library.GetStmt("sqlFeaturedSpeakerLoadByEIDKey")
+	const sqltext = `SELECT featured_speakers.oid, featured_speakers.eid, featured_speakers.conference_id, featured_speakers.speaker_id, featured_speakers.avatar_url, featured_speakers.display_name, featured_speakers.description, featured_speakers.created_on, featured_speakers.modified_on FROM featured_speakers WHERE featured_speakers.eid = ?`
+	row, err := QueryRow(tx, sqltext, eid)
 	if err != nil {
-		return errors.Wrap(err, `failed to get statement`)
+		return errors.Wrap(err, `failed to query row`)
 	}
-	row := tx.Stmt(stmt).QueryRow(eid)
 	if err := f.Scan(row); err != nil {
 		return err
 	}
@@ -108,14 +66,14 @@ func (f *FeaturedSpeaker) Create(tx *sql.Tx, opts ...InsertOption) (err error) {
 	stmt.WriteString("INTO ")
 	stmt.WriteString(FeaturedSpeakerTable)
 	stmt.WriteString(` (eid, conference_id, speaker_id, avatar_url, display_name, description, created_on, modified_on) VALUES (?, ?, ?, ?, ?, ?, ?, ?)`)
-	result, err := tx.Exec(stmt.String(), f.EID, f.ConferenceID, f.SpeakerID, f.AvatarURL, f.DisplayName, f.Description, f.CreatedOn, f.ModifiedOn)
+	result, err := Exec(tx, stmt.String(), f.EID, f.ConferenceID, f.SpeakerID, f.AvatarURL, f.DisplayName, f.Description, f.CreatedOn, f.ModifiedOn)
 	if err != nil {
-		return err
+		return errors.Wrap(err, `failed to execute statement`)
 	}
 
 	lii, err := result.LastInsertId()
 	if err != nil {
-		return err
+		return errors.Wrap(err, `failed to fetch last insert ID`)
 	}
 
 	f.OID = lii
@@ -131,46 +89,42 @@ func (f FeaturedSpeaker) Update(tx *sql.Tx) (err error) {
 		if pdebug.Enabled {
 			pdebug.Printf(`Using OID (%d) as key`, f.OID)
 		}
-		stmt, err := library.GetStmt("sqlFeaturedSpeakerUpdateByOIDKey")
-		if err != nil {
-			return errors.Wrap(err, `failed to get statement`)
+		const sqltext = `UPDATE featured_speakers SET eid = ?, conference_id = ?, speaker_id = ?, avatar_url = ?, display_name = ?, description = ? WHERE oid = ?`
+		if _, err := Exec(tx, sqltext, f.EID, f.ConferenceID, f.SpeakerID, f.AvatarURL, f.DisplayName, f.Description, f.OID); err != nil {
+			return errors.Wrap(err, `failed to execute statement`)
 		}
-		_, err = tx.Stmt(stmt).Exec(f.EID, f.ConferenceID, f.SpeakerID, f.AvatarURL, f.DisplayName, f.Description, f.OID)
-		return err
+		return nil
 	}
+
 	if f.EID != "" {
 		if pdebug.Enabled {
 			pdebug.Printf(`Using EID (%s) as key`, f.EID)
 		}
-		stmt, err := library.GetStmt("sqlFeaturedSpeakerUpdateByEIDKey")
-		if err != nil {
-			return errors.Wrap(err, `failed to get statement`)
+		const sqltext = `UPDATE featured_speakers SET eid = ?, conference_id = ?, speaker_id = ?, avatar_url = ?, display_name = ?, description = ? WHERE eid = ?`
+		if _, err := Exec(tx, sqltext, f.EID, f.ConferenceID, f.SpeakerID, f.AvatarURL, f.DisplayName, f.Description, f.EID); err != nil {
+			return errors.Wrap(err, `failed to execute statement`)
 		}
-		_, err = tx.Stmt(stmt).Exec(f.EID, f.ConferenceID, f.SpeakerID, f.AvatarURL, f.DisplayName, f.Description, f.EID)
-		return err
+		return nil
 	}
 	return errors.New("either OID/EID must be filled")
 }
 
 func (f FeaturedSpeaker) Delete(tx *sql.Tx) error {
 	if f.OID != 0 {
-		stmt, err := library.GetStmt("sqlFeaturedSpeakerDeleteByOIDKey")
-		if err != nil {
-			return errors.Wrap(err, `failed to get statement`)
+		const sqltext = `DELETE FROM featured_speakers WHERE oid = ?`
+		if _, err := Exec(tx, sqltext, f.OID); err != nil {
+			return errors.Wrap(err, `failed to execute statement`)
 		}
-		_, err = tx.Stmt(stmt).Exec(f.OID)
-		return err
+		return nil
 	}
 
 	if f.EID != "" {
-		stmt, err := library.GetStmt("sqlFeaturedSpeakerDeleteByEIDKey")
-		if err != nil {
+		const sqltext = `DELETE FROM featured_speakers WHERE eid = ?`
+		if _, err := Exec(tx, sqltext, f.EID); err != nil {
 			return errors.Wrap(err, `failed to get statement`)
 		}
-		_, err = tx.Stmt(stmt).Exec(f.EID)
-		return err
+		return nil
 	}
-
 	return errors.New("either OID/EID must be filled")
 }
 
@@ -207,10 +161,11 @@ func (v *FeaturedSpeakerList) LoadSinceEID(tx *sql.Tx, since string, limit int) 
 }
 
 func (v *FeaturedSpeakerList) LoadSince(tx *sql.Tx, since int64, limit int) error {
-	rows, err := tx.Query(`SELECT `+FeaturedSpeakerStdSelectColumns+` FROM `+FeaturedSpeakerTable+` WHERE featured_speakers.oid > ? ORDER BY oid ASC LIMIT `+strconv.Itoa(limit), since)
+	rows, err := Query(tx, `SELECT `+FeaturedSpeakerStdSelectColumns+` FROM `+FeaturedSpeakerTable+` WHERE featured_speakers.oid > ? ORDER BY oid ASC LIMIT `+strconv.Itoa(limit), since)
 	if err != nil {
 		return err
 	}
+	defer rows.Close()
 
 	if err := v.FromRows(rows, limit); err != nil {
 		return err

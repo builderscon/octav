@@ -7,7 +7,6 @@ import (
 	"database/sql"
 	"strconv"
 
-	"github.com/builderscon/octav/octav/tools"
 	"github.com/lestrrat/go-pdebug"
 	"github.com/pkg/errors"
 )
@@ -23,57 +22,16 @@ func (e *ExternalResource) Scan(scanner interface {
 	return scanner.Scan(&e.OID, &e.EID, &e.ConferenceID, &e.Description, &e.ImageURL, &e.Title, &e.URL, &e.SortOrder)
 }
 
-func init() {
-	hooks = append(hooks, func() {
-		stmt := tools.GetBuffer()
-		defer tools.ReleaseBuffer(stmt)
-
-		stmt.Reset()
-		stmt.WriteString(`DELETE FROM `)
-		stmt.WriteString(ExternalResourceTable)
-		stmt.WriteString(` WHERE oid = ?`)
-		library.Register("sqlExternalResourceDeleteByOIDKey", stmt.String())
-
-		stmt.Reset()
-		stmt.WriteString(`UPDATE `)
-		stmt.WriteString(ExternalResourceTable)
-		stmt.WriteString(` SET eid = ?, conference_id = ?, description = ?, image_url = ?, title = ?, url = ?, sort_order = ? WHERE oid = ?`)
-		library.Register("sqlExternalResourceUpdateByOIDKey", stmt.String())
-
-		stmt.Reset()
-		stmt.WriteString(`SELECT `)
-		stmt.WriteString(ExternalResourceStdSelectColumns)
-		stmt.WriteString(` FROM `)
-		stmt.WriteString(ExternalResourceTable)
-		stmt.WriteString(` WHERE `)
-		stmt.WriteString(ExternalResourceTable)
-		stmt.WriteString(`.eid = ?`)
-		library.Register("sqlExternalResourceLoadByEIDKey", stmt.String())
-
-		stmt.Reset()
-		stmt.WriteString(`DELETE FROM `)
-		stmt.WriteString(ExternalResourceTable)
-		stmt.WriteString(` WHERE eid = ?`)
-		library.Register("sqlExternalResourceDeleteByEIDKey", stmt.String())
-
-		stmt.Reset()
-		stmt.WriteString(`UPDATE `)
-		stmt.WriteString(ExternalResourceTable)
-		stmt.WriteString(` SET eid = ?, conference_id = ?, description = ?, image_url = ?, title = ?, url = ?, sort_order = ? WHERE eid = ?`)
-		library.Register("sqlExternalResourceUpdateByEIDKey", stmt.String())
-	})
-}
-
 func (e *ExternalResource) LoadByEID(tx *sql.Tx, eid string) (err error) {
 	if pdebug.Enabled {
 		g := pdebug.Marker(`ExternalResource.LoadByEID %s`, eid).BindError(&err)
 		defer g.End()
 	}
-	stmt, err := library.GetStmt("sqlExternalResourceLoadByEIDKey")
+	const sqltext = `SELECT external_resources.oid, external_resources.eid, external_resources.conference_id, external_resources.description, external_resources.image_url, external_resources.title, external_resources.url, external_resources.sort_order FROM external_resources WHERE external_resources.eid = ?`
+	row, err := QueryRow(tx, sqltext, eid)
 	if err != nil {
-		return errors.Wrap(err, `failed to get statement`)
+		return errors.Wrap(err, `failed to query row`)
 	}
-	row := tx.Stmt(stmt).QueryRow(eid)
 	if err := e.Scan(row); err != nil {
 		return err
 	}
@@ -106,14 +64,14 @@ func (e *ExternalResource) Create(tx *sql.Tx, opts ...InsertOption) (err error) 
 	stmt.WriteString("INTO ")
 	stmt.WriteString(ExternalResourceTable)
 	stmt.WriteString(` (eid, conference_id, description, image_url, title, url, sort_order) VALUES (?, ?, ?, ?, ?, ?, ?)`)
-	result, err := tx.Exec(stmt.String(), e.EID, e.ConferenceID, e.Description, e.ImageURL, e.Title, e.URL, e.SortOrder)
+	result, err := Exec(tx, stmt.String(), e.EID, e.ConferenceID, e.Description, e.ImageURL, e.Title, e.URL, e.SortOrder)
 	if err != nil {
-		return err
+		return errors.Wrap(err, `failed to execute statement`)
 	}
 
 	lii, err := result.LastInsertId()
 	if err != nil {
-		return err
+		return errors.Wrap(err, `failed to fetch last insert ID`)
 	}
 
 	e.OID = lii
@@ -129,46 +87,42 @@ func (e ExternalResource) Update(tx *sql.Tx) (err error) {
 		if pdebug.Enabled {
 			pdebug.Printf(`Using OID (%d) as key`, e.OID)
 		}
-		stmt, err := library.GetStmt("sqlExternalResourceUpdateByOIDKey")
-		if err != nil {
-			return errors.Wrap(err, `failed to get statement`)
+		const sqltext = `UPDATE external_resources SET eid = ?, conference_id = ?, description = ?, image_url = ?, title = ?, url = ?, sort_order = ? WHERE oid = ?`
+		if _, err := Exec(tx, sqltext, e.EID, e.ConferenceID, e.Description, e.ImageURL, e.Title, e.URL, e.SortOrder, e.OID); err != nil {
+			return errors.Wrap(err, `failed to execute statement`)
 		}
-		_, err = tx.Stmt(stmt).Exec(e.EID, e.ConferenceID, e.Description, e.ImageURL, e.Title, e.URL, e.SortOrder, e.OID)
-		return err
+		return nil
 	}
+
 	if e.EID != "" {
 		if pdebug.Enabled {
 			pdebug.Printf(`Using EID (%s) as key`, e.EID)
 		}
-		stmt, err := library.GetStmt("sqlExternalResourceUpdateByEIDKey")
-		if err != nil {
-			return errors.Wrap(err, `failed to get statement`)
+		const sqltext = `UPDATE external_resources SET eid = ?, conference_id = ?, description = ?, image_url = ?, title = ?, url = ?, sort_order = ? WHERE eid = ?`
+		if _, err := Exec(tx, sqltext, e.EID, e.ConferenceID, e.Description, e.ImageURL, e.Title, e.URL, e.SortOrder, e.EID); err != nil {
+			return errors.Wrap(err, `failed to execute statement`)
 		}
-		_, err = tx.Stmt(stmt).Exec(e.EID, e.ConferenceID, e.Description, e.ImageURL, e.Title, e.URL, e.SortOrder, e.EID)
-		return err
+		return nil
 	}
 	return errors.New("either OID/EID must be filled")
 }
 
 func (e ExternalResource) Delete(tx *sql.Tx) error {
 	if e.OID != 0 {
-		stmt, err := library.GetStmt("sqlExternalResourceDeleteByOIDKey")
-		if err != nil {
-			return errors.Wrap(err, `failed to get statement`)
+		const sqltext = `DELETE FROM external_resources WHERE oid = ?`
+		if _, err := Exec(tx, sqltext, e.OID); err != nil {
+			return errors.Wrap(err, `failed to execute statement`)
 		}
-		_, err = tx.Stmt(stmt).Exec(e.OID)
-		return err
+		return nil
 	}
 
 	if e.EID != "" {
-		stmt, err := library.GetStmt("sqlExternalResourceDeleteByEIDKey")
-		if err != nil {
+		const sqltext = `DELETE FROM external_resources WHERE eid = ?`
+		if _, err := Exec(tx, sqltext, e.EID); err != nil {
 			return errors.Wrap(err, `failed to get statement`)
 		}
-		_, err = tx.Stmt(stmt).Exec(e.EID)
-		return err
+		return nil
 	}
-
 	return errors.New("either OID/EID must be filled")
 }
 
@@ -205,10 +159,11 @@ func (v *ExternalResourceList) LoadSinceEID(tx *sql.Tx, since string, limit int)
 }
 
 func (v *ExternalResourceList) LoadSince(tx *sql.Tx, since int64, limit int) error {
-	rows, err := tx.Query(`SELECT `+ExternalResourceStdSelectColumns+` FROM `+ExternalResourceTable+` WHERE external_resources.oid > ? ORDER BY oid ASC LIMIT `+strconv.Itoa(limit), since)
+	rows, err := Query(tx, `SELECT `+ExternalResourceStdSelectColumns+` FROM `+ExternalResourceTable+` WHERE external_resources.oid > ? ORDER BY oid ASC LIMIT `+strconv.Itoa(limit), since)
 	if err != nil {
 		return err
 	}
+	defer rows.Close()
 
 	if err := v.FromRows(rows, limit); err != nil {
 		return err

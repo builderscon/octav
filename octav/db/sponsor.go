@@ -5,7 +5,27 @@ import (
 	"strconv"
 
 	"github.com/builderscon/octav/octav/tools"
+	"github.com/pkg/errors"
 )
+
+var (
+	sqlSponsorListLoadByConferenceID string
+)
+
+func init() {
+	stmt := tools.GetBuffer()
+	defer tools.ReleaseBuffer(stmt)
+
+	stmt.WriteString(`SELECT `)
+	stmt.WriteString(SponsorStdSelectColumns)
+	stmt.WriteString(` FROM `)
+	stmt.WriteString(SponsorTable)
+	stmt.WriteString(` WHERE `)
+	stmt.WriteString(SponsorTable)
+	stmt.WriteString(`.conference_id = ?`)
+	stmt.WriteString(` ORDER BY sort_order ASC, group_name ASC`)
+	sqlSponsorListLoadByConferenceID = stmt.String()
+}
 
 func (v *SponsorList) LoadByConferenceSinceEID(tx *sql.Tx, confID, since string, limit int) error {
 	var s int64
@@ -33,10 +53,11 @@ func (v *SponsorList) LoadByConferenceSince(tx *sql.Tx, confID string, since int
 	stmt.WriteString(`.oid > ? ORDER BY oid ASC LIMIT `)
 	stmt.WriteString(strconv.Itoa(limit))
 
-	rows, err := tx.Query(stmt.String(), confID, since)
+	rows, err := Query(tx, stmt.String(), confID, since)
 	if err != nil {
-		return err
+		return errors.Wrap(err, `failed to execute statement`)
 	}
+	defer rows.Close()
 
 	if err := v.FromRows(rows, limit); err != nil {
 		return err
@@ -44,34 +65,23 @@ func (v *SponsorList) LoadByConferenceSince(tx *sql.Tx, confID string, since int
 	return nil
 }
 
-func LoadSponsors(tx *sql.Tx, venues *SponsorList, cid string) error {
-	stmt := tools.GetBuffer()
-	defer tools.ReleaseBuffer(stmt)
-
-	stmt.WriteString(`SELECT `)
-	stmt.WriteString(SponsorStdSelectColumns)
-	stmt.WriteString(` FROM `)
-	stmt.WriteString(SponsorTable)
-	stmt.WriteString(` WHERE `)
-	stmt.WriteString(SponsorTable)
-	stmt.WriteString(`.conference_id = ?`)
-	stmt.WriteString(` ORDER BY sort_order ASC, group_name ASC`)
-
-	rows, err := tx.Query(stmt.String(), cid)
+func (v *SponsorList) LoadByConferenceID(tx *sql.Tx, cid string) error {
+	rows, err := Query(tx, sqlSponsorListLoadByConferenceID, cid)
 	if err != nil {
-		return err
+		return errors.Wrap(err, `failed to execute statement`)
 	}
+	defer rows.Close()
 
 	var res SponsorList
 	for rows.Next() {
 		var u Sponsor
 		if err := u.Scan(rows); err != nil {
-			return err
+			return errors.Wrap(err, `failed to scan row`)
 		}
 
 		res = append(res, u)
 	}
 
-	*venues = res
+	*v = res
 	return nil
 }
